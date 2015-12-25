@@ -57,16 +57,10 @@ struct DYND_API array_preamble : memory_block_data {
   }
 
   /** Return a pointer to the arrmeta, immediately after the preamble */
-  inline char *metadata()
-  {
-    return reinterpret_cast<char *>(this + 1);
-  }
+  inline char *metadata() { return reinterpret_cast<char *>(this + 1); }
 
   /** Return a pointer to the arrmeta, immediately after the preamble */
-  inline const char *metadata() const
-  {
-    return reinterpret_cast<const char *>(this + 1);
-  }
+  inline const char *metadata() const { return reinterpret_cast<const char *>(this + 1); }
 };
 
 /**
@@ -95,5 +89,16 @@ DYND_API intrusive_ptr<memory_block_data> shallow_copy_array_memory_block(const 
 
 DYND_API void array_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
                                              const std::string &indent);
+
+inline long intrusive_ptr_use_count(array_preamble *ptr) { return ptr->m_use_count; }
+
+inline void intrusive_ptr_retain(array_preamble *ptr) { ++ptr->m_use_count; }
+
+inline void intrusive_ptr_release(array_preamble *ptr)
+{
+  if (--ptr->m_use_count == 0) {
+    detail::memory_block_free(ptr);
+  }
+}
 
 } // namespace dynd

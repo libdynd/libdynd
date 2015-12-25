@@ -116,7 +116,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim, const intp
     ndo->tp->arrmeta_default_construct(meta, true);
   }
 
-  return array(result);
+  return array(ndo, true);
 }
 
 nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t ndim, const intptr_t *shape,
@@ -155,7 +155,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
     *out_uniform_arrmeta = reinterpret_cast<char *>(meta + ndim);
   }
 
-  return nd::array(result);
+  return nd::array(ndo, true);
 }
 
 nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
@@ -179,7 +179,9 @@ nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t D
  */
 static nd::array make_array_clone_with_new_type(const nd::array &n, const ndt::type &new_dt)
 {
-  nd::array result(shallow_copy_array_memory_block(n));
+  nd::array result(reinterpret_cast<array_preamble *>(
+                       shallow_copy_array_memory_block(intrusive_ptr<memory_block_data>(n.get(), true)).get()),
+                   true);
   array_preamble *preamble = result.get();
   // Swap in the type
   preamble->tp = new_dt;
@@ -268,11 +270,13 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
     ndt::type dt = get()->tp->apply_linear_index(nindices, indices, 0, this_dt, collapse_leading);
     array result;
     if (!dt.is_builtin()) {
-      result.set(make_array_memory_block(dt.extended()->get_arrmeta_size()));
+      intrusive_ptr<memory_block_data> memblock = make_array_memory_block(dt.extended()->get_arrmeta_size());
+      result.set(intrusive_ptr<array_preamble>(reinterpret_cast<array_preamble *>(memblock.get()), true));
       result.get()->tp = dt;
     }
     else {
-      result.set(make_array_memory_block(0));
+      result.set(
+          intrusive_ptr<array_preamble>(reinterpret_cast<array_preamble *>(make_array_memory_block(0).get()), true));
       result.get()->tp = dt;
     }
     result.get()->data = get()->data;
@@ -281,11 +285,11 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
     }
     else {
       // If the data reference is NULL, the data is embedded in the array itself
-      result.get()->owner = *this;
+      result.get()->owner = get();
     }
-    intptr_t offset =
-        get()->tp->apply_linear_index(nindices, indices, get()->metadata(), dt, result.get()->metadata(), *this, 0,
-                                      this_dt, collapse_leading, &result.get()->data, result.get()->owner);
+    intptr_t offset = get()->tp->apply_linear_index(nindices, indices, get()->metadata(), dt, result.get()->metadata(),
+                                                    intrusive_ptr<memory_block_data>(get(), true), 0, this_dt,
+                                                    collapse_leading, &result.get()->data, result.get()->owner);
     result.get()->data += offset;
     result.get()->flags = get()->flags;
     return result;
@@ -308,7 +312,7 @@ void nd::array::flag_as_immutable()
 
   // Check that nobody else is peeking into our data
   bool ok = true;
-  if (intrusive_ptr<memory_block_data>::get()->m_use_count != 1) {
+  if (intrusive_ptr<array_preamble>::get()->m_use_count != 1) {
     // More than one reference to the array itself
     ok = false;
   }
@@ -716,7 +720,9 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
   // Make a shallow copy of the arrmeta. When we permute the type,
   // its arrmeta has identical structure, so we can fix it up
   // while we're transforming the type.
-  nd::array res(shallow_copy_array_memory_block(*this));
+  nd::array res(reinterpret_cast<array_preamble *>(
+                    shallow_copy_array_memory_block(intrusive_ptr<memory_block_data>(get(), true)).get()),
+                true);
 
   ndt::type transformed_tp;
   bool was_transformed = false;
@@ -834,10 +840,10 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
   ndt::type dst_tp = src_tp.with_new_axis(i, new_ndim);
 
   // This is taken from view_concrete in view.cpp
-  nd::array res(make_array_memory_block(dst_tp.get_arrmeta_size()));
+  nd::array res(reinterpret_cast<array_preamble *>(make_array_memory_block(dst_tp.get_arrmeta_size()).get()), true);
   res.get()->data = get()->data;
   if (!get()->owner) {
-    res.get()->owner = *this;
+    res.get()->owner = get();
   }
   else {
     res.get()->owner = get_data_memblock();
@@ -945,14 +951,16 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const
       else {
         result_tp = ndt::make_fixed_dim(dim_size, make_unaligned(scalar_tp));
       }
-      array result(make_array_memory_block(result_tp.extended()->get_arrmeta_size()));
+      array result(
+          reinterpret_cast<array_preamble *>(make_array_memory_block(result_tp.extended()->get_arrmeta_size()).get()),
+          true);
       // Copy all the array arrmeta fields
       result.get()->data = get()->data;
       if (get()->owner) {
         result.get()->owner = get()->owner;
       }
       else {
-        result.get()->owner = intrusive_ptr<memory_block_data>::get();
+        result.get()->owner = intrusive_ptr<array_preamble>::get();
       }
       result.get()->tp = result_tp;
       result.get()->flags = get()->flags;
@@ -975,9 +983,9 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const
 void nd::array::debug_print(std::ostream &o, const std::string &indent) const
 {
   o << indent << "------ array\n";
-  if (intrusive_ptr<memory_block_data>::get()) {
+  if (intrusive_ptr<array_preamble>::get()) {
     const array_preamble *ndo = get();
-    o << " address: " << (void *)intrusive_ptr<memory_block_data>::get() << "\n";
+    o << " address: " << (void *)intrusive_ptr<array_preamble>::get() << "\n";
     o << " refcount: " << static_cast<long>(ndo->m_use_count) << "\n";
     o << " type:\n";
     o << "  pointer: " << (void *)ndo->tp.extended() << "\n";
@@ -1092,7 +1100,7 @@ nd::array nd::empty_shell(const ndt::type &tp)
     preamble->data = data_ptr;
     preamble->owner = NULL;
     preamble->flags = nd::read_access_flag | nd::write_access_flag;
-    return nd::array(std::move(result));
+    return nd::array(preamble, true);
   }
   else if (!tp.is_symbolic()) {
     char *data_ptr = NULL;
@@ -1122,7 +1130,7 @@ nd::array nd::empty_shell(const ndt::type &tp)
     preamble->data = data_ptr;
     preamble->owner = NULL;
     preamble->flags = nd::read_access_flag | nd::write_access_flag;
-    return nd::array(std::move(result));
+    return nd::array(preamble, true);
   }
   else {
     stringstream ss;
@@ -1242,8 +1250,8 @@ nd::array nd::reshape(const nd::array &a, const nd::array &shape)
     shape_copy[i] = shape(i).as<intptr_t>();
   }
 
-  return make_strided_array_from_data(a.get_dtype(), ndim, shape_copy.get(), strides.get(), a.get_flags(), a.data(), a,
-                                      NULL);
+  return make_strided_array_from_data(a.get_dtype(), ndim, shape_copy.get(), strides.get(), a.get_flags(), a.data(),
+                                      intrusive_ptr<memory_block_data>(a.get(), true), NULL);
 }
 
 nd::array nd::memmap(const std::string &DYND_UNUSED(filename), intptr_t DYND_UNUSED(begin), intptr_t DYND_UNUSED(end),
@@ -1299,8 +1307,11 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
   const ndt::tuple_type *fsd = result_type.extended<ndt::tuple_type>();
   char *data_ptr = NULL;
 
-  array result(make_array_memory_block(fsd->get_arrmeta_size(), fsd->get_default_data_size(), fsd->get_data_alignment(),
-                                       &data_ptr));
+  array result(
+      reinterpret_cast<array_preamble *>(make_array_memory_block(fsd->get_arrmeta_size(), fsd->get_default_data_size(),
+                                                                 fsd->get_data_alignment(), &data_ptr)
+                                             .get()),
+      true);
   // Set the array properties
   result.get()->tp = result_type;
   result.get()->data = data_ptr;
@@ -1320,13 +1331,14 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     pointer_type_arrmeta *pmeta;
     pmeta = reinterpret_cast<pointer_type_arrmeta *>(result.get()->metadata() + arrmeta_offsets[i]);
     pmeta->offset = 0;
-    pmeta->blockref =
-        field_values[i].get()->owner ? field_values[i].get()->owner : const_cast<array &>(field_values[i]);
+    pmeta->blockref = field_values[i].get()->owner ? field_values[i].get()->owner
+                                                   : intrusive_ptr<memory_block_data>(field_values[i].get(), true);
 
     const ndt::type &field_dt = field_values[i].get_type();
     if (field_dt.get_arrmeta_size() > 0) {
       field_dt.extended()->arrmeta_copy_construct(reinterpret_cast<char *>(pmeta + 1),
-                                                  field_values[i].get()->metadata(), field_values[i]);
+                                                  field_values[i].get()->metadata(),
+                                                  intrusive_ptr<memory_block_data>(field_values[i].get(), true));
     }
   }
 
