@@ -828,6 +828,12 @@ namespace ndt {
   }
 
   template <typename ValueType>
+  type type_for(const ValueType &value)
+  {
+    return make_type<ValueType>(value);
+  }
+
+  template <typename ValueType>
   type type_for(const std::initializer_list<ValueType> &values)
   {
     return make_type<std::initializer_list<ValueType>>(values);

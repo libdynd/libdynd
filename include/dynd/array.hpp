@@ -188,7 +188,7 @@ namespace nd {
     template <typename T,
               typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
     array(T &&value)
-        : intrusive_ptr<memory_block_data>(empty(ndt::make_type<typename remove_reference_then_cv<T>::type>(value)))
+        : intrusive_ptr<memory_block_data>(empty(ndt::type_for(value)))
     {
       init(std::forward<T>(value));
     }
@@ -196,7 +196,7 @@ namespace nd {
     /** Constructs an array from a 1D initializer list */
     template <typename ValueType>
     array(const std::initializer_list<ValueType> &values)
-        : intrusive_ptr<memory_block_data>(empty(ndt::make_type<std::initializer_list<ValueType>>(values)))
+        : intrusive_ptr<memory_block_data>(empty(ndt::type_for(values)))
     {
       init(values);
     }
@@ -204,8 +204,7 @@ namespace nd {
     /** Constructs an array from a 2D initializer list */
     template <typename ValueType>
     array(const std::initializer_list<std::initializer_list<ValueType>> &values)
-        : intrusive_ptr<memory_block_data>(
-              empty(ndt::make_type<std::initializer_list<std::initializer_list<ValueType>>>(values)))
+        : intrusive_ptr<memory_block_data>(empty(ndt::type_for(values)))
     {
       init(values);
     }
@@ -213,8 +212,7 @@ namespace nd {
     /** Constructs an array from a 3D initializer list */
     template <typename ValueType>
     array(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
-        : intrusive_ptr<memory_block_data>(empty(
-              ndt::make_type<std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>>>(values)))
+        : intrusive_ptr<memory_block_data>(empty(ndt::type_for(values)))
     {
       init(values);
     }
