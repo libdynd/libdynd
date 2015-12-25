@@ -827,27 +827,26 @@ namespace ndt {
     return detail::make_type<T>(0, std::forward<ArgTypes>(args)...);
   }
 
-/*
   template <typename T, typename... ArgTypes>
   type make_type(const std::initializer_list<T> &value, ArgTypes &&... args)
   {
-    return make_type<std::initializer_list<T>>(value, std::forward<ArgTypes>(args)...);
+    return detail::make_type<std::initializer_list<T>>(0, value, std::forward<ArgTypes>(args)...);
   }
 
   template <typename T, typename... ArgTypes>
   type make_type(const std::initializer_list<std::initializer_list<T>> &value, ArgTypes &&... args)
   {
-    return make_type<std::initializer_list<std::initializer_list<T>>>(value, std::forward<ArgTypes>(args)...);
+    return detail::make_type<std::initializer_list<std::initializer_list<T>>>(0, value,
+                                                                              std::forward<ArgTypes>(args)...);
   }
 
   template <typename T, typename... ArgTypes>
   type make_type(const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &value,
                  ArgTypes &&... args)
   {
-    return make_type<std::initializer_list<std::initializer_list<std::initializer_list<T>>>>(
-        value, std::forward<ArgTypes>(args)...);
+    return detail::make_type<std::initializer_list<std::initializer_list<std::initializer_list<T>>>>(
+        0, value, std::forward<ArgTypes>(args)...);
   }
-*/
 
   /**
    * Allocates and constructs a type with a use count of 1.
