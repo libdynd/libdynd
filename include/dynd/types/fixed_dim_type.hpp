@@ -295,7 +295,7 @@ namespace nd {
 
     template <typename ValueType, size_t Size>
     struct init_from_c_array<ValueType[Size], false> {
-      init<ValueType> child;
+      nd::init<ValueType> child;
 
       init_from_c_array(const ndt::type &tp, const char *metadata)
           : child(tp.extended<ndt::fixed_dim_type>()->get_element_type(),
