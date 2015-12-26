@@ -271,12 +271,11 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
     array result;
     if (!dt.is_builtin()) {
       intrusive_ptr<memory_block_data> memblock = make_array_memory_block(dt.extended()->get_arrmeta_size());
-      result.set(intrusive_ptr<array_preamble>(reinterpret_cast<array_preamble *>(memblock.get()), true));
+      result = array(reinterpret_cast<array_preamble *>(memblock.get()), true);
       result.get()->tp = dt;
     }
     else {
-      result.set(
-          intrusive_ptr<array_preamble>(reinterpret_cast<array_preamble *>(make_array_memory_block(0).get()), true));
+      result = array(reinterpret_cast<array_preamble *>(make_array_memory_block(0).get()), true);
       result.get()->tp = dt;
     }
     result.get()->data = get()->data;

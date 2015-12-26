@@ -137,9 +137,6 @@ namespace nd {
    * This is the primary multi-dimensional array class.
    */
   class DYND_API array : public intrusive_ptr<array_preamble> {
-    // Don't allow implicit construction from a raw pointer
-    array(const void *);
-
     template <typename T>
     void init(T &&value)
     {
@@ -161,6 +158,8 @@ namespace nd {
     }
 
   public:
+    using intrusive_ptr<array_preamble>::intrusive_ptr;
+
     /**
       * Constructs an array with no data.
       */
@@ -210,63 +209,6 @@ namespace nd {
     {
       init(values, size);
     }
-
-    /**
-      * Copy constructs an array.
-      */
-    array(const array &other) = default;
-
-    /**
-     * Move constructs an array.
-     */
-    array(array &&other) = default;
-
-    explicit array(const intrusive_ptr<array_preamble> &ndobj_memblock) : intrusive_ptr<array_preamble>(ndobj_memblock)
-    {
-      if (intrusive_ptr<array_preamble>::get()->m_type != array_memory_block_type) {
-        throw std::runtime_error("array can only be constructed from a memblock with array type");
-      }
-    }
-
-    explicit array(array_preamble *ndo, bool add_ref) : intrusive_ptr<array_preamble>(ndo, add_ref) {}
-
-    void set(const intrusive_ptr<array_preamble> &ndobj_memblock)
-    {
-      if (ndobj_memblock.get()->m_type != array_memory_block_type) {
-        throw std::runtime_error("array can only be constructed from a memblock with array type");
-      }
-      intrusive_ptr<array_preamble>::operator=(ndobj_memblock);
-    }
-
-    void set(intrusive_ptr<array_preamble> &&ndobj_memblock)
-    {
-      if (ndobj_memblock.get()->m_type != array_memory_block_type) {
-        throw std::runtime_error("array can only be constructed from a memblock with array type");
-      }
-      intrusive_ptr<array_preamble>::operator=(std::move(ndobj_memblock));
-    }
-
-    /**
-     * This function releases the memory block reference, setting the
-     * array to NULL. The caller takes explicit ownership of the
-     * reference.
-     */
-    array_preamble *release() { return reinterpret_cast<array_preamble *>(intrusive_ptr<array_preamble>::release()); }
-
-    /**
-     * Assignment operator.
-     */
-    array &operator=(const array &rhs) = default;
-
-    /**
-     * Move assignment operator.
-     */
-    array &operator=(array &&rhs) = default;
-
-    /** Low level access to the array preamble */
-    array_preamble *get() const { return reinterpret_cast<array_preamble *>(intrusive_ptr<array_preamble>::get()); }
-
-    array_preamble *operator->() const { return get(); }
 
     /** Returns true if the array is NULL */
     inline bool is_null() const { return intrusive_ptr<array_preamble>::get() == NULL; }
