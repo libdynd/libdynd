@@ -158,21 +158,6 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
   return nd::array(ndo, true);
 }
 
-nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
-{
-  nd::array result = nd::empty(ndt::bytes_type::make(alignment));
-  reinterpret_cast<bytes *>(result.data())->assign(data, len);
-  return result;
-}
-
-nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t DYND_UNUSED(encoding),
-                                uint64_t DYND_UNUSED(access_flags))
-{
-  nd::array result = empty(ndt::make_type<ndt::string_type>());
-  reinterpret_cast<string *>(result.data())->assign(str, len);
-  return result;
-}
-
 /**
  * Clones the arrmeta and swaps in a new type. The type must
  * have identical arrmeta, but this function doesn't check that.

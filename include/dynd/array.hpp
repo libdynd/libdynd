@@ -849,11 +849,6 @@ namespace nd {
                                               const intrusive_ptr<memory_block_data> &data_reference,
                                               char **out_uniform_arrmeta = NULL);
 
-  /** Makes an array of 'bytes' type from the data */
-  DYND_API array make_bytes_array(const char *data, size_t len, size_t alignment = 1);
-
-  DYND_API array make_string_array(const char *str, size_t len, string_encoding_t encoding, uint64_t access_flags);
-
   inline array_vals array::vals() const { return array_vals(*this); }
 
   inline array_vals_at array::vals_at(const irange &i0) const { return array_vals_at(at_array(1, &i0, false)); }
