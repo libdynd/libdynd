@@ -313,7 +313,7 @@ TEST(FFT1D, Shift)
 {
   double vals0[9] = {0.0, 1.0, 2.0, 3.0, 4.0, -4.0, -3.0, -2.0, -1.0};
 
-  nd::array x0 = nd::empty<double[9]>();
+  nd::array x0 = nd::empty(ndt::make_type<double[9]>());
   x0.vals() = vals0;
 
   nd::array y0 = nd::fftshift(x0);
@@ -324,7 +324,7 @@ TEST(FFT1D, Shift)
 
   double vals1[10] = {0.0, 1.0, 2.0, 3.0, 4.0, -5.0, -4.0, -3.0, -2.0, -1.0};
 
-  nd::array x1 = nd::empty<double[10]>();
+  nd::array x1 = nd::empty(ndt::make_type<double[10]>());
   x1.vals() = vals1;
 
   nd::array y1 = nd::fftshift(x1);
@@ -611,7 +611,7 @@ TEST(FFT2D, Shift)
 {
   double vals0[3][3] = {{0.0, 1.0, 2.0}, {3.0, 4.0, -4.0}, {-3.0, -2.0, -1.0}};
 
-  nd::array x0 = nd::empty<double[3][3]>();
+  nd::array x0 = nd::empty(ndt::make_type<double[3][3]>());
   x0.vals() = vals0;
 
   nd::array y0 = nd::fftshift(x0);
@@ -634,7 +634,7 @@ TEST(FFT2D, Shift)
 
   double vals1[4][2] = {{0.0, 5.0}, {1.0, 8.0}, {-6.0, 7.0}, {3.0, -1.0}};
 
-  nd::array x1 = nd::empty<double[4][2]>();
+  nd::array x1 = nd::empty(ndt::make_type<double[4][2]>());
   x1.vals() = vals1;
 
   nd::array y1 = nd::fftshift(x1);
@@ -656,7 +656,7 @@ TEST(FFT2D, Shift)
 
   double vals2[2][3] = {{0.0, 5.0, 1.0}, {8.0, -6.0, 7.0}};
 
-  nd::array x2 = nd::empty<double[2][3]>();
+  nd::array x2 = nd::empty(ndt::make_type<double[2][3]>());
   x2.vals() = vals2;
 
   nd::array y2 = nd::fftshift(x2);
