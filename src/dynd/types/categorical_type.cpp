@@ -14,7 +14,6 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/array_range.hpp>
 #include <dynd/func/assignment.hpp>
-#include <dynd/kernels/base_property_kernel.hpp>
 #include <dynd/search.hpp>
 
 using namespace dynd;
@@ -592,29 +591,6 @@ static ndt::type property_type_get_category_type(ndt::type d)
 
 std::map<std::string, nd::callable> ndt::categorical_type::get_dynamic_type_properties() const
 {
-  struct categories_kernel : nd::base_property_kernel<categories_kernel> {
-    categories_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
-        : base_property_kernel(tp, dst_tp, dst_arrmeta)
-    {
-    }
-
-    void single(char *dst, char *const *DYND_UNUSED(src))
-    {
-      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
-                        tp.extended<categorical_type>()->m_categories.get()->metadata(),
-                        tp.extended<categorical_type>()->m_categories.cdata());
-    }
-
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,
-                                 ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 const dynd::nd::array &DYND_UNUSED(kwds),
-                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      dst_tp = tp.extended<categorical_type>()->m_categories.get_type();
-    }
-  };
-
   static const std::map<std::string, nd::callable> categorical_type_properties{
       {"storage_type", nd::functional::apply(&property_type_get_storage_type, "self")},
       {"category_type", nd::functional::apply(&property_type_get_category_type, "self")}};

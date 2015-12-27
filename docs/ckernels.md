@@ -63,28 +63,6 @@ The ``N`` parameter is baked into the ckernel, so it is not
 provided redundantly as a parameter. Similarly, it must
 have full knowledge of the input and output memory layout.
 
-Here's some example code which does one assignment using
-this mechanism, by building an assignment ckernel and
-calling it.
-
-```cpp
-void dynd::typed_data_assign(const ndt::type &dst_tp,
-                             const char *dst_arrmeta,
-                             char *dst_data, const ndt::type &src_tp,
-                             const char *src_arrmeta, const char *src_data,
-                             const eval::eval_context *ectx)
-{
-  unary_ckernel_builder k;
-  make_assignment_kernel(&k, 0, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                         kernel_request_single, ectx);
-  k(dst_data, src_data);
-}
-```
-
-The ``unary_ckernel_builder`` object is a subclass of
-``ckernel_builder``, which overloads the call operator to
-provide a more convenient kernel function call syntax.
-
 ### Assignment Kernel Example
 
 CKernels are typically constructed hierarchically, often matching
@@ -183,7 +161,7 @@ when an exception is raised during ckernel construction.
 ### Kernel Construction Cautions
 
 Some care must be taken by code which is constructing
-ckernels. 
+ckernels.
 
 1. The construction and destruction must be crafted to account
    for exceptions.
