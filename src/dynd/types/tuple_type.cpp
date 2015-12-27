@@ -8,10 +8,10 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/tuple_comparison_kernels.hpp>
-#include <dynd/kernels/base_property_kernel.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/kernels/get_then_copy_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -532,75 +532,16 @@ bool ndt::tuple_type::match(const char *arrmeta, const type &candidate_tp, const
   }
 }
 
-/*
-static nd::array property_get_field_types(const ndt::type &tp)
-{
-  return tp.extended<ndt::tuple_type>()->get_field_types();
-}
-
-static nd::array property_get_arrmeta_offsets(const ndt::type &tp)
-{
-  return tp.extended<ndt::tuple_type>()->get_arrmeta_offsets();
-}
-*/
-
 std::map<std::string, nd::callable> ndt::tuple_type::get_dynamic_type_properties() const
 {
-  struct field_types_kernel : nd::base_property_kernel<field_types_kernel> {
-    field_types_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
-        : base_property_kernel<field_types_kernel>(tp, dst_tp, dst_arrmeta)
-    {
-    }
-
-    void single(char *dst, char *const *DYND_UNUSED(src))
-    {
-      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp, tp.extended<tuple_type>()->m_field_types.get()->metadata(),
-                        tp.extended<tuple_type>()->m_field_types.cdata());
-    }
-
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
-                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 intptr_t DYND_UNUSED(nkwd), const dynd::nd::array *DYND_UNUSED(kwds),
-                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      dst_tp = tp.extended<tuple_type>()->m_field_types.get_type();
-    }
-  };
-
   std::map<std::string, nd::callable> properties;
-  properties["field_types"] = nd::callable::make<field_types_kernel>(type("(self: type) -> Any"));
-  properties["metadata_offsets"] = nd::callable::make<metadata_offsets_kernel>(
-      ndt::callable_type::make(m_arrmeta_offsets.get_type(), ndt::tuple_type::make(),
+  properties["field_types"] = nd::callable::make<nd::get_then_copy_kernel<tuple_type, &tuple_type::get_field_types>>(
+      ndt::callable_type::make(m_field_types.get_type(), ndt::tuple_type::make(),
                                ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
+  properties["metadata_offsets"] =
+      nd::callable::make<nd::get_then_copy_kernel<tuple_type, &tuple_type::get_arrmeta_offsets>>(
+          ndt::callable_type::make(m_arrmeta_offsets.get_type(), ndt::tuple_type::make(),
+                                   ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
 
   return properties;
 }
-
-struct ndt::tuple_type::metadata_offsets_kernel : nd::base_kernel<metadata_offsets_kernel, 0> {
-  type tp;
-
-  metadata_offsets_kernel(const type &tp) : tp(tp) {}
-
-  void single(char *res, char *const *DYND_UNUSED(args))
-  {
-    char *child_args = const_cast<char *>(tp.extended<tuple_type>()->m_arrmeta_offsets.cdata());
-    get_child()->single(res, &child_args);
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-  {
-    const ndt::type &tp = kwds[0].as<type>();
-    make(ckb, kernreq, ckb_offset, tp);
-
-    const char *src_metadata = tp.extended<tuple_type>()->m_arrmeta_offsets.get()->metadata();
-
-    static const nd::array error_mode(opt<assign_error_mode>());
-    return nd::assign::get()->instantiate(nd::assign::get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                          1, &dst_tp, &src_metadata, kernreq, ectx, 1, &error_mode, tp_vars);
-  }
-};

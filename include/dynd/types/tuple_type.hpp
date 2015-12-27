@@ -18,8 +18,6 @@ namespace dynd {
 namespace ndt {
 
   class DYND_API tuple_type : public base_type {
-    struct metadata_offsets_kernel;
-
   protected:
     /**
      * The number of values in m_field_types and m_arrmeta_offsets.
