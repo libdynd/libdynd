@@ -69,3 +69,11 @@ TEST(TupleType, Assign)
   b.vals() = a;
   EXPECT_JSON_EQ_ARR("[12, 2.5, \"test\"]", b);
 }
+
+TEST(TupleType, Properties)
+{
+  ndt::type tp =
+      ndt::tuple_type::make({ndt::make_type<int>(), ndt::make_type<dynd::string>(), ndt::make_type<float>()});
+
+  EXPECT_ARRAY_EQ((nd::array{3 * sizeof(size_t), 3 * sizeof(size_t), 3 * sizeof(size_t)}), tp.p("metadata_offsets"));
+}
