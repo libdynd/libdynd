@@ -8,7 +8,6 @@
 #pragma once
 
 #include <dynd/kernels/ckernel_builder.hpp>
-#include <dynd/typed_data_assign.hpp>
 #include <dynd/string_encodings.hpp>
 
 namespace dynd { namespace kernels {

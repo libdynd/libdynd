@@ -6,9 +6,6 @@
 #pragma once
 
 #include <dynd/type.hpp>
-#include <dynd/typed_data_assign.hpp>
-#include <dynd/types/view_type.hpp>
-#include <dynd/string_encodings.hpp>
 #include <dynd/types/datetime_util.hpp>
 
 namespace dynd {

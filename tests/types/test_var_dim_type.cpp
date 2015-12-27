@@ -348,7 +348,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   EXPECT_THROW(a.assign(b), broadcast_error);
 
   // Assignment initialized var array -> strided array
-  a = nd::empty<int[3]>();
+  a = nd::empty(ndt::make_type<int[3]>());
   a.vals() = 0;
   b = parse_json("var * int32", "[3, 5, 7]");
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
@@ -359,7 +359,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   EXPECT_EQ(7, a(2).as<int>());
 
   // Error assignment initialized var array -> strided array
-  a = nd::empty<int[3]>();
+  a = nd::empty(ndt::make_type<int[3]>());
   a.vals() = 0;
   b = parse_json("var * int32", "[3, 5, 7, 9]");
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
@@ -367,7 +367,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   EXPECT_THROW(a.assign(b), broadcast_error);
 
   // Error assignment uninitialized var array -> strided array
-  a = nd::empty<int[3]>();
+  a = nd::empty(ndt::make_type<int[3]>());
   a.vals() = 0;
   b = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());

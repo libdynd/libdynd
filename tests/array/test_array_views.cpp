@@ -29,7 +29,7 @@ TEST(ArrayViews, OneDimensionalRawMemory)
   uint64_t u8_value;
 
   // Make an 8 byte aligned array of 80 chars
-  a = nd::empty<uint64_t[10]>();
+  a = nd::empty(ndt::make_type<uint64_t[10]>());
   a = a.view_scalars(ndt::make_type<char>());
 
   // Initialize the char values from a uint64_t,
@@ -127,7 +127,7 @@ TEST(ArrayViews, OneDimPermute)
 {
   int vals0[3] = {0, 1, 2};
 
-  nd::array a = nd::empty<int[3]>();
+  nd::array a = nd::empty(ndt::make_type<int[3]>());
   a.vals() = vals0;
 
   intptr_t ndim = 1;
@@ -152,7 +152,7 @@ TEST(ArrayViews, TwoDimPermute)
 {
   int vals0[3][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}};
 
-  nd::array a = nd::empty<int[3][3]>();
+  nd::array a = nd::empty(ndt::make_type<int[3][3]>());
   a.vals() = vals0;
 
   intptr_t ndim = 2;
@@ -201,7 +201,7 @@ TEST(ArrayViews, TwoDimPermute)
 
   int vals1[4][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}, {-5, 0, 2}};
 
-  a = nd::empty<int[4][3]>();
+  a = nd::empty(ndt::make_type<int[4][3]>());
   a.vals() = vals1;
 
   b = a.permute(ndim, axes);

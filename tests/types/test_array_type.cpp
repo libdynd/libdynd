@@ -24,10 +24,3 @@ TEST(ArrayType, Constructor)
   EXPECT_FALSE(array_tp.is_expression());
   EXPECT_EQ(array_tp, ndt::type(array_tp.str())); // Round trip through a string
 }
-
-TEST(ArrayType, Null)
-{
-  nd::array a = nd::empty(ndt::type("array[int32]"));
-  EXPECT_FALSE(a.is_null());
-  EXPECT_TRUE(a.underlying().is_null());
-}

@@ -11,7 +11,6 @@
 
 #include <dynd/config.hpp>
 #include <dynd/init.hpp>
-#include <dynd/typed_data_assign.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
@@ -461,14 +460,6 @@ namespace nd {
     array storage() const;
 
     /**
-     * Returns either this array or the array stored in the reference if the
-     * type is a reference tpye.
-     */
-    array &underlying();
-
-    const array &underlying() const;
-
-    /**
      * General irange-based indexing operation.
      *
      * \param nindices  The number of 'irange' indices.
@@ -818,12 +809,6 @@ namespace nd {
     friend array_vals_at array::vals_at(const irange &, const irange &, const irange &, const irange &) const;
   };
 
-  /** Makes a strided array with uninitialized data. If axis_perm is NULL, it is
-   * C-order */
-  DYND_API array make_strided_array(const ndt::type &uniform_dtype, intptr_t ndim, const intptr_t *shape,
-                                    int64_t access_flags = read_access_flag | write_access_flag,
-                                    const int *axis_perm = NULL);
-
   /**
    * \brief Makes a strided array pointing to existing data
    *
@@ -992,21 +977,6 @@ namespace nd {
   inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char(&dshape)[N])
   {
     return empty(dim0, dim1, dim2, ndt::type(dshape, dshape + N - 1));
-  }
-
-  /**
-   * Constructs an uninitialized array of the given C++ type, as a strided
-   *array.
-   *
-   * // a has type "float64"
-   * array a = nd::empty<double>();
-   * // b has type "3 * 4 * float64", and is in C order
-   * array b = nd::empty<double[3][4]>();
-   */
-  template <typename T>
-  array empty()
-  {
-    return empty(ndt::make_type<T>());
   }
 
   /**

@@ -7,21 +7,12 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_dim_type.hpp>
-#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/array.hpp>
 
 namespace dynd {
-namespace nd {
-
-  template <typename T, int N>
-  class strided_vals;
-
-} // namespace dynd::nd
-
 namespace ndt {
 
   class DYND_API fixed_dim_kind_type : public base_dim_type {

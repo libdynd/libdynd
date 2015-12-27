@@ -12,9 +12,7 @@
 
 #pragma once
 
-#include <dynd/type.hpp>
 #include <dynd/callable.hpp>
-#include <dynd/typed_data_assign.hpp>
 
 namespace dynd {
 namespace ndt {

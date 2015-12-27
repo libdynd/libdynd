@@ -34,91 +34,6 @@
 using namespace std;
 using namespace dynd;
 
-nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim, const intptr_t *shape, int64_t access_flags,
-                                 const int *axis_perm)
-{
-  // Create the type of the result
-  bool any_variable_dims = false;
-  ndt::type array_tp = ndt::make_type(ndim, shape, dtp, any_variable_dims);
-
-  // Determine the total data size
-  size_t data_size;
-  if (array_tp.is_builtin()) {
-    data_size = array_tp.get_data_size();
-  }
-  else {
-    data_size = array_tp.extended()->get_default_data_size();
-  }
-
-  intrusive_ptr<memory_block_data> result;
-  char *data_ptr = NULL;
-  if (array_tp.get_kind() == memory_kind) {
-    result = make_array_memory_block(array_tp.get_arrmeta_size());
-    array_tp.extended<ndt::base_memory_type>()->data_alloc(&data_ptr, data_size);
-  }
-  else {
-    // Allocate the array arrmeta and data in one memory block
-    result = make_array_memory_block(array_tp.get_arrmeta_size(), data_size, array_tp.get_data_alignment(), &data_ptr);
-  }
-
-  if (array_tp.get_flags() & type_flag_zeroinit) {
-    if (array_tp.get_kind() == memory_kind) {
-      array_tp.extended<ndt::base_memory_type>()->data_zeroinit(data_ptr, data_size);
-    }
-    else {
-      memset(data_ptr, 0, data_size);
-    }
-  }
-
-  // Fill in the preamble arrmeta
-  array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-  ndo->tp = array_tp;
-  ndo->data = data_ptr;
-  ndo->owner = NULL;
-  ndo->flags = access_flags;
-
-  if (!any_variable_dims) {
-    // Fill in the array arrmeta with strides and sizes
-    fixed_dim_type_arrmeta *meta = reinterpret_cast<fixed_dim_type_arrmeta *>(ndo + 1);
-    // Use the default construction to handle the uniform_tp's arrmeta
-    intptr_t stride = dtp.get_data_size();
-    if (stride == 0) {
-      stride = dtp.extended()->get_default_data_size();
-    }
-    if (!dtp.is_builtin()) {
-      dtp.extended()->arrmeta_default_construct(reinterpret_cast<char *>(meta + ndim), true);
-    }
-    if (axis_perm == NULL) {
-      for (ptrdiff_t i = (ptrdiff_t)ndim - 1; i >= 0; --i) {
-        intptr_t dim_size = shape[i];
-        meta[i].stride = dim_size > 1 ? stride : 0;
-        meta[i].dim_size = dim_size;
-        stride *= dim_size;
-      }
-    }
-    else {
-      for (intptr_t i = 0; i < ndim; ++i) {
-        int i_perm = axis_perm[i];
-        intptr_t dim_size = shape[i_perm];
-        meta[i_perm].stride = dim_size > 1 ? stride : 0;
-        meta[i_perm].dim_size = dim_size;
-        stride *= dim_size;
-      }
-    }
-  }
-  else {
-    if (axis_perm != NULL) {
-      // Maybe force C-order in this case?
-      throw runtime_error("dynd presently only supports C-order with variable-sized arrays");
-    }
-    // Fill in the array arrmeta with strides and sizes
-    char *meta = reinterpret_cast<char *>(ndo + 1);
-    ndo->tp->arrmeta_default_construct(meta, true);
-  }
-
-  return array(ndo, true);
-}
-
 nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t ndim, const intptr_t *shape,
                                            const intptr_t *strides, int64_t access_flags, char *data_ptr,
                                            const intrusive_ptr<memory_block_data> &data_reference,
@@ -222,24 +137,6 @@ nd::array nd::array::storage() const
   else {
     return *this;
   }
-}
-
-nd::array &nd::array::underlying()
-{
-  if (get_type().get_type_id() == array_type_id) {
-    return *reinterpret_cast<array *>(data());
-  }
-
-  return *this;
-}
-
-const nd::array &nd::array::underlying() const
-{
-  if (get_type().get_type_id() == array_type_id) {
-    return *reinterpret_cast<const array *>(cdata());
-  }
-
-  return *this;
 }
 
 nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool collapse_leading) const
@@ -1144,7 +1041,7 @@ nd::array nd::empty_like(const nd::array &rhs, const ndt::type &uniform_tp)
     size_t ndim = rhs.get_type().extended()->get_ndim();
     dimvector shape(ndim);
     rhs.get_shape(shape.get());
-    array result(make_strided_array(uniform_tp, ndim, shape.get()));
+    array result = empty(make_fixed_dim(ndim, shape.get(), uniform_tp));
     // Reorder strides of output strided dimensions in a KEEPORDER fashion
     if (result.get_type().get_type_id() == fixed_dim_type_id) {
       result.get_type().extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(
@@ -1171,7 +1068,7 @@ nd::array nd::empty_like(const nd::array &rhs)
     intptr_t ndim = dt.extended()->get_ndim();
     dimvector shape(ndim);
     rhs.get_shape(shape.get());
-    nd::array result(make_strided_array(dt.get_dtype(), ndim, shape.get()));
+    nd::array result = empty(make_fixed_dim(ndim, shape.get(), dt.get_dtype()));
     // Reorder strides of output strided dimensions in a KEEPORDER fashion
     if (result.get_type().get_type_id() == fixed_dim_type_id) {
       result.get_type().extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(

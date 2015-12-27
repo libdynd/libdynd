@@ -6,12 +6,6 @@
 #pragma once
 
 #include <dynd/type.hpp>
-#include <dynd/types/base_dim_type.hpp>
-#include <dynd/typed_data_assign.hpp>
-#include <dynd/types/view_type.hpp>
-#include <dynd/types/string_type.hpp>
-#include <dynd/types/type_type.hpp>
-#include <dynd/array.hpp>
 
 namespace dynd {
 namespace ndt {

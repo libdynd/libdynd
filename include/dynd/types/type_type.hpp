@@ -6,12 +6,8 @@
 #pragma once
 
 #include <dynd/type.hpp>
-#include <dynd/typed_data_assign.hpp>
 
 namespace dynd {
-
-typedef ndt::type type_type_data;
-
 namespace ndt {
 
   /**
@@ -21,6 +17,8 @@ namespace ndt {
     type m_pattern_tp;
 
   public:
+    typedef type data_type;
+
     type_type();
 
     type_type(const type &pattern_tp);

@@ -8,12 +8,8 @@
 #include <dynd/bytes.hpp>
 #include <dynd/type.hpp>
 #include <dynd/types/base_bytes_type.hpp>
-#include <dynd/typed_data_assign.hpp>
 
 namespace dynd {
-
-typedef bytes bytes_type_data;
-
 namespace ndt {
 
   /**
@@ -24,6 +20,8 @@ namespace ndt {
     size_t m_alignment;
 
   public:
+    typedef bytes data_type;
+
     bytes_type(size_t alignment);
 
     virtual ~bytes_type();

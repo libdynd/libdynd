@@ -31,14 +31,14 @@ ndt::bytes_type::~bytes_type() {}
 void ndt::bytes_type::get_bytes_range(const char **out_begin, const char **out_end, const char *DYND_UNUSED(arrmeta),
                                       const char *data) const
 {
-  *out_begin = reinterpret_cast<const bytes_type_data *>(data)->begin();
-  *out_end = reinterpret_cast<const bytes_type_data *>(data)->end();
+  *out_begin = reinterpret_cast<const bytes *>(data)->begin();
+  *out_end = reinterpret_cast<const bytes *>(data)->end();
 }
 
 void ndt::bytes_type::set_bytes_data(const char *DYND_UNUSED(arrmeta), char *data, const char *bytes_begin,
                                      const char *bytes_end) const
 {
-  bytes_type_data *d = reinterpret_cast<bytes_type_data *>(data);
+  bytes *d = reinterpret_cast<bytes *>(data);
   if (d->begin() != NULL) {
     throw runtime_error("assigning to a bytes data element requires that it be "
                         "initialized to NULL");
@@ -76,7 +76,7 @@ void ndt::bytes_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, 
     out_shape[i] = -1;
   }
   else {
-    const bytes_type_data *d = reinterpret_cast<const bytes_type_data *>(data);
+    const bytes *d = reinterpret_cast<const bytes *>(data);
     out_shape[i] = d->end() - d->begin();
   }
   if (i + 1 < ndim) {

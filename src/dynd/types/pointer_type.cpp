@@ -398,9 +398,10 @@ struct dereference_kernel : nd::base_kernel<dereference_kernel> {
     }
 
     // Create an array without the pointers
-    nd::array result(static_cast<array_preamble *>(make_array_memory_block(dt.get_arrmeta_size()).get()), true);
+    nd::array result = nd::empty(dt);
     if (!dt.is_builtin()) {
-      dt.extended()->arrmeta_copy_construct(result.get()->metadata(), arrmeta, intrusive_ptr<memory_block_data>(self.get(), true));
+      dt.extended()->arrmeta_copy_construct(result.get()->metadata(), arrmeta,
+                                            intrusive_ptr<memory_block_data>(self.get(), true));
     }
     result.get()->tp = dt;
     result.get()->data = data;

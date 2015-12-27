@@ -129,19 +129,6 @@ void dynd::broadcast_input_shapes(intptr_t ninputs, const nd::array* inputs,
     }
 }
 
-void dynd::create_broadcast_result(const ndt::type& result_inner_tp,
-                const nd::array& op0, const nd::array& op1, const nd::array& op2,
-                nd::array &out, intptr_t& out_ndim, dimvector& out_shape)
-{
-    // Get the shape of the result
-    shortvector<int> axis_perm;
-    nd::array ops[3] = {op0, op1, op2};
-    broadcast_input_shapes(3, ops, out_ndim, out_shape, axis_perm);
-
-    out = nd::make_strided_array(result_inner_tp, out_ndim, out_shape.get(),
-                    nd::read_access_flag|nd::write_access_flag, axis_perm.get());
-}
-
 void dynd::incremental_broadcast(intptr_t out_undim, intptr_t *out_shape,
                 intptr_t undim, const intptr_t *shape)
 {
