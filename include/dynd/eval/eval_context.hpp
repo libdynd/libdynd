@@ -12,7 +12,6 @@
 #endif
 
 #include <dynd/config.hpp>
-#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/date_util.hpp>
 
 namespace dynd {

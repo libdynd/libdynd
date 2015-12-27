@@ -172,7 +172,7 @@ TEST(TypeCasting, IsLosslessAssignment) {
 
 
 TEST(TypeCasting, StringToInt32) {
-    nd::array a = nd::empty<int>();
+    nd::array a = nd::empty(ndt::make_type<int>());
 
     // Test the limits of string to int conversion
     a.vals() = "2147483647";
@@ -206,7 +206,7 @@ TEST(TypeCasting, StringToInt32) {
 ToDo: Reenable this.
 
 TEST(TypeCasting, StringToInt64) {
-    nd::array a = nd::empty<int64_t>();
+    nd::array a = nd::empty(ndt::make_type<int64_t>());
 
     // Test the limits of string to int conversion
     a.vals() = "-0";
@@ -229,7 +229,7 @@ TEST(TypeCasting, StringToInt64) {
 
 /*
 TEST(TypeCasting, StringToInt128) {
-    nd::array a = nd::empty<int128>();
+    nd::array a = nd::empty(ndt::make_type<int128>());
 
     // Test the limits of string to int conversion
     a.vals() = "-0";
@@ -256,7 +256,7 @@ TEST(TypeCasting, StringToInt128) {
 */
 
 TEST(TypeCasting, StringToUInt64) {
-    nd::array a = nd::empty<uint64_t>();
+    nd::array a = nd::empty(ndt::make_type<uint64_t>());
 
     // Test the limits of string to int conversion
     a.vals() = "0";

@@ -10,8 +10,6 @@
 
 #include <dynd/string.hpp>
 #include <dynd/type.hpp>
-#include <dynd/typed_data_assign.hpp>
-#include <dynd/types/view_type.hpp>
 #include <dynd/string_encodings.hpp>
 
 namespace dynd {
@@ -19,6 +17,8 @@ namespace ndt {
 
   class DYND_API string_type : public base_string_type {
   public:
+    typedef string data_type;
+
     string_type();
 
     virtual ~string_type();

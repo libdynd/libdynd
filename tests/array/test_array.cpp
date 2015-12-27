@@ -455,68 +455,6 @@ TYPED_TEST_P(Array, AsScalar)
   EXPECT_EQ(3.141592653589f, a.as<float>());
 }
 
-TEST(Array, ConstructorMemoryLayouts)
-{
-  nd::array a, b;
-  ndt::type dt(int16_type_id), dt2(int32_type_id);
-  intptr_t shape[6];
-  int axisperm[6];
-
-  // The strides are set to zero for size-one dimensions
-  shape[0] = 1;
-  shape[1] = 1;
-  shape[2] = 1;
-  axisperm[0] = 0;
-  axisperm[1] = 1;
-  axisperm[2] = 2;
-  a = nd::make_strided_array(dt, 3, shape, nd::read_access_flag | nd::write_access_flag, axisperm);
-  EXPECT_EQ(3u, a.get_strides().size());
-  EXPECT_EQ(0, a.get_strides()[0]);
-  EXPECT_EQ(0, a.get_strides()[1]);
-  EXPECT_EQ(0, a.get_strides()[2]);
-  b = empty_like(a);
-  EXPECT_EQ(3u, b.get_strides().size());
-  EXPECT_EQ(0, b.get_strides()[0]);
-  EXPECT_EQ(0, b.get_strides()[1]);
-  EXPECT_EQ(0, b.get_strides()[2]);
-
-  // Test all permutations of memory layouts from 1 through 6 dimensions
-  for (intptr_t ndim = 1; ndim <= 6; ++ndim) {
-    // Go through all the permutations on ndim elements
-    // to check every memory layout
-    intptr_t num_elements = 1;
-    for (intptr_t i = 0; i < ndim; ++i) {
-      shape[i] = i + 2;
-      axisperm[i] = int(i);
-      num_elements *= shape[i];
-    }
-    do {
-      // Test constructing the array using the perm
-      a = nd::make_strided_array(dt, ndim, shape, nd::read_access_flag | nd::write_access_flag, axisperm);
-      EXPECT_EQ(ndim, (intptr_t)a.get_strides().size());
-      intptr_t s = dt.get_data_size();
-      for (intptr_t i = 0; i < ndim; ++i) {
-        EXPECT_EQ(s, a.get_strides()[axisperm[i]]);
-        s *= shape[axisperm[i]];
-      }
-      // Test constructing the array using empty_like, which preserves the memory layout
-      b = empty_like(a);
-      EXPECT_EQ(ndim, (intptr_t)b.get_strides().size());
-      for (intptr_t i = 0; i < ndim; ++i) {
-        EXPECT_EQ(a.get_strides()[i], b.get_strides()[i]);
-      }
-      // Test constructing the array using empty_like with a different type, which preserves the memory layout
-      b = empty_like(a, dt2);
-      EXPECT_EQ(ndim, (intptr_t)b.get_strides().size());
-      for (intptr_t i = 0; i < ndim; ++i) {
-        EXPECT_EQ(2 * a.get_strides()[i], b.get_strides()[i]);
-      }
-      // cout << "perm " << axisperm[0] << " " << axisperm[1] << " " << axisperm[2] << "\n";
-      // cout << "strides " << a.get_strides(0) << " " << a.get_strides(1) << " " << a.get_strides(2) << "\n";
-    } while (next_permutation(&axisperm[0], &axisperm[0] + ndim));
-  }
-}
-
 TEST(Array, InitFromInitializerLists)
 {
   nd::array a = {1, 2, 3, 4, 5};

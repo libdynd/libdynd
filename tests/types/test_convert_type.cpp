@@ -8,7 +8,6 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/convert_type.hpp>
 
 using namespace std;
