@@ -345,8 +345,6 @@ static nd::array property_get_kwd_names(const ndt::type &tp)
 
 */
 
-static ndt::type property_get_return_type(ndt::type tp) { return tp.extended<ndt::callable_type>()->get_return_type(); }
-
 std::map<std::string, nd::callable> ndt::callable_type::get_dynamic_type_properties() const
 {
   struct pos_types_kernel : nd::base_property_kernel<pos_types_kernel> {
@@ -422,7 +420,7 @@ std::map<std::string, nd::callable> ndt::callable_type::get_dynamic_type_propert
   properties["pos_types"] = nd::callable::make<pos_types_kernel>(type("(self: type) -> Fixed * type"));
   properties["kwd_types"] = nd::callable::make<kwd_types_kernel>(type("(self: type) -> Fixed * type"));
   properties["kwd_names"] = nd::callable::make<kwd_names_kernel>(type("(self: type) -> Fixed * Any"));
-  properties["return_type"] = nd::functional::apply(&property_get_return_type, "self");
+  properties["return_type"] = nd::callable([](type self) { return self.extended<callable_type>()->get_return_type(); });
 
   return properties;
 }

@@ -11,13 +11,11 @@ namespace dynd {
 
 class DYND_API string : public bytes {
 public:
-  string()
-  {
-  }
+  string() {}
 
-  string(const char *data, size_t size) : bytes(data, size)
-  {
-  }
+  string(const char *data, size_t size) : bytes(data, size) {}
+
+  string(const std::string &other) : string(other.data(), other.size()) {}
 
   bool operator<(const string &rhs) const
   {

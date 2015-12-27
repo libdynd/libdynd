@@ -24,7 +24,6 @@ cuda_device_type::~cuda_device_type() {}
 void cuda_device_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const
 {
   nd::array a = nd::empty(m_element_tp);
-  typed_data_assign(a.get_type(), a.get_arrmeta(), a.get_readwrite_originptr(), ndt::type(this, true), arrmeta, data);
 
   if (m_element_tp.is_builtin()) {
     print_builtin_scalar(m_element_tp.get_type_id(), o, a.get_readonly_originptr());

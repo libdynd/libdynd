@@ -4,7 +4,6 @@
 //
 
 #include <dynd/callable.hpp>
-#include <dynd/kernels/base_property_kernel.hpp>
 #include <dynd/types/typevar_type.hpp>
 
 using namespace std;
@@ -126,40 +125,10 @@ bool ndt::typevar_type::match(const char *DYND_UNUSED(arrmeta), const type &cand
   }
 }
 
-/*
-static nd::array property_get_name(const ndt::type &tp)
-{
-  return tp.extended<ndt::typevar_type>()->get_name();
-}
-*/
-
 std::map<std::string, nd::callable> ndt::typevar_type::get_dynamic_type_properties() const
 {
-  struct name_kernel : nd::base_property_kernel<name_kernel> {
-    name_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
-        : base_property_kernel<name_kernel>(tp, dst_tp, dst_arrmeta)
-    {
-    }
-
-    void single(char *dst, char *const *DYND_UNUSED(src))
-    {
-      const nd::array &a = tp.extended<typevar_type>()->get_name();
-      typed_data_assign(dst_tp, dst_arrmeta, dst, a.get_type(), a.get()->metadata(), a.cdata());
-    }
-
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
-                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 intptr_t DYND_UNUSED(nkwd), const dynd::nd::array *DYND_UNUSED(kwds),
-                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      const nd::array &a = tp.extended<typevar_type>()->get_name();
-      dst_tp = a.get_type();
-    }
-  };
-
   std::map<std::string, nd::callable> properties;
-  properties["name"] = nd::callable::make<name_kernel>(type("(self: type) -> Any"));
+  properties["name"] = nd::callable([](type self) -> string { return self.extended<typevar_type>()->get_name(); });
 
   return properties;
 }

@@ -147,46 +147,12 @@ bool ndt::typevar_dim_type::match(const char *arrmeta, const type &candidate_tp,
   }
 }
 
-/*
-static nd::array property_get_name(const ndt::type &tp)
-{
-  return tp.extended<ndt::typevar_dim_type>()->get_name();
-}
-*/
-
-static ndt::type property_get_element_type(ndt::type dt)
-{
-  return dt.extended<ndt::typevar_dim_type>()->get_element_type();
-}
-
 std::map<std::string, nd::callable> ndt::typevar_dim_type::get_dynamic_type_properties() const
 {
-  struct name_kernel : nd::base_property_kernel<name_kernel> {
-    name_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
-        : base_property_kernel<name_kernel>(tp, dst_tp, dst_arrmeta)
-    {
-    }
-
-    void single(char *dst, char *const *DYND_UNUSED(src))
-    {
-      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
-                        static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).get()->metadata(),
-                        static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).cdata());
-    }
-
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
-                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 intptr_t DYND_UNUSED(nkwd), const dynd::nd::array *DYND_UNUSED(kwds),
-                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      dst_tp = static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).get_type();
-    }
-  };
-
   std::map<std::string, nd::callable> properties;
-  properties["name"] = nd::callable::make<name_kernel>(type("(self: type) -> Any"));
-  properties["element_type"] = nd::functional::apply(&property_get_element_type, "self");
+  properties["name"] = nd::callable([](type self) -> string { return self.extended<typevar_dim_type>()->get_name(); });
+  properties["element_type"] =
+      nd::callable([](type self) { return self.extended<typevar_dim_type>()->get_element_type(); });
 
   return properties;
 }
