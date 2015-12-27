@@ -19,7 +19,7 @@ DYND_API nd::callable nd::assign::make()
                            complex_float64_type_id> numeric_type_ids;
 
   ndt::type self_tp = ndt::callable_type::make(ndt::any_kind_type::make(), {ndt::any_kind_type::make()}, {"error_mode"},
-                                               {ndt::make_type<ndt::option_type>(ndt::make_type<int>())});
+                                               {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())});
 
   map<std::array<type_id_t, 2>, callable> children =
       callable::make_all<_bind<assign_error_mode, assignment_kernel>::type, numeric_type_ids, numeric_type_ids>();

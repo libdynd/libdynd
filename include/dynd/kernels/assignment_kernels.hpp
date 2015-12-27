@@ -179,7 +179,7 @@ namespace nd {
           }
         }
 
-        switch (kwds[0].as<int>()) {
+        switch (kwds[0].as<assign_error_mode>()) {
         case assign_error_default:
         case assign_error_nocheck:
           return assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind, assign_error_nocheck>::instantiate(
@@ -1885,8 +1885,8 @@ namespace nd {
         // instantiate src_is_avail
         nd::callable &is_missing = nd::is_missing::get();
         ckb_offset = is_missing.get()->instantiate(is_missing->static_data(), NULL, ckb, ckb_offset,
-                                                 ndt::make_type<bool1>(), NULL, nsrc, src_tp, src_arrmeta, kernreq,
-                                                 &eval::default_eval_context, nkwd, kwds, tp_vars);
+                                                   ndt::make_type<bool1>(), NULL, nsrc, src_tp, src_arrmeta, kernreq,
+                                                   &eval::default_eval_context, nkwd, kwds, tp_vars);
         // instantiate dst_assign_na
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
         self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<self_type>(root_ckb_offset);
@@ -3270,7 +3270,7 @@ namespace ndt {
     static type equivalent()
     {
       return callable_type::make(type(DstTypeID), {type(Src0TypeID)}, {"error_mode"},
-                                 {ndt::make_type<ndt::option_type>(ndt::make_type<int>())});
+                                 {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())});
     }
   };
 

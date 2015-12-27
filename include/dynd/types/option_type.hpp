@@ -8,6 +8,28 @@
 #include <dynd/callable.hpp>
 
 namespace dynd {
+
+template <typename ValueType>
+struct option {
+  ValueType value;
+
+  option() : value(ndt::traits<ValueType>::na()) {}
+
+  option(ValueType value) : value(value) {}
+};
+
+template <typename ValueType>
+option<ValueType> opt()
+{
+  return option<ValueType>();
+}
+
+template <typename ValueType>
+option<ValueType> opt(ValueType value)
+{
+  return option<ValueType>(value);
+}
+
 namespace ndt {
 
   /**
@@ -64,6 +86,13 @@ namespace ndt {
                std::map<std::string, type> &tp_vars) const;
 
     std::map<std::string, nd::callable> get_dynamic_type_properties() const;
+  };
+
+  template <typename ValueType>
+  struct traits<option<ValueType>> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return make_type<option_type>(make_type<ValueType>()); }
   };
 
 } // namespace dynd::ndt

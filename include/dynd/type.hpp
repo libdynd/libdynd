@@ -898,7 +898,7 @@ namespace ndt {
 
     static type equivalent() { return type(type_id_of<signed char>::value); }
 
-    static signed char sentinel() { return std::numeric_limits<signed char>::min(); }
+    static signed char na() { return std::numeric_limits<signed char>::min(); }
   };
 
   template <>
@@ -917,6 +917,8 @@ namespace ndt {
     static const bool is_same_layout = true;
 
     static type equivalent() { return type(type_id_of<int>::value); }
+
+    static int na() { return std::numeric_limits<int>::min(); }
   };
 
   template <>
@@ -971,6 +973,8 @@ namespace ndt {
     static const bool is_same_layout = true;
 
     static type equivalent() { return type(type_id_of<unsigned int>::value); }
+
+    static unsigned int na() { return std::numeric_limits<unsigned int>::max(); }
   };
 
   template <>
@@ -1071,7 +1075,7 @@ namespace ndt {
 
     static type equivalent() { return type(string_type_id); }
 
-    static string sentinel() { return string(); }
+    static string na() { return string(); }
   };
 
   template <>
@@ -1155,6 +1159,20 @@ namespace ndt {
     static const bool is_same_layout = false;
 
     static type equivalent() { return make_type<string>(); }
+  };
+
+  template <>
+  struct traits<assign_error_mode> {
+    static const size_t ndim = 0;
+
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return make_type<typename std::underlying_type<assign_error_mode>::type>(); }
+
+    static assign_error_mode na()
+    {
+      return static_cast<assign_error_mode>(traits<typename std::underlying_type<assign_error_mode>::type>::na());
+    }
   };
 
   // Need to handle const properly
