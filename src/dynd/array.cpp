@@ -179,7 +179,7 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
 
 nd::array nd::array::assign(const array &rhs, assign_error_mode error_mode) const
 {
-  return nd::assign({rhs}, {{"error_mode", static_cast<int>(error_mode)}, {"dst", *this}});
+  return nd::assign({rhs}, {{"error_mode", error_mode}, {"dst", *this}});
 }
 
 nd::array nd::array::assign_na() const { return nd::assign_na({}, {{"dst", *this}}); }

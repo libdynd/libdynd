@@ -11,6 +11,7 @@
 #include <dynd/kernels/base_property_kernel.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/shape_tools.hpp>
+#include <dynd/types/option_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -590,18 +591,16 @@ struct ndt::tuple_type::metadata_offsets_kernel : nd::base_kernel<metadata_offse
   static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                              const std::map<std::string, ndt::type> &tp_vars)
+                              kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
   {
     const ndt::type &tp = kwds[0].as<type>();
     make(ckb, kernreq, ckb_offset, tp);
 
     const char *src_metadata = tp.extended<tuple_type>()->m_arrmeta_offsets.get()->metadata();
 
-    nd::array error_mode = nd::empty(make_type<option_type>(make_type<int>()));
-    error_mode.assign((int)assign_error_nocheck);
+    static const nd::array error_mode(opt<assign_error_mode>());
     return nd::assign::get()->instantiate(nd::assign::get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                          1, &dst_tp, &src_metadata, kernreq, NULL, 1, &error_mode, tp_vars);
+                                          1, &dst_tp, &src_metadata, kernreq, ectx, 1, &error_mode, tp_vars);
   }
 };
