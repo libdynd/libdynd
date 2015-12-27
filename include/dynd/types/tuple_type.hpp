@@ -18,6 +18,8 @@ namespace dynd {
 namespace ndt {
 
   class DYND_API tuple_type : public base_type {
+    struct metadata_offsets_kernel;
+
   protected:
     /**
      * The number of values in m_field_types and m_arrmeta_offsets.
@@ -157,8 +159,6 @@ namespace ndt {
     /** Makes an empty tuple */
     static type make(bool variadic = false) { return make(nd::empty(0, make_type<type_type>()), variadic); }
   };
-
-  DYND_API nd::array pack(intptr_t field_count, const nd::array *field_vals);
 
 } // namespace dynd::ndt
 } // namespace dynd

@@ -567,51 +567,41 @@ std::map<std::string, nd::callable> ndt::tuple_type::get_dynamic_type_properties
     }
   };
 
-  struct arrmeta_offsets_kernel : nd::base_property_kernel<arrmeta_offsets_kernel> {
-    arrmeta_offsets_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
-        : base_property_kernel<arrmeta_offsets_kernel>(tp, dst_tp, dst_arrmeta)
-    {
-    }
-
-    void single(char *dst, char *const *DYND_UNUSED(src))
-    {
-      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
-                        tp.extended<tuple_type>()->m_arrmeta_offsets.get()->metadata(),
-                        tp.extended<tuple_type>()->m_arrmeta_offsets.cdata());
-    }
-
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
-                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 intptr_t DYND_UNUSED(nkwd), const dynd::nd::array *DYND_UNUSED(kwds),
-                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      dst_tp = tp.extended<tuple_type>()->m_arrmeta_offsets.get_type();
-    }
-  };
-
   std::map<std::string, nd::callable> properties;
   properties["field_types"] = nd::callable::make<field_types_kernel>(type("(self: type) -> Any"));
-  properties["arrmeta_offsets"] = nd::callable::make<arrmeta_offsets_kernel>(type("(self: type) -> Any"));
+  properties["metadata_offsets"] = nd::callable::make<metadata_offsets_kernel>(
+      ndt::callable_type::make(m_arrmeta_offsets.get_type(), ndt::tuple_type::make(),
+                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
 
   return properties;
 }
 
-nd::array ndt::pack(intptr_t field_count, const nd::array *field_vals)
-{
-  if (field_count == 0) {
-    return nd::array();
+struct ndt::tuple_type::metadata_offsets_kernel : nd::base_kernel<metadata_offsets_kernel, 0> {
+  type tp;
+
+  metadata_offsets_kernel(const type &tp) : tp(tp) {}
+
+  void single(char *res, char *const *DYND_UNUSED(args))
+  {
+    char *child_args = const_cast<char *>(tp.extended<tuple_type>()->m_arrmeta_offsets.cdata());
+    get_child()->single(res, &child_args);
   }
 
-  vector<type> field_types(field_count);
-  for (intptr_t i = 0; i < field_count; ++i) {
-    field_types[i] = field_vals[i].get_type();
-  }
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                              kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+                              intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                              const std::map<std::string, ndt::type> &tp_vars)
+  {
+    const ndt::type &tp = kwds[0].as<type>();
+    make(ckb, kernreq, ckb_offset, tp);
 
-  nd::array res = nd::empty(ndt::tuple_type::make(field_types));
-  for (intptr_t i = 0; i < field_count; ++i) {
-    res.vals_at(i) = field_vals[i];
-  }
+    const char *src_metadata = tp.extended<tuple_type>()->m_arrmeta_offsets.get()->metadata();
 
-  return res;
-}
+    nd::array error_mode = nd::empty(make_type<option_type>(make_type<int>()));
+    error_mode.assign((int)assign_error_nocheck);
+    return nd::assign::get()->instantiate(nd::assign::get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                          1, &dst_tp, &src_metadata, kernreq, NULL, 1, &error_mode, tp_vars);
+  }
+};
