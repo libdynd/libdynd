@@ -72,14 +72,14 @@ struct output_data {
 
 static void format_json(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data);
 
-static void format_json_bool(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
+static void format_json_bool(output_data &out, const ndt::type &dt, const char *DYND_UNUSED(arrmeta), const char *data)
 {
   bool1 value(false);
   if (dt.get_type_id() == bool_type_id) {
     value = (*data != 0);
   }
   else {
-    typed_data_assign(ndt::make_type<bool1>(), NULL, reinterpret_cast<char *>(&value), dt, arrmeta, data);
+    throw std::runtime_error("cannot format bool JSON");
   }
   if (value) {
     out.write("true");

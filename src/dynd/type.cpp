@@ -1070,3 +1070,127 @@ ndt::type ndt::common_type::operator()(const ndt::type &tp0, const ndt::type &tp
 }
 
 class ndt::common_type ndt::common_type;
+
+// Returns true if the destination type can represent *all* the values
+// of the source type, false otherwise. This is used, for example,
+// to skip any overflow checks when doing value assignments between differing
+// types.
+bool dynd::is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_tp)
+{
+  if (dst_tp.is_builtin() && src_tp.is_builtin()) {
+    switch (src_tp.get_kind()) {
+    case kind_kind: // TODO: raise an error?
+      return true;
+    case pattern_kind: // TODO: raise an error?
+      return true;
+    case bool_kind:
+      switch (dst_tp.get_kind()) {
+      case bool_kind:
+      case sint_kind:
+      case uint_kind:
+      case real_kind:
+      case complex_kind:
+        return true;
+      case bytes_kind:
+        return false;
+      default:
+        break;
+      }
+      break;
+    case sint_kind:
+      switch (dst_tp.get_kind()) {
+      case bool_kind:
+        return false;
+      case sint_kind:
+        return dst_tp.get_data_size() >= src_tp.get_data_size();
+      case uint_kind:
+        return false;
+      case real_kind:
+        return dst_tp.get_data_size() > src_tp.get_data_size();
+      case complex_kind:
+        return dst_tp.get_data_size() > 2 * src_tp.get_data_size();
+      case bytes_kind:
+        return false;
+      default:
+        break;
+      }
+      break;
+    case uint_kind:
+      switch (dst_tp.get_kind()) {
+      case bool_kind:
+        return false;
+      case sint_kind:
+        return dst_tp.get_data_size() > src_tp.get_data_size();
+      case uint_kind:
+        return dst_tp.get_data_size() >= src_tp.get_data_size();
+      case real_kind:
+        return dst_tp.get_data_size() > src_tp.get_data_size();
+      case complex_kind:
+        return dst_tp.get_data_size() > 2 * src_tp.get_data_size();
+      case bytes_kind:
+        return false;
+      default:
+        break;
+      }
+      break;
+    case real_kind:
+      switch (dst_tp.get_kind()) {
+      case bool_kind:
+      case sint_kind:
+      case uint_kind:
+        return false;
+      case real_kind:
+        return dst_tp.get_data_size() >= src_tp.get_data_size();
+      case complex_kind:
+        return dst_tp.get_data_size() >= 2 * src_tp.get_data_size();
+      case bytes_kind:
+        return false;
+      default:
+        break;
+      }
+    case complex_kind:
+      switch (dst_tp.get_kind()) {
+      case bool_kind:
+      case sint_kind:
+      case uint_kind:
+      case real_kind:
+        return false;
+      case complex_kind:
+        return dst_tp.get_data_size() >= src_tp.get_data_size();
+      case bytes_kind:
+        return false;
+      default:
+        break;
+      }
+    case string_kind:
+      switch (dst_tp.get_kind()) {
+      case bool_kind:
+      case sint_kind:
+      case uint_kind:
+      case real_kind:
+      case complex_kind:
+        return false;
+      case bytes_kind:
+        return false;
+      default:
+        break;
+      }
+    case bytes_kind:
+      return dst_tp.get_kind() == bytes_kind && dst_tp.get_data_size() == src_tp.get_data_size();
+    default:
+      break;
+    }
+
+    throw std::runtime_error("unhandled built-in case in is_lossless_assignmently");
+  }
+
+  // Use the available base_type to check the casting
+  if (!dst_tp.is_builtin()) {
+    // Call with dst_dt (the first parameter) first
+    return dst_tp.extended()->is_lossless_assignment(dst_tp, src_tp);
+  }
+  else {
+    // Fall back to src_dt if the dst's extended is NULL
+    return src_tp.extended()->is_lossless_assignment(dst_tp, src_tp);
+  }
+}
