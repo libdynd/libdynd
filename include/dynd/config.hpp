@@ -102,8 +102,6 @@
 #define DYND_USE_FPSTATUS
 #endif
 
-#define DYND_USE_STD_ATOMIC
-
 // No DYND_CONSTEXPR yet, define it as nothing
 #define DYND_CONSTEXPR
 
