@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/types/string_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 namespace dynd {
@@ -104,90 +105,43 @@ namespace nd {
   };
 
   template <typename ContainerType, size_t Rank>
-  struct fixed_dim_init {
-    typedef typename ContainerType::value_type value_type;
-
-    intptr_t stride;
-    init<value_type> child;
-
-    fixed_dim_init(const ndt::type &tp, const char *metadata)
-        : stride(reinterpret_cast<const size_stride_t *>(metadata)->stride),
-          child(tp.extended<ndt::base_dim_type>()->get_element_type(),
-                metadata + tp.extended<ndt::base_dim_type>()->get_element_arrmeta_offset())
-
-    {
-    }
-
-    void single(char *data, const ContainerType &values) const
-    {
-      for (const value_type &value : values) {
-        child.single(data, value);
-        data += stride;
-      }
-    }
-  };
-
-  template <typename ContainerType, size_t Rank>
-  struct var_dim_init {
-    typedef typename ContainerType::value_type value_type;
-
-    intptr_t stride;
-    init<value_type> child;
-
-    var_dim_init(const ndt::type &tp, const char *metadata)
-        : stride(reinterpret_cast<const size_stride_t *>(metadata)->stride),
-          child(tp.extended<ndt::base_dim_type>()->get_element_type(),
-                metadata + tp.extended<ndt::base_dim_type>()->get_element_arrmeta_offset())
-
-    {
-    }
-
-    void single(char *data, const ContainerType &values) const
-    {
-      for (const value_type &value : values) {
-        child.single(data, value);
-        data += stride;
-      }
-    }
-  };
-
-  template <typename ContainerType, size_t Rank>
   struct container_init {
-    void (*wrapper)(const void *self, char *, const ContainerType &);
-    union dim_init {
-      fixed_dim_init<ContainerType, Rank> x;
-      var_dim_init<ContainerType, Rank> y;
+    typedef void (*closure_type)(const container_init *, char *, const ContainerType &);
+    typedef typename ContainerType::value_type value_type;
 
-      dim_init(const ndt::type &tp, const char *metadata, int) : x(tp, metadata) {}
-
-      dim_init(const ndt::type &tp, const char *metadata, char) : y(tp, metadata) {}
-    } child;
+    intptr_t stride;
+    closure_type closure;
+    init<value_type> child;
 
     container_init(const ndt::type &tp, const char *metadata)
-        : child(true ? dim_init(tp, metadata, 0) : dim_init(tp, metadata, 'a'))
+        : child(tp.extended<ndt::base_dim_type>()->get_element_type(),
+                metadata + tp.extended<ndt::base_dim_type>()->get_element_arrmeta_offset())
     {
       switch (tp.get_type_id()) {
       case fixed_dim_type_id:
-        wrapper = [](const void *self, char *data, const ContainerType &values) {
-          reinterpret_cast<const fixed_dim_init<ContainerType, Rank> *>(self)->single(data, values);
+        stride = reinterpret_cast<const size_stride_t *>(metadata)->stride;
+        closure = [](const container_init *self, char *data, const ContainerType &values) {
+          for (const value_type &value : values) {
+            self->child.single(data, value);
+            data += self->stride;
+          }
         };
         break;
       default:
-        throw std::runtime_error("unknown type id");
+        throw std::runtime_error("unsupported");
       }
     }
 
-    void single(char *data, const ContainerType &values) const
-    {
-      wrapper(reinterpret_cast<const void *>(&child), data, values);
-    }
+    void single(char *data, const ContainerType &values) const { closure(this, data, values); }
   };
 
   template <typename ValueType>
   struct container_init<std::initializer_list<ValueType>, 1> {
+    typedef void (*closure_type)(const container_init *, char *, const std::initializer_list<ValueType> &);
     typedef ValueType value_type;
 
-    void (*func)(const container_init *, char *, const std::initializer_list<ValueType> &);
+    intrusive_ptr<memory_block_data> memblock;
+    closure_type closure;
     init<value_type> child;
 
     container_init(const ndt::type &tp, const char *metadata)
@@ -195,14 +149,17 @@ namespace nd {
     {
       switch (tp.get_type_id()) {
       case fixed_dim_type_id:
-        func = [](const container_init *self, char *data, const std::initializer_list<ValueType> &values) {
+        closure = [](const container_init *self, char *data, const std::initializer_list<ValueType> &values) {
           self->child.contiguous(data, values.begin(), values.size());
         };
         break;
       case var_dim_type_id:
-        func = [](const container_init *self, char *data, const std::initializer_list<ValueType> &values) {
-          //          memory_block_data::api *allocator = self->memblock->get_api();
-          //          dst_vddd->begin = allocator->allocate(memblock, dim_size);
+        memblock = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(metadata)->blockref;
+        closure = [](const container_init *self, char *data, const std::initializer_list<ValueType> &values) {
+          memory_block_data::api *allocator = self->memblock->get_api();
+          reinterpret_cast<ndt::var_dim_type::data_type *>(data)->begin =
+              allocator->allocate(self->memblock.get(), values.size());
+          reinterpret_cast<ndt::var_dim_type::data_type *>(data)->size = values.size();
           self->child.contiguous(reinterpret_cast<ndt::var_dim_type::data_type *>(data)->begin, values.begin(),
                                  values.size());
         };
@@ -212,7 +169,7 @@ namespace nd {
       }
     }
 
-    void single(char *data, const std::initializer_list<ValueType> &values) const { func(this, data, values); }
+    void single(char *data, const std::initializer_list<ValueType> &values) const { closure(this, data, values); }
   };
 
   template <typename ContainerType>

@@ -9,7 +9,6 @@
 #include <string>
 
 #include <dynd/array.hpp>
-#include <dynd/string.hpp>
 
 namespace dynd {
 namespace ndt {

@@ -8,7 +8,6 @@
 #include <map>
 
 #include <dynd/type.hpp>
-#include <dynd/string.hpp>
 
 namespace dynd { namespace ndt {
 
