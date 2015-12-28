@@ -482,7 +482,7 @@ void ndt::datetime_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta), 
 {
   datetime_struct dts;
   const char *tz_begin = NULL, *tz_end = NULL;
-  dts.set_from_str(utf8_begin, utf8_end, ectx->date_parse_order, ectx->century_window, ectx->errmode, tz_begin, tz_end);
+  dts.set_from_str(utf8_begin, utf8_end, date_parse_no_ambig, 70, ectx->errmode, tz_begin, tz_end);
   if (m_timezone != tz_abstract && tz_begin != tz_end) {
     if (m_timezone == tz_utc &&
         (compare_range_to_literal(tz_begin, tz_end, "Z") || compare_range_to_literal(tz_begin, tz_end, "UTC"))) {

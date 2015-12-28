@@ -106,7 +106,7 @@ void ndt::date_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta), char
                                           const char *utf8_end, const eval::eval_context *ectx) const
 {
   date_ymd ymd;
-  ymd.set_from_str(utf8_begin, utf8_end, ectx->date_parse_order, ectx->century_window, ectx->errmode);
+  ymd.set_from_str(utf8_begin, utf8_end, date_parse_no_ambig, 70, ectx->errmode);
   *reinterpret_cast<int32_t *>(data) = ymd.to_days();
 }
 
