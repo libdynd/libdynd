@@ -8,7 +8,6 @@
 #include <dynd/config.hpp>
 #include <dynd/types/date_util.hpp>
 #include <dynd/types/time_util.hpp>
-#include <dynd/typed_data_assign.hpp>
 
 #define DYND_DATETIME_NA (std::numeric_limits<int64_t>::min())
 

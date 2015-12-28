@@ -16,3 +16,29 @@ bool dynd::built_with_cuda()
   return false;
 #endif
 }
+
+std::ostream &dynd::operator<<(ostream &o, assign_error_mode errmode)
+{
+  switch (errmode) {
+  case assign_error_nocheck:
+    o << "nocheck";
+    break;
+  case assign_error_overflow:
+    o << "overflow";
+    break;
+  case assign_error_fractional:
+    o << "fractional";
+    break;
+  case assign_error_inexact:
+    o << "inexact";
+    break;
+  case assign_error_default:
+    o << "default";
+    break;
+  default:
+    o << "invalid error mode(" << (int)errmode << ")";
+    break;
+  }
+
+  return o;
+}

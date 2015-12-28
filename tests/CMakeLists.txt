@@ -96,7 +96,6 @@ set(tests_SRC
     array/test_array_compare.cpp
     array/test_array_views.cpp
     array/test_asarray.cpp
-    array/test_arrmeta_holder.cpp
     array/test_json_formatter.cpp
     array/test_json_parser.cpp
     array/test_memmap.cpp

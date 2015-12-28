@@ -402,7 +402,6 @@ set(libdynd_SRC
     src/dynd/sort.cpp
     src/dynd/type.cpp
     src/dynd/type_registry.cpp
-    src/dynd/typed_data_assign.cpp
     src/dynd/type_promotion.cpp
     src/dynd/exceptions.cpp
     src/dynd/git_version.cpp.in # Included here for ease of editing in IDEs
@@ -441,7 +440,6 @@ set(libdynd_SRC
     include/dynd/type.hpp
     include/dynd/type_registry.hpp
     include/dynd/type_sequence.hpp
-    include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp
     include/dynd/exceptions.hpp
     include/dynd/fpstatus.hpp
