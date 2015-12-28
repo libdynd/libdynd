@@ -69,6 +69,7 @@ set(tests_SRC
     func/test_constant.cpp
     func/test_elwise.cpp
     func/test_fft.cpp
+    func/test_logic.cpp
     func/test_math.cpp
     func/test_max.cpp
     func/test_mean.cpp

@@ -408,6 +408,7 @@ set(libdynd_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp
     src/dynd/json_formatter.cpp
     src/dynd/json_parser.cpp
+    src/dynd/logic.cpp
     src/dynd/parse.cpp
     src/dynd/shape_tools.cpp
     src/dynd/special.cpp
@@ -435,6 +436,7 @@ set(libdynd_SRC
     include/dynd/float128.hpp
     include/dynd/int128.hpp
     include/dynd/iterator.hpp
+    include/dynd/logic.hpp
     include/dynd/math.hpp
     include/dynd/sort.hpp
     include/dynd/type.hpp
