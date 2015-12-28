@@ -11,6 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/func/sum.hpp>
+#include <dynd/logic.hpp>
 
 #include "dynd_assertions.hpp"
 
