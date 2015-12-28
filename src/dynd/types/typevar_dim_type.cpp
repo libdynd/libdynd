@@ -4,7 +4,6 @@
 //
 
 #include <dynd/callable.hpp>
-#include <dynd/kernels/base_property_kernel.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 
