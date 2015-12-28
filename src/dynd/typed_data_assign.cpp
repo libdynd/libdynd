@@ -180,6 +180,7 @@ void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta, c
   nd::array kwd = nd::empty(ndt::make_type<ndt::option_type>(ndt::make_type<int>()));
   *reinterpret_cast<int *>(kwd.data()) = static_cast<int>(error_mode);
   std::map<std::string, ndt::type> tp_vars;
+  
   nd::assign::get()->call(dst_tp, dst_arrmeta, dst_data, 1, &src_tp, &src_arrmeta, const_cast<char *const *>(&src_data),
                           1, &kwd, tp_vars);
 }

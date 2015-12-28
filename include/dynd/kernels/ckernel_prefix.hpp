@@ -11,9 +11,26 @@
 
 #include <dynd/config.hpp>
 #include <dynd/diagnostics.hpp>
-#include <dynd/typed_data_assign.hpp>
 
 namespace dynd {
+namespace nd {
+
+  class array;
+
+} // namespace dynd::nd
+
+namespace eval {
+
+  struct DYND_API eval_context;
+  extern DYND_API eval_context default_eval_context;
+
+} // namespace dynd::eval
+
+namespace ndt {
+
+  class type;
+
+} // namespace dynd::ndt
 
 struct ckernel_prefix;
 

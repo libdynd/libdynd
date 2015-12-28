@@ -745,6 +745,25 @@ T floor(T value)
   return std::floor(value);
 }
 
+/**
+ * An enumeration for the error checks during assignment.
+ */
+enum assign_error_mode {
+  /** No error checking during assignment */
+  assign_error_nocheck,
+  /** Check overflow, but allow precision loss. Checks loss of imaginary
+     component  */
+  assign_error_overflow,
+  /** Overflow and loss of fractional part (for float -> int) checking */
+  assign_error_fractional,
+  /** Overflow and floating point precision loss checking */
+  assign_error_inexact,
+  /** Use the mode specified in the eval_context */
+  assign_error_default
+};
+
+DYND_API std::ostream &operator<<(std::ostream &o, assign_error_mode errmode);
+
 namespace detail {
   // Use these declarations before includeing bool1, int128, uint128, etc. so they are usable there.
   // Helper to use for determining if a type is in a given list of unique types.

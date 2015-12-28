@@ -1349,4 +1349,7 @@ DYND_API void strided_array_summarized(std::ostream &o, const ndt::type &tp, con
 DYND_API void print_indented(std::ostream &o, const std::string &indent, const std::string &s,
                              bool skipfirstline = false);
 
+/** If 'src' can always be cast to 'dst' with no loss of information */
+DYND_API bool is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_tp);
+
 } // namespace dynd

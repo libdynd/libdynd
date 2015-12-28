@@ -9,6 +9,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
+#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 
 using namespace std;
