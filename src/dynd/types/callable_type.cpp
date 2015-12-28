@@ -8,7 +8,7 @@
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
 #include <dynd/types/typevar_type.hpp>
-#include <dynd/kernels/base_property_kernel.hpp>
+#include <dynd/kernels/get_then_copy_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -347,79 +347,19 @@ static nd::array property_get_kwd_names(const ndt::type &tp)
 
 std::map<std::string, nd::callable> ndt::callable_type::get_dynamic_type_properties() const
 {
-  struct pos_types_kernel : nd::base_property_kernel<pos_types_kernel> {
-    pos_types_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
-        : base_property_kernel<pos_types_kernel>(tp, dst_tp, dst_arrmeta)
-    {
-    }
-
-    void single(char *dst, char *const *DYND_UNUSED(src))
-    {
-      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
-                        tp.extended<callable_type>()->get_pos_types().get()->metadata(),
-                        tp.extended<callable_type>()->get_pos_types().cdata());
-    }
-
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
-                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 intptr_t DYND_UNUSED(nkwd), const dynd::nd::array *DYND_UNUSED(kwds),
-                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      dst_tp = make_fixed_dim(tp.extended<callable_type>()->get_npos(), make_type<type_type>());
-    }
-  };
-
-  struct kwd_types_kernel : nd::base_property_kernel<kwd_types_kernel> {
-    kwd_types_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
-        : base_property_kernel<kwd_types_kernel>(tp, dst_tp, dst_arrmeta)
-    {
-    }
-
-    void single(char *dst, char *const *DYND_UNUSED(src))
-    {
-      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
-                        tp.extended<callable_type>()->get_kwd_types().get()->metadata(),
-                        tp.extended<callable_type>()->get_kwd_types().cdata());
-    }
-
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
-                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 intptr_t DYND_UNUSED(nkwd), const dynd::nd::array *DYND_UNUSED(kwds),
-                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      dst_tp = make_fixed_dim(tp.extended<callable_type>()->get_nkwd(), make_type<type_type>());
-    }
-  };
-
-  struct kwd_names_kernel : nd::base_property_kernel<kwd_names_kernel> {
-    kwd_names_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
-        : base_property_kernel<kwd_names_kernel>(tp, dst_tp, dst_arrmeta)
-    {
-    }
-
-    void single(char *dst, char *const *DYND_UNUSED(src))
-    {
-      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
-                        tp.extended<callable_type>()->get_kwd_names().get()->metadata(),
-                        tp.extended<callable_type>()->get_kwd_names().cdata());
-    }
-
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
-                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 intptr_t DYND_UNUSED(nkwd), const dynd::nd::array *DYND_UNUSED(kwds),
-                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      dst_tp = tp.extended<callable_type>()->get_kwd_names().get_type();
-    }
-  };
-
   std::map<std::string, nd::callable> properties;
-  properties["pos_types"] = nd::callable::make<pos_types_kernel>(type("(self: type) -> Fixed * type"));
-  properties["kwd_types"] = nd::callable::make<kwd_types_kernel>(type("(self: type) -> Fixed * type"));
-  properties["kwd_names"] = nd::callable::make<kwd_names_kernel>(type("(self: type) -> Fixed * Any"));
+  properties["pos_types"] = nd::callable::make<nd::get_then_copy_kernel<callable_type, &callable_type::get_pos_types>>(
+      ndt::callable_type::make(m_pos_tuple.extended<ndt::tuple_type>()->get_field_types().get_type(),
+                               ndt::tuple_type::make(),
+                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
+  properties["kwd_types"] = nd::callable::make<nd::get_then_copy_kernel<callable_type, &callable_type::get_kwd_types>>(
+      ndt::callable_type::make(m_kwd_struct.extended<ndt::struct_type>()->get_field_types().get_type(),
+                               ndt::tuple_type::make(),
+                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
+  properties["kwd_names"] = nd::callable::make<nd::get_then_copy_kernel<callable_type, &callable_type::get_kwd_names>>(
+      ndt::callable_type::make(m_kwd_struct.extended<ndt::struct_type>()->get_field_names().get_type(),
+                               ndt::tuple_type::make(),
+                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
   properties["return_type"] = nd::callable([](type self) { return self.extended<callable_type>()->get_return_type(); });
 
   return properties;
