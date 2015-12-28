@@ -147,20 +147,18 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
 {
   nd::callable f = nd::functional::reduction(nd::functional::apply([](double x, double y) { return x + y; }));
 
-  EXPECT_ARRAY_EQ((initializer_list<double>{1.5 - 2.375 + 2.0 + 1.25 + 7.0 - 0.5, -2.25 + 1.0 + 7.0 + 2.125 + 0.25}),
-                  f({initializer_list<initializer_list<initializer_list<double>>>{
-                        {{1.5, -2.375}, {2.0, 1.25}, {7.0, -0.5}}, {{-2.25, 1.0}, {7.0, 0.0}, {2.125, 0.25}}}},
-                    {{"axes", nd::array({1, 2})}}));
+  EXPECT_ARRAY_EQ((nd::array{1.5 - 2.375 + 2.0 + 1.25 + 7.0 - 0.5, -2.25 + 1.0 + 7.0 + 2.125 + 0.25}),
+                  f({nd::array{{{1.5, -2.375}, {2.0, 1.25}, {7.0, -0.5}}, {{-2.25, 1.0}, {7.0, 0.0}, {2.125, 0.25}}}},
+                    {{"axes", {1, 2}}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
 {
   nd::callable f = nd::functional::reduction(nd::functional::apply([](double x, double y) { return x + y; }));
 
-  EXPECT_ARRAY_EQ((initializer_list<double>{1.5 - 2.375 - 2.25 + 1.0, 2.0 + 1.25 + 7.0, 7.0 - 0.5 + 2.125 + 0.25}),
-                  f({initializer_list<initializer_list<initializer_list<double>>>{
-                        {{1.5, -2.375}, {2.0, 1.25}, {7.0, -0.5}}, {{-2.25, 1.0}, {7.0, 0.0}, {2.125, 0.25}}}},
-                    {{"axes", nd::array({0, 2})}}));
+  EXPECT_ARRAY_EQ(
+      (nd::array{1.5 - 2.375 - 2.25 + 1.0, 2.0 + 1.25 + 7.0, 7.0 - 0.5 + 2.125 + 0.25}),
+      f({{{{1.5, -2.375}, {2.0, 1.25}, {7.0, -0.5}}, {{-2.25, 1.0}, {7.0, 0.0}, {2.125, 0.25}}}}, {{"axes", {0, 2}}}));
 }
 
 TEST(Reduction, Except)

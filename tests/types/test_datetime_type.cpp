@@ -9,7 +9,6 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/string.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>

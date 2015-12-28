@@ -9,7 +9,6 @@
 #include <string>
 
 #include <dynd/array.hpp>
-#include <dynd/string.hpp>
 #include <dynd/types/base_dim_type.hpp>
 
 namespace dynd {

@@ -10,7 +10,6 @@
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/base_expr_type.hpp>
 #include <dynd/types/base_string_type.hpp>
-#include <dynd/string.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -1068,17 +1067,6 @@ namespace ndt {
   };
 
   template <>
-  struct traits<string> {
-    static const size_t ndim = 0;
-
-    static const bool is_same_layout = true;
-
-    static type equivalent() { return type(string_type_id); }
-
-    static string na() { return string(); }
-  };
-
-  template <>
   struct traits<const char *> {
     static const size_t ndim = 0;
 
@@ -1150,15 +1138,6 @@ namespace ndt {
     static const bool is_same_layout = traits<T>::is_same_layout;
 
     static type equivalent() { return make_fixed_dim(N, make_type<T>()); }
-  };
-
-  template <>
-  struct traits<std::string> {
-    static const size_t ndim = 0;
-
-    static const bool is_same_layout = false;
-
-    static type equivalent() { return make_type<string>(); }
   };
 
   template <>

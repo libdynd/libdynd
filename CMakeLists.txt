@@ -453,7 +453,6 @@ set(libdynd_SRC
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
     include/dynd/special.hpp
-    include/dynd/string.hpp
     include/dynd/string_encodings.hpp
     include/dynd/uint128.hpp
     include/dynd/view.hpp

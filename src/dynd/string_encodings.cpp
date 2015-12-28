@@ -9,7 +9,6 @@
 #include <dynd/string_encodings.hpp>
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
-#include <dynd/string.hpp>
 
 #include <utf8.h>
 
