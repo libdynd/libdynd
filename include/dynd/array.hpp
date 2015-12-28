@@ -1090,12 +1090,6 @@ namespace nd {
   }
 
   /**
-   * Given the type/arrmeta/data of an array (or sub-component of an array),
-   * evaluates a new copy of it as the canonical type.
-   */
-  DYND_API array eval_raw_copy(const ndt::type &dt, const char *arrmeta, const char *data);
-
-  /**
    * Memory-maps a file with dynd type 'bytes'.
    *
    * \param filename  The name of the file to memory map.

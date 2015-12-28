@@ -944,28 +944,6 @@ nd::array nd::as_struct(size_t size, const pair<const char *, array> *pairs)
   return res;
 }
 
-nd::array nd::eval_raw_copy(const ndt::type &dt, const char *arrmeta, const char *data)
-{
-  // Allocate an output array with the canonical version of the type
-  ndt::type cdt = dt.get_canonical_type();
-  size_t ndim = dt.get_ndim();
-  array result;
-  if (ndim > 0) {
-    result = nd::empty(cdt);
-    // Reorder strides of output strided dimensions in a KEEPORDER fashion
-    if (cdt.get_type_id() == fixed_dim_type_id) {
-      cdt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), dt, arrmeta);
-    }
-  }
-  else {
-    result = nd::empty(cdt);
-  }
-
-  typed_data_assign(cdt, result.get()->metadata(), result.data(), dt, arrmeta, data);
-
-  return result;
-}
-
 nd::array nd::empty_shell(const ndt::type &tp)
 {
   if (tp.is_builtin()) {

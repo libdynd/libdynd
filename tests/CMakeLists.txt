@@ -52,7 +52,7 @@ set(tests_SRC
     types/test_tuple_type.cpp
     types/test_type.cpp
     types/test_type_type.cpp
-    types/test_type_assign.cpp
+#    types/test_type_assign.cpp
     types/test_type_casting.cpp
     types/test_type_registry.cpp
     types/test_type_substitute.cpp

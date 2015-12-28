@@ -10,7 +10,6 @@
 #include <iostream>
 
 #include <dynd/config.hpp>
-#include <dynd/typed_data_assign.hpp>
 
 #define DYND_DATE_NA (std::numeric_limits<int32_t>::min())
 

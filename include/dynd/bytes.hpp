@@ -17,9 +17,7 @@ protected:
   size_t m_size;
 
 public:
-  bytes() : m_data(NULL), m_size(0)
-  {
-  }
+  bytes() : m_data(NULL), m_size(0) {}
 
   bytes(const char *data, size_t size) : m_data(new char[size]), m_size(size) { memcpy(m_data, data, size); }
 
@@ -30,20 +28,11 @@ public:
 
   ~bytes() { delete[] m_data; }
 
-  char *data()
-  {
-    return m_data;
-  }
+  char *data() { return m_data; }
 
-  const char *data() const
-  {
-    return m_data;
-  }
+  const char *data() const { return m_data; }
 
-  size_t size() const
-  {
-    return m_size;
-  }
+  size_t size() const { return m_size; }
 
   bytes &assign(const char *data, size_t size)
   {
@@ -79,30 +68,15 @@ public:
     }
   }
 
-  char *begin()
-  {
-    return m_data;
-  }
+  char *begin() { return m_data; }
 
-  const char *begin() const
-  {
-    return m_data;
-  }
+  const char *begin() const { return m_data; }
 
-  char *end()
-  {
-    return m_data + m_size;
-  }
+  char *end() { return m_data + m_size; }
 
-  const char *end() const
-  {
-    return m_data + m_size;
-  }
+  const char *end() const { return m_data + m_size; }
 
-  bytes &operator=(const bytes &rhs)
-  {
-    return assign(rhs.m_data, rhs.m_size);
-  }
+  bytes &operator=(const bytes &rhs) { return assign(rhs.m_data, rhs.m_size); }
   bool operator==(const bytes &rhs) const
   {
     return m_size == rhs.m_size && std::memcmp(m_data, rhs.m_data, m_size) == 0;
@@ -121,34 +95,21 @@ namespace detail {
     char *m_data;
     size_t m_size;
 
-    value_bytes(char *data, size_t size) : m_data(data), m_size(size)
-    {
-    }
+    value_bytes(char *data, size_t size) : m_data(data), m_size(size) {}
 
   public:
-    value_bytes() : m_data(NULL), m_size(0)
-    {
-    }
+    value_bytes() : m_data(NULL), m_size(0) {}
 
     value_bytes(const value_bytes &other) : m_data(new char[other.m_size]), m_size(other.m_size)
     {
       memcpy(m_data, other.m_data, m_size);
     }
 
-    ~value_bytes()
-    {
-      delete[] m_data;
-    }
+    ~value_bytes() { delete[] m_data; }
 
-    operator char *()
-    {
-      return m_data;
-    }
+    operator char *() { return m_data; }
 
-    operator const char *() const
-    {
-      return m_data;
-    }
+    operator const char *() const { return m_data; }
 
     value_bytes &operator=(const value_bytes &rhs)
     {
@@ -166,15 +127,11 @@ class strided_iterator : public detail::value_bytes,
   intptr_t m_stride;
 
 public:
-  strided_iterator() : m_stride(0) {};
+  strided_iterator() : m_stride(0){};
 
-  strided_iterator(char *data, size_t size, intptr_t stride) : value_bytes(data, size), m_stride(stride)
-  {
-  }
+  strided_iterator(char *data, size_t size, intptr_t stride) : value_bytes(data, size), m_stride(stride) {}
 
-  strided_iterator(const strided_iterator &other) : value_bytes(other.m_data, other.m_size), m_stride(other.m_stride)
-  {
-  }
+  strided_iterator(const strided_iterator &other) : value_bytes(other.m_data, other.m_size), m_stride(other.m_stride) {}
 
   ~strided_iterator()
   {
@@ -182,15 +139,9 @@ public:
     m_size = 0;
   }
 
-  intptr_t stride() const
-  {
-    return m_stride;
-  }
+  intptr_t stride() const { return m_stride; }
 
-  value_bytes &operator*()
-  {
-    return *this;
-  }
+  value_bytes &operator*() { return *this; }
 
   strided_iterator &operator++()
   {
@@ -230,40 +181,19 @@ public:
     return *this;
   }
 
-  bool operator<(const strided_iterator &rhs) const
-  {
-    return m_data < rhs.m_data;
-  }
+  bool operator<(const strided_iterator &rhs) const { return m_data < rhs.m_data; }
 
-  bool operator<=(const strided_iterator &rhs) const
-  {
-    return m_data <= rhs.m_data;
-  }
+  bool operator<=(const strided_iterator &rhs) const { return m_data <= rhs.m_data; }
 
-  bool operator==(const strided_iterator &rhs) const
-  {
-    return m_data == rhs.m_data;
-  }
+  bool operator==(const strided_iterator &rhs) const { return m_data == rhs.m_data; }
 
-  bool operator!=(const strided_iterator &rhs) const
-  {
-    return m_data != rhs.m_data;
-  }
+  bool operator!=(const strided_iterator &rhs) const { return m_data != rhs.m_data; }
 
-  bool operator>=(const strided_iterator &rhs) const
-  {
-    return m_data >= rhs.m_data;
-  }
+  bool operator>=(const strided_iterator &rhs) const { return m_data >= rhs.m_data; }
 
-  bool operator>(const strided_iterator &rhs) const
-  {
-    return m_data > rhs.m_data;
-  }
+  bool operator>(const strided_iterator &rhs) const { return m_data > rhs.m_data; }
 
-  std::ptrdiff_t operator-(strided_iterator rhs)
-  {
-    return (m_data - rhs.m_data) / m_stride;
-  }
+  std::ptrdiff_t operator-(strided_iterator rhs) { return (m_data - rhs.m_data) / m_stride; }
 
   strided_iterator &operator=(const strided_iterator &other)
   {

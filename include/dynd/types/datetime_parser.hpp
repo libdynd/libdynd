@@ -7,7 +7,6 @@
 
 #include <dynd/config.hpp>
 #include <dynd/types/date_parser.hpp>
-#include <dynd/typed_data_assign.hpp>
 
 namespace dynd {
 
