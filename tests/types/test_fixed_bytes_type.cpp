@@ -8,8 +8,6 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/array.hpp>
-#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 
 using namespace std;
@@ -46,20 +44,4 @@ TEST(FixedBytesDType, Create)
   EXPECT_THROW(ndt::make_fixed_bytes(10, 5), runtime_error);
   // Alignment must divide size
   EXPECT_THROW(ndt::make_fixed_bytes(9, 4), runtime_error);
-}
-
-TEST(FixedBytesDType, Assign)
-{
-  char a[3] = {0, 0, 0};
-  char b[3] = {1, 2, 3};
-
-  // Assignment with fixed_bytes
-  typed_data_assign(ndt::make_fixed_bytes(3, 1), NULL, a, ndt::make_fixed_bytes(3, 1), NULL, b);
-  EXPECT_EQ(1, a[0]);
-  EXPECT_EQ(2, a[1]);
-  EXPECT_EQ(3, a[2]);
-
-  // Must be the same size
-  EXPECT_THROW(typed_data_assign(ndt::make_fixed_bytes(2, 1), NULL, a, ndt::make_fixed_bytes(3, 1), NULL, b),
-               runtime_error);
 }
