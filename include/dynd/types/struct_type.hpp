@@ -109,10 +109,4 @@ namespace ndt {
   };
 
 } // namespace dynd::ndt
-
-/**
- * Concatenates the fields of two structs together into one.
- */
-DYND_API nd::array struct_concat(nd::array lhs, nd::array rhs);
-
 } // namespace dynd
