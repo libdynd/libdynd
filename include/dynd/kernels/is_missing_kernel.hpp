@@ -58,6 +58,27 @@ namespace nd {
       }
     };
 
+    template <type_id_t Src0TypeID>
+    struct is_missing_kernel<Src0TypeID, uint_kind> : base_kernel<is_missing_kernel<Src0TypeID, uint_kind>, 1> {
+      typedef typename type_of<Src0TypeID>::type src0_type;
+
+      void single(char *dst, char *const *src)
+      {
+        *dst = **reinterpret_cast<src0_type *const *>(src) == std::numeric_limits<src0_type>::max();
+      }
+
+      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
+      {
+        char *src0 = src[0];
+        intptr_t src0_stride = src_stride[0];
+        for (size_t i = 0; i != count; ++i) {
+          *dst = *reinterpret_cast<src0_type *>(src0) == std::numeric_limits<src0_type>::max();
+          dst += dst_stride;
+          src0 += src0_stride;
+        }
+      }
+    };
+
     // option[float]
     // NA is 0x7f8007a2
     // Special rule adopted from R: Any NaN is NA
@@ -240,8 +261,8 @@ namespace nd {
                                   intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
                                   const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                                   const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-                                  kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-                                  intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                                  kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         switch (src_tp->get_dtype().get_type_id()) {

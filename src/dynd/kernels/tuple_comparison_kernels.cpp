@@ -144,8 +144,9 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset, const 
       inc_ckb_offset(ckb_offset,
                      sizeof(tuple_compare_sorting_less_matching_arrmeta_kernel) + field_count * sizeof(size_t));
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-      tuple_compare_sorting_less_matching_arrmeta_kernel *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
-          ckb)->get_at<tuple_compare_sorting_less_matching_arrmeta_kernel>(root_ckb_offset);
+      tuple_compare_sorting_less_matching_arrmeta_kernel *e =
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->get_at<tuple_compare_sorting_less_matching_arrmeta_kernel>(root_ckb_offset);
       e->base.function = reinterpret_cast<void *>(&tuple_compare_sorting_less_matching_arrmeta_kernel::sorting_less);
       e->base.destructor = &tuple_compare_sorting_less_matching_arrmeta_kernel::destruct;
       e->field_count = field_count;
@@ -168,14 +169,16 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset, const 
                                             comparison_type_sorting_less, ectx);
       }
       return ckb_offset;
-    } else {
+    }
+    else {
       // The arrmeta is different, so have to get the kernels both ways for the
       // fields
       inc_ckb_offset(ckb_offset,
                      sizeof(tuple_compare_sorting_less_diff_arrmeta_kernel) + 2 * field_count * sizeof(size_t));
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-      tuple_compare_sorting_less_diff_arrmeta_kernel *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
-          ckb)->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
+      tuple_compare_sorting_less_diff_arrmeta_kernel *e =
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
       e->base.function = reinterpret_cast<void *>(&tuple_compare_sorting_less_diff_arrmeta_kernel::sorting_less);
       e->base.destructor = &tuple_compare_sorting_less_diff_arrmeta_kernel::destruct;
       e->field_count = field_count;
@@ -207,7 +210,8 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset, const 
       }
       return ckb_offset;
     }
-  } else if (comptype == comparison_type_equal || comptype == comparison_type_not_equal) {
+  }
+  else if (comptype == comparison_type_equal || comptype == comparison_type_not_equal) {
     //    inc_ckb_offset(ckb_offset, sizeof(nd::tuple_compare_equality_kernel) +
     //                                 field_count * sizeof(size_t));
     //    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -217,16 +221,18 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset, const 
       const char *src_arrmeta[2] = {src0_arrmeta, src1_arrmeta};
       return nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
           NULL, NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, 2, &src_tp, src_arrmeta,
-          kernel_request_host | kernel_request_single, ectx, 0, NULL, tp_vars);
-    } else {
+          kernel_request_host | kernel_request_single, 0, NULL, tp_vars);
+    }
+    else {
       std::map<std::string, ndt::type> tp_vars;
       const char *src_arrmeta[2] = {src0_arrmeta, src1_arrmeta};
       return nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
           NULL, NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, 2, &src_tp, src_arrmeta,
-          kernel_request_host | kernel_request_single, ectx, 0, NULL, tp_vars);
+          kernel_request_host | kernel_request_single, 0, NULL, tp_vars);
     }
     return ckb_offset;
-  } else {
+  }
+  else {
     throw not_comparable_error(src_tp, src_tp, comptype);
   }
 }

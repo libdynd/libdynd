@@ -107,8 +107,7 @@ namespace nd {
                                 const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                                 const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                                const nd::array *DYND_UNUSED(kwds),
+                                intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       SelfType::make(ckb, kernreq, ckb_offset);
@@ -181,7 +180,7 @@ namespace nd {
     void call(array *DYND_UNUSED(dst), array *const *DYND_UNUSED(src))                                                 \
     {                                                                                                                  \
       std::stringstream ss;                                                                                            \
-      ss << "void call(array *dst, array *const *src) is not implemented in " << typeid(SelfType).name();            \
+      ss << "void call(array *dst, array *const *src) is not implemented in " << typeid(SelfType).name();              \
       throw std::runtime_error(ss.str());                                                                              \
     }                                                                                                                  \
                                                                                                                        \

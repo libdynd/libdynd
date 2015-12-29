@@ -219,8 +219,9 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
                                       const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
                                       const eval::eval_context *ectx)
 {
+  nd::array error_mode = ectx->errmode;
   return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1,
-                                        &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                        &src_tp, &src_arrmeta, kernreq, 1, &error_mode,
                                         std::map<std::string, ndt::type>());
 }
 

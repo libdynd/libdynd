@@ -60,13 +60,13 @@ namespace nd {
       }                                                                                                                \
     }                                                                                                                  \
                                                                                                                        \
-    static intptr_t                                                                                                    \
-    instantiate_without_cuda_launch(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,                \
-                                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),                         \
-                                    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),                  \
-                                    const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, \
-                                    const eval::eval_context *DYND_UNUSED(ectx), intptr_t nkwd, const nd::array *kwds, \
-                                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))                      \
+    static intptr_t instantiate_without_cuda_launch(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data),           \
+                                                    void *ckb, intptr_t ckb_offset,                                    \
+                                                    const ndt::type &DYND_UNUSED(dst_tp),                              \
+                                                    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),  \
+                                                    const ndt::type *src_tp, const char *const *src_arrmeta,           \
+                                                    kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,    \
+                                                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))      \
     {                                                                                                                  \
       self_type::make(ckb, kernreq, ckb_offset, args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));          \
       return ckb_offset;                                                                                               \
@@ -75,7 +75,7 @@ namespace nd {
     static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,                    \
                                 intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,  \
                                 const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,     \
-                                const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,                  \
+                                intptr_t nkwd, const nd::array *kwds,                                                  \
                                 const std::map<std::string, ndt::type> &tp_vars);                                      \
   };                                                                                                                   \
                                                                                                                        \
@@ -122,12 +122,13 @@ namespace nd {
       }                                                                                                                \
     }                                                                                                                  \
                                                                                                                        \
-    static intptr_t instantiate_without_cuda_launch(                                                                   \
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,             \
-        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),               \
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, \
-        const eval::eval_context *DYND_UNUSED(ectx), intptr_t nkwd, const nd::array *kwds,                             \
-        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))                                                  \
+    static intptr_t instantiate_without_cuda_launch(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),     \
+                                                    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,           \
+                                                    const ndt::type &DYND_UNUSED(dst_tp),                              \
+                                                    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),  \
+                                                    const ndt::type *src_tp, const char *const *src_arrmeta,           \
+                                                    kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,    \
+                                                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))      \
     {                                                                                                                  \
       self_type::make(ckb, kernreq, ckb_offset, args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));          \
       return ckb_offset;                                                                                               \
@@ -136,7 +137,7 @@ namespace nd {
     static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,                    \
                                 intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,  \
                                 const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,     \
-                                const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,                  \
+                                intptr_t nkwd, const nd::array *kwds,                                                  \
                                 const std::map<std::string, ndt::type> &tp_vars);                                      \
   }
 
@@ -151,13 +152,12 @@ namespace nd {
                                                                         const char *dst_arrmeta, intptr_t nsrc,
                                                                         const ndt::type *src_tp,
                                                                         const char *const *src_arrmeta,
-                                                                        kernel_request_t kernreq,
-                                                                        const eval::eval_context *ectx, intptr_t nkwd,
+                                                                        kernel_request_t kernreq, intptr_t nkwd,
                                                                         const nd::array *kwds,
                                                                         const std::map<std::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(static_data, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-                                             src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
+                                             src_arrmeta, kernreq, nkwd, kwds, tp_vars);
     }
 
 #undef CONSTRUCT_THEN_APPLY_CALLABLE_CK

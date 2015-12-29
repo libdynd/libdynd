@@ -51,9 +51,9 @@ DYND_API struct nd::assign_na nd::assign_na;
 DYND_API nd::callable nd::is_missing::make()
 {
   typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
-                           float32_type_id, float64_type_id, complex_float32_type_id, complex_float64_type_id,
-                           void_type_id, string_type_id, fixed_dim_type_id, date_type_id, time_type_id,
-                           datetime_type_id> type_ids;
+                           uint32_type_id, float32_type_id, float64_type_id, complex_float32_type_id,
+                           complex_float64_type_id, void_type_id, string_type_id, fixed_dim_type_id, date_type_id,
+                           time_type_id, datetime_type_id> type_ids;
 
   std::map<type_id_t, callable> children = callable::make_all<is_missing_kernel, type_ids>();
   std::array<callable, 2> dim_children;

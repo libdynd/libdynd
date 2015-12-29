@@ -201,8 +201,7 @@ namespace nd {
       static intptr_t instantiate(char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                                   const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                   const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  const eval::eval_context *ectx, intptr_t nkwd, const array *kwds,
-                                  const std::map<std::string, ndt::type> &tp_vars)
+                                  intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &af = *reinterpret_cast<callable *>(static_data);
         const ndt::type *src_tp_for_af = af.get_type()->get_pos_types_raw();
@@ -221,16 +220,17 @@ namespace nd {
         }
         // Instantiate the callable being buffered
         ckb_offset = af.get()->instantiate(af.get()->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-                                           src_tp_for_af, &buffered_arrmeta[0], kernreq, ectx, nkwd, kwds, tp_vars);
+                                           src_tp_for_af, &buffered_arrmeta[0], kernreq, nkwd, kwds, tp_vars);
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
         self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<convert_kernel>(root_ckb_offset);
         // Instantiate assignments for all the buffered operands
         for (intptr_t i = 0; i < nsrc; ++i) {
           if (!self->m_bufs[i].is_null()) {
             self->m_src_buf_ck_offsets[i] = ckb_offset - root_ckb_offset;
+            nd::array error_mode = eval::default_eval_context.errmode;
             ckb_offset = assign::get()->instantiate(assign::get()->static_data(), NULL, ckb, ckb_offset,
                                                     src_tp_for_af[i], self->m_bufs[i].get_arrmeta(), 1, src_tp + i,
-                                                    src_arrmeta + i, kernreq, ectx, nkwd, kwds, tp_vars);
+                                                    src_arrmeta + i, kernreq, 1, &error_mode, tp_vars);
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
             if (i < nsrc - 1) {
               self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
