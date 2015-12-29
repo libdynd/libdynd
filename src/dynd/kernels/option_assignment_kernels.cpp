@@ -18,8 +18,8 @@ using namespace dynd;
 static intptr_t instantiate_option_as_value_assignment_kernel(
     char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
-    const nd::array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   // In all cases not handled, we use the
   // regular S to T assignment kernel.
@@ -34,7 +34,8 @@ static intptr_t instantiate_option_as_value_assignment_kernel(
       dst_tp.get_type_id() == option_type_id ? dst_tp.extended<ndt::option_type>()->get_value_type() : dst_tp;
   ndt::type val_src_tp =
       src_tp[0].get_type_id() == option_type_id ? src_tp[0].extended<ndt::option_type>()->get_value_type() : src_tp[0];
-  return ::make_assignment_kernel(ckb, ckb_offset, val_dst_tp, dst_arrmeta, val_src_tp, src_arrmeta[0], kernreq, ectx);
+  return ::make_assignment_kernel(ckb, ckb_offset, val_dst_tp, dst_arrmeta, val_src_tp, src_arrmeta[0], kernreq,
+                                  &eval::default_eval_context);
 }
 
 namespace {
@@ -87,8 +88,10 @@ size_t kernels::make_option_assignment_kernel(void *ckb, intptr_t ckb_offset, co
   for (intptr_t i = 0; i < size; ++i, ++af_tp, ++af) {
     typevars.clear();
     if ((*af_tp)->get_pos_type(0).match(src_tp, typevars) && (*af_tp)->get_return_type().match(dst_tp, typevars)) {
+      nd::array error_mode = ectx->errmode;
       return af->instantiate(const_cast<char *>(af->static_data()), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, size,
-                             &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
+                             &src_tp, &src_arrmeta, kernreq, 1, &error_mode, std::map<std::string, ndt::type>());
+
     }
   }
 

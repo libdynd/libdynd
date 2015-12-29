@@ -47,8 +47,7 @@ TEST(Callable, Assignment)
   ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(af.get()->static_data(), NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
                         af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
-                        kernel_request_single, &eval::default_eval_context, 0, NULL,
-                        std::map<std::string, ndt::type>());
+                        kernel_request_single, 0, NULL, std::map<std::string, ndt::type>());
   int int_out = 0;
   char str_in[16] = "3251";
   const char *str_in_ptr = str_in;
@@ -60,8 +59,7 @@ TEST(Callable, Assignment)
   ckb.reset();
   af.get()->instantiate(af.get()->static_data(), NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
                         af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
-                        kernel_request_strided, &eval::default_eval_context, 0, NULL,
-                        std::map<std::string, ndt::type>());
+                        kernel_request_strided, 0, NULL, std::map<std::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};
   const char *strs_in_ptr = strs_in[0];
@@ -228,8 +226,7 @@ TEST(Callable, AssignmentAsExpr)
   ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(af.get()->static_data(), NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
                         af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
-                        kernel_request_single, &eval::default_eval_context, 0, NULL,
-                        std::map<std::string, ndt::type>());
+                        kernel_request_single, 0, NULL, std::map<std::string, ndt::type>());
   int int_out = 0;
   char str_in[16] = "3251";
   char *str_in_ptr = str_in;
@@ -241,8 +238,7 @@ TEST(Callable, AssignmentAsExpr)
   ckb.reset();
   af.get()->instantiate(af.get()->static_data(), NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
                         af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
-                        kernel_request_strided, &eval::default_eval_context, 0, NULL,
-                        std::map<std::string, ndt::type>());
+                        kernel_request_strided, 0, NULL, std::map<std::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};
   char *strs_in_ptr = strs_in[0];

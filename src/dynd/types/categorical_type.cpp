@@ -549,8 +549,8 @@ struct get_ints_kernel : nd::base_kernel<get_ints_kernel> {
                               const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                               const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+                              intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     get_ints_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
     return ckb_offset;

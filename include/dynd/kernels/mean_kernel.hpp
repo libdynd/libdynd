@@ -61,23 +61,22 @@ namespace nd {
 
     static intptr_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                                const char *const *src_arrmeta, kernel_request_t kernreq,
-                                const eval::eval_context *ectx, intptr_t nkwd, const array *kwds,
-                                const std::map<std::string, ndt::type> &tp_vars)
+                                const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                                const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       intptr_t mean_offset = ckb_offset;
       make(ckb, kernreq, ckb_offset, src_tp[0].get_size(src_arrmeta[0]));
 
       ckb_offset = nd::sum::get().get()->instantiate(
           nd::sum::get().get()->static_data(), reinterpret_cast<data_type *>(data)->sum_data, ckb, ckb_offset, dst_tp,
-          dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
+          dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
 
       mean_kernel *self = get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), mean_offset);
       self->compound_div_offset = ckb_offset;
       ckb_offset = nd::compound_div::get().get()->instantiate(
           nd::compound_div::get().get()->static_data(), reinterpret_cast<data_type *>(data)->compound_div_data, ckb,
-          ckb_offset, dst_tp, dst_arrmeta, 1, reinterpret_cast<ndt::type *>(static_data), NULL, kernreq, ectx, nkwd,
-          kwds, tp_vars);
+          ckb_offset, dst_tp, dst_arrmeta, 1, reinterpret_cast<ndt::type *>(static_data), NULL, kernreq, nkwd, kwds,
+          tp_vars);
 
       delete reinterpret_cast<data_type *>(data);
 

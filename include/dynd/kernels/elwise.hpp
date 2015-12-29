@@ -130,8 +130,8 @@ namespace nd {
       static intptr_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset,
                                   const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                   const ndt::type *src_tp, const char *const *src_arrmeta,
-                                  dynd::kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
-                                  const dynd::nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+                                  dynd::kernel_request_t kernreq, intptr_t nkwd, const dynd::nd::array *kwds,
+                                  const std::map<std::string, ndt::type> &tp_vars)
 
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
@@ -154,7 +154,7 @@ namespace nd {
           if (i == nsrc) {
             // No dimensions to lift, call the elementwise instantiate directly
             return child.get()->instantiate(child.get()->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                            nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
+                                            nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
           }
           else {
             intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
@@ -194,13 +194,13 @@ namespace nd {
         case fixed_dim_type_id:
           if (src_all_strided) {
             return elwise_ck<fixed_dim_type_id, fixed_dim_type_id, N>::instantiate(
-                static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd,
-                kwds, tp_vars);
+                static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
+                tp_vars);
           }
           else if (src_all_strided_or_var) {
             return elwise_ck<fixed_dim_type_id, var_dim_type_id, N>::instantiate(
-                static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd,
-                kwds, tp_vars);
+                static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
+                tp_vars);
           }
           else {
             // TODO
@@ -209,8 +209,8 @@ namespace nd {
         case var_dim_type_id:
           if (src_all_strided_or_var) {
             return elwise_ck<var_dim_type_id, fixed_dim_type_id, N>::instantiate(
-                static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd,
-                kwds, tp_vars);
+                static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
+                tp_vars);
           }
           else {
             // TODO
@@ -279,9 +279,8 @@ namespace nd {
 
       static size_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                                const char *const *src_arrmeta, kernel_request_t kernreq,
-                                const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
-                                const std::map<std::string, ndt::type> &tp_vars)
+                                const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                                const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
@@ -339,15 +338,15 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck<N>::instantiate(
-              static_data, data, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp,
-              child_src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
+          return nd::functional::elwise_virtual_ck<N>::instantiate(static_data, data, ckb, ckb_offset, child_dst_tp,
+                                                                   child_dst_arrmeta, nsrc, child_src_tp,
+                                                                   child_src_arrmeta, kernreq, nkwd, kwds, tp_vars);
         }
 
         // Instantiate the elementwise handler
         return child.get()->instantiate(child.get()->static_data(), NULL, ckb, ckb_offset, child_dst_tp,
-                                        child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta, kernreq, ectx, nkwd,
-                                        kwds, tp_vars);
+                                        child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta, kernreq, nkwd, kwds,
+                                        tp_vars);
       }
     };
 
@@ -386,9 +385,8 @@ namespace nd {
 
       static size_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
-                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
-                                const std::map<std::string, ndt::type> &tp_vars)
+                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t nkwd,
+                                const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
@@ -421,13 +419,13 @@ namespace nd {
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
           return nd::functional::elwise_virtual_ck<0>::instantiate(static_data, data, ckb, ckb_offset, child_dst_tp,
-                                                                   child_dst_arrmeta, nsrc, NULL, NULL, kernreq, ectx,
-                                                                   nkwd, kwds, tp_vars);
+                                                                   child_dst_arrmeta, nsrc, NULL, NULL, kernreq, nkwd,
+                                                                   kwds, tp_vars);
         }
 
         // Instantiate the elementwise handler
         return child.get()->instantiate(child.get()->static_data(), NULL, ckb, ckb_offset, child_dst_tp,
-                                        child_dst_arrmeta, nsrc, NULL, NULL, kernreq, ectx, nkwd, kwds, tp_vars);
+                                        child_dst_arrmeta, nsrc, NULL, NULL, kernreq, nkwd, kwds, tp_vars);
       }
     };
 
@@ -504,9 +502,8 @@ namespace nd {
 
       static size_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                                const char *const *src_arrmeta, kernel_request_t kernreq,
-                                const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
-                                const std::map<std::string, ndt::type> &tp_vars)
+                                const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                                const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
@@ -575,12 +572,12 @@ namespace nd {
         if (!finished) {
           return nd::functional::elwise_virtual_ck<N>::instantiate(
               static_data, data, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp,
-              child_src_arrmeta, kernel_request_strided, ectx, nkwd, kwds, tp_vars);
+              child_src_arrmeta, kernel_request_strided, nkwd, kwds, tp_vars);
         }
         // Instantiate the elementwise handler
         return child.get()->instantiate(child.get()->static_data(), NULL, ckb, ckb_offset, child_dst_tp,
                                         child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-                                        kernel_request_strided, ectx, nkwd, kwds, tp_vars);
+                                        kernel_request_strided, nkwd, kwds, tp_vars);
       }
     };
 
@@ -617,9 +614,8 @@ namespace nd {
 
       static size_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
-                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
-                                const std::map<std::string, ndt::type> &tp_vars)
+                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t nkwd,
+                                const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
@@ -648,11 +644,11 @@ namespace nd {
         if (!finished) {
           return nd::functional::elwise_virtual_ck<0>::instantiate(static_data, data, ckb, ckb_offset, child_dst_tp,
                                                                    child_dst_arrmeta, nsrc, NULL, NULL,
-                                                                   kernel_request_strided, ectx, nkwd, kwds, tp_vars);
+                                                                   kernel_request_strided, nkwd, kwds, tp_vars);
         }
         // Instantiate the elementwise handler
         return child.get()->instantiate(child.get()->static_data(), NULL, ckb, ckb_offset, child_dst_tp,
-                                        child_dst_arrmeta, nsrc, NULL, NULL, kernel_request_strided, ectx, nkwd, kwds,
+                                        child_dst_arrmeta, nsrc, NULL, NULL, kernel_request_strided, nkwd, kwds,
                                         tp_vars);
       }
     };
@@ -815,9 +811,8 @@ namespace nd {
 
       static size_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                                const char *const *src_arrmeta, kernel_request_t kernreq,
-                                const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
-                                const std::map<std::string, ndt::type> &tp_vars)
+                                const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                                const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
@@ -883,12 +878,12 @@ namespace nd {
         if (!finished) {
           return nd::functional::elwise_virtual_ck<N>::instantiate(
               static_data, data, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp,
-              child_src_arrmeta, kernel_request_strided, ectx, nkwd, kwds, tp_vars);
+              child_src_arrmeta, kernel_request_strided, nkwd, kwds, tp_vars);
         }
         // All the types matched, so instantiate the elementwise handler
         return child.get()->instantiate(child.get()->static_data(), NULL, ckb, ckb_offset, child_dst_tp,
                                         child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-                                        kernel_request_strided, ectx, nkwd, kwds, tp_vars);
+                                        kernel_request_strided, nkwd, kwds, tp_vars);
       }
     };
 
@@ -960,9 +955,8 @@ namespace nd {
 
       static size_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
-                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
-                                const std::map<std::string, ndt::type> &tp_vars)
+                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t nkwd,
+                                const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
@@ -992,11 +986,11 @@ namespace nd {
         if (!finished) {
           return nd::functional::elwise_virtual_ck<0>::instantiate(static_data, data, ckb, ckb_offset, child_dst_tp,
                                                                    child_dst_arrmeta, nsrc, NULL, NULL,
-                                                                   kernel_request_strided, ectx, nkwd, kwds, tp_vars);
+                                                                   kernel_request_strided, nkwd, kwds, tp_vars);
         }
         // All the types matched, so instantiate the elementwise handler
         return child.get()->instantiate(child.get()->static_data(), NULL, ckb, ckb_offset, child_dst_tp,
-                                        child_dst_arrmeta, nsrc, NULL, NULL, kernel_request_strided, ectx, nkwd, kwds,
+                                        child_dst_arrmeta, nsrc, NULL, NULL, kernel_request_strided, nkwd, kwds,
                                         tp_vars);
       }
     };

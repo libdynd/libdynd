@@ -32,7 +32,8 @@ ndt::option_type::option_type(const type &value_tp)
 
 void ndt::option_type::get_vars(std::unordered_set<std::string> &vars) const { m_value_tp.get_vars(vars); }
 
-bool ndt::option_type::is_avail(const char *arrmeta, const char *data, const eval::eval_context *ectx) const
+bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
+                                const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   if (m_value_tp.is_builtin()) {
     switch (m_value_tp.get_type_id()) {
@@ -70,7 +71,7 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data, const eva
     nd::callable &af = nd::is_missing::get();
     type src_tp[1] = {type(this, true)};
     af.get()->instantiate(af->static_data(), NULL, &ckb, 0, make_type<bool1>(), NULL, 1, src_tp, &arrmeta,
-                          kernel_request_single, ectx, 0, NULL, std::map<std::string, type>());
+                          kernel_request_single, 0, NULL, std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
     char result;
     ckp->get_function<kernel_single_t>()(ckp, &result, const_cast<char **>(&data));
@@ -78,7 +79,7 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data, const eva
   }
 }
 
-void ndt::option_type::assign_na(const char *arrmeta, char *data, const eval::eval_context *ectx) const
+void ndt::option_type::assign_na(const char *arrmeta, char *data, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   if (m_value_tp.is_builtin()) {
     switch (m_value_tp.get_type_id()) {
@@ -123,7 +124,7 @@ void ndt::option_type::assign_na(const char *arrmeta, char *data, const eval::ev
     ckernel_builder<kernel_request_host> ckb;
     nd::callable &af = nd::assign_na::get();
     af.get()->instantiate(af->static_data(), NULL, &ckb, 0, type(this, true), arrmeta, 0, NULL, NULL,
-                          kernel_request_single, ectx, 0, NULL, std::map<std::string, type>());
+                          kernel_request_single, 0, NULL, std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
     ckp->get_function<kernel_single_t>()(ckp, data, NULL);
   }

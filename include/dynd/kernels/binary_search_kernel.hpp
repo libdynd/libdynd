@@ -56,7 +56,7 @@ namespace nd {
     static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
                                 const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
                                 const nd::array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars)
     {
       make(ckb, kernreq, ckb_offset, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
@@ -70,7 +70,7 @@ namespace nd {
 
       return total_order::get().get()->instantiate(total_order::get().get()->static_data(), data, ckb, ckb_offset,
                                                    ndt::make_type<int>(), NULL, 2, child_src_tp, child_src_arrmeta,
-                                                   kernreq, ectx, 0, NULL, tp_vars);
+                                                   kernreq, 0, NULL, tp_vars);
     }
   };
 
@@ -80,7 +80,10 @@ namespace ndt {
 
   template <>
   struct traits<nd::binary_search_kernel> {
-    static type equivalent() { return callable_type::make(make_type<intptr_t>(), {type("Fixed * Scalar"), type("Scalar")}); }
+    static type equivalent()
+    {
+      return callable_type::make(make_type<intptr_t>(), {type("Fixed * Scalar"), type("Scalar")});
+    }
   };
 
 } // namespace dynd::ndt
