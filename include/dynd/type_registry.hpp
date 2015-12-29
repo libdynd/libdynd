@@ -10,7 +10,7 @@
 namespace dynd {
 namespace ndt {
 
-  DYND_API struct type_info {
+  struct type_info {
     size_t nbases;
     const type_id_t *bases;
     type kind_tp;
