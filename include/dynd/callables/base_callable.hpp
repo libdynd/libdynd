@@ -68,7 +68,6 @@ namespace nd {
    * \param kernreq  What kind of C function prototype the resulting ckernel
    *                 should follow. Defined by the enum with kernel_request_*
    *                 values.
-   * \param ectx  The evaluation context.
    * \param kwds  A struct array of named auxiliary arguments.
    *
    * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.

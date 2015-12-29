@@ -257,7 +257,7 @@ nd::callable nd::array::find_dynamic_function(const char *function_name) const
   throw runtime_error(ss.str());
 }
 
-nd::array nd::array::eval(const eval::eval_context *ectx) const
+nd::array nd::array::eval() const
 {
   const ndt::type &current_tp = get_type();
   if (!current_tp.is_expression()) {
@@ -272,12 +272,12 @@ nd::array nd::array::eval(const eval::eval_context *ectx) const
       dt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), get_type(),
                                                                               get()->metadata());
     }
-    result.assign(*this, ectx->errmode);
+    result.assign(*this);
     return result;
   }
 }
 
-nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
+nd::array nd::array::eval_immutable() const
 {
   const ndt::type &current_tp = get_type();
   if ((get_access_flags() & immutable_access_flag) && !current_tp.is_expression()) {
@@ -292,13 +292,13 @@ nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
       dt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), get_type(),
                                                                               get()->metadata());
     }
-    result.assign(*this, ectx->errmode);
+    result.assign(*this);
     result.get()->flags = immutable_access_flag | read_access_flag;
     return result;
   }
 }
 
-nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *ectx) const
+nd::array nd::array::eval_copy(uint32_t access_flags) const
 {
   const ndt::type &current_tp = get_type();
   const ndt::type &dt = current_tp.get_canonical_type();
@@ -308,7 +308,7 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
     dt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), get_type(),
                                                                             get()->metadata());
   }
-  result.assign(*this, ectx->errmode);
+  result.assign(*this);
   // If the access_flags are 0, use the defaults
   access_flags = access_flags ? access_flags : (int32_t)nd::default_access_flags;
   // If the access_flags are just readonly, add immutable
