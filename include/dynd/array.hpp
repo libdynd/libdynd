@@ -437,22 +437,21 @@ namespace nd {
      * required. If the array is not ane expression, simply
      * returns it as is, otherwise evaluates into a new copy.
      */
-    array eval(const eval::eval_context *ectx = &eval::default_eval_context) const;
+    array eval() const;
 
     /**
      * Evaluates the array into an immutable strided array, or
      * returns it untouched if it is already both immutable and strided.
      */
-    array eval_immutable(const eval::eval_context *ectx = &eval::default_eval_context) const;
+    array eval_immutable() const;
 
     /**
      * Evaluates the array node into a newly allocated strided array,
      * with the requested access flags.
      *
      * \param access_flags  The access flags for the result, default immutable.
-     * \param ectx  The evaluation context
      */
-    array eval_copy(uint32_t access_flags = 0, const eval::eval_context *ectx = &eval::default_eval_context) const;
+    array eval_copy(uint32_t access_flags = 0) const;
 
     /**
      * Returns a view of the array as bytes (for POD) or the storage type,

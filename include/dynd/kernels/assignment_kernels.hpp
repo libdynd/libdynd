@@ -3054,7 +3054,7 @@ namespace nd {
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         return kernels::make_option_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
-                                                      kernreq, &eval::default_eval_context);
+                                                      kernreq);
       }
     };
 
