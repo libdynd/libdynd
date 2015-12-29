@@ -22,8 +22,7 @@ using namespace dynd;
 
 size_t dynd::make_struct_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_struct_tp,
                                            const char *dst_arrmeta, const ndt::type &src_struct_tp,
-                                           const char *src_arrmeta, kernel_request_t kernreq,
-                                           const eval::eval_context *ectx)
+                                           const char *src_arrmeta, kernel_request_t kernreq)
 {
   if (src_struct_tp.get_kind() != struct_kind) {
     stringstream ss;
@@ -78,5 +77,5 @@ size_t dynd::make_struct_assignment_kernel(void *ckb, intptr_t ckb_offset, const
   return make_tuple_unary_op_ckernel(nd::copy::get().get(), nd::copy::get().get_type(), ckb, ckb_offset, field_count,
                                      dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types_raw(),
                                      dst_fields_arrmeta.get(), src_data_offsets.get(), &src_fields_tp[0],
-                                     src_fields_arrmeta.get(), kernreq, ectx);
+                                     src_fields_arrmeta.get(), kernreq);
 }

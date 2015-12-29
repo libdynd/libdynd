@@ -2219,16 +2219,14 @@ namespace nd {
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         if (dst_tp.extended() == src_tp[0].extended()) {
-          return make_tuple_identical_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta[0], kernreq,
-                                                        &eval::default_eval_context);
+          return make_tuple_identical_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta[0], kernreq);
         }
         else if (src_tp[0].get_kind() == tuple_kind || src_tp[0].get_kind() == struct_kind) {
-          return make_tuple_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                              &eval::default_eval_context);
+          return make_tuple_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq);
         }
         else if (src_tp[0].is_builtin()) {
           return make_broadcast_to_tuple_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0],
-                                                           src_arrmeta[0], kernreq, &eval::default_eval_context);
+                                                           src_arrmeta[0], kernreq);
         }
 
         std::stringstream ss;
@@ -2248,16 +2246,15 @@ namespace nd {
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         if (dst_tp.extended() == src_tp[0].extended()) {
-          return make_tuple_identical_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta[0], kernreq,
-                                                        &eval::default_eval_context);
+          return make_tuple_identical_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta[0], kernreq);
         }
         else if (src_tp[0].get_kind() == struct_kind) {
-          return make_struct_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                               &eval::default_eval_context);
+          return make_struct_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
+                                               kernreq);
         }
         else if (src_tp[0].is_builtin()) {
           return make_broadcast_to_tuple_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0],
-                                                           src_arrmeta[0], kernreq, &eval::default_eval_context);
+                                                           src_arrmeta[0], kernreq);
         }
 
         std::stringstream ss;
