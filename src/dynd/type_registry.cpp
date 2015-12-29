@@ -119,9 +119,9 @@ ndt::type_registry::~type_registry()
   }
 }
 
-size_t ndt::type_registry::size() const { return m_infos.size(); }
+DYND_API size_t ndt::type_registry::size() const { return m_infos.size(); }
 
-type_id_t ndt::type_registry::insert(type_id_t base_tp_id, const type &kind_tp)
+DYND_API type_id_t ndt::type_registry::insert(type_id_t base_tp_id, const type &kind_tp)
 {
   type_id_t tp_id = static_cast<type_id_t>(size());
   const type_info &base_tp_info = m_infos[base_tp_id];
@@ -135,6 +135,6 @@ type_id_t ndt::type_registry::insert(type_id_t base_tp_id, const type &kind_tp)
   return tp_id;
 }
 
-const ndt::type_info &ndt::type_registry::operator[](type_id_t tp_id) const { return m_infos[tp_id]; }
+DYND_API const ndt::type_info &ndt::type_registry::operator[](type_id_t tp_id) const { return m_infos[tp_id]; }
 
-class ndt::type_registry ndt::type_registry;
+DYND_API class ndt::type_registry ndt::type_registry;

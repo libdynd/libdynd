@@ -10,7 +10,7 @@
 namespace dynd {
 namespace ndt {
 
-  struct type_info {
+  DYND_API struct type_info {
     size_t nbases;
     const type_id_t *bases;
     type kind_tp;
@@ -21,7 +21,7 @@ namespace ndt {
     }
   };
 
-  extern class type_registry {
+  extern DYND_API class type_registry {
     std::vector<type_info> m_infos;
 
   public:
@@ -29,11 +29,11 @@ namespace ndt {
 
     ~type_registry();
 
-    size_t size() const;
+    DYND_API size_t size() const;
 
-    type_id_t insert(type_id_t base_id, const type &kind_tp);
+    DYND_API type_id_t insert(type_id_t base_id, const type &kind_tp);
 
-    const type_info &operator[](type_id_t tp_id) const;
+    DYND_API const type_info &operator[](type_id_t tp_id) const;
   } type_registry;
 
 } // namespace dynd::ndt
