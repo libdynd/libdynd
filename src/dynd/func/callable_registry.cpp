@@ -11,6 +11,7 @@
 #include <dynd/func/random.hpp>
 #include <dynd/func/callable_registry.hpp>
 #include <dynd/func/arithmetic.hpp>
+#include <dynd/func/assignment.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/func/sum.hpp>
 #include <dynd/func/min.hpp>
@@ -197,6 +198,7 @@ std::map<std::string, nd::callable> &func::get_regfunctions()
     registry["is_missing"] = nd::is_missing::get();
     registry["min"] = nd::min::get();
     registry["max"] = nd::max::get();
+    registry["assign"] = nd::assign::get();
   }
 
   return registry;
