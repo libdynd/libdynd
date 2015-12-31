@@ -101,6 +101,10 @@ namespace nd {
         DispatcherType &dispatcher = *reinterpret_cast<static_data_type *>(static_data);
 
         callable &child = dispatcher(dst_tp, nsrc, src_tp);
+        if (child.is_null()) {
+          throw std::runtime_error("no suitable child for multidispatch");
+        }
+
         const ndt::type &child_dst_tp = child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
           child->resolve_dst_type(child->static_data(), data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
@@ -118,6 +122,9 @@ namespace nd {
         DispatcherType &dispatcher = *reinterpret_cast<static_data_type *>(static_data);
 
         callable &child = dispatcher(dst_tp, nsrc, src_tp);
+        if (child.is_null()) {
+          throw std::runtime_error("no suitable child for multidispatch");
+        }
         return child->instantiate(child->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
                                   src_arrmeta, kernreq, nkwd, kwds, tp_vars);
       }

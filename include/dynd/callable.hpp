@@ -199,6 +199,11 @@ namespace nd {
       get()->overload(ret_tp, narg, arg_tp) = value;
     }
 
+    void set_overload(const ndt::type &ret_tp, const std::initializer_list<ndt::type> &arg_tp, const callable &value)
+    {
+      set_overload(ret_tp, arg_tp.size(), arg_tp.begin(), value);
+    }
+
     template <typename DataType>
     array call(size_t args_size, const array *args_values, size_t kwds_size,
                const std::pair<const char *, array> *kwds_values)
