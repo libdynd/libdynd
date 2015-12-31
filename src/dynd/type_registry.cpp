@@ -109,6 +109,21 @@ ndt::type_registry::type_registry()
   insert(any_kind_type_id, type()); // expr_type_id
   insert(any_kind_type_id, type()); // convert_type_id
   insert(any_kind_type_id, type()); // view_type_id
+
+  insert(any_kind_type_id, type()); // c_contiguous_type_id
+
+  insert(any_kind_type_id, type()); // cuda_host_type_id
+  insert(any_kind_type_id, type()); // cuda_device_type_id
+
+  insert(any_kind_type_id, type()); // kind_sym_type_id
+  insert(any_kind_type_id, type()); // int_sym_type_id
+
+  insert(any_kind_type_id, type()); // typevar_type_id
+  insert(any_kind_type_id, type()); // typevar_dim_type_id
+  insert(any_kind_type_id, type()); // typevar_constructed_type_id
+  insert(any_kind_type_id, type()); // pow_dimsym_type_id
+  insert(any_kind_type_id, type()); // ellipsis_dim_type_id
+  insert(any_kind_type_id, type()); // dim_fragment_type_id
 }
 
 ndt::type_registry::~type_registry()
