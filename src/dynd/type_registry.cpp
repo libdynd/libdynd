@@ -98,7 +98,7 @@ ndt::type_registry::type_registry()
   insert(dim_kind_type_id, var_dim_type::make(any_kind_type::make()));        // var_dim_type_id
 
   insert(any_kind_type_id, categorical_kind_type::make());             // categorical_type_id
-  insert(any_kind_type_id, type());                                    // option_type_id
+  insert(any_kind_type_id, type("?Any"));                              // option_type_id
   insert(any_kind_type_id, pointer_type::make(any_kind_type::make())); // pointer_type_id
 
   insert(any_kind_type_id, make_type<type_type>()); // type_type_id
