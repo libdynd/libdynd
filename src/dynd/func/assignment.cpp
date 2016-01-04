@@ -207,7 +207,7 @@ DYND_API nd::callable nd::assign::make()
                                                   const ndt::type *src_tp) mutable -> callable & {
     callable &child = children[{{dst_tp.get_type_id(), src_tp[0].get_type_id()}}];
     if (child.is_null()) {
-//      throw std::runtime_error("assignment error");
+      //      throw std::runtime_error("assignment error");
     }
     return child;
   });
