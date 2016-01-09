@@ -10,8 +10,8 @@
 namespace dynd {
 namespace nd {
 
-  extern DYND_API struct min : declfunc<min> {
-    static DYND_API callable make();
+  extern DYND_API struct DYND_API min : declfunc<min> {
+    static callable make();
   } min;
 
 } // namespace dynd::nd

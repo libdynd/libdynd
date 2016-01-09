@@ -16,8 +16,8 @@ namespace nd {
    *
    * \returns  The index of the found element, or -1 if not found.
    */
-  extern DYND_API struct binary_search : declfunc<binary_search> {
-    static DYND_API callable make();
+  extern DYND_API struct DYND_API binary_search : declfunc<binary_search> {
+    static callable make();
   } binary_search;
 
 } // namespace dynd::nd

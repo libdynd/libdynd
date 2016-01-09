@@ -70,13 +70,13 @@ namespace nd {
     }
   };
 
-  extern DYND_API struct less : comparison_operator<less, less_kernel> {
+  extern DYND_API struct DYND_API less : comparison_operator<less, less_kernel> {
   } less;
 
-  extern DYND_API struct less_equal : comparison_operator<less_equal, less_equal_kernel> {
+  extern DYND_API struct DYND_API less_equal : comparison_operator<less_equal, less_equal_kernel> {
   } less_equal;
 
-  extern DYND_API struct equal : comparison_operator<equal, equal_kernel> {
+  extern DYND_API struct DYND_API equal : comparison_operator<equal, equal_kernel> {
     static std::map<std::array<type_id_t, 2>, callable> make_children()
     {
       std::map<std::array<type_id_t, 2>, callable> children = comparison_operator::make_children();
@@ -92,7 +92,7 @@ namespace nd {
     }
   } equal;
 
-  extern DYND_API struct not_equal : comparison_operator<not_equal, not_equal_kernel> {
+  extern DYND_API struct DYND_API not_equal : comparison_operator<not_equal, not_equal_kernel> {
     static std::map<std::array<type_id_t, 2>, callable> make_children()
     {
       std::map<std::array<type_id_t, 2>, callable> children = comparison_operator::make_children();
@@ -108,14 +108,14 @@ namespace nd {
     }
   } not_equal;
 
-  extern DYND_API struct greater_equal : comparison_operator<greater_equal, greater_equal_kernel> {
+  extern DYND_API struct DYND_API greater_equal : comparison_operator<greater_equal, greater_equal_kernel> {
   } greater_equal;
 
-  extern DYND_API struct greater : comparison_operator<greater, greater_kernel> {
+  extern DYND_API struct DYND_API greater : comparison_operator<greater, greater_kernel> {
   } greater;
 
-  extern DYND_API struct total_order : declfunc<total_order> {
-    static DYND_API callable make();
+  extern DYND_API struct DYND_API total_order : declfunc<total_order> {
+    static callable make();
   } total_order;
 
 } // namespace dynd::nd

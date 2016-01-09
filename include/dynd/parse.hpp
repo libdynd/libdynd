@@ -1446,7 +1446,7 @@ namespace json {
 namespace nd {
   namespace json {
 
-    extern DYND_API struct parse : declfunc<parse> {
+    extern DYND_API struct DYND_API parse : declfunc<parse> {
       array operator()(const ndt::type &ret_tp, const char *begin, const char *end)
       {
         skip_whitespace(begin, end);
@@ -1474,7 +1474,7 @@ namespace nd {
         return (*this)(ret_tp, s.c_str(), s.c_str() + s.size());
       }
 
-      static DYND_API callable make();
+      static callable make();
     } parse;
 
   } // namespace dynd::nd::json

@@ -10,12 +10,12 @@
 namespace dynd {
 namespace nd {
 
-  extern DYND_API struct sort : declfunc<sort> {
-    static DYND_API callable make();
+  extern DYND_API struct DYND_API sort : declfunc<sort> {
+    static callable make();
   } sort;
 
-  extern DYND_API struct unique : declfunc<unique> {
-    static DYND_API callable make();
+  extern DYND_API struct DYND_API unique : declfunc<unique> {
+    static callable make();
   } unique;
 
 } // namespace dynd::nd
