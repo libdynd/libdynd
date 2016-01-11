@@ -38,7 +38,7 @@ namespace nd {
   };
 
 #define DYND_DEF_UNARY_OP_CALLABLE(NAME, TYPES)                                                                        \
-  extern DYND_API struct NAME : unary_arithmetic_operator<NAME, NAME##_kernel, TYPES> {                                \
+  extern DYND_API struct DYND_API NAME : unary_arithmetic_operator<NAME, NAME##_kernel, TYPES> {                       \
     static std::string what(const ndt::type &src0_type)                                                                \
     {                                                                                                                  \
       std::stringstream ss;                                                                                            \
@@ -94,7 +94,7 @@ namespace nd {
   };
 
 #define DYND_DEF_BINARY_OP_CALLABLE(NAME, TYPES)                                                                       \
-  extern DYND_API struct NAME : binary_arithmetic_operator<NAME, NAME##_kernel, TYPES> {                               \
+  extern DYND_API struct DYND_API NAME : binary_arithmetic_operator<NAME, NAME##_kernel, TYPES> {                      \
     static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)                                        \
     {                                                                                                                  \
       std::stringstream ss;                                                                                            \
@@ -157,7 +157,7 @@ namespace nd {
   };
 
 #define DYND_DEF_COMPOUND_OP_CALLABLE(NAME, TYPES)                                                                     \
-  extern DYND_API struct NAME : compound_arithmetic_operator<NAME, NAME##_kernel_t, TYPES> {                           \
+  extern DYND_API struct DYND_API NAME : compound_arithmetic_operator<NAME, NAME##_kernel_t, TYPES> {                  \
   } NAME;
 
   DYND_DEF_COMPOUND_OP_CALLABLE(compound_add, detail::binop_type_ids)

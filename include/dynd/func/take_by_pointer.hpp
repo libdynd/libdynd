@@ -17,8 +17,8 @@ namespace nd {
    * operation, but stores the pointers.
    *
    */
-  extern DYND_API struct take_by_pointer : declfunc<take_by_pointer> {
-    static DYND_API callable make();
+  extern DYND_API struct DYND_API take_by_pointer : declfunc<take_by_pointer> {
+    static callable make();
   } take_by_pointer;
 
 } // namespace dynd::nd

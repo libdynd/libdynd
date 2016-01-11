@@ -123,7 +123,9 @@ namespace nd {
 
         callable &child = dispatcher(dst_tp, nsrc, src_tp);
         if (child.is_null()) {
-          throw std::runtime_error("no suitable child for multidispatch");
+          std::stringstream ss;
+          ss << "no suitable child for multidispatch for types " << src_tp << ", and " << dst_tp << "\n";
+          throw std::runtime_error(ss.str());
         }
         return child->instantiate(child->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
                                   src_arrmeta, kernreq, nkwd, kwds, tp_vars);

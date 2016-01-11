@@ -10,12 +10,12 @@
 namespace dynd {
 namespace nd {
 
-  extern DYND_API struct assign_na : declfunc<assign_na> {
-    static DYND_API callable make();
+  extern DYND_API struct DYND_API assign_na : declfunc<assign_na> {
+    static callable make();
   } assign_na;
 
-  extern DYND_API struct is_missing : declfunc<is_missing> {
-    static DYND_API callable make();
+  extern DYND_API struct DYND_API is_missing : declfunc<is_missing> {
+    static callable make();
   } is_missing;
 
 } // namespace dynd::nd

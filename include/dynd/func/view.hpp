@@ -10,8 +10,8 @@
 namespace dynd {
 namespace nd {
 
-  extern DYND_API struct view : declfunc<view> {
-    static DYND_API callable make();
+  extern DYND_API struct DYND_API view : declfunc<view> {
+    static callable make();
   } view;
 
 } // namespace dynd::nd
