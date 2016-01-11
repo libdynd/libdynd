@@ -102,7 +102,7 @@ matrix:
 #    - python -c "import numpy; print numpy.__version__"
     - python setup.py install
     - cd ..
-    - python -c "import dynd; dynd.test(exit=True)"
+    - python -c "import dynd; dynd.test(verbosity=2, exit=True)"
     after_script:
     - cd .
 
