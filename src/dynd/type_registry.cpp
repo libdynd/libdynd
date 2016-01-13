@@ -152,7 +152,7 @@ DYND_API type_id_t ndt::type_registry::insert(type_id_t base_tp_id, const type &
 
 DYND_API const ndt::type_info &ndt::type_registry::operator[](type_id_t id) const
 {
-  if (id >= size()) {
+  if (id >= static_cast<type_id_t>(size())) {
     throw runtime_error("invalid type id");
   }
 
