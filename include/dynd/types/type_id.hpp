@@ -192,13 +192,6 @@ typedef join<integral_type_ids, join<float_type_ids, complex_type_ids>::type>::t
 
 typedef type_id_sequence<fixed_dim_type_id, var_dim_type_id> dim_type_ids;
 
-inline void validate_type_id(type_id_t tp_id)
-{
-  if (tp_id > static_cast<type_id_t>(static_type_id_max)) {
-    throw std::runtime_error("invalid type id");
-  }
-}
-
 enum type_flags_t {
   // A symbolic name instead of just "0"
   type_flag_none = 0x00000000,
