@@ -18,8 +18,6 @@ As a serialization protocol, this document is concerned with converting to/from 
 
 The `serialize` callable has signature `(Any) -> bytes`, and operates as a reduction kernel. This means it concatenates data to the output bytes object. Only the data gets serialized, not the type. This is not a problem, however, because to serialize an arbitrary array, one can serialize it as `array[Any]`, which must serialize both the type and the data.
 
-All primitives are serialized in little-endian order. By making this choice explicitly, there is no ambiguity across different platforms, and by not allowing alternatives, this makes the serialization suitable for use in Merkle DAGs. A majority of platforms are little-endian, so this is also good for the typical case.
-
 In DyND's storage within memory, there is some metadata which describes memory layout, data references, and other details incidental to how things are stored. For serialization, the layout is defined completely in terms of the type, and there is no such metadata. For example, the `fixed` dimension type has a stride in its metadata. In the serialization of a strided array, the data is always tightly packed, and no stride is stored anywhere.
 
 ## Deserialize Callable
@@ -27,6 +25,12 @@ In DyND's storage within memory, there is some metadata which describes memory l
 The `deserialize` callable has signature `(bytes, dst_tp: type) -> Any`, where the output array has the specified destination type. The generic case of of deserializing a general DyND array is treated as an element of type `array[Any]`, as noted in the serialize section above.
 
 ## Type to Bytes Mapping
+
+A fundamental principle used to design this mapping is that the serialization of particular data for a particular type must be unique. This is not the case in DyND's storage within memory, where there is some metadata which additionally describes memory layout and some other details. The reason for this design choice is to allow this serialization to be a building block in CAS/Merkle DAG technologies.
+
+One choice made to remove this ambiguity is that all primitives are serialized in little-endian order. A majority of platforms are little-endian, so this is also good for the typical case.
+
+A consequence of this choice is that multi-dimensional arrays always serialize in "C order". This is great for deduplication of data, but does have some performance consequence when working with "F order" arrays. I (Mark) view the support of the CAS/Merkle use case to be strong enough to not change the unique serialization principle, and propose doing something within the type system layered on top of the simple core serialization definition for cases where the performance is more critical. For example, a type which represents a storage axis permutation could do this in general, like `storage[3 * 5 * 7 * float64, axis=[2, 1, 0]]` or `storage[3 * 5 * 7 * float64, order='F']` could represent F order.
 
 * `bool`
   * Single byte `0x00` (false) `0x01` (true)
@@ -41,7 +45,7 @@ The `deserialize` callable has signature `(bytes, dst_tp: type) -> Any`, where t
 * `string`
   * The UTF-8 encoding of the string is serialized identically to `bytes`.
 * `char`
-  * The 32-bit code point is serialized as is. (TODO: Would be better as UTF-8?)
+  * The code point is serialized as its UTF-8 bytes. This means arrays of `char` serialize into a UTF-8 representation.
 * `type`
   * The type represented as a string, serialized as `string`. (TODO: Need to specify a well-defined type to string serialization that we will never change.)
 * `void`
@@ -61,4 +65,4 @@ The `deserialize` callable has signature `(bytes, dst_tp: type) -> Any`, where t
 
 ## Possible DyND Array Serialization As CBOR
 
-The serialization could be as [CBOR](http://cbor.io/), through the mechanism described in http://tools.ietf.org/html/rfc7049#section-7.2. This is not thought out properly yet.
+Some of the serialization could be as [CBOR](http://cbor.io/), through the mechanism described in http://tools.ietf.org/html/rfc7049#section-7.2. This is not thought out properly yet. An idea for this is to serialize `array[T]` as CBOR, storing as straight CBOR in the simple cases, and falling back to a DyND type + DyND serialization as CBOR bytes in the general case. This requires carefully defining when CBOR native types are used, and a canonical form so as to keep the unique serialization property.
