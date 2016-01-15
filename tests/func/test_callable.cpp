@@ -155,21 +155,21 @@ TEST(Callable, DecomposedDynamicCall)
 
   af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; });
   ret_tp = af.get_ret_type();
-  EXPECT_EQ(26.5, (*af.get())(ret_tp, 3, types, arrmetas, datas, 0, NULL, map<std::string, ndt::type>()).as<double>());
+  EXPECT_EQ(26.5, af->call(ret_tp, 3, types, arrmetas, datas, 0, NULL, map<std::string, ndt::type>()).as<double>());
 
   af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "z");
   ret_tp = af.get_ret_type();
   EXPECT_EQ(26.5,
-            (*af.get())(ret_tp, 2, types, arrmetas, datas, 1, values + 2, map<std::string, ndt::type>()).as<double>());
+            af->call(ret_tp, 2, types, arrmetas, datas, 1, values + 2, map<std::string, ndt::type>()).as<double>());
 
   af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "y", "z");
   ret_tp = af.get_ret_type();
   EXPECT_EQ(26.5,
-            (*af.get())(ret_tp, 1, types, arrmetas, datas, 2, values + 1, map<std::string, ndt::type>()).as<double>());
+            af->call(ret_tp, 1, types, arrmetas, datas, 2, values + 1, map<std::string, ndt::type>()).as<double>());
 
   //  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "x", "y", "z");
   //  ret_tp = af.get_ret_type();
-  //  EXPECT_EQ(26.5, (*af.get())(ret_tp, 0, NULL, NULL, NULL, 3, values, map<string, ndt::type>()).as<double>());
+  //  EXPECT_EQ(26.5, af->call(ret_tp, 0, NULL, NULL, NULL, 3, values, map<string, ndt::type>()).as<double>());
 }
 
 TEST(Callable, KeywordParsing)

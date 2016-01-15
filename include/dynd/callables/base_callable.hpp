@@ -164,48 +164,21 @@ namespace nd {
       throw std::runtime_error("callable is not overloadable");
     }
 
-    array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                     char *const *src_data, intptr_t nkwd, const array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars);
-
     array call(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-               char *const *src_data, intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-    {
-      return (*this)(dst_tp, nsrc, src_tp, src_arrmeta, src_data, nkwd, kwds, tp_vars);
-    }
-
-    array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                     array *const *src_data, intptr_t nkwd, const array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars);
+               char *const *src_data, intptr_t nkwd, const array *kwds,
+               const std::map<std::string, ndt::type> &tp_vars);
 
     array call(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                array *const *src_data, intptr_t nkwd, const array *kwds,
-               const std::map<std::string, ndt::type> &tp_vars)
-    {
-      return (*this)(dst_tp, nsrc, src_tp, src_arrmeta, src_data, nkwd, kwds, tp_vars);
-    }
-
-    void operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
-                    const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
-                    const array *kwds, const std::map<std::string, ndt::type> &tp_vars);
-
-    void call(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc, const ndt::type *src_tp,
-              const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd, const array *kwds,
-              const std::map<std::string, ndt::type> &tp_vars)
-    {
-      (*this)(dst_tp, dst_arrmeta, dst_data, nsrc, src_tp, src_arrmeta, src_data, nkwd, kwds, tp_vars);
-    }
-
-    void operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
-                    const ndt::type *src_tp, const char *const *src_arrmeta, array *const *src_data, intptr_t nkwd,
-                    const array *kwds, const std::map<std::string, ndt::type> &tp_vars);
+               const std::map<std::string, ndt::type> &tp_vars);
 
     void call(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc, const ndt::type *src_tp,
               const char *const *src_arrmeta, array *const *src_data, intptr_t nkwd, const array *kwds,
-              const std::map<std::string, ndt::type> &tp_vars)
-    {
-      (*this)(dst_tp, dst_arrmeta, dst_data, nsrc, src_tp, src_arrmeta, src_data, nkwd, kwds, tp_vars);
-    }
+              const std::map<std::string, ndt::type> &tp_vars);
+
+    void call(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc, const ndt::type *src_tp,
+              const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd, const array *kwds,
+              const std::map<std::string, ndt::type> &tp_vars);
 
     static void *operator new(size_t size, size_t static_data_size = 0)
     {
