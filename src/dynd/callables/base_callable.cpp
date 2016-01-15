@@ -10,9 +10,9 @@
 using namespace std;
 using namespace dynd;
 
-nd::array nd::base_callable::operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                                        const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
-                                        const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                                  const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
+                                  const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   // Allocate, then initialize, the data
   char *data = data_init(static_data(), dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
@@ -39,9 +39,9 @@ nd::array nd::base_callable::operator()(ndt::type &dst_tp, intptr_t nsrc, const 
   return dst;
 }
 
-nd::array nd::base_callable::operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                                        const char *const *src_arrmeta, array *const *src_data, intptr_t nkwd,
-                                        const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                                  const char *const *src_arrmeta, array *const *src_data, intptr_t nkwd,
+                                  const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   // Allocate, then initialize, the data
   char *data = data_init(static_data(), dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
@@ -68,9 +68,9 @@ nd::array nd::base_callable::operator()(ndt::type &dst_tp, intptr_t nsrc, const 
   return dst;
 }
 
-void nd::base_callable::operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
-                                   const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data,
-                                   intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
+                             const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data,
+                             intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   char *data = data_init(static_data(), dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
@@ -82,12 +82,12 @@ void nd::base_callable::operator()(const ndt::type &dst_tp, const char *dst_arrm
   fn(ckb.get(), dst_data, src_data);
 }
 
-void nd::base_callable::operator()(const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                                   char *DYND_UNUSED(dst_data), intptr_t DYND_UNUSED(nsrc),
-                                   const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                                   array *const *DYND_UNUSED(src_data), intptr_t DYND_UNUSED(nkwd),
-                                   const array *DYND_UNUSED(kwds),
-                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+void nd::base_callable::call(const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                             char *DYND_UNUSED(dst_data), intptr_t DYND_UNUSED(nsrc),
+                             const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                             array *const *DYND_UNUSED(src_data), intptr_t DYND_UNUSED(nkwd),
+                             const array *DYND_UNUSED(kwds),
+                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   throw std::runtime_error("view callables are not fully implemented yet");
 }

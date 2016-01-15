@@ -317,13 +317,13 @@ namespace nd {
       ndt::type dst_tp;
       if (dst.is_null()) {
         dst_tp = self_tp->get_return_type();
-        return (*get())(dst_tp, narg, args_tp.data(), args_arrmeta.data(), args_data.data(), nkwd,
-                        kwds_as_vector.data(), tp_vars);
+        return get()->call(dst_tp, narg, args_tp.data(), args_arrmeta.data(), args_data.data(), nkwd,
+                           kwds_as_vector.data(), tp_vars);
       }
 
       dst_tp = dst.get_type();
-      (*get())(dst_tp, dst->metadata(), dst.data(), narg, args_tp.data(), args_arrmeta.data(), args_data.data(), nkwd,
-               kwds_as_vector.data(), tp_vars);
+      get()->call(dst_tp, dst->metadata(), dst.data(), narg, args_tp.data(), args_arrmeta.data(), args_data.data(),
+                  nkwd, kwds_as_vector.data(), tp_vars);
       return dst;
     }
 
