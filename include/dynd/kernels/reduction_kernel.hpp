@@ -109,10 +109,11 @@ namespace nd {
           reinterpret_cast<data_type *>(data)->stored_ndim = reinterpret_cast<data_type *>(data)->ndim;
         }
 
+        ndt::type child_src_tp = src_tp[0].get_type_at_dimension(NULL, reinterpret_cast<data_type *>(data)->naxis);
         reinterpret_cast<data_type *>(data)->child_data =
             reinterpret_cast<static_data_type *>(static_data)
                 ->child->data_init(reinterpret_cast<static_data_type *>(static_data)->child->static_data(),
-                                   child_dst_tp, nsrc, src_tp, nkwd - 3, kwds, tp_vars);
+                                   child_dst_tp, nsrc, &child_src_tp, nkwd - 3, kwds, tp_vars);
 
         return data;
       }
