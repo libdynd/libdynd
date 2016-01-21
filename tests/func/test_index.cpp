@@ -17,7 +17,6 @@
 using namespace std;
 using namespace dynd;
 
-/*
 TEST(Index, Dim)
 {
   nd::array a = {0, 1, 2, 3, 4};
@@ -25,4 +24,3 @@ TEST(Index, Dim)
 
   nd::index(a, i);
 }
-*/

@@ -15,15 +15,16 @@ namespace nd {
     static const kernel_request_t kernreq = kernel_request_call;
 
     struct data_type {
-      int nindices;
+      intptr_t nindices;
       int *indices;
 
       data_type(const array &index) : nindices(index.get_dim_size()) {}
     };
 
-    void call(array *DYND_UNUSED(res), array *const *DYND_UNUSED(args))
+    void call(array *res, array *const *args)
     {
-      // body
+      res->get()->data = args[0]->get()->data;
+      reinterpret_cast<SelfType *>(this)->single(res->get()->metadata(), &res->get()->data);
     }
 
     static char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp),
@@ -31,6 +32,19 @@ namespace nd {
                            const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       return reinterpret_cast<char *>(new data_type(kwds[0]));
+    }
+
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
+                                const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                                intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      SelfType::make(ckb, kernreq, ckb_offset);
+      delete reinterpret_cast<data_type *>(data);
+
+      return ckb_offset;
     }
   };
 
@@ -40,12 +54,20 @@ namespace nd {
 
   template <>
   struct index_kernel<fixed_dim_type_id> : base_index_kernel<index_kernel<fixed_dim_type_id>> {
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+    void single(char *DYND_UNUSED(metadata), char *const *DYND_UNUSED(data))
+    {
+      //      std::cout << "index_kernel<fixed_dim_type_id>::single" << std::endl;
+      // body
+    }
+
+    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
+                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
+                                 const array *DYND_UNUSED(kwds),
                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::type("int32");
+      if (reinterpret_cast<data_type *>(data)->nindices == 1) {
+        dst_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
+      }
     }
   };
 
