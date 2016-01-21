@@ -80,19 +80,16 @@ namespace nd {
     struct multidispatch_kernel : base_kernel<multidispatch_kernel<DispatcherType>> {
       typedef DispatcherType static_data_type;
 
-      /*
-            static char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                                   intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-            {
-              DispatcherType &dispatcher = *reinterpret_cast<static_data_type *>(static_data);
-              callable &child = dispatcher(dst_tp, nsrc, src_tp);
+      static char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                             intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      {
+        DispatcherType &dispatcher = *reinterpret_cast<static_data_type *>(static_data);
+        callable &child = dispatcher(dst_tp, nsrc, src_tp);
 
-              std::cout << child << std::endl;
+        const ndt::type &child_dst_tp = child.get_type()->get_return_type();
 
-              return NULL;
-            }
-      */
+        return child->data_init(static_data, child_dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+      }
 
       static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
                                    const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
@@ -124,7 +121,7 @@ namespace nd {
         callable &child = dispatcher(dst_tp, nsrc, src_tp);
         if (child.is_null()) {
           std::stringstream ss;
-          ss << "no suitable child for multidispatch for types " << src_tp << ", and " << dst_tp << "\n";
+          ss << "no suitable child for multidispatch for types " << src_tp[0] << ", and " << dst_tp << "\n";
           throw std::runtime_error(ss.str());
         }
         return child->instantiate(child->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,

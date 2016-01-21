@@ -347,6 +347,7 @@ set(libdynd_SRC
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
     include/dynd/kernels/fft_kernel.hpp
+    include/dynd/kernels/index_kernel.hpp
     include/dynd/kernels/is_missing_kernel.hpp
     include/dynd/kernels/max_kernel.hpp
     include/dynd/kernels/min_kernel.hpp
@@ -406,6 +407,7 @@ set(libdynd_SRC
     src/dynd/exceptions.cpp
     src/dynd/git_version.cpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp
+    src/dynd/index.cpp
     src/dynd/json_formatter.cpp
     src/dynd/json_parser.cpp
     src/dynd/logic.cpp
@@ -448,6 +450,7 @@ set(libdynd_SRC
     include/dynd/functional.hpp
     include/dynd/json_formatter.hpp
     include/dynd/json_parser.hpp
+    include/dynd/index.hpp
     include/dynd/irange.hpp
     include/dynd/option.hpp
     include/dynd/parse.hpp
