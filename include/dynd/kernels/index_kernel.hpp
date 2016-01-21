@@ -18,8 +18,12 @@ namespace nd {
       intptr_t nindices;
       int *indices;
 
-      data_type(const array &index) : nindices(index.get_dim_size()) {}
+      data_type(const array &index) : nindices(index.get_dim_size()), indices(reinterpret_cast<int *>(index.data())) {}
     };
+
+    int index;
+
+    base_index_kernel(int index) : index(index) {}
 
     void call(array *res, array *const *args)
     {
@@ -41,7 +45,7 @@ namespace nd {
                                 intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      SelfType::make(ckb, kernreq, ckb_offset);
+      SelfType::make(ckb, kernreq, ckb_offset, *reinterpret_cast<data_type *>(data)->indices);
       delete reinterpret_cast<data_type *>(data);
 
       return ckb_offset;
@@ -50,14 +54,19 @@ namespace nd {
 
   template <type_id_t Arg0ID>
   struct index_kernel : base_index_kernel<index_kernel<Arg0ID>> {
+    using base_index_kernel<index_kernel>::base_index_kernel;
   };
 
   template <>
   struct index_kernel<fixed_dim_type_id> : base_index_kernel<index_kernel<fixed_dim_type_id>> {
-    void single(char *DYND_UNUSED(metadata), char *const *DYND_UNUSED(data))
+    intptr_t stride;
+
+    index_kernel(int index, intptr_t stride) : base_index_kernel(index), stride(stride) {}
+
+    void single(char *metadata, char *const *data)
     {
-      //      std::cout << "index_kernel<fixed_dim_type_id>::single" << std::endl;
-      // body
+      reinterpret_cast<ndt::fixed_dim_type::metadata_type *>(metadata)->stride = stride;
+      *const_cast<char **>(data) += index * stride;
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
@@ -68,6 +77,20 @@ namespace nd {
       if (reinterpret_cast<data_type *>(data)->nindices == 1) {
         dst_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
       }
+    }
+
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
+                                const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                                intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
+                                const nd::array *DYND_UNUSED(kwds),
+                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      make(ckb, kernreq, ckb_offset, *reinterpret_cast<data_type *>(data)->indices,
+           reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(src_arrmeta[0])->stride);
+      delete reinterpret_cast<data_type *>(data);
+
+      return ckb_offset;
     }
   };
 

@@ -20,7 +20,7 @@ using namespace dynd;
 TEST(Index, Dim)
 {
   nd::array a = {0, 1, 2, 3, 4};
-  nd::array i = {0};
+  nd::array i = {3};
 
-  nd::index(a, i);
+  EXPECT_ARRAY_EQ(3, nd::index(a, i));
 }
