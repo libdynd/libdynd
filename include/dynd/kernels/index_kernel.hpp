@@ -35,6 +35,7 @@ namespace nd {
                            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
                            const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
+      std::cout << "data_init" << std::endl;
       return reinterpret_cast<char *>(new data_type(kwds[0]));
     }
 
@@ -63,9 +64,9 @@ namespace nd {
 
     index_kernel(int index, intptr_t stride) : base_index_kernel(index), stride(stride) {}
 
-    void single(char *metadata, char *const *data)
+    void single(char *DYND_UNUSED(metadata), char *const *data)
     {
-      reinterpret_cast<ndt::fixed_dim_type::metadata_type *>(metadata)->stride = stride;
+      //      reinterpret_cast<ndt::fixed_dim_type::metadata_type *>(metadata)->stride = stride;
       *const_cast<char **>(data) += index * stride;
     }
 
@@ -86,6 +87,7 @@ namespace nd {
                                 const nd::array *DYND_UNUSED(kwds),
                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
+      std::cout << "instantiate" << std::endl;
       make(ckb, kernreq, ckb_offset, *reinterpret_cast<data_type *>(data)->indices,
            reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(src_arrmeta[0])->stride);
       delete reinterpret_cast<data_type *>(data);
@@ -98,8 +100,8 @@ namespace nd {
 
 namespace ndt {
 
-  template <type_id_t Arg0ID>
-  struct traits<nd::index_kernel<Arg0ID>> {
+  template <type_id_t ResID>
+  struct traits<nd::index_kernel<ResID>> {
     static type equivalent() { return type("(Any, i: Any) -> Any"); }
   };
 
