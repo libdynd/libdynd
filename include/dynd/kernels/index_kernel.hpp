@@ -46,7 +46,17 @@ namespace nd {
   struct index_kernel : base_index_kernel<index_kernel<Arg0ID>> {
     using base_index_kernel<index_kernel>::base_index_kernel;
 
+    typedef typename base_index_kernel<index_kernel<Arg0ID>>::data_type data_type;
+
     void single(char *DYND_UNUSED(metadata), char *const *DYND_UNUSED(data)) {}
+
+    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
+                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
+                                 const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      dst_tp = src_tp[0];
+      new (data) data_type(kwds[0]);
+    }
 
     static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
                                 const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
@@ -69,6 +79,8 @@ namespace nd {
 
     index_kernel(int index, intptr_t stride) : index(index), stride(stride) {}
 
+    ~index_kernel() { get_child()->destroy(); }
+
     void single(char *metadata, char *const *data)
     {
       //      reinterpret_cast<ndt::fixed_dim_type::metadata_type *>(metadata)->stride = stride;
@@ -81,17 +93,11 @@ namespace nd {
                                  const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                                  const std::map<std::string, ndt::type> &tp_vars)
     {
-      if (reinterpret_cast<data_type *>(data)->nindices == 1) {
-        dst_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
-        new (data) data_type(kwds[0]);
-      }
-      else {
-        reinterpret_cast<data_type *>(data)->next();
+      reinterpret_cast<data_type *>(data)->next();
 
-        ndt::type child_src_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
-        index::get()->resolve_dst_type(index::get()->static_data(), data, dst_tp, nsrc, &child_src_tp, nkwd, kwds,
-                                       tp_vars);
-      }
+      ndt::type child_src_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
+      index::get()->resolve_dst_type(index::get()->static_data(), data, dst_tp, nsrc, &child_src_tp, nkwd, kwds,
+                                     tp_vars);
     }
 
     static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
