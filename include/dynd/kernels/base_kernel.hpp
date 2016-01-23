@@ -8,7 +8,7 @@
 #include <typeinfo>
 
 #include <dynd/array.hpp>
-#include <dynd/kernels/ckernel_builder.hpp>
+#include <dynd/kernels/kernel_builder.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
@@ -43,7 +43,7 @@ namespace nd {
     static SelfType *reserve(void *ckb, kernel_request_t DYND_UNUSED(kernreq), intptr_t ckb_offset,
                              size_t requested_capacity)
     {
-      return reserve(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), ckb_offset, requested_capacity);
+      return reserve(reinterpret_cast<kernel_builder *>(ckb), ckb_offset, requested_capacity);
     }
 
     /**
@@ -121,8 +121,7 @@ namespace nd {
                                                               intptr_t &inout_ckb_offset, A &&... args)
   {
     // Disallow requests from a different memory space
-    return SelfType::make(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq, inout_ckb_offset,
-                          std::forward<A>(args)...);
+    return SelfType::make(reinterpret_cast<kernel_builder *>(ckb), kernreq, inout_ckb_offset, std::forward<A>(args)...);
   }
 
   /**

@@ -1854,15 +1854,15 @@ namespace nd {
             is_missing.get()->instantiate(is_missing->static_data(), NULL, ckb, ckb_offset, ndt::make_type<bool1>(),
                                           NULL, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
         // instantiate dst_assign_na
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-        self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<self_type>(root_ckb_offset);
+        reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+        self = reinterpret_cast<kernel_builder *>(ckb)->get_at<self_type>(root_ckb_offset);
         self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
         nd::callable &assign_na = nd::assign_na::get();
         ckb_offset = assign_na.get()->instantiate(assign_na->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                                   nsrc, NULL, NULL, kernreq, nkwd, kwds, tp_vars);
         // instantiate value_assign
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-        self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<self_type>(root_ckb_offset);
+        reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+        self = reinterpret_cast<kernel_builder *>(ckb)->get_at<self_type>(root_ckb_offset);
         self->m_value_assign_offset = ckb_offset - root_ckb_offset;
         ckb_offset = make_assignment_kernel(ckb, ckb_offset, dst_val_tp, dst_arrmeta, src_val_tp, src_arrmeta[0],
                                             kernreq, &eval::default_eval_context);
@@ -1993,8 +1993,7 @@ namespace nd {
             make_assignment_kernel(ckb, ckb_offset, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
                                    src_tp[0], src_arrmeta[0], kernreq, &eval::default_eval_context);
         // Re-acquire self because the address may have changed
-        self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-                   ->get_at<string_to_option_tp_ck>(root_ckb_offset);
+        self = reinterpret_cast<kernel_builder *>(ckb)->get_at<string_to_option_tp_ck>(root_ckb_offset);
         // Second child ckernel is the NA assignment
         self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
         nd::callable &assign_na = nd::assign_na::get();
@@ -2082,8 +2081,8 @@ namespace nd {
                                                   ndt::make_type<bool1>(), NULL, nsrc, src_tp, src_arrmeta, kernreq, 0,
                                                   nullptr, tp_vars);
       // instantiate value_assign
-      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-      self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<self_type>(root_ckb_offset);
+      reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+      self = reinterpret_cast<kernel_builder *>(ckb)->get_at<self_type>(root_ckb_offset);
       self->m_value_assign_offset = ckb_offset - root_ckb_offset;
       return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq,
                                     &eval::default_eval_context);
@@ -2915,8 +2914,7 @@ namespace nd {
           ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
           ckb_offset = forward->instantiate(forward->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                             src_tp2, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
-          get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), self_offset)->forward_offset =
-              forward_offset;
+          get_self(reinterpret_cast<kernel_builder *>(ckb), self_offset)->forward_offset = forward_offset;
 
           return ckb_offset;
         }

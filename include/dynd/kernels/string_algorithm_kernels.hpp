@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <dynd/kernels/ckernel_builder.hpp>
+#include <dynd/kernels/kernel_builder.hpp>
 #include <dynd/string_encodings.hpp>
 
 namespace dynd { namespace kernels {

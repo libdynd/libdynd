@@ -71,7 +71,7 @@ namespace nd {
           nd::sum::get().get()->static_data(), reinterpret_cast<data_type *>(data)->sum_data, ckb, ckb_offset, dst_tp,
           dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
 
-      mean_kernel *self = get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), mean_offset);
+      mean_kernel *self = get_self(reinterpret_cast<kernel_builder *>(ckb), mean_offset);
       self->compound_div_offset = ckb_offset;
       ckb_offset = nd::compound_div::get().get()->instantiate(
           nd::compound_div::get().get()->static_data(), reinterpret_cast<data_type *>(data)->compound_div_data, ckb,

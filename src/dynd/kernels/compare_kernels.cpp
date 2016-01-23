@@ -32,8 +32,8 @@ intptr_t nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
     // field comparison kernel. Have to re-get
     // the pointer because creating the field comparison kernel may
     // move the memory.
-    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-    e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<extra_type>(root_ckb_offset);
+    reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+    e = reinterpret_cast<kernel_builder *>(ckb)->get_at<extra_type>(root_ckb_offset);
     field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
     field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
     const char *field_arrmeta = src_arrmeta[0] + arrmeta_offsets[i];
@@ -69,8 +69,8 @@ intptr_t nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
     // field comparison kernel. Have to re-get
     // the pointer because creating the field comparison kernel may
     // move the memory.
-    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-    e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<extra_type>(root_ckb_offset);
+    reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+    e = reinterpret_cast<kernel_builder *>(ckb)->get_at<extra_type>(root_ckb_offset);
     field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
     field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
     const char *field_arrmeta = src_arrmeta[0] + arrmeta_offsets[i];
