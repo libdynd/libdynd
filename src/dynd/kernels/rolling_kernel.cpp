@@ -59,8 +59,7 @@ void nd::functional::var_rolling_ck::single(char *dst, char *const *src)
 intptr_t nd::functional::rolling_ck::instantiate(char *_static_data, char *data, void *ckb, intptr_t ckb_offset,
                                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                                  const ndt::type *src_tp, const char *const *src_arrmeta,
-                                                 kernel_request_t kernreq,
-                                                 intptr_t nkwd, const nd::array *kwds,
+                                                 kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                                                  const std::map<std::string, ndt::type> &tp_vars)
 {
   typedef dynd::nd::functional::strided_rolling_ck self_type;
@@ -98,7 +97,7 @@ intptr_t nd::functional::rolling_ck::instantiate(char *_static_data, char *data,
   //  numeric_limits<double>::quiet_NaN(), kernel_request_strided, ectx);
   // Re-retrieve the self pointer, because it may be at a new memory location
   // now
-  self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<self_type>(root_ckb_offset);
+  self = reinterpret_cast<kernel_builder *>(ckb)->get_at<self_type>(root_ckb_offset);
   // Create the window op child ckernel
   self->m_window_op_offset = ckb_offset - root_ckb_offset;
   // We construct array arrmeta for the window op ckernel to use,

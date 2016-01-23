@@ -481,7 +481,7 @@ namespace nd {
                                                              kernel_request_single, nkwd, kwds, tp_vars);
         }
 
-        e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
+        e = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
         e->init_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
 
         delete reinterpret_cast<data_type *>(data);
@@ -582,8 +582,7 @@ namespace nd {
                                               &src0_element_tp, &src0_element_arrmeta, kernel_request_single, nkwd,
                                               kwds, tp_vars);
 
-        reduction_kernel *self =
-            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
+        reduction_kernel *self = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
         self->init_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
 
         delete reinterpret_cast<data_type *>(data);
@@ -842,7 +841,7 @@ namespace nd {
         ckb_offset = reduction_virtual_kernel::instantiate(
             static_data, data, ckb, ckb_offset, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
             &src0_element_arrmeta, kernel_request_strided, nkwd, kwds, tp_vars);
-        self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
+        self = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
         self->dst_init_kernel_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
 
         delete reinterpret_cast<data_type *>(data);

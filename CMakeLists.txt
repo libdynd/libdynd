@@ -310,13 +310,13 @@ set(libdynd_SRC
     # Kernels
     src/dynd/kernels/base_kernel.cpp
     src/dynd/kernels/byteswap_kernels.cpp
-    src/dynd/kernels/ckernel_builder.cpp
     src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/compare_kernels.cpp
     src/dynd/kernels/copy_kernel.cpp
     src/dynd/kernels/expression_assignment_kernels.cpp
     src/dynd/kernels/expression_comparison_kernels.cpp
     src/dynd/kernels/fft_kernel.cpp
+    src/dynd/kernels/kernel_builder.cpp
     src/dynd/kernels/multidispatch_kernel.cpp
     src/dynd/kernels/option_assignment_kernels.cpp
     src/dynd/kernels/pointer_assignment_kernels.cpp
@@ -334,7 +334,6 @@ set(libdynd_SRC
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/base_kernel.hpp
     include/dynd/kernels/byteswap_kernels.hpp
-    include/dynd/kernels/ckernel_builder.hpp
     include/dynd/kernels/ckernel_common_functions.hpp
     include/dynd/kernels/ckernel_prefix.hpp
     include/dynd/kernels/comparison_kernels.hpp
@@ -349,6 +348,7 @@ set(libdynd_SRC
     include/dynd/kernels/fft_kernel.hpp
     include/dynd/kernels/index_kernel.hpp
     include/dynd/kernels/is_missing_kernel.hpp
+    include/dynd/kernels/kernel_builder.hpp
     include/dynd/kernels/max_kernel.hpp
     include/dynd/kernels/min_kernel.hpp
     include/dynd/kernels/multidispatch_kernel.hpp
@@ -504,7 +504,7 @@ if (DYND_CUDA)
             src/dynd/func/random.cpp
             # Kernels
             src/dynd/kernels/assignment_kernels.cpp
-            src/dynd/kernels/ckernel_builder.cpp
+            src/dynd/kernels/kernel_builder.cpp
         )
         list(REMOVE_ITEM libdynd_SRC ${filename_CPP})
         list(APPEND libdynddev_SRC ${filename_CPP})

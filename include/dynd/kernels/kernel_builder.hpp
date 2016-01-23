@@ -142,11 +142,7 @@ public:
   intptr_t get_capacity() const { return m_capacity; }
 };
 
-template <kernel_request_t kernreq>
-class ckernel_builder;
-
-template <>
-class ckernel_builder<kernel_request_host> : public base_ckernel_builder<ckernel_builder<kernel_request_host>> {
+class kernel_builder : public base_ckernel_builder<kernel_builder> {
   // When the amount of data is small, this static data is used,
   // otherwise dynamic memory is allocated when it gets too big
   char m_static_data[16 * 8];
@@ -170,7 +166,7 @@ public:
     return SelfType::init(rawself, kernreq, std::forward<A>(args)...);
   }
 
-  void destroy() { base_ckernel_builder<ckernel_builder<kernel_request_host>>::destroy(); }
+  void destroy() { base_ckernel_builder<kernel_builder>::destroy(); }
 
   void destroy(ckernel_prefix *self) { self->destroy(); }
 
@@ -203,7 +199,7 @@ public:
 
   void *set(void *dst, int value, size_t size) { return std::memset(dst, value, size); }
 
-  void swap(ckernel_builder<kernel_request_host> &rhs)
+  void swap(kernel_builder &rhs)
   {
     if (using_static_data()) {
       if (rhs.using_static_data()) {
@@ -390,7 +386,7 @@ inline intptr_t ckernel_prefix::instantiate(char *static_data, char *DYND_UNUSED
     throw std::invalid_argument("no kernel request");
   }
 
-  make(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq, ckb_offset, func);
+  make(reinterpret_cast<kernel_builder *>(ckb), kernreq, ckb_offset, func);
   return ckb_offset;
 }
 

@@ -221,8 +221,8 @@ namespace nd {
         // Instantiate the callable being buffered
         ckb_offset = af.get()->instantiate(af.get()->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                            src_tp_for_af, &buffered_arrmeta[0], kernreq, nkwd, kwds, tp_vars);
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-        self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<convert_kernel>(root_ckb_offset);
+        reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+        self = reinterpret_cast<kernel_builder *>(ckb)->get_at<convert_kernel>(root_ckb_offset);
         // Instantiate assignments for all the buffered operands
         for (intptr_t i = 0; i < nsrc; ++i) {
           if (!self->m_bufs[i].is_null()) {
@@ -231,10 +231,9 @@ namespace nd {
             ckb_offset = assign::get()->instantiate(assign::get()->static_data(), NULL, ckb, ckb_offset,
                                                     src_tp_for_af[i], self->m_bufs[i].get_arrmeta(), 1, src_tp + i,
                                                     src_arrmeta + i, kernreq, 1, &error_mode, tp_vars);
-            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+            reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
             if (i < nsrc - 1) {
-              self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-                         ->get_at<convert_kernel>(root_ckb_offset);
+              self = reinterpret_cast<kernel_builder *>(ckb)->get_at<convert_kernel>(root_ckb_offset);
             }
           }
         }

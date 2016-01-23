@@ -129,7 +129,7 @@ namespace nd {
         ckb_offset =
             first->instantiate(first->static_data(), data, ckb, ckb_offset, buffer_tp, self->buffer_arrmeta.get(), 1,
                                src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-        self = get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), root_ckb_offset);
+        self = get_self(reinterpret_cast<kernel_builder *>(ckb), root_ckb_offset);
         self->second_offset = ckb_offset - root_ckb_offset;
         const char *buffer_arrmeta = self->buffer_arrmeta.get();
         return second->instantiate(second->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &buffer_tp,

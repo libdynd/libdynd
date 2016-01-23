@@ -46,12 +46,11 @@ struct buffered_kernel_extra {
         b.tp->arrmeta_default_construct(b.arrmeta, true);
       }
       // Make sure the buffer data size is pointer size-aligned
-      b.data_size =
-          inc_to_alignment(b.tp->get_default_data_size(), sizeof(void *));
-    } else {
+      b.data_size = inc_to_alignment(b.tp->get_default_data_size(), sizeof(void *));
+    }
+    else {
       // Make sure the buffer data size is pointer size-aligned
-      b.data_size =
-          inc_to_alignment(buffer_dt_.get_data_size(), sizeof(void *));
+      b.data_size = inc_to_alignment(buffer_dt_.get_data_size(), sizeof(void *));
     }
   }
 
@@ -61,8 +60,7 @@ struct buffered_kernel_extra {
     char *dst = eraw + b.data_offset;
 
     // If the type needs it, initialize the buffer data to zero
-    if (!is_builtin_type(b.tp) &&
-        (b.tp->get_flags() & type_flag_zeroinit) != 0) {
+    if (!is_builtin_type(b.tp) && (b.tp->get_flags() & type_flag_zeroinit) != 0) {
       memset(dst, 0, b.data_size);
     }
 
@@ -85,13 +83,15 @@ struct buffered_kernel_extra {
     // Buffer the first operand if necessary
     if (e->buf[0].kernel_offset != 0) {
       src_buffered[0] = e->buffer_operand(e->buf[0], src[0]);
-    } else {
+    }
+    else {
       src_buffered[0] = src[0];
     }
     // Buffer the second operand if necessary
     if (e->buf[1].kernel_offset != 0) {
       src_buffered[1] = e->buffer_operand(e->buf[1], src[1]);
-    } else {
+    }
+    else {
       src_buffered[1] = src[1];
     }
     // Call the comparison kernel
@@ -140,42 +140,33 @@ struct buffered_kernel_extra {
 };
 } // anonymous namespace
 
-size_t dynd::make_expression_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                               const ndt::type &src0_dt,
-                                               const char *src0_arrmeta,
-                                               const ndt::type &src1_dt,
-                                               const char *src1_arrmeta,
-                                               comparison_type_t comptype,
+size_t dynd::make_expression_comparison_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
+                                               const char *src0_arrmeta, const ndt::type &src1_dt,
+                                               const char *src1_arrmeta, comparison_type_t comptype,
                                                const eval::eval_context *ectx)
 {
   intptr_t root_ckb_offset = ckb_offset;
-  buffered_kernel_extra *e =
-      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck<buffered_kernel_extra>(ckb_offset);
+  buffered_kernel_extra *e = reinterpret_cast<kernel_builder *>(ckb)->alloc_ck<buffered_kernel_extra>(ckb_offset);
   e->base.function = reinterpret_cast<void *>(&buffered_kernel_extra::kernel);
   e->base.destructor = &buffered_kernel_extra::destruct;
   // Initialize the information for buffering the operands
   if (src0_dt.get_kind() == expr_kind) {
     e->init_buffer(0, src0_dt.value_type());
     e->buf[0].kernel_offset = ckb_offset - root_ckb_offset;
-    ckb_offset = make_assignment_kernel(
-        ckb, ckb_offset, src0_dt.value_type(), e->buf[0].arrmeta, src0_dt,
-        src0_arrmeta, kernel_request_single, ectx);
+    ckb_offset = make_assignment_kernel(ckb, ckb_offset, src0_dt.value_type(), e->buf[0].arrmeta, src0_dt, src0_arrmeta,
+                                        kernel_request_single, ectx);
     // Have to re-retrieve 'e', because creating another kernel may invalidate
     // it
-    e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->get_at<buffered_kernel_extra>(root_ckb_offset);
+    e = reinterpret_cast<kernel_builder *>(ckb)->get_at<buffered_kernel_extra>(root_ckb_offset);
   }
   if (src1_dt.get_kind() == expr_kind) {
     e->init_buffer(1, src1_dt.value_type());
     e->buf[1].kernel_offset = ckb_offset - root_ckb_offset;
-    ckb_offset = make_assignment_kernel(
-        ckb, ckb_offset, src1_dt.value_type(), e->buf[1].arrmeta, src1_dt,
-        src1_arrmeta, kernel_request_single, ectx);
+    ckb_offset = make_assignment_kernel(ckb, ckb_offset, src1_dt.value_type(), e->buf[1].arrmeta, src1_dt, src1_arrmeta,
+                                        kernel_request_single, ectx);
     // Have to re-retrieve 'e', because creating another kernel may invalidate
     // it
-    e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->get_at<buffered_kernel_extra>(root_ckb_offset);
+    e = reinterpret_cast<kernel_builder *>(ckb)->get_at<buffered_kernel_extra>(root_ckb_offset);
   }
   // Allocate the data for the buffers
   if (e->buf[0].kernel_offset != 0) {
@@ -188,17 +179,12 @@ size_t dynd::make_expression_comparison_kernel(void *ckb, intptr_t ckb_offset,
     e->buf[1].data_offset = ckb_offset - root_ckb_offset;
     ckb_offset += e->buf[1].data_size;
   }
-  reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-      ->reserve(ckb_offset + sizeof(ckernel_prefix));
+  reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
   // Have to re-retrieve 'e', because allocating the buffer data may invalidate
   // it
-  e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->get_at<buffered_kernel_extra>(root_ckb_offset);
+  e = reinterpret_cast<kernel_builder *>(ckb)->get_at<buffered_kernel_extra>(root_ckb_offset);
   e->cmp_kernel_offset = ckb_offset - root_ckb_offset;
-  return make_comparison_kernel(
-      ckb, ckb_offset, src0_dt.value_type(),
-      (e->buf[0].kernel_offset != 0) ? e->buf[0].arrmeta : src0_arrmeta,
-      src1_dt.value_type(),
-      (e->buf[1].kernel_offset != 0) ? e->buf[1].arrmeta : src1_arrmeta,
-      comptype, ectx);
+  return make_comparison_kernel(ckb, ckb_offset, src0_dt.value_type(),
+                                (e->buf[0].kernel_offset != 0) ? e->buf[0].arrmeta : src0_arrmeta, src1_dt.value_type(),
+                                (e->buf[1].kernel_offset != 0) ? e->buf[1].arrmeta : src1_arrmeta, comptype, ectx);
 }
