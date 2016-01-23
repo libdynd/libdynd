@@ -140,7 +140,7 @@ struct buffered_kernel_extra {
 };
 } // anonymous namespace
 
-size_t dynd::make_expression_comparison_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
+size_t dynd::make_expression_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
                                                const char *src0_arrmeta, const ndt::type &src1_dt,
                                                const char *src1_arrmeta, comparison_type_t comptype,
                                                const eval::eval_context *ectx)

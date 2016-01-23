@@ -78,9 +78,9 @@ namespace ndt {
     void data_destruct(const char *arrmeta, char *data) const;
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
 
-    size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_dt, const char *src0_arrmeta,
-                                  const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
-                                  const eval::eval_context *ectx) const;
+    size_t make_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
+                                  const char *src0_arrmeta, const type &src1_dt, const char *src1_arrmeta,
+                                  comparison_type_t comptype, const eval::eval_context *ectx) const;
   };
 
   template <>

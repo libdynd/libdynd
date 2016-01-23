@@ -370,94 +370,6 @@ bool ndt::categorical_type::is_lossless_assignment(const type &dst_tp, const typ
   }
 }
 
-/*
-intptr_t ndt::categorical_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
-                                                       const char *dst_arrmeta, const type &src_tp,
-                                                       const char *src_arrmeta, kernel_request_t kernreq,
-                                                       const eval::eval_context *ectx) const
-{
-  if (this == dst_tp.extended()) {
-    if (this == src_tp.extended()) {
-      // When assigning identical types, just use a POD copy
-      return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
-    }
-    // assign from the same category value type
-    else if (src_tp == m_category_tp) {
-      switch (m_storage_type.get_type_id()) {
-      case uint8_type_id: {
-        nd::category_to_categorical_kernel_extra<uint8_t> *e =
-            nd::category_to_categorical_kernel_extra<uint8_t>::make(ckb, kernreq, ckb_offset);
-        e->dst_cat_tp = dst_tp;
-        e->src_arrmeta = src_arrmeta;
-      } break;
-      case uint16_type_id: {
-        nd::category_to_categorical_kernel_extra<uint16_t> *e =
-            nd::category_to_categorical_kernel_extra<uint16_t>::make(ckb, kernreq, ckb_offset);
-        e->dst_cat_tp = dst_tp;
-        e->src_arrmeta = src_arrmeta;
-      } break;
-      case uint32_type_id: {
-        nd::category_to_categorical_kernel_extra<uint32_t> *e =
-            nd::category_to_categorical_kernel_extra<uint32_t>::make(ckb, kernreq, ckb_offset);
-        e->dst_cat_tp = dst_tp;
-        e->src_arrmeta = src_arrmeta;
-      } break;
-      default:
-        throw runtime_error("internal error in categorical_type::make_assignment_kernel");
-      }
-      // The kernel type owns a reference to this type
-      return ckb_offset;
-    }
-    else if (src_tp.value_type() != m_category_tp && src_tp.value_type().get_type_id() != categorical_type_id) {
-      std::cout << dst_tp << std::endl;
-      std::cout << src_tp << std::endl;
-      // Make a convert type to the category type, and have it do the chaining
-      type src_cvt_tp = convert_type::make(m_category_tp, src_tp);
-      return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_cvt_tp, src_arrmeta, kernreq, ectx);
-    }
-    else {
-      // Let the src_tp handle it
-      return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                                                       kernreq, ectx);
-    }
-  }
-  else {
-    if (dst_tp.value_type().get_type_id() != categorical_type_id) {
-      switch (m_storage_type.get_type_id()) {
-      case uint8_type_id: {
-        nd::categorical_to_other_kernel<uint8_t> *e =
-            nd::categorical_to_other_kernel<uint8_t>::make(ckb, kernreq, ckb_offset);
-        // The kernel type owns a reference to this type
-        e->src_cat_tp = type(src_tp);
-
-      } break;
-      case uint16_type_id: {
-        nd::categorical_to_other_kernel<uint16_t> *e =
-            nd::categorical_to_other_kernel<uint16_t>::make(ckb, kernreq, ckb_offset);
-        // The kernel type owns a reference to this type
-        e->src_cat_tp = type(src_tp);
-      } break;
-      case uint32_type_id: {
-        nd::categorical_to_other_kernel<uint32_t> *e =
-            nd::categorical_to_other_kernel<uint32_t>::make(ckb, kernreq, ckb_offset);
-        // The kernel type owns a reference to this type
-        e->src_cat_tp = type(src_tp);
-      } break;
-      default:
-        throw runtime_error("internal error in categorical_type::make_assignment_kernel");
-      }
-      return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, get_category_type(), get_category_arrmeta(),
-                                      kernel_request_single, ectx);
-    }
-    else {
-      stringstream ss;
-      ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-      throw runtime_error(ss.str());
-    }
-  }
-}
-*/
-
 bool ndt::categorical_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs)
@@ -545,11 +457,11 @@ struct get_ints_kernel : nd::base_kernel<get_ints_kernel> {
     dst_tp = helper(kwds[0]).get_type();
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     get_ints_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);

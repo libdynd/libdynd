@@ -12,15 +12,12 @@ using namespace dynd;
 namespace {
 template <typename T>
 struct value_to_pointer_ck : nd::base_kernel<value_to_pointer_ck<T>, 1> {
-  void single(char *dst, char *const *src)
-  {
-    *reinterpret_cast<T **>(dst) = *reinterpret_cast<T **>(src[0]);
-  }
+  void single(char *dst, char *const *src) { *reinterpret_cast<T **>(dst) = *reinterpret_cast<T **>(src[0]); }
 };
 } // anonymous namespace
 
-size_t dynd::make_builtin_value_to_pointer_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, type_id_t tp_id, kernel_request_t kernreq)
+size_t dynd::make_builtin_value_to_pointer_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, type_id_t tp_id,
+                                                             kernel_request_t kernreq)
 {
   switch (tp_id) {
   case bool_type_id:
@@ -77,7 +74,8 @@ size_t dynd::make_builtin_value_to_pointer_assignment_kernel(
   default: {
     stringstream ss;
     ss << "make_builtin_value_to_pointer_assignment_kernel: unrecognized "
-          "type_id " << tp_id;
+          "type_id "
+       << tp_id;
     throw runtime_error(ss.str());
     break;
   }
@@ -85,14 +83,11 @@ size_t dynd::make_builtin_value_to_pointer_assignment_kernel(
   return ckb_offset;
 }
 
-size_t dynd::make_value_to_pointer_assignment_kernel(void *ckb,
-                                                     intptr_t ckb_offset,
-                                                     const ndt::type &tp,
+size_t dynd::make_value_to_pointer_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &tp,
                                                      kernel_request_t kernreq)
 {
   if (tp.is_builtin()) {
-    return make_builtin_value_to_pointer_assignment_kernel(
-        ckb, ckb_offset, tp.get_type_id(), kernreq);
+    return make_builtin_value_to_pointer_assignment_kernel(ckb, ckb_offset, tp.get_type_id(), kernreq);
   }
 
   stringstream ss;

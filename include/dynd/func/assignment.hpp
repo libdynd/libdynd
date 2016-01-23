@@ -39,12 +39,12 @@ namespace nd {
  * \returns  The offset within 'ckb' immediately after the
  *           created kernel.
  */
-DYND_API intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+DYND_API intptr_t make_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                                          const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
                                          kernel_request_t kernreq, const eval::eval_context *ectx);
 
-inline intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                                       const ndt::type *src_tp, const char *const *src_arrmeta,
+inline intptr_t make_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                                       const char *dst_arrmeta, const ndt::type *src_tp, const char *const *src_arrmeta,
                                        kernel_request_t kernreq, const eval::eval_context *ectx)
 {
   return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, *src_tp, *src_arrmeta, kernreq, ectx);
@@ -60,7 +60,7 @@ inline intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt
  * \param data_alignment  The alignment of the data being assigned.
  * \param kernreq  What kind of kernel must be placed in 'ckb'.
  */
-DYND_API size_t make_pod_typed_data_assignment_kernel(void *ckb, intptr_t ckb_offset, size_t data_size,
+DYND_API size_t make_pod_typed_data_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, size_t data_size,
                                                       size_t data_alignment, kernel_request_t kernreq);
 
 } // namespace dynd

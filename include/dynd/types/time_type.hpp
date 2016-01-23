@@ -47,9 +47,9 @@ namespace ndt {
     {
     }
 
-    size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_dt, const char *src0_arrmeta,
-                                  const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
-                                  const eval::eval_context *ectx) const;
+    size_t make_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
+                                  const char *src0_arrmeta, const type &src1_dt, const char *src1_arrmeta,
+                                  comparison_type_t comptype, const eval::eval_context *ectx) const;
 
     std::map<std::string, nd::callable> get_dynamic_array_properties() const;
     std::map<std::string, nd::callable> get_dynamic_array_functions() const;

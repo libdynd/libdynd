@@ -51,7 +51,7 @@ void nd::functional::old_multidispatch_ck::resolve_dst_type(char *static_data, c
 }
 
 intptr_t nd::functional::old_multidispatch_ck::instantiate(
-    char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {

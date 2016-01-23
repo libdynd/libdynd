@@ -53,7 +53,7 @@ void ndt::base_expr_type::arrmeta_debug_print(const char *arrmeta, std::ostream 
 
 size_t ndt::base_expr_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const { return 0; }
 
-size_t ndt::base_expr_type::make_operand_to_value_assignment_kernel(void *DYND_UNUSED(ckb),
+size_t ndt::base_expr_type::make_operand_to_value_assignment_kernel(kernel_builder *DYND_UNUSED(ckb),
                                                                     intptr_t DYND_UNUSED(ckb_offset),
                                                                     const char *DYND_UNUSED(dst_arrmeta),
                                                                     const char *DYND_UNUSED(src_arrmeta),
@@ -65,7 +65,7 @@ size_t ndt::base_expr_type::make_operand_to_value_assignment_kernel(void *DYND_U
   throw dynd::type_error(ss.str());
 }
 
-size_t ndt::base_expr_type::make_value_to_operand_assignment_kernel(void *DYND_UNUSED(ckb),
+size_t ndt::base_expr_type::make_value_to_operand_assignment_kernel(kernel_builder *DYND_UNUSED(ckb),
                                                                     intptr_t DYND_UNUSED(ckb_offset),
                                                                     const char *DYND_UNUSED(dst_arrmeta),
                                                                     const char *DYND_UNUSED(src_arrmeta),
@@ -77,7 +77,7 @@ size_t ndt::base_expr_type::make_value_to_operand_assignment_kernel(void *DYND_U
   throw dynd::type_error(ss.str());
 }
 
-size_t ndt::base_expr_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_dt,
+size_t ndt::base_expr_type::make_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
                                                    const char *src0_arrmeta, const type &src1_dt,
                                                    const char *src1_arrmeta, comparison_type_t comptype,
                                                    const eval::eval_context *ectx) const

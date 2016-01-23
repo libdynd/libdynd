@@ -122,9 +122,9 @@ namespace ndt {
 
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
-    size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_dt, const char *src0_arrmeta,
-                                  const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
-                                  const eval::eval_context *ectx) const;
+    size_t make_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
+                                  const char *src0_arrmeta, const type &src1_dt, const char *src1_arrmeta,
+                                  comparison_type_t comptype, const eval::eval_context *ectx) const;
 
     virtual bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                        std::map<std::string, type> &tp_vars) const;
