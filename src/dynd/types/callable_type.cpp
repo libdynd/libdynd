@@ -261,7 +261,7 @@ static intptr_t make_callable_to_string_assignment_kernel(void *ckb, intptr_t ck
                                                           const eval::eval_context *ectx)
 {
   typedef callable_to_string_ck self_type;
-  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(reinterpret_cast<kernel_builder *>(ckb), kernreq, ckb_offset);
   // The kernel data owns a reference to this type
   self->m_src_tp = src_tp;
   self->m_dst_string_dt = dst_string_dt;
@@ -280,7 +280,8 @@ intptr_t ndt::callable_type::make_assignment_kernel(void *ckb, intptr_t ckb_offs
   else {
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
-      return make_callable_to_string_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, kernreq, ectx);
+      return make_callable_to_string_assignment_kernel(reinterpret_cast<kernel_builder *>(ckb), ckb_offset, dst_tp,
+                                                       dst_arrmeta, src_tp, kernreq, ectx);
     }
   }
 

@@ -196,7 +196,7 @@ struct utf32_fixed_string_compare_kernel {
         type##_fixed_string_compare_kernel::greater                                                                    \
   }
 
-size_t dynd::make_fixed_string_comparison_kernel(void *ckb, intptr_t ckb_offset, size_t string_size,
+size_t dynd::make_fixed_string_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, size_t string_size,
                                                  string_encoding_t encoding, comparison_type_t comptype,
                                                  const eval::eval_context *DYND_UNUSED(ectx))
 {
@@ -288,7 +288,7 @@ struct string_compare_kernel {
         string_compare_kernel<type>::greater_equal, string_compare_kernel<type>::greater                               \
   }
 
-size_t dynd::make_string_comparison_kernel(void *ckb, intptr_t ckb_offset, string_encoding_t encoding,
+size_t dynd::make_string_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, string_encoding_t encoding,
                                            comparison_type_t comptype, const eval::eval_context *DYND_UNUSED(ectx))
 {
   static int lookup[5] = {0, 1, 0, 1, 2};
@@ -310,7 +310,7 @@ size_t dynd::make_string_comparison_kernel(void *ckb, intptr_t ckb_offset, strin
 
 #undef DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL
 
-size_t dynd::make_general_string_comparison_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
+size_t dynd::make_general_string_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
                                                    const char *src0_arrmeta, const ndt::type &src1_dt,
                                                    const char *src1_arrmeta, comparison_type_t comptype,
                                                    const eval::eval_context *ectx)

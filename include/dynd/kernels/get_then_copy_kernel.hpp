@@ -25,7 +25,7 @@ namespace nd {
       this->get_child()->single(res, &child_args);
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
                                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                                 const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                                 kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *kwds,

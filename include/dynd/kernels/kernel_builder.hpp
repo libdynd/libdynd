@@ -362,9 +362,10 @@ ckernel_prefix *ckernel_prefix::make(CKBT *ckb, kernel_request_t kernreq, intptr
   return ckb->template init<ckernel_prefix>(rawself, kernreq, func);
 }
 
-inline intptr_t ckernel_prefix::instantiate(char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                                            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+inline intptr_t ckernel_prefix::instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,
+                                            intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                            const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                            const ndt::type *DYND_UNUSED(src_tp),
                                             const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                                             intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -386,7 +387,7 @@ inline intptr_t ckernel_prefix::instantiate(char *static_data, char *DYND_UNUSED
     throw std::invalid_argument("no kernel request");
   }
 
-  make(reinterpret_cast<kernel_builder *>(ckb), kernreq, ckb_offset, func);
+  make(ckb, kernreq, ckb_offset, func);
   return ckb_offset;
 }
 

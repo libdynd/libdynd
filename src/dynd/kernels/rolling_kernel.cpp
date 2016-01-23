@@ -56,9 +56,9 @@ void nd::functional::var_rolling_ck::single(char *dst, char *const *src)
 }
 
 // TODO This should handle both strided and var cases
-intptr_t nd::functional::rolling_ck::instantiate(char *_static_data, char *data, void *ckb, intptr_t ckb_offset,
-                                                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                                 const ndt::type *src_tp, const char *const *src_arrmeta,
+intptr_t nd::functional::rolling_ck::instantiate(char *_static_data, char *data, kernel_builder *ckb,
+                                                 intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                                 intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                                                  kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                                                  const std::map<std::string, ndt::type> &tp_vars)
 {

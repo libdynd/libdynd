@@ -13,22 +13,22 @@
 namespace dynd {
 
 namespace ndt {
-    class type;
+  class type;
 } // namespace ndt
 
 enum comparison_type_t {
-    /**
-     * A less than operation suitable for sorting
-     * (one of a < b or b < a must be true when a != b).
-     */
-    comparison_type_sorting_less,
-    /** Standard comparisons */
-    comparison_type_less,
-    comparison_type_less_equal,
-    comparison_type_equal,
-    comparison_type_not_equal,
-    comparison_type_greater_equal,
-    comparison_type_greater
+  /**
+   * A less than operation suitable for sorting
+   * (one of a < b or b < a must be true when a != b).
+   */
+  comparison_type_sorting_less,
+  /** Standard comparisons */
+  comparison_type_less,
+  comparison_type_less_equal,
+  comparison_type_equal,
+  comparison_type_not_equal,
+  comparison_type_greater_equal,
+  comparison_type_greater
 };
 
 /**
@@ -53,13 +53,9 @@ enum comparison_type_t {
  * \returns  The offset within 'out' immediately after the
  *           created kernel.
  */
-DYND_API size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                       const ndt::type &src0_dt,
-                                       const char *src0_arrmeta,
-                                       const ndt::type &src1_dt,
-                                       const char *src1_arrmeta,
-                                       comparison_type_t comptype,
-                                       const eval::eval_context *ectx);
+DYND_API size_t make_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
+                                       const char *src0_arrmeta, const ndt::type &src1_dt, const char *src1_arrmeta,
+                                       comparison_type_t comptype, const eval::eval_context *ectx);
 
 /**
  * Creates a comparison kernel that compares the two builtin
@@ -71,10 +67,7 @@ DYND_API size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset,
  * \param src1_type_id  The second dynd type id.
  * \param comptype  The type of comparison to do.
  */
-DYND_API size_t make_builtin_type_comparison_kernel(void *ckb,
-                                                    intptr_t ckb_offset,
-                                                    type_id_t src0_type_id,
-                                                    type_id_t src1_type_id,
-                                                    comparison_type_t comptype);
+DYND_API size_t make_builtin_type_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, type_id_t src0_type_id,
+                                                    type_id_t src1_type_id, comparison_type_t comptype);
 
 } // namespace dynd

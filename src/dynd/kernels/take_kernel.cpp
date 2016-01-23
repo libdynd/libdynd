@@ -47,7 +47,7 @@ void nd::masked_take_ck::single(char *dst, char *const *src)
   ndt::var_dim_element_resize(m_dst_tp, m_dst_meta, dst, dst_count);
 }
 
-intptr_t nd::masked_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+intptr_t nd::masked_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                                          intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
                                          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                                          const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -123,7 +123,7 @@ void nd::indexed_take_ck::single(char *dst, char *const *src)
   }
 }
 
-intptr_t nd::indexed_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+intptr_t nd::indexed_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                                           intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
                                           intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                                           const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -177,7 +177,7 @@ intptr_t nd::indexed_take_ck::instantiate(char *DYND_UNUSED(static_data), char *
                                 kernel_request_single, &eval::default_eval_context);
 }
 
-intptr_t nd::take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+intptr_t nd::take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                   const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                   intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)

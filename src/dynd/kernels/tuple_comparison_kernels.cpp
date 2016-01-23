@@ -129,7 +129,7 @@ struct tuple_compare_sorting_less_diff_arrmeta_kernel {
 
 } // anonymous namespace
 
-size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &src_tp,
+size_t dynd::make_tuple_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src_tp,
                                           const char *src0_arrmeta, const char *src1_arrmeta,
                                           comparison_type_t comptype, const eval::eval_context *ectx)
 {

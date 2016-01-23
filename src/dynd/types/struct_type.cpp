@@ -177,7 +177,7 @@ bool ndt::struct_type::is_lossless_assignment(const type &dst_tp, const type &sr
   return false;
 }
 
-size_t ndt::struct_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_dt,
+size_t ndt::struct_type::make_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
                                                 const char *src0_arrmeta, const type &src1_dt, const char *src1_arrmeta,
                                                 comparison_type_t comptype, const eval::eval_context *ectx) const
 {
@@ -380,7 +380,7 @@ namespace nd {
       dst_tp = helper(kwds[0], *reinterpret_cast<intptr_t *>(static_data)).get_type();
     }
 
-    static intptr_t instantiate(char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    static intptr_t instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb, intptr_t ckb_offset,
                                 const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                                 const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,

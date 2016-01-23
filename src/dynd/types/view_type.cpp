@@ -142,7 +142,7 @@ ndt::type ndt::view_type::with_replaced_storage_type(const type &replacement_typ
   }
 }
 
-size_t ndt::view_type::make_operand_to_value_assignment_kernel(void *ckb, intptr_t ckb_offset,
+size_t ndt::view_type::make_operand_to_value_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset,
                                                                const char *DYND_UNUSED(dst_arrmeta),
                                                                const char *DYND_UNUSED(src_arrmeta),
                                                                kernel_request_t kernreq,
@@ -153,7 +153,7 @@ size_t ndt::view_type::make_operand_to_value_assignment_kernel(void *ckb, intptr
       std::min(m_value_type.get_data_alignment(), m_operand_type.get_data_alignment()), kernreq);
 }
 
-size_t ndt::view_type::make_value_to_operand_assignment_kernel(void *ckb, intptr_t ckb_offset,
+size_t ndt::view_type::make_value_to_operand_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset,
                                                                const char *DYND_UNUSED(dst_arrmeta),
                                                                const char *DYND_UNUSED(src_arrmeta),
                                                                kernel_request_t kernreq,
