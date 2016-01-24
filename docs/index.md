@@ -16,4 +16,4 @@ for any queries regarding the library.
  * Design Documents
    * [String](string-design.md)
    * [Serialization](serialization-design.md)
-
+   * [Merkle DAG Features](merkledag-design.md)
