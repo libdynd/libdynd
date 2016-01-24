@@ -129,9 +129,9 @@ struct tuple_compare_sorting_less_diff_arrmeta_kernel {
 
 } // anonymous namespace
 
-size_t dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src_tp,
-                                          const char *src0_arrmeta, const char *src1_arrmeta,
-                                          comparison_type_t comptype, const eval::eval_context *ectx)
+void dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src_tp,
+                                        const char *src0_arrmeta, const char *src1_arrmeta, comparison_type_t comptype,
+                                        const eval::eval_context *ectx)
 {
   intptr_t root_ckb_offset = ckb_offset;
   auto bsd = src_tp.extended<ndt::tuple_type>();
@@ -163,10 +163,11 @@ size_t dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_
         field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
         const char *field_arrmeta = src0_arrmeta + arrmeta_offsets[i];
         const ndt::type &ft = bsd->get_field_type(i);
-        ckb_offset = make_comparison_kernel(ckb, ckb_offset, ft, field_arrmeta, ft, field_arrmeta,
-                                            comparison_type_sorting_less, ectx);
+        make_comparison_kernel(ckb, ckb_offset, ft, field_arrmeta, ft, field_arrmeta, comparison_type_sorting_less,
+                               ectx);
+        ckb_offset = ckb->m_size;
       }
-      return ckb_offset;
+      return;
     }
     else {
       // The arrmeta is different, so have to get the kernels both ways for the
@@ -193,17 +194,20 @@ size_t dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_
         e = ckb->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
         field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
         field_kernel_offsets[2 * i] = ckb_offset - root_ckb_offset;
-        ckb_offset = make_comparison_kernel(ckb, ckb_offset, ft, src0_arrmeta + arrmeta_offsets[i], ft,
-                                            src1_arrmeta + arrmeta_offsets[i], comparison_type_sorting_less, ectx);
+        make_comparison_kernel(ckb, ckb_offset, ft, src0_arrmeta + arrmeta_offsets[i], ft,
+                               src1_arrmeta + arrmeta_offsets[i], comparison_type_sorting_less, ectx);
+        ckb_offset = ckb->m_size;
+
         // Repeat for comparing the other way
         ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
         e = ckb->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
         field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
         field_kernel_offsets[2 * i + 1] = ckb_offset - root_ckb_offset;
-        ckb_offset = make_comparison_kernel(ckb, ckb_offset, ft, src1_arrmeta + arrmeta_offsets[i], ft,
-                                            src0_arrmeta + arrmeta_offsets[i], comparison_type_sorting_less, ectx);
+        make_comparison_kernel(ckb, ckb_offset, ft, src1_arrmeta + arrmeta_offsets[i], ft,
+                               src0_arrmeta + arrmeta_offsets[i], comparison_type_sorting_less, ectx);
+        ckb_offset = ckb->m_size;
       }
-      return ckb_offset;
+      return;
     }
   }
   else if (comptype == comparison_type_equal || comptype == comparison_type_not_equal) {
@@ -218,7 +222,7 @@ size_t dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_
           NULL, NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, 2, &src_tp, src_arrmeta,
           kernel_request_host | kernel_request_single, 0, NULL, tp_vars);
       ckb_offset = ckb->m_size;
-      return ckb_offset;
+      return;
     }
     else {
       std::map<std::string, ndt::type> tp_vars;
@@ -227,9 +231,9 @@ size_t dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_
           NULL, NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, 2, &src_tp, src_arrmeta,
           kernel_request_host | kernel_request_single, 0, NULL, tp_vars);
       ckb_offset = ckb->m_size;
-      return ckb_offset;
+      return;
     }
-    return ckb_offset;
+    return;
   }
   else {
     throw not_comparable_error(src_tp, src_tp, comptype);

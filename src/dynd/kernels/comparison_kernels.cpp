@@ -10,23 +10,25 @@
 using namespace std;
 using namespace dynd;
 
-size_t dynd::make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
-                                    const char *src0_arrmeta, const ndt::type &src1_dt, const char *src1_arrmeta,
-                                    comparison_type_t comptype, const eval::eval_context *ectx)
+void dynd::make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
+                                  const char *src0_arrmeta, const ndt::type &src1_dt, const char *src1_arrmeta,
+                                  comparison_type_t comptype, const eval::eval_context *ectx)
 {
   if (src0_dt.is_builtin()) {
     if (src1_dt.is_builtin()) {
-      return make_builtin_type_comparison_kernel(ckb, ckb_offset, src0_dt.get_type_id(), src1_dt.get_type_id(),
-                                                 comptype);
+      make_builtin_type_comparison_kernel(ckb, ckb_offset, src0_dt.get_type_id(), src1_dt.get_type_id(), comptype);
+      return;
     }
     else {
-      return src1_dt.extended()->make_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta,
-                                                        comptype, ectx);
+      src1_dt.extended()->make_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta,
+                                                 comptype, ectx);
+      return;
     }
   }
   else {
-    return src0_dt.extended()->make_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta,
-                                                      comptype, ectx);
+    src0_dt.extended()->make_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype,
+                                               ectx);
+    return;
   }
 }
 
@@ -60,17 +62,17 @@ static kernel_single_t compare_kernel_table[builtin_type_id_count - 2][builtin_t
 #undef INNER_LEVEL
 };
 
-size_t dynd::make_builtin_type_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, type_id_t src0_type_id,
-                                                 type_id_t src1_type_id, comparison_type_t comptype)
+void dynd::make_builtin_type_comparison_kernel(nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
+                                               type_id_t src0_type_id, type_id_t src1_type_id,
+                                               comparison_type_t comptype)
 {
   // Do a table lookup for the built-in range of dynd types
   if (src0_type_id >= bool_type_id && src0_type_id <= complex_float64_type_id && src1_type_id >= bool_type_id &&
       src1_type_id <= complex_float64_type_id && comptype >= 0 && comptype <= comparison_type_greater) {
     // No need to reserve more space, the space for a leaf is already there
-    ckernel_prefix *result = ckb->alloc_ck<ckernel_prefix>(ckb_offset);
+    ckernel_prefix *result = ckb->alloc_ck<ckernel_prefix>();
     result->function = reinterpret_cast<void *>(
         compare_kernel_table[src0_type_id - bool_type_id][src1_type_id - bool_type_id][comptype]);
-    return ckb_offset;
   }
   else {
     throw not_comparable_error(ndt::type(src0_type_id), ndt::type(src1_type_id), comptype);

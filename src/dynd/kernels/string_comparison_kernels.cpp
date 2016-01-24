@@ -196,19 +196,18 @@ struct utf32_fixed_string_compare_kernel {
         type##_fixed_string_compare_kernel::greater                                                                    \
   }
 
-size_t dynd::make_fixed_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, size_t string_size,
-                                                 string_encoding_t encoding, comparison_type_t comptype,
-                                                 const eval::eval_context *DYND_UNUSED(ectx))
+void dynd::make_fixed_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
+                                               size_t string_size, string_encoding_t encoding,
+                                               comparison_type_t comptype, const eval::eval_context *DYND_UNUSED(ectx))
 {
   static int lookup[5] = {0, 1, 0, 1, 2};
   static kernel_single_t fixed_string_comparisons_table[3][7] = {
       DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(ascii_utf8), DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf16),
       DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf32)};
   if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
-    fixed_string_compare_kernel_extra *e = ckb->alloc_ck<fixed_string_compare_kernel_extra>(ckb_offset);
+    fixed_string_compare_kernel_extra *e = ckb->alloc_ck<fixed_string_compare_kernel_extra>();
     e->base.function = reinterpret_cast<void *>(fixed_string_comparisons_table[lookup[encoding]][comptype]);
     e->string_size = string_size;
-    return ckb_offset;
   }
   else {
     stringstream ss;
@@ -287,17 +286,17 @@ struct string_compare_kernel {
         string_compare_kernel<type>::greater_equal, string_compare_kernel<type>::greater                               \
   }
 
-size_t dynd::make_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, string_encoding_t encoding,
-                                           comparison_type_t comptype, const eval::eval_context *DYND_UNUSED(ectx))
+void dynd::make_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
+                                         string_encoding_t encoding, comparison_type_t comptype,
+                                         const eval::eval_context *DYND_UNUSED(ectx))
 {
   static int lookup[5] = {0, 1, 0, 1, 2};
   static kernel_single_t string_comparisons_table[3][7] = {DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint8_t),
                                                            DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint16_t),
                                                            DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint32_t)};
   if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
-    ckernel_prefix *e = ckb->alloc_ck<ckernel_prefix>(ckb_offset);
+    ckernel_prefix *e = ckb->alloc_ck<ckernel_prefix>();
     e->function = reinterpret_cast<void *>(string_comparisons_table[lookup[encoding]][comptype]);
-    return ckb_offset;
   }
   else {
     stringstream ss;
@@ -309,13 +308,13 @@ size_t dynd::make_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb
 
 #undef DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL
 
-size_t dynd::make_general_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
-                                                   const ndt::type &src0_dt, const char *src0_arrmeta,
-                                                   const ndt::type &src1_dt, const char *src1_arrmeta,
-                                                   comparison_type_t comptype, const eval::eval_context *ectx)
+void dynd::make_general_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
+                                                 const char *src0_arrmeta, const ndt::type &src1_dt,
+                                                 const char *src1_arrmeta, comparison_type_t comptype,
+                                                 const eval::eval_context *ectx)
 {
   // TODO: Make more efficient, direct comparison kernels
   ndt::type sdt = ndt::make_type<ndt::string_type>();
-  return make_comparison_kernel(ckb, ckb_offset, ndt::convert_type::make(sdt, src0_dt), src0_arrmeta,
-                                ndt::convert_type::make(sdt, src1_dt), src1_arrmeta, comptype, ectx);
+  make_comparison_kernel(ckb, ckb_offset, ndt::convert_type::make(sdt, src0_dt), src0_arrmeta,
+                         ndt::convert_type::make(sdt, src1_dt), src1_arrmeta, comptype, ectx);
 }

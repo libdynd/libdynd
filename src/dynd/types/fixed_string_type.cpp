@@ -154,22 +154,25 @@ bool ndt::fixed_string_type::operator==(const base_type &rhs) const
   }
 }
 
-size_t ndt::fixed_string_type::make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
-                                                      const char *src0_arrmeta, const type &src1_dt,
-                                                      const char *src1_arrmeta, comparison_type_t comptype,
-                                                      const eval::eval_context *ectx) const
+void ndt::fixed_string_type::make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
+                                                    const char *src0_arrmeta, const type &src1_dt,
+                                                    const char *src1_arrmeta, comparison_type_t comptype,
+                                                    const eval::eval_context *ectx) const
 {
   if (this == src0_dt.extended()) {
     if (*this == *src1_dt.extended()) {
-      return make_fixed_string_comparison_kernel(ckb, ckb_offset, m_stringsize, m_encoding, comptype, ectx);
+      make_fixed_string_comparison_kernel(ckb, ckb_offset, m_stringsize, m_encoding, comptype, ectx);
+      return;
     }
     else if (src1_dt.get_kind() == string_kind) {
-      return make_general_string_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta,
-                                                   comptype, ectx);
+      make_general_string_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype,
+                                            ectx);
+      return;
     }
     else if (!src1_dt.is_builtin()) {
-      return src1_dt.extended()->make_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta,
-                                                        comptype, ectx);
+      src1_dt.extended()->make_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta,
+                                                 comptype, ectx);
+      return;
     }
   }
 

@@ -1862,8 +1862,8 @@ namespace nd {
         ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
         self = ckb->get_at<self_type>(root_ckb_offset);
         self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-        ckb_offset = make_assignment_kernel(ckb, ckb_offset, dst_val_tp, dst_arrmeta, src_val_tp, src_arrmeta[0],
-                                            kernreq, &eval::default_eval_context);
+        make_assignment_kernel(ckb, ckb_offset, dst_val_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq,
+                               &eval::default_eval_context);
       }
     };
 
@@ -1987,9 +1987,9 @@ namespace nd {
         intptr_t root_ckb_offset = ckb_offset;
         string_to_option_tp_ck *self = string_to_option_tp_ck::make(ckb, kernreq, ckb_offset);
         // First child ckernel is the value assignment
-        ckb_offset =
-            make_assignment_kernel(ckb, ckb_offset, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
-                                   src_tp[0], src_arrmeta[0], kernreq, &eval::default_eval_context);
+        make_assignment_kernel(ckb, ckb_offset, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
+                               src_tp[0], src_arrmeta[0], kernreq, &eval::default_eval_context);
+        ckb_offset = ckb->m_size;
         // Re-acquire self because the address may have changed
         self = ckb->get_at<string_to_option_tp_ck>(root_ckb_offset);
         // Second child ckernel is the NA assignment

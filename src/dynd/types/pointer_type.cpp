@@ -306,14 +306,14 @@ struct operand_to_value_ck : nd::base_kernel<operand_to_value_ck, 1> {
 
 } // anonymous namespace
 
-size_t ndt::pointer_type::make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
-                                                                  const char *dst_arrmeta, const char *src_arrmeta,
-                                                                  kernel_request_t kernreq,
-                                                                  const eval::eval_context *ectx) const
+void ndt::pointer_type::make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
+                                                                const char *dst_arrmeta, const char *src_arrmeta,
+                                                                kernel_request_t kernreq,
+                                                                const eval::eval_context *ectx) const
 {
   operand_to_value_ck::make(ckb, kernreq, ckb_offset);
-  return ::make_assignment_kernel(ckb, ckb_offset, m_target_tp, dst_arrmeta, m_target_tp,
-                                  src_arrmeta + sizeof(pointer_type_arrmeta), kernel_request_single, ectx);
+  ::make_assignment_kernel(ckb, ckb_offset, m_target_tp, dst_arrmeta, m_target_tp,
+                           src_arrmeta + sizeof(pointer_type_arrmeta), kernel_request_single, ectx);
 }
 
 nd::array ndt::pointer_type::get_option_nafunc() const
