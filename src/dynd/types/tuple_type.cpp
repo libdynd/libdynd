@@ -326,13 +326,14 @@ bool ndt::tuple_type::is_lossless_assignment(const type &dst_tp, const type &src
   return false;
 }
 
-size_t ndt::tuple_type::make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &src0_tp,
-                                               const char *src0_arrmeta, const type &src1_tp, const char *src1_arrmeta,
-                                               comparison_type_t comptype, const eval::eval_context *ectx) const
+void ndt::tuple_type::make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &src0_tp,
+                                             const char *src0_arrmeta, const type &src1_tp, const char *src1_arrmeta,
+                                             comparison_type_t comptype, const eval::eval_context *ectx) const
 {
   if (this == src0_tp.extended()) {
     if (*this == *src1_tp.extended()) {
-      return make_tuple_comparison_kernel(ckb, ckb_offset, src0_tp, src0_arrmeta, src1_arrmeta, comptype, ectx);
+      make_tuple_comparison_kernel(ckb, ckb_offset, src0_tp, src0_arrmeta, src1_arrmeta, comptype, ectx);
+      return;
     }
     else if (src1_tp.get_kind() == tuple_kind) {
       // TODO
