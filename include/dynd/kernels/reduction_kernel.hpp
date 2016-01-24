@@ -154,10 +154,10 @@ namespace nd {
         }
       }
 
-      static intptr_t instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars);
+      static void instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const array *kwds, const std::map<std::string, ndt::type> &tp_vars);
     };
 
     template <typename SelfType>
@@ -307,10 +307,10 @@ namespace nd {
        * This is for a strided dimension which is being reduced, and is not
        * the final dimension before the accumulation operation.
        */
-      static intptr_t instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         const ndt::type &src0_element_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
         const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
@@ -434,10 +434,10 @@ namespace nd {
        * This is for a strided dimension which is being reduced, and is
        * the final dimension before the accumulation operation.
        */
-      static intptr_t instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         const ndt::type &src0_element_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
         const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
@@ -471,21 +471,22 @@ namespace nd {
           const ndt::type &dst_element_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
           const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
 
-          ckb_offset = reduction_virtual_kernel::instantiate(
-              static_data, data, ckb, ckb_offset, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
-              &src0_element_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+          reduction_virtual_kernel::instantiate(static_data, data, ckb, ckb_offset, dst_element_tp, dst_element_arrmeta,
+                                                nsrc, &src0_element_tp, &src0_element_arrmeta, kernel_request_single,
+                                                nkwd, kwds, tp_vars);
+          ckb_offset = ckb->m_size;
         }
         else {
-          ckb_offset = reduction_virtual_kernel::instantiate(static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                                             nsrc, &src0_element_tp, &src0_element_arrmeta,
-                                                             kernel_request_single, nkwd, kwds, tp_vars);
+          reduction_virtual_kernel::instantiate(static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+                                                &src0_element_tp, &src0_element_arrmeta, kernel_request_single, nkwd,
+                                                kwds, tp_vars);
+          ckb_offset = ckb->m_size;
         }
 
         e = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
         e->init_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
 
         delete reinterpret_cast<data_type *>(data);
-        return ckb_offset;
       }
     };
 
@@ -563,10 +564,10 @@ namespace nd {
         }
       }
 
-      static intptr_t instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         const ndt::type &src0_element_tp = src_tp[0].extended<ndt::var_dim_type>()->get_element_type();
         const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(ndt::var_dim_type::metadata_type);
@@ -586,7 +587,6 @@ namespace nd {
         self->init_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
 
         delete reinterpret_cast<data_type *>(data);
-        return ckb_offset;
       }
     };
 
@@ -674,10 +674,10 @@ namespace nd {
        * This is for a strided dimension which is being broadcast, and is not
        * the final dimension before the accumulation operation.
        */
-      static intptr_t instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         intptr_t src_size = src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
         intptr_t src_stride = src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_stride(src_arrmeta[0]);
@@ -801,10 +801,10 @@ namespace nd {
        * This is for a strided dimension which is being broadcast, and is
        * the final dimension before the accumulation operation.
        */
-      static intptr_t instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         const ndt::type &src0_element_tp = src_tp[0].extended<ndt::base_dim_type>()->get_element_type();
         const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
@@ -838,23 +838,22 @@ namespace nd {
 
         --reinterpret_cast<data_type *>(data)->ndim;
 
-        ckb_offset = reduction_virtual_kernel::instantiate(
-            static_data, data, ckb, ckb_offset, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
-            &src0_element_arrmeta, kernel_request_strided, nkwd, kwds, tp_vars);
+        reduction_virtual_kernel::instantiate(static_data, data, ckb, ckb_offset, dst_element_tp, dst_element_arrmeta,
+                                              nsrc, &src0_element_tp, &src0_element_arrmeta, kernel_request_strided,
+                                              nkwd, kwds, tp_vars);
+        ckb_offset = ckb->m_size;
         self = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
         self->dst_init_kernel_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
 
         delete reinterpret_cast<data_type *>(data);
-        return ckb_offset;
       }
     };
 
-    intptr_t reduction_virtual_kernel::instantiate(char *static_data, char *data, kernel_builder *ckb,
-                                                   intptr_t ckb_offset, const ndt::type &dst_tp,
-                                                   const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                                                   const char *const *src_arrmeta, kernel_request_t kernreq,
-                                                   intptr_t nkwd, const array *kwds,
-                                                   const std::map<std::string, ndt::type> &tp_vars)
+    void reduction_virtual_kernel::instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                               const ndt::type *src_tp, const char *const *src_arrmeta,
+                                               kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
+                                               const std::map<std::string, ndt::type> &tp_vars)
     {
       static const callable_instantiate_t table[2][2][2] = {
           {{reduction_kernel<fixed_dim_type_id, false, false>::instantiate,
@@ -865,27 +864,28 @@ namespace nd {
 
       if (reinterpret_cast<data_type *>(data)->ndim == 0) {
         callable &child = reinterpret_cast<static_data_type *>(static_data)->child;
-        ckb_offset = child.get()->instantiate(
+        child.get()->instantiate(
             child.get()->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
             (reinterpret_cast<data_type *>(data)->stored_ndim == 0) ? kernel_request_single : kernel_request_strided,
             nkwd - 3, kwds + 3, tp_vars);
+        ckb_offset = ckb->m_size;
 
         reinterpret_cast<data_type *>(data)->init_offset = ckb_offset;
 
         if (reinterpret_cast<data_type *>(data)->identity.is_null()) {
-          return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                        &eval::default_eval_context);
+          make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
+                                 &eval::default_eval_context);
+          return;
         }
-        return constant_kernel::instantiate(
+        constant_kernel::instantiate(
             reinterpret_cast<char *>(const_cast<nd::array *>(&reinterpret_cast<data_type *>(data)->identity)), NULL,
             ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        return;
       }
 
-      return table[src_tp[0].get_type_id() -
-                   fixed_dim_type_id][reinterpret_cast<data_type *>(data)
-                                          ->is_broadcast()][reinterpret_cast<data_type *>(data)->is_inner()](
-          static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
-          tp_vars);
+      table[src_tp[0].get_type_id() - fixed_dim_type_id][reinterpret_cast<data_type *>(data)->is_broadcast()]
+           [reinterpret_cast<data_type *>(data)->is_inner()](static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                                             nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
     }
 
   } // namespace dynd::nd::functional

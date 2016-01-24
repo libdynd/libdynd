@@ -45,11 +45,11 @@ namespace nd {
       reinterpret_cast<size_stride_t *>(src[0]->get()->metadata())->dim_size = new_size;
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                                intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
-                                const std::map<std::string, ndt::type> &tp_vars)
+    static void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                            intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                            kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
+                            const std::map<std::string, ndt::type> &tp_vars)
     {
       const ndt::type &src0_element_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
       make(ckb, kernreq, ckb_offset, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
@@ -57,8 +57,8 @@ namespace nd {
 
       const callable &equal = nd::equal::get();
       const ndt::type equal_src_tp[2] = {src0_element_tp, src0_element_tp};
-      return equal.get()->instantiate(equal.get()->static_data(), data, ckb, ckb_offset, ndt::make_type<bool1>(), NULL,
-                                      2, equal_src_tp, NULL, kernel_request_single, nkwd, kwds, tp_vars);
+      equal.get()->instantiate(equal.get()->static_data(), data, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, 2,
+                               equal_src_tp, NULL, kernel_request_single, nkwd, kwds, tp_vars);
     }
   };
 

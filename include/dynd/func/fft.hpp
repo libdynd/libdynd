@@ -44,12 +44,12 @@ namespace nd {
       return 1;
     }
 
-    static intptr_t instantiate(const callable_type_data *DYND_UNUSED(self), const callable_type *DYND_UNUSED(self_tp),
-                                kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                                const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                                const char *const *src_arrmeta, kernel_request_t kernreq,
-                                const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static void instantiate(const callable_type_data *DYND_UNUSED(self), const callable_type *DYND_UNUSED(self_tp),
+                            kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                            const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                            const char *const *src_arrmeta, kernel_request_t kernreq,
+                            const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const size_stride_t *dst_size_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta);
       const size_stride_t *src_size_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0]);
@@ -77,8 +77,6 @@ namespace nd {
       self_type *self = self_type::create(ckb, kernreq, ckb_offset);
       cufftPlanMany(&self->plan, rank, n.data(), inembed.data(), istride, idist, onembed.data(), ostride, odist,
                     CUFFT_Z2Z, batch);
-
-      return ckb_offset;
     }
   };
 

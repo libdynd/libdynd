@@ -51,10 +51,10 @@ namespace nd {
     template <typename... A>
     static SelfType *make(kernel_builder *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset, A &&... args)
     {
-      intptr_t ckb_offset = inout_ckb_offset;
-      inc_ckb_offset<SelfType>(inout_ckb_offset);
+      intptr_t ckb_offset = ckb->m_size;
       inc_ckb_offset<SelfType>(ckb->m_size);
-      ckb->reserve(inout_ckb_offset);
+      ckb->reserve(ckb->m_size);
+      inout_ckb_offset = ckb->m_size;
       PrefixType *rawself = ckb->template get_at<PrefixType>(ckb_offset);
       return ckb->template init<SelfType>(rawself, kernreq, std::forward<A>(args)...);
     }
@@ -99,15 +99,14 @@ namespace nd {
       dst_tp = ndt::substitute(dst_tp, tp_vars, true);
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                                const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                                const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                                kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                            intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                            const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                            const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                            kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       SelfType::make(ckb, kernreq, ckb_offset);
-      return ckb_offset;
     }
   };
 

@@ -169,10 +169,10 @@ namespace nd {
         dst_tp = ndt::substitute_shape(dst_tp, ndim, shape.get());
       }
 
-      static intptr_t instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         intptr_t neighborhood_offset = ckb_offset;
         neighborhood_kernel::make(
@@ -198,19 +198,20 @@ namespace nd {
 
           const char *child_src_arrmeta =
               reinterpret_cast<char *>(reinterpret_cast<data_type *>(data)->child_src_arrmeta);
-          ckb_offset =
-              child.get()->instantiate(child.get()->static_data(), NULL, ckb, ckb_offset, child_dst_tp,
-                                       child_dst_arrmeta, nsrc, &reinterpret_cast<data_type *>(data)->child_src_tp,
-                                       &child_src_arrmeta, kernel_request_single, nkwd - 3, kwds + 3, tp_vars);
+          child.get()->instantiate(child.get()->static_data(), NULL, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+                                   nsrc, &reinterpret_cast<data_type *>(data)->child_src_tp, &child_src_arrmeta,
+                                   kernel_request_single, nkwd - 3, kwds + 3, tp_vars);
+          ckb_offset = ckb->m_size;
           neighborhood_kernel::get_self(reinterpret_cast<kernel_builder *>(ckb), neighborhood_offset)
               ->boundary_child_offset = ckb_offset - neighborhood_offset;
 
-          ckb_offset = boundary_child.get()->instantiate(boundary_child.get()->static_data(), NULL, ckb, ckb_offset,
-                                                         child_dst_tp, child_dst_arrmeta, 0, NULL, NULL,
-                                                         kernel_request_single, nkwd - 3, kwds + 3, tp_vars);
+          boundary_child.get()->instantiate(boundary_child.get()->static_data(), NULL, ckb, ckb_offset, child_dst_tp,
+                                            child_dst_arrmeta, 0, NULL, NULL, kernel_request_single, nkwd - 3, kwds + 3,
+                                            tp_vars);
+          ckb_offset = ckb->m_size;
 
           delete reinterpret_cast<data_type *>(data);
-          return ckb_offset;
+          return;
         }
 
         ndt::type child_src_tp[N];

@@ -149,11 +149,11 @@ namespace nd {
         }
     */
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                                intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                                intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                            intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                            intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                            kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       int flags;
       if (kwds[2].is_missing()) {
@@ -210,8 +210,6 @@ namespace nd {
                     detail::fftw_plan_guru_dft(rank, dims.get(), howmany_rank, howmany_dims.get(),
                                                reinterpret_cast<fftw_src_type *>(src.data()),
                                                reinterpret_cast<fftw_dst_type *>(dst.data()), sign, flags));
-
-      return ckb_offset;
     }
 
     template <bool real_to_complex>

@@ -37,15 +37,14 @@ struct datetime_get_struct_kernel : nd::base_kernel<datetime_get_struct_kernel, 
     throw runtime_error("TODO: get_property_kernel_struct_single");
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     make(ckb, kernreq, ckb_offset, src_tp[0]);
-    return ckb_offset;
   }
 };
 
@@ -59,15 +58,14 @@ struct datetime_set_struct_kernel : nd::base_kernel<datetime_set_struct_kernel, 
     throw runtime_error("TODO: set_property_kernel_struct_single");
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     make(ckb, kernreq, ckb_offset, src_tp[0]);
-    return ckb_offset;
   }
 };
 
@@ -95,15 +93,14 @@ struct datetime_get_date_kernel : nd::base_kernel<datetime_get_date_kernel, 1> {
     }
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     make(ckb, kernreq, ckb_offset, src_tp[0]);
-    return ckb_offset;
   }
 };
 
@@ -130,15 +127,14 @@ struct datetime_get_time_kernel : nd::base_kernel<datetime_get_time_kernel, 1> {
     }
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     make(ckb, kernreq, ckb_offset, src_tp[0]);
-    return ckb_offset;
   }
 };
 
@@ -162,15 +158,14 @@ struct datetime_get_year_kernel : nd::base_kernel<datetime_get_year_kernel, 1> {
     }
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     make(ckb, kernreq, ckb_offset, src_tp[0]);
-    return ckb_offset;
   }
 };
 
@@ -194,15 +189,14 @@ struct datetime_get_month_kernel : nd::base_kernel<datetime_get_month_kernel, 1>
     }
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     make(ckb, kernreq, ckb_offset, src_tp[0]);
-    return ckb_offset;
   }
 };
 
@@ -226,15 +220,14 @@ struct datetime_get_day_kernel : nd::base_kernel<datetime_get_day_kernel, 1> {
     }
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     make(ckb, kernreq, ckb_offset, src_tp[0]);
-    return ckb_offset;
   }
 };
 
@@ -261,15 +254,14 @@ struct datetime_get_hour_kernel : nd::base_kernel<datetime_get_hour_kernel, 1> {
     }
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     make(ckb, kernreq, ckb_offset, src_tp[0]);
-    return ckb_offset;
   }
 };
 
@@ -296,15 +288,14 @@ struct datetime_get_minute_kernel : nd::base_kernel<datetime_get_minute_kernel, 
     }
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     make(ckb, kernreq, ckb_offset, src_tp[0]);
-    return ckb_offset;
   }
 };
 
@@ -331,15 +322,14 @@ struct datetime_get_second_kernel : nd::base_kernel<datetime_get_second_kernel, 
     }
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     make(ckb, kernreq, ckb_offset, src_tp[0]);
-    return ckb_offset;
   }
 };
 
@@ -366,15 +356,14 @@ struct datetime_get_microsecond_kernel : nd::base_kernel<datetime_get_microsecon
     }
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     make(ckb, kernreq, ckb_offset, src_tp[0]);
-    return ckb_offset;
   }
 };
 
@@ -400,15 +389,14 @@ struct datetime_get_tick_kernel : nd::base_kernel<datetime_get_tick_kernel, 1> {
     }
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     make(ckb, kernreq, ckb_offset, src_tp[0]);
-    return ckb_offset;
   }
 };
 

@@ -69,11 +69,10 @@ namespace nd {
                                    const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                                    const std::map<std::string, ndt::type> &tp_vars);
 
-      static intptr_t instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const nd::array *kwds,
-                                  const std::map<std::string, ndt::type> &tp_vars);
+      static void instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
     };
 
     template <typename DispatcherType>
@@ -111,10 +110,10 @@ namespace nd {
         }
       }
 
-      static intptr_t instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         DispatcherType &dispatcher = *reinterpret_cast<static_data_type *>(static_data);
 
@@ -124,8 +123,8 @@ namespace nd {
           ss << "no suitable child for multidispatch for types " << src_tp[0] << ", and " << dst_tp << "\n";
           throw std::runtime_error(ss.str());
         }
-        return child->instantiate(child->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-                                  src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        child->instantiate(child->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
+                           kernreq, nkwd, kwds, tp_vars);
       }
     };
 

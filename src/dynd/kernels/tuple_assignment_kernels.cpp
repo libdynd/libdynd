@@ -69,8 +69,9 @@ intptr_t dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const nd
     field.dst_data_offset = dst_offsets[i];
     field.src_data_offset = src_offsets[i];
     nd::array error_mode = ndt::traits<assign_error_mode>::na();
-    ckb_offset = af->instantiate(NULL, NULL, ckb, ckb_offset, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i], &src_arrmeta[i],
-                                 kernel_request_single, 1, &error_mode, std::map<std::string, ndt::type>());
+    af->instantiate(NULL, NULL, ckb, ckb_offset, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i], &src_arrmeta[i],
+                    kernel_request_single, 1, &error_mode, std::map<std::string, ndt::type>());
+    ckb_offset = ckb->m_size;
   }
   return ckb_offset;
 }
@@ -93,9 +94,9 @@ intptr_t dynd::make_tuple_unary_op_ckernel(const nd::base_callable *const *af,
     field.dst_data_offset = dst_offsets[i];
     field.src_data_offset = src_offsets[i];
     nd::array error_mode = ndt::traits<assign_error_mode>::na();
-    ckb_offset =
-        af[i]->instantiate(NULL, NULL, ckb, ckb_offset, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i], &src_arrmeta[i],
-                           kernel_request_single, 1, &error_mode, std::map<std::string, ndt::type>());
+    af[i]->instantiate(NULL, NULL, ckb, ckb_offset, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i], &src_arrmeta[i],
+                       kernel_request_single, 1, &error_mode, std::map<std::string, ndt::type>());
+    ckb_offset = ckb->m_size;
   }
   return ckb_offset;
 }

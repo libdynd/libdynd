@@ -236,24 +236,24 @@ namespace nd {
         }
       }
 
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
 
         intptr_t self_offset = ckb_offset;
         make(ckb, kernreq, ckb_offset);
 
-        ckb_offset = assign_na::get()->instantiate(assign_na::get()->static_data(), data, ckb, ckb_offset, dst_tp,
-                                                   dst_arrmeta, 0, nullptr, nullptr, kernreq, nkwd, kwds, tp_vars);
+        assign_na::get()->instantiate(assign_na::get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, 0,
+                                      nullptr, nullptr, kernreq, nkwd, kwds, tp_vars);
+        ckb_offset = ckb->m_size;
 
         get_self(reinterpret_cast<kernel_builder *>(ckb), self_offset)->parse_offset = ckb_offset - self_offset;
-        ckb_offset = parse::get()->instantiate(parse::get()->static_data(), data, ckb, ckb_offset,
-                                               dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc,
-                                               src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-
-        return ckb_offset;
+        parse::get()->instantiate(parse::get()->static_data(), data, ckb, ckb_offset,
+                                  dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc, src_tp,
+                                  src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        ckb_offset = ckb->m_size;
       }
     };
 
@@ -324,10 +324,10 @@ namespace nd {
         }
       }
 
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         size_t field_count = dst_tp.extended<ndt::struct_type>()->get_field_count();
         const size_t *arrmeta_offsets = dst_tp.extended<ndt::struct_type>()->get_arrmeta_offsets_raw();
@@ -337,14 +337,13 @@ namespace nd {
              dst_tp.extended<ndt::struct_type>()->get_data_offsets(dst_arrmeta));
 
         for (size_t i = 0; i < field_count; ++i) {
-          get_self(reinterpret_cast<kernel_builder *>(ckb), self_offset)->child_offsets[i] = ckb_offset - self_offset;
-          ckb_offset = json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset,
-                                                       dst_tp.extended<ndt::struct_type>()->get_field_type(i),
-                                                       dst_arrmeta + arrmeta_offsets[i], nsrc, src_tp, src_arrmeta,
-                                                       kernreq, nkwd, kwds, tp_vars);
+          get_self(ckb, self_offset)->child_offsets[i] = ckb_offset - self_offset;
+          json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset,
+                                          dst_tp.extended<ndt::struct_type>()->get_field_type(i),
+                                          dst_arrmeta + arrmeta_offsets[i], nsrc, src_tp, src_arrmeta, kernreq, nkwd,
+                                          kwds, tp_vars);
+          ckb_offset = ckb->m_size;
         }
-
-        return ckb_offset;
       }
     };
 
@@ -383,18 +382,18 @@ namespace nd {
         }
       }
 
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         make(ckb, kernreq, ckb_offset, dst_tp, reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size,
              reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride);
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
-        return json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset, child_dst_tp,
-                                               dst_arrmeta + sizeof(ndt::fixed_dim_type::metadata_type), nsrc, src_tp,
-                                               src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset, child_dst_tp,
+                                        dst_arrmeta + sizeof(ndt::fixed_dim_type::metadata_type), nsrc, src_tp,
+                                        src_arrmeta, kernreq, nkwd, kwds, tp_vars);
       }
     };
 
@@ -453,19 +452,19 @@ namespace nd {
         reinterpret_cast<ret_type *>(ret)->size = size;
       }
 
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         make(ckb, kernreq, ckb_offset, dst_tp,
              reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->blockref,
              reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->stride);
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::var_dim_type>()->get_element_type();
-        return json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset, child_dst_tp,
-                                               dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), nsrc, src_tp,
-                                               src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset, child_dst_tp,
+                                        dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), nsrc, src_tp,
+                                        src_arrmeta, kernreq, nkwd, kwds, tp_vars);
       }
     };
 
