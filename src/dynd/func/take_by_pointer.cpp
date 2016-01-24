@@ -54,11 +54,11 @@ struct take_by_pointer_ck : nd::base_kernel<take_by_pointer_ck, 2> {
 };
 
 struct take_by_pointer_virtual_ck : nd::base_kernel<take_by_pointer_virtual_ck> {
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                          intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                          kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     intptr_t ndim = src_tp[0].get_ndim();
 
@@ -93,7 +93,7 @@ struct take_by_pointer_virtual_ck : nd::base_kernel<take_by_pointer_virtual_ck> 
                                src_size_stride[0][i].stride, src_size_stride[1][1].stride);
     }
 
-    return make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta, src_el_tp[0], src_el_meta[0],
+     make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta, src_el_tp[0], src_el_meta[0],
                                   kernel_request_single, &eval::default_eval_context);
   }
 

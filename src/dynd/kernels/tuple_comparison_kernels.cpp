@@ -142,7 +142,7 @@ size_t dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_
       // The arrmeta is identical, so can use a more specialized comparison
       // function
       nd::inc_ckb_offset(ckb_offset,
-                     sizeof(tuple_compare_sorting_less_matching_arrmeta_kernel) + field_count * sizeof(size_t));
+                         sizeof(tuple_compare_sorting_less_matching_arrmeta_kernel) + field_count * sizeof(size_t));
       ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
       tuple_compare_sorting_less_matching_arrmeta_kernel *e =
           ckb->get_at<tuple_compare_sorting_less_matching_arrmeta_kernel>(root_ckb_offset);
@@ -172,7 +172,7 @@ size_t dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_
       // The arrmeta is different, so have to get the kernels both ways for the
       // fields
       nd::inc_ckb_offset(ckb_offset,
-                     sizeof(tuple_compare_sorting_less_diff_arrmeta_kernel) + 2 * field_count * sizeof(size_t));
+                         sizeof(tuple_compare_sorting_less_diff_arrmeta_kernel) + 2 * field_count * sizeof(size_t));
       ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
       tuple_compare_sorting_less_diff_arrmeta_kernel *e =
           ckb->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
@@ -214,16 +214,20 @@ size_t dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_
     if (comptype == comparison_type_equal) {
       std::map<std::string, ndt::type> tp_vars;
       const char *src_arrmeta[2] = {src0_arrmeta, src1_arrmeta};
-      return nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
+      nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
           NULL, NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, 2, &src_tp, src_arrmeta,
           kernel_request_host | kernel_request_single, 0, NULL, tp_vars);
+      ckb_offset = ckb->m_size;
+      return ckb_offset;
     }
     else {
       std::map<std::string, ndt::type> tp_vars;
       const char *src_arrmeta[2] = {src0_arrmeta, src1_arrmeta};
-      return nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
+      nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
           NULL, NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, 2, &src_tp, src_arrmeta,
           kernel_request_host | kernel_request_single, 0, NULL, tp_vars);
+      ckb_offset = ckb->m_size;
+      return ckb_offset;
     }
     return ckb_offset;
   }

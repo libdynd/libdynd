@@ -220,9 +220,9 @@ intptr_t dynd::make_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offs
                                       kernel_request_t kernreq, const eval::eval_context *ectx)
 {
   nd::array error_mode = ectx->errmode;
-  return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1,
-                                        &src_tp, &src_arrmeta, kernreq, 1, &error_mode,
-                                        std::map<std::string, ndt::type>());
+  nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1,
+                                 &src_tp, &src_arrmeta, kernreq, 1, &error_mode, std::map<std::string, ndt::type>());
+  return ckb->m_size;
 }
 
 size_t dynd::make_pod_typed_data_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, size_t data_size,

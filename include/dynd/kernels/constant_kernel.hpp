@@ -29,18 +29,17 @@ namespace nd {
         get_child()->strided(dst, dst_stride, &data, data_stride, count);
       }
 
-      static intptr_t instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb, intptr_t ckb_offset,
-                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                                  const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                                  kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
-                                  const nd::array *DYND_UNUSED(kwds),
-                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         const array &val = *reinterpret_cast<array *>(static_data);
 
         make(ckb, kernreq, ckb_offset, const_cast<char *>(val.cdata()));
-        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, dst_tp, val.get()->metadata(), kernreq,
-                                      &eval::default_eval_context);
+        make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, dst_tp, val.get()->metadata(), kernreq,
+                               &eval::default_eval_context);
       }
     };
 

@@ -128,13 +128,12 @@ namespace nd {
       }
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                                const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                                const ndt::type *src_tp, const char *const *src_arrmeta,
-                                kernel_request_t DYND_UNUSED(kernreq), intptr_t DYND_UNUSED(nkwd),
-                                const nd::array *DYND_UNUSED(kwds),
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars));
+    static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                            intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                            const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                            const char *const *src_arrmeta, kernel_request_t DYND_UNUSED(kernreq),
+                            intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars));
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -206,12 +205,12 @@ namespace nd {
       }
     }
 
-    static intptr_t instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb, intptr_t ckb_offset,
-                                const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                                intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                kernel_request_t DYND_UNUSED(kernreq), intptr_t DYND_UNUSED(nkwd),
-                                const nd::array *DYND_UNUSED(kwds),
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars));
+    static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb, intptr_t ckb_offset,
+                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                            intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                            kernel_request_t DYND_UNUSED(kernreq), intptr_t DYND_UNUSED(nkwd),
+                            const nd::array *DYND_UNUSED(kwds),
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars));
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -282,32 +281,33 @@ namespace nd {
       }
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    static void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                            const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                            const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
+                            const std::map<std::string, ndt::type> &tp_vars)
     {
       intptr_t option_comp_offset = ckb_offset;
       option_comparison_kernel::make(ckb, kernreq, ckb_offset);
 
       auto is_missing = is_missing::get();
-      ckb_offset =
-          is_missing.get()->instantiate(is_missing.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                        nsrc, src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+      is_missing.get()->instantiate(is_missing.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+                                    src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+      ckb_offset = ckb->m_size;
       option_comparison_kernel *self = option_comparison_kernel::get_self(ckb, option_comp_offset);
       self->comp_offset = ckb_offset - option_comp_offset;
       auto cmp = FuncType::get();
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(), src_tp[1]};
-      ckb_offset = cmp.get()->instantiate(cmp.get()->static_data(), data, ckb, ckb_offset,
-                                          dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc,
-                                          child_src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+      cmp.get()->instantiate(cmp.get()->static_data(), data, ckb, ckb_offset,
+                             dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc, child_src_tp,
+                             src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+      ckb_offset = ckb->m_size;
       self = option_comparison_kernel::get_self(ckb, option_comp_offset);
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
-      ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
-                                                ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0,
-                                                nullptr, nullptr, kernel_request_single, nkwd, kwds, tp_vars);
-      return ckb_offset;
+      assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
+                                   ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0, nullptr,
+                                   nullptr, kernel_request_single, nkwd, kwds, tp_vars);
+      ckb_offset = ckb->m_size;
     }
   };
 
@@ -330,34 +330,35 @@ namespace nd {
       }
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    static void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                            const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                            const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
+                            const std::map<std::string, ndt::type> &tp_vars)
     {
       intptr_t option_comp_offset = ckb_offset;
       option_comparison_kernel::make(ckb, kernreq, ckb_offset);
 
       auto is_missing = is_missing::get();
-      ckb_offset =
-          is_missing.get()->instantiate(is_missing.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                        nsrc, &src_tp[1], &src_arrmeta[1], kernel_request_single, nkwd, kwds, tp_vars);
+      is_missing.get()->instantiate(is_missing.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+                                    &src_tp[1], &src_arrmeta[1], kernel_request_single, nkwd, kwds, tp_vars);
+      ckb_offset = ckb->m_size;
       option_comparison_kernel *self = option_comparison_kernel::get_self(ckb, option_comp_offset);
       self->comp_offset = ckb_offset - option_comp_offset;
       auto cmp = FuncType::get();
       const ndt::type child_src_tp[2] = {
           src_tp[0], src_tp[1].extended<ndt::option_type>()->get_value_type(),
       };
-      ckb_offset = cmp.get()->instantiate(cmp.get()->static_data(), data, ckb, ckb_offset,
-                                          dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc,
-                                          child_src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+      cmp.get()->instantiate(cmp.get()->static_data(), data, ckb, ckb_offset,
+                             dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc, child_src_tp,
+                             src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+      ckb_offset = ckb->m_size;
       self = option_comparison_kernel::get_self(ckb, option_comp_offset);
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
-      ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
-                                                ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0,
-                                                nullptr, nullptr, kernel_request_single, nkwd, kwds, tp_vars);
-      return ckb_offset;
+      assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
+                                   ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0, nullptr,
+                                   nullptr, kernel_request_single, nkwd, kwds, tp_vars);
+      ckb_offset = ckb->m_size;
     }
   };
 
@@ -384,40 +385,41 @@ namespace nd {
       }
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    static void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
+                            const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                            const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
+                            const std::map<std::string, ndt::type> &tp_vars)
     {
       intptr_t option_comp_offset = ckb_offset;
       option_comparison_kernel::make(ckb, kernreq, ckb_offset);
 
       auto is_missing_lhs = is_missing::get();
-      ckb_offset = is_missing_lhs.get()->instantiate(is_missing_lhs.get()->static_data(), data, ckb, ckb_offset, dst_tp,
-                                                     dst_arrmeta, nsrc, &src_tp[0], &src_arrmeta[0],
-                                                     kernel_request_single, nkwd, kwds, tp_vars);
+      is_missing_lhs.get()->instantiate(is_missing_lhs.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                        nsrc, &src_tp[0], &src_arrmeta[0], kernel_request_single, nkwd, kwds, tp_vars);
+      ckb_offset = ckb->m_size;
       option_comparison_kernel *self = option_comparison_kernel::get_self(ckb, option_comp_offset);
       self->is_missing_rhs_offset = ckb_offset - option_comp_offset;
 
       auto is_missing_rhs = is_missing::get();
-      ckb_offset = is_missing_rhs.get()->instantiate(is_missing_rhs.get()->static_data(), data, ckb, ckb_offset, dst_tp,
-                                                     dst_arrmeta, nsrc, &src_tp[1], &src_arrmeta[1],
-                                                     kernel_request_single, nkwd, kwds, tp_vars);
+      is_missing_rhs.get()->instantiate(is_missing_rhs.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                        nsrc, &src_tp[1], &src_arrmeta[1], kernel_request_single, nkwd, kwds, tp_vars);
+      ckb_offset = ckb->m_size;
       self = option_comparison_kernel::get_self(ckb, option_comp_offset);
       self->comp_offset = ckb_offset - option_comp_offset;
       auto cmp = FuncType::get();
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(),
                                          src_tp[1].extended<ndt::option_type>()->get_value_type()};
-      ckb_offset = cmp.get()->instantiate(cmp.get()->static_data(), data, ckb, ckb_offset,
-                                          dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc,
-                                          child_src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+      cmp.get()->instantiate(cmp.get()->static_data(), data, ckb, ckb_offset,
+                             dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc, child_src_tp,
+                             src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+      ckb_offset = ckb->m_size;
       self = option_comparison_kernel::get_self(ckb, option_comp_offset);
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
-      ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
-                                                ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0,
-                                                nullptr, nullptr, kernel_request_single, nkwd, kwds, tp_vars);
-      return ckb_offset;
+      assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
+                                   ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0, nullptr,
+                                   nullptr, kernel_request_single, nkwd, kwds, tp_vars);
+      ckb_offset = ckb->m_size;
     }
   };
 
