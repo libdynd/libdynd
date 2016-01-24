@@ -337,7 +337,7 @@ namespace nd {
              dst_tp.extended<ndt::struct_type>()->get_data_offsets(dst_arrmeta));
 
         for (size_t i = 0; i < field_count; ++i) {
-          get_self(reinterpret_cast<kernel_builder *>(ckb), self_offset)->child_offsets[i] = ckb_offset - self_offset;
+          get_self(ckb, self_offset)->child_offsets[i] = ckb_offset - self_offset;
           ckb_offset = json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset,
                                                        dst_tp.extended<ndt::struct_type>()->get_field_type(i),
                                                        dst_arrmeta + arrmeta_offsets[i], nsrc, src_tp, src_arrmeta,

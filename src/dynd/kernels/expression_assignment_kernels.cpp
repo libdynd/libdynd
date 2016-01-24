@@ -181,6 +181,7 @@ size_t dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, intptr_t
         ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
         intptr_t buffer_data_offset = ckb_offset;
         nd::inc_ckb_offset(ckb_offset, e->buffer_data_size);
+        nd::inc_ckb_offset(ckb->m_size, e->buffer_data_size);
         ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
         // This may have invalidated the 'e' pointer, so get it again!
         e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
@@ -215,6 +216,7 @@ size_t dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, intptr_t
       // Allocate the buffer data
       intptr_t buffer_data_offset = ckb_offset;
       nd::inc_ckb_offset(ckb_offset, e->buffer_data_size);
+      nd::inc_ckb_offset(ckb->m_size, e->buffer_data_size);
       ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
       // This may have invalidated the 'e' pointer, so get it again!
       e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
@@ -249,6 +251,7 @@ size_t dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, intptr_t
         ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
         size_t buffer_data_offset = ckb_offset;
         nd::inc_ckb_offset(ckb_offset, buffer_data_size);
+        nd::inc_ckb_offset(ckb->m_size, buffer_data_size);
         ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
         // This may have invalidated the 'e' pointer, so get it again!
         e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
@@ -274,6 +277,7 @@ size_t dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, intptr_t
       ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
       size_t buffer_data_offset = ckb_offset;
       nd::inc_ckb_offset(ckb_offset, buffer_data_size);
+      nd::inc_ckb_offset(ckb->m_size, buffer_data_size);
       ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
       // This may have invalidated the 'e' pointer, so get it again!
       e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);

@@ -54,6 +54,9 @@ namespace nd {
       intptr_t ckb_offset = inout_ckb_offset;
       inc_ckb_offset<SelfType>(inout_ckb_offset);
       inc_ckb_offset<SelfType>(ckb->m_size);
+      if (inout_ckb_offset != ckb->m_size) {
+        std::exit(-1);
+      }
       ckb->reserve(inout_ckb_offset);
       PrefixType *rawself = ckb->template get_at<PrefixType>(ckb_offset);
       return ckb->template init<SelfType>(rawself, kernreq, std::forward<A>(args)...);

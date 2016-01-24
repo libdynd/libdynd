@@ -135,6 +135,9 @@ namespace nd {
       intptr_t ckb_offset = inout_ckb_offset;
       inc_ckb_offset<T>(inout_ckb_offset);
       inc_ckb_offset<T>(m_size);
+      if (inout_ckb_offset != m_size) {
+        std::exit(-1);
+      }
       reserve(inout_ckb_offset);
       return reinterpret_cast<T *>(m_data + ckb_offset);
     }
@@ -192,6 +195,10 @@ inline ckernel_prefix *ckernel_prefix::make(nd::kernel_builder *ckb, kernel_requ
   intptr_t ckb_offset = inout_ckb_offset;
   nd::inc_ckb_offset<ckernel_prefix>(inout_ckb_offset);
   nd::inc_ckb_offset<ckernel_prefix>(ckb->m_size);
+  if (inout_ckb_offset != ckb->m_size) {
+    std::exit(-1);
+  }
+
   ckb->reserve(inout_ckb_offset);
   ckernel_prefix *rawself = ckb->template get_at<ckernel_prefix>(ckb_offset);
   return ckb->template init<ckernel_prefix>(rawself, kernreq, func);

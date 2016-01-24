@@ -22,6 +22,7 @@ intptr_t nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
                                    bsd->get_data_offsets(src_arrmeta[0]), bsd->get_data_offsets(src_arrmeta[1]));
   e = extra_type::reserve(ckb, kernel_request_host | kernel_request_single, ckb_offset, field_count * sizeof(size_t));
   inc_ckb_offset(ckb_offset, field_count * sizeof(size_t));
+  inc_ckb_offset(ckb->m_size, field_count * sizeof(size_t));
   //      e->field_count = field_count;
   //    e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
   //  e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
@@ -60,6 +61,7 @@ intptr_t nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
                                    bsd->get_data_offsets(src_arrmeta[0]), bsd->get_data_offsets(src_arrmeta[1]));
   e = extra_type::reserve(ckb, kernel_request_host | kernel_request_single, ckb_offset, field_count * sizeof(size_t));
   inc_ckb_offset(ckb_offset, field_count * sizeof(size_t));
+  inc_ckb_offset(ckb->m_size, field_count * sizeof(size_t));
   //      e->field_count = field_count;
   //    e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
   //  e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
