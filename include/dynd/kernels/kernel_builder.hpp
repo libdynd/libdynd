@@ -40,8 +40,7 @@ void inc_ckb_offset(intptr_t &inout_ckb_offset)
  * be relocatable with a memcpy, it must not rely on its
  * own address.
  */
-template <typename CKBT>
-class base_ckernel_builder {
+class kernel_builder {
 protected:
   // Pointer to the kernel function pointers + data
   char *m_data;
@@ -71,14 +70,25 @@ protected:
   }
 
 public:
-  base_ckernel_builder() { init(); }
+  kernel_builder() { init(); }
 
-  ~base_ckernel_builder() { destroy(); }
+  ~kernel_builder() { destroy(); }
 
-  template <typename SelfType, typename... A>
-  SelfType *init(ckernel_prefix *rawself, kernel_request_t kernreq, A &&... args)
+  /*
+    template <typename SelfType, typename... A>
+    SelfType *init(ckernel_prefix *rawself, kernel_request_t kernreq, A &&... args)
+    {
+      return reinterpret_cast<CKBT *>(this)->template init<SelfType>(rawself, kernreq, std::forward<A>(args)...);
+    }
+  */
+
+  template <typename SelfType, typename PrefixType, typename... A>
+  SelfType *init(PrefixType *rawself, kernel_request_t kernreq, A &&... args)
   {
-    return reinterpret_cast<CKBT *>(this)->template init<SelfType>(rawself, kernreq, std::forward<A>(args)...);
+    /* Alignment requirement of the type. */
+    static_assert(alignof(SelfType) <= alignof(uint64_t), "ckernel types require alignment <= 64 bits");
+
+    return SelfType::init(rawself, kernreq, std::forward<A>(args)...);
   }
 
   void destroy(ckernel_prefix *self) { self->destroy(); }
@@ -174,7 +184,7 @@ public:
 
   void *set(void *dst, int value, size_t size) { return std::memset(dst, value, size); }
 
-  void swap(base_ckernel_builder &rhs)
+  void swap(kernel_builder &rhs)
   {
     if (using_static_data()) {
       if (rhs.using_static_data()) {
@@ -208,18 +218,6 @@ public:
 
   /** For debugging/informational purposes */
   intptr_t get_capacity() const { return m_capacity; }
-};
-
-class kernel_builder : public base_ckernel_builder<kernel_builder> {
-public:
-  template <typename SelfType, typename PrefixType, typename... A>
-  SelfType *init(PrefixType *rawself, kernel_request_t kernreq, A &&... args)
-  {
-    /* Alignment requirement of the type. */
-    static_assert(alignof(SelfType) <= alignof(uint64_t), "ckernel types require alignment <= 64 bits");
-
-    return SelfType::init(rawself, kernreq, std::forward<A>(args)...);
-  }
 };
 
 template <typename CKBT>
