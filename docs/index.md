@@ -13,3 +13,7 @@ for any queries regarding the library.
    * [ArrFuncs](arrfuncs.md)
    * [CKernels](ckernels.md)
    * [Multi-dimensional Kernels](multidim_kernels.md)
+ * Design Documents
+   * [String](string-design.md)
+   * [Serialization](serialization-design.md)
+
