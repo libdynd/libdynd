@@ -139,7 +139,7 @@ void ndt::string_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), c
   }
 }
 
-size_t ndt::string_type::make_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
+size_t ndt::string_type::make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
                                                 const char *src0_arrmeta, const type &src1_dt, const char *src1_arrmeta,
                                                 comparison_type_t comptype, const eval::eval_context *ectx) const
 {

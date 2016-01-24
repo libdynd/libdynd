@@ -20,7 +20,7 @@ using namespace dynd;
 /////////////////////////////////////////
 // struct to different struct assignment
 
-size_t dynd::make_struct_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_struct_tp,
+size_t dynd::make_struct_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_struct_tp,
                                            const char *dst_arrmeta, const ndt::type &src_struct_tp,
                                            const char *src_arrmeta, kernel_request_t kernreq)
 {

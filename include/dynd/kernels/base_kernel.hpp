@@ -21,8 +21,7 @@ namespace nd {
       return reinterpret_cast<SelfType *>(rawself);
     }
 
-    template <typename CKBT>
-    static SelfType *get_self(CKBT *ckb, intptr_t ckb_offset)
+    static SelfType *get_self(kernel_builder *ckb, intptr_t ckb_offset)
     {
       return ckb->template get_at<SelfType>(ckb_offset);
     }
@@ -33,8 +32,7 @@ namespace nd {
       return ckernel_prefix::get_child(offset);
     }
 
-    template <typename CKBT>
-    static SelfType *reserve(CKBT *ckb, intptr_t ckb_offset, size_t requested_capacity)
+    static SelfType *reserve(kernel_builder *ckb, intptr_t ckb_offset, size_t requested_capacity)
     {
       ckb->reserve(requested_capacity);
       return get_self(ckb, ckb_offset);
@@ -50,11 +48,12 @@ namespace nd {
      * Creates the ckernel, and increments ``inckb_offset``
      * to the position after it.
      */
-    template <typename CKBT, typename... A>
-    static SelfType *make(CKBT *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset, A &&... args)
+    template <typename... A>
+    static SelfType *make(kernel_builder *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset, A &&... args)
     {
       intptr_t ckb_offset = inout_ckb_offset;
       inc_ckb_offset<SelfType>(inout_ckb_offset);
+      inc_ckb_offset<SelfType>(ckb->m_size);
       ckb->reserve(inout_ckb_offset);
       PrefixType *rawself = ckb->template get_at<PrefixType>(ckb_offset);
       return ckb->template init<SelfType>(rawself, kernreq, std::forward<A>(args)...);

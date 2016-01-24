@@ -140,13 +140,13 @@ struct buffered_kernel_extra {
 };
 } // anonymous namespace
 
-size_t dynd::make_expression_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
+size_t dynd::make_expression_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
                                                const char *src0_arrmeta, const ndt::type &src1_dt,
                                                const char *src1_arrmeta, comparison_type_t comptype,
                                                const eval::eval_context *ectx)
 {
   intptr_t root_ckb_offset = ckb_offset;
-  buffered_kernel_extra *e = reinterpret_cast<kernel_builder *>(ckb)->alloc_ck<buffered_kernel_extra>(ckb_offset);
+  buffered_kernel_extra *e = ckb->alloc_ck<buffered_kernel_extra>(ckb_offset);
   e->base.function = reinterpret_cast<void *>(&buffered_kernel_extra::kernel);
   e->base.destructor = &buffered_kernel_extra::destruct;
   // Initialize the information for buffering the operands
@@ -157,7 +157,7 @@ size_t dynd::make_expression_comparison_kernel(kernel_builder *ckb, intptr_t ckb
                                         kernel_request_single, ectx);
     // Have to re-retrieve 'e', because creating another kernel may invalidate
     // it
-    e = reinterpret_cast<kernel_builder *>(ckb)->get_at<buffered_kernel_extra>(root_ckb_offset);
+    e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
   }
   if (src1_dt.get_kind() == expr_kind) {
     e->init_buffer(1, src1_dt.value_type());
@@ -166,7 +166,7 @@ size_t dynd::make_expression_comparison_kernel(kernel_builder *ckb, intptr_t ckb
                                         kernel_request_single, ectx);
     // Have to re-retrieve 'e', because creating another kernel may invalidate
     // it
-    e = reinterpret_cast<kernel_builder *>(ckb)->get_at<buffered_kernel_extra>(root_ckb_offset);
+    e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
   }
   // Allocate the data for the buffers
   if (e->buf[0].kernel_offset != 0) {
@@ -179,10 +179,10 @@ size_t dynd::make_expression_comparison_kernel(kernel_builder *ckb, intptr_t ckb
     e->buf[1].data_offset = ckb_offset - root_ckb_offset;
     ckb_offset += e->buf[1].data_size;
   }
-  reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+  ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
   // Have to re-retrieve 'e', because allocating the buffer data may invalidate
   // it
-  e = reinterpret_cast<kernel_builder *>(ckb)->get_at<buffered_kernel_extra>(root_ckb_offset);
+  e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
   e->cmp_kernel_offset = ckb_offset - root_ckb_offset;
   return make_comparison_kernel(ckb, ckb_offset, src0_dt.value_type(),
                                 (e->buf[0].kernel_offset != 0) ? e->buf[0].arrmeta : src0_arrmeta, src1_dt.value_type(),

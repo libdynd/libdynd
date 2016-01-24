@@ -98,7 +98,7 @@ ndt::type ndt::convert_type::with_replaced_storage_type(const type &replacement_
   }
 }
 
-size_t ndt::convert_type::make_operand_to_value_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset,
+size_t ndt::convert_type::make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
                                                                   const char *dst_arrmeta, const char *src_arrmeta,
                                                                   kernel_request_t kernreq,
                                                                   const eval::eval_context *ectx) const
@@ -107,7 +107,7 @@ size_t ndt::convert_type::make_operand_to_value_assignment_kernel(kernel_builder
                                   kernreq, ectx);
 }
 
-size_t ndt::convert_type::make_value_to_operand_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset,
+size_t ndt::convert_type::make_value_to_operand_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
                                                                   const char *dst_arrmeta, const char *src_arrmeta,
                                                                   kernel_request_t kernreq,
                                                                   const eval::eval_context *ectx) const
