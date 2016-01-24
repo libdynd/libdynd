@@ -196,9 +196,9 @@ struct utf32_fixed_string_compare_kernel {
         type##_fixed_string_compare_kernel::greater                                                                    \
   }
 
-void dynd::make_fixed_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, size_t string_size,
-                                               string_encoding_t encoding, comparison_type_t comptype,
-                                               const eval::eval_context *DYND_UNUSED(ectx))
+void dynd::make_fixed_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
+                                               size_t string_size, string_encoding_t encoding,
+                                               comparison_type_t comptype, const eval::eval_context *DYND_UNUSED(ectx))
 {
   static int lookup[5] = {0, 1, 0, 1, 2};
   static kernel_single_t fixed_string_comparisons_table[3][7] = {
@@ -206,7 +206,6 @@ void dynd::make_fixed_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t
       DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf32)};
   if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
     fixed_string_compare_kernel_extra *e = ckb->alloc_ck<fixed_string_compare_kernel_extra>();
-    ckb_offset = ckb->m_size;
     e->base.function = reinterpret_cast<void *>(fixed_string_comparisons_table[lookup[encoding]][comptype]);
     e->string_size = string_size;
   }
@@ -287,8 +286,9 @@ struct string_compare_kernel {
         string_compare_kernel<type>::greater_equal, string_compare_kernel<type>::greater                               \
   }
 
-void dynd::make_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, string_encoding_t encoding,
-                                         comparison_type_t comptype, const eval::eval_context *DYND_UNUSED(ectx))
+void dynd::make_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
+                                         string_encoding_t encoding, comparison_type_t comptype,
+                                         const eval::eval_context *DYND_UNUSED(ectx))
 {
   static int lookup[5] = {0, 1, 0, 1, 2};
   static kernel_single_t string_comparisons_table[3][7] = {DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint8_t),
@@ -296,7 +296,6 @@ void dynd::make_string_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_o
                                                            DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint32_t)};
   if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
     ckernel_prefix *e = ckb->alloc_ck<ckernel_prefix>();
-    ckb_offset = ckb->m_size;
     e->function = reinterpret_cast<void *>(string_comparisons_table[lookup[encoding]][comptype]);
   }
   else {
