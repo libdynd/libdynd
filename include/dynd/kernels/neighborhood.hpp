@@ -211,6 +211,7 @@ namespace nd {
           ckb_offset = ckb->m_size;
 
           delete reinterpret_cast<data_type *>(data);
+          return;
         }
 
         ndt::type child_src_tp[N];
