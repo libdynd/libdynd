@@ -473,7 +473,7 @@ namespace ndt {
      * \returns  The offset at the end of 'ckb' after adding this
      *           kernel.
      */
-    virtual size_t make_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
+    virtual size_t make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
                                           const char *src0_arrmeta, const ndt::type &src1_dt, const char *src1_arrmeta,
                                           comparison_type_t comptype, const eval::eval_context *ectx) const;
 

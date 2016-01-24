@@ -52,7 +52,7 @@ struct tuple_unary_op_ck : nd::base_kernel<tuple_unary_op_ck, 1> {
 } // anonymous namespace
 
 intptr_t dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const ndt::callable_type *DYND_UNUSED(af_tp),
-                                           kernel_builder *ckb, intptr_t ckb_offset, intptr_t field_count,
+                                           nd::kernel_builder *ckb, intptr_t ckb_offset, intptr_t field_count,
                                            const uintptr_t *dst_offsets, const ndt::type *dst_tp,
                                            const char *const *dst_arrmeta, const uintptr_t *src_offsets,
                                            const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -62,8 +62,8 @@ intptr_t dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const nd
   tuple_unary_op_ck *self = tuple_unary_op_ck::make(ckb, kernreq, ckb_offset);
   self->m_fields.resize(field_count);
   for (intptr_t i = 0; i < field_count; ++i) {
-    reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-    self = reinterpret_cast<kernel_builder *>(ckb)->get_at<tuple_unary_op_ck>(root_ckb_offset);
+    ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
+    self = ckb->get_at<tuple_unary_op_ck>(root_ckb_offset);
     tuple_unary_op_item &field = self->m_fields[i];
     field.child_kernel_offset = ckb_offset - root_ckb_offset;
     field.dst_data_offset = dst_offsets[i];
@@ -76,7 +76,7 @@ intptr_t dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const nd
 }
 
 intptr_t dynd::make_tuple_unary_op_ckernel(const nd::base_callable *const *af,
-                                           const ndt::callable_type *const *DYND_UNUSED(af_tp), kernel_builder *ckb,
+                                           const ndt::callable_type *const *DYND_UNUSED(af_tp), nd::kernel_builder *ckb,
                                            intptr_t ckb_offset, intptr_t field_count, const uintptr_t *dst_offsets,
                                            const ndt::type *dst_tp, const char *const *dst_arrmeta,
                                            const uintptr_t *src_offsets, const ndt::type *src_tp,
@@ -86,8 +86,8 @@ intptr_t dynd::make_tuple_unary_op_ckernel(const nd::base_callable *const *af,
   tuple_unary_op_ck *self = tuple_unary_op_ck::make(ckb, kernreq, ckb_offset);
   self->m_fields.resize(field_count);
   for (intptr_t i = 0; i < field_count; ++i) {
-    reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-    self = reinterpret_cast<kernel_builder *>(ckb)->get_at<tuple_unary_op_ck>(root_ckb_offset);
+    ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
+    self = ckb->get_at<tuple_unary_op_ck>(root_ckb_offset);
     tuple_unary_op_item &field = self->m_fields[i];
     field.child_kernel_offset = ckb_offset - root_ckb_offset;
     field.dst_data_offset = dst_offsets[i];
@@ -103,7 +103,7 @@ intptr_t dynd::make_tuple_unary_op_ckernel(const nd::base_callable *const *af,
 /////////////////////////////////////////
 // tuple/struct to identical tuple/struct assignment
 
-size_t dynd::make_tuple_identical_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset,
+size_t dynd::make_tuple_identical_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
                                                     const ndt::type &val_tup_tp, const char *dst_arrmeta,
                                                     const char *src_arrmeta, kernel_request_t kernreq)
 {
@@ -140,7 +140,7 @@ size_t dynd::make_tuple_identical_assignment_kernel(kernel_builder *ckb, intptr_
 // struct/tuple to different struct/tuple assignment
 // (matches up fields by number, not name in struct case)
 
-size_t dynd::make_tuple_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tuple_tp,
+size_t dynd::make_tuple_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tuple_tp,
                                           const char *dst_arrmeta, const ndt::type &src_tuple_tp,
                                           const char *src_arrmeta, kernel_request_t kernreq)
 {
@@ -187,7 +187,7 @@ size_t dynd::make_tuple_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offs
 /////////////////////////////////////////
 // value to each tuple/struct field assignment
 
-size_t dynd::make_broadcast_to_tuple_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset,
+size_t dynd::make_broadcast_to_tuple_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
                                                        const ndt::type &dst_tuple_tp, const char *dst_arrmeta,
                                                        const ndt::type &src_tp, const char *src_arrmeta,
                                                        kernel_request_t kernreq)

@@ -104,15 +104,15 @@ TEST(FixedDimType, SimpleIndex)
 TEST(FixedDimType, AssignKernel_ScalarToFixed)
 {
   nd::array a, b;
-  kernel_builder k;
+  nd::kernel_builder k;
 
   // Assignment scalar -> fixed array
   a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
   a.vals() = 0;
   b = 9.0;
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(), kernel_request_single,
-                         &eval::default_eval_context);
+  make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
+                         kernel_request_single, &eval::default_eval_context);
   kernel_single_t fn = k.get()->get_function<kernel_single_t>();
   char *src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
@@ -124,7 +124,7 @@ TEST(FixedDimType, AssignKernel_ScalarToFixed)
 TEST(FixedDimType, AssignKernel_FixedToFixed)
 {
   nd::array a, b;
-  kernel_builder k;
+  nd::kernel_builder k;
 
   // Assignment fixed array -> fixed array
   a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
@@ -132,8 +132,8 @@ TEST(FixedDimType, AssignKernel_FixedToFixed)
   b = parse_json("3 * int32", "[3, 5, 7]");
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(), kernel_request_single,
-                         &eval::default_eval_context);
+  make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
+                         kernel_request_single, &eval::default_eval_context);
   kernel_single_t fn = k.get()->get_function<kernel_single_t>();
   char *src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
@@ -145,7 +145,7 @@ TEST(FixedDimType, AssignKernel_FixedToFixed)
 TEST(FixedDimType, AssignKernel_FixedToScalarError)
 {
   nd::array a, b;
-  kernel_builder k;
+  nd::kernel_builder k;
 
   // Assignment fixed array -> scalar
   a = 9.0;

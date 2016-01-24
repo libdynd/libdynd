@@ -13,10 +13,9 @@
 #include <dynd/diagnostics.hpp>
 
 namespace dynd {
-class kernel_builder;
-
 namespace nd {
 
+  class kernel_builder;
   class array;
 
 } // namespace dynd::nd
@@ -135,8 +134,8 @@ struct DYND_API ckernel_prefix {
     return self;
   }
 
-  template <typename CKBT>
-  static ckernel_prefix *make(CKBT *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset, void *func);
+  static ckernel_prefix *make(nd::kernel_builder *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
+                              void *func);
 
   static char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp),
                          intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
@@ -146,7 +145,7 @@ struct DYND_API ckernel_prefix {
     return NULL;
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
                               intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
                               const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),

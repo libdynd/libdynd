@@ -16,8 +16,8 @@ struct value_to_pointer_ck : nd::base_kernel<value_to_pointer_ck<T>, 1> {
 };
 } // anonymous namespace
 
-size_t dynd::make_builtin_value_to_pointer_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, type_id_t tp_id,
-                                                             kernel_request_t kernreq)
+size_t dynd::make_builtin_value_to_pointer_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
+                                                             type_id_t tp_id, kernel_request_t kernreq)
 {
   switch (tp_id) {
   case bool_type_id:
@@ -83,7 +83,7 @@ size_t dynd::make_builtin_value_to_pointer_assignment_kernel(kernel_builder *ckb
   return ckb_offset;
 }
 
-size_t dynd::make_value_to_pointer_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &tp,
+size_t dynd::make_value_to_pointer_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &tp,
                                                      kernel_request_t kernreq)
 {
   if (tp.is_builtin()) {

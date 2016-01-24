@@ -326,7 +326,7 @@ bool ndt::tuple_type::is_lossless_assignment(const type &dst_tp, const type &src
   return false;
 }
 
-size_t ndt::tuple_type::make_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const type &src0_tp,
+size_t ndt::tuple_type::make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &src0_tp,
                                                const char *src0_arrmeta, const type &src1_tp, const char *src1_arrmeta,
                                                comparison_type_t comptype, const eval::eval_context *ectx) const
 {

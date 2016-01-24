@@ -116,7 +116,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques, c
                                         const char *arrmeta)
 {
   nd::array categories = nd::empty(uniques.size(), element_tp);
-  kernel_builder k;
+  nd::kernel_builder k;
   make_assignment_kernel(&k, 0, element_tp, categories.get()->metadata() + sizeof(fixed_dim_type_arrmeta), element_tp,
                          arrmeta, kernel_request_single, &eval::default_eval_context);
   kernel_single_t fn = k.get()->get_function<kernel_single_t>();
@@ -168,7 +168,7 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
     intptr_t categories_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.get()->metadata())->stride;
 
     const char *categories_element_arrmeta = categories.get()->metadata() + sizeof(fixed_dim_type_arrmeta);
-    kernel_builder k;
+    nd::kernel_builder k;
     ::make_comparison_kernel(&k, 0, m_category_tp, categories_element_arrmeta, m_category_tp,
                              categories_element_arrmeta, comparison_type_sorting_less, &eval::default_eval_context);
     kernel_single_t fn = k.get()->get_function<kernel_single_t>();
@@ -343,7 +343,7 @@ nd::array ndt::categorical_type::get_categories() const
   type el_tp;
   const char *el_arrmeta;
   categories.get_type().get_as_strided(categories.get()->metadata(), &dim_size, &stride, &el_tp, &el_arrmeta);
-  kernel_builder k;
+  nd::kernel_builder k;
   ::make_assignment_kernel(&k, 0, m_category_tp, el_arrmeta, el_tp, get_category_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
   kernel_single_t fn = k.get()->get_function<kernel_single_t>();
@@ -421,7 +421,7 @@ ndt::type ndt::factor_categorical(const nd::array &values)
   const char *el_arrmeta;
   values_eval.get_type().get_as_strided(values_eval.get()->metadata(), &dim_size, &stride, &el_tp, &el_arrmeta);
 
-  kernel_builder k;
+  nd::kernel_builder k;
   ::make_comparison_kernel(&k, 0, el_tp, el_arrmeta, el_tp, el_arrmeta, comparison_type_sorting_less,
                            &eval::default_eval_context);
   kernel_single_t fn = k.get()->get_function<kernel_single_t>();
@@ -457,7 +457,7 @@ struct get_ints_kernel : nd::base_kernel<get_ints_kernel> {
     dst_tp = helper(kwds[0]).get_type();
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
                               intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
                               const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),

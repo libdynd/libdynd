@@ -88,9 +88,9 @@ namespace ndt {
     void arrmeta_destruct(char *arrmeta) const;
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
-    size_t make_operand_to_value_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
-                                                   const char *src_arrmeta, kernel_request_t kernreq,
-                                                   const eval::eval_context *ectx) const;
+    size_t make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
+                                                   const char *dst_arrmeta, const char *src_arrmeta,
+                                                   kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     nd::array get_option_nafunc() const;
 

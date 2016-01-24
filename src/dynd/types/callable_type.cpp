@@ -255,13 +255,13 @@ struct callable_to_string_ck : nd::base_kernel<callable_to_string_ck, 1> {
 };
 } // anonymous namespace
 
-static intptr_t make_callable_to_string_assignment_kernel(void *ckb, intptr_t ckb_offset,
+static intptr_t make_callable_to_string_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
                                                           const ndt::type &dst_string_dt, const char *dst_arrmeta,
                                                           const ndt::type &src_tp, kernel_request_t kernreq,
                                                           const eval::eval_context *ectx)
 {
   typedef callable_to_string_ck self_type;
-  self_type *self = self_type::make(reinterpret_cast<kernel_builder *>(ckb), kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   // The kernel data owns a reference to this type
   self->m_src_tp = src_tp;
   self->m_dst_string_dt = dst_string_dt;
@@ -270,7 +270,7 @@ static intptr_t make_callable_to_string_assignment_kernel(void *ckb, intptr_t ck
   return ckb_offset;
 }
 
-intptr_t ndt::callable_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
+intptr_t ndt::callable_type::make_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &dst_tp,
                                                     const char *dst_arrmeta, const type &src_tp,
                                                     const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                                                     const eval::eval_context *ectx) const
@@ -280,8 +280,7 @@ intptr_t ndt::callable_type::make_assignment_kernel(void *ckb, intptr_t ckb_offs
   else {
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
-      return make_callable_to_string_assignment_kernel(reinterpret_cast<kernel_builder *>(ckb), ckb_offset, dst_tp,
-                                                       dst_arrmeta, src_tp, kernreq, ectx);
+      return make_callable_to_string_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, kernreq, ectx);
     }
   }
 
@@ -370,67 +369,6 @@ ndt::type ndt::make_generic_funcproto(intptr_t nargs)
 {
   return callable_type::make(typevar_type::make("R"), make_typevar_range("T", nargs));
 }
-
-///////// functions on the nd::array
-
-// Maximum number of args (including out) for now
-// (need to add varargs capability to this calling convention)
-// static const int max_args = 6;
-
-/*
-static array_preamble *function___call__(const array_preamble *params, void *DYND_UNUSED(self))
-{
-  // TODO: Remove the const_cast
-  nd::array par(const_cast<array_preamble *>(params), true);
-  const nd::array *par_arrs = reinterpret_cast<const nd::array *>(par.cdata());
-  if (par_arrs[0].get_type().get_type_id() != callable_type_id) {
-    throw runtime_error("callable method '__call__' only works on individual "
-                        "callable instances presently");
-  }
-  // Figure out how many args were provided
-  int nargs;
-  nd::array args[max_args];
-  for (nargs = 1; nargs < max_args; ++nargs) {
-    // Stop at the first NULL arg (means it was default)
-    if (par_arrs[nargs].get() == NULL) {
-      break;
-    } else {
-      args[nargs - 1] = par_arrs[nargs];
-    }
-  }
-  const ndt::callable_type::data_type *af =
-      reinterpret_cast<const ndt::callable_type::data_type *>(par_arrs[0].cdata());
-  const ndt::callable_type *af_tp = par_arrs[0].get_type().extended<ndt::callable_type>();
-  nargs -= 1;
-  // Validate the number of arguments
-  if (nargs != af_tp->get_narg() + 1) {
-    stringstream ss;
-    ss << "callable expected " << (af_tp->get_narg() + 1) << " arguments, got " << nargs;
-    throw runtime_error(ss.str());
-  }
-  // Instantiate the ckernel
-  ndt::type src_tp[max_args];
-  for (int i = 0; i < nargs - 1; ++i) {
-    src_tp[i] = args[i + 1].get_type();
-  }
-  const char *dynd_arrmeta[max_args];
-  for (int i = 0; i < nargs - 1; ++i) {
-    dynd_arrmeta[i] = args[i + 1].get()->metadata();
-  }
-  ckernel_builder<kernel_request_host> ckb;
-  af->instantiate(NULL, NULL, &ckb, 0, args[0].get_type(), args[0].get()->metadata(), nargs, src_tp, dynd_arrmeta,
-                  kernel_request_single, &eval::default_eval_context, 0, NULL, std::map<std::string, ndt::type>());
-  // Call the ckernel
-  expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-  char *in_ptrs[max_args];
-  for (int i = 0; i < nargs - 1; ++i) {
-    in_ptrs[i] = const_cast<char *>(args[i + 1].cdata());
-  }
-  usngo(ckb.get(), args[0].data(), in_ptrs);
-  // Return void
-  return nd::empty(ndt::type::make<void>()).release();
-}
-*/
 
 std::map<std::string, nd::callable> ndt::callable_type::get_dynamic_array_functions() const
 {

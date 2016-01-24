@@ -72,19 +72,19 @@ namespace ndt {
 
     /** Makes a kernel which converts from (operand_type().value_type()) to
      * (value_type()) */
-    virtual size_t make_operand_to_value_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset,
+    virtual size_t make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
                                                            const char *dst_arrmeta, const char *src_arrmeta,
                                                            kernel_request_t kernreq,
                                                            const eval::eval_context *ectx) const;
 
     /** Makes a kernel which converts from (value_type()) to
      * (operand_type().value_type()) */
-    virtual size_t make_value_to_operand_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset,
+    virtual size_t make_value_to_operand_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
                                                            const char *dst_arrmeta, const char *src_arrmeta,
                                                            kernel_request_t kernreq,
                                                            const eval::eval_context *ectx) const;
 
-    size_t make_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
+    size_t make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
                                   const char *src0_arrmeta, const type &src1_dt, const char *src1_arrmeta,
                                   comparison_type_t comptype, const eval::eval_context *ectx) const;
   };

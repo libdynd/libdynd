@@ -129,7 +129,7 @@ struct tuple_compare_sorting_less_diff_arrmeta_kernel {
 
 } // anonymous namespace
 
-size_t dynd::make_tuple_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src_tp,
+size_t dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src_tp,
                                           const char *src0_arrmeta, const char *src1_arrmeta,
                                           comparison_type_t comptype, const eval::eval_context *ectx)
 {
@@ -141,12 +141,11 @@ size_t dynd::make_tuple_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offs
         memcmp(src0_arrmeta, src1_arrmeta, src_tp.get_arrmeta_size()) == 0) {
       // The arrmeta is identical, so can use a more specialized comparison
       // function
-      inc_ckb_offset(ckb_offset,
+      nd::inc_ckb_offset(ckb_offset,
                      sizeof(tuple_compare_sorting_less_matching_arrmeta_kernel) + field_count * sizeof(size_t));
-      reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+      ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
       tuple_compare_sorting_less_matching_arrmeta_kernel *e =
-          reinterpret_cast<kernel_builder *>(ckb)
-              ->get_at<tuple_compare_sorting_less_matching_arrmeta_kernel>(root_ckb_offset);
+          ckb->get_at<tuple_compare_sorting_less_matching_arrmeta_kernel>(root_ckb_offset);
       e->base.function = reinterpret_cast<void *>(&tuple_compare_sorting_less_matching_arrmeta_kernel::sorting_less);
       e->base.destructor = &tuple_compare_sorting_less_matching_arrmeta_kernel::destruct;
       e->field_count = field_count;
@@ -158,9 +157,8 @@ size_t dynd::make_tuple_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offs
         // field comparison kernel. Have to re-get
         // the pointer because creating the field comparison kernel may
         // move the memory.
-        reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-        e = reinterpret_cast<kernel_builder *>(ckb)
-                ->get_at<tuple_compare_sorting_less_matching_arrmeta_kernel>(root_ckb_offset);
+        ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
+        e = ckb->get_at<tuple_compare_sorting_less_matching_arrmeta_kernel>(root_ckb_offset);
         field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
         field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
         const char *field_arrmeta = src0_arrmeta + arrmeta_offsets[i];
@@ -173,12 +171,11 @@ size_t dynd::make_tuple_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offs
     else {
       // The arrmeta is different, so have to get the kernels both ways for the
       // fields
-      inc_ckb_offset(ckb_offset,
+      nd::inc_ckb_offset(ckb_offset,
                      sizeof(tuple_compare_sorting_less_diff_arrmeta_kernel) + 2 * field_count * sizeof(size_t));
-      reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+      ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
       tuple_compare_sorting_less_diff_arrmeta_kernel *e =
-          reinterpret_cast<kernel_builder *>(ckb)
-              ->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
+          ckb->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
       e->base.function = reinterpret_cast<void *>(&tuple_compare_sorting_less_diff_arrmeta_kernel::sorting_less);
       e->base.destructor = &tuple_compare_sorting_less_diff_arrmeta_kernel::destruct;
       e->field_count = field_count;
@@ -192,17 +189,15 @@ size_t dynd::make_tuple_comparison_kernel(kernel_builder *ckb, intptr_t ckb_offs
         // field comparison kernel. Have to re-get
         // the pointer because creating the field comparison kernel may
         // move the memory.
-        reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-        e = reinterpret_cast<kernel_builder *>(ckb)
-                ->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
+        ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
+        e = ckb->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
         field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
         field_kernel_offsets[2 * i] = ckb_offset - root_ckb_offset;
         ckb_offset = make_comparison_kernel(ckb, ckb_offset, ft, src0_arrmeta + arrmeta_offsets[i], ft,
                                             src1_arrmeta + arrmeta_offsets[i], comparison_type_sorting_less, ectx);
         // Repeat for comparing the other way
-        reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-        e = reinterpret_cast<kernel_builder *>(ckb)
-                ->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
+        ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
+        e = ckb->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
         field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
         field_kernel_offsets[2 * i + 1] = ckb_offset - root_ckb_offset;
         ckb_offset = make_comparison_kernel(ckb, ckb_offset, ft, src1_arrmeta + arrmeta_offsets[i], ft,

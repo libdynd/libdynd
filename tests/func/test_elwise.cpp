@@ -62,7 +62,7 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
   // Test it on some data
   ndt::type dst_tp("var * int32");
   ndt::type src_tp("5 * fixed_string[16]");
-  kernel_builder ckb;
+  nd::kernel_builder ckb;
   nd::array in = nd::empty(src_tp);
   nd::array out = nd::empty(dst_tp);
   in(0).vals() = "172";
@@ -95,7 +95,7 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
   nd::callable af = nd::functional::elwise(af_base);
 
   // Test it on some data
-  kernel_builder ckb;
+  nd::kernel_builder ckb;
   nd::array in = nd::empty("var * fixed_string[16]");
   nd::array out = nd::empty("var * int32");
   const char *in_vals[] = {"172", "-139", "12345", "-1111", "284"};

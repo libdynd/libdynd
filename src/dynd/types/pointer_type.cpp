@@ -306,12 +306,12 @@ struct operand_to_value_ck : nd::base_kernel<operand_to_value_ck, 1> {
 
 } // anonymous namespace
 
-size_t ndt::pointer_type::make_operand_to_value_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset,
+size_t ndt::pointer_type::make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
                                                                   const char *dst_arrmeta, const char *src_arrmeta,
                                                                   kernel_request_t kernreq,
                                                                   const eval::eval_context *ectx) const
 {
-  operand_to_value_ck::make(reinterpret_cast<kernel_builder *>(ckb), kernreq, ckb_offset);
+  operand_to_value_ck::make(ckb, kernreq, ckb_offset);
   return ::make_assignment_kernel(ckb, ckb_offset, m_target_tp, dst_arrmeta, m_target_tp,
                                   src_arrmeta + sizeof(pointer_type_arrmeta), kernel_request_single, ectx);
 }
@@ -366,7 +366,7 @@ struct dereference_kernel : nd::base_kernel<dereference_kernel> {
     dst_tp = helper(kwds[0]).get_type();
   }
 
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
                               intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
                               const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),

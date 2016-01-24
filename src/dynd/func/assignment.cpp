@@ -215,7 +215,7 @@ DYND_API nd::callable nd::assign::make()
 
 DYND_API struct nd::assign nd::assign;
 
-intptr_t dynd::make_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+intptr_t dynd::make_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                                       const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
                                       kernel_request_t kernreq, const eval::eval_context *ectx)
 {
@@ -225,7 +225,7 @@ intptr_t dynd::make_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, 
                                         std::map<std::string, ndt::type>());
 }
 
-size_t dynd::make_pod_typed_data_assignment_kernel(kernel_builder *ckb, intptr_t ckb_offset, size_t data_size,
+size_t dynd::make_pod_typed_data_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, size_t data_size,
                                                    size_t DYND_UNUSED(data_alignment), kernel_request_t kernreq)
 {
   // Aligned specialization tables
