@@ -39,14 +39,14 @@ namespace nd {
         dst_tp = reinterpret_cast<static_data_type *>(static_data)->value_tp;
       }
 
-      static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+      static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,
+                              intptr_t DYND_UNUSED(ckb_offset), const ndt::type &DYND_UNUSED(dst_tp),
+                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        make(ckb, kernreq, ckb_offset, reinterpret_cast<static_data_type *>(static_data)->value_tp,
+        make(ckb, kernreq, reinterpret_cast<static_data_type *>(static_data)->value_tp,
              reinterpret_cast<static_data_type *>(static_data)->forward);
       }
     };

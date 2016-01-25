@@ -207,7 +207,8 @@ namespace nd {
         const ndt::type *src_tp_for_af = af.get_type()->get_pos_types_raw();
 
         intptr_t root_ckb_offset = ckb_offset;
-        convert_kernel *self = convert_kernel::make(ckb, kernreq, ckb_offset, nsrc);
+        convert_kernel *self = convert_kernel::make(ckb, kernreq, nsrc);
+        ckb_offset = ckb->m_size;
         std::vector<const char *> buffered_arrmeta(nsrc);
         for (intptr_t i = 0; i < nsrc; ++i) {
           if (src_tp[i] == src_tp_for_af[i]) {

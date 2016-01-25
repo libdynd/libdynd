@@ -176,12 +176,13 @@ namespace nd {
       {
         intptr_t neighborhood_offset = ckb_offset;
         neighborhood_kernel::make(
-            ckb, kernreq, ckb_offset, reinterpret_cast<const fixed_dim_type_arrmeta *>(dst_arrmeta)->stride,
+            ckb, kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(dst_arrmeta)->stride,
             reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
             reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride,
             reinterpret_cast<data_type *>(data)->shape[0],
             (reinterpret_cast<data_type *>(data)->offset == NULL) ? 0 : reinterpret_cast<data_type *>(data)->offset[0],
             reinterpret_cast<data_type *>(data)->out_of_bounds);
+        ckb_offset = ckb->m_size;
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         const char *child_dst_arrmeta = dst_arrmeta + sizeof(fixed_dim_type_arrmeta);

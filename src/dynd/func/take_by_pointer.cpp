@@ -85,16 +85,18 @@ struct take_by_pointer_virtual_ck : nd::base_kernel<take_by_pointer_virtual_ck> 
       }
     }
 
-    take_by_pointer_outer_ck::make(ckb, kernreq, ckb_offset, dst_size_stride[0].dim_size, dst_size_stride[0].stride,
+    take_by_pointer_outer_ck::make(ckb, kernreq, dst_size_stride[0].dim_size, dst_size_stride[0].stride,
                                    src_size_stride[1][0].stride);
+    ckb_offset = ckb->m_size;
 
     for (intptr_t i = 0; i < ndim; ++i) {
-      take_by_pointer_ck::make(ckb, kernel_request_single, ckb_offset, src_size_stride[0][i].dim_size,
-                               src_size_stride[0][i].stride, src_size_stride[1][1].stride);
+      take_by_pointer_ck::make(ckb, kernel_request_single, src_size_stride[0][i].dim_size, src_size_stride[0][i].stride,
+                               src_size_stride[1][1].stride);
+      ckb_offset = ckb->m_size;
     }
 
-     make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta, src_el_tp[0], src_el_meta[0],
-                                  kernel_request_single, &eval::default_eval_context);
+    make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta, src_el_tp[0], src_el_meta[0], kernel_request_single,
+                           &eval::default_eval_context);
   }
 
   static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,

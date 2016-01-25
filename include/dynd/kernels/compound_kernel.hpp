@@ -40,7 +40,8 @@ namespace nd {
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
-        make(ckb, kernreq, ckb_offset);
+        make(ckb, kernreq);
+        ckb_offset = ckb->m_size;
 
         ndt::type child_src_tp[2] = {dst_tp, src_tp[0]};
         const char *child_src_arrmeta[2] = {dst_arrmeta, src_arrmeta[0]};
@@ -78,7 +79,8 @@ namespace nd {
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
-        make(ckb, kernreq, ckb_offset);
+        make(ckb, kernreq);
+        ckb_offset = ckb->m_size;
 
         ndt::type child_src_tp[2] = {src_tp[0], dst_tp};
         const char *child_src_arrmeta[2] = {src_arrmeta[0], dst_arrmeta};

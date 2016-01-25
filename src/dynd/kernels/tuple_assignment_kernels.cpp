@@ -59,7 +59,8 @@ void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const ndt::c
                                        kernel_request_t kernreq)
 {
   intptr_t root_ckb_offset = ckb_offset;
-  tuple_unary_op_ck *self = tuple_unary_op_ck::make(ckb, kernreq, ckb_offset);
+  tuple_unary_op_ck *self = tuple_unary_op_ck::make(ckb, kernreq);
+  ckb_offset = ckb->m_size;
   self->m_fields.resize(field_count);
   for (intptr_t i = 0; i < field_count; ++i) {
     ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
@@ -83,7 +84,8 @@ void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *const *af,
                                        const char *const *src_arrmeta, kernel_request_t kernreq)
 {
   intptr_t root_ckb_offset = ckb_offset;
-  tuple_unary_op_ck *self = tuple_unary_op_ck::make(ckb, kernreq, ckb_offset);
+  tuple_unary_op_ck *self = tuple_unary_op_ck::make(ckb, kernreq);
+  ckb_offset = ckb->m_size;
   self->m_fields.resize(field_count);
   for (intptr_t i = 0; i < field_count; ++i) {
     ckb->reserve(ckb_offset + sizeof(ckernel_prefix));

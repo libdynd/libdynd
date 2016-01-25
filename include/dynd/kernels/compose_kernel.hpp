@@ -125,7 +125,8 @@ namespace nd {
         const ndt::type &buffer_tp = static_data_x->buffer_tp;
 
         intptr_t root_ckb_offset = ckb_offset;
-        compose_kernel *self = make(ckb, kernreq, ckb_offset, static_data_x->buffer_tp);
+        compose_kernel *self = make(ckb, kernreq, static_data_x->buffer_tp);
+        ckb_offset = ckb->m_size;
         first->instantiate(first->static_data(), data, ckb, ckb_offset, buffer_tp, self->buffer_arrmeta.get(), 1,
                            src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
         ckb_offset = ckb->m_size;

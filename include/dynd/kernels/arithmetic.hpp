@@ -108,7 +108,8 @@ namespace nd {
                             const std::map<std::string, ndt::type> &tp_vars)
     {
       intptr_t option_arith_offset = ckb_offset;
-      option_arithmetic_kernel::make(ckb, kernreq, ckb_offset);
+      option_arithmetic_kernel::make(ckb, kernreq);
+      ckb_offset = ckb->m_size;
 
       auto is_missing = is_missing::get();
       is_missing.get()->instantiate(is_missing.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
@@ -165,7 +166,8 @@ namespace nd {
                             const std::map<std::string, ndt::type> &tp_vars)
     {
       intptr_t option_arith_offset = ckb_offset;
-      option_arithmetic_kernel::make(ckb, kernreq, ckb_offset);
+      option_arithmetic_kernel::make(ckb, kernreq);
+      ckb_offset = ckb->m_size;
 
       auto is_missing = is_missing::get();
       is_missing.get()->instantiate(is_missing.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
@@ -227,7 +229,8 @@ namespace nd {
                             const std::map<std::string, ndt::type> &tp_vars)
     {
       intptr_t option_arith_offset = ckb_offset;
-      option_arithmetic_kernel::make(ckb, kernreq, ckb_offset);
+      option_arithmetic_kernel::make(ckb, kernreq);
+      ckb_offset = ckb->m_size;
 
       auto is_missing_lhs = is_missing::get();
       is_missing_lhs.get()->instantiate(is_missing_lhs.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,

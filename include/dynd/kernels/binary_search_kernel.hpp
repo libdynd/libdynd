@@ -59,8 +59,9 @@ namespace nd {
                             kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                             const std::map<std::string, ndt::type> &tp_vars)
     {
-      make(ckb, kernreq, ckb_offset, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
+      make(ckb, kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
            reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride);
+      ckb_offset = ckb->m_size;
 
       const char *n_arrmeta = src_arrmeta[0];
       ndt::type element_tp = src_tp[0].at_single(0, &n_arrmeta);

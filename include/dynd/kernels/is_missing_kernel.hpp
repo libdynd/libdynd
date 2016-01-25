@@ -258,7 +258,7 @@ namespace nd {
     struct is_missing_kernel<fixed_dim_type_id, dim_kind>
         : base_kernel<is_missing_kernel<fixed_dim_type_id, dim_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                              intptr_t DYND_UNUSED(ckb_offset), const ndt::type &DYND_UNUSED(dst_tp),
                               const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                               const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                               intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
@@ -266,34 +266,34 @@ namespace nd {
       {
         switch (src_tp->get_dtype().get_type_id()) {
         case bool_type_id:
-          is_missing_kernel<bool_type_id, bool_kind>::make(ckb, kernreq, ckb_offset);
+          is_missing_kernel<bool_type_id, bool_kind>::make(ckb, kernreq);
           break;
         case int8_type_id:
-          is_missing_kernel<int8_type_id, sint_kind>::make(ckb, kernreq, ckb_offset);
+          is_missing_kernel<int8_type_id, sint_kind>::make(ckb, kernreq);
           break;
         case int16_type_id:
-          is_missing_kernel<int16_type_id, sint_kind>::make(ckb, kernreq, ckb_offset);
+          is_missing_kernel<int16_type_id, sint_kind>::make(ckb, kernreq);
           break;
         case int32_type_id:
-          is_missing_kernel<int32_type_id, sint_kind>::make(ckb, kernreq, ckb_offset);
+          is_missing_kernel<int32_type_id, sint_kind>::make(ckb, kernreq);
           break;
         case int64_type_id:
-          is_missing_kernel<int64_type_id, sint_kind>::make(ckb, kernreq, ckb_offset);
+          is_missing_kernel<int64_type_id, sint_kind>::make(ckb, kernreq);
           break;
         case int128_type_id:
-          is_missing_kernel<int128_type_id, sint_kind>::make(ckb, kernreq, ckb_offset);
+          is_missing_kernel<int128_type_id, sint_kind>::make(ckb, kernreq);
           break;
         case float32_type_id:
-          is_missing_kernel<float32_type_id, real_kind>::make(ckb, kernreq, ckb_offset);
+          is_missing_kernel<float32_type_id, real_kind>::make(ckb, kernreq);
           break;
         case float64_type_id:
-          is_missing_kernel<float64_type_id, real_kind>::make(ckb, kernreq, ckb_offset);
+          is_missing_kernel<float64_type_id, real_kind>::make(ckb, kernreq);
           break;
         case complex_float32_type_id:
-          is_missing_kernel<complex_float32_type_id, complex_kind>::make(ckb, kernreq, ckb_offset);
+          is_missing_kernel<complex_float32_type_id, complex_kind>::make(ckb, kernreq);
           break;
         case complex_float64_type_id:
-          is_missing_kernel<complex_float64_type_id, complex_kind>::make(ckb, kernreq, ckb_offset);
+          is_missing_kernel<complex_float64_type_id, complex_kind>::make(ckb, kernreq);
           break;
         default:
           throw type_error("fixed_dim_is_avail: expected built-in type");

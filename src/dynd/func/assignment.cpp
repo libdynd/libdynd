@@ -224,25 +224,26 @@ void dynd::make_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, 
                                  &src_tp, &src_arrmeta, kernreq, 1, &error_mode, std::map<std::string, ndt::type>());
 }
 
-void dynd::make_pod_typed_data_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, size_t data_size,
-                                                 size_t DYND_UNUSED(data_alignment), kernel_request_t kernreq)
+void dynd::make_pod_typed_data_assignment_kernel(nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
+                                                 size_t data_size, size_t DYND_UNUSED(data_alignment),
+                                                 kernel_request_t kernreq)
 {
   // Aligned specialization tables
   switch (data_size) {
   case 1:
-    nd::trivial_copy_kernel<1>::make(ckb, kernreq, ckb_offset);
+    nd::trivial_copy_kernel<1>::make(ckb, kernreq);
     break;
   case 2:
-    nd::trivial_copy_kernel<2>::make(ckb, kernreq, ckb_offset);
+    nd::trivial_copy_kernel<2>::make(ckb, kernreq);
     break;
   case 4:
-    nd::trivial_copy_kernel<4>::make(ckb, kernreq, ckb_offset);
+    nd::trivial_copy_kernel<4>::make(ckb, kernreq);
     break;
   case 8:
-    nd::trivial_copy_kernel<8>::make(ckb, kernreq, ckb_offset);
+    nd::trivial_copy_kernel<8>::make(ckb, kernreq);
     break;
   default:
-    nd::unaligned_copy_ck::make(ckb, kernreq, ckb_offset, data_size);
+    nd::unaligned_copy_ck::make(ckb, kernreq, data_size);
     break;
   }
 }

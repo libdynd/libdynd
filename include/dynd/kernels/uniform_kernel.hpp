@@ -61,7 +61,7 @@ namespace nd {
         */
 
         static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                intptr_t DYND_UNUSED(ckb_offset), const ndt::type &DYND_UNUSED(dst_tp),
                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                                 const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                                 kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
@@ -85,7 +85,7 @@ namespace nd {
             b = kwds[1].as<R>();
           }
 
-          uniform_kernel::make(ckb, kernreq, ckb_offset, g.get(), a, b);
+          uniform_kernel::make(ckb, kernreq, g.get(), a, b);
         }
       };
 
@@ -130,7 +130,7 @@ namespace nd {
         */
 
         static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                intptr_t DYND_UNUSED(ckb_offset), const ndt::type &DYND_UNUSED(dst_tp),
                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                                 const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                                 kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
@@ -154,7 +154,7 @@ namespace nd {
             b = kwds[1].as<R>();
           }
 
-          uniform_kernel::make(ckb, kernreq, ckb_offset, g.get(), a, b);
+          uniform_kernel::make(ckb, kernreq, g.get(), a, b);
         }
       };
 
@@ -196,7 +196,7 @@ namespace nd {
         */
 
         static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                intptr_t DYND_UNUSED(ckb_offset), const ndt::type &DYND_UNUSED(dst_tp),
                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                                 const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                                 kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
@@ -220,7 +220,7 @@ namespace nd {
             b = kwds[1].as<R>();
           }
 
-          uniform_kernel::make(ckb, kernreq, ckb_offset, g.get(), a, b);
+          uniform_kernel::make(ckb, kernreq, g.get(), a, b);
         }
       };
 
