@@ -52,10 +52,8 @@ namespace nd {
     static SelfType *make(kernel_builder *ckb, kernel_request_t kernreq, A &&... args)
     {
       intptr_t ckb_offset = ckb->m_size;
-      inc_ckb_offset<SelfType>(ckb->m_size);
-      ckb->reserve(ckb->m_size);
-      PrefixType *rawself = ckb->template get_at<PrefixType>(ckb_offset);
-      return ckb->template init<SelfType>(rawself, kernreq, std::forward<A>(args)...);
+      ckb->emplace_back<SelfType>(kernreq, std::forward<A>(args)...);
+      return ckb->template get_at<SelfType>(ckb_offset);
     }
 
     /**                                                                        \
@@ -105,7 +103,7 @@ namespace nd {
                             kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      SelfType::make(ckb, kernreq);
+      ckb->emplace_back<SelfType>(kernreq);
     }
   };
 
