@@ -1888,6 +1888,16 @@ namespace nd {
         const string *std = reinterpret_cast<string *>(src[0]);
         string_to_number(dst, m_tid, std->begin(), std->end(), m_errmode);
       }
+
+      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                              intptr_t DYND_UNUSED(ckb_offset), const ndt::type &dst_tp,
+                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *kwds,
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        ckb->emplace_back<string_to_option_number_ck>(kernreq, dst_tp.get_type_id(), kwds[0].as<assign_error_mode>());
+      }
     };
 
     struct DYND_API string_to_option_tp_ck : nd::base_kernel<string_to_option_tp_ck, 1> {
