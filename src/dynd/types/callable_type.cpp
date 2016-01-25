@@ -245,6 +245,12 @@ struct callable_to_string_ck : nd::base_kernel<callable_to_string_ck, 1> {
   const char *m_dst_arrmeta;
   eval::eval_context m_ectx;
 
+  callable_to_string_ck(const ndt::type &src_tp, const ndt::type &dst_string_dt, const char *dst_arrmeta,
+                        eval::eval_context ectx)
+      : m_src_tp(src_tp), m_dst_string_dt(dst_string_dt), m_dst_arrmeta(dst_arrmeta), m_ectx(ectx)
+  {
+  }
+
   void single(char *dst, char *const *src)
   {
     const ndt::callable_type::data_type *af = reinterpret_cast<const ndt::callable_type::data_type *>(src[0]);
@@ -254,19 +260,6 @@ struct callable_to_string_ck : nd::base_kernel<callable_to_string_ck, 1> {
   }
 };
 } // anonymous namespace
-
-static void make_callable_to_string_assignment_kernel(nd::kernel_builder *ckb, const ndt::type &dst_string_dt,
-                                                      const char *dst_arrmeta, const ndt::type &src_tp,
-                                                      kernel_request_t kernreq, const eval::eval_context *ectx)
-{
-  typedef callable_to_string_ck self_type;
-  self_type *self = self_type::make(ckb, kernreq);
-  // The kernel data owns a reference to this type
-  self->m_src_tp = src_tp;
-  self->m_dst_string_dt = dst_string_dt;
-  self->m_dst_arrmeta = dst_arrmeta;
-  self->m_ectx = *ectx;
-}
 
 void ndt::callable_type::make_assignment_kernel(nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
                                                 const type &dst_tp, const char *dst_arrmeta, const type &src_tp,
@@ -278,7 +271,7 @@ void ndt::callable_type::make_assignment_kernel(nd::kernel_builder *ckb, intptr_
   else {
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
-      make_callable_to_string_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp, kernreq, ectx);
+      ckb->emplace_back<callable_to_string_ck>(kernreq, src_tp, dst_tp, dst_arrmeta, *ectx);
       return;
     }
   }

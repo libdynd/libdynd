@@ -52,8 +52,9 @@ namespace nd {
                             const std::map<std::string, ndt::type> &tp_vars)
     {
       const ndt::type &src0_element_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
-      make(ckb, kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
-           reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride, src0_element_tp.get_data_size());
+      ckb->emplace_back<unique_kernel>(
+          kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
+          reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride, src0_element_tp.get_data_size());
       ckb_offset = ckb->m_size;
 
       const callable &equal = nd::equal::get();

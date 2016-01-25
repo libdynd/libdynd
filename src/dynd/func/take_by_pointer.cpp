@@ -85,13 +85,13 @@ struct take_by_pointer_virtual_ck : nd::base_kernel<take_by_pointer_virtual_ck> 
       }
     }
 
-    take_by_pointer_outer_ck::make(ckb, kernreq, dst_size_stride[0].dim_size, dst_size_stride[0].stride,
-                                   src_size_stride[1][0].stride);
+    ckb->emplace_back<take_by_pointer_outer_ck>(kernreq, dst_size_stride[0].dim_size, dst_size_stride[0].stride,
+                                                src_size_stride[1][0].stride);
     ckb_offset = ckb->m_size;
 
     for (intptr_t i = 0; i < ndim; ++i) {
-      take_by_pointer_ck::make(ckb, kernel_request_single, src_size_stride[0][i].dim_size, src_size_stride[0][i].stride,
-                               src_size_stride[1][1].stride);
+      ckb->emplace_back<take_by_pointer_ck>(kernel_request_single, src_size_stride[0][i].dim_size,
+                                            src_size_stride[0][i].stride, src_size_stride[1][1].stride);
       ckb_offset = ckb->m_size;
     }
 

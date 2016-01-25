@@ -85,7 +85,7 @@ namespace nd {
             b = kwds[1].as<R>();
           }
 
-          uniform_kernel::make(ckb, kernreq, g.get(), a, b);
+          ckb->emplace_back<uniform_kernel>(kernreq, g.get(), a, b);
         }
       };
 
@@ -154,7 +154,7 @@ namespace nd {
             b = kwds[1].as<R>();
           }
 
-          uniform_kernel::make(ckb, kernreq, g.get(), a, b);
+          ckb->emplace_back<uniform_kernel>(kernreq, g.get(), a, b);
         }
       };
 
@@ -220,7 +220,7 @@ namespace nd {
             b = kwds[1].as<R>();
           }
 
-          uniform_kernel::make(ckb, kernreq, g.get(), a, b);
+          ckb->emplace_back<uniform_kernel>(kernreq, g.get(), a, b);
         }
       };
 

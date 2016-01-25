@@ -231,19 +231,19 @@ void dynd::make_pod_typed_data_assignment_kernel(nd::kernel_builder *ckb, intptr
   // Aligned specialization tables
   switch (data_size) {
   case 1:
-    nd::trivial_copy_kernel<1>::make(ckb, kernreq);
+    ckb->emplace_back<nd::trivial_copy_kernel<1>>(kernreq);
     break;
   case 2:
-    nd::trivial_copy_kernel<2>::make(ckb, kernreq);
+    ckb->emplace_back<nd::trivial_copy_kernel<2>>(kernreq);
     break;
   case 4:
-    nd::trivial_copy_kernel<4>::make(ckb, kernreq);
+    ckb->emplace_back<nd::trivial_copy_kernel<4>>(kernreq);
     break;
   case 8:
-    nd::trivial_copy_kernel<8>::make(ckb, kernreq);
+    ckb->emplace_back<nd::trivial_copy_kernel<8>>(kernreq);
     break;
   default:
-    nd::unaligned_copy_ck::make(ckb, kernreq, data_size);
+    ckb->emplace_back<nd::unaligned_copy_ck>(kernreq, data_size);
     break;
   }
 }

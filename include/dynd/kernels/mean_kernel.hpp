@@ -65,7 +65,7 @@ namespace nd {
                             const std::map<std::string, ndt::type> &tp_vars)
     {
       intptr_t mean_offset = ckb_offset;
-      make(ckb, kernreq, src_tp[0].get_size(src_arrmeta[0]));
+      ckb->emplace_back<mean_kernel>(kernreq, src_tp[0].get_size(src_arrmeta[0]));
       ckb_offset = ckb->m_size;
 
       nd::sum::get().get()->instantiate(nd::sum::get().get()->static_data(),

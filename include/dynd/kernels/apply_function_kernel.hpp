@@ -62,7 +62,7 @@ namespace nd {
                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,                   \
                             const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))       \
     {                                                                                                                  \
-      self_type::make(ckb, kernreq, args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                      \
+      ckb->emplace_back<self_type>(kernreq, args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));              \
     }                                                                                                                  \
   };                                                                                                                   \
                                                                                                                        \
@@ -111,7 +111,7 @@ namespace nd {
                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,                   \
                             const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))       \
     {                                                                                                                  \
-      self_type::make(ckb, kernreq, args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                      \
+      ckb->emplace_back<self_type>(kernreq, args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));              \
     }                                                                                                                  \
   }
 

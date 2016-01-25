@@ -37,7 +37,7 @@ namespace nd {
       {
         const array &val = *reinterpret_cast<array *>(static_data);
 
-        make(ckb, kernreq, const_cast<char *>(val.cdata()));
+        ckb->emplace_back<constant_kernel>(kernreq, const_cast<char *>(val.cdata()));
         ckb_offset = ckb->m_size;
         make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, dst_tp, val.get()->metadata(), kernreq,
                                &eval::default_eval_context);

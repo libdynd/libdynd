@@ -69,8 +69,9 @@ namespace nd {
                                                 kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,        \
                                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
     {                                                                                                                  \
-      self_type::make(ckb, kernreq, dynd::detail::make_value_wrapper(*reinterpret_cast<func_type *>(static_data)),     \
-                      args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                                    \
+      ckb->emplace_back<self_type>(kernreq,                                                                            \
+                                   dynd::detail::make_value_wrapper(*reinterpret_cast<func_type *>(static_data)),      \
+                                   args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                       \
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,              \
@@ -131,8 +132,9 @@ namespace nd {
                                                 kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,        \
                                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
     {                                                                                                                  \
-      self_type::make(ckb, kernreq, dynd::detail::make_value_wrapper(*reinterpret_cast<func_type *>(static_data)),     \
-                      args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                                    \
+      ckb->emplace_back<self_type>(kernreq,                                                                            \
+                                   dynd::detail::make_value_wrapper(*reinterpret_cast<func_type *>(static_data)),      \
+                                   args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                       \
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb, intptr_t ckb_offset,      \
@@ -213,9 +215,8 @@ namespace nd {
                                                 kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,        \
                                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
     {                                                                                                                  \
-                                                                                                                       \
-      self_type::make(ckb, kernreq, *reinterpret_cast<func_type **>(static_data),                                      \
-                      args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                                    \
+      ckb->emplace_back<self_type>(kernreq, *reinterpret_cast<func_type **>(static_data),                              \
+                                   args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                       \
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,              \
@@ -276,9 +277,8 @@ namespace nd {
                                                 kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,        \
                                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
     {                                                                                                                  \
-                                                                                                                       \
-      self_type::make(ckb, kernreq, *reinterpret_cast<func_type **>(static_data),                                      \
-                      args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                                    \
+      ckb->emplace_back<self_type>(kernreq, *reinterpret_cast<func_type **>(static_data),                              \
+                                   args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                       \
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,              \

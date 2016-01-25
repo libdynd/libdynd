@@ -64,7 +64,7 @@ namespace nd {
                             intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      make(ckb, kernreq, src_tp[0].get_data_size());
+      ckb->emplace_back<byteswap_ck>(kernreq, src_tp[0].get_data_size());
     }
   };
 
@@ -103,7 +103,7 @@ namespace nd {
                             intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      make(ckb, kernreq, src_tp[0].get_data_size());
+      ckb->emplace_back<pairwise_byteswap_ck>(kernreq, src_tp[0].get_data_size());
     }
   };
 

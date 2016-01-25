@@ -181,18 +181,22 @@ namespace nd {
 
     /** For debugging/informational purposes */
     intptr_t get_capacity() const { return m_capacity; }
+
+    /**
+     * Creates the kernel, and increments ``m_size`` to the position after it.
+     */
+    template <typename KernelType, typename... ArgTypes>
+    void emplace_back(ArgTypes &&... args)
+    {
+      intptr_t ckb_offset = m_size;
+      inc_ckb_offset<KernelType>(m_size);
+      reserve(m_size);
+      KernelType *rawself = this->get_at<KernelType>(ckb_offset);
+      this->init<KernelType>(rawself, std::forward<ArgTypes>(args)...);
+    }
   };
 
 } // namespace dynd::nd
-
-inline ckernel_prefix *ckernel_prefix::make(nd::kernel_builder *ckb, kernel_request_t kernreq, void *func)
-{
-  intptr_t ckb_offset = ckb->m_size;
-  nd::inc_ckb_offset<ckernel_prefix>(ckb->m_size);
-  ckb->reserve(ckb->m_size);
-  ckernel_prefix *rawself = ckb->template get_at<ckernel_prefix>(ckb_offset);
-  return ckb->template init<ckernel_prefix>(rawself, kernreq, func);
-}
 
 inline void ckernel_prefix::instantiate(char *static_data, char *DYND_UNUSED(data), nd::kernel_builder *ckb,
                                         intptr_t DYND_UNUSED(ckb_offset), const ndt::type &DYND_UNUSED(dst_tp),
@@ -219,7 +223,7 @@ inline void ckernel_prefix::instantiate(char *static_data, char *DYND_UNUSED(dat
     throw std::invalid_argument("no kernel request");
   }
 
-  make(ckb, kernreq, func);
+  ckb->emplace_back<ckernel_prefix>(kernreq, func);
 }
 
 } // namespace dynd

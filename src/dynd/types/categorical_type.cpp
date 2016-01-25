@@ -464,7 +464,7 @@ struct get_ints_kernel : nd::base_kernel<get_ints_kernel> {
                           kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    get_ints_kernel::make(ckb, kernreq, kwds[0]);
+    ckb->emplace_back<get_ints_kernel>(kernreq, kwds[0]);
   }
 
   static nd::array helper(const nd::array &n)

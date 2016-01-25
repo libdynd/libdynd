@@ -66,7 +66,8 @@ void nd::functional::rolling_ck::instantiate(char *_static_data, char *data, ker
   rolling_callable_data *static_data = *reinterpret_cast<rolling_callable_data **>(_static_data);
 
   intptr_t root_ckb_offset = ckb_offset;
-  self_type *self = self_type::make(ckb, kernreq);
+  ckb->emplace_back<self_type>(kernreq);
+  self_type *self = ckb->get_at<self_type>(root_ckb_offset);
   ckb_offset = ckb->m_size;
   const base_callable *window_af = static_data->window_op.get();
   ndt::type dst_el_tp, src_el_tp;

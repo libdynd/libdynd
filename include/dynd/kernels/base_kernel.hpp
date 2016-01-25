@@ -44,20 +44,6 @@ namespace nd {
       return reserve(reinterpret_cast<kernel_builder *>(ckb), ckb_offset, requested_capacity);
     }
 
-    /**
-     * Creates the ckernel, and increments ``inckb_offset``
-     * to the position after it.
-     */
-    template <typename... A>
-    static SelfType *make(kernel_builder *ckb, kernel_request_t kernreq, A &&... args)
-    {
-      intptr_t ckb_offset = ckb->m_size;
-      inc_ckb_offset<SelfType>(ckb->m_size);
-      ckb->reserve(ckb->m_size);
-      PrefixType *rawself = ckb->template get_at<PrefixType>(ckb_offset);
-      return ckb->template init<SelfType>(rawself, kernreq, std::forward<A>(args)...);
-    }
-
     /**                                                                        \
      * Initializes an instance of this ckernel in-place according to the       \
      * kernel request. This calls the constructor in-place, and initializes    \
@@ -105,7 +91,7 @@ namespace nd {
                             kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      SelfType::make(ckb, kernreq);
+      ckb->emplace_back<SelfType>(kernreq);
     }
   };
 

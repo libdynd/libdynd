@@ -134,8 +134,6 @@ struct DYND_API ckernel_prefix {
     return self;
   }
 
-  static ckernel_prefix *make(nd::kernel_builder *ckb, kernel_request_t kernreq, void *func);
-
   static char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp),
                          intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
                          const nd::array *DYND_UNUSED(kwds),
