@@ -175,8 +175,8 @@ namespace nd {
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         intptr_t neighborhood_offset = ckb_offset;
-        neighborhood_kernel::make(
-            ckb, kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(dst_arrmeta)->stride,
+        ckb->emplace_back<neighborhood_kernel>(
+            kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(dst_arrmeta)->stride,
             reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
             reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride,
             reinterpret_cast<data_type *>(data)->shape[0],

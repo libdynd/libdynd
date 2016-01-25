@@ -169,34 +169,34 @@ namespace nd {
       {
         switch (dst_tp.get_dtype().get_type_id()) {
         case bool_type_id:
-          assign_na_kernel<bool_type_id, bool_kind_type_id>::make(ckb, kernreq);
+          ckb->emplace_back<assign_na_kernel<bool_type_id, bool_kind_type_id>>(kernreq);
           break;
         case int8_type_id:
-          assign_na_kernel<int8_type_id, int_kind_type_id>::make(ckb, kernreq);
+          ckb->emplace_back<assign_na_kernel<int8_type_id, int_kind_type_id>>(kernreq);
           break;
         case int16_type_id:
-          assign_na_kernel<int16_type_id, int_kind_type_id>::make(ckb, kernreq);
+          ckb->emplace_back<assign_na_kernel<int16_type_id, int_kind_type_id>>(kernreq);
           break;
         case int32_type_id:
-          assign_na_kernel<int32_type_id, int_kind_type_id>::make(ckb, kernreq);
+          ckb->emplace_back<assign_na_kernel<int32_type_id, int_kind_type_id>>(kernreq);
           break;
         case int64_type_id:
-          assign_na_kernel<int64_type_id, int_kind_type_id>::make(ckb, kernreq);
+          ckb->emplace_back<assign_na_kernel<int64_type_id, int_kind_type_id>>(kernreq);
           break;
         case int128_type_id:
-          assign_na_kernel<int128_type_id, int_kind_type_id>::make(ckb, kernreq);
+          ckb->emplace_back<assign_na_kernel<int128_type_id, int_kind_type_id>>(kernreq);
           break;
         case float32_type_id:
-          assign_na_kernel<float32_type_id, float_kind_type_id>::make(ckb, kernreq);
+          ckb->emplace_back<assign_na_kernel<float32_type_id, float_kind_type_id>>(kernreq);
           break;
         case float64_type_id:
-          assign_na_kernel<float64_type_id, float_kind_type_id>::make(ckb, kernreq);
+          ckb->emplace_back<assign_na_kernel<float64_type_id, float_kind_type_id>>(kernreq);
           break;
         case complex_float32_type_id:
-          assign_na_kernel<complex_float32_type_id, complex_kind_type_id>::make(ckb, kernreq);
+          ckb->emplace_back<assign_na_kernel<complex_float32_type_id, complex_kind_type_id>>(kernreq);
           break;
         case complex_float64_type_id:
-          assign_na_kernel<complex_float64_type_id, complex_kind_type_id>::make(ckb, kernreq);
+          ckb->emplace_back<assign_na_kernel<complex_float64_type_id, complex_kind_type_id>>(kernreq);
           break;
         default:
           throw type_error("fixed_dim_assign_na: expected built-in type");

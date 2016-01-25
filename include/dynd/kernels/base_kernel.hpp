@@ -48,7 +48,6 @@ namespace nd {
      * Creates the ckernel, and increments ``inckb_offset``
      * to the position after it.
      */
-
     template <typename... A>
     static SelfType *make(kernel_builder *ckb, kernel_request_t kernreq, A &&... args)
     {

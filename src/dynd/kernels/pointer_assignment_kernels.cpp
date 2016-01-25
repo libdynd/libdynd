@@ -21,55 +21,55 @@ void dynd::make_builtin_value_to_pointer_assignment_kernel(nd::kernel_builder *c
 {
   switch (tp_id) {
   case bool_type_id:
-    value_to_pointer_ck<bool1>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<bool1>>(kernreq);
     break;
   case int8_type_id:
-    value_to_pointer_ck<int8>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<int8>>(kernreq);
     break;
   case int16_type_id:
-    value_to_pointer_ck<int16>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<int16>>(kernreq);
     break;
   case int32_type_id:
-    value_to_pointer_ck<int32>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<int32>>(kernreq);
     break;
   case int64_type_id:
-    value_to_pointer_ck<int64>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<int64>>(kernreq);
     break;
   case int128_type_id:
-    value_to_pointer_ck<int128>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<int128>>(kernreq);
     break;
   case uint8_type_id:
-    value_to_pointer_ck<uint8>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<uint8>>(kernreq);
     break;
   case uint16_type_id:
-    value_to_pointer_ck<uint16>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<uint16>>(kernreq);
     break;
   case uint32_type_id:
-    value_to_pointer_ck<uint32>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<uint32>>(kernreq);
     break;
   case uint64_type_id:
-    value_to_pointer_ck<uint64>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<uint64>>(kernreq);
     break;
   case uint128_type_id:
-    value_to_pointer_ck<uint128>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<uint128>>(kernreq);
     break;
   case float16_type_id:
-    value_to_pointer_ck<float16>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<float16>>(kernreq);
     break;
   case float32_type_id:
-    value_to_pointer_ck<float32>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<float32>>(kernreq);
     break;
   case float64_type_id:
-    value_to_pointer_ck<float64>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<float64>>(kernreq);
     break;
   case float128_type_id:
-    value_to_pointer_ck<float128>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<float128>>(kernreq);
     break;
   case complex_float32_type_id:
-    value_to_pointer_ck<complex<float>>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<complex<float>>>(kernreq);
     break;
   case complex_float64_type_id:
-    value_to_pointer_ck<complex<double>>::make(ckb, kernreq);
+    ckb->emplace_back<value_to_pointer_ck<complex<double>>>(kernreq);
     break;
   default: {
     stringstream ss;
