@@ -62,14 +62,14 @@ namespace nd {
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate_without_cuda_launch(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,       \
-                                                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
+                                                intptr_t DYND_UNUSED(ckb_offset),                                      \
+                                                const ndt::type &DYND_UNUSED(dst_tp),                                  \
                                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
                                                 const ndt::type *src_tp, const char *const *src_arrmeta,               \
                                                 kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,        \
                                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
     {                                                                                                                  \
-      self_type::make(ckb, kernreq, ckb_offset,                                                                        \
-                      dynd::detail::make_value_wrapper(*reinterpret_cast<func_type *>(static_data)),                   \
+      self_type::make(ckb, kernreq, dynd::detail::make_value_wrapper(*reinterpret_cast<func_type *>(static_data)),     \
                       args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                                    \
     }                                                                                                                  \
                                                                                                                        \
@@ -124,14 +124,14 @@ namespace nd {
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate_without_cuda_launch(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,       \
-                                                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
+                                                intptr_t DYND_UNUSED(ckb_offset),                                      \
+                                                const ndt::type &DYND_UNUSED(dst_tp),                                  \
                                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
                                                 const ndt::type *src_tp, const char *const *src_arrmeta,               \
                                                 kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,        \
                                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
     {                                                                                                                  \
-      self_type::make(ckb, kernreq, ckb_offset,                                                                        \
-                      dynd::detail::make_value_wrapper(*reinterpret_cast<func_type *>(static_data)),                   \
+      self_type::make(ckb, kernreq, dynd::detail::make_value_wrapper(*reinterpret_cast<func_type *>(static_data)),     \
                       args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                                    \
     }                                                                                                                  \
                                                                                                                        \
@@ -206,14 +206,15 @@ namespace nd {
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate_without_cuda_launch(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,       \
-                                                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
+                                                intptr_t DYND_UNUSED(ckb_offset),                                      \
+                                                const ndt::type &DYND_UNUSED(dst_tp),                                  \
                                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
                                                 const ndt::type *src_tp, const char *const *src_arrmeta,               \
                                                 kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,        \
                                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
     {                                                                                                                  \
                                                                                                                        \
-      self_type::make(ckb, kernreq, ckb_offset, *reinterpret_cast<func_type **>(static_data),                          \
+      self_type::make(ckb, kernreq, *reinterpret_cast<func_type **>(static_data),                                      \
                       args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                                    \
     }                                                                                                                  \
                                                                                                                        \
@@ -268,14 +269,15 @@ namespace nd {
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate_without_cuda_launch(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,       \
-                                                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
+                                                intptr_t DYND_UNUSED(ckb_offset),                                      \
+                                                const ndt::type &DYND_UNUSED(dst_tp),                                  \
                                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
                                                 const ndt::type *src_tp, const char *const *src_arrmeta,               \
                                                 kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,        \
                                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
     {                                                                                                                  \
                                                                                                                        \
-      self_type::make(ckb, kernreq, ckb_offset, *reinterpret_cast<func_type **>(static_data),                          \
+      self_type::make(ckb, kernreq, *reinterpret_cast<func_type **>(static_data),                                      \
                       args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                                    \
     }                                                                                                                  \
                                                                                                                        \

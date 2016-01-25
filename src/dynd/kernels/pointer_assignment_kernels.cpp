@@ -16,60 +16,60 @@ struct value_to_pointer_ck : nd::base_kernel<value_to_pointer_ck<T>, 1> {
 };
 } // anonymous namespace
 
-void dynd::make_builtin_value_to_pointer_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
+void dynd::make_builtin_value_to_pointer_assignment_kernel(nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
                                                            type_id_t tp_id, kernel_request_t kernreq)
 {
   switch (tp_id) {
   case bool_type_id:
-    value_to_pointer_ck<bool1>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<bool1>::make(ckb, kernreq);
     break;
   case int8_type_id:
-    value_to_pointer_ck<int8>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<int8>::make(ckb, kernreq);
     break;
   case int16_type_id:
-    value_to_pointer_ck<int16>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<int16>::make(ckb, kernreq);
     break;
   case int32_type_id:
-    value_to_pointer_ck<int32>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<int32>::make(ckb, kernreq);
     break;
   case int64_type_id:
-    value_to_pointer_ck<int64>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<int64>::make(ckb, kernreq);
     break;
   case int128_type_id:
-    value_to_pointer_ck<int128>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<int128>::make(ckb, kernreq);
     break;
   case uint8_type_id:
-    value_to_pointer_ck<uint8>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<uint8>::make(ckb, kernreq);
     break;
   case uint16_type_id:
-    value_to_pointer_ck<uint16>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<uint16>::make(ckb, kernreq);
     break;
   case uint32_type_id:
-    value_to_pointer_ck<uint32>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<uint32>::make(ckb, kernreq);
     break;
   case uint64_type_id:
-    value_to_pointer_ck<uint64>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<uint64>::make(ckb, kernreq);
     break;
   case uint128_type_id:
-    value_to_pointer_ck<uint128>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<uint128>::make(ckb, kernreq);
     break;
   case float16_type_id:
-    value_to_pointer_ck<float16>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<float16>::make(ckb, kernreq);
     break;
   case float32_type_id:
-    value_to_pointer_ck<float32>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<float32>::make(ckb, kernreq);
     break;
   case float64_type_id:
-    value_to_pointer_ck<float64>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<float64>::make(ckb, kernreq);
     break;
   case float128_type_id:
-    value_to_pointer_ck<float128>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<float128>::make(ckb, kernreq);
     break;
   case complex_float32_type_id:
-    value_to_pointer_ck<complex<float>>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<complex<float>>::make(ckb, kernreq);
     break;
   case complex_float64_type_id:
-    value_to_pointer_ck<complex<double>>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<complex<double>>::make(ckb, kernreq);
     break;
   default: {
     stringstream ss;

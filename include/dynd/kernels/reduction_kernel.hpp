@@ -318,7 +318,8 @@ namespace nd {
         intptr_t src_size = src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
         intptr_t src_stride = src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_stride(src_arrmeta[0]);
 
-        make(ckb, kernreq, ckb_offset, src_size, src_stride);
+        make(ckb, kernreq, src_size, src_stride);
+        ckb_offset = ckb->m_size;
 
         --reinterpret_cast<data_type *>(data)->ndim;
         --reinterpret_cast<data_type *>(data)->naxis;
@@ -446,7 +447,8 @@ namespace nd {
         intptr_t src_stride = src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_stride(src_arrmeta[0]);
 
         intptr_t root_ckb_offset = ckb_offset;
-        reduction_kernel *e = make(ckb, kernreq, ckb_offset);
+        reduction_kernel *e = make(ckb, kernreq);
+        ckb_offset = ckb->m_size;
         // The striding parameters
         e->src_stride = src_stride;
         e->size = src_size;
@@ -573,8 +575,8 @@ namespace nd {
         const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(ndt::var_dim_type::metadata_type);
 
         intptr_t root_ckb_offset = ckb_offset;
-        make(ckb, kernreq, ckb_offset,
-             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(src_arrmeta[0])->stride);
+        make(ckb, kernreq, reinterpret_cast<const ndt::var_dim_type::metadata_type *>(src_arrmeta[0])->stride);
+        ckb_offset = ckb->m_size;
 
         --reinterpret_cast<data_type *>(data)->ndim;
         --reinterpret_cast<data_type *>(data)->naxis;
@@ -684,7 +686,8 @@ namespace nd {
 
         intptr_t dst_stride = dst_tp.extended<ndt::fixed_dim_type>()->get_fixed_stride(dst_arrmeta);
 
-        make(ckb, kernreq, ckb_offset, src_size, dst_stride, src_stride);
+        make(ckb, kernreq, src_size, dst_stride, src_stride);
+        ckb_offset = ckb->m_size;
 
         --reinterpret_cast<data_type *>(data)->ndim;
 
@@ -819,7 +822,8 @@ namespace nd {
         const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
 
         intptr_t root_ckb_offset = ckb_offset;
-        reduction_kernel *self = make(ckb, kernreq, ckb_offset, dst_stride, src_stride);
+        reduction_kernel *self = make(ckb, kernreq, dst_stride, src_stride);
+        ckb_offset = ckb->m_size;
 
         // The striding parameters
         self->size = src_size;

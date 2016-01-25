@@ -32,7 +32,8 @@ namespace nd {
                             const std::map<std::string, ndt::type> &tp_vars)
     {
       const ndt::type &tp = kwds[0].as<ndt::type>();
-      get_then_copy_kernel::make(ckb, kernreq, ckb_offset, tp);
+      get_then_copy_kernel::make(ckb, kernreq, tp);
+      ckb_offset = ckb->m_size;
 
       const char *src_metadata = (tp.extended<TypeType>()->*Func)()->metadata();
 

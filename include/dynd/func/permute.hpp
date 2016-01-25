@@ -65,7 +65,8 @@ namespace kernels {
       const char *src_arrmeta_inv[N];
       inv(src_arrmeta_inv, dst_arrmeta, src_arrmeta, perm);
 
-      self_type::make(ckb, kernreq, ckb_offset, detail::make_array_wrapper<N>(perm));
+      self_type::make(ckb, kernreq, detail::make_array_wrapper<N>(perm));
+      ckb_offset = ckb->m_size;
       child->instantiate(const_cast<char *>(child->static_data()), NULL, ckb, ckb_offset, ndt::make_type<void>(), NULL,
                          nsrc, src_tp_inv, src_arrmeta_inv, kernreq, nkwd, kwds, tp_vars);
     }
@@ -128,7 +129,7 @@ namespace kernels {
       single(dst, src_inv_perm, child);
     }
 
-    static void instantiate(char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    static void instantiate(char *static_data, char *DYND_UNUSED(data), nd::kernel_builder *ckb, intptr_t ckb_offset,
                             const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                             const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
@@ -146,7 +147,8 @@ namespace kernels {
       const char *src_arrmeta_inv[N];
       inv_permute(src_arrmeta_inv, src_arrmeta, perm);
 
-      self_type::make(ckb, kernreq, ckb_offset, detail::make_array_wrapper<N>(perm));
+      self_type::make(ckb, kernreq, detail::make_array_wrapper<N>(perm));
+      ckb_offset = ckb->m_size;
       child->instantiate(const_cast<char *>(child->static_data()), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                          src_tp_inv, src_arrmeta_inv, kernreq, nkwd, kwds, tp_vars);
     }

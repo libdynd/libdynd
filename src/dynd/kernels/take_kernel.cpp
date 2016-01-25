@@ -56,7 +56,8 @@ void nd::masked_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_
 {
   typedef nd::masked_take_ck self_type;
 
-  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq);
+  ckb_offset = ckb->m_size;
 
   if (dst_tp.get_type_id() != var_dim_type_id) {
     stringstream ss;
@@ -132,7 +133,8 @@ void nd::indexed_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND
 {
   typedef nd::indexed_take_ck self_type;
 
-  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq);
+  ckb_offset = ckb->m_size;
 
   ndt::type dst_el_tp;
   const char *dst_el_meta;

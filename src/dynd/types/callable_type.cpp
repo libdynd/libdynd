@@ -255,32 +255,31 @@ struct callable_to_string_ck : nd::base_kernel<callable_to_string_ck, 1> {
 };
 } // anonymous namespace
 
-static intptr_t make_callable_to_string_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
-                                                          const ndt::type &dst_string_dt, const char *dst_arrmeta,
-                                                          const ndt::type &src_tp, kernel_request_t kernreq,
-                                                          const eval::eval_context *ectx)
+static void make_callable_to_string_assignment_kernel(nd::kernel_builder *ckb, const ndt::type &dst_string_dt,
+                                                      const char *dst_arrmeta, const ndt::type &src_tp,
+                                                      kernel_request_t kernreq, const eval::eval_context *ectx)
 {
   typedef callable_to_string_ck self_type;
-  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq);
   // The kernel data owns a reference to this type
   self->m_src_tp = src_tp;
   self->m_dst_string_dt = dst_string_dt;
   self->m_dst_arrmeta = dst_arrmeta;
   self->m_ectx = *ectx;
-  return ckb_offset;
 }
 
-intptr_t ndt::callable_type::make_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &dst_tp,
-                                                    const char *dst_arrmeta, const type &src_tp,
-                                                    const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                                    const eval::eval_context *ectx) const
+void ndt::callable_type::make_assignment_kernel(nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
+                                                const type &dst_tp, const char *dst_arrmeta, const type &src_tp,
+                                                const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                                const eval::eval_context *ectx) const
 {
   if (this == dst_tp.extended()) {
   }
   else {
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
-      return make_callable_to_string_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, kernreq, ectx);
+      make_callable_to_string_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp, kernreq, ectx);
+      return;
     }
   }
 

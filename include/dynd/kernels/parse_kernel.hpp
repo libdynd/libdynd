@@ -243,7 +243,8 @@ namespace nd {
       {
 
         intptr_t self_offset = ckb_offset;
-        make(ckb, kernreq, ckb_offset);
+        make(ckb, kernreq);
+        ckb_offset = ckb->m_size;
 
         assign_na::get()->instantiate(assign_na::get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, 0,
                                       nullptr, nullptr, kernreq, nkwd, kwds, tp_vars);
@@ -333,8 +334,8 @@ namespace nd {
         const size_t *arrmeta_offsets = dst_tp.extended<ndt::struct_type>()->get_arrmeta_offsets_raw();
 
         intptr_t self_offset = ckb_offset;
-        make(ckb, kernreq, ckb_offset, dst_tp, field_count,
-             dst_tp.extended<ndt::struct_type>()->get_data_offsets(dst_arrmeta));
+        make(ckb, kernreq, dst_tp, field_count, dst_tp.extended<ndt::struct_type>()->get_data_offsets(dst_arrmeta));
+        ckb_offset = ckb->m_size;
 
         for (size_t i = 0; i < field_count; ++i) {
           get_self(ckb, self_offset)->child_offsets[i] = ckb_offset - self_offset;
@@ -387,8 +388,9 @@ namespace nd {
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        make(ckb, kernreq, ckb_offset, dst_tp, reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size,
+        make(ckb, kernreq, dst_tp, reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size,
              reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride);
+        ckb_offset = ckb->m_size;
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset, child_dst_tp,
@@ -457,9 +459,9 @@ namespace nd {
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        make(ckb, kernreq, ckb_offset, dst_tp,
-             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->blockref,
+        make(ckb, kernreq, dst_tp, reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->blockref,
              reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->stride);
+        ckb_offset = ckb->m_size;
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::var_dim_type>()->get_element_type();
         json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset, child_dst_tp,

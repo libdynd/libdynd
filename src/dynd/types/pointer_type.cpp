@@ -311,7 +311,8 @@ void ndt::pointer_type::make_operand_to_value_assignment_kernel(nd::kernel_build
                                                                 kernel_request_t kernreq,
                                                                 const eval::eval_context *ectx) const
 {
-  operand_to_value_ck::make(ckb, kernreq, ckb_offset);
+  operand_to_value_ck::make(ckb, kernreq);
+  ckb_offset = ckb->m_size;
   ::make_assignment_kernel(ckb, ckb_offset, m_target_tp, dst_arrmeta, m_target_tp,
                            src_arrmeta + sizeof(pointer_type_arrmeta), kernel_request_single, ectx);
 }
@@ -367,13 +368,13 @@ struct dereference_kernel : nd::base_kernel<dereference_kernel> {
   }
 
   static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                          intptr_t DYND_UNUSED(ckb_offset), const ndt::type &DYND_UNUSED(dst_tp),
                           const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                           const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                           kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, ckb_offset, kwds[0]);
+    make(ckb, kernreq, kwds[0]);
   }
 
   static nd::array helper(const nd::array &self)

@@ -61,14 +61,14 @@ namespace nd {
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate_without_cuda_launch(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data),               \
-                                                kernel_builder *ckb, intptr_t ckb_offset,                              \
+                                                kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),                 \
                                                 const ndt::type &DYND_UNUSED(dst_tp),                                  \
                                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
                                                 const ndt::type *src_tp, const char *const *src_arrmeta,               \
                                                 kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,        \
                                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
     {                                                                                                                  \
-      self_type::make(ckb, kernreq, ckb_offset, args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));          \
+      self_type::make(ckb, kernreq, args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                      \
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,              \
@@ -120,15 +120,13 @@ namespace nd {
       }                                                                                                                \
     }                                                                                                                  \
                                                                                                                        \
-    static void instantiate_without_cuda_launch(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),         \
-                                                char *DYND_UNUSED(data), kernel_builder *ckb, intptr_t ckb_offset,     \
-                                                const ndt::type &DYND_UNUSED(dst_tp),                                  \
-                                                const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
-                                                const ndt::type *src_tp, const char *const *src_arrmeta,               \
-                                                kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,        \
-                                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
+    static void instantiate_without_cuda_launch(                                                                       \
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), kernel_builder *ckb,   \
+        intptr_t DYND_UNUSED(ckb_offset), const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),  \
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, \
+        intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))            \
     {                                                                                                                  \
-      self_type::make(ckb, kernreq, ckb_offset, args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));          \
+      self_type::make(ckb, kernreq, args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                      \
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,              \
