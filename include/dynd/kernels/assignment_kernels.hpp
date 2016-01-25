@@ -1881,6 +1881,8 @@ namespace nd {
       type_id_t m_tid;
       assign_error_mode m_errmode;
 
+      string_to_option_number_ck() {}
+
       string_to_option_number_ck(type_id_t tid, assign_error_mode errmode) : m_tid(tid), m_errmode(errmode) {}
 
       void single(char *dst, char *const *src)
