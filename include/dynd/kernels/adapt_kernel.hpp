@@ -46,8 +46,8 @@ namespace nd {
                               kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        make(ckb, kernreq, reinterpret_cast<static_data_type *>(static_data)->value_tp,
-             reinterpret_cast<static_data_type *>(static_data)->forward);
+        ckb->emplace_back<adapt_kernel>(kernreq, reinterpret_cast<static_data_type *>(static_data)->value_tp,
+                                        reinterpret_cast<static_data_type *>(static_data)->forward);
       }
     };
 

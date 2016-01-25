@@ -311,7 +311,7 @@ void ndt::pointer_type::make_operand_to_value_assignment_kernel(nd::kernel_build
                                                                 kernel_request_t kernreq,
                                                                 const eval::eval_context *ectx) const
 {
-  operand_to_value_ck::make(ckb, kernreq);
+  ckb->emplace_back<operand_to_value_ck>(kernreq);
   ckb_offset = ckb->m_size;
   ::make_assignment_kernel(ckb, ckb_offset, m_target_tp, dst_arrmeta, m_target_tp,
                            src_arrmeta + sizeof(pointer_type_arrmeta), kernel_request_single, ectx);
@@ -374,7 +374,7 @@ struct dereference_kernel : nd::base_kernel<dereference_kernel> {
                           kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, kwds[0]);
+    ckb->emplace_back<dereference_kernel>(kernreq, kwds[0]);
   }
 
   static nd::array helper(const nd::array &self)

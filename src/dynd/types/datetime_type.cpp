@@ -44,7 +44,7 @@ struct datetime_get_struct_kernel : nd::base_kernel<datetime_get_struct_kernel, 
                           intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, src_tp[0]);
+    ckb->emplace_back<datetime_get_struct_kernel>(kernreq, src_tp[0]);
   }
 };
 
@@ -65,7 +65,7 @@ struct datetime_set_struct_kernel : nd::base_kernel<datetime_set_struct_kernel, 
                           intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, src_tp[0]);
+    ckb->emplace_back<datetime_set_struct_kernel>(kernreq, src_tp[0]);
   }
 };
 
@@ -100,7 +100,7 @@ struct datetime_get_date_kernel : nd::base_kernel<datetime_get_date_kernel, 1> {
                           intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, src_tp[0]);
+    ckb->emplace_back<datetime_get_date_kernel>(kernreq, src_tp[0]);
   }
 };
 
@@ -134,7 +134,7 @@ struct datetime_get_time_kernel : nd::base_kernel<datetime_get_time_kernel, 1> {
                           intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, src_tp[0]);
+    ckb->emplace_back<datetime_get_time_kernel>(kernreq, src_tp[0]);
   }
 };
 
@@ -165,7 +165,7 @@ struct datetime_get_year_kernel : nd::base_kernel<datetime_get_year_kernel, 1> {
                           intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, src_tp[0]);
+    ckb->emplace_back<datetime_get_year_kernel>(kernreq, src_tp[0]);
   }
 };
 
@@ -196,7 +196,7 @@ struct datetime_get_month_kernel : nd::base_kernel<datetime_get_month_kernel, 1>
                           intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, src_tp[0]);
+    ckb->emplace_back<datetime_get_month_kernel>(kernreq, src_tp[0]);
   }
 };
 
@@ -227,7 +227,7 @@ struct datetime_get_day_kernel : nd::base_kernel<datetime_get_day_kernel, 1> {
                           intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, src_tp[0]);
+    ckb->emplace_back<datetime_get_day_kernel>(kernreq, src_tp[0]);
   }
 };
 
@@ -261,7 +261,7 @@ struct datetime_get_hour_kernel : nd::base_kernel<datetime_get_hour_kernel, 1> {
                           intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, src_tp[0]);
+    ckb->emplace_back<datetime_get_hour_kernel>(kernreq, src_tp[0]);
   }
 };
 
@@ -295,7 +295,7 @@ struct datetime_get_minute_kernel : nd::base_kernel<datetime_get_minute_kernel, 
                           intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, src_tp[0]);
+    ckb->emplace_back<datetime_get_minute_kernel>(kernreq, src_tp[0]);
   }
 };
 
@@ -329,7 +329,7 @@ struct datetime_get_second_kernel : nd::base_kernel<datetime_get_second_kernel, 
                           intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, src_tp[0]);
+    ckb->emplace_back<datetime_get_second_kernel>(kernreq, src_tp[0]);
   }
 };
 
@@ -363,7 +363,7 @@ struct datetime_get_microsecond_kernel : nd::base_kernel<datetime_get_microsecon
                           intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, src_tp[0]);
+    ckb->emplace_back<datetime_get_microsecond_kernel>(kernreq, src_tp[0]);
   }
 };
 
@@ -396,7 +396,7 @@ struct datetime_get_tick_kernel : nd::base_kernel<datetime_get_tick_kernel, 1> {
                           intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    make(ckb, kernreq, src_tp[0]);
+    ckb->emplace_back<datetime_get_tick_kernel>(kernreq, src_tp[0]);
   }
 };
 

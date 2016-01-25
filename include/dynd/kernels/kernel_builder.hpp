@@ -186,13 +186,13 @@ namespace nd {
      * Creates the kernel, and increments ``m_size`` to the position after it.
      */
     template <typename KernelType, typename... ArgTypes>
-    void emplace_back(kernel_request_t kernreq, ArgTypes &&... args)
+    void emplace_back(ArgTypes &&... args)
     {
       intptr_t ckb_offset = m_size;
       inc_ckb_offset<KernelType>(m_size);
       reserve(m_size);
       KernelType *rawself = this->get_at<KernelType>(ckb_offset);
-      this->init<KernelType>(rawself, kernreq, std::forward<ArgTypes>(args)...);
+      this->init<KernelType>(rawself, std::forward<ArgTypes>(args)...);
     }
   };
 
