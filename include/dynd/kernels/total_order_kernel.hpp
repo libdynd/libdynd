@@ -50,7 +50,7 @@ namespace nd {
                               intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        total_order_kernel::make(ckb, kernreq, src_tp[0].extended<ndt::fixed_string_type>()->get_size());
+        ckb->emplace_back<total_order_kernel>(kernreq, src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       }
     };
 
