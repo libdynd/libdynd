@@ -16,32 +16,10 @@ namespace nd {
 
   template <typename PrefixType, typename SelfType>
   struct kernel_prefix_wrapper : PrefixType {
-    DYND_CUDA_HOST_DEVICE static SelfType *get_self(PrefixType *rawself)
-    {
-      return reinterpret_cast<SelfType *>(rawself);
-    }
-
-    static SelfType *get_self(kernel_builder *ckb, intptr_t ckb_offset)
-    {
-      return ckb->template get_at<SelfType>(ckb_offset);
-    }
-
     /**  Returns the child ckernel immediately following this one. */
     DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child(intptr_t offset = sizeof(SelfType))
     {
       return ckernel_prefix::get_child(offset);
-    }
-
-    static SelfType *reserve(kernel_builder *ckb, intptr_t ckb_offset, size_t requested_capacity)
-    {
-      ckb->reserve(requested_capacity);
-      return get_self(ckb, ckb_offset);
-    }
-
-    static SelfType *reserve(void *ckb, kernel_request_t DYND_UNUSED(kernreq), intptr_t ckb_offset,
-                             size_t requested_capacity)
-    {
-      return reserve(reinterpret_cast<kernel_builder *>(ckb), ckb_offset, requested_capacity);
     }
 
     /**                                                                        \
@@ -54,10 +32,6 @@ namespace nd {
     {
       /* Call the constructor in-place. */
       SelfType *self = new (rawself) SelfType(args...);
-      /* Double check that the C++ struct layout is as we expect. */
-      if (self != get_self(rawself)) {
-        DYND_HOST_THROW(std::runtime_error, "internal ckernel error: struct layout is not valid");
-      }
       self->destructor = &SelfType::destruct;
 
       return self;
@@ -174,7 +148,7 @@ namespace nd {
     __VA_ARGS__ static void strided_wrapper(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,    \
                                             const intptr_t *src_stride, size_t count)                                  \
     {                                                                                                                  \
-      SelfType::get_self(self)->strided(dst, dst_stride, src, src_stride, count);                                      \
+      reinterpret_cast<SelfType *>(self)->strided(dst, dst_stride, src, src_stride, count);                            \
     }                                                                                                                  \
                                                                                                                        \
     static const volatile char *DYND_USED(ir);                                                                         \
@@ -193,9 +167,8 @@ namespace nd {
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),                            \
                              const intptr_t *DYND_UNUSED(src_stride), size_t count)                                    \
     {                                                                                                                  \
-      SelfType *self = SelfType::get_self(this);                                                                       \
       for (size_t i = 0; i != count; ++i) {                                                                            \
-        self->single(dst, NULL);                                                                                       \
+        reinterpret_cast<SelfType *>(this)->single(dst, NULL);                                                         \
         dst += dst_stride;                                                                                             \
       }                                                                                                                \
     }                                                                                                                  \
@@ -215,11 +188,10 @@ namespace nd {
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride,             \
                              size_t count)                                                                             \
     {                                                                                                                  \
-      SelfType *self = SelfType::get_self(this);                                                                       \
       char *src_copy[N];                                                                                               \
       memcpy(src_copy, src, sizeof(src_copy));                                                                         \
       for (size_t i = 0; i != count; ++i) {                                                                            \
-        self->single(dst, src_copy);                                                                                   \
+        reinterpret_cast<SelfType *>(this)->single(dst, src_copy);                                                     \
         dst += dst_stride;                                                                                             \
         for (size_t j = 0; j < N; ++j) {                                                                               \
           src_copy[j] += src_stride[j];                                                                                \
