@@ -250,7 +250,7 @@ namespace nd {
                                       nullptr, nullptr, kernreq, nkwd, kwds, tp_vars);
         ckb_offset = ckb->m_size;
 
-        get_self(reinterpret_cast<kernel_builder *>(ckb), self_offset)->parse_offset = ckb_offset - self_offset;
+        ckb->get_at<parse_kernel>(self_offset)->parse_offset = ckb_offset - self_offset;
         parse::get()->instantiate(parse::get()->static_data(), data, ckb, ckb_offset,
                                   dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc, src_tp,
                                   src_arrmeta, kernreq, nkwd, kwds, tp_vars);
@@ -339,7 +339,7 @@ namespace nd {
         ckb_offset = ckb->m_size;
 
         for (size_t i = 0; i < field_count; ++i) {
-          get_self(ckb, self_offset)->child_offsets[i] = ckb_offset - self_offset;
+          ckb->get_at<parse_kernel>(self_offset)->child_offsets[i] = ckb_offset - self_offset;
           json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset,
                                           dst_tp.extended<ndt::struct_type>()->get_field_type(i),
                                           dst_arrmeta + arrmeta_offsets[i], nsrc, src_tp, src_arrmeta, kernreq, nkwd,

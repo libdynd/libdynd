@@ -2905,7 +2905,7 @@ namespace nd {
           forward->instantiate(forward->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp2,
                                src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
           ckb_offset = ckb->m_size;
-          get_self(ckb, self_offset)->forward_offset = forward_offset;
+          ckb->get_at<adapt_assign_from_kernel>(self_offset)->forward_offset = forward_offset;
         }
         else {
           const callable &forward = src_tp[0].extended<ndt::adapt_type>()->get_forward();

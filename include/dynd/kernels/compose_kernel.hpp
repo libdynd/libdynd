@@ -131,7 +131,7 @@ namespace nd {
         first->instantiate(first->static_data(), data, ckb, ckb_offset, buffer_tp, self->buffer_arrmeta.get(), 1,
                            src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
         ckb_offset = ckb->m_size;
-        self = get_self(reinterpret_cast<kernel_builder *>(ckb), root_ckb_offset);
+        self = ckb->get_at<compose_kernel>(root_ckb_offset);
         self->second_offset = ckb_offset - root_ckb_offset;
         const char *buffer_arrmeta = self->buffer_arrmeta.get();
         second->instantiate(second->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &buffer_tp,

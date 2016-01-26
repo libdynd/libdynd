@@ -115,14 +115,14 @@ namespace nd {
       is_missing.get()->instantiate(is_missing.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                     src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->m_size;
-      option_arithmetic_kernel *self = option_arithmetic_kernel::get_self(ckb, option_arith_offset);
+      option_arithmetic_kernel *self = ckb->get_at<option_arithmetic_kernel>(option_arith_offset);
       self->arith_offset = ckb_offset - option_arith_offset;
       auto arith = FuncType::get();
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(), src_tp[1]};
       arith.get()->instantiate(arith.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                child_src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->m_size;
-      self = option_arithmetic_kernel::get_self(ckb, option_arith_offset);
+      self = ckb->get_at<option_arithmetic_kernel>(option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
       auto assign_na = nd::assign_na::get();
       assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
@@ -173,14 +173,14 @@ namespace nd {
       is_missing.get()->instantiate(is_missing.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                     &src_tp[1], &src_arrmeta[1], kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->m_size;
-      option_arithmetic_kernel *self = option_arithmetic_kernel::get_self(ckb, option_arith_offset);
+      option_arithmetic_kernel *self = ckb->get_at<option_arithmetic_kernel>(option_arith_offset);
       self->arith_offset = ckb_offset - option_arith_offset;
       auto arith = FuncType::get();
       const ndt::type child_src_tp[2] = {src_tp[0], src_tp[1].extended<ndt::option_type>()->get_value_type()};
       arith.get()->instantiate(arith.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                child_src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->m_size;
-      self = option_arithmetic_kernel::get_self(ckb, option_arith_offset);
+      self = ckb->get_at<option_arithmetic_kernel>(option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
       auto assign_na = nd::assign_na::get();
       assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset, src_tp[1], src_arrmeta[1], 0,
@@ -236,13 +236,13 @@ namespace nd {
       is_missing_lhs.get()->instantiate(is_missing_lhs.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                         nsrc, src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->m_size;
-      option_arithmetic_kernel *self = option_arithmetic_kernel::get_self(ckb, option_arith_offset);
+      option_arithmetic_kernel *self = ckb->get_at<option_arithmetic_kernel>(option_arith_offset);
       self->is_missing_rhs_offset = ckb_offset - option_arith_offset;
       auto is_missing_rhs = is_missing::get();
       is_missing_rhs.get()->instantiate(is_missing_rhs.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                         nsrc, src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->m_size;
-      self = option_arithmetic_kernel::get_self(ckb, option_arith_offset);
+      self = ckb->get_at<option_arithmetic_kernel>(option_arith_offset);
       self->arith_offset = ckb_offset - option_arith_offset;
       auto arith = FuncType::get();
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(),
@@ -250,7 +250,7 @@ namespace nd {
       arith.get()->instantiate(arith.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                child_src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->m_size;
-      self = option_arithmetic_kernel::get_self(ckb, option_arith_offset);
+      self = ckb->get_at<option_arithmetic_kernel>(option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
       auto assign_na = nd::assign_na::get();
       assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, 0,
