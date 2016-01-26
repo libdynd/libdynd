@@ -12,23 +12,13 @@
 #include <dynd/kernels/ckernel_prefix.hpp>
 
 namespace dynd {
+
+/**
+ * Aligns an offset as required by ckernels.
+ */
+inline size_t align_offset(size_t offset) { return (offset + size_t(7)) & ~size_t(7); }
+
 namespace nd {
-
-  /**
-   * Increments a ``ckb_offset`` variable (offset into a ckernel_builder)
-   * by the provided increment. The increment needs to be aligned to 8 bytes,
-   * so padding may be added.
-   */
-  inline void inc_ckb_offset(intptr_t &inout_ckb_offset, size_t inc)
-  {
-    inout_ckb_offset += static_cast<intptr_t>(ckernel_prefix::align_offset(inc));
-  }
-
-  template <class T = ckernel_prefix>
-  void inc_ckb_offset(intptr_t &inout_ckb_offset)
-  {
-    inc_ckb_offset(inout_ckb_offset, sizeof(T));
-  }
 
   /**
    * Function pointers + data for a hierarchical
@@ -77,15 +67,6 @@ namespace nd {
 
     ~kernel_builder() { destroy(); }
 
-    template <typename SelfType, typename PrefixType, typename... A>
-    SelfType *init(PrefixType *rawself, kernel_request_t kernreq, A &&... args)
-    {
-      /* Alignment requirement of the type. */
-      static_assert(alignof(SelfType) <= alignof(uint64_t), "ckernel types require alignment <= 64 bits");
-
-      return SelfType::init(rawself, kernreq, std::forward<A>(args)...);
-    }
-
     void destroy(ckernel_prefix *self) { self->destroy(); }
 
     void reset()
@@ -121,21 +102,6 @@ namespace nd {
         m_data = new_data;
         m_capacity = requested_capacity;
       }
-    }
-
-    /**
-     * For use during construction. This function ensures that the
-     * ckernel_builder has enough capacity (including a child), increments the
-     * provided offset appropriately based on the size of T, and returns a pointer
-     * to the allocated ckernel.
-     */
-    template <class T>
-    T *alloc_ck()
-    {
-      intptr_t ckb_offset = m_size;
-      inc_ckb_offset<T>(m_size);
-      reserve(m_size);
-      return reinterpret_cast<T *>(m_data + ckb_offset);
     }
 
     ckernel_prefix *get() const { return reinterpret_cast<ckernel_prefix *>(m_data); }
@@ -188,11 +154,14 @@ namespace nd {
     template <typename KernelType, typename... ArgTypes>
     void emplace_back(ArgTypes &&... args)
     {
+      /* Alignment requirement of the type. */
+      static_assert(alignof(KernelType) <= 8, "kernel types require alignment <= 64 bits");
+
       intptr_t ckb_offset = m_size;
-      inc_ckb_offset<KernelType>(m_size);
+      m_size +=
+          align_offset(sizeof(KernelType)); // The increment needs to be aligned to 8 bytes, so padding may be added.
       reserve(m_size);
-      KernelType *rawself = this->get_at<KernelType>(ckb_offset);
-      this->init<KernelType>(rawself, std::forward<ArgTypes>(args)...);
+      KernelType::init(this->get_at<KernelType>(ckb_offset), std::forward<ArgTypes>(args)...);
     }
   };
 
@@ -223,7 +192,7 @@ inline void ckernel_prefix::instantiate(char *static_data, char *DYND_UNUSED(dat
     throw std::invalid_argument("no kernel request");
   }
 
-  ckb->emplace_back<ckernel_prefix>(kernreq, func);
+  ckb->emplace_back<ckernel_prefix>(func);
 }
 
 } // namespace dynd

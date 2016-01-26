@@ -23,6 +23,12 @@ namespace {
 struct fixed_string_compare_kernel_extra {
   ckernel_prefix base;
   size_t string_size;
+
+  static fixed_string_compare_kernel_extra *init(fixed_string_compare_kernel_extra *rawself)
+  {
+    fixed_string_compare_kernel_extra *self = new (rawself) fixed_string_compare_kernel_extra();
+    return self;
+  }
 };
 
 struct ascii_utf8_fixed_string_compare_kernel {
@@ -204,7 +210,9 @@ void dynd::make_fixed_string_comparison_kernel(nd::kernel_builder *ckb, size_t s
       DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(ascii_utf8), DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf16),
       DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf32)};
   if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
-    fixed_string_compare_kernel_extra *e = ckb->alloc_ck<fixed_string_compare_kernel_extra>();
+    intptr_t ckb_offset = ckb->m_size;
+    ckb->emplace_back<fixed_string_compare_kernel_extra>();
+    fixed_string_compare_kernel_extra *e = ckb->get_at<fixed_string_compare_kernel_extra>(ckb_offset);
     e->base.function = reinterpret_cast<void *>(fixed_string_comparisons_table[lookup[encoding]][comptype]);
     e->string_size = string_size;
   }
@@ -293,8 +301,7 @@ void dynd::make_string_comparison_kernel(nd::kernel_builder *ckb, string_encodin
                                                            DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint16_t),
                                                            DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint32_t)};
   if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
-    ckernel_prefix *e = ckb->alloc_ck<ckernel_prefix>();
-    e->function = reinterpret_cast<void *>(string_comparisons_table[lookup[encoding]][comptype]);
+    ckb->emplace_back<ckernel_prefix>(reinterpret_cast<void *>(string_comparisons_table[lookup[encoding]][comptype]));
   }
   else {
     stringstream ss;
