@@ -142,25 +142,25 @@ ndt::type ndt::view_type::with_replaced_storage_type(const type &replacement_typ
   }
 }
 
-void ndt::view_type::make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
+void ndt::view_type::make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
                                                              const char *DYND_UNUSED(dst_arrmeta),
                                                              const char *DYND_UNUSED(src_arrmeta),
                                                              kernel_request_t kernreq,
                                                              const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   ::make_pod_typed_data_assignment_kernel(
-      ckb, ckb_offset, m_value_type.get_data_size(),
+      ckb, m_value_type.get_data_size(),
       std::min(m_value_type.get_data_alignment(), m_operand_type.get_data_alignment()), kernreq);
 }
 
-void ndt::view_type::make_value_to_operand_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
+void ndt::view_type::make_value_to_operand_assignment_kernel(nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
                                                              const char *DYND_UNUSED(dst_arrmeta),
                                                              const char *DYND_UNUSED(src_arrmeta),
                                                              kernel_request_t kernreq,
                                                              const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   ::make_pod_typed_data_assignment_kernel(
-      ckb, ckb_offset, m_value_type.get_data_size(),
+      ckb, m_value_type.get_data_size(),
       std::min(m_value_type.get_data_alignment(), m_operand_type.get_data_alignment()), kernreq);
 }
 

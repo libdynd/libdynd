@@ -189,7 +189,7 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, intptr_t c
         e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
         // Construct the second kernel (buffer -> dst)
         e->second_kernel_offset = ckb_offset - root_ckb_offset;
-        ::make_assignment_kernel(ckb, ckb_offset, opdt, dst_arrmeta, buffer_tp, e->buffer_arrmeta, kernreq, ectx);
+        ::make_assignment_kernel(ckb, opdt, dst_arrmeta, buffer_tp, e->buffer_arrmeta, kernreq, ectx);
         return;
       }
     }
@@ -212,7 +212,7 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, intptr_t c
       e->init(buffer_tp, kernreq);
       // Construct the first kernel (src -> buffer)
       e->first_kernel_offset = ckb_offset - root_ckb_offset;
-      ::make_assignment_kernel(ckb, ckb_offset, buffer_tp, e->buffer_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
+      ::make_assignment_kernel(ckb, buffer_tp, e->buffer_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
       ckb_offset = ckb->m_size;
       ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
       // Allocate the buffer data
@@ -225,7 +225,7 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, intptr_t c
       e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
       // Construct the second kernel (buffer -> dst)
       e->second_kernel_offset = ckb_offset - root_ckb_offset;
-      ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, buffer_tp, e->buffer_arrmeta, kernreq, ectx);
+      ::make_assignment_kernel(ckb, dst_tp, dst_arrmeta, buffer_tp, e->buffer_arrmeta, kernreq, ectx);
       return;
     }
   }
@@ -248,7 +248,7 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, intptr_t c
         size_t buffer_data_size = e->buffer_data_size;
         // Construct the first kernel (src -> buffer)
         e->first_kernel_offset = ckb_offset - root_ckb_offset;
-        ::make_assignment_kernel(ckb, ckb_offset, buffer_tp, e->buffer_arrmeta, opdt, src_arrmeta, kernreq, ectx);
+        ::make_assignment_kernel(ckb, buffer_tp, e->buffer_arrmeta, opdt, src_arrmeta, kernreq, ectx);
         ckb_offset = ckb->m_size;
         // Allocate the buffer data
         ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
@@ -276,7 +276,7 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, intptr_t c
       size_t buffer_data_size = e->buffer_data_size;
       // Construct the first kernel (src -> buffer)
       e->first_kernel_offset = ckb_offset - root_ckb_offset;
-      ::make_assignment_kernel(ckb, ckb_offset, buffer_tp, e->buffer_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
+      ::make_assignment_kernel(ckb, buffer_tp, e->buffer_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
       ckb_offset = ckb->m_size;
       // Allocate the buffer data
       ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
@@ -289,7 +289,7 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, intptr_t c
       e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
       // Construct the second kernel (buffer -> dst)
       e->second_kernel_offset = ckb_offset - root_ckb_offset;
-      ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, buffer_tp, e->buffer_arrmeta, kernreq, ectx);
+      ::make_assignment_kernel(ckb, dst_tp, dst_arrmeta, buffer_tp, e->buffer_arrmeta, kernreq, ectx);
     }
   }
 }

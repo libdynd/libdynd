@@ -101,7 +101,7 @@ void nd::masked_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_
   }
 
   // Create the child element assignment ckernel
-  make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta, src0_el_tp, src0_el_meta, kernel_request_strided,
+  make_assignment_kernel(ckb, dst_el_tp, dst_el_meta, src0_el_tp, src0_el_meta, kernel_request_strided,
                          &eval::default_eval_context);
 }
 
@@ -177,7 +177,7 @@ void nd::indexed_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND
   }
 
   // Create the child element assignment ckernel
-  make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta, src0_el_tp, src0_el_meta, kernel_request_single,
+  make_assignment_kernel(ckb, dst_el_tp, dst_el_meta, src0_el_tp, src0_el_meta, kernel_request_single,
                          &eval::default_eval_context);
 }
 

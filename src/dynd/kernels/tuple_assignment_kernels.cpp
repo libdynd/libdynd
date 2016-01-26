@@ -117,8 +117,7 @@ void dynd::make_tuple_identical_assignment_kernel(nd::kernel_builder *ckb, intpt
   }
   if (val_tup_tp.is_pod()) {
     // For POD structs, get a trivial memory copy kernel
-    make_pod_typed_data_assignment_kernel(ckb, ckb_offset, val_tup_tp.get_data_size(), val_tup_tp.get_data_alignment(),
-                                          kernreq);
+    make_pod_typed_data_assignment_kernel(ckb, val_tup_tp.get_data_size(), val_tup_tp.get_data_alignment(), kernreq);
     return;
   }
 

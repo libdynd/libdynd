@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 static void instantiate_option_as_value_assignment_kernel(
-    char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb, intptr_t ckb_offset,
+    char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
     const nd::array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -34,7 +34,7 @@ static void instantiate_option_as_value_assignment_kernel(
       dst_tp.get_type_id() == option_type_id ? dst_tp.extended<ndt::option_type>()->get_value_type() : dst_tp;
   ndt::type val_src_tp =
       src_tp[0].get_type_id() == option_type_id ? src_tp[0].extended<ndt::option_type>()->get_value_type() : src_tp[0];
-  ::make_assignment_kernel(ckb, ckb_offset, val_dst_tp, dst_arrmeta, val_src_tp, src_arrmeta[0], kernreq,
+  ::make_assignment_kernel(ckb, val_dst_tp, dst_arrmeta, val_src_tp, src_arrmeta[0], kernreq,
                            &eval::default_eval_context);
 }
 

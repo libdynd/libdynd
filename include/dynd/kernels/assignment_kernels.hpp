@@ -1864,7 +1864,7 @@ namespace nd {
         ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
         self = ckb->get_at<self_type>(root_ckb_offset);
         self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-        make_assignment_kernel(ckb, ckb_offset, dst_val_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq,
+        make_assignment_kernel(ckb, dst_val_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq,
                                &eval::default_eval_context);
       }
     };
@@ -1983,8 +1983,8 @@ namespace nd {
           return;
         case string_type_id: {
           // Just a string to string assignment
-          make_assignment_kernel(ckb, ckb_offset, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
-                                 src_tp[0], src_arrmeta[0], kernreq, &eval::default_eval_context);
+          make_assignment_kernel(ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, src_tp[0],
+                                 src_arrmeta[0], kernreq, &eval::default_eval_context);
           return;
         }
         default:
@@ -1997,8 +1997,8 @@ namespace nd {
         ckb->emplace_back<string_to_option_tp_ck>(kernreq);
         ckb_offset = ckb->m_size;
         // First child ckernel is the value assignment
-        make_assignment_kernel(ckb, ckb_offset, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
-                               src_tp[0], src_arrmeta[0], kernreq, &eval::default_eval_context);
+        make_assignment_kernel(ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, src_tp[0],
+                               src_arrmeta[0], kernreq, &eval::default_eval_context);
         ckb_offset = ckb->m_size;
         // Re-acquire self because the address may have changed
         string_to_option_tp_ck *self = ckb->get_at<string_to_option_tp_ck>(root_ckb_offset);
@@ -2093,7 +2093,7 @@ namespace nd {
       ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
       self_type *self = ckb->get_at<self_type>(root_ckb_offset);
       self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-      make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq,
+      make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq,
                              &eval::default_eval_context);
     }
   };
@@ -2144,14 +2144,13 @@ namespace nd {
     struct assignment_virtual_kernel<date_type_id, datetime_kind, date_type_id, datetime_kind>
         : base_kernel<assignment_virtual_kernel<date_type_id, datetime_kind, date_type_id, datetime_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                              intptr_t DYND_UNUSED(ckb_offset), const ndt::type &dst_tp,
+                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        make_pod_typed_data_assignment_kernel(ckb, ckb_offset, dst_tp->get_data_size(), dst_tp->get_data_alignment(),
-                                              kernreq);
+        make_pod_typed_data_assignment_kernel(ckb, dst_tp->get_data_size(), dst_tp->get_data_alignment(), kernreq);
       }
     };
 
@@ -2159,8 +2158,8 @@ namespace nd {
     struct assignment_virtual_kernel<fixed_bytes_type_id, bytes_kind, fixed_bytes_type_id, bytes_kind>
         : base_kernel<assignment_virtual_kernel<fixed_bytes_type_id, bytes_kind, fixed_bytes_type_id, bytes_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              intptr_t DYND_UNUSED(ckb_offset), const ndt::type &dst_tp,
+                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                               const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                               intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -2169,9 +2168,8 @@ namespace nd {
         if (dst_tp.get_data_size() != src_fs->get_data_size()) {
           throw std::runtime_error("cannot assign to a fixed_bytes type of a different size");
         }
-        make_pod_typed_data_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(),
-                                              std::min(dst_tp.get_data_alignment(), src_fs->get_data_alignment()),
-                                              kernreq);
+        make_pod_typed_data_assignment_kernel(
+            ckb, dst_tp.get_data_size(), std::min(dst_tp.get_data_alignment(), src_fs->get_data_alignment()), kernreq);
       }
     };
 
@@ -3022,14 +3020,13 @@ namespace nd {
     struct assignment_virtual_kernel<time_type_id, datetime_kind, time_type_id, datetime_kind>
         : base_kernel<assignment_virtual_kernel<time_type_id, datetime_kind, time_type_id, datetime_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                              intptr_t DYND_UNUSED(ckb_offset), const ndt::type &dst_tp,
+                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        make_pod_typed_data_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(), dst_tp.get_data_alignment(),
-                                              kernreq);
+        make_pod_typed_data_assignment_kernel(ckb, dst_tp.get_data_size(), dst_tp.get_data_alignment(), kernreq);
       }
     };
 
@@ -3055,8 +3052,7 @@ namespace nd {
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         if (dst_tp == src_tp[0]) {
-          make_pod_typed_data_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(), dst_tp.get_data_alignment(),
-                                                kernreq);
+          make_pod_typed_data_assignment_kernel(ckb, dst_tp.get_data_size(), dst_tp.get_data_alignment(), kernreq);
           return;
         }
         else {
@@ -3075,8 +3071,8 @@ namespace nd {
     struct assignment_kernel<datetime_type_id, datetime_kind, datetime_type_id, datetime_kind, ErrorMode>
         : base_kernel<assignment_kernel<datetime_type_id, datetime_kind, datetime_type_id, datetime_kind, ErrorMode>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              intptr_t DYND_UNUSED(ckb_offset), const ndt::type &dst_tp,
+                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                               const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                               intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -3085,24 +3081,21 @@ namespace nd {
           // TODO: If the destination timezone is not UTC, do an
           //       appropriate transformation
           if (dst_tp.extended<ndt::datetime_type>()->get_timezone() == tz_utc) {
-            make_pod_typed_data_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(), dst_tp.get_data_alignment(),
-                                                  kernreq);
+            make_pod_typed_data_assignment_kernel(ckb, dst_tp.get_data_size(), dst_tp.get_data_alignment(), kernreq);
             return;
           }
         }
         else if (dst_tp.extended<ndt::datetime_type>()->get_timezone() != tz_abstract) {
           // The value stored is independent of the time zone, so
           // a straight assignment is fine.
-          make_pod_typed_data_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(), dst_tp.get_data_alignment(),
-                                                kernreq);
+          make_pod_typed_data_assignment_kernel(ckb, dst_tp.get_data_size(), dst_tp.get_data_alignment(), kernreq);
           return;
         }
         else if (ErrorMode == assign_error_nocheck) {
           // TODO: If the source timezone is not UTC, do an appropriate
           //       transformation
           if (src_tp[0].extended<ndt::datetime_type>()->get_timezone() == tz_utc) {
-            make_pod_typed_data_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(), dst_tp.get_data_alignment(),
-                                                  kernreq);
+            make_pod_typed_data_assignment_kernel(ckb, dst_tp.get_data_size(), dst_tp.get_data_alignment(), kernreq);
             return;
           }
         }
