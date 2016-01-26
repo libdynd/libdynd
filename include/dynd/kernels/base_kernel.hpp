@@ -32,18 +32,6 @@ namespace nd {
       return ckernel_prefix::get_child(offset);
     }
 
-    static SelfType *reserve(kernel_builder *ckb, intptr_t ckb_offset, size_t requested_capacity)
-    {
-      ckb->reserve(requested_capacity);
-      return get_self(ckb, ckb_offset);
-    }
-
-    static SelfType *reserve(void *ckb, kernel_request_t DYND_UNUSED(kernreq), intptr_t ckb_offset,
-                             size_t requested_capacity)
-    {
-      return reserve(reinterpret_cast<kernel_builder *>(ckb), ckb_offset, requested_capacity);
-    }
-
     /**                                                                        \
      * Initializes an instance of this ckernel in-place according to the       \
      * kernel request. This calls the constructor in-place, and initializes    \

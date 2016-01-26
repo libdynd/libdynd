@@ -22,7 +22,8 @@ void nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
                                 bsd->get_data_offsets(src_arrmeta[0]), bsd->get_data_offsets(src_arrmeta[1]));
   extra_type *e = ckb->get_at<extra_type>(root_ckb_offset);
   ckb_offset = ckb->m_size;
-  e = extra_type::reserve(ckb, kernel_request_host | kernel_request_single, ckb_offset, field_count * sizeof(size_t));
+  ckb->reserve(ckb_offset);
+  e = ckb->get_at<equal_kernel>(ckb_offset);
   inc_ckb_offset(ckb_offset, field_count * sizeof(size_t));
   inc_ckb_offset(ckb->m_size, field_count * sizeof(size_t));
   //      e->field_count = field_count;
@@ -36,7 +37,7 @@ void nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
     // field comparison kernel. Have to re-get
     // the pointer because creating the field comparison kernel may
     // move the memory.
-    reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+    ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
     e = reinterpret_cast<kernel_builder *>(ckb)->get_at<extra_type>(root_ckb_offset);
     field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
     field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
@@ -62,7 +63,8 @@ void nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
                                 bsd->get_data_offsets(src_arrmeta[0]), bsd->get_data_offsets(src_arrmeta[1]));
   extra_type *e = ckb->get_at<extra_type>(root_ckb_offset);
   ckb_offset = ckb->m_size;
-  e = extra_type::reserve(ckb, kernel_request_host | kernel_request_single, ckb_offset, field_count * sizeof(size_t));
+  ckb->reserve(ckb_offset);
+  e = ckb->get_at<extra_type>(ckb_offset);
   inc_ckb_offset(ckb_offset, field_count * sizeof(size_t));
   inc_ckb_offset(ckb->m_size, field_count * sizeof(size_t));
   //      e->field_count = field_count;
