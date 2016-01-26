@@ -127,7 +127,7 @@ struct DYND_API ckernel_prefix {
     return reinterpret_cast<ckernel_prefix *>(reinterpret_cast<char *>(this) + ckernel_prefix::align_offset(offset));
   }
 
-  static ckernel_prefix *init(ckernel_prefix *self, kernel_request_t DYND_UNUSED(kernreq), void *func)
+  static ckernel_prefix *init(ckernel_prefix *self, void *func)
   {
     self->function = func;
     self->destructor = NULL;

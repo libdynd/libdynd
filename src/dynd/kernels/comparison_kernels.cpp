@@ -67,9 +67,8 @@ void dynd::make_builtin_type_comparison_kernel(nd::kernel_builder *ckb, type_id_
   if (src0_type_id >= bool_type_id && src0_type_id <= complex_float64_type_id && src1_type_id >= bool_type_id &&
       src1_type_id <= complex_float64_type_id && comptype >= 0 && comptype <= comparison_type_greater) {
     // No need to reserve more space, the space for a leaf is already there
-    ckernel_prefix *result = ckb->alloc_ck<ckernel_prefix>();
-    result->function = reinterpret_cast<void *>(
-        compare_kernel_table[src0_type_id - bool_type_id][src1_type_id - bool_type_id][comptype]);
+    ckb->emplace_back<ckernel_prefix>(reinterpret_cast<void *>(
+        compare_kernel_table[src0_type_id - bool_type_id][src1_type_id - bool_type_id][comptype]));
   }
   else {
     throw not_comparable_error(ndt::type(src0_type_id), ndt::type(src1_type_id), comptype);

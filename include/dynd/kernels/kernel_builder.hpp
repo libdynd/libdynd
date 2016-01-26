@@ -78,12 +78,12 @@ namespace nd {
     ~kernel_builder() { destroy(); }
 
     template <typename SelfType, typename PrefixType, typename... A>
-    SelfType *init(PrefixType *rawself, kernel_request_t kernreq, A &&... args)
+    SelfType *init(PrefixType *rawself, A &&... args)
     {
       /* Alignment requirement of the type. */
       static_assert(alignof(SelfType) <= alignof(uint64_t), "ckernel types require alignment <= 64 bits");
 
-      return SelfType::init(rawself, kernreq, std::forward<A>(args)...);
+      return SelfType::init(rawself, std::forward<A>(args)...);
     }
 
     void destroy(ckernel_prefix *self) { self->destroy(); }
@@ -121,21 +121,6 @@ namespace nd {
         m_data = new_data;
         m_capacity = requested_capacity;
       }
-    }
-
-    /**
-     * For use during construction. This function ensures that the
-     * ckernel_builder has enough capacity (including a child), increments the
-     * provided offset appropriately based on the size of T, and returns a pointer
-     * to the allocated ckernel.
-     */
-    template <class T>
-    T *alloc_ck()
-    {
-      intptr_t ckb_offset = m_size;
-      inc_ckb_offset<T>(m_size);
-      reserve(m_size);
-      return reinterpret_cast<T *>(m_data + ckb_offset);
     }
 
     ckernel_prefix *get() const { return reinterpret_cast<ckernel_prefix *>(m_data); }
@@ -183,6 +168,21 @@ namespace nd {
     intptr_t get_capacity() const { return m_capacity; }
 
     /**
+     * For use during construction. This function ensures that the
+     * ckernel_builder has enough capacity (including a child), increments the
+     * provided offset appropriately based on the size of T, and returns a pointer
+     * to the allocated ckernel.
+     */
+    template <class T>
+    T *alloc_ck()
+    {
+      intptr_t ckb_offset = m_size;
+      inc_ckb_offset<T>(m_size);
+      reserve(m_size);
+      return reinterpret_cast<T *>(m_data + ckb_offset);
+    }
+
+    /**
      * Creates the kernel, and increments ``m_size`` to the position after it.
      */
     template <typename KernelType, typename... ArgTypes>
@@ -223,7 +223,7 @@ inline void ckernel_prefix::instantiate(char *static_data, char *DYND_UNUSED(dat
     throw std::invalid_argument("no kernel request");
   }
 
-  ckb->emplace_back<ckernel_prefix>(kernreq, func);
+  ckb->emplace_back<ckernel_prefix>(func);
 }
 
 } // namespace dynd

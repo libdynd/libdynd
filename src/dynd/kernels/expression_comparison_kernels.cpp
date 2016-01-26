@@ -29,6 +29,12 @@ struct buffered_kernel_extra {
   size_t cmp_kernel_offset;
   single_buffer buf[2];
 
+  static buffered_kernel_extra *init(buffered_kernel_extra *rawself)
+  {
+    buffered_kernel_extra *self = new (rawself) buffered_kernel_extra();
+    return self;
+  }
+
   // Initializes the type and arrmeta for one of the two buffers
   // NOTE: This does NOT initialize buf[i].data_offset or buf[i].kernel_offset
   void init_buffer(int i, const ndt::type &buffer_dt_)
@@ -146,7 +152,8 @@ void dynd::make_expression_comparison_kernel(nd::kernel_builder *ckb, const ndt:
                                              const eval::eval_context *ectx)
 {
   intptr_t root_ckb_offset = ckb->m_size;
-  buffered_kernel_extra *e = ckb->alloc_ck<buffered_kernel_extra>();
+  ckb->emplace_back<buffered_kernel_extra>();
+  buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
   intptr_t ckb_offset = ckb->m_size;
   e->base.function = reinterpret_cast<void *>(&buffered_kernel_extra::kernel);
   e->base.destructor = &buffered_kernel_extra::destruct;

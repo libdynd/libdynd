@@ -27,6 +27,12 @@ struct buffered_kernel_extra {
   size_t buffer_data_offset, buffer_data_size;
   intptr_t buffer_stride;
 
+  static buffered_kernel_extra *init(buffered_kernel_extra *rawself)
+  {
+    buffered_kernel_extra *self = new (rawself) buffered_kernel_extra();
+    return self;
+  }
+
   // Initializes the type and arrmeta for the buffer
   // NOTE: This does NOT initialize the buffer_data_offset,
   //       just the buffer_data_size.
@@ -170,7 +176,9 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
       else {
         // Chain case, buffer one segment of the chain
         const ndt::type &buffer_tp = static_cast<const ndt::base_expr_type *>(opdt.extended())->get_value_type();
-        buffered_kernel_extra *e = ckb->alloc_ck<buffered_kernel_extra>();
+        intptr_t saved_ckb_offset = ckb->m_size;
+        ckb->emplace_back<buffered_kernel_extra>();
+        buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(saved_ckb_offset);
         ckb_offset = ckb->m_size;
         e->init(buffer_tp, kernreq);
         // Construct the first kernel (src -> buffer)
@@ -206,7 +214,9 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
         // the src value type to dst type as the two segments to buffer together
         buffer_tp = src_tp.value_type();
       }
-      buffered_kernel_extra *e = ckb->alloc_ck<buffered_kernel_extra>();
+      intptr_t saved_ckb_offset = ckb->m_size;
+      ckb->emplace_back<buffered_kernel_extra>();
+      buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(saved_ckb_offset);
       ckb_offset = ckb->m_size;
       e->init(buffer_tp, kernreq);
       // Construct the first kernel (src -> buffer)
@@ -241,7 +251,9 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
       else {
         // Chain case, buffer one segment of the chain
         const ndt::type &buffer_tp = static_cast<const ndt::base_expr_type *>(opdt.extended())->get_value_type();
-        buffered_kernel_extra *e = ckb->alloc_ck<buffered_kernel_extra>();
+        intptr_t saved_ckb_offset = ckb->m_size;
+        ckb->emplace_back<buffered_kernel_extra>();
+        buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(saved_ckb_offset);
         ckb_offset = ckb->m_size;
         e->init(buffer_tp, kernreq);
         size_t buffer_data_size = e->buffer_data_size;
@@ -268,7 +280,9 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
       // Put together the src expression chain and the src value type
       // to dst value type conversion
       const ndt::type &buffer_tp = src_tp.value_type();
-      buffered_kernel_extra *e = ckb->alloc_ck<buffered_kernel_extra>();
+      intptr_t saved_ckb_offset = ckb->m_size;
+      ckb->emplace_back<buffered_kernel_extra>();
+      buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(saved_ckb_offset);
       ckb_offset = ckb->m_size;
       e->init(buffer_tp, kernreq);
       size_t buffer_data_size = e->buffer_data_size;
