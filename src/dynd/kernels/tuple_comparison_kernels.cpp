@@ -129,10 +129,11 @@ struct tuple_compare_sorting_less_diff_arrmeta_kernel {
 
 } // anonymous namespace
 
-void dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src_tp,
-                                        const char *src0_arrmeta, const char *src1_arrmeta, comparison_type_t comptype,
+void dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, const ndt::type &src_tp, const char *src0_arrmeta,
+                                        const char *src1_arrmeta, comparison_type_t comptype,
                                         const eval::eval_context *ectx)
 {
+  intptr_t ckb_offset = ckb->m_size;
   intptr_t root_ckb_offset = ckb_offset;
   auto bsd = src_tp.extended<ndt::tuple_type>();
   size_t field_count = bsd->get_field_count();
@@ -163,8 +164,7 @@ void dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_of
         field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
         const char *field_arrmeta = src0_arrmeta + arrmeta_offsets[i];
         const ndt::type &ft = bsd->get_field_type(i);
-        make_comparison_kernel(ckb, ckb_offset, ft, field_arrmeta, ft, field_arrmeta, comparison_type_sorting_less,
-                               ectx);
+        make_comparison_kernel(ckb, ft, field_arrmeta, ft, field_arrmeta, comparison_type_sorting_less, ectx);
         ckb_offset = ckb->m_size;
       }
       return;
@@ -194,8 +194,8 @@ void dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_of
         e = ckb->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
         field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
         field_kernel_offsets[2 * i] = ckb_offset - root_ckb_offset;
-        make_comparison_kernel(ckb, ckb_offset, ft, src0_arrmeta + arrmeta_offsets[i], ft,
-                               src1_arrmeta + arrmeta_offsets[i], comparison_type_sorting_less, ectx);
+        make_comparison_kernel(ckb, ft, src0_arrmeta + arrmeta_offsets[i], ft, src1_arrmeta + arrmeta_offsets[i],
+                               comparison_type_sorting_less, ectx);
         ckb_offset = ckb->m_size;
 
         // Repeat for comparing the other way
@@ -203,8 +203,8 @@ void dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_of
         e = ckb->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);
         field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
         field_kernel_offsets[2 * i + 1] = ckb_offset - root_ckb_offset;
-        make_comparison_kernel(ckb, ckb_offset, ft, src1_arrmeta + arrmeta_offsets[i], ft,
-                               src0_arrmeta + arrmeta_offsets[i], comparison_type_sorting_less, ectx);
+        make_comparison_kernel(ckb, ft, src1_arrmeta + arrmeta_offsets[i], ft, src0_arrmeta + arrmeta_offsets[i],
+                               comparison_type_sorting_less, ectx);
         ckb_offset = ckb->m_size;
       }
       return;

@@ -52,9 +52,9 @@ namespace ndt {
     {
     }
 
-    void make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
-                                const char *src0_arrmeta, const type &src1_dt, const char *src1_arrmeta,
-                                comparison_type_t comptype, const eval::eval_context *ectx) const;
+    void make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_dt, const char *src0_arrmeta,
+                                const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
+                                const eval::eval_context *ectx) const;
 
     static type make(intptr_t stringsize, string_encoding_t encoding = string_encoding_utf_8)
     {

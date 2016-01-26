@@ -214,10 +214,9 @@ size_t ndt::base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata),
   throw std::runtime_error(ss.str());
 }
 
-void ndt::base_type::make_comparison_kernel(nd::kernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
-                                            const type &src0_dt, const char *DYND_UNUSED(src0_arrmeta),
-                                            const type &src1_dt, const char *DYND_UNUSED(src1_arrmeta),
-                                            comparison_type_t comptype,
+void ndt::base_type::make_comparison_kernel(nd::kernel_builder *DYND_UNUSED(ckb), const type &src0_dt,
+                                            const char *DYND_UNUSED(src0_arrmeta), const type &src1_dt,
+                                            const char *DYND_UNUSED(src1_arrmeta), comparison_type_t comptype,
                                             const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   throw not_comparable_error(src0_dt, src1_dt, comptype);

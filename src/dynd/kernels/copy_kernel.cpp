@@ -33,7 +33,7 @@ void nd::copy_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(
     if (src_tp[0].is_builtin()) {
       if (dst_tp.extended() == src_tp[0].extended()) {
         make_pod_typed_data_assignment_kernel(
-            ckb, ckb_offset, dynd::ndt::detail::builtin_data_sizes[dst_tp.unchecked_get_builtin_type_id()],
+            ckb, dynd::ndt::detail::builtin_data_sizes[dst_tp.unchecked_get_builtin_type_id()],
             dynd::ndt::detail::builtin_data_alignments[dst_tp.unchecked_get_builtin_type_id()], kernreq);
         return;
       }
@@ -45,14 +45,12 @@ void nd::copy_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(
       }
     }
     else {
-      make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                             &eval::default_eval_context);
+      make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, &eval::default_eval_context);
       return;
     }
   }
   else {
-    make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                           &eval::default_eval_context);
+    make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, &eval::default_eval_context);
     return;
   }
 }

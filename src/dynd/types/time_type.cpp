@@ -182,18 +182,17 @@ bool ndt::time_type::operator==(const base_type &rhs) const
   }
 }
 
-void ndt::time_type::make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &src0_tp,
-                                            const char *src0_arrmeta, const type &src1_tp, const char *src1_arrmeta,
-                                            comparison_type_t comptype, const eval::eval_context *ectx) const
+void ndt::time_type::make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_tp, const char *src0_arrmeta,
+                                            const type &src1_tp, const char *src1_arrmeta, comparison_type_t comptype,
+                                            const eval::eval_context *ectx) const
 {
   if (this == src0_tp.extended()) {
     if (*this == *src1_tp.extended()) {
-      make_builtin_type_comparison_kernel(ckb, ckb_offset, int64_type_id, int64_type_id, comptype);
+      make_builtin_type_comparison_kernel(ckb, int64_type_id, int64_type_id, comptype);
       return;
     }
     else if (!src1_tp.is_builtin()) {
-      src1_tp.extended()->make_comparison_kernel(ckb, ckb_offset, src0_tp, src0_arrmeta, src1_tp, src1_arrmeta,
-                                                 comptype, ectx);
+      src1_tp.extended()->make_comparison_kernel(ckb, src0_tp, src0_arrmeta, src1_tp, src1_arrmeta, comptype, ectx);
       return;
     }
   }

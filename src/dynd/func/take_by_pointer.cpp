@@ -55,7 +55,7 @@ struct take_by_pointer_ck : nd::base_kernel<take_by_pointer_ck, 2> {
 
 struct take_by_pointer_virtual_ck : nd::base_kernel<take_by_pointer_virtual_ck> {
   static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                          intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                          intptr_t DYND_UNUSED(ckb_offset), const ndt::type &dst_tp, const char *dst_arrmeta,
                           intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
                           kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -87,15 +87,12 @@ struct take_by_pointer_virtual_ck : nd::base_kernel<take_by_pointer_virtual_ck> 
 
     ckb->emplace_back<take_by_pointer_outer_ck>(kernreq, dst_size_stride[0].dim_size, dst_size_stride[0].stride,
                                                 src_size_stride[1][0].stride);
-    ckb_offset = ckb->m_size;
-
     for (intptr_t i = 0; i < ndim; ++i) {
       ckb->emplace_back<take_by_pointer_ck>(kernel_request_single, src_size_stride[0][i].dim_size,
                                             src_size_stride[0][i].stride, src_size_stride[1][1].stride);
-      ckb_offset = ckb->m_size;
     }
 
-    make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta, src_el_tp[0], src_el_meta[0], kernel_request_single,
+    make_assignment_kernel(ckb, dst_el_tp, dst_el_meta, src_el_tp[0], src_el_meta[0], kernel_request_single,
                            &eval::default_eval_context);
   }
 

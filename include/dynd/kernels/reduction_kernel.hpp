@@ -880,7 +880,7 @@ namespace nd {
         reinterpret_cast<data_type *>(data)->init_offset = ckb_offset;
 
         if (reinterpret_cast<data_type *>(data)->identity.is_null()) {
-          make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
+          make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
                                  &eval::default_eval_context);
           return;
         }
