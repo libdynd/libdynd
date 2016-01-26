@@ -165,7 +165,7 @@ namespace nd {
     void emplace_back(ArgTypes &&... args)
     {
       /* Alignment requirement of the type. */
-      static_assert(alignof(KernelType) == sizeof(void *), "kernel types require alignment <= 64 bits");
+      static_assert(alignof(KernelType) <= 8, "kernel types require alignment <= 64 bits");
 
       intptr_t ckb_offset = m_size;
       inc_ckb_offset<KernelType>(m_size);

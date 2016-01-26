@@ -73,7 +73,7 @@ typedef uint32_t kernel_request_t;
  * concurrency requirements to be valid. See the
  * document
  */
-struct DYND_API alignas(void *) ckernel_prefix {
+struct DYND_API ckernel_prefix {
   typedef void (*destructor_fn_t)(ckernel_prefix *);
 
   void (*destructor)(ckernel_prefix *self);
