@@ -219,7 +219,7 @@ void dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, const ndt::type
       std::map<std::string, ndt::type> tp_vars;
       const char *src_arrmeta[2] = {src0_arrmeta, src1_arrmeta};
       nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
-          NULL, NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, 2, &src_tp, src_arrmeta,
+          NULL, NULL, ckb, ndt::make_type<bool1>(), NULL, 2, &src_tp, src_arrmeta,
           kernel_request_host | kernel_request_single, 0, NULL, tp_vars);
       ckb_offset = ckb->m_size;
       return;
@@ -228,7 +228,7 @@ void dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, const ndt::type
       std::map<std::string, ndt::type> tp_vars;
       const char *src_arrmeta[2] = {src0_arrmeta, src1_arrmeta};
       nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
-          NULL, NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, 2, &src_tp, src_arrmeta,
+          NULL, NULL, ckb, ndt::make_type<bool1>(), NULL, 2, &src_tp, src_arrmeta,
           kernel_request_host | kernel_request_single, 0, NULL, tp_vars);
       ckb_offset = ckb->m_size;
       return;

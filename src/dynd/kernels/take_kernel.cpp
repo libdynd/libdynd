@@ -48,17 +48,16 @@ void nd::masked_take_ck::single(char *dst, char *const *src)
 }
 
 void nd::masked_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                                     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                                     const char *const *src_arrmeta, kernel_request_t kernreq,
+                                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                      intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef nd::masked_take_ck self_type;
 
+  intptr_t ckb_offset = ckb->m_size;
   ckb->emplace_back<self_type>(kernreq);
   self_type *self = ckb->get_at<self_type>(ckb_offset);
-  ckb_offset = ckb->m_size;
 
   if (dst_tp.get_type_id() != var_dim_type_id) {
     stringstream ss;
@@ -126,14 +125,14 @@ void nd::indexed_take_ck::single(char *dst, char *const *src)
 }
 
 void nd::indexed_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                                      intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                                      intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                                      const char *const *src_arrmeta, kernel_request_t kernreq,
+                                      const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                                      const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                       intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef nd::indexed_take_ck self_type;
 
+  intptr_t ckb_offset = ckb->m_size;
   ckb->emplace_back<self_type>(kernreq);
   self_type *self = ckb->get_at<self_type>(ckb_offset);
   ckb_offset = ckb->m_size;
@@ -182,19 +181,19 @@ void nd::indexed_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND
 }
 
 void nd::take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                              const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                              intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
   if (mask_el_tp.get_type_id() == bool_type_id) {
-    nd::masked_take_ck::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
-                                    kernreq, nkwd, kwds, tp_vars);
+    nd::masked_take_ck::instantiate(NULL, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd,
+                                    kwds, tp_vars);
     return;
   }
   else if (mask_el_tp.get_type_id() == (type_id_t)type_id_of<intptr_t>::value) {
-    nd::indexed_take_ck::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
-                                     kernreq, nkwd, kwds, tp_vars);
+    nd::indexed_take_ck::instantiate(NULL, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd,
+                                     kwds, tp_vars);
     return;
   }
   else {

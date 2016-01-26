@@ -15,11 +15,13 @@
 using namespace std;
 using namespace dynd;
 
-static void instantiate_option_as_value_assignment_kernel(
-    char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
-    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
-    const nd::array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+static void instantiate_option_as_value_assignment_kernel(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data),
+                                                          nd::kernel_builder *ckb, const ndt::type &dst_tp,
+                                                          const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                                                          const ndt::type *src_tp, const char *const *src_arrmeta,
+                                                          kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
+                                                          const nd::array *DYND_UNUSED(kwds),
+                                                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   // In all cases not handled, we use the
   // regular S to T assignment kernel.
@@ -88,7 +90,7 @@ void kernels::make_option_assignment_kernel(nd::kernel_builder *ckb, const ndt::
     typevars.clear();
     if ((*af_tp)->get_pos_type(0).match(src_tp, typevars) && (*af_tp)->get_return_type().match(dst_tp, typevars)) {
       nd::array error_mode = opt(assign_error_fractional);
-      af->instantiate(const_cast<char *>(af->static_data()), NULL, ckb, ckb->m_size, dst_tp, dst_arrmeta, size, &src_tp,
+      af->instantiate(const_cast<char *>(af->static_data()), NULL, ckb, dst_tp, dst_arrmeta, size, &src_tp,
                       &src_arrmeta, kernreq, 1, &error_mode, std::map<std::string, ndt::type>());
       return;
     }

@@ -112,11 +112,12 @@ namespace nd {
        * chained
        * callable.
        */
-      static void instantiate(char *static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                              intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                              const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
+        intptr_t ckb_offset = ckb->m_size;
         const struct static_data *static_data_x = reinterpret_cast<struct static_data *>(static_data);
 
         base_callable *first = const_cast<base_callable *>(static_data_x->first.get());
@@ -128,14 +129,14 @@ namespace nd {
         ckb->emplace_back<compose_kernel>(kernreq, static_data_x->buffer_tp);
         ckb_offset = ckb->m_size;
         compose_kernel *self = ckb->get_at<compose_kernel>(root_ckb_offset);
-        first->instantiate(first->static_data(), data, ckb, ckb_offset, buffer_tp, self->buffer_arrmeta.get(), 1,
-                           src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        first->instantiate(first->static_data(), data, ckb, buffer_tp, self->buffer_arrmeta.get(), 1, src_tp,
+                           src_arrmeta, kernreq, nkwd, kwds, tp_vars);
         ckb_offset = ckb->m_size;
         self = ckb->get_at<compose_kernel>(root_ckb_offset);
         self->second_offset = ckb_offset - root_ckb_offset;
         const char *buffer_arrmeta = self->buffer_arrmeta.get();
-        second->instantiate(second->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &buffer_tp,
-                            &buffer_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        second->instantiate(second->static_data(), data, ckb, dst_tp, dst_arrmeta, 1, &buffer_tp, &buffer_arrmeta,
+                            kernreq, nkwd, kwds, tp_vars);
         ckb_offset = ckb->m_size;
       }
     };

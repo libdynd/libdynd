@@ -47,7 +47,7 @@ namespace kernels {
       strided(child, NULL, 0, src_inv_perm, src_stride_inv_perm, count);
     }
 
-    static void instantiate(char *static_data, char *DYND_UNUSED(data), nd::kernel_builder *ckb, intptr_t ckb_offset,
+    static void instantiate(char *static_data, char *DYND_UNUSED(data), nd::kernel_builder *ckb,
                             const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                             const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
@@ -66,9 +66,8 @@ namespace kernels {
       inv(src_arrmeta_inv, dst_arrmeta, src_arrmeta, perm);
 
       ckb->emplace_back<self_type>(kernreq, detail::make_array_wrapper<N>(perm));
-      ckb_offset = ckb->m_size;
-      child->instantiate(const_cast<char *>(child->static_data()), NULL, ckb, ckb_offset, ndt::make_type<void>(), NULL,
-                         nsrc, src_tp_inv, src_arrmeta_inv, kernreq, nkwd, kwds, tp_vars);
+      child->instantiate(const_cast<char *>(child->static_data()), NULL, ckb, ndt::make_type<void>(), NULL, nsrc,
+                         src_tp_inv, src_arrmeta_inv, kernreq, nkwd, kwds, tp_vars);
     }
 
   private:
@@ -129,7 +128,7 @@ namespace kernels {
       single(dst, src_inv_perm, child);
     }
 
-    static void instantiate(char *static_data, char *DYND_UNUSED(data), nd::kernel_builder *ckb, intptr_t ckb_offset,
+    static void instantiate(char *static_data, char *DYND_UNUSED(data), nd::kernel_builder *ckb,
                             const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                             const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
@@ -148,9 +147,8 @@ namespace kernels {
       inv_permute(src_arrmeta_inv, src_arrmeta, perm);
 
       ckb->emplace_back<self_type>(kernreq, detail::make_array_wrapper<N>(perm));
-      ckb_offset = ckb->m_size;
-      child->instantiate(const_cast<char *>(child->static_data()), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-                         src_tp_inv, src_arrmeta_inv, kernreq, nkwd, kwds, tp_vars);
+      child->instantiate(const_cast<char *>(child->static_data()), NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp_inv,
+                         src_arrmeta_inv, kernreq, nkwd, kwds, tp_vars);
     }
 
   private:
