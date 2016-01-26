@@ -76,9 +76,8 @@ struct option_callable_list {
 };
 } // anonymous namespace
 
-void kernels::make_option_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                            const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-                                            kernel_request_t kernreq)
+void kernels::make_option_assignment_kernel(nd::kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                            const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq)
 {
   static option_callable_list afl;
   intptr_t size = afl.size();
@@ -89,7 +88,7 @@ void kernels::make_option_assignment_kernel(nd::kernel_builder *ckb, intptr_t ck
     typevars.clear();
     if ((*af_tp)->get_pos_type(0).match(src_tp, typevars) && (*af_tp)->get_return_type().match(dst_tp, typevars)) {
       nd::array error_mode = opt(assign_error_fractional);
-      af->instantiate(const_cast<char *>(af->static_data()), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, size, &src_tp,
+      af->instantiate(const_cast<char *>(af->static_data()), NULL, ckb, ckb->m_size, dst_tp, dst_arrmeta, size, &src_tp,
                       &src_arrmeta, kernreq, 1, &error_mode, std::map<std::string, ndt::type>());
       return;
     }

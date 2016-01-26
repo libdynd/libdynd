@@ -306,10 +306,8 @@ struct operand_to_value_ck : nd::base_kernel<operand_to_value_ck, 1> {
 
 } // anonymous namespace
 
-void ndt::pointer_type::make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb,
-                                                                intptr_t DYND_UNUSED(ckb_offset),
-                                                                const char *dst_arrmeta, const char *src_arrmeta,
-                                                                kernel_request_t kernreq,
+void ndt::pointer_type::make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb, const char *dst_arrmeta,
+                                                                const char *src_arrmeta, kernel_request_t kernreq,
                                                                 const eval::eval_context *ectx) const
 {
   ckb->emplace_back<operand_to_value_ck>(kernreq);

@@ -16,9 +16,8 @@ namespace dynd {
  * \param dst_struct_tp  The struct-kind dtype of the destination.
  * \param src_struct_tp  The struct-kind dtype of the source.
  */
-DYND_API void make_struct_assignment_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset,
-                                            const ndt::type &dst_struct_tp, const char *dst_arrmeta,
-                                            const ndt::type &src_struct_tp, const char *src_arrmeta,
-                                            kernel_request_t kernreq);
+DYND_API void make_struct_assignment_kernel(nd::kernel_builder *ckb, const ndt::type &dst_struct_tp,
+                                            const char *dst_arrmeta, const ndt::type &src_struct_tp,
+                                            const char *src_arrmeta, kernel_request_t kernreq);
 
 } // namespace dynd
