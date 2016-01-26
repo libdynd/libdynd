@@ -142,8 +142,8 @@ void dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, const ndt::type
         memcmp(src0_arrmeta, src1_arrmeta, src_tp.get_arrmeta_size()) == 0) {
       // The arrmeta is identical, so can use a more specialized comparison
       // function
-      nd::inc_ckb_offset(ckb_offset,
-                         sizeof(tuple_compare_sorting_less_matching_arrmeta_kernel) + field_count * sizeof(size_t));
+      ckb_offset +=
+          align_offset(sizeof(tuple_compare_sorting_less_matching_arrmeta_kernel) + field_count * sizeof(size_t));
       ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
       tuple_compare_sorting_less_matching_arrmeta_kernel *e =
           ckb->get_at<tuple_compare_sorting_less_matching_arrmeta_kernel>(root_ckb_offset);
@@ -172,8 +172,8 @@ void dynd::make_tuple_comparison_kernel(nd::kernel_builder *ckb, const ndt::type
     else {
       // The arrmeta is different, so have to get the kernels both ways for the
       // fields
-      nd::inc_ckb_offset(ckb_offset,
-                         sizeof(tuple_compare_sorting_less_diff_arrmeta_kernel) + 2 * field_count * sizeof(size_t));
+      ckb_offset +=
+          align_offset(sizeof(tuple_compare_sorting_less_diff_arrmeta_kernel) + 2 * field_count * sizeof(size_t));
       ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
       tuple_compare_sorting_less_diff_arrmeta_kernel *e =
           ckb->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(root_ckb_offset);

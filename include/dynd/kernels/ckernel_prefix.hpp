@@ -61,6 +61,8 @@ enum {
 };
 typedef uint32_t kernel_request_t;
 
+size_t align_offset(size_t offset);
+
 /**
  * This is the struct which begins the memory layout
  * of all ckernels. First comes the function pointer,
@@ -78,11 +80,6 @@ struct DYND_API ckernel_prefix {
 
   void (*destructor)(ckernel_prefix *self);
   void *function;
-
-  /**
-   * Aligns an offset as required by ckernels.
-   */
-  DYND_CUDA_HOST_DEVICE static size_t align_offset(size_t offset) { return (offset + size_t(7)) & ~size_t(7); }
 
   /**
    * Call to get the kernel function pointer, whose type
@@ -124,7 +121,7 @@ struct DYND_API ckernel_prefix {
    */
   DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child(intptr_t offset)
   {
-    return reinterpret_cast<ckernel_prefix *>(reinterpret_cast<char *>(this) + ckernel_prefix::align_offset(offset));
+    return reinterpret_cast<ckernel_prefix *>(reinterpret_cast<char *>(this) + align_offset(offset));
   }
 
   static ckernel_prefix *init(ckernel_prefix *self, void *func)

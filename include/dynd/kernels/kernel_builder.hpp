@@ -12,23 +12,13 @@
 #include <dynd/kernels/ckernel_prefix.hpp>
 
 namespace dynd {
+
+/**
+ * Aligns an offset as required by ckernels.
+ */
+inline size_t align_offset(size_t offset) { return (offset + size_t(7)) & ~size_t(7); }
+
 namespace nd {
-
-  /**
-   * Increments a ``ckb_offset`` variable (offset into a ckernel_builder)
-   * by the provided increment. The increment needs to be aligned to 8 bytes,
-   * so padding may be added.
-   */
-  inline void inc_ckb_offset(intptr_t &inout_ckb_offset, size_t inc)
-  {
-    inout_ckb_offset += static_cast<intptr_t>(ckernel_prefix::align_offset(inc));
-  }
-
-  template <class T = ckernel_prefix>
-  void inc_ckb_offset(intptr_t &inout_ckb_offset)
-  {
-    inc_ckb_offset(inout_ckb_offset, sizeof(T));
-  }
 
   /**
    * Function pointers + data for a hierarchical
@@ -168,7 +158,8 @@ namespace nd {
       static_assert(alignof(KernelType) <= 8, "kernel types require alignment <= 64 bits");
 
       intptr_t ckb_offset = m_size;
-      inc_ckb_offset<KernelType>(m_size);
+      m_size +=
+          align_offset(sizeof(KernelType)); // The increment needs to be aligned to 8 bytes, so padding may be added.
       reserve(m_size);
       KernelType::init(this->get_at<KernelType>(ckb_offset), std::forward<ArgTypes>(args)...);
     }
