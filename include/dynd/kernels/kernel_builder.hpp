@@ -77,15 +77,6 @@ namespace nd {
 
     ~kernel_builder() { destroy(); }
 
-    template <typename SelfType, typename PrefixType, typename... A>
-    SelfType *init(PrefixType *rawself, A &&... args)
-    {
-      /* Alignment requirement of the type. */
-      static_assert(alignof(SelfType) <= alignof(uint64_t), "ckernel types require alignment <= 64 bits");
-
-      return SelfType::init(rawself, std::forward<A>(args)...);
-    }
-
     void destroy(ckernel_prefix *self) { self->destroy(); }
 
     void reset()
@@ -168,31 +159,18 @@ namespace nd {
     intptr_t get_capacity() const { return m_capacity; }
 
     /**
-     * For use during construction. This function ensures that the
-     * ckernel_builder has enough capacity (including a child), increments the
-     * provided offset appropriately based on the size of T, and returns a pointer
-     * to the allocated ckernel.
-     */
-    template <class T>
-    T *alloc_ck()
-    {
-      intptr_t ckb_offset = m_size;
-      inc_ckb_offset<T>(m_size);
-      reserve(m_size);
-      return reinterpret_cast<T *>(m_data + ckb_offset);
-    }
-
-    /**
      * Creates the kernel, and increments ``m_size`` to the position after it.
      */
     template <typename KernelType, typename... ArgTypes>
     void emplace_back(ArgTypes &&... args)
     {
+      /* Alignment requirement of the type. */
+      static_assert(alignof(KernelType) == sizeof(void *), "kernel types require alignment <= 64 bits");
+
       intptr_t ckb_offset = m_size;
       inc_ckb_offset<KernelType>(m_size);
       reserve(m_size);
-      KernelType *rawself = this->get_at<KernelType>(ckb_offset);
-      this->init<KernelType>(rawself, std::forward<ArgTypes>(args)...);
+      KernelType::init(this->get_at<KernelType>(ckb_offset), std::forward<ArgTypes>(args)...);
     }
   };
 
