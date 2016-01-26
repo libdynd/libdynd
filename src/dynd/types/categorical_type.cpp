@@ -169,8 +169,8 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
 
     const char *categories_element_arrmeta = categories.get()->metadata() + sizeof(fixed_dim_type_arrmeta);
     nd::kernel_builder k;
-    ::make_comparison_kernel(&k, 0, m_category_tp, categories_element_arrmeta, m_category_tp,
-                             categories_element_arrmeta, comparison_type_sorting_less, &eval::default_eval_context);
+    ::make_comparison_kernel(&k, m_category_tp, categories_element_arrmeta, m_category_tp, categories_element_arrmeta,
+                             comparison_type_sorting_less, &eval::default_eval_context);
     kernel_single_t fn = k.get()->get_function<kernel_single_t>();
 
     cmp less(fn, k.get());
@@ -422,7 +422,7 @@ ndt::type ndt::factor_categorical(const nd::array &values)
   values_eval.get_type().get_as_strided(values_eval.get()->metadata(), &dim_size, &stride, &el_tp, &el_arrmeta);
 
   nd::kernel_builder k;
-  ::make_comparison_kernel(&k, 0, el_tp, el_arrmeta, el_tp, el_arrmeta, comparison_type_sorting_less,
+  ::make_comparison_kernel(&k, el_tp, el_arrmeta, el_tp, el_arrmeta, comparison_type_sorting_less,
                            &eval::default_eval_context);
   kernel_single_t fn = k.get()->get_function<kernel_single_t>();
 

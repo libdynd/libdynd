@@ -154,24 +154,22 @@ bool ndt::fixed_string_type::operator==(const base_type &rhs) const
   }
 }
 
-void ndt::fixed_string_type::make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
+void ndt::fixed_string_type::make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_dt,
                                                     const char *src0_arrmeta, const type &src1_dt,
                                                     const char *src1_arrmeta, comparison_type_t comptype,
                                                     const eval::eval_context *ectx) const
 {
   if (this == src0_dt.extended()) {
     if (*this == *src1_dt.extended()) {
-      make_fixed_string_comparison_kernel(ckb, ckb_offset, m_stringsize, m_encoding, comptype, ectx);
+      make_fixed_string_comparison_kernel(ckb, m_stringsize, m_encoding, comptype, ectx);
       return;
     }
     else if (src1_dt.get_kind() == string_kind) {
-      make_general_string_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype,
-                                            ectx);
+      make_general_string_comparison_kernel(ckb, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype, ectx);
       return;
     }
     else if (!src1_dt.is_builtin()) {
-      src1_dt.extended()->make_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta,
-                                                 comptype, ectx);
+      src1_dt.extended()->make_comparison_kernel(ckb, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype, ectx);
       return;
     }
   }

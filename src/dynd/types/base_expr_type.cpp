@@ -77,10 +77,9 @@ void ndt::base_expr_type::make_value_to_operand_assignment_kernel(nd::kernel_bui
   throw dynd::type_error(ss.str());
 }
 
-void ndt::base_expr_type::make_comparison_kernel(nd::kernel_builder *ckb, intptr_t ckb_offset, const type &src0_dt,
-                                                 const char *src0_arrmeta, const type &src1_dt,
-                                                 const char *src1_arrmeta, comparison_type_t comptype,
-                                                 const eval::eval_context *ectx) const
+void ndt::base_expr_type::make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_dt, const char *src0_arrmeta,
+                                                 const type &src1_dt, const char *src1_arrmeta,
+                                                 comparison_type_t comptype, const eval::eval_context *ectx) const
 {
-  make_expression_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype, ectx);
+  make_expression_comparison_kernel(ckb, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype, ectx);
 }
