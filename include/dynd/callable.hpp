@@ -55,9 +55,7 @@ namespace nd {
 
     inline void set_data(array *&data, const array &value) { data = const_cast<array *>(&value); }
 
-    DYND_HAS(data_init);
     DYND_HAS(resolve_dst_type);
-    DYND_HAS(instantiate);
 
     template <typename KernelType>
     kernel_targets_t get_targets()
@@ -71,29 +69,6 @@ namespace nd {
     const volatile char *get_ir()
     {
       return KernelType::ir;
-    }
-
-    template <typename KernelType>
-    typename std::enable_if<std::is_same<decltype(&KernelType::instantiate), callable_instantiate_t>::value,
-                            callable_instantiate_t>::type
-    get_instantiate()
-    {
-      return &KernelType::instantiate;
-    }
-
-    template <typename KernelType>
-    typename std::enable_if<!has_data_init<KernelType>::value, callable_data_init_t>::type get_data_init()
-    {
-      return NULL;
-    }
-
-    template <typename KernelType>
-    typename std::enable_if<has_data_init<KernelType>::value &&
-                                std::is_same<decltype(&KernelType::data_init), callable_data_init_t>::value,
-                            callable_data_init_t>::type
-    get_data_init()
-    {
-      return &KernelType::data_init;
     }
 
     template <typename KernelType>
@@ -364,16 +339,15 @@ namespace nd {
     static typename std::enable_if<ndt::has_traits<KernelType>::value, callable>::type make()
     {
       return callable(ndt::traits<KernelType>::equivalent(), KernelType::kernreq, detail::get_targets<KernelType>(),
-                      detail::get_ir<KernelType>(), detail::get_data_init<KernelType>(),
-                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
+                      detail::get_ir<KernelType>(), &KernelType::data_init, detail::get_resolve_dst_type<KernelType>(),
+                      &KernelType::instantiate);
     }
 
     template <typename KernelType>
     static typename std::enable_if<!ndt::has_traits<KernelType>::value, callable>::type make(const ndt::type &tp)
     {
       return callable(tp, KernelType::kernreq, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
-                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
-                      detail::get_instantiate<KernelType>());
+                      &KernelType::data_init, detail::get_resolve_dst_type<KernelType>(), &KernelType::instantiate);
     }
 
     template <typename KernelType, typename StaticDataType>
@@ -381,9 +355,8 @@ namespace nd {
     make(StaticDataType &&static_data)
     {
       return callable(ndt::traits<KernelType>::equivalent(), KernelType::kernreq, detail::get_targets<KernelType>(),
-                      detail::get_ir<KernelType>(), std::forward<StaticDataType>(static_data),
-                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
-                      detail::get_instantiate<KernelType>());
+                      detail::get_ir<KernelType>(), std::forward<StaticDataType>(static_data), &KernelType::data_init,
+                      detail::get_resolve_dst_type<KernelType>(), &KernelType::instantiate);
     }
 
     template <typename KernelType, typename StaticDataType>
@@ -391,8 +364,8 @@ namespace nd {
     make(const ndt::type &tp, StaticDataType &&static_data)
     {
       return callable(tp, KernelType::kernreq, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
-                      std::forward<StaticDataType>(static_data), detail::get_data_init<KernelType>(),
-                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
+                      std::forward<StaticDataType>(static_data), &KernelType::data_init,
+                      detail::get_resolve_dst_type<KernelType>(), &KernelType::instantiate);
     }
 
     template <template <int> class CKT, typename T>
@@ -451,8 +424,8 @@ namespace nd {
   {
     return callable(new CallableType(ndt::traits<KernelType>::equivalent(), KernelType::kernreq,
                                      detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
-                                     detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
-                                     detail::get_instantiate<KernelType>(), std::forward<ArgTypes>(args)...),
+                                     &KernelType::data_init, detail::get_resolve_dst_type<KernelType>(),
+                                     &KernelType::instantiate, std::forward<ArgTypes>(args)...),
                     true);
   }
 
@@ -461,8 +434,8 @@ namespace nd {
                                                                                 ArgTypes &&... args)
   {
     return callable(new CallableType(tp, KernelType::kernreq, detail::get_targets<KernelType>(),
-                                     detail::get_ir<KernelType>(), detail::get_data_init<KernelType>(),
-                                     detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>(),
+                                     detail::get_ir<KernelType>(), &KernelType::data_init,
+                                     detail::get_resolve_dst_type<KernelType>(), &KernelType::instantiate,
                                      std::forward<ArgTypes>(args)...),
                     true);
   }

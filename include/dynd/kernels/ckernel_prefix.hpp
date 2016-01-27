@@ -11,11 +11,11 @@
 
 #include <dynd/config.hpp>
 #include <dynd/diagnostics.hpp>
+#include <dynd/kernels/kernel_builder.hpp>
 
 namespace dynd {
 namespace nd {
 
-  class kernel_builder;
   class array;
 
 } // namespace dynd::nd
@@ -60,8 +60,6 @@ enum {
   kernel_request_data_only = 0x00000001
 };
 typedef uint32_t kernel_request_t;
-
-size_t align_offset(size_t offset);
 
 /**
  * This is the struct which begins the memory layout
@@ -121,7 +119,8 @@ struct DYND_API ckernel_prefix {
    */
   DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child(intptr_t offset)
   {
-    return reinterpret_cast<ckernel_prefix *>(reinterpret_cast<char *>(this) + align_offset(offset));
+    return reinterpret_cast<ckernel_prefix *>(reinterpret_cast<char *>(this) +
+                                              nd::kernel_builder::aligned_size(offset));
   }
 
   static ckernel_prefix *init(ckernel_prefix *self, void *func)
@@ -139,12 +138,32 @@ struct DYND_API ckernel_prefix {
     return NULL;
   }
 
-  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+  static void instantiate(char *static_data, char *DYND_UNUSED(data), nd::kernel_builder *ckb,
                           const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                           intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                           const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                          intptr_t DYND_UNUSED(nkwds), const nd::array *DYND_UNUSED(kwds),
-                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars));
+                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    void *func;
+    switch (kernreq) {
+    case kernel_request_single:
+      func = reinterpret_cast<kernel_targets_t *>(static_data)->single;
+      break;
+    case kernel_request_strided:
+      func = reinterpret_cast<kernel_targets_t *>(static_data)->strided;
+      break;
+    default:
+      throw std::invalid_argument("unrecognized kernel request");
+      break;
+    }
+
+    if (func == NULL) {
+      throw std::invalid_argument("no kernel request");
+    }
+
+    ckb->emplace_back<ckernel_prefix>(func);
+  }
 };
 
 } // namespace dynd

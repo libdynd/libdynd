@@ -3,7 +3,6 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/kernels/ckernel_common_functions.hpp>
 #include <dynd/kernels/compound_kernel.hpp>
 #include <dynd/func/compound.hpp>
 

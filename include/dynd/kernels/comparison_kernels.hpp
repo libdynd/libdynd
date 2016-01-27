@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/types/type_id.hpp>
-#include <dynd/kernels/kernel_builder.hpp>
+#include <dynd/kernels/ckernel_prefix.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/math.hpp>
 

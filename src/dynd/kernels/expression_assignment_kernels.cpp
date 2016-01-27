@@ -188,8 +188,8 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
         // Allocate the buffer data
         ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
         intptr_t buffer_data_offset = ckb_offset;
-        ckb_offset += align_offset(e->buffer_data_size);
-        ckb->m_size += align_offset(e->buffer_data_size);
+        ckb_offset += nd::kernel_builder::aligned_size(e->buffer_data_size);
+        ckb->m_size += nd::kernel_builder::aligned_size(e->buffer_data_size);
         ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
         // This may have invalidated the 'e' pointer, so get it again!
         e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
@@ -226,8 +226,8 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
       ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
       // Allocate the buffer data
       intptr_t buffer_data_offset = ckb_offset;
-      ckb_offset += align_offset(e->buffer_data_size);
-      ckb->m_size += align_offset(e->buffer_data_size);
+      ckb_offset += nd::kernel_builder::aligned_size(e->buffer_data_size);
+      ckb->m_size += nd::kernel_builder::aligned_size(e->buffer_data_size);
       ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
       // This may have invalidated the 'e' pointer, so get it again!
       e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
@@ -264,8 +264,8 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
         // Allocate the buffer data
         ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
         size_t buffer_data_offset = ckb_offset;
-        ckb_offset += align_offset(buffer_data_size);
-        ckb->m_size += align_offset(buffer_data_size);
+        ckb_offset += nd::kernel_builder::aligned_size(buffer_data_size);
+        ckb->m_size += nd::kernel_builder::aligned_size(buffer_data_size);
         ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
         // This may have invalidated the 'e' pointer, so get it again!
         e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
@@ -293,8 +293,8 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
       // Allocate the buffer data
       ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
       size_t buffer_data_offset = ckb_offset;
-      ckb_offset += align_offset(buffer_data_size);
-      ckb->m_size += align_offset(buffer_data_size);
+      ckb_offset += nd::kernel_builder::aligned_size(buffer_data_size);
+      ckb->m_size += nd::kernel_builder::aligned_size(buffer_data_size);
       ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
       // This may have invalidated the 'e' pointer, so get it again!
       e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);

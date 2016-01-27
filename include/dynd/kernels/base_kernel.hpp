@@ -8,7 +8,7 @@
 #include <typeinfo>
 
 #include <dynd/array.hpp>
-#include <dynd/kernels/kernel_builder.hpp>
+#include <dynd/kernels/ckernel_prefix.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
@@ -17,7 +17,7 @@ namespace nd {
   template <typename PrefixType, typename SelfType>
   struct kernel_prefix_wrapper : PrefixType {
     /**  Returns the child ckernel immediately following this one. */
-    DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child(intptr_t offset = sizeof(SelfType))
+    DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child(intptr_t offset = kernel_builder::aligned_size(sizeof(SelfType)))
     {
       return ckernel_prefix::get_child(offset);
     }
@@ -42,13 +42,6 @@ namespace nd {
      * the ckernel_prefix destructor.
      */
     static void destruct(ckernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }
-
-    static char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp),
-                           intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
-                           const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      return NULL;
-    }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),

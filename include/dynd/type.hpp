@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <stdexcept>
+
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/base_expr_type.hpp>
 #include <dynd/types/base_string_type.hpp>

@@ -24,8 +24,8 @@ void nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
   ckb_offset = ckb->m_size;
   ckb->reserve(ckb_offset);
   e = ckb->get_at<equal_kernel>(ckb_offset);
-  ckb_offset += align_offset(field_count * sizeof(size_t));
-  ckb->m_size += align_offset(field_count * sizeof(size_t));
+  ckb_offset += nd::kernel_builder::aligned_size(field_count * sizeof(size_t));
+  ckb->m_size += nd::kernel_builder::aligned_size(field_count * sizeof(size_t));
   //      e->field_count = field_count;
   //    e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
   //  e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
@@ -65,8 +65,8 @@ void nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
   ckb_offset = ckb->m_size;
   ckb->reserve(ckb_offset);
   e = ckb->get_at<extra_type>(ckb_offset);
-  ckb_offset += align_offset(field_count * sizeof(size_t));
-  ckb->m_size += align_offset(field_count * sizeof(size_t));
+  ckb_offset += nd::kernel_builder::aligned_size(field_count * sizeof(size_t));
+  ckb->m_size += nd::kernel_builder::aligned_size(field_count * sizeof(size_t));
   //      e->field_count = field_count;
   //    e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
   //  e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
