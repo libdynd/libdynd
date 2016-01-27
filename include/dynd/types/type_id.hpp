@@ -149,6 +149,7 @@ enum type_id_t {
   array_id, // A dynamic array type
   callable_id,
 
+  expr_kind_id,
   adapt_id, // Adapter type
   expr_id,  // Advanced expression types
   convert_id,

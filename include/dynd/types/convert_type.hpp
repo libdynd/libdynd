@@ -66,7 +66,7 @@ namespace ndt {
     static type make(const type &value_type, const type &operand_type)
     {
       if (operand_type.value_type() != value_type) {
-        if (value_type.get_kind() != expr_kind) {
+        if (value_type.get_base_id() != expr_kind_id) {
           // Create a conversion type when the value kind is different
           return type(new convert_type(value_type, operand_type), false);
         }

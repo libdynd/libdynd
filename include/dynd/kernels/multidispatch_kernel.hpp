@@ -46,18 +46,19 @@ namespace nd {
         }
       }
 
-      if (src.get_kind() == uint_kind &&
-          (dst.get_kind() == uint_kind || dst.get_kind() == sint_kind || dst.get_kind() == real_kind)) {
+      if (src.get_base_id() == uint_kind_id && (dst.get_base_id() == uint_kind_id || dst.get_base_id() == int_kind_id ||
+                                                dst.get_base_id() == float_kind_id)) {
         return src.get_data_size() < dst.get_data_size();
       }
-      if (src.get_kind() == sint_kind && (dst.get_kind() == sint_kind || dst.get_kind() == real_kind)) {
+      if (src.get_base_id() == int_kind_id &&
+          (dst.get_base_id() == int_kind_id || dst.get_base_id() == float_kind_id)) {
         return src.get_data_size() < dst.get_data_size();
       }
-      if (src.get_kind() == real_kind) {
-        if (dst.get_kind() == real_kind) {
+      if (src.get_base_id() == float_kind_id) {
+        if (dst.get_base_id() == float_kind_id) {
           return src.get_data_size() < dst.get_data_size();
         }
-        else if (dst.get_kind() == complex_kind) {
+        else if (dst.get_base_id() == complex_kind_id) {
           return src.get_data_size() * 2 <= dst.get_data_size();
         }
       }

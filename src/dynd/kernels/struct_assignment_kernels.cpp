@@ -24,12 +24,12 @@ void dynd::make_struct_assignment_kernel(nd::kernel_builder *ckb, const ndt::typ
                                          const char *dst_arrmeta, const ndt::type &src_struct_tp,
                                          const char *src_arrmeta, kernel_request_t kernreq)
 {
-  if (src_struct_tp.get_kind() != struct_kind) {
+  if (src_struct_tp.get_id() != struct_id) {
     stringstream ss;
     ss << "struct_type::make_assignment_kernel: provided source type " << src_struct_tp << " is not of struct kind";
     throw runtime_error(ss.str());
   }
-  if (dst_struct_tp.get_kind() != struct_kind) {
+  if (dst_struct_tp.get_id() != struct_id) {
     stringstream ss;
     ss << "struct_type::make_assignment_kernel: provided destination type " << dst_struct_tp
        << " is not of struct kind";
