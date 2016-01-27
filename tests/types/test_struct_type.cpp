@@ -96,7 +96,7 @@ TEST(StructType, CreateTwoField)
   // Struct with two fields
   dt = ndt::struct_type::make({"a", "b"}, {ndt::make_type<int64_t>(), ndt::make_type<int32_t>()});
   EXPECT_EQ(struct_id, dt.get_id());
-  EXPECT_EQ(struct_kind, dt.get_kind());
+  EXPECT_EQ(tuple_id, dt.get_base_id());
   EXPECT_EQ(0u, dt.get_data_size());
   EXPECT_EQ(sizeof(two_field_struct), dt.extended()->get_default_data_size());
   EXPECT_EQ((size_t)alignof(two_field_struct), dt.get_data_alignment());
@@ -127,7 +127,7 @@ TEST(StructType, CreateThreeField)
   ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_8);
   dt = ndt::struct_type::make({"x", "y", "z"}, {d1, d2, d3});
   EXPECT_EQ(struct_id, dt.get_id());
-  EXPECT_EQ(struct_kind, dt.get_kind());
+  EXPECT_EQ(tuple_id, dt.get_base_id());
   EXPECT_EQ(0u, dt.get_data_size());
   EXPECT_EQ(sizeof(three_field_struct), dt.extended()->get_default_data_size());
   EXPECT_EQ((size_t)alignof(two_field_struct), dt.get_data_alignment());

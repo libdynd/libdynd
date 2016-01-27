@@ -90,7 +90,7 @@ ndt::type_registry::type_registry()
   insert(dim_kind_id, fixed_dim_kind_type::make(any_kind_type::make())); // fixed_dim_id
   insert(dim_kind_id, var_dim_type::make(any_kind_type::make()));        // var_dim_id
 
-  insert(any_kind_id, categorical_kind_type::make());             // categorical_id
+  insert(scalar_kind_id, categorical_kind_type::make());          // categorical_id
   insert(any_kind_id, type("?Any"));                              // option_id
   insert(any_kind_id, pointer_type::make(any_kind_type::make())); // pointer_id
   insert(any_kind_id, type());                                    // memory_id
@@ -99,10 +99,11 @@ ndt::type_registry::type_registry()
   insert(scalar_kind_id, type());                 // array_id
   insert(scalar_kind_id, type());                 // callable_id
 
-  insert(any_kind_id, type()); // adapt_id
-  insert(any_kind_id, type()); // expr_id
-  insert(any_kind_id, type()); // convert_id
-  insert(any_kind_id, type()); // view_id
+  insert(any_kind_id, type());  // expr_kind_id
+  insert(expr_kind_id, type()); // adapt_id
+  insert(expr_kind_id, type()); // expr_id
+  insert(expr_kind_id, type()); // convert_id
+  insert(expr_kind_id, type()); // view_id
 
   insert(any_kind_id, type()); // c_contiguous_id
 
@@ -130,18 +131,18 @@ ndt::type_registry::~type_registry()
 
 DYND_API size_t ndt::type_registry::size() const { return m_infos.size(); }
 
-DYND_API type_id_t ndt::type_registry::insert(type_id_t base_tp_id, const type &kind_tp)
+DYND_API type_id_t ndt::type_registry::insert(type_id_t base_id, const type &kind_tp)
 {
-  type_id_t tp_id = static_cast<type_id_t>(size());
-  const type_info &base_tp_info = m_infos[base_tp_id];
+  type_id_t id = static_cast<type_id_t>(size());
+  const type_info &base_tp_info = m_infos[base_id];
 
   size_t nbases = base_tp_info.nbases + 1;
-  type_id_t *bases = new type_id_t[nbases]{base_tp_id};
+  type_id_t *bases = new type_id_t[nbases]{base_id};
   memcpy(bases + 1, base_tp_info.bases, base_tp_info.nbases);
 
   m_infos.emplace_back(nbases, bases, kind_tp);
 
-  return tp_id;
+  return id;
 }
 
 DYND_API const ndt::type_info &ndt::type_registry::operator[](type_id_t id) const

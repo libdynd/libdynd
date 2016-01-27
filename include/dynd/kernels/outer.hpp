@@ -47,7 +47,7 @@ namespace nd {
           }
           j += old_tp.get_ndim();
           for (; old_tp.get_ndim(); ++k) {
-            if (new_tp.get_kind() == memory_kind) {
+            if (new_tp.get_base_id() == memory_id) {
               new_tp.extended<ndt::base_memory_type>()
                   ->get_element_type()
                   .extended<ndt::base_dim_type>()
@@ -96,7 +96,7 @@ namespace nd {
             tp = src_tp[i].without_memory_type().with_replaced_dtype(tp);
           }
         }
-        if (dst_tp.get_kind() == memory_kind) {
+        if (dst_tp.get_base_id() == memory_id) {
           dst_tp = dst_tp.extended<ndt::base_memory_type>()->with_replaced_storage_type(tp);
         }
         else {

@@ -17,7 +17,7 @@ TEST(CategoricalKindType, Construction)
 {
   ndt::type tp = ndt::categorical_kind_type::make();
   EXPECT_EQ(categorical_id, tp.get_id());
-  EXPECT_EQ(kind_kind, tp.get_kind());
+  EXPECT_EQ(scalar_kind_id, tp.get_base_id());
   EXPECT_EQ(0u, tp.get_data_alignment());
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_FALSE(tp.is_expression());

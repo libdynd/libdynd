@@ -110,7 +110,7 @@ static void as_storage_type(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_of
       out_was_transformed = true;
     }
     else {
-      if (dt.get_kind() == expr_kind) {
+      if (dt.get_base_id() == expr_kind_id) {
         out_transformed_tp = storage_dt;
         out_was_transformed = true;
       }
@@ -530,7 +530,7 @@ static void permute_type_dims(const ndt::type &tp, intptr_t arrmeta_offset, void
       out_transformed_tp = tp;
     }
     else {
-      if (tp.get_kind() == dim_kind) {
+      if (tp.get_base_id() == dim_kind_id) {
         ++pdd->i;
       }
       tp.extended()->transform_child_types(&permute_type_dims, arrmeta_offset, extra, out_transformed_tp,
@@ -761,7 +761,7 @@ static void view_scalar_types(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_
   if (dt.is_scalar()) {
     const ndt::type *e = reinterpret_cast<const ndt::type *>(extra);
     // If things aren't simple, use a view_type
-    if (dt.get_kind() == expr_kind || dt.get_data_size() != e->get_data_size() || !dt.is_pod() || !e->is_pod()) {
+    if (dt.get_base_id() == expr_kind_id || dt.get_data_size() != e->get_data_size() || !dt.is_pod() || !e->is_pod()) {
       // Some special cases that have the same memory layouts
       switch (dt.get_id()) {
       case string_id:
@@ -812,7 +812,7 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const
     const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(get()->metadata());
     const ndt::type &edt = sad->get_element_type();
     if (edt.is_pod() && (intptr_t)edt.get_data_size() == md->stride &&
-        sad->get_element_type().get_kind() != expr_kind) {
+        sad->get_element_type().get_base_id() != expr_kind_id) {
       intptr_t nbytes = md->dim_size * edt.get_data_size();
       // Make sure the element size divides into the # of bytes
       if (nbytes % scalar_tp.get_data_size() != 0) {

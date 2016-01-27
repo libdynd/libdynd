@@ -66,7 +66,7 @@ namespace nd {
         if (nsrc == 0) {
           dst_tp =
               tp_vars.at("Dims").extended<ndt::dim_fragment_type>()->apply_to_dtype(child_dst_tp.without_memory_type());
-          if (child_dst_tp.get_kind() == memory_kind) {
+          if (child_dst_tp.get_base_id() == memory_id) {
             dst_tp = child_dst_tp.extended<ndt::base_memory_type>()->with_replaced_storage_type(dst_tp);
           }
 
@@ -117,7 +117,7 @@ namespace nd {
               tp = ndt::make_fixed_dim(shape[i], tp);
             }
           }
-          if (child_dst_tp.get_kind() == memory_kind) {
+          if (child_dst_tp.get_base_id() == memory_id) {
             child_dst_tp = child_dst_tp.extended<ndt::base_memory_type>()->with_replaced_storage_type(tp);
           }
           else {
@@ -230,8 +230,7 @@ namespace nd {
     };
 
     template <int N>
-    struct elwise_ck<fixed_dim_id, fixed_dim_id, N>
-        : base_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, N>, N> {
+    struct elwise_ck<fixed_dim_id, fixed_dim_id, N> : base_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, N>, N> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -348,8 +347,7 @@ namespace nd {
     // int N, int K
 
     template <>
-    struct elwise_ck<fixed_dim_id, fixed_dim_id, 0>
-        : base_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, 0>, 0> {
+    struct elwise_ck<fixed_dim_id, fixed_dim_id, 0> : base_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, 0>, 0> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -430,8 +428,7 @@ namespace nd {
      * kernel_request_strided type of kernel.
      */
     template <int N>
-    struct elwise_ck<fixed_dim_id, var_dim_id, N>
-        : base_kernel<elwise_ck<fixed_dim_id, var_dim_id, N>, N> {
+    struct elwise_ck<fixed_dim_id, var_dim_id, N> : base_kernel<elwise_ck<fixed_dim_id, var_dim_id, N>, N> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -575,8 +572,7 @@ namespace nd {
     };
 
     template <>
-    struct elwise_ck<fixed_dim_id, var_dim_id, 0>
-        : base_kernel<elwise_ck<fixed_dim_id, var_dim_id, 0>, 0> {
+    struct elwise_ck<fixed_dim_id, var_dim_id, 0> : base_kernel<elwise_ck<fixed_dim_id, var_dim_id, 0>, 0> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -652,8 +648,7 @@ namespace nd {
      * kernel_request_strided type of kernel.
      */
     template <int N>
-    struct elwise_ck<var_dim_id, fixed_dim_id, N>
-        : base_kernel<elwise_ck<var_dim_id, fixed_dim_id, N>, N> {
+    struct elwise_ck<var_dim_id, fixed_dim_id, N> : base_kernel<elwise_ck<var_dim_id, fixed_dim_id, N>, N> {
       typedef elwise_ck self_type;
 
       memory_block_data *m_dst_memblock;
@@ -879,8 +874,7 @@ namespace nd {
     };
 
     template <>
-    struct elwise_ck<var_dim_id, fixed_dim_id, 0>
-        : base_kernel<elwise_ck<var_dim_id, fixed_dim_id, 0>, 0> {
+    struct elwise_ck<var_dim_id, fixed_dim_id, 0> : base_kernel<elwise_ck<var_dim_id, fixed_dim_id, 0>, 0> {
       typedef elwise_ck self_type;
 
       memory_block_data *m_dst_memblock;

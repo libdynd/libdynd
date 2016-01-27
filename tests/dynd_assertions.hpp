@@ -53,7 +53,7 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
                                            << expr1 << " has shape " << ShapeFormatter(val1.get_shape()) << ",\n"
                                            << expr2 << " has shape " << ShapeFormatter(val2.get_shape()) << ".";
     }
-    else if (val1.get_type().get_kind() == struct_kind) {
+    else if (val1.get_type().get_id() == struct_id) {
       const ndt::struct_type *bsd = val1.get_type().extended<ndt::struct_type>();
       intptr_t field_count = bsd->get_field_count();
       for (intptr_t i = 0; i < field_count; ++i) {
@@ -68,7 +68,7 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
       return ::testing::AssertionFailure() << "DYND ASSERTION INTERNAL ERROR: One of the struct fields "
                                               "should have compared unequal";
     }
-    else if (val1.get_type().get_kind() == tuple_kind) {
+    else if (val1.get_type().get_id() == tuple_id) {
       const ndt::tuple_type *bsd = val1.get_type().extended<ndt::tuple_type>();
       intptr_t field_count = bsd->get_field_count();
       for (intptr_t i = 0; i < field_count; ++i) {

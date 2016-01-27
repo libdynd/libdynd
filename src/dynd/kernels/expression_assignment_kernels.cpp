@@ -164,12 +164,12 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
 {
   intptr_t ckb_offset = ckb->m_size;
   intptr_t root_ckb_offset = ckb_offset;
-  if (dst_tp.get_kind() == expr_kind) {
+  if (dst_tp.get_base_id() == expr_kind_id) {
     const ndt::base_expr_type *dst_bed = dst_tp.extended<ndt::base_expr_type>();
     if (src_tp == dst_bed->get_value_type()) {
       // In this case, it's just a chain of value -> operand on the dst side
       const ndt::type &opdt = dst_bed->get_operand_type();
-      if (opdt.get_kind() != expr_kind) {
+      if (opdt.get_base_id() != expr_kind_id) {
         // Leaf case, just a single value -> operand kernel
         return dst_bed->make_value_to_operand_assignment_kernel(ckb, dst_arrmeta, src_arrmeta, kernreq, ectx);
       }

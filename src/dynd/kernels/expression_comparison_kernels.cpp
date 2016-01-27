@@ -158,7 +158,7 @@ void dynd::make_expression_comparison_kernel(nd::kernel_builder *ckb, const ndt:
   e->base.function = reinterpret_cast<void *>(&buffered_kernel_extra::kernel);
   e->base.destructor = &buffered_kernel_extra::destruct;
   // Initialize the information for buffering the operands
-  if (src0_dt.get_kind() == expr_kind) {
+  if (src0_dt.get_base_id() == expr_kind_id) {
     e->init_buffer(0, src0_dt.value_type());
     e->buf[0].kernel_offset = ckb_offset - root_ckb_offset;
     make_assignment_kernel(ckb, src0_dt.value_type(), e->buf[0].arrmeta, src0_dt, src0_arrmeta, kernel_request_single,
@@ -168,7 +168,7 @@ void dynd::make_expression_comparison_kernel(nd::kernel_builder *ckb, const ndt:
     // it
     e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
   }
-  if (src1_dt.get_kind() == expr_kind) {
+  if (src1_dt.get_base_id() == expr_kind_id) {
     e->init_buffer(1, src1_dt.value_type());
     e->buf[1].kernel_offset = ckb_offset - root_ckb_offset;
     make_assignment_kernel(ckb, src1_dt.value_type(), e->buf[1].arrmeta, src1_dt, src1_arrmeta, kernel_request_single,

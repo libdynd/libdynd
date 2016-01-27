@@ -322,7 +322,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
     if (data_size % (intptr_t)el_data_size == 0 &&
         offset_is_aligned(reinterpret_cast<size_t>(data_ptr), arr_tp.get_data_alignment())) {
       intptr_t dim_size = data_size / el_data_size;
-      if (arr_tp.get_kind() != kind_kind) {
+      if (arr_tp.get_base_id() != ) {
         if (arr_tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size() != dim_size) {
           return nd::array();
         }

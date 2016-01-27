@@ -76,12 +76,12 @@ void kernels::string_concatenation_kernel::strided(char *dst, intptr_t dst_strid
 
 void kernels::string_find_kernel::init(const ndt::type *src_tp, const char *const *src_arrmeta)
 {
-  if (src_tp[0].get_kind() != string_kind) {
+  if (src_tp[0].get_base_id() != string_kind_id) {
     stringstream ss;
     ss << "Expected a string type for the string find kernel, not " << src_tp[0];
     throw runtime_error(ss.str());
   }
-  if (src_tp[1].get_kind() != string_kind) {
+  if (src_tp[1].get_base_id() != string_kind_id) {
     stringstream ss;
     ss << "Expected a string type for the string find kernel, not " << src_tp[1];
     throw runtime_error(ss.str());
@@ -93,9 +93,7 @@ void kernels::string_find_kernel::init(const ndt::type *src_tp, const char *cons
   m_sub_arrmeta = src_arrmeta[1];
 }
 
-void kernels::string_find_kernel::destruct(ckernel_prefix *DYND_UNUSED(extra))
-{
-}
+void kernels::string_find_kernel::destruct(ckernel_prefix *DYND_UNUSED(extra)) {}
 
 inline void find_one_string(intptr_t *d, const char *str_begin, const char *str_end, const char *sub_begin,
                             const char *sub_end, next_unicode_codepoint_t str_next_fn,

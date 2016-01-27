@@ -148,7 +148,7 @@ void ndt::string_type::make_comparison_kernel(nd::kernel_builder *ckb, const typ
       make_string_comparison_kernel(ckb, string_encoding_utf_8, comptype, ectx);
       return;
     }
-    else if (src1_dt.get_kind() == string_kind) {
+    else if (src1_dt.get_base_id() == string_kind_id) {
       make_general_string_comparison_kernel(ckb, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype, ectx);
       return;
     }

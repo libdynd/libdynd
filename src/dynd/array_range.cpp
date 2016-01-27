@@ -58,13 +58,15 @@ struct range_counter {
         return 0;
       }
       return ((intptr_t)end - (intptr_t)begin + (intptr_t)step - 1) / (intptr_t)step;
-    } else if (step < 0) {
+    }
+    else if (step < 0) {
       if (end >= begin) {
         return 0;
       }
       step = -step;
       return ((intptr_t)begin - (intptr_t)end + (intptr_t)step - 1) / (intptr_t)step;
-    } else {
+    }
+    else {
       throw std::runtime_error("nd::range cannot have a zero-sized step");
     }
   }
@@ -83,7 +85,8 @@ struct range_counter<T, uint_kind> {
         return 0;
       }
       return ((intptr_t)end - (intptr_t)begin + (intptr_t)step - 1) / (intptr_t)step;
-    } else {
+    }
+    else {
       throw std::runtime_error("nd::range cannot have a zero-sized step");
     }
   }
@@ -105,14 +108,16 @@ struct range_counter<T, real_kind> {
       // Add half a step to make the count robust. This requires
       // that the range given is approximately a multiple of step
       return (intptr_t)floor((end - begin + 0.5 * step) / step);
-    } else if (step < 0) {
+    }
+    else if (step < 0) {
       if (end >= begin) {
         return 0;
       }
       // Add half a step to make the count robust. This requires
       // that the range given is approximately a multiple of step
       return (intptr_t)floor((end - begin + 0.5 * step) / step);
-    } else {
+    }
+    else {
       throw std::runtime_error("nd::range cannot have a zero-sized step");
     }
   }
@@ -206,7 +211,8 @@ nd::array dynd::nd::linspace(const nd::array &start, const nd::array &stop, intp
 
   if (start_cleaned.is_scalar() && stop_cleaned.is_scalar()) {
     return linspace(dt, start_cleaned.cdata(), stop_cleaned.cdata(), count);
-  } else {
+  }
+  else {
     throw runtime_error("dynd::linspace presently only supports scalar parameters");
   }
 }
@@ -215,7 +221,7 @@ nd::array dynd::nd::linspace(const nd::array &start, const nd::array &stop, intp
 {
   ndt::type dt = promote_types_arithmetic(start.get_dtype(), stop.get_dtype());
   // Make sure it's at least floating point
-  if (dt.get_kind() == bool_kind || dt.get_kind() == sint_kind || dt.get_kind() == uint_kind) {
+  if (dt.get_base_id() == bool_kind_id || dt.get_base_id() == int_kind_id || dt.get_base_id() == uint_kind_id) {
     dt = ndt::make_type<double>();
   }
   return linspace(start, stop, count, dt);
