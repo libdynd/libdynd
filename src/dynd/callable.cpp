@@ -5,8 +5,6 @@
 
 #include <dynd/func/assignment.hpp>
 #include <dynd/callable.hpp>
-#include <dynd/kernels/ckernel_common_functions.hpp>
-#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/option_type.hpp>
@@ -31,39 +29,6 @@ struct unary_assignment_ck : nd::base_kernel<unary_assignment_ck> {
     eval::eval_context ectx_tmp;
     ectx_tmp.errmode = errmode;
     make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, &ectx_tmp);
-  }
-};
-
-////////////////////////////////////////////////////////////////
-// Functions for property access as an callable
-
-struct property_kernel : nd::base_kernel<property_kernel> {
-  static void instantiate(char *static_data, char *DYND_UNUSED(data), nd::kernel_builder *ckb, const ndt::type &dst_tp,
-                          const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                          const char *const *src_arrmeta, kernel_request_t kernreq, const eval::eval_context *ectx,
-                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    ndt::type prop_src_tp = *reinterpret_cast<ndt::type *>(static_data);
-
-    if (dst_tp.value_type() == prop_src_tp.value_type()) {
-      if (src_tp[0] == prop_src_tp.operand_type()) {
-        make_assignment_kernel(ckb, dst_tp, dst_arrmeta, prop_src_tp, src_arrmeta[0], kernreq, ectx);
-        return;
-      }
-      else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
-        make_assignment_kernel(ckb, dst_tp, dst_arrmeta,
-                               prop_src_tp.extended<ndt::base_expr_type>()->with_replaced_storage_type(src_tp[0]),
-                               src_arrmeta[0], kernreq, ectx);
-        return;
-      }
-    }
-
-    stringstream ss;
-    ss << "Cannot instantiate callable for assigning from ";
-    ss << " using input type " << src_tp[0];
-    ss << " and output type " << dst_tp;
-    throw type_error(ss.str());
   }
 };
 

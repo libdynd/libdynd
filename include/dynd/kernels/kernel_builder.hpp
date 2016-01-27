@@ -9,14 +9,9 @@
 #include <algorithm>
 #include <map>
 
-#include <dynd/kernels/ckernel_prefix.hpp>
-
 namespace dynd {
 
-/**
- * Aligns an offset as required by ckernels.
- */
-inline size_t align_offset(size_t offset) { return (offset + size_t(7)) & ~size_t(7); }
+struct ckernel_prefix;
 
 namespace nd {
 
@@ -52,22 +47,12 @@ namespace nd {
       set(m_static_data, 0, sizeof(m_static_data));
     }
 
-    void destroy()
-    {
-      if (m_data != NULL) {
-        // Destroy whatever was created
-        destroy(reinterpret_cast<ckernel_prefix *>(m_data));
-        // Free the memory
-        free(m_data);
-      }
-    }
+    DYND_API void destroy();
 
   public:
     kernel_builder() { init(); }
 
     ~kernel_builder() { destroy(); }
-
-    void destroy(ckernel_prefix *self) { self->destroy(); }
 
     void reset()
     {
@@ -155,43 +140,22 @@ namespace nd {
     void emplace_back(ArgTypes &&... args)
     {
       /* Alignment requirement of the type. */
-      static_assert(alignof(KernelType) <= 8, "kernel types require alignment <= 64 bits");
+      static_assert(alignof(KernelType) <= 8, "kernel types require alignment to be at most 8 bytes");
 
-      intptr_t ckb_offset = m_size;
-      m_size +=
-          align_offset(sizeof(KernelType)); // The increment needs to be aligned to 8 bytes, so padding may be added.
+      size_t offset = m_size;
+      m_size += aligned_size(sizeof(KernelType));
       reserve(m_size);
-      KernelType::init(this->get_at<KernelType>(ckb_offset), std::forward<ArgTypes>(args)...);
+      KernelType::init(this->get_at<KernelType>(offset), std::forward<ArgTypes>(args)...);
+    }
+
+    /**
+     * Aligns a size as required by kernels.
+     */
+    static constexpr size_t aligned_size(size_t size)
+    {
+      return (size + static_cast<size_t>(7)) & ~static_cast<size_t>(7);
     }
   };
 
 } // namespace dynd::nd
-
-inline void ckernel_prefix::instantiate(char *static_data, char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                                        const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                                        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                        intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                                        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-{
-  void *func;
-  switch (kernreq) {
-  case kernel_request_single:
-    func = reinterpret_cast<kernel_targets_t *>(static_data)->single;
-    break;
-  case kernel_request_strided:
-    func = reinterpret_cast<kernel_targets_t *>(static_data)->strided;
-    break;
-  default:
-    throw std::invalid_argument("unrecognized kernel request");
-    break;
-  }
-
-  if (func == NULL) {
-    throw std::invalid_argument("no kernel request");
-  }
-
-  ckb->emplace_back<ckernel_prefix>(func);
-}
-
 } // namespace dynd

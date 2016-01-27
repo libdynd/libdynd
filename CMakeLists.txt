@@ -339,7 +339,6 @@ set(libdynd_SRC
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/base_kernel.hpp
     include/dynd/kernels/byteswap_kernels.hpp
-    include/dynd/kernels/ckernel_common_functions.hpp
     include/dynd/kernels/ckernel_prefix.hpp
     include/dynd/kernels/comparison_kernels.hpp
     include/dynd/kernels/compose_kernel.hpp

@@ -236,52 +236,6 @@ void ndt::callable_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
   }
 }
 
-/////////////////////////////////////////
-// callable to string assignment
-
-namespace {
-struct callable_to_string_ck : nd::base_kernel<callable_to_string_ck, 1> {
-  ndt::type m_src_tp, m_dst_string_dt;
-  const char *m_dst_arrmeta;
-  eval::eval_context m_ectx;
-
-  callable_to_string_ck(const ndt::type &src_tp, const ndt::type &dst_string_dt, const char *dst_arrmeta,
-                        eval::eval_context ectx)
-      : m_src_tp(src_tp), m_dst_string_dt(dst_string_dt), m_dst_arrmeta(dst_arrmeta), m_ectx(ectx)
-  {
-  }
-
-  void single(char *dst, char *const *src)
-  {
-    const ndt::callable_type::data_type *af = reinterpret_cast<const ndt::callable_type::data_type *>(src[0]);
-    stringstream ss;
-    print_callable(ss, m_src_tp.extended<ndt::callable_type>(), af);
-    m_dst_string_dt.extended<ndt::base_string_type>()->set_from_utf8_string(m_dst_arrmeta, dst, ss.str(), &m_ectx);
-  }
-};
-} // anonymous namespace
-
-void ndt::callable_type::make_assignment_kernel(nd::kernel_builder *ckb, intptr_t DYND_UNUSED(ckb_offset),
-                                                const type &dst_tp, const char *dst_arrmeta, const type &src_tp,
-                                                const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                                const eval::eval_context *ectx) const
-{
-  if (this == dst_tp.extended()) {
-  }
-  else {
-    if (dst_tp.get_kind() == string_kind) {
-      // Assignment to strings
-      ckb->emplace_back<callable_to_string_ck>(kernreq, src_tp, dst_tp, dst_arrmeta, *ectx);
-      return;
-    }
-  }
-
-  // Nothing can be assigned to/from callable
-  stringstream ss;
-  ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-  throw dynd::type_error(ss.str());
-}
-
 bool ndt::callable_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                                std::map<std::string, type> &tp_vars) const
 {
@@ -308,34 +262,6 @@ bool ndt::callable_type::match(const char *arrmeta, const type &candidate_tp, co
 
   return true;
 }
-
-/*
-static nd::array property_get_pos(const ndt::type &tp)
-{
-  return tp.extended<ndt::callable_type>()->get_pos_types();
-}
-
-static nd::array property_get_kwd(const ndt::type &tp)
-{
-  return tp.extended<ndt::callable_type>()->get_kwd_types();
-}
-
-static nd::array property_get_pos_types(const ndt::type &tp)
-{
-  return tp.extended<ndt::callable_type>()->get_pos_types();
-}
-
-static nd::array property_get_kwd_types(const ndt::type &tp)
-{
-  return tp.extended<ndt::callable_type>()->get_kwd_types();
-}
-
-static nd::array property_get_kwd_names(const ndt::type &tp)
-{
-  return tp.extended<ndt::callable_type>()->get_kwd_names();
-}
-
-*/
 
 std::map<std::string, nd::callable> ndt::callable_type::get_dynamic_type_properties() const
 {
@@ -364,18 +290,5 @@ ndt::type ndt::make_generic_funcproto(intptr_t nargs)
 
 std::map<std::string, nd::callable> ndt::callable_type::get_dynamic_array_functions() const
 {
-  /*
-    static pair<std::string, gfunc::callable> callable_array_functions[] = {pair<std::string, nd::callable>(
-        "execute", gfunc::callable(type("{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
-                                        "p1:ndarrayarg,p2:ndarrayarg,"
-                                        "p3:ndarrayarg,p4:ndarrayarg}"),
-                                   &function___call__, NULL, 3,
-    nd::empty("{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
-                                                                          "p1:ndarrayarg,p2:ndarrayarg,"
-                                                                          "p3:ndarrayarg,p4:ndarrayarg}")))};
-  */
-
-  //  *out_functions = callable_array_functions;
-
   return std::map<std::string, nd::callable>();
 }
