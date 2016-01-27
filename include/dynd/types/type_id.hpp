@@ -110,9 +110,11 @@ enum type_id_t {
   float_kind_id,
   complex_kind_id,
 
+  bytes_kind_id,
   fixed_bytes_id, // A bytes buffer of a fixed size
   bytes_id,       // blockref primitive types
 
+  string_kind_id,
   fixed_string_id, // A NULL-terminated string buffer of a fixed size
   char_id,         // A single string character
   string_id,       // A variable-sized string type
@@ -141,8 +143,9 @@ enum type_id_t {
   categorical_id, // A categorical (enum-like) type
   option_id,
   pointer_id, // A pointer type
+  memory_id,  // For types that specify a memory space
 
-  type_id, // Instances of this type are themselves types
+  type_id,  // Instances of this type are themselves types
   array_id, // A dynamic array type
   callable_id,
 

@@ -25,7 +25,7 @@ TEST(OptionType, Create)
 
   d = ndt::make_type<ndt::option_type>(ndt::make_type<int16_t>());
   EXPECT_EQ(option_id, d.get_id());
-  EXPECT_EQ(option_kind, d.get_kind());
+  EXPECT_EQ(any_kind_id, d.get_base_id());
   EXPECT_EQ(2u, d.get_data_alignment());
   EXPECT_EQ(2u, d.get_data_size());
   EXPECT_EQ(ndt::make_type<int16_t>(), d.extended<ndt::option_type>()->get_value_type());
@@ -39,7 +39,7 @@ TEST(OptionType, Create)
 
   d = ndt::make_type<ndt::option_type>(ndt::make_type<ndt::string_type>());
   EXPECT_EQ(option_id, d.get_id());
-  EXPECT_EQ(option_kind, d.get_kind());
+  EXPECT_EQ(any_kind_id, d.get_base_id());
   EXPECT_EQ(ndt::make_type<ndt::string_type>().get_data_alignment(), d.get_data_alignment());
   EXPECT_EQ(ndt::make_type<ndt::string_type>().get_data_size(), d.get_data_size());
   EXPECT_EQ(ndt::make_type<ndt::string_type>(), d.extended<ndt::option_type>()->get_value_type());

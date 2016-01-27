@@ -21,13 +21,13 @@ namespace nd {
   namespace random {
     namespace detail {
 
-      template <type_id_t DstTypeID, type_kind_t DstTypeKind, typename GeneratorType>
+      template <type_id_t ResID, type_id_t ResBaseID, typename GeneratorType>
       struct uniform_kernel;
 
-      template <type_id_t DstTypeID, typename GeneratorType>
-      struct uniform_kernel<DstTypeID, sint_kind, GeneratorType>
-          : base_kernel<uniform_kernel<DstTypeID, sint_kind, GeneratorType>, 0> {
-        typedef typename type_of<DstTypeID>::type R;
+      template <type_id_t ResID, typename GeneratorType>
+      struct uniform_kernel<ResID, int_kind_id, GeneratorType>
+          : base_kernel<uniform_kernel<ResID, int_kind_id, GeneratorType>, 0> {
+        typedef typename type_of<ResID>::type R;
 
         GeneratorType &g;
         std::uniform_int_distribution<R> d;
@@ -89,14 +89,14 @@ namespace nd {
         }
       };
 
-      template <type_id_t DstTypeID, typename GeneratorType>
-      struct uniform_kernel<DstTypeID, uint_kind, GeneratorType> : uniform_kernel<DstTypeID, sint_kind, GeneratorType> {
+      template <type_id_t ResID, typename GeneratorType>
+      struct uniform_kernel<ResID, uint_kind_id, GeneratorType> : uniform_kernel<ResID, int_kind_id, GeneratorType> {
       };
 
-      template <type_id_t DstTypeID, typename GeneratorType>
-      struct uniform_kernel<DstTypeID, real_kind, GeneratorType>
-          : base_kernel<uniform_kernel<DstTypeID, real_kind, GeneratorType>, 0> {
-        typedef typename type_of<DstTypeID>::type R;
+      template <type_id_t ResID, typename GeneratorType>
+      struct uniform_kernel<ResID, float_kind_id, GeneratorType>
+          : base_kernel<uniform_kernel<ResID, float_kind_id, GeneratorType>, 0> {
+        typedef typename type_of<ResID>::type R;
 
         GeneratorType &g;
         std::uniform_real_distribution<R> d;
@@ -158,10 +158,10 @@ namespace nd {
         }
       };
 
-      template <type_id_t DstTypeID, typename GeneratorType>
-      struct uniform_kernel<DstTypeID, complex_kind, GeneratorType>
-          : base_kernel<uniform_kernel<DstTypeID, complex_kind, GeneratorType>, 0> {
-        typedef typename type_of<DstTypeID>::type R;
+      template <type_id_t ResID, typename GeneratorType>
+      struct uniform_kernel<ResID, complex_kind_id, GeneratorType>
+          : base_kernel<uniform_kernel<ResID, complex_kind_id, GeneratorType>, 0> {
+        typedef typename type_of<ResID>::type R;
 
         GeneratorType &g;
         std::uniform_real_distribution<typename R::value_type> d_real;
@@ -226,8 +226,8 @@ namespace nd {
 
     } // namespace dynd::nd::random::detail
 
-    template <type_id_t DstTypeID, typename GeneratorType>
-    using uniform_kernel = detail::uniform_kernel<DstTypeID, type_kind_of<DstTypeID>::value, GeneratorType>;
+    template <type_id_t ResID, typename GeneratorType>
+    using uniform_kernel = detail::uniform_kernel<ResID, base_id_of<ResID>::value, GeneratorType>;
 
   } // namespace dynd::nd::random
 } // namespace dynd::nd

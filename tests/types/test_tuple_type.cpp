@@ -25,7 +25,7 @@ TEST(TupleType, CreateSimple)
   // Tuple with one field
   tp = ndt::tuple_type::make({ndt::make_type<int32_t>()});
   EXPECT_EQ(tuple_id, tp.get_id());
-  EXPECT_EQ(tuple_kind, tp.get_kind());
+  EXPECT_EQ(scalar_kind_id, tp.get_base_id());
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_EQ(4u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
@@ -40,7 +40,7 @@ TEST(TupleType, CreateSimple)
   // Tuple with two fields
   tp = ndt::tuple_type::make({ndt::make_type<int16_t>(), ndt::make_type<double>()});
   EXPECT_EQ(tuple_id, tp.get_id());
-  EXPECT_EQ(tuple_kind, tp.get_kind());
+  EXPECT_EQ(scalar_kind_id, tp.get_base_id());
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_EQ((size_t)alignof(double), tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());

@@ -335,9 +335,6 @@ void ndt::tuple_type::make_comparison_kernel(nd::kernel_builder *ckb, const type
       make_tuple_comparison_kernel(ckb, src0_tp, src0_arrmeta, src1_arrmeta, comptype, ectx);
       return;
     }
-    else if (src1_tp.get_kind() == tuple_kind) {
-      // TODO
-    }
   }
 
   throw not_comparable_error(src0_tp, src1_tp, comptype);

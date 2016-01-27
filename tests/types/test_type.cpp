@@ -30,7 +30,6 @@ TEST(Type, BasicConstructor)
 
   // Default-constructed type properties
   EXPECT_EQ(uninitialized_id, d.get_id());
-  EXPECT_EQ(void_kind, d.get_kind());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(0u, d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -38,7 +37,7 @@ TEST(Type, BasicConstructor)
   // void type
   d = ndt::type(void_id);
   EXPECT_EQ(void_id, d.get_id());
-  EXPECT_EQ(void_kind, d.get_kind());
+  EXPECT_EQ(any_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(0u, d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -48,7 +47,7 @@ TEST(Type, BasicConstructor)
   // bool type
   d = ndt::type(bool_id);
   EXPECT_EQ(bool_id, d.get_id());
-  EXPECT_EQ(bool_kind, d.get_kind());
+  EXPECT_EQ(bool_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(1u, d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -58,7 +57,7 @@ TEST(Type, BasicConstructor)
   // int8 type
   d = ndt::type(int8_id);
   EXPECT_EQ(int8_id, d.get_id());
-  EXPECT_EQ(sint_kind, d.get_kind());
+  EXPECT_EQ(int_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(1u, d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -67,7 +66,7 @@ TEST(Type, BasicConstructor)
 
   // int16 type
   d = ndt::type(int16_id);
-  EXPECT_EQ(sint_kind, d.get_kind());
+  EXPECT_EQ(int_kind_id, d.get_base_id());
   EXPECT_EQ(2u, d.get_data_alignment());
   EXPECT_EQ(2u, d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -77,7 +76,7 @@ TEST(Type, BasicConstructor)
   // int32 type
   d = ndt::type(int32_id);
   EXPECT_EQ(int32_id, d.get_id());
-  EXPECT_EQ(sint_kind, d.get_kind());
+  EXPECT_EQ(int_kind_id, d.get_base_id());
   EXPECT_EQ(4u, d.get_data_alignment());
   EXPECT_EQ(4u, d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -87,7 +86,7 @@ TEST(Type, BasicConstructor)
   // int
   d = ndt::make_type<int>();
   EXPECT_EQ(int32_id, d.get_id());
-  EXPECT_EQ(sint_kind, d.get_kind());
+  EXPECT_EQ(int_kind_id, d.get_base_id());
   EXPECT_EQ(sizeof(int), d.get_data_alignment());
   EXPECT_EQ(sizeof(int), d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -96,7 +95,7 @@ TEST(Type, BasicConstructor)
 
   // long
   d = ndt::make_type<long>();
-  EXPECT_EQ(sint_kind, d.get_kind());
+  EXPECT_EQ(int_kind_id, d.get_base_id());
   EXPECT_EQ(sizeof(long), d.get_data_alignment());
   EXPECT_EQ(sizeof(long), d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -106,7 +105,7 @@ TEST(Type, BasicConstructor)
   // long long
   d = ndt::make_type<long long>();
   EXPECT_EQ(int64_id, d.get_id());
-  EXPECT_EQ(sint_kind, d.get_kind());
+  EXPECT_EQ(int_kind_id, d.get_base_id());
   EXPECT_EQ((size_t)alignof(long long), d.get_data_alignment());
   EXPECT_EQ(sizeof(long long), d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -116,7 +115,7 @@ TEST(Type, BasicConstructor)
   // unsigned int
   d = ndt::make_type<unsigned int>();
   EXPECT_EQ(uint32_id, d.get_id());
-  EXPECT_EQ(uint_kind, d.get_kind());
+  EXPECT_EQ(uint_kind_id, d.get_base_id());
   EXPECT_EQ(sizeof(unsigned int), d.get_data_alignment());
   EXPECT_EQ(sizeof(unsigned int), d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -125,7 +124,7 @@ TEST(Type, BasicConstructor)
 
   // unsigned long
   d = ndt::make_type<unsigned long>();
-  EXPECT_EQ(uint_kind, d.get_kind());
+  EXPECT_EQ(uint_kind_id, d.get_base_id());
   EXPECT_EQ(sizeof(unsigned long), d.get_data_alignment());
   EXPECT_EQ(sizeof(unsigned long), d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -135,7 +134,7 @@ TEST(Type, BasicConstructor)
   // unsigned long long
   d = ndt::make_type<unsigned long long>();
   EXPECT_EQ(uint64_id, d.get_id());
-  EXPECT_EQ(uint_kind, d.get_kind());
+  EXPECT_EQ(uint_kind_id, d.get_base_id());
   EXPECT_EQ((size_t)alignof(unsigned long long), d.get_data_alignment());
   EXPECT_EQ(sizeof(unsigned long long), d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -145,7 +144,7 @@ TEST(Type, BasicConstructor)
   // float
   d = ndt::make_type<float>();
   EXPECT_EQ(float32_id, d.get_id());
-  EXPECT_EQ(real_kind, d.get_kind());
+  EXPECT_EQ(float_kind_id, d.get_base_id());
   EXPECT_EQ(sizeof(float), d.get_data_alignment());
   EXPECT_EQ(sizeof(float), d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
@@ -155,7 +154,7 @@ TEST(Type, BasicConstructor)
   // double
   d = ndt::make_type<double>();
   EXPECT_EQ(float64_id, d.get_id());
-  EXPECT_EQ(real_kind, d.get_kind());
+  EXPECT_EQ(float_kind_id, d.get_base_id());
   EXPECT_EQ((size_t)alignof(double), d.get_data_alignment());
   EXPECT_EQ(sizeof(double), d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
