@@ -37,7 +37,7 @@ namespace nd {
                 });
     }
 
-    static void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, intptr_t ckb_offset,
+    static void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb,
                             const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                             intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
                             kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
@@ -48,12 +48,11 @@ namespace nd {
       ckb->emplace_back<sort_kernel>(
           kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
           reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride, src0_element_tp.get_data_size());
-      ckb_offset = ckb->m_size;
 
       const ndt::type child_src_tp[2] = {src0_element_tp, src0_element_tp};
       const callable &less = nd::less::get();
-      less.get()->instantiate(less.get()->static_data(), data, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, 2,
-                              child_src_tp, NULL, kernel_request_single, nkwd, kwds, tp_vars);
+      less.get()->instantiate(less.get()->static_data(), data, ckb, ndt::make_type<bool1>(), NULL, 2, child_src_tp,
+                              NULL, kernel_request_single, nkwd, kwds, tp_vars);
     }
   };
 

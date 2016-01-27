@@ -45,7 +45,7 @@ TEST(Callable, Assignment)
 
   // Instantiate a single ckernel
   nd::kernel_builder ckb;
-  af.get()->instantiate(af.get()->static_data(), NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+  af.get()->instantiate(af.get()->static_data(), NULL, &ckb, af.get_type()->get_return_type(), NULL,
                         af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
                         kernel_request_single, 0, NULL, std::map<std::string, ndt::type>());
   int int_out = 0;
@@ -57,7 +57,7 @@ TEST(Callable, Assignment)
 
   // Instantiate a strided ckernel
   ckb.reset();
-  af.get()->instantiate(af.get()->static_data(), NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+  af.get()->instantiate(af.get()->static_data(), NULL, &ckb, af.get_type()->get_return_type(), NULL,
                         af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
                         kernel_request_strided, 0, NULL, std::map<std::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};
@@ -224,7 +224,7 @@ TEST(Callable, AssignmentAsExpr)
 
   // Instantiate a single ckernel
   nd::kernel_builder ckb;
-  af.get()->instantiate(af.get()->static_data(), NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+  af.get()->instantiate(af.get()->static_data(), NULL, &ckb, af.get_type()->get_return_type(), NULL,
                         af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
                         kernel_request_single, 0, NULL, std::map<std::string, ndt::type>());
   int int_out = 0;
@@ -236,7 +236,7 @@ TEST(Callable, AssignmentAsExpr)
 
   // Instantiate a strided ckernel
   ckb.reset();
-  af.get()->instantiate(af.get()->static_data(), NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+  af.get()->instantiate(af.get()->static_data(), NULL, &ckb, af.get_type()->get_return_type(), NULL,
                         af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
                         kernel_request_strided, 0, NULL, std::map<std::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};

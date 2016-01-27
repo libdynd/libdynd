@@ -198,11 +198,12 @@ namespace nd {
         }
       }
 
-      static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb, intptr_t ckb_offset,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+      static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
+                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
+        intptr_t ckb_offset = ckb->m_size;
         callable &af = *reinterpret_cast<callable *>(static_data);
         const ndt::type *src_tp_for_af = af.get_type()->get_pos_types_raw();
 
@@ -221,7 +222,7 @@ namespace nd {
           }
         }
         // Instantiate the callable being buffered
-        af.get()->instantiate(af.get()->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp_for_af,
+        af.get()->instantiate(af.get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp_for_af,
                               &buffered_arrmeta[0], kernreq, nkwd, kwds, tp_vars);
         ckb_offset = ckb->m_size;
         reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
@@ -231,7 +232,7 @@ namespace nd {
           if (!self->m_bufs[i].is_null()) {
             self->m_src_buf_ck_offsets[i] = ckb_offset - root_ckb_offset;
             nd::array error_mode = eval::default_eval_context.errmode;
-            assign::get()->instantiate(assign::get()->static_data(), NULL, ckb, ckb_offset, src_tp_for_af[i],
+            assign::get()->instantiate(assign::get()->static_data(), NULL, ckb, src_tp_for_af[i],
                                        self->m_bufs[i].get_arrmeta(), 1, src_tp + i, src_arrmeta + i, kernreq, 1,
                                        &error_mode, tp_vars);
             ckb_offset = ckb->m_size;

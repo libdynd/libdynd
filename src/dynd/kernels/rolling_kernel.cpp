@@ -56,7 +56,7 @@ void nd::functional::var_rolling_ck::single(char *dst, char *const *src)
 }
 
 // TODO This should handle both strided and var cases
-void nd::functional::rolling_ck::instantiate(char *_static_data, char *data, kernel_builder *ckb, intptr_t ckb_offset,
+void nd::functional::rolling_ck::instantiate(char *_static_data, char *data, kernel_builder *ckb,
                                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                              const ndt::type *src_tp, const char *const *src_arrmeta,
                                              kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
@@ -65,10 +65,9 @@ void nd::functional::rolling_ck::instantiate(char *_static_data, char *data, ker
   typedef dynd::nd::functional::strided_rolling_ck self_type;
   rolling_callable_data *static_data = *reinterpret_cast<rolling_callable_data **>(_static_data);
 
-  intptr_t root_ckb_offset = ckb_offset;
+  intptr_t root_ckb_offset = ckb->m_size;
   ckb->emplace_back<self_type>(kernreq);
   self_type *self = ckb->get_at<self_type>(root_ckb_offset);
-  ckb_offset = ckb->m_size;
   const base_callable *window_af = static_data->window_op.get();
   ndt::type dst_el_tp, src_el_tp;
   const char *dst_el_arrmeta, *src_el_arrmeta;
@@ -101,7 +100,7 @@ void nd::functional::rolling_ck::instantiate(char *_static_data, char *data, ker
   // now
   self = reinterpret_cast<kernel_builder *>(ckb)->get_at<self_type>(root_ckb_offset);
   // Create the window op child ckernel
-  self->m_window_op_offset = ckb_offset - root_ckb_offset;
+  self->m_window_op_offset = ckb->m_size - root_ckb_offset;
   // We construct array arrmeta for the window op ckernel to use,
   // without actually creating an nd::array to hold it.
   arrmeta_holder(ndt::make_fixed_dim(static_data->window_size, src_el_tp)).swap(self->m_src_winop_meta);
@@ -113,8 +112,8 @@ void nd::functional::rolling_ck::instantiate(char *_static_data, char *data, ker
   }
 
   const char *src_winop_meta = self->m_src_winop_meta.get();
-  window_af->instantiate(const_cast<char *>(window_af->static_data()), data, ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
-                         nsrc, &self->m_src_winop_meta.get_type(), &src_winop_meta, kernel_request_strided, nkwd, kwds,
+  window_af->instantiate(const_cast<char *>(window_af->static_data()), data, ckb, dst_el_tp, dst_el_arrmeta, nsrc,
+                         &self->m_src_winop_meta.get_type(), &src_winop_meta, kernel_request_strided, nkwd, kwds,
                          tp_vars);
 }
 
