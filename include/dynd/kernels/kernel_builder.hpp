@@ -47,7 +47,7 @@ namespace nd {
       set(m_static_data, 0, sizeof(m_static_data));
     }
 
-    void destroy();
+    DYND_API void destroy();
 
   public:
     kernel_builder() { init(); }
