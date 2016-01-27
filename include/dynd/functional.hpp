@@ -96,20 +96,20 @@ namespace nd {
           case 1:
             return multidispatch(tp, begin_child, end_child,
                                  [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                                    const ndt::type *src_tp) { return src_tp[0].get_type_id(); },
+                                    const ndt::type *src_tp) { return src_tp[0].get_id(); },
                                  on_null);
           case 2:
             return multidispatch(tp, begin_child, end_child,
                                  [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
                                     const ndt::type *src_tp) -> std::array<type_id_t, 2> {
-                                   return {{src_tp[0].get_type_id(), src_tp[1].get_type_id()}};
+                                   return {{src_tp[0].get_id(), src_tp[1].get_id()}};
                                  },
                                  on_null);
           case 3:
             return multidispatch(tp, begin_child, end_child,
                                  [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
                                     const ndt::type *src_tp) -> std::array<type_id_t, 3> {
-                                   return {{src_tp[0].get_type_id(), src_tp[1].get_type_id(), src_tp[2].get_type_id()}};
+                                   return {{src_tp[0].get_id(), src_tp[1].get_id(), src_tp[2].get_id()}};
                                  },
                                  on_null);
           default:
@@ -121,7 +121,7 @@ namespace nd {
                              [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t nsrc, const ndt::type *src_tp) {
                                std::vector<type_id_t> key;
                                for (std::intptr_t i = 0; i < nsrc; ++i) {
-                                 key.push_back(src_tp[i].get_type_id());
+                                 key.push_back(src_tp[i].get_id());
                                }
                                return key;
                              },
@@ -137,7 +137,7 @@ namespace nd {
                                            const ndt::type *src_tp) {
                                std::vector<type_id_t> key;
                                for (std::intptr_t i : permutation) {
-                                 key.push_back((src_tp + i)->get_type_id());
+                                 key.push_back((src_tp + i)->get_id());
                                }
                                return key;
                              },

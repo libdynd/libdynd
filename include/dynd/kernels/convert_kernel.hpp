@@ -44,7 +44,7 @@ namespace nd {
 
       void internal_allocate()
       {
-        if (m_type.get_type_id() != uninitialized_type_id) {
+        if (m_type.get_id() != uninitialized_id) {
           m_stride = m_type.get_data_size();
           m_storage = new char[DYND_BUFFER_CHUNK_SIZE * m_stride];
           m_arrmeta = NULL;

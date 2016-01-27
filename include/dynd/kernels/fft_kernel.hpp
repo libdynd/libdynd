@@ -165,7 +165,7 @@ namespace nd {
 
       nd::array shape = kwds[0];
       if (!shape.is_missing()) {
-        if (shape.get_type().get_type_id() == pointer_type_id) {
+        if (shape.get_type().get_id() == pointer_id) {
           shape = shape;
         }
       }
@@ -173,7 +173,7 @@ namespace nd {
       nd::array axes;
       if (!kwds[1].is_missing()) {
         axes = kwds[1];
-        if (axes.get_type().get_type_id() == pointer_type_id) {
+        if (axes.get_type().get_id() == pointer_id) {
           axes = axes;
         }
       }
@@ -238,7 +238,7 @@ namespace nd {
         dst_tp = src_tp[0];
       }
       else {
-        if (shape.get_type().get_type_id() == pointer_type_id) {
+        if (shape.get_type().get_id() == pointer_id) {
           shape = shape.f("dereference");
         }
         dst_tp = ndt::make_fixed_dim(shape.get_dim_size(), reinterpret_cast<const intptr_t *>(shape.data()),

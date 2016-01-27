@@ -59,7 +59,7 @@ void nd::masked_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_
   ckb->emplace_back<self_type>(kernreq);
   self_type *self = ckb->get_at<self_type>(ckb_offset);
 
-  if (dst_tp.get_type_id() != var_dim_type_id) {
+  if (dst_tp.get_id() != var_dim_id) {
     stringstream ss;
     ss << "masked take arrfunc: could not process type " << dst_tp;
     ss << " as a var dimension";
@@ -92,7 +92,7 @@ void nd::masked_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_
     throw invalid_argument(ss.str());
   }
   self->m_dim_size = src0_dim_size;
-  if (mask_el_tp.get_type_id() != bool_type_id) {
+  if (mask_el_tp.get_id() != bool_id) {
     stringstream ss;
     ss << "masked take arrfunc: mask type should be bool, not ";
     ss << mask_el_tp;
@@ -168,7 +168,7 @@ void nd::indexed_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND
     ss << index_dim_size << " and " << self->m_dst_dim_size;
     throw invalid_argument(ss.str());
   }
-  if (index_el_tp.get_type_id() != (type_id_t)type_id_of<intptr_t>::value) {
+  if (index_el_tp.get_id() != (type_id_t)type_id_of<intptr_t>::value) {
     stringstream ss;
     ss << "indexed take arrfunc: index type should be intptr, not ";
     ss << index_el_tp;
@@ -186,12 +186,12 @@ void nd::take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
-  if (mask_el_tp.get_type_id() == bool_type_id) {
+  if (mask_el_tp.get_id() == bool_id) {
     nd::masked_take_ck::instantiate(NULL, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd,
                                     kwds, tp_vars);
     return;
   }
-  else if (mask_el_tp.get_type_id() == (type_id_t)type_id_of<intptr_t>::value) {
+  else if (mask_el_tp.get_id() == (type_id_t)type_id_of<intptr_t>::value) {
     nd::indexed_take_ck::instantiate(NULL, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd,
                                      kwds, tp_vars);
     return;
@@ -218,11 +218,11 @@ void nd::take_ck::resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UN
   */
 
   ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
-  if (mask_el_tp.get_type_id() == bool_type_id) {
+  if (mask_el_tp.get_id() == bool_id) {
     dst_tp = ndt::var_dim_type::make(src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
   }
-  else if (mask_el_tp.get_type_id() == (type_id_t)type_id_of<intptr_t>::value) {
-    if (src_tp[1].get_type_id() == var_dim_type_id) {
+  else if (mask_el_tp.get_id() == (type_id_t)type_id_of<intptr_t>::value) {
+    if (src_tp[1].get_id() == var_dim_id) {
       dst_tp = ndt::var_dim_type::make(src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
     }
     else {

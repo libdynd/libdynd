@@ -15,13 +15,13 @@ using namespace dynd;
 ndt::pow_dimsym_type::pow_dimsym_type(const type &base_tp,
                                       const std::string &exponent,
                                       const type &element_type)
-    : base_dim_type(pow_dimsym_type_id, pattern_kind, element_type, 0, 1, 0,
+    : base_dim_type(pow_dimsym_id, pattern_kind, element_type, 0, 1, 0,
                     type_flag_symbolic, false),
       m_base_tp(base_tp), m_exponent(exponent)
 {
   if (base_tp.is_scalar() ||
-      base_tp.extended<base_dim_type>()->get_element_type().get_type_id() !=
-          void_type_id) {
+      base_tp.extended<base_dim_type>()->get_element_type().get_id() !=
+          void_id) {
     stringstream ss;
     ss << "dynd base type for dimensional power symbolic type is not valid: "
        << base_tp;
@@ -48,18 +48,18 @@ void ndt::pow_dimsym_type::print_data(std::ostream &DYND_UNUSED(o),
 
 void ndt::pow_dimsym_type::print_type(std::ostream &o) const
 {
-  switch (m_base_tp.get_type_id()) {
-  case fixed_dim_type_id:
+  switch (m_base_tp.get_id()) {
+  case fixed_dim_id:
     if (m_base_tp.get_kind() == kind_kind) {
       o << "Fixed";
     } else {
       o << m_base_tp.extended<fixed_dim_type>()->get_fixed_dim_size();
     }
     break;
-  case var_dim_type_id:
+  case var_dim_id:
     o << "var";
     break;
-  case typevar_dim_type_id:
+  case typevar_dim_id:
     o << m_base_tp.extended<typevar_dim_type>()->get_name();
     break;
   default:
@@ -105,7 +105,7 @@ bool ndt::pow_dimsym_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != pow_dimsym_type_id) {
+  } else if (rhs.get_id() != pow_dimsym_id) {
     return false;
   } else {
     const pow_dimsym_type *tvt = static_cast<const pow_dimsym_type *>(&rhs);
@@ -143,12 +143,12 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
                                  const char *candidate_arrmeta,
                                  std::map<std::string, type> &tp_vars) const
 {
-  if (candidate_tp.get_type_id() == typevar_constructed_type_id) {
+  if (candidate_tp.get_id() == typevar_constructed_id) {
     return candidate_tp.extended<typevar_constructed_type>()->match(
         candidate_arrmeta, type(this, true), arrmeta, tp_vars);
   }
 
-  if (candidate_tp.get_type_id() == pow_dimsym_type_id) {
+  if (candidate_tp.get_id() == pow_dimsym_id) {
     if (m_base_tp.match(
             arrmeta, candidate_tp.extended<pow_dimsym_type>()->get_base_type(),
             NULL, tp_vars)) {
@@ -167,7 +167,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
       } else {
         // Make sure the type matches previous
         // instances of the type var
-        return tv_type.get_type_id() == typevar_dim_type_id &&
+        return tv_type.get_id() == typevar_dim_id &&
                tv_type.extended<typevar_dim_type>()->get_name() ==
                    candidate_tp.extended<pow_dimsym_type>()->get_exponent();
       }
@@ -179,7 +179,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
       if (tv_type.is_null()) {
         // Fill in the exponent by the number of dimensions left
         tv_type = make_fixed_dim(0, make_type<void>());
-      } else if (tv_type.get_type_id() == fixed_dim_type_id) {
+      } else if (tv_type.get_id() == fixed_dim_id) {
         // Make sure the exponent already seen matches the number of
         // dimensions left in the concrete type
         if (tv_type.extended<fixed_dim_type>()->get_fixed_dim_size() != 0) {
@@ -202,7 +202,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
     // Fill in the exponent by the number of dimensions left
     exponent = candidate_tp.get_ndim() - get_element_type().get_ndim();
     tv_type = make_fixed_dim(exponent, make_type<void>());
-  } else if (tv_type.get_type_id() == fixed_dim_type_id) {
+  } else if (tv_type.get_id() == fixed_dim_id) {
     // Make sure the exponent already seen matches the number of
     // dimensions left in the concrete type
     exponent = tv_type.extended<fixed_dim_type>()->get_fixed_dim_size();
@@ -221,7 +221,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
   }
   // Get the base type
   type base_tp = get_base_type();
-  if (base_tp.get_type_id() == typevar_dim_type_id) {
+  if (base_tp.get_id() == typevar_dim_id) {
     type &btv_type = tp_vars[base_tp.extended<typevar_dim_type>()->get_name()];
     if (btv_type.is_null()) {
       // We haven't seen this typevar yet, set it to the concrete's
@@ -229,7 +229,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
       btv_type = candidate_tp;
       base_tp = candidate_tp;
     } else if (btv_type.get_ndim() > 0 &&
-               btv_type.get_type_id() != dim_fragment_type_id) {
+               btv_type.get_id() != dim_fragment_id) {
       // Continue matching after substituting in the typevar for
       // the base type
       base_tp = btv_type;
@@ -240,12 +240,12 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
   }
   // Now make sure the base_tp is repeated the right number of times
   type concrete_subtype = candidate_tp;
-  switch (base_tp.get_type_id()) {
-  case fixed_dim_type_id: {
+  switch (base_tp.get_id()) {
+  case fixed_dim_id: {
     if (base_tp.get_kind() == kind_kind) {
       for (intptr_t i = 0; i < exponent; ++i) {
-        switch (concrete_subtype.get_type_id()) {
-        case fixed_dim_type_id:
+        switch (concrete_subtype.get_id()) {
+        case fixed_dim_id:
           concrete_subtype =
               concrete_subtype.extended<base_dim_type>()->get_element_type();
           break;
@@ -258,7 +258,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
       intptr_t dim_size =
           base_tp.extended<fixed_dim_type>()->get_fixed_dim_size();
       for (intptr_t i = 0; i < exponent; ++i) {
-        if (concrete_subtype.get_type_id() == fixed_dim_type_id &&
+        if (concrete_subtype.get_id() == fixed_dim_id &&
             concrete_subtype.extended<fixed_dim_type>()->get_fixed_dim_size() ==
                 dim_size) {
           concrete_subtype =
@@ -270,9 +270,9 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
       break;
     }
   }
-  case var_dim_type_id:
+  case var_dim_id:
     for (intptr_t i = 0; i < exponent; ++i) {
-      if (concrete_subtype.get_type_id() == var_dim_type_id) {
+      if (concrete_subtype.get_id() == var_dim_id) {
         concrete_subtype =
             concrete_subtype.extended<base_dim_type>()->get_element_type();
       }

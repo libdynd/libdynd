@@ -14,7 +14,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::fixed_string_type::fixed_string_type(intptr_t stringsize, string_encoding_t encoding)
-    : base_string_type(fixed_string_type_id, 0, 1, type_flag_none, 0), m_stringsize(stringsize), m_encoding(encoding)
+    : base_string_type(fixed_string_id, 0, 1, type_flag_none, 0), m_stringsize(stringsize), m_encoding(encoding)
 {
   switch (encoding) {
   case string_encoding_ascii:
@@ -145,7 +145,7 @@ bool ndt::fixed_string_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != fixed_string_type_id) {
+  else if (rhs.get_id() != fixed_string_id) {
     return false;
   }
   else {

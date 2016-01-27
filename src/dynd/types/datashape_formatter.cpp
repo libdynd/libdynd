@@ -53,8 +53,8 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &tp, const 
 static void format_dim_datashape(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
                                  const std::string &indent, bool multiline)
 {
-  switch (tp.get_type_id()) {
-  case fixed_dim_type_id: {
+  switch (tp.get_id()) {
+  case fixed_dim_id: {
     if (tp.get_kind() == kind_kind) {
       // A symbolic type, so arrmeta/data can't exist
       o << "Fixed * ";
@@ -72,7 +72,7 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp, const cha
                      multiline);
     break;
   }
-  case var_dim_type_id: {
+  case var_dim_id: {
     const ndt::var_dim_type *vad = tp.extended<ndt::var_dim_type>();
     const char *child_data = NULL;
     if (data == NULL || arrmeta == NULL) {
@@ -106,9 +106,9 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp, const cha
 
 static void format_string_datashape(std::ostream &o, const ndt::type &tp)
 {
-  switch (tp.get_type_id()) {
-  case string_type_id:
-  case fixed_string_type_id:
+  switch (tp.get_id()) {
+  case string_id:
+  case fixed_string_id:
     // data shape only has one kind of string
     o << "string";
     break;
@@ -122,11 +122,11 @@ static void format_string_datashape(std::ostream &o, const ndt::type &tp)
 
 static void format_complex_datashape(std::ostream &o, const ndt::type &tp)
 {
-  switch (tp.get_type_id()) {
-  case complex_float32_type_id:
+  switch (tp.get_id()) {
+  case complex_float32_id:
     o << "complex[float32]";
     break;
-  case complex_float64_type_id:
+  case complex_float64_id:
     o << "complex[float64]";
     break;
   default: {

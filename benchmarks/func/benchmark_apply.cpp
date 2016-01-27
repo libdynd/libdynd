@@ -49,13 +49,13 @@ BENCHMARK(BM_Func_Apply_Function);
 static void BM_Func_Apply_Callable(benchmark::State &state)
 {
   std::map<type_id_t, nd::callable> overloads;
-  overloads[int32_type_id] = nd::callable();
+  overloads[int32_id] = nd::callable();
 
   //  nd::array a = 10;
   // nd::array b = 11;
   //  nd::array c = nd::empty(af.get_type()->get_return_type());
   while (state.KeepRunning()) {
-    overloads[int32_type_id];
+    overloads[int32_id];
   }
 }
 

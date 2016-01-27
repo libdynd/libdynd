@@ -25,7 +25,7 @@ TEST(DatetimeType, Create)
   const ndt::datetime_type *dd;
 
   d = ndt::datetime_type::make();
-  ASSERT_EQ(datetime_type_id, d.get_type_id());
+  ASSERT_EQ(datetime_id, d.get_id());
   dd = d.extended<ndt::datetime_type>();
   EXPECT_EQ(8u, d.get_data_size());
   EXPECT_EQ((size_t)alignof(int64_t), d.get_data_alignment());
@@ -48,14 +48,14 @@ TEST(DatetimeType, CreateFromString)
   const ndt::datetime_type *dd;
 
   d = ndt::type("datetime");
-  ASSERT_EQ(datetime_type_id, d.get_type_id());
+  ASSERT_EQ(datetime_id, d.get_id());
   dd = d.extended<ndt::datetime_type>();
   EXPECT_EQ(tz_abstract, dd->get_timezone());
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::type("datetime[tz='UTC']");
-  ASSERT_EQ(datetime_type_id, d.get_type_id());
+  ASSERT_EQ(datetime_id, d.get_id());
   dd = d.extended<ndt::datetime_type>();
   EXPECT_EQ(tz_utc, dd->get_timezone());
   // Roundtripping through a string

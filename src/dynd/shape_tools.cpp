@@ -562,8 +562,8 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
 axis_order_classification_t dynd::classify_strided_axis_order(intptr_t current_stride,
                 const ndt::type& element_tp, const char *element_arrmeta)
 {
-    switch (element_tp.get_type_id()) {
-        case fixed_dim_type_id: {
+    switch (element_tp.get_id()) {
+        case fixed_dim_id: {
             const ndt::fixed_dim_type *edt = element_tp.extended<ndt::fixed_dim_type>();
             const fixed_dim_type_arrmeta *emd =
                 reinterpret_cast<const fixed_dim_type_arrmeta *>(
@@ -599,8 +599,8 @@ axis_order_classification_t dynd::classify_strided_axis_order(intptr_t current_s
                 return axis_order_none;
             }
         }
-        case pointer_type_id:
-        case var_dim_type_id: {
+        case pointer_id:
+        case var_dim_id: {
             // A pointer or a var type is treated like C-order
             axis_order_classification_t aoc =
                             element_tp.extended()->classify_axis_order(element_arrmeta);

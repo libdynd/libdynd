@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::bytes_type::bytes_type(size_t alignment)
-    : base_bytes_type(bytes_type_id, bytes_kind, sizeof(bytes), alignof(bytes),
+    : base_bytes_type(bytes_id, bytes_kind, sizeof(bytes), alignof(bytes),
                       type_flag_zeroinit | type_flag_destructor, 0),
       m_alignment(alignment)
 {
@@ -106,7 +106,7 @@ bool ndt::bytes_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != bytes_type_id) {
+  else if (rhs.get_id() != bytes_id) {
     return false;
   }
   else {

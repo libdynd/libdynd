@@ -22,7 +22,7 @@ ToDo: Reenable this.
 
 TEST(Rolling, BuiltinSum_Kernel)
 {
-  nd::callable sum_1d = kernels::make_builtin_sum1d_callable(float64_type_id);
+  nd::callable sum_1d = kernels::make_builtin_sum1d_callable(float64_id);
   nd::callable rolling_sum = nd::functional::rolling(sum_1d, 4);
 
   double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};
@@ -43,7 +43,7 @@ TEST(Rolling, BuiltinSum_Kernel)
 
 TEST(Rolling, BuiltinMean_Kernel)
 {
-  nd::callable mean_1d = nd::make_builtin_mean1d_callable(float64_type_id, 0);
+  nd::callable mean_1d = nd::make_builtin_mean1d_callable(float64_id, 0);
   nd::callable rolling_sum = nd::functional::rolling(mean_1d, 4);
 
   double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};

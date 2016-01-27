@@ -24,7 +24,7 @@ TEST(StringType, Create)
 
   // Strings with various encodings
   d = ndt::make_type<ndt::string_type>();
-  EXPECT_EQ(string_type_id, d.get_type_id());
+  EXPECT_EQ(string_id, d.get_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(alignof(dynd::string), d.get_data_alignment());
   EXPECT_EQ(sizeof(dynd::string), d.get_data_size());
@@ -33,7 +33,7 @@ TEST(StringType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::make_type<ndt::string_type>();
-  EXPECT_EQ(string_type_id, d.get_type_id());
+  EXPECT_EQ(string_id, d.get_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(alignof(dynd::string), d.get_data_alignment());
   EXPECT_EQ(sizeof(dynd::string), d.get_data_size());
@@ -41,7 +41,7 @@ TEST(StringType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::make_type<ndt::string_type>();
-  EXPECT_EQ(string_type_id, d.get_type_id());
+  EXPECT_EQ(string_id, d.get_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(alignof(dynd::string), d.get_data_alignment());
   EXPECT_EQ(sizeof(dynd::string), d.get_data_size());
@@ -49,7 +49,7 @@ TEST(StringType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::make_type<ndt::string_type>();
-  EXPECT_EQ(string_type_id, d.get_type_id());
+  EXPECT_EQ(string_id, d.get_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(sizeof(void *), d.get_data_alignment());
   EXPECT_EQ(sizeof(dynd::string), d.get_data_size());
@@ -57,7 +57,7 @@ TEST(StringType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::make_type<ndt::string_type>();
-  EXPECT_EQ(string_type_id, d.get_type_id());
+  EXPECT_EQ(string_id, d.get_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(alignof(dynd::string), d.get_data_alignment());
   EXPECT_EQ(sizeof(dynd::string), d.get_data_size());

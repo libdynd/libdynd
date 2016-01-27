@@ -16,7 +16,7 @@ using namespace dynd;
 
 ndt::busdate_type::busdate_type(busdate_roll_t roll, const bool *weekmask,
                                 const nd::array &holidays)
-    : base_type(busdate_type_id, datetime_kind, 4, 4, type_flag_none, 0, 0, 0),
+    : base_type(busdate_id, datetime_kind, 4, 4, type_flag_none, 0, 0, 0),
       m_roll(roll)
 {
   memcpy(m_workweek, weekmask, sizeof(m_workweek));
@@ -108,7 +108,7 @@ bool ndt::busdate_type::is_lossless_assignment(const type &dst_tp,
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    } else if (src_tp.get_type_id() == date_type_id) {
+    } else if (src_tp.get_id() == date_id) {
       const busdate_type *src_fs =
           static_cast<const busdate_type *>(src_tp.extended());
       // No need to compare the roll policy, just the weekmask and holidays
@@ -127,7 +127,7 @@ bool ndt::busdate_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != busdate_type_id) {
+  } else if (rhs.get_id() != busdate_id) {
     return false;
   } else {
     const busdate_type *dt = static_cast<const busdate_type *>(&rhs);

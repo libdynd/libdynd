@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::any_kind_type::any_kind_type()
-    : base_type(any_kind_type_id, kind_kind, 0, 1,
+    : base_type(any_kind_id, kind_kind, 0, 1,
                 type_flag_symbolic | type_flag_variadic, 0, 0, 0)
 {
 }
@@ -98,7 +98,7 @@ bool ndt::any_kind_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   } else {
-    return rhs.get_type_id() == any_kind_type_id;
+    return rhs.get_id() == any_kind_id;
   }
 }
 

@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::int_kind_sym_type::int_kind_sym_type()
-    : base_type(int_sym_type_id, kind_kind, 0, 1, type_flag_symbolic, 0, 0, 0)
+    : base_type(int_sym_id, kind_kind, 0, 1, type_flag_symbolic, 0, 0, 0)
 {
 }
 
@@ -66,7 +66,7 @@ bool ndt::int_kind_sym_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   } else {
-    return rhs.get_type_id() == int_sym_type_id;
+    return rhs.get_id() == int_sym_id;
   }
 }
 

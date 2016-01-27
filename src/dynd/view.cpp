@@ -32,14 +32,14 @@ using namespace dynd;
 static bool try_view(const ndt::type &tp, const char *arrmeta, const ndt::type &view_tp, char *view_arrmeta,
                      const intrusive_ptr<memory_block_data> &embedded_reference)
 {
-  switch (tp.get_type_id()) {
-  case fixed_dim_type_id: {
+  switch (tp.get_id()) {
+  case fixed_dim_id: {
     // All the strided dim types share the same arrmeta, so can be
     // treated uniformly here
     const ndt::base_dim_type *sdt = tp.extended<ndt::base_dim_type>();
     const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
-    switch (view_tp.get_type_id()) {
-    case fixed_dim_type_id: { // strided as fixed
+    switch (view_tp.get_id()) {
+    case fixed_dim_id: { // strided as fixed
       const ndt::fixed_dim_type *view_fdt = view_tp.extended<ndt::fixed_dim_type>();
       // The size must match exactly in this case
       if (md->dim_size != view_fdt->get_fixed_dim_size()) {
@@ -146,8 +146,8 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr, ndt::
     return;
   }
 
-  switch (data_tp.get_type_id()) {
-  case var_dim_type_id: {
+  switch (data_tp.get_id()) {
+  case var_dim_id: {
     // We can only allow leading var_dim
     if (data_dim_size != -1) {
       data_tp = ndt::type();
@@ -169,7 +169,7 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr, ndt::
     data_meta += sizeof(ndt::var_dim_type::metadata_type);
     return;
   }
-  case pointer_type_id: {
+  case pointer_id: {
     // We can only strip away leading pointers
     if (data_dim_size != -1) {
       data_tp = ndt::type();
@@ -185,7 +185,7 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr, ndt::
     data_meta += sizeof(pointer_type_arrmeta);
     return;
   }
-  case string_type_id: {
+  case string_id: {
     // We can only view leading strings
     if (data_dim_size != -1) {
       data_tp = ndt::type();
@@ -235,7 +235,7 @@ static nd::array view_as_bytes(const nd::array &DYND_UNUSED(arr), const ndt::typ
   throw std::runtime_error("view_as_bytes is not yet implemented");
 
   /*
-    if (arr.get_type().get_flags() & type_flag_destructor && (arr.get_dtype().get_type_id() != string_type_id)) {
+    if (arr.get_type().get_flags() & type_flag_destructor && (arr.get_dtype().get_id() != string_id)) {
       // Can't view arrays of object type
       return nd::array();
     }
@@ -247,7 +247,7 @@ static nd::array view_as_bytes(const nd::array &DYND_UNUSED(arr), const ndt::typ
     const char *data_meta = arr.get()->metadata();
     intptr_t data_dim_size = -1, data_stride = 0;
     // Repeatedly refine the data
-    while (data_tp.get_type_id() != uninitialized_type_id) {
+    while (data_tp.get_id() != uninitialized_id) {
       refine_bytes_view(data_ref, data_ptr, data_tp, data_meta, data_dim_size, data_stride);
     }
     // Check that it worked, and that the resulting data pointer is aligned
@@ -313,7 +313,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       }
       return result;
     }
-  } else if (tp.get_type_id() == fixed_dim_type_id) {
+  } else if (tp.get_id() == fixed_dim_id) {
     ndt::type arr_tp = tp;
     ndt::type el_tp = arr_tp.extended<ndt::base_dim_type>()->get_element_type();
     size_t el_data_size = el_tp.get_data_size();
@@ -369,7 +369,7 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
   result.get()->tp = tp;
   result.get()->flags = arr.get()->flags;
   // First handle a special case of viewing outermost "var" as "fixed[#]"
-  if (arr.get_type().get_type_id() == var_dim_type_id && tp.get_type_id() == fixed_dim_type_id) {
+  if (arr.get_type().get_id() == var_dim_id && tp.get_id() == fixed_dim_id) {
     const ndt::var_dim_type::metadata_type *in_am =
         reinterpret_cast<const ndt::var_dim_type::metadata_type *>(arr.get()->metadata());
     const ndt::var_dim_type::data_type *in_dat = reinterpret_cast<const ndt::var_dim_type::data_type *>(arr.cdata());
@@ -411,14 +411,14 @@ nd::array nd::view(const nd::array &arr, const ndt::type &tp)
     // If the types match exactly, simply return 'arr'
     return arr;
   }
-  else if (tp.get_type_id() == bytes_type_id) {
+  else if (tp.get_id() == bytes_id) {
     // If it's a request to view the data as raw bytes
     nd::array result = view_as_bytes(arr, tp);
     if (!result.is_null()) {
       return result;
     }
   }
-  else if (arr.get_type().get_type_id() == bytes_type_id) {
+  else if (arr.get_type().get_id() == bytes_id) {
     // If it's a request to view raw bytes as something else
     //    nd::array result = view_from_bytes(arr, tp);
     //    if (!result.is_null()) {

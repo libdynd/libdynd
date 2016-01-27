@@ -510,7 +510,7 @@ TEST(DataShapeParser, KivaLoanDataShape)
                      "    }\n"
                      "}\n";
   ndt::type d = ndt::type(klds);
-  EXPECT_EQ(struct_type_id, d.get_type_id());
+  EXPECT_EQ(struct_id, d.get_id());
 }
 
 TEST(DataShapeParser, SpecialCharacterFields)

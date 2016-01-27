@@ -1203,32 +1203,32 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
 
   if (parse_na(begin, end)) {
     switch (tid) {
-    case int8_type_id:
+    case int8_id:
       *reinterpret_cast<int8_t *>(out) = DYND_INT8_NA;
       return;
-    case int16_type_id:
+    case int16_id:
       *reinterpret_cast<int16_t *>(out) = DYND_INT16_NA;
       return;
-    case int32_type_id:
+    case int32_id:
       *reinterpret_cast<int32_t *>(out) = DYND_INT32_NA;
       return;
-    case int64_type_id:
+    case int64_id:
       *reinterpret_cast<int64_t *>(out) = DYND_INT64_NA;
       return;
-    case int128_type_id:
+    case int128_id:
       *reinterpret_cast<int128 *>(out) = DYND_INT128_NA;
       return;
-    case float32_type_id:
+    case float32_id:
       *reinterpret_cast<uint32_t *>(out) = DYND_FLOAT32_NA_AS_UINT;
       return;
-    case float64_type_id:
+    case float64_id:
       *reinterpret_cast<uint64_t *>(out) = DYND_FLOAT64_NA_AS_UINT;
       return;
-    case complex_float32_type_id:
+    case complex_float32_id:
       reinterpret_cast<uint32_t *>(out)[0] = DYND_FLOAT32_NA_AS_UINT;
       reinterpret_cast<uint32_t *>(out)[1] = DYND_FLOAT32_NA_AS_UINT;
       return;
-    case complex_float64_type_id:
+    case complex_float64_id:
       reinterpret_cast<uint64_t *>(out)[0] = DYND_FLOAT64_NA_AS_UINT;
       reinterpret_cast<uint64_t *>(out)[1] = DYND_FLOAT64_NA_AS_UINT;
       return;
@@ -1246,38 +1246,38 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
   }
   if (errmode != assign_error_nocheck) {
     switch (tid) {
-    case int8_type_id:
+    case int8_id:
       uvalue = parse<uint64_t>(begin, end);
       assign_signed_int_value<int8_t>(out, uvalue, negative, overflow);
       break;
-    case int16_type_id:
+    case int16_id:
       uvalue = parse<uint64_t>(begin, end);
       assign_signed_int_value<int16_t>(out, uvalue, negative, overflow);
       break;
-    case int32_type_id:
+    case int32_id:
       uvalue = parse<uint64_t>(begin, end);
       assign_signed_int_value<int32_t>(out, uvalue, negative, overflow);
       break;
-    case int64_type_id:
+    case int64_id:
       uvalue = parse<uint64_t>(begin, end);
       assign_signed_int_value<int64_t>(out, uvalue, negative, overflow);
       break;
-    case uint8_type_id:
+    case uint8_id:
       uvalue = parse<uint64_t>(begin, end);
       negative = negative && (uvalue != 0);
       assign_unsigned_int_value<uint8_t>(out, uvalue, negative, overflow);
       break;
-    case uint16_type_id:
+    case uint16_id:
       uvalue = parse<uint64_t>(begin, end);
       negative = negative && (uvalue != 0);
       assign_unsigned_int_value<uint16_t>(out, uvalue, negative, overflow);
       break;
-    case uint32_type_id:
+    case uint32_id:
       uvalue = parse<uint64_t>(begin, end);
       negative = negative && (uvalue != 0);
       assign_unsigned_int_value<uint32_t>(out, uvalue, negative, overflow);
       break;
-    case uint64_type_id:
+    case uint64_id:
       uvalue = parse<uint64_t>(begin, end);
       negative = negative && (uvalue != 0);
       overflow = overflow || negative;
@@ -1285,7 +1285,7 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
         *reinterpret_cast<uint64_t *>(out) = uvalue;
       }
       break;
-    case uint128_type_id: {
+    case uint128_id: {
       uint128 buvalue = parse<uint128>(begin, end);
       negative = negative && (buvalue != 0);
       overflow = overflow || negative;
@@ -1294,11 +1294,11 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
       }
       break;
     }
-    case float32_type_id: {
+    case float32_id: {
       *reinterpret_cast<float *>(out) = parse<float>(saved_begin, end);
       break;
     }
-    case float64_type_id: {
+    case float64_id: {
       *reinterpret_cast<double *>(out) = parse<double>(saved_begin, end);
       break;
     }
@@ -1320,56 +1320,56 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
   else {
     // errmode == assign_error_nocheck
     switch (tid) {
-    case int8_type_id:
+    case int8_id:
       uvalue = parse<uint64_t>(begin, end, nocheck);
       *reinterpret_cast<int8_t *>(out) =
           static_cast<int8_t>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
       break;
-    case int16_type_id:
+    case int16_id:
       uvalue = parse<uint64_t>(begin, end, nocheck);
       *reinterpret_cast<int16_t *>(out) =
           static_cast<int16_t>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
       break;
-    case int32_type_id:
+    case int32_id:
       uvalue = parse<uint64_t>(begin, end, nocheck);
       *reinterpret_cast<int32_t *>(out) =
           static_cast<int32_t>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
       break;
-    case int64_type_id:
+    case int64_id:
       uvalue = parse<uint64_t>(begin, end, nocheck);
       *reinterpret_cast<int64_t *>(out) = negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue);
       break;
-    case int128_type_id: {
+    case int128_id: {
       uint128 buvalue = parse<uint128>(begin, end, nocheck);
       *reinterpret_cast<int128 *>(out) = negative ? -static_cast<int128>(buvalue) : static_cast<int128>(buvalue);
       break;
     }
-    case uint8_type_id:
+    case uint8_id:
       uvalue = parse<uint64_t>(begin, end, nocheck);
       *reinterpret_cast<uint8_t *>(out) = static_cast<uint8_t>(negative ? 0 : uvalue);
       break;
-    case uint16_type_id:
+    case uint16_id:
       uvalue = parse<uint64_t>(begin, end, nocheck);
       *reinterpret_cast<uint16_t *>(out) = static_cast<uint16_t>(negative ? 0 : uvalue);
       break;
-    case uint32_type_id:
+    case uint32_id:
       uvalue = parse<uint64_t>(begin, end, nocheck);
       *reinterpret_cast<uint32_t *>(out) = static_cast<uint32_t>(negative ? 0 : uvalue);
       break;
-    case uint64_type_id:
+    case uint64_id:
       uvalue = parse<uint64_t>(begin, end, nocheck);
       *reinterpret_cast<uint64_t *>(out) = negative ? 0 : uvalue;
       break;
-    case uint128_type_id: {
+    case uint128_id: {
       uint128 buvalue = parse<uint128>(begin, end, nocheck);
       *reinterpret_cast<uint128 *>(out) = negative ? static_cast<uint128>(0) : buvalue;
       break;
     }
-    case float32_type_id: {
+    case float32_id: {
       *reinterpret_cast<float *>(out) = parse<float>(saved_begin, end);
       break;
     }
-    case float64_type_id: {
+    case float64_id: {
       *reinterpret_cast<double *>(out) = parse<double>(saved_begin, end);
       break;
     }
@@ -1410,18 +1410,18 @@ inline void parse_number_json(const ndt::type &tp, char *out_data, const char *&
     ndt::make_type<ndt::option_type>(tp).extended<ndt::option_type>()->assign_na(NULL, out_data, ectx);
   }
   else if (json::parse_number(begin, end, nbegin, nend)) {
-    string_to_number(out_data, tp.get_type_id(), nbegin, nend, ectx->errmode);
+    string_to_number(out_data, tp.get_id(), nbegin, nend, ectx->errmode);
   }
   else if (parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
     // Interpret the data inside the string as an int
     try {
       if (!escaped) {
-        string_to_number(out_data, tp.get_type_id(), nbegin, nend, ectx->errmode);
+        string_to_number(out_data, tp.get_id(), nbegin, nend, ectx->errmode);
       }
       else {
         std::string s;
         unescape_string(nbegin, nend, s);
-        string_to_number(out_data, tp.get_type_id(), nbegin, nend, ectx->errmode);
+        string_to_number(out_data, tp.get_id(), nbegin, nend, ectx->errmode);
       }
     }
     catch (const std::exception &e) {

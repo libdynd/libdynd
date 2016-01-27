@@ -10,7 +10,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::convert_type::convert_type(const type &value_type, const type &operand_type)
-    : base_expr_type(convert_type_id, expr_kind, operand_type.get_data_size(), operand_type.get_data_alignment(),
+    : base_expr_type(convert_id, expr_kind, operand_type.get_data_size(), operand_type.get_data_alignment(),
                      inherited_flags(value_type.get_flags(), operand_type.get_flags()), operand_type.get_arrmeta_size(),
                      value_type.get_ndim()),
       m_value_type(value_type), m_operand_type(operand_type)
@@ -70,7 +70,7 @@ bool ndt::convert_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != convert_type_id) {
+  else if (rhs.get_id() != convert_id) {
     return false;
   }
   else {

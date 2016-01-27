@@ -325,8 +325,8 @@ namespace nd {
 
     // Anything -> boolean with no checking
     template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-    struct assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_nocheck>
-        : base_kernel<assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_nocheck>, 1> {
+    struct assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_nocheck>
+        : base_kernel<assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_nocheck>, 1> {
       typedef typename type_of<Src0TypeID>::type src0_type;
 
       void single(char *dst, char *const *src)
@@ -692,115 +692,115 @@ namespace nd {
 
     // float -> float with no checking
     template <>
-    struct assignment_kernel<float32_type_id, real_kind, float32_type_id, real_kind, assign_error_overflow>
-        : assignment_kernel<float32_type_id, real_kind, float32_type_id, real_kind, assign_error_nocheck> {
+    struct assignment_kernel<float32_id, real_kind, float32_id, real_kind, assign_error_overflow>
+        : assignment_kernel<float32_id, real_kind, float32_id, real_kind, assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<float32_type_id, real_kind, float32_type_id, real_kind, assign_error_fractional>
-        : assignment_kernel<float32_type_id, real_kind, float32_type_id, real_kind, assign_error_nocheck> {
+    struct assignment_kernel<float32_id, real_kind, float32_id, real_kind, assign_error_fractional>
+        : assignment_kernel<float32_id, real_kind, float32_id, real_kind, assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<float32_type_id, real_kind, float32_type_id, real_kind, assign_error_inexact>
-        : assignment_kernel<float32_type_id, real_kind, float32_type_id, real_kind, assign_error_nocheck> {
+    struct assignment_kernel<float32_id, real_kind, float32_id, real_kind, assign_error_inexact>
+        : assignment_kernel<float32_id, real_kind, float32_id, real_kind, assign_error_nocheck> {
     };
 
     // complex<float> -> complex<float> with no checking
     template <>
-    struct assignment_kernel<complex_float32_type_id, complex_kind, complex_float32_type_id, complex_kind,
+    struct assignment_kernel<complex_float32_id, complex_kind, complex_float32_id, complex_kind,
                              assign_error_overflow>
-        : assignment_kernel<complex_float32_type_id, complex_kind, complex_float32_type_id, complex_kind,
+        : assignment_kernel<complex_float32_id, complex_kind, complex_float32_id, complex_kind,
                             assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<complex_float32_type_id, complex_kind, complex_float32_type_id, complex_kind,
+    struct assignment_kernel<complex_float32_id, complex_kind, complex_float32_id, complex_kind,
                              assign_error_fractional>
-        : assignment_kernel<complex_float32_type_id, complex_kind, complex_float32_type_id, complex_kind,
+        : assignment_kernel<complex_float32_id, complex_kind, complex_float32_id, complex_kind,
                             assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<complex_float32_type_id, complex_kind, complex_float32_type_id, complex_kind,
+    struct assignment_kernel<complex_float32_id, complex_kind, complex_float32_id, complex_kind,
                              assign_error_inexact>
-        : assignment_kernel<complex_float32_type_id, complex_kind, complex_float32_type_id, complex_kind,
+        : assignment_kernel<complex_float32_id, complex_kind, complex_float32_id, complex_kind,
                             assign_error_nocheck> {
     };
 
     // float -> double with no checking
     template <>
-    struct assignment_kernel<float64_type_id, real_kind, float32_type_id, real_kind, assign_error_overflow>
-        : assignment_kernel<float64_type_id, real_kind, float32_type_id, real_kind, assign_error_nocheck> {
+    struct assignment_kernel<float64_id, real_kind, float32_id, real_kind, assign_error_overflow>
+        : assignment_kernel<float64_id, real_kind, float32_id, real_kind, assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<float64_type_id, real_kind, float32_type_id, real_kind, assign_error_fractional>
-        : assignment_kernel<float64_type_id, real_kind, float32_type_id, real_kind, assign_error_nocheck> {
+    struct assignment_kernel<float64_id, real_kind, float32_id, real_kind, assign_error_fractional>
+        : assignment_kernel<float64_id, real_kind, float32_id, real_kind, assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<float64_type_id, real_kind, float32_type_id, real_kind, assign_error_inexact>
-        : assignment_kernel<float64_type_id, real_kind, float32_type_id, real_kind, assign_error_nocheck> {
+    struct assignment_kernel<float64_id, real_kind, float32_id, real_kind, assign_error_inexact>
+        : assignment_kernel<float64_id, real_kind, float32_id, real_kind, assign_error_nocheck> {
     };
 
     // complex<float> -> complex<double> with no checking
     template <>
-    struct assignment_kernel<complex_float64_type_id, complex_kind, complex_float32_type_id, complex_kind,
+    struct assignment_kernel<complex_float64_id, complex_kind, complex_float32_id, complex_kind,
                              assign_error_overflow>
-        : assignment_kernel<complex_float64_type_id, complex_kind, complex_float32_type_id, complex_kind,
+        : assignment_kernel<complex_float64_id, complex_kind, complex_float32_id, complex_kind,
                             assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<complex_float64_type_id, complex_kind, complex_float32_type_id, complex_kind,
+    struct assignment_kernel<complex_float64_id, complex_kind, complex_float32_id, complex_kind,
                              assign_error_fractional>
-        : assignment_kernel<complex_float64_type_id, complex_kind, complex_float32_type_id, complex_kind,
+        : assignment_kernel<complex_float64_id, complex_kind, complex_float32_id, complex_kind,
                             assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<complex_float64_type_id, complex_kind, complex_float32_type_id, complex_kind,
+    struct assignment_kernel<complex_float64_id, complex_kind, complex_float32_id, complex_kind,
                              assign_error_inexact>
-        : assignment_kernel<complex_float64_type_id, complex_kind, complex_float32_type_id, complex_kind,
+        : assignment_kernel<complex_float64_id, complex_kind, complex_float32_id, complex_kind,
                             assign_error_nocheck> {
     };
 
     // double -> double with no checking
     template <>
-    struct assignment_kernel<float64_type_id, real_kind, float64_type_id, real_kind, assign_error_overflow>
-        : assignment_kernel<float64_type_id, real_kind, float64_type_id, real_kind, assign_error_nocheck> {
+    struct assignment_kernel<float64_id, real_kind, float64_id, real_kind, assign_error_overflow>
+        : assignment_kernel<float64_id, real_kind, float64_id, real_kind, assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<float64_type_id, real_kind, float64_type_id, real_kind, assign_error_fractional>
-        : assignment_kernel<float64_type_id, real_kind, float64_type_id, real_kind, assign_error_nocheck> {
+    struct assignment_kernel<float64_id, real_kind, float64_id, real_kind, assign_error_fractional>
+        : assignment_kernel<float64_id, real_kind, float64_id, real_kind, assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<float64_type_id, real_kind, float64_type_id, real_kind, assign_error_inexact>
-        : assignment_kernel<float64_type_id, real_kind, float64_type_id, real_kind, assign_error_nocheck> {
+    struct assignment_kernel<float64_id, real_kind, float64_id, real_kind, assign_error_inexact>
+        : assignment_kernel<float64_id, real_kind, float64_id, real_kind, assign_error_nocheck> {
     };
 
     // complex<double> -> complex<double> with no checking
     template <>
-    struct assignment_kernel<complex_float64_type_id, complex_kind, complex_float64_type_id, complex_kind,
+    struct assignment_kernel<complex_float64_id, complex_kind, complex_float64_id, complex_kind,
                              assign_error_overflow>
-        : assignment_kernel<complex_float64_type_id, complex_kind, complex_float64_type_id, complex_kind,
+        : assignment_kernel<complex_float64_id, complex_kind, complex_float64_id, complex_kind,
                             assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<complex_float64_type_id, complex_kind, complex_float64_type_id, complex_kind,
+    struct assignment_kernel<complex_float64_id, complex_kind, complex_float64_id, complex_kind,
                              assign_error_fractional>
-        : assignment_kernel<complex_float64_type_id, complex_kind, complex_float64_type_id, complex_kind,
+        : assignment_kernel<complex_float64_id, complex_kind, complex_float64_id, complex_kind,
                             assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<complex_float64_type_id, complex_kind, complex_float64_type_id, complex_kind,
+    struct assignment_kernel<complex_float64_id, complex_kind, complex_float64_id, complex_kind,
                              assign_error_inexact>
-        : assignment_kernel<complex_float64_type_id, complex_kind, complex_float64_type_id, complex_kind,
+        : assignment_kernel<complex_float64_id, complex_kind, complex_float64_id, complex_kind,
                             assign_error_nocheck> {
     };
 
@@ -942,8 +942,8 @@ namespace nd {
 
     // Anything -> boolean with overflow checking
     template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-    struct assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_overflow>
-        : base_kernel<assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_overflow>, 1> {
+    struct assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_overflow>
+        : base_kernel<assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_overflow>, 1> {
       typedef typename type_of<Src0TypeID>::type src0_type;
 
       void single(char *dst, char *const *src)
@@ -969,45 +969,45 @@ namespace nd {
 
     // Anything -> boolean with other error checking
     template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-    struct assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_fractional>
-        : assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_overflow> {
+    struct assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_fractional>
+        : assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_overflow> {
     };
 
     template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-    struct assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_inexact>
-        : assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_overflow> {
+    struct assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_inexact>
+        : assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_overflow> {
     };
 
     // Boolean -> boolean with other error checking
     template <>
-    struct assignment_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind, assign_error_overflow>
-        : assignment_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind, assign_error_nocheck> {
+    struct assignment_kernel<bool_id, bool_kind, bool_id, bool_kind, assign_error_overflow>
+        : assignment_kernel<bool_id, bool_kind, bool_id, bool_kind, assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind, assign_error_fractional>
-        : assignment_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind, assign_error_nocheck> {
+    struct assignment_kernel<bool_id, bool_kind, bool_id, bool_kind, assign_error_fractional>
+        : assignment_kernel<bool_id, bool_kind, bool_id, bool_kind, assign_error_nocheck> {
     };
 
     template <>
-    struct assignment_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind, assign_error_inexact>
-        : assignment_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind, assign_error_nocheck> {
+    struct assignment_kernel<bool_id, bool_kind, bool_id, bool_kind, assign_error_inexact>
+        : assignment_kernel<bool_id, bool_kind, bool_id, bool_kind, assign_error_nocheck> {
     };
 
     // Boolean -> anything with other error checking
     template <type_id_t DstTypeID, type_kind_t DstTypeKind>
-    struct assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind, assign_error_overflow>
-        : assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind, assign_error_nocheck> {
+    struct assignment_kernel<DstTypeID, DstTypeKind, bool_id, bool_kind, assign_error_overflow>
+        : assignment_kernel<DstTypeID, DstTypeKind, bool_id, bool_kind, assign_error_nocheck> {
     };
 
     template <type_id_t DstTypeID, type_kind_t DstTypeKind>
-    struct assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind, assign_error_fractional>
-        : assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind, assign_error_nocheck> {
+    struct assignment_kernel<DstTypeID, DstTypeKind, bool_id, bool_kind, assign_error_fractional>
+        : assignment_kernel<DstTypeID, DstTypeKind, bool_id, bool_kind, assign_error_nocheck> {
     };
 
     template <type_id_t DstTypeID, type_kind_t DstTypeKind>
-    struct assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind, assign_error_inexact>
-        : assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind, assign_error_nocheck> {
+    struct assignment_kernel<DstTypeID, DstTypeKind, bool_id, bool_kind, assign_error_inexact>
+        : assignment_kernel<DstTypeID, DstTypeKind, bool_id, bool_kind, assign_error_nocheck> {
     };
 
     // Signed int -> signed int with overflow checking
@@ -1258,8 +1258,8 @@ namespace nd {
 
     // complex<double> -> float with inexact checking
     template <>
-    struct assignment_kernel<float32_type_id, real_kind, complex_float64_type_id, complex_kind, assign_error_inexact>
-        : base_kernel<assignment_kernel<float32_type_id, real_kind, complex_float64_type_id, complex_kind,
+    struct assignment_kernel<float32_id, real_kind, complex_float64_id, complex_kind, assign_error_inexact>
+        : base_kernel<assignment_kernel<float32_id, real_kind, complex_float64_id, complex_kind,
                                         assign_error_inexact>,
                       1> {
       void single(char *dst, char *const *src)
@@ -1397,9 +1397,9 @@ namespace nd {
 
     // complex<double> -> complex<float> with overflow checking
     template <>
-    struct assignment_kernel<complex_float32_type_id, complex_kind, complex_float64_type_id, complex_kind,
+    struct assignment_kernel<complex_float32_id, complex_kind, complex_float64_id, complex_kind,
                              assign_error_overflow>
-        : base_kernel<assignment_kernel<complex_float32_type_id, complex_kind, complex_float64_type_id, complex_kind,
+        : base_kernel<assignment_kernel<complex_float32_id, complex_kind, complex_float64_id, complex_kind,
                                         assign_error_overflow>,
                       1> {
       typedef complex<float> dst_type;
@@ -1435,17 +1435,17 @@ namespace nd {
 
     // complex<double> -> complex<float> with fractional checking
     template <>
-    struct assignment_kernel<complex_float32_type_id, complex_kind, complex_float64_type_id, complex_kind,
+    struct assignment_kernel<complex_float32_id, complex_kind, complex_float64_id, complex_kind,
                              assign_error_fractional>
-        : assignment_kernel<complex_float32_type_id, complex_kind, complex_float64_type_id, complex_kind,
+        : assignment_kernel<complex_float32_id, complex_kind, complex_float64_id, complex_kind,
                             assign_error_overflow> {
     };
 
     // complex<double> -> complex<float> with inexact checking
     template <>
-    struct assignment_kernel<complex_float32_type_id, complex_kind, complex_float64_type_id, complex_kind,
+    struct assignment_kernel<complex_float32_id, complex_kind, complex_float64_id, complex_kind,
                              assign_error_inexact>
-        : base_kernel<assignment_kernel<complex_float32_type_id, complex_kind, complex_float64_type_id, complex_kind,
+        : base_kernel<assignment_kernel<complex_float32_id, complex_kind, complex_float64_id, complex_kind,
                                         assign_error_inexact>,
                       1> {
       typedef complex<float> dst_type;
@@ -1497,8 +1497,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<date_type_id, datetime_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<date_type_id, datetime_kind, string_type_id, string_kind, ErrorMode>, 1> {
+    struct assignment_kernel<date_id, datetime_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<date_id, datetime_kind, string_id, string_kind, ErrorMode>, 1> {
       ndt::type m_src_string_tp;
       const char *m_src_arrmeta;
       date_parse_order_t m_date_parse_order;
@@ -1538,8 +1538,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<string_type_id, string_kind, date_type_id, datetime_kind, ErrorMode>
-        : base_kernel<assignment_kernel<string_type_id, string_kind, date_type_id, datetime_kind, ErrorMode>, 1> {
+    struct assignment_kernel<string_id, string_kind, date_id, datetime_kind, ErrorMode>
+        : base_kernel<assignment_kernel<string_id, string_kind, date_id, datetime_kind, ErrorMode>, 1> {
       ndt::type m_dst_string_tp;
       const char *m_dst_arrmeta;
 
@@ -1571,8 +1571,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<datetime_type_id, datetime_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<datetime_type_id, datetime_kind, string_type_id, string_kind, ErrorMode>, 1> {
+    struct assignment_kernel<datetime_id, datetime_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<datetime_id, datetime_kind, string_id, string_kind, ErrorMode>, 1> {
       ndt::type m_dst_datetime_tp;
       ndt::type m_src_string_tp;
       const char *m_src_arrmeta;
@@ -1614,8 +1614,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<string_type_id, string_kind, datetime_type_id, datetime_kind, ErrorMode>
-        : base_kernel<assignment_kernel<string_type_id, string_kind, datetime_type_id, datetime_kind, ErrorMode>, 1> {
+    struct assignment_kernel<string_id, string_kind, datetime_id, datetime_kind, ErrorMode>
+        : base_kernel<assignment_kernel<string_id, string_kind, datetime_id, datetime_kind, ErrorMode>, 1> {
       ndt::type m_dst_string_tp;
       const char *m_dst_arrmeta;
       ndt::type m_src_datetime_tp;
@@ -1651,8 +1651,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<time_type_id, datetime_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<time_type_id, datetime_kind, string_type_id, string_kind, ErrorMode>, 1> {
+    struct assignment_kernel<time_id, datetime_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<time_id, datetime_kind, string_id, string_kind, ErrorMode>, 1> {
       ndt::type m_src_string_tp;
       const char *m_src_arrmeta;
 
@@ -1689,8 +1689,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<string_type_id, string_kind, time_type_id, datetime_kind, ErrorMode>
-        : base_kernel<assignment_kernel<string_type_id, string_kind, time_type_id, datetime_kind, ErrorMode>, 1> {
+    struct assignment_kernel<string_id, string_kind, time_id, datetime_kind, ErrorMode>
+        : base_kernel<assignment_kernel<string_id, string_kind, time_id, datetime_kind, ErrorMode>, 1> {
       ndt::type m_dst_string_tp;
       const char *m_dst_arrmeta;
 
@@ -1725,8 +1725,8 @@ namespace nd {
      * A ckernel which assigns option[S] to option[T].
      */
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<option_type_id, option_kind, option_type_id, option_kind, ErrorMode>
-        : base_kernel<assignment_kernel<option_type_id, option_kind, option_type_id, option_kind, ErrorMode>, 1> {
+    struct assignment_kernel<option_id, option_kind, option_id, option_kind, ErrorMode>
+        : base_kernel<assignment_kernel<option_id, option_kind, option_id, option_kind, ErrorMode>, 1> {
       // The default child is the src is_avail ckernel
       // This child is the dst assign_na ckernel
       size_t m_dst_assign_na_offset;
@@ -1827,7 +1827,7 @@ namespace nd {
         intptr_t ckb_offset = ckb->m_size;
         intptr_t root_ckb_offset = ckb_offset;
         typedef assignment_kernel self_type;
-        if (dst_tp.get_type_id() != option_type_id || src_tp[0].get_type_id() != option_type_id) {
+        if (dst_tp.get_id() != option_id || src_tp[0].get_id() != option_id) {
           std::stringstream ss;
           ss << "option to option kernel needs option types, got " << dst_tp << " and " << src_tp[0];
           throw std::invalid_argument(ss.str());
@@ -1886,7 +1886,7 @@ namespace nd {
                               kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *kwds,
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        ckb->emplace_back<string_to_option_number_ck>(kernreq, dst_tp.get_type_id(), kwds[0].as<assign_error_mode>());
+        ckb->emplace_back<string_to_option_number_ck>(kernreq, dst_tp.get_id(), kwds[0].as<assign_error_mode>());
       }
     };
 
@@ -1920,7 +1920,7 @@ namespace nd {
     };
 
     template <type_id_t Src0TypeID, assign_error_mode ErrorMode>
-    struct assignment_kernel<option_type_id, option_kind, Src0TypeID, real_kind, ErrorMode> {
+    struct assignment_kernel<option_id, option_kind, Src0TypeID, real_kind, ErrorMode> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
@@ -1930,13 +1930,13 @@ namespace nd {
         // interpreted
         // as NA.
         ndt::type src_tp_as_option = ndt::make_type<ndt::option_type>(src_tp[0]);
-        assignment_kernel<option_type_id, option_kind, option_type_id, option_kind, ErrorMode>::instantiate(
+        assignment_kernel<option_id, option_kind, option_id, option_kind, ErrorMode>::instantiate(
             NULL, NULL, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp_as_option, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
       }
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<option_type_id, option_kind, string_type_id, string_kind, ErrorMode> {
+    struct assignment_kernel<option_id, option_kind, string_id, string_kind, ErrorMode> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
@@ -1944,31 +1944,31 @@ namespace nd {
       {
         // Deal with some string to option[T] conversions where string values
         // might mean NA
-        if (dst_tp.get_type_id() != option_type_id ||
+        if (dst_tp.get_id() != option_id ||
             !(src_tp[0].get_kind() == string_kind ||
-              (src_tp[0].get_type_id() == option_type_id &&
+              (src_tp[0].get_id() == option_id &&
                src_tp[0].extended<ndt::option_type>()->get_value_type().get_kind() == string_kind))) {
           std::stringstream ss;
           ss << "string to option kernel needs string/option types, got (" << src_tp[0] << ") -> " << dst_tp;
           throw std::invalid_argument(ss.str());
         }
 
-        type_id_t tid = dst_tp.extended<ndt::option_type>()->get_value_type().get_type_id();
+        type_id_t tid = dst_tp.extended<ndt::option_type>()->get_value_type().get_id();
         switch (tid) {
-        case bool_type_id:
+        case bool_id:
           ckb->emplace_back<string_to_option_bool_ck>(kernreq);
           return;
-        case int8_type_id:
-        case int16_type_id:
-        case int32_type_id:
-        case int64_type_id:
-        case int128_type_id:
-        case float16_type_id:
-        case float32_type_id:
-        case float64_type_id:
+        case int8_id:
+        case int16_id:
+        case int32_id:
+        case int64_id:
+        case int128_id:
+        case float16_id:
+        case float32_id:
+        case float64_id:
           ckb->emplace_back<string_to_option_number_ck>(kernreq, tid, ErrorMode);
           return;
-        case string_type_id: {
+        case string_id: {
           // Just a string to string assignment
           make_assignment_kernel(ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, src_tp[0],
                                  src_arrmeta[0], kernreq, &eval::default_eval_context);
@@ -2065,7 +2065,7 @@ namespace nd {
       intptr_t ckb_offset = ckb->m_size;
       intptr_t root_ckb_offset = ckb_offset;
       typedef dynd::nd::option_to_value_ck self_type;
-      if (dst_tp.get_type_id() == option_type_id || src_tp[0].get_type_id() != option_type_id) {
+      if (dst_tp.get_id() == option_id || src_tp[0].get_id() != option_id) {
         std::stringstream ss;
         ss << "option to value kernel needs value/option types, got " << dst_tp << " and " << src_tp[0];
         throw std::invalid_argument(ss.str());
@@ -2128,8 +2128,8 @@ namespace nd {
   namespace detail {
 
     template <>
-    struct assignment_virtual_kernel<date_type_id, datetime_kind, date_type_id, datetime_kind>
-        : base_kernel<assignment_virtual_kernel<date_type_id, datetime_kind, date_type_id, datetime_kind>> {
+    struct assignment_virtual_kernel<date_id, datetime_kind, date_id, datetime_kind>
+        : base_kernel<assignment_virtual_kernel<date_id, datetime_kind, date_id, datetime_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
@@ -2141,8 +2141,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_virtual_kernel<fixed_bytes_type_id, bytes_kind, fixed_bytes_type_id, bytes_kind>
-        : base_kernel<assignment_virtual_kernel<fixed_bytes_type_id, bytes_kind, fixed_bytes_type_id, bytes_kind>> {
+    struct assignment_virtual_kernel<fixed_bytes_id, bytes_kind, fixed_bytes_id, bytes_kind>
+        : base_kernel<assignment_virtual_kernel<fixed_bytes_id, bytes_kind, fixed_bytes_id, bytes_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -2159,14 +2159,14 @@ namespace nd {
     };
 
     template <type_id_t Src0TypeID, assign_error_mode ErrorMode>
-    struct assignment_kernel<string_type_id, string_kind, Src0TypeID, sint_kind, ErrorMode>
-        : base_kernel<assignment_kernel<string_type_id, string_kind, Src0TypeID, sint_kind, ErrorMode>, 1> {
+    struct assignment_kernel<string_id, string_kind, Src0TypeID, sint_kind, ErrorMode>
+        : base_kernel<assignment_kernel<string_id, string_kind, Src0TypeID, sint_kind, ErrorMode>, 1> {
       ndt::type dst_string_tp;
-      type_id_t src_type_id;
+      type_id_t src_id;
       const char *dst_arrmeta;
 
-      assignment_kernel(const ndt::type &dst_string_tp, type_id_t src_type_id, const char *dst_arrmeta)
-          : dst_string_tp(dst_string_tp), src_type_id(src_type_id), dst_arrmeta(dst_arrmeta)
+      assignment_kernel(const ndt::type &dst_string_tp, type_id_t src_id, const char *dst_arrmeta)
+          : dst_string_tp(dst_string_tp), src_id(src_id), dst_arrmeta(dst_arrmeta)
       {
       }
 
@@ -2178,7 +2178,7 @@ namespace nd {
         //       guaranteed to parse to the same float number, would be
         //       better.
         std::stringstream ss;
-        ndt::type(src_type_id).print_data(ss, NULL, src[0]);
+        ndt::type(src_id).print_data(ss, NULL, src[0]);
         dst_string_tp->set_from_utf8_string(dst_arrmeta, dst, ss.str(), &eval::default_eval_context);
       }
 
@@ -2188,18 +2188,18 @@ namespace nd {
                               kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        ckb->emplace_back<assignment_kernel>(kernreq, dst_tp, src_tp[0].get_type_id(), dst_arrmeta);
+        ckb->emplace_back<assignment_kernel>(kernreq, dst_tp, src_tp[0].get_id(), dst_arrmeta);
       }
     };
 
     template <type_id_t Src0TypeID, type_kind_t Src0TypeKind, assign_error_mode ErrorMode>
-    struct assignment_kernel<fixed_string_type_id, string_kind, Src0TypeID, Src0TypeKind, ErrorMode>
-        : assignment_kernel<string_type_id, string_kind, int32_type_id, sint_kind, ErrorMode> {
+    struct assignment_kernel<fixed_string_id, string_kind, Src0TypeID, Src0TypeKind, ErrorMode>
+        : assignment_kernel<string_id, string_kind, int32_id, sint_kind, ErrorMode> {
     };
 
     template <>
-    struct assignment_virtual_kernel<tuple_type_id, tuple_kind, tuple_type_id, tuple_kind>
-        : base_kernel<assignment_virtual_kernel<tuple_type_id, tuple_kind, tuple_type_id, tuple_kind>> {
+    struct assignment_virtual_kernel<tuple_id, tuple_kind, tuple_id, tuple_kind>
+        : base_kernel<assignment_virtual_kernel<tuple_id, tuple_kind, tuple_id, tuple_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2224,8 +2224,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_virtual_kernel<struct_type_id, struct_kind, struct_type_id, struct_kind>
-        : base_kernel<assignment_virtual_kernel<struct_type_id, struct_kind, struct_type_id, struct_kind>> {
+    struct assignment_virtual_kernel<struct_id, struct_kind, struct_id, struct_kind>
+        : base_kernel<assignment_virtual_kernel<struct_id, struct_kind, struct_id, struct_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2252,8 +2252,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<string_type_id, string_kind, fixed_string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<string_type_id, string_kind, fixed_string_type_id, string_kind, ErrorMode>, 1> {
+    struct assignment_kernel<string_id, string_kind, fixed_string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<string_id, string_kind, fixed_string_id, string_kind, ErrorMode>, 1> {
       string_encoding_t m_dst_encoding, m_src_encoding;
       intptr_t m_src_element_size;
       next_unicode_codepoint_t m_next_fn;
@@ -2333,8 +2333,8 @@ namespace nd {
     };
 
     template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-    struct assignment_virtual_kernel<view_type_id, expr_kind, Src0TypeID, Src0TypeKind>
-        : base_kernel<assignment_virtual_kernel<view_type_id, expr_kind, Src0TypeID, Src0TypeKind>> {
+    struct assignment_virtual_kernel<view_id, expr_kind, Src0TypeID, Src0TypeKind>
+        : base_kernel<assignment_virtual_kernel<view_id, expr_kind, Src0TypeID, Src0TypeKind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2347,8 +2347,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_virtual_kernel<view_type_id, expr_kind, view_type_id, expr_kind>
-        : base_kernel<assignment_virtual_kernel<view_type_id, expr_kind, view_type_id, expr_kind>> {
+    struct assignment_virtual_kernel<view_id, expr_kind, view_id, expr_kind>
+        : base_kernel<assignment_virtual_kernel<view_id, expr_kind, view_id, expr_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2361,8 +2361,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_virtual_kernel<convert_type_id, expr_kind, convert_type_id, expr_kind>
-        : base_kernel<assignment_virtual_kernel<convert_type_id, expr_kind, convert_type_id, expr_kind>> {
+    struct assignment_virtual_kernel<convert_id, expr_kind, convert_id, expr_kind>
+        : base_kernel<assignment_virtual_kernel<convert_id, expr_kind, convert_id, expr_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2375,8 +2375,8 @@ namespace nd {
     };
 
     template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-    struct assignment_virtual_kernel<convert_type_id, expr_kind, Src0TypeID, Src0TypeKind>
-        : base_kernel<assignment_virtual_kernel<convert_type_id, expr_kind, Src0TypeID, Src0TypeKind>> {
+    struct assignment_virtual_kernel<convert_id, expr_kind, Src0TypeID, Src0TypeKind>
+        : base_kernel<assignment_virtual_kernel<convert_id, expr_kind, Src0TypeID, Src0TypeKind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2403,8 +2403,8 @@ namespace nd {
     };
 
     template <type_id_t Src0TypeID, assign_error_mode ErrorMode>
-    struct assignment_kernel<fixed_string_type_id, string_kind, Src0TypeID, expr_kind, ErrorMode>
-        : base_kernel<assignment_kernel<fixed_string_type_id, string_kind, Src0TypeID, expr_kind, ErrorMode>> {
+    struct assignment_kernel<fixed_string_id, string_kind, Src0TypeID, expr_kind, ErrorMode>
+        : base_kernel<assignment_kernel<fixed_string_id, string_kind, Src0TypeID, expr_kind, ErrorMode>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2417,8 +2417,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_nocheck>
-        : base_kernel<assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_nocheck>,
+    struct assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_nocheck>
+        : base_kernel<assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_nocheck>,
                       1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
@@ -2448,8 +2448,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_inexact>
-        : base_kernel<assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_inexact>,
+    struct assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_inexact>
+        : base_kernel<assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_inexact>,
                       1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
@@ -2479,8 +2479,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_default>
-        : base_kernel<assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_default>,
+    struct assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_default>
+        : base_kernel<assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_default>,
                       1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
@@ -2510,8 +2510,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_overflow>
-        : base_kernel<assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_overflow>,
+    struct assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_overflow>
+        : base_kernel<assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_overflow>,
                       1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
@@ -2541,8 +2541,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_fractional>
-        : base_kernel<assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_fractional>,
+    struct assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_fractional>
+        : base_kernel<assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_fractional>,
                       1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
@@ -2572,8 +2572,8 @@ namespace nd {
     };
 
     template <type_id_t Src0TypeID, assign_error_mode ErrorMode>
-    struct assignment_kernel<Src0TypeID, sint_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<Src0TypeID, sint_kind, string_type_id, string_kind, ErrorMode>, 1> {
+    struct assignment_kernel<Src0TypeID, sint_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<Src0TypeID, sint_kind, string_id, string_kind, ErrorMode>, 1> {
       typedef typename type_of<Src0TypeID>::type T;
 
       ndt::type src_string_tp;
@@ -2621,8 +2621,8 @@ namespace nd {
     };
 
     template <type_id_t DstTypeID>
-    struct assignment_virtual_kernel<DstTypeID, uint_kind, string_type_id, string_kind>
-        : base_kernel<assignment_virtual_kernel<DstTypeID, uint_kind, string_type_id, string_kind>, 1> {
+    struct assignment_virtual_kernel<DstTypeID, uint_kind, string_id, string_kind>
+        : base_kernel<assignment_virtual_kernel<DstTypeID, uint_kind, string_id, string_kind>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
 
       void single(char *dst, char *const *src)
@@ -2632,9 +2632,9 @@ namespace nd {
     };
 
     template <type_id_t DstTypeID>
-    struct assignment_virtual_kernel<DstTypeID, uint_kind, string_type_id, string_kind, assign_error_nocheck>
+    struct assignment_virtual_kernel<DstTypeID, uint_kind, string_id, string_kind, assign_error_nocheck>
         : base_kernel<
-              assignment_virtual_kernel<DstTypeID, uint_kind, string_type_id, string_kind, assign_error_nocheck>, 1> {
+              assignment_virtual_kernel<DstTypeID, uint_kind, string_id, string_kind, assign_error_nocheck>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
 
       void single(char *dst, char *const *src)
@@ -2644,8 +2644,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<float16_type_id, real_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<float16_type_id, real_kind, string_type_id, string_kind, ErrorMode>, 1> {
+    struct assignment_kernel<float16_id, real_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<float16_id, real_kind, string_id, string_kind, ErrorMode>, 1> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("TODO: implement string_to_float16_single");
@@ -2653,8 +2653,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<float32_type_id, real_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<float32_type_id, real_kind, string_type_id, string_kind, ErrorMode>, 1> {
+    struct assignment_kernel<float32_id, real_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<float32_id, real_kind, string_id, string_kind, ErrorMode>, 1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2672,7 +2672,7 @@ namespace nd {
         double value = parse<double>(s.data(), s.data() + s.size());
         // Assign double -> float according to the error mode
         char *child_src[1] = {reinterpret_cast<char *>(&value)};
-        dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
+        dynd::nd::detail::assignment_kernel<float32_id, real_kind, float64_id, real_kind,
                                             ErrorMode>::single_wrapper(NULL, dst, child_src);
       }
 
@@ -2687,8 +2687,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<float64_type_id, real_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<float64_type_id, real_kind, string_type_id, string_kind, ErrorMode>, 1> {
+    struct assignment_kernel<float64_id, real_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<float64_id, real_kind, string_id, string_kind, ErrorMode>, 1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2718,8 +2718,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<float128_type_id, real_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<float128_type_id, real_kind, string_type_id, string_kind, ErrorMode>, 1> {
+    struct assignment_kernel<float128_id, real_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<float128_id, real_kind, string_id, string_kind, ErrorMode>, 1> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("TODO: implement string_to_float128_single");
@@ -2727,8 +2727,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<complex_float32_type_id, complex_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<complex_float32_type_id, complex_kind, string_type_id, string_kind, ErrorMode>,
+    struct assignment_kernel<complex_float32_id, complex_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<complex_float32_id, complex_kind, string_id, string_kind, ErrorMode>,
                       1> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
@@ -2737,8 +2737,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<complex_float64_type_id, complex_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<complex_float64_type_id, complex_kind, string_type_id, string_kind, ErrorMode>,
+    struct assignment_kernel<complex_float64_id, complex_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<complex_float64_id, complex_kind, string_id, string_kind, ErrorMode>,
                       1> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
@@ -2747,14 +2747,14 @@ namespace nd {
     };
 
     template <type_id_t DstTypeID, assign_error_mode ErrorMode>
-    struct assignment_kernel<DstTypeID, sint_kind, fixed_string_type_id, string_kind, ErrorMode>
-        : assignment_kernel<DstTypeID, sint_kind, string_type_id, string_kind, ErrorMode> {
+    struct assignment_kernel<DstTypeID, sint_kind, fixed_string_id, string_kind, ErrorMode>
+        : assignment_kernel<DstTypeID, sint_kind, string_id, string_kind, ErrorMode> {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind, ErrorMode>
+    struct assignment_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind, ErrorMode>
         : base_kernel<
-              assignment_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind, ErrorMode>, 1> {
+              assignment_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind, ErrorMode>, 1> {
       next_unicode_codepoint_t m_next_fn;
       append_unicode_codepoint_t m_append_fn;
       intptr_t m_dst_data_size, m_src_data_size;
@@ -2814,13 +2814,13 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<char_type_id, char_kind, char_type_id, char_kind, ErrorMode>
-        : assignment_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind, ErrorMode> {
+    struct assignment_kernel<char_id, char_kind, char_id, char_kind, ErrorMode>
+        : assignment_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind, ErrorMode> {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<char_type_id, char_kind, fixed_string_type_id, string_kind, ErrorMode>
-        : assignment_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind, ErrorMode> {
+    struct assignment_kernel<char_id, char_kind, fixed_string_id, string_kind, ErrorMode>
+        : assignment_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind, ErrorMode> {
     };
 
     struct adapt_assign_to_kernel : base_kernel<adapt_assign_to_kernel> {
@@ -2893,8 +2893,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<fixed_string_type_id, string_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<fixed_string_type_id, string_kind, string_type_id, string_kind, ErrorMode>, 1> {
+    struct assignment_kernel<fixed_string_id, string_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<fixed_string_id, string_kind, string_id, string_kind, ErrorMode>, 1> {
       next_unicode_codepoint_t m_next_fn;
       append_unicode_codepoint_t m_append_fn;
       intptr_t m_dst_data_size;
@@ -2947,8 +2947,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<char_type_id, char_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<char_type_id, char_kind, string_type_id, string_kind, ErrorMode>> {
+    struct assignment_kernel<char_id, char_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<char_id, char_kind, string_id, string_kind, ErrorMode>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -2956,7 +2956,7 @@ namespace nd {
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         const ndt::base_string_type *src_fs = src_tp[0].extended<ndt::base_string_type>();
-        ckb->emplace_back<assignment_kernel<fixed_string_type_id, string_kind, string_type_id, string_kind, ErrorMode>>(
+        ckb->emplace_back<assignment_kernel<fixed_string_id, string_kind, string_id, string_kind, ErrorMode>>(
             kernreq, get_next_unicode_codepoint_function(src_fs->get_encoding(), ErrorMode),
             get_append_unicode_codepoint_function(dst_tp.extended<ndt::char_type>()->get_encoding(), ErrorMode),
             dst_tp.get_data_size(), ErrorMode != assign_error_nocheck);
@@ -2964,20 +2964,20 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<fixed_string_type_id, string_kind, char_type_id, char_kind, ErrorMode>
-        : assignment_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind, ErrorMode> {
+    struct assignment_kernel<fixed_string_id, string_kind, char_id, char_kind, ErrorMode>
+        : assignment_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind, ErrorMode> {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<string_type_id, string_kind, char_type_id, char_kind, ErrorMode>
-        : base_kernel<assignment_kernel<string_type_id, string_kind, char_type_id, char_kind, ErrorMode>> {
+    struct assignment_kernel<string_id, string_kind, char_id, char_kind, ErrorMode>
+        : base_kernel<assignment_kernel<string_id, string_kind, char_id, char_kind, ErrorMode>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
                               kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        ckb->emplace_back<assignment_kernel<string_type_id, string_kind, fixed_string_type_id, string_kind, ErrorMode>>(
+        ckb->emplace_back<assignment_kernel<string_id, string_kind, fixed_string_id, string_kind, ErrorMode>>(
             kernreq, dst_tp.extended<ndt::base_string_type>()->get_encoding(),
             src_tp[0].extended<ndt::char_type>()->get_encoding(), src_tp[0].get_data_size(),
             get_next_unicode_codepoint_function(src_tp[0].extended<ndt::char_type>()->get_encoding(), ErrorMode),
@@ -2986,8 +2986,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_virtual_kernel<time_type_id, datetime_kind, time_type_id, datetime_kind>
-        : base_kernel<assignment_virtual_kernel<time_type_id, datetime_kind, time_type_id, datetime_kind>> {
+    struct assignment_virtual_kernel<time_id, datetime_kind, time_id, datetime_kind>
+        : base_kernel<assignment_virtual_kernel<time_id, datetime_kind, time_id, datetime_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
@@ -3010,8 +3010,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_virtual_kernel<pointer_type_id, expr_kind, pointer_type_id, expr_kind>
-        : base_kernel<assignment_virtual_kernel<pointer_type_id, expr_kind, pointer_type_id, expr_kind>> {
+    struct assignment_virtual_kernel<pointer_id, expr_kind, pointer_id, expr_kind>
+        : base_kernel<assignment_virtual_kernel<pointer_id, expr_kind, pointer_id, expr_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -3035,8 +3035,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<datetime_type_id, datetime_kind, datetime_type_id, datetime_kind, ErrorMode>
-        : base_kernel<assignment_kernel<datetime_type_id, datetime_kind, datetime_type_id, datetime_kind, ErrorMode>> {
+    struct assignment_kernel<datetime_id, datetime_kind, datetime_id, datetime_kind, ErrorMode>
+        : base_kernel<assignment_kernel<datetime_id, datetime_kind, datetime_id, datetime_kind, ErrorMode>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -3073,8 +3073,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_virtual_kernel<type_type_id, type_kind, type_type_id, type_kind>
-        : base_kernel<assignment_virtual_kernel<type_type_id, type_kind, type_type_id, type_kind>, 1> {
+    struct assignment_virtual_kernel<type_id, type_kind, type_id, type_kind>
+        : base_kernel<assignment_virtual_kernel<type_id, type_kind, type_id, type_kind>, 1> {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<ndt::type *>(dst) = *reinterpret_cast<ndt::type *>(src[0]);
@@ -3082,8 +3082,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<type_type_id, type_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<type_type_id, type_kind, string_type_id, string_kind, ErrorMode>, 1> {
+    struct assignment_kernel<type_id, type_kind, string_id, string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<type_id, type_kind, string_id, string_kind, ErrorMode>, 1> {
       ndt::type src_string_dt;
       const char *src_arrmeta;
 
@@ -3110,8 +3110,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<string_type_id, string_kind, type_type_id, type_kind, ErrorMode>
-        : base_kernel<assignment_kernel<string_type_id, string_kind, type_type_id, type_kind, ErrorMode>, 1> {
+    struct assignment_kernel<string_id, string_kind, type_id, type_kind, ErrorMode>
+        : base_kernel<assignment_kernel<string_id, string_kind, type_id, type_kind, ErrorMode>, 1> {
       ndt::type dst_string_dt;
       const char *dst_arrmeta;
 

@@ -130,7 +130,7 @@ nd::array dynd::nd::range(const ndt::type &scalar_tp, const void *beginval, cons
     return result;                                                                                                     \
   }
 
-  switch (scalar_tp.get_type_id()) {
+  switch (scalar_tp.get_id()) {
     ONE_ARANGE_SPECIALIZATION(int8_t);
     ONE_ARANGE_SPECIALIZATION(int16_t);
     ONE_ARANGE_SPECIALIZATION(int32_t);
@@ -227,26 +227,26 @@ nd::array dynd::nd::linspace(const ndt::type &dt, const void *startval, const vo
     throw runtime_error("linspace needs a count of at least 2");
   }
 
-  switch (dt.get_type_id()) {
-  case float32_type_id: {
+  switch (dt.get_id()) {
+  case float32_id: {
     nd::array result = nd::empty(count, dt);
     linspace_specialization(*reinterpret_cast<const float *>(startval), *reinterpret_cast<const float *>(stopval),
                             count, result);
     return result;
   }
-  case float64_type_id: {
+  case float64_id: {
     nd::array result = nd::empty(count, dt);
     linspace_specialization(*reinterpret_cast<const double *>(startval), *reinterpret_cast<const double *>(stopval),
                             count, result);
     return result;
   }
-  case complex_float32_type_id: {
+  case complex_float32_id: {
     nd::array result = nd::empty(count, dt);
     linspace_specialization(*reinterpret_cast<const dynd::complex<float> *>(startval),
                             *reinterpret_cast<const dynd::complex<float> *>(stopval), count, result);
     return result;
   }
-  case complex_float64_type_id: {
+  case complex_float64_id: {
     nd::array result = nd::empty(count, dt);
     linspace_specialization(*reinterpret_cast<const dynd::complex<double> *>(startval),
                             *reinterpret_cast<const dynd::complex<double> *>(stopval), count, result);

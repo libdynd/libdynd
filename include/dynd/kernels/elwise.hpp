@@ -86,8 +86,8 @@ namespace nd {
               intptr_t *shape_i = shape.get() + (ndim - ndim_i);
               intptr_t shape_at_j;
               for (intptr_t j = 0; j < ndim_i; ++j) {
-                switch (tp.get_type_id()) {
-                case fixed_dim_type_id:
+                switch (tp.get_id()) {
+                case fixed_dim_id:
                   shape_at_j = tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
                   if (shape_i[j] < 0 || shape_i[j] == 1) {
                     if (shape_at_j != 1) {
@@ -98,7 +98,7 @@ namespace nd {
                     throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
                   }
                   break;
-                case var_dim_type_id:
+                case var_dim_id:
                   break;
                 default:
                   throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
@@ -171,10 +171,10 @@ namespace nd {
         bool src_all_strided = true, src_all_strided_or_var = true;
         for (intptr_t i = 0; i < nsrc; ++i) {
           intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
-          switch (src_tp[i].get_type_id()) {
-          case fixed_dim_type_id:
+          switch (src_tp[i].get_id()) {
+          case fixed_dim_id:
             break;
-          case var_dim_type_id:
+          case var_dim_id:
             src_all_strided = false;
             break;
           default:
@@ -189,23 +189,23 @@ namespace nd {
 
         // Call to some special-case functions based on the
         // destination type
-        switch (dst_tp.get_type_id()) {
-        case fixed_dim_type_id:
+        switch (dst_tp.get_id()) {
+        case fixed_dim_id:
           if (src_all_strided) {
-            return elwise_ck<fixed_dim_type_id, fixed_dim_type_id, N>::instantiate(
+            return elwise_ck<fixed_dim_id, fixed_dim_id, N>::instantiate(
                 static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
           }
           else if (src_all_strided_or_var) {
-            return elwise_ck<fixed_dim_type_id, var_dim_type_id, N>::instantiate(
+            return elwise_ck<fixed_dim_id, var_dim_id, N>::instantiate(
                 static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
           }
           else {
             // TODO
           }
           break;
-        case var_dim_type_id:
+        case var_dim_id:
           if (src_all_strided_or_var) {
-            return elwise_ck<var_dim_type_id, fixed_dim_type_id, N>::instantiate(
+            return elwise_ck<var_dim_id, fixed_dim_id, N>::instantiate(
                 static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
           }
           else {
@@ -230,8 +230,8 @@ namespace nd {
     };
 
     template <int N>
-    struct elwise_ck<fixed_dim_type_id, fixed_dim_type_id, N>
-        : base_kernel<elwise_ck<fixed_dim_type_id, fixed_dim_type_id, N>, N> {
+    struct elwise_ck<fixed_dim_id, fixed_dim_id, N>
+        : base_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, N>, N> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -283,7 +283,7 @@ namespace nd {
 
         intptr_t dst_ndim = dst_tp.get_ndim();
         if (!child_tp->get_return_type().is_symbolic() ||
-            child_tp->get_return_type().get_type_id() == typevar_constructed_type_id) {
+            child_tp->get_return_type().get_id() == typevar_constructed_id) {
           dst_ndim -= child_tp->get_return_type().get_ndim();
         }
 
@@ -348,8 +348,8 @@ namespace nd {
     // int N, int K
 
     template <>
-    struct elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 0>
-        : base_kernel<elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 0>, 0> {
+    struct elwise_ck<fixed_dim_id, fixed_dim_id, 0>
+        : base_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, 0>, 0> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -390,7 +390,7 @@ namespace nd {
         if (!child_tp->get_return_type().is_symbolic()) {
           dst_ndim -= child_tp->get_return_type().get_ndim();
         }
-        else if (child_tp->get_return_type().get_type_id() == typevar_constructed_type_id) {
+        else if (child_tp->get_return_type().get_id() == typevar_constructed_id) {
           dst_ndim -= child_tp->get_return_type().get_ndim();
         }
 
@@ -430,8 +430,8 @@ namespace nd {
      * kernel_request_strided type of kernel.
      */
     template <int N>
-    struct elwise_ck<fixed_dim_type_id, var_dim_type_id, N>
-        : base_kernel<elwise_ck<fixed_dim_type_id, var_dim_type_id, N>, N> {
+    struct elwise_ck<fixed_dim_id, var_dim_id, N>
+        : base_kernel<elwise_ck<fixed_dim_id, var_dim_id, N>, N> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -575,8 +575,8 @@ namespace nd {
     };
 
     template <>
-    struct elwise_ck<fixed_dim_type_id, var_dim_type_id, 0>
-        : base_kernel<elwise_ck<fixed_dim_type_id, var_dim_type_id, 0>, 0> {
+    struct elwise_ck<fixed_dim_id, var_dim_id, 0>
+        : base_kernel<elwise_ck<fixed_dim_id, var_dim_id, 0>, 0> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -652,8 +652,8 @@ namespace nd {
      * kernel_request_strided type of kernel.
      */
     template <int N>
-    struct elwise_ck<var_dim_type_id, fixed_dim_type_id, N>
-        : base_kernel<elwise_ck<var_dim_type_id, fixed_dim_type_id, N>, N> {
+    struct elwise_ck<var_dim_id, fixed_dim_id, N>
+        : base_kernel<elwise_ck<var_dim_id, fixed_dim_id, N>, N> {
       typedef elwise_ck self_type;
 
       memory_block_data *m_dst_memblock;
@@ -879,8 +879,8 @@ namespace nd {
     };
 
     template <>
-    struct elwise_ck<var_dim_type_id, fixed_dim_type_id, 0>
-        : base_kernel<elwise_ck<var_dim_type_id, fixed_dim_type_id, 0>, 0> {
+    struct elwise_ck<var_dim_id, fixed_dim_id, 0>
+        : base_kernel<elwise_ck<var_dim_id, fixed_dim_id, 0>, 0> {
       typedef elwise_ck self_type;
 
       memory_block_data *m_dst_memblock;
@@ -986,7 +986,7 @@ namespace nd {
     };
 
     template <int N>
-    struct elwise_ck<var_dim_type_id, var_dim_type_id, N> : elwise_ck<var_dim_type_id, fixed_dim_type_id, N> {
+    struct elwise_ck<var_dim_id, var_dim_id, N> : elwise_ck<var_dim_id, fixed_dim_id, N> {
     };
 
   } // namespace dynd::nd::functional

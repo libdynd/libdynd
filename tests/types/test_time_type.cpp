@@ -24,7 +24,7 @@ TEST(TimeDType, Create)
   const ndt::time_type *tt;
 
   d = ndt::time_type::make(tz_abstract);
-  ASSERT_EQ(time_type_id, d.get_type_id());
+  ASSERT_EQ(time_id, d.get_id());
   tt = d.extended<ndt::time_type>();
   EXPECT_EQ(8u, d.get_data_size());
   EXPECT_EQ((size_t)alignof(int64_t), d.get_data_alignment());
@@ -47,14 +47,14 @@ TEST(TimeDType, CreateFromString)
   const ndt::time_type *tt;
 
   d = ndt::type("time");
-  ASSERT_EQ(time_type_id, d.get_type_id());
+  ASSERT_EQ(time_id, d.get_id());
   tt = d.extended<ndt::time_type>();
   EXPECT_EQ(tz_abstract, tt->get_timezone());
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::type("time[tz='UTC']");
-  ASSERT_EQ(time_type_id, d.get_type_id());
+  ASSERT_EQ(time_id, d.get_id());
   tt = d.extended<ndt::time_type>();
   EXPECT_EQ(tz_utc, tt->get_timezone());
   // Roundtripping through a string

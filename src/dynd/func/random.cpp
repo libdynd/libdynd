@@ -15,16 +15,16 @@ struct uniform_kernel_alias {
 
 DYND_API nd::callable nd::random::uniform::make()
 {
-  typedef type_id_sequence<int32_type_id, int64_type_id, uint32_type_id, uint64_type_id, float32_type_id,
-                           float64_type_id, complex_float32_type_id, complex_float64_type_id> numeric_type_ids;
+  typedef type_id_sequence<int32_id, int64_id, uint32_id, uint64_id, float32_id,
+                           float64_id, complex_float32_id, complex_float64_id> numeric_ids;
 
   std::random_device random_device;
 
-  auto children = callable::make_all<uniform_kernel_alias<std::default_random_engine>::type, numeric_type_ids>(0);
+  auto children = callable::make_all<uniform_kernel_alias<std::default_random_engine>::type, numeric_ids>(0);
   return functional::elwise(functional::dispatch(
       ndt::type("(a: ?R, b: ?R) -> R"), [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                                                    const ndt::type *DYND_UNUSED(src_tp)) mutable -> callable & {
-        callable &child = children[dst_tp.get_type_id()];
+        callable &child = children[dst_tp.get_id()];
         if (child.is_null()) {
           throw std::runtime_error("assignment error");
         }

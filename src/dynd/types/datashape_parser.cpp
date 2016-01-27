@@ -414,11 +414,11 @@ static ndt::type parse_complex_parameters(const char *&rbegin, const char *end, 
     if (!parse_token_ds(begin, end, ']')) {
       throw datashape_parse_error(begin, "expected closing ']'");
     }
-    if (tp.get_type_id() == float32_type_id) {
+    if (tp.get_id() == float32_id) {
       rbegin = begin;
       return ndt::make_type<dynd::complex<float>>();
     }
-    else if (tp.get_type_id() == float64_type_id) {
+    else if (tp.get_id() == float64_id) {
       rbegin = begin;
       return ndt::make_type<dynd::complex<double>>();
     }
@@ -1057,7 +1057,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end, map<std::str
   bool variadic = false;
 
   if (!parse_token_ds(begin, end, '{')) {
-    return ndt::type(uninitialized_type_id);
+    return ndt::type(uninitialized_id);
   }
   if (parse_token_ds(begin, end, '}')) {
     // Empty struct
@@ -1156,7 +1156,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
   bool variadic = false;
 
   if (!parse_token_ds(begin, end, '(')) {
-    return ndt::type(uninitialized_type_id);
+    return ndt::type(uninitialized_id);
   }
   if (!parse_token_ds(begin, end, ')')) {
     for (;;) {
@@ -1209,7 +1209,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
 
       tp = parse_datashape(begin, end, symtable);
 
-      if (tp.get_type_id() != uninitialized_type_id) {
+      if (tp.get_id() != uninitialized_id) {
         field_type_list.push_back(tp);
       }
       else {

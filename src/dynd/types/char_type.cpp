@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::char_type::char_type(string_encoding_t encoding)
-    : base_type(char_type_id, char_kind, string_encoding_char_size_table[encoding],
+    : base_type(char_id, char_kind, string_encoding_char_size_table[encoding],
                 string_encoding_char_size_table[encoding], type_flag_none, 0, 0, 0),
       m_encoding(encoding)
 {
@@ -89,7 +89,7 @@ bool ndt::char_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != char_type_id) {
+  else if (rhs.get_id() != char_id) {
     return false;
   }
   else {

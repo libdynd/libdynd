@@ -18,12 +18,12 @@ using namespace std;
 using namespace dynd;
 
 ndt::option_type::option_type(const type &value_tp)
-    : base_type(option_type_id, option_kind, value_tp.get_data_size(), value_tp.get_data_alignment(),
+    : base_type(option_id, option_kind, value_tp.get_data_size(), value_tp.get_data_alignment(),
                 value_tp.get_flags() & (type_flags_value_inherited | type_flags_operand_inherited),
                 value_tp.get_arrmeta_size(), value_tp.get_ndim(), 0),
       m_value_tp(value_tp)
 {
-  if (value_tp.get_type_id() == option_type_id) {
+  if (value_tp.get_id() == option_id) {
     stringstream ss;
     ss << "Cannot construct an option type out of " << value_tp << ", it is already an option type";
     throw type_error(ss.str());
@@ -36,30 +36,30 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
                                 const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   if (m_value_tp.is_builtin()) {
-    switch (m_value_tp.get_type_id()) {
+    switch (m_value_tp.get_id()) {
     // Just use the known value assignments for these builtins
-    case bool_type_id:
+    case bool_id:
       return *reinterpret_cast<const unsigned char *>(data) <= 1;
-    case int8_type_id:
+    case int8_id:
       return *reinterpret_cast<const int8_t *>(data) != DYND_INT8_NA;
-    case int16_type_id:
+    case int16_id:
       return *reinterpret_cast<const int16_t *>(data) != DYND_INT16_NA;
-    case int32_type_id:
+    case int32_id:
       return *reinterpret_cast<const int32_t *>(data) != DYND_INT32_NA;
-    case uint32_type_id:
+    case uint32_id:
       return *reinterpret_cast<const uint32_t *>(data) != DYND_UINT32_NA;
-    case int64_type_id:
+    case int64_id:
       return *reinterpret_cast<const int64_t *>(data) != DYND_INT64_NA;
-    case int128_type_id:
+    case int128_id:
       return *reinterpret_cast<const int128 *>(data) != DYND_INT128_NA;
-    case float32_type_id:
+    case float32_id:
       return !isnan(*reinterpret_cast<const float *>(data));
-    case float64_type_id:
+    case float64_id:
       return !isnan(*reinterpret_cast<const double *>(data));
-    case complex_float32_type_id:
+    case complex_float32_id:
       return reinterpret_cast<const uint32_t *>(data)[0] != DYND_FLOAT32_NA_AS_UINT ||
              reinterpret_cast<const uint32_t *>(data)[1] != DYND_FLOAT32_NA_AS_UINT;
-    case complex_float64_type_id:
+    case complex_float64_id:
       return reinterpret_cast<const uint64_t *>(data)[0] != DYND_FLOAT64_NA_AS_UINT ||
              reinterpret_cast<const uint64_t *>(data)[1] != DYND_FLOAT64_NA_AS_UINT;
     default:
@@ -82,37 +82,37 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
 void ndt::option_type::assign_na(const char *arrmeta, char *data, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   if (m_value_tp.is_builtin()) {
-    switch (m_value_tp.get_type_id()) {
+    switch (m_value_tp.get_id()) {
     // Just use the known value assignments for these builtins
-    case bool_type_id:
+    case bool_id:
       *data = 2;
       return;
-    case int8_type_id:
+    case int8_id:
       *reinterpret_cast<int8_t *>(data) = DYND_INT8_NA;
       return;
-    case int16_type_id:
+    case int16_id:
       *reinterpret_cast<int16_t *>(data) = DYND_INT16_NA;
       return;
-    case int32_type_id:
+    case int32_id:
       *reinterpret_cast<int32_t *>(data) = DYND_INT32_NA;
       return;
-    case int64_type_id:
+    case int64_id:
       *reinterpret_cast<int64_t *>(data) = DYND_INT64_NA;
       return;
-    case int128_type_id:
+    case int128_id:
       *reinterpret_cast<int128 *>(data) = DYND_INT128_NA;
       return;
-    case float32_type_id:
+    case float32_id:
       *reinterpret_cast<uint32_t *>(data) = DYND_FLOAT32_NA_AS_UINT;
       return;
-    case float64_type_id:
+    case float64_id:
       *reinterpret_cast<uint64_t *>(data) = DYND_FLOAT64_NA_AS_UINT;
       return;
-    case complex_float32_type_id:
+    case complex_float32_id:
       reinterpret_cast<uint32_t *>(data)[0] = DYND_FLOAT32_NA_AS_UINT;
       reinterpret_cast<uint32_t *>(data)[1] = DYND_FLOAT32_NA_AS_UINT;
       return;
-    case complex_float64_type_id:
+    case complex_float64_id:
       reinterpret_cast<uint64_t *>(data)[0] = DYND_FLOAT64_NA_AS_UINT;
       reinterpret_cast<uint64_t *>(data)[1] = DYND_FLOAT64_NA_AS_UINT;
       return;
@@ -185,11 +185,11 @@ void ndt::option_type::set_from_utf8_string(const char *arrmeta, char *data, con
   }
   else {
     if (m_value_tp.is_builtin()) {
-      if (m_value_tp.unchecked_get_builtin_type_id() == bool_type_id) {
+      if (m_value_tp.unchecked_get_builtin_id() == bool_id) {
         *reinterpret_cast<bool1 *>(data) = parse<bool>(utf8_begin, utf8_end);
       }
       else {
-        string_to_number(data, m_value_tp.unchecked_get_builtin_type_id(), utf8_begin, utf8_end, ectx->errmode);
+        string_to_number(data, m_value_tp.unchecked_get_builtin_id(), utf8_begin, utf8_end, ectx->errmode);
       }
     }
     else {
@@ -223,7 +223,7 @@ bool ndt::option_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != option_type_id) {
+  else if (rhs.get_id() != option_id) {
     return false;
   }
   else {
@@ -289,7 +289,7 @@ void ndt::option_type::data_destruct_strided(const char *arrmeta, char *data, in
 bool ndt::option_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                              std::map<std::string, type> &tp_vars) const
 {
-  if (candidate_tp.get_type_id() != option_type_id) {
+  if (candidate_tp.get_id() != option_id) {
     return false;
   }
 

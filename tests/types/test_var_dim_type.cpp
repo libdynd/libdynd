@@ -257,8 +257,8 @@ TEST(VarArrayDType, AssignKernel)
   // Assignment initialized var array -> uninitialized var array
   a = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
   b = parse_json("var * int32", "[3, 5, 7]");
-  EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(var_dim_id, a.get_type().get_id());
+  EXPECT_EQ(var_dim_id, b.get_type().get_id());
   a.assign(b);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(3, a(0).as<int>());
@@ -269,8 +269,8 @@ TEST(VarArrayDType, AssignKernel)
   a = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
   parse_json(a, "[0, 0, 0]");
   b = parse_json("var * int32", "[3, 5, 7]");
-  EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(var_dim_id, a.get_type().get_id());
+  EXPECT_EQ(var_dim_id, b.get_type().get_id());
   a.assign(b);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(3, a(0).as<int>());
@@ -281,8 +281,8 @@ TEST(VarArrayDType, AssignKernel)
   a = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
   parse_json(a, "[0, 0, 0]");
   b = parse_json("var * int32", "[9]");
-  EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(var_dim_id, a.get_type().get_id());
+  EXPECT_EQ(var_dim_id, b.get_type().get_id());
   a.assign(b);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(9, a(0).as<int>());
@@ -292,22 +292,22 @@ TEST(VarArrayDType, AssignKernel)
   // No-op assignment uninitialized var array -> uinitialized var array
   a = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
   b = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
-  EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(var_dim_id, a.get_type().get_id());
+  EXPECT_EQ(var_dim_id, b.get_type().get_id());
   a.assign(b); // No error, a is still uninitialized
 
   // Error assignment var array -> scalar
   a = 9.0;
   b = parse_json("var * int32", "[3, 5, 7]");
-  EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(var_dim_id, b.get_type().get_id());
   EXPECT_THROW(a.assign(b), runtime_error);
 
   // Error assignment initialized var array -> initialized var array
   a = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
   parse_json(a, "[0, 0, 0]");
   b = parse_json("var * int32", "[9, 2]");
-  EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(var_dim_id, a.get_type().get_id());
+  EXPECT_EQ(var_dim_id, b.get_type().get_id());
   EXPECT_THROW(a.assign(b), broadcast_error);
 }
 
@@ -319,8 +319,8 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   // Assignment strided array -> uninitialized var array
   a = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
   b = vals_int;
-  EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(var_dim_id, a.get_type().get_id());
+  EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
   a.assign(b);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(3, a(0).as<int>());
@@ -331,8 +331,8 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   a = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
   parse_json(a, "[0, 0, 0]");
   b = vals_int;
-  EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(var_dim_id, a.get_type().get_id());
+  EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
   a.assign(b);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(3, a(0).as<int>());
@@ -343,16 +343,16 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   a = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
   parse_json(a, "[0, 0, 0, 0]");
   b = vals_int;
-  EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(var_dim_id, a.get_type().get_id());
+  EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
   EXPECT_THROW(a.assign(b), broadcast_error);
 
   // Assignment initialized var array -> strided array
   a = nd::empty(ndt::make_type<int[3]>());
   a.vals() = 0;
   b = parse_json("var * int32", "[3, 5, 7]");
-  EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(fixed_dim_id, a.get_type().get_id());
+  EXPECT_EQ(var_dim_id, b.get_type().get_id());
   a.assign(b);
   EXPECT_EQ(3, a(0).as<int>());
   EXPECT_EQ(5, a(1).as<int>());
@@ -362,16 +362,16 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   a = nd::empty(ndt::make_type<int[3]>());
   a.vals() = 0;
   b = parse_json("var * int32", "[3, 5, 7, 9]");
-  EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(fixed_dim_id, a.get_type().get_id());
+  EXPECT_EQ(var_dim_id, b.get_type().get_id());
   EXPECT_THROW(a.assign(b), broadcast_error);
 
   // Error assignment uninitialized var array -> strided array
   a = nd::empty(ndt::make_type<int[3]>());
   a.vals() = 0;
   b = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
-  EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(fixed_dim_id, a.get_type().get_id());
+  EXPECT_EQ(var_dim_id, b.get_type().get_id());
   EXPECT_THROW(a.assign(b), broadcast_error);
 }
 
@@ -382,8 +382,8 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   // Assignment fixed array -> uninitialized var array
   a = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
   b = parse_json("3 * int32", "[3, 5, 7]");
-  EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(var_dim_id, a.get_type().get_id());
+  EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
   a.assign(b);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(3, a(0).as<int>());
@@ -394,8 +394,8 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   a = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
   parse_json(a, "[0, 0, 0]");
   b = parse_json("3 * int32", "[3, 5, 7]");
-  EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(var_dim_id, a.get_type().get_id());
+  EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
   a.assign(b);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(3, a(0).as<int>());
@@ -406,16 +406,16 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   a = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
   parse_json(a, "[0, 0, 0, 0]");
   b = parse_json("3 * int32", "[3, 5, 7]");
-  EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(var_dim_id, a.get_type().get_id());
+  EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
   EXPECT_THROW(a.assign(b), broadcast_error);
 
   // Assignment initialized var array -> fixed array
   a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
   a.vals() = 0;
   b = parse_json("var * int32", "[3, 5, 7]");
-  EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(fixed_dim_id, a.get_type().get_id());
+  EXPECT_EQ(var_dim_id, b.get_type().get_id());
   a.assign(b);
   EXPECT_EQ(3, a(0).as<int>());
   EXPECT_EQ(5, a(1).as<int>());
@@ -425,16 +425,16 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
   a.vals() = 0;
   b = parse_json("var * int32", "[3, 5, 7, 9]");
-  EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(fixed_dim_id, a.get_type().get_id());
+  EXPECT_EQ(var_dim_id, b.get_type().get_id());
   EXPECT_THROW(a.assign(b), broadcast_error);
 
   // Error assignment uninitialized var array -> fixed array
   a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
   a.vals() = 0;
   b = nd::empty(ndt::var_dim_type::make(ndt::make_type<int>()));
-  EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(fixed_dim_id, a.get_type().get_id());
+  EXPECT_EQ(var_dim_id, b.get_type().get_id());
   EXPECT_THROW(a.assign(b), broadcast_error);
 }
 

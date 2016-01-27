@@ -33,8 +33,8 @@ void nd::copy_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(
     if (src_tp[0].is_builtin()) {
       if (dst_tp.extended() == src_tp[0].extended()) {
         make_pod_typed_data_assignment_kernel(
-            ckb, dynd::ndt::detail::builtin_data_sizes[dst_tp.unchecked_get_builtin_type_id()],
-            dynd::ndt::detail::builtin_data_alignments[dst_tp.unchecked_get_builtin_type_id()], kernreq);
+            ckb, dynd::ndt::detail::builtin_data_sizes[dst_tp.unchecked_get_builtin_id()],
+            dynd::ndt::detail::builtin_data_alignments[dst_tp.unchecked_get_builtin_id()], kernreq);
         return;
       }
       else {

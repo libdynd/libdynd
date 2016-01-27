@@ -28,7 +28,7 @@ struct custom_type : ndt::base_type {
 
   bool operator==(const ndt::base_type &rhs) const
   {
-    return get_type_id() == rhs.get_type_id();
+    return get_id() == rhs.get_id();
   }
 };
 
@@ -38,5 +38,5 @@ TEST(Type, Registry)
 
   const nd::array &a = nd::array();
   ndt::type tp = ndt::type::make(tp_id, a);
-  EXPECT_EQ(tp_id, tp.get_type_id());
+  EXPECT_EQ(tp_id, tp.get_id());
 }

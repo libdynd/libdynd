@@ -45,19 +45,19 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
 {
   // This function assumes that ``pattern`` is symbolic, so does not
   // have to check types that are always concrete
-  switch (pattern.get_type_id()) {
+  switch (pattern.get_id()) {
 #ifdef DYND_CUDA
-  case cuda_device_type_id:
+  case cuda_device_id:
     return ndt::make_cuda_device(
         ndt::substitute(pattern.extended<base_memory_type>()->get_element_type(), typevars, concrete));
 #endif
-  case c_contiguous_type_id:
+  case c_contiguous_id:
     return ndt::c_contiguous_type::make(
         ndt::substitute(pattern.extended<c_contiguous_type>()->get_child_type(), typevars, concrete));
-  case pointer_type_id:
+  case pointer_id:
     return ndt::pointer_type::make(
         ndt::substitute(pattern.extended<pointer_type>()->get_target_type(), typevars, concrete));
-  case fixed_dim_type_id:
+  case fixed_dim_id:
     if (pattern.get_kind() == kind_kind) {
       if (!concrete) {
         return ndt::make_fixed_dim_kind(
@@ -72,38 +72,38 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
           pattern.extended<fixed_dim_type>()->get_fixed_dim_size(),
           ndt::substitute(pattern.extended<fixed_dim_type>()->get_element_type(), typevars, concrete));
     }
-  case var_dim_type_id:
+  case var_dim_id:
     return ndt::var_dim_type::make(
         ndt::substitute(pattern.extended<var_dim_type>()->get_element_type(), typevars, concrete));
-  case struct_type_id:
+  case struct_id:
     return ndt::struct_type::make(
         pattern.extended<struct_type>()->get_field_names(),
         substitute_type_array(pattern.extended<tuple_type>()->get_field_types(), typevars, concrete));
-  case tuple_type_id:
+  case tuple_id:
     return ndt::tuple_type::make(
         substitute_type_array(pattern.extended<tuple_type>()->get_field_types(), typevars, concrete));
-  case option_type_id:
+  case option_id:
     return ndt::make_type<ndt::option_type>(
         ndt::substitute(pattern.extended<option_type>()->get_value_type(), typevars, concrete));
-  case callable_type_id:
+  case callable_id:
     return ndt::callable_type::make(
         substitute(pattern.extended<callable_type>()->get_return_type(), typevars, concrete),
         substitute(pattern.extended<callable_type>()->get_pos_tuple(), typevars, concrete),
         substitute(pattern.extended<callable_type>()->get_kwd_struct(), typevars, concrete));
-  case typevar_constructed_type_id: {
+  case typevar_constructed_id: {
     map<std::string, ndt::type>::const_iterator it =
         typevars.find(pattern.extended<typevar_constructed_type>()->get_name());
-    if (it->second.get_type_id() == void_type_id) {
+    if (it->second.get_id() == void_id) {
       return substitute(pattern.extended<typevar_constructed_type>()->get_arg(), typevars, concrete);
     }
 #ifdef DYND_CUDA
-    if (it->second.get_type_id() == cuda_device_type_id) {
+    if (it->second.get_id() == cuda_device_id) {
       return ndt::make_cuda_device(
           substitute(pattern.extended<typevar_constructed_type>()->get_arg(), typevars, concrete));
     }
 #endif
   }
-  case typevar_type_id: {
+  case typevar_id: {
     map<std::string, ndt::type>::const_iterator it = typevars.find(pattern.extended<typevar_type>()->get_name());
     if (it != typevars.end()) {
       if (it->second.get_ndim() != 0) {
@@ -129,7 +129,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
       }
     }
   }
-  case typevar_dim_type_id: {
+  case typevar_dim_id: {
     map<std::string, ndt::type>::const_iterator it = typevars.find(pattern.extended<typevar_dim_type>()->get_name());
     if (it != typevars.end()) {
       if (it->second.get_ndim() == 0) {
@@ -139,8 +139,8 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
         throw invalid_argument(ss.str());
       }
       if (!concrete || !it->second.is_symbolic()) {
-        switch (it->second.get_type_id()) {
-        case fixed_dim_type_id:
+        switch (it->second.get_id()) {
+        case fixed_dim_id:
           if (it->second.get_kind() == kind_kind) {
             return ndt::make_fixed_dim_kind(
                 ndt::substitute(pattern.extended<typevar_dim_type>()->get_element_type(), typevars, concrete));
@@ -149,7 +149,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
                 it->second.extended<fixed_dim_type>()->get_fixed_dim_size(),
                 ndt::substitute(pattern.extended<typevar_dim_type>()->get_element_type(), typevars, concrete));
           }
-        case var_dim_type_id:
+        case var_dim_id:
           return ndt::var_dim_type::make(
               ndt::substitute(pattern.extended<typevar_dim_type>()->get_element_type(), typevars, concrete));
         default: {
@@ -176,15 +176,15 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
       }
     }
   }
-  case pow_dimsym_type_id: {
+  case pow_dimsym_id: {
     // Look up to the exponent typevar
     std::string exponent_name = pattern.extended<pow_dimsym_type>()->get_exponent();
     map<std::string, ndt::type>::const_iterator tv_type = typevars.find(exponent_name);
     intptr_t exponent = -1;
     if (tv_type != typevars.end()) {
-      if (tv_type->second.get_type_id() == fixed_dim_type_id) {
+      if (tv_type->second.get_id() == fixed_dim_id) {
         exponent = tv_type->second.extended<fixed_dim_type>()->get_fixed_dim_size();
-      } else if (tv_type->second.get_type_id() == typevar_dim_type_id) {
+      } else if (tv_type->second.get_id() == typevar_dim_id) {
         // If it's a typevar, substitute the new name in
         exponent_name = tv_type->second.extended<typevar_dim_type>()->get_name();
         if (concrete) {
@@ -206,7 +206,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
     }
     // Get the base type
     ndt::type base_tp = pattern.extended<pow_dimsym_type>()->get_base_type();
-    if (base_tp.get_type_id() == typevar_dim_type_id) {
+    if (base_tp.get_id() == typevar_dim_id) {
       map<std::string, ndt::type>::const_iterator btv_type =
           typevars.find(base_tp.extended<typevar_dim_type>()->get_name());
       if (btv_type == typevars.end()) {
@@ -217,7 +217,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
           ss << "No substitution type for dynd typevar " << base_tp << " was available";
           throw invalid_argument(ss.str());
         }
-      } else if (btv_type->second.get_ndim() > 0 && btv_type->second.get_type_id() != dim_fragment_type_id) {
+      } else if (btv_type->second.get_ndim() > 0 && btv_type->second.get_id() != dim_fragment_id) {
         // Swap in for the base type
         base_tp = btv_type->second;
       } else {
@@ -234,8 +234,8 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
     } else if (exponent < 0) {
       return ndt::make_pow_dimsym(base_tp, exponent_name, result);
     } else {
-      switch (base_tp.get_type_id()) {
-      case fixed_dim_type_id: {
+      switch (base_tp.get_id()) {
+      case fixed_dim_id: {
         if (base_tp.get_kind() == kind_kind) {
           if (concrete) {
             stringstream ss;
@@ -254,12 +254,12 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
           return result;
         }
       }
-      case var_dim_type_id:
+      case var_dim_id:
         for (intptr_t i = 0; i < exponent; ++i) {
           result = ndt::var_dim_type::make(result);
         }
         return result;
-      case typevar_dim_type_id: {
+      case typevar_dim_id: {
         const std::string &tvname = base_tp.extended<typevar_dim_type>()->get_name();
         for (intptr_t i = 0; i < exponent; ++i) {
           result = ndt::typevar_dim_type::make(tvname, result);
@@ -274,12 +274,12 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
       }
     }
   }
-  case ellipsis_dim_type_id: {
+  case ellipsis_dim_id: {
     const std::string &name = pattern.extended<ellipsis_dim_type>()->get_name();
     if (!name.empty()) {
       map<std::string, ndt::type>::const_iterator it = typevars.find(pattern.extended<typevar_dim_type>()->get_name());
       if (it != typevars.end()) {
-        if (it->second.get_type_id() == dim_fragment_type_id) {
+        if (it->second.get_id() == dim_fragment_id) {
           return it->second.extended<dim_fragment_type>()->apply_to_dtype(
               ndt::substitute(pattern.extended<ellipsis_dim_type>()->get_element_type(), typevars, concrete));
         } else {
@@ -303,7 +303,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
       throw invalid_argument("Cannot substitute into an unnamed ellipsis typevar");
     }
   }
-  case any_kind_type_id: {
+  case any_kind_id: {
     if (concrete) {
       stringstream ss;
       ss << "The dynd type " << pattern << " is not concrete as required";
@@ -312,7 +312,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
       return pattern;
     }
   }
-  case scalar_kind_type_id: {
+  case scalar_kind_id: {
     if (concrete) {
       stringstream ss;
       ss << "The dynd type " << pattern << " is not concrete as required";

@@ -18,11 +18,11 @@ namespace nd {
       inline static std::enable_if<is_dynd_scalar<T>::value, bool> run(nd::array &a)
       {
         const ndt::type &tp = a.get_type();
-        if (a.is_immutable() && tp.get_type_id() == fixed_dim_type_id) {
+        if (a.is_immutable() && tp.get_id() == fixed_dim_id) {
           // It's immutable and "N * <something>"
           const ndt::type &et = tp.extended<ndt::fixed_dim_type>()->get_element_type();
           const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get()->metadata());
-          if (et.get_type_id() == type_id_of<T>::value && (md->stride == 0 || md->stride == sizeof(T))) {
+          if (et.get_id() == type_id_of<T>::value && (md->stride == 0 || md->stride == sizeof(T))) {
             // It also has the right type and is contiguous,
             // so no modification necessary.
             return true;
@@ -52,11 +52,11 @@ namespace nd {
       inline static bool run(nd::array &a)
       {
         const ndt::type &tp = a.get_type();
-        if (a.is_immutable() && tp.get_type_id() == fixed_dim_type_id) {
+        if (a.is_immutable() && tp.get_id() == fixed_dim_id) {
           // It's immutable and "N * <something>"
           const ndt::type &et = tp.extended<ndt::fixed_dim_type>()->get_element_type();
           const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get()->metadata());
-          if (et.get_type_id() == type_type_id && (md->stride == 0 || md->stride == sizeof(ndt::type))) {
+          if (et.get_id() == type_id && (md->stride == 0 || md->stride == sizeof(ndt::type))) {
             // It also has the right type and is contiguous,
             // so no modification necessary.
             return true;
@@ -67,7 +67,7 @@ namespace nd {
         if (tp.get_ndim() == 1) {
           // It's a 1D array
           const ndt::type &et = tp.get_type_at_dimension(NULL, 1).value_type();
-          if (et.get_type_id() == type_type_id) {
+          if (et.get_id() == type_id) {
             // It also has the same array type as requested
             nd::array tmp = nd::empty(a.get_dim_size(), ndt::make_type<ndt::type_type>());
             tmp.vals() = a;

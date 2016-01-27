@@ -22,7 +22,7 @@ namespace dynd {
 struct DYND_API array_preamble : memory_block_data {
   /**
    * type is overloaded - for builtin scalar types, it
-   * simply contains the type id. If (type&~builtin_type_id_mask)
+   * simply contains the type id. If (type&~builtin_id_mask)
    * is 0, its a builtin type.
    */
   ndt::type tp;

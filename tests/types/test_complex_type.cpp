@@ -157,7 +157,7 @@ TEST(ComplexDType, Create)
 
   // complex[float32]
   d = ndt::make_type<dynd::complex<float>>();
-  EXPECT_EQ(complex_float32_type_id, d.get_type_id());
+  EXPECT_EQ(complex_float32_id, d.get_id());
   EXPECT_EQ(complex_kind, d.get_kind());
   EXPECT_EQ(8u, d.get_data_size());
   EXPECT_EQ((size_t)alignof(float), d.get_data_alignment());
@@ -168,7 +168,7 @@ TEST(ComplexDType, Create)
 
   // complex[float64]
   d = ndt::make_type<dynd::complex<double>>();
-  EXPECT_EQ(complex_float64_type_id, d.get_type_id());
+  EXPECT_EQ(complex_float64_id, d.get_id());
   EXPECT_EQ(complex_kind, d.get_kind());
   EXPECT_EQ(16u, d.get_data_size());
   EXPECT_EQ((size_t)alignof(double), d.get_data_alignment());

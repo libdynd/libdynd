@@ -23,7 +23,7 @@ TEST(CharDType, Create)
 
   // Chars of various encodings
   d = ndt::make_type<ndt::char_type>();
-  EXPECT_EQ(char_type_id, d.get_type_id());
+  EXPECT_EQ(char_id, d.get_id());
   EXPECT_EQ(char_kind, d.get_kind());
   EXPECT_EQ(4u, d.get_data_size());
   EXPECT_EQ(4u, d.get_data_alignment());
@@ -35,7 +35,7 @@ TEST(CharDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::make_type<ndt::char_type>(string_encoding_ascii);
-  EXPECT_EQ(char_type_id, d.get_type_id());
+  EXPECT_EQ(char_id, d.get_id());
   EXPECT_EQ(char_kind, d.get_kind());
   EXPECT_EQ(1u, d.get_data_size());
   EXPECT_EQ(1u, d.get_data_alignment());
@@ -47,7 +47,7 @@ TEST(CharDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::make_type<ndt::char_type>(string_encoding_ucs_2);
-  EXPECT_EQ(char_type_id, d.get_type_id());
+  EXPECT_EQ(char_id, d.get_id());
   EXPECT_EQ(char_kind, d.get_kind());
   EXPECT_EQ(2u, d.get_data_size());
   EXPECT_EQ(2u, d.get_data_alignment());
@@ -59,7 +59,7 @@ TEST(CharDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::make_type<ndt::char_type>(string_encoding_utf_32);
-  EXPECT_EQ(char_type_id, d.get_type_id());
+  EXPECT_EQ(char_id, d.get_id());
   EXPECT_EQ(char_kind, d.get_kind());
   EXPECT_EQ(4u, d.get_data_size());
   EXPECT_EQ(4u, d.get_data_alignment());

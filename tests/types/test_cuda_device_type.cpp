@@ -26,7 +26,7 @@ using namespace dynd;
 TEST(CUDADeviceType, Simple)
 {
   ndt::type d = ndt::make_cuda_device(ndt::make_type<int32_t>());
-  EXPECT_EQ(cuda_device_type_id, d.get_type_id());
+  EXPECT_EQ(cuda_device_id, d.get_id());
   EXPECT_EQ(memory_kind, d.get_kind());
   EXPECT_EQ(ndt::make_type<int32_t>(), d.p("storage_type").as<ndt::type>());
   EXPECT_FALSE(d.is_expression());
@@ -47,7 +47,7 @@ TEST(CUDADeviceType, Simple)
 TEST(CUDADeviceType, BuiltIn)
 {
   ndt::type d = ndt::make_cuda_device(ndt::make_type<float>());
-  EXPECT_EQ(cuda_device_type_id, d.get_type_id());
+  EXPECT_EQ(cuda_device_id, d.get_id());
   EXPECT_EQ(memory_kind, d.get_kind());
   EXPECT_EQ(sizeof(float), d.get_data_size());
   // CUDA host type and CUDA device type have the same data alignment
@@ -60,7 +60,7 @@ TEST(CUDADeviceType, FixedDim)
 {
   ndt::type d =
       ndt::make_cuda_device(ndt::make_fixed_dimsym(ndt::make_type<float>()));
-  EXPECT_EQ(cuda_device_type_id, d.get_type_id());
+  EXPECT_EQ(cuda_device_id, d.get_id());
   EXPECT_EQ(memory_kind, d.get_kind());
   EXPECT_EQ(d.extended<base_memory_type>()->get_element_type().get_data_size(),
             d.get_data_size());

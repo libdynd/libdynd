@@ -11,7 +11,7 @@ using namespace dynd;
 #ifdef DYND_CUDA
 
 cuda_host_type::cuda_host_type(const ndt::type &element_tp, unsigned int cuda_host_flags)
-    : base_memory_type(cuda_host_type_id, element_tp, element_tp.get_data_size(),
+    : base_memory_type(cuda_host_id, element_tp, element_tp.get_data_size(),
                        get_cuda_device_data_alignment(element_tp), 0, element_tp.get_flags()),
       m_cuda_host_flags(cuda_host_flags)
 {
@@ -26,7 +26,7 @@ bool cuda_host_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != cuda_host_type_id) {
+  else if (rhs.get_id() != cuda_host_id) {
     return false;
   }
   else {

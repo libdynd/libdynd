@@ -14,13 +14,13 @@ using namespace dynd;
 
 DYND_API nd::callable nd::min::make()
 {
-  auto children = callable::make_all<min_kernel, arithmetic_type_ids>();
+  auto children = callable::make_all<min_kernel, arithmetic_ids>();
 
   return functional::reduction(
       functional::dispatch(ndt::callable_type::make(ndt::scalar_kind_type::make(), ndt::scalar_kind_type::make()),
                            [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
                                       const ndt::type *src_tp) mutable -> callable & {
-                             callable &child = children[src_tp[0].get_type_id()];
+                             callable &child = children[src_tp[0].get_id()];
                              if (child.is_null()) {
                                throw runtime_error("no suitable child found for nd::min");
                              }

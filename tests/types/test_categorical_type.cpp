@@ -27,7 +27,7 @@ TEST(CategoricalType, Create)
 
   ndt::type d;
   d = ndt::categorical_type::make(a);
-  EXPECT_EQ(categorical_type_id, d.get_type_id());
+  EXPECT_EQ(categorical_id, d.get_id());
   EXPECT_EQ(custom_kind, d.get_kind());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(1u, d.get_data_size());

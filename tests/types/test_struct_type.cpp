@@ -70,7 +70,7 @@ TEST(StructType, CreateOneField)
 
   // Struct with one field
   dt = ndt::struct_type::make({"x"}, {ndt::make_type<int32_t>()});
-  EXPECT_EQ(struct_type_id, dt.get_type_id());
+  EXPECT_EQ(struct_id, dt.get_id());
   EXPECT_EQ(struct_kind, dt.get_kind());
   EXPECT_EQ(0u, dt.get_data_size()); // No size
   EXPECT_EQ(4u, dt.extended()->get_default_data_size());
@@ -95,7 +95,7 @@ TEST(StructType, CreateTwoField)
 
   // Struct with two fields
   dt = ndt::struct_type::make({"a", "b"}, {ndt::make_type<int64_t>(), ndt::make_type<int32_t>()});
-  EXPECT_EQ(struct_type_id, dt.get_type_id());
+  EXPECT_EQ(struct_id, dt.get_id());
   EXPECT_EQ(struct_kind, dt.get_kind());
   EXPECT_EQ(0u, dt.get_data_size());
   EXPECT_EQ(sizeof(two_field_struct), dt.extended()->get_default_data_size());
@@ -126,7 +126,7 @@ TEST(StructType, CreateThreeField)
   ndt::type d2 = ndt::make_type<int32_t>();
   ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_8);
   dt = ndt::struct_type::make({"x", "y", "z"}, {d1, d2, d3});
-  EXPECT_EQ(struct_type_id, dt.get_type_id());
+  EXPECT_EQ(struct_id, dt.get_id());
   EXPECT_EQ(struct_kind, dt.get_kind());
   EXPECT_EQ(0u, dt.get_data_size());
   EXPECT_EQ(sizeof(three_field_struct), dt.extended()->get_default_data_size());

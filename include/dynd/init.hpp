@@ -117,8 +117,8 @@ namespace nd {
         : child(tp.extended<ndt::base_dim_type>()->get_element_type(),
                 metadata + tp.extended<ndt::base_dim_type>()->get_element_arrmeta_offset())
     {
-      switch (tp.get_type_id()) {
-      case fixed_dim_type_id:
+      switch (tp.get_id()) {
+      case fixed_dim_id:
         stride = reinterpret_cast<const size_stride_t *>(metadata)->stride;
         closure = [](const container_init *self, char *data, const ContainerType &values) {
           for (const value_type &value : values) {
@@ -147,13 +147,13 @@ namespace nd {
     container_init(const ndt::type &tp, const char *metadata)
         : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t))
     {
-      switch (tp.get_type_id()) {
-      case fixed_dim_type_id:
+      switch (tp.get_id()) {
+      case fixed_dim_id:
         closure = [](const container_init *self, char *data, const std::initializer_list<ValueType> &values) {
           self->child.contiguous(data, values.begin(), values.size());
         };
         break;
-      case var_dim_type_id:
+      case var_dim_id:
         memblock = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(metadata)->blockref;
         closure = [](const container_init *self, char *data, const std::initializer_list<ValueType> &values) {
           memory_block_data::api *allocator = self->memblock->get_api();

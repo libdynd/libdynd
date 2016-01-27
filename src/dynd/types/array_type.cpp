@@ -10,7 +10,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::array_type::array_type(const type &value_tp)
-    : base_expr_type(array_type_id, expr_kind, sizeof(nd::array), sizeof(nd::array),
+    : base_expr_type(array_id, expr_kind, sizeof(nd::array), sizeof(nd::array),
                      inherited_flags(value_tp.get_flags(), type_flag_construct | type_flag_destructor),
                      value_tp.get_arrmeta_size(), value_tp.get_ndim()),
       m_value_tp(value_tp)
@@ -27,7 +27,7 @@ bool ndt::array_type::operator==(const base_type &rhs) const
     return true;
   }
 
-  return rhs.get_type_id() == array_type_id;
+  return rhs.get_id() == array_id;
 }
 
 void ndt::array_type::data_construct(const char *DYND_UNUSED(arrmeta), char *data) const

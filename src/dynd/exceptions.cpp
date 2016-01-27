@@ -262,7 +262,7 @@ irange_out_of_bounds::irange_out_of_bounds(const irange& i, intptr_t dimension_s
 {
 }
 
-inline std::string invalid_type_id_message(int type_id)
+inline std::string invalid_id_message(int type_id)
 {
     stringstream ss;
 
@@ -271,10 +271,10 @@ inline std::string invalid_type_id_message(int type_id)
     return ss.str();
 }
 
-invalid_type_id::invalid_type_id(int type_id)
-    : type_error("invalid type id", invalid_type_id_message(type_id))
+invalid_id::invalid_id(int type_id)
+    : type_error("invalid type id", invalid_id_message(type_id))
 {
-    //cout << "throwing invalid_type_id\n";
+    //cout << "throwing invalid_id\n";
 }
 
 inline std::string string_decode_error_message(const char *begin, const char *end, string_encoding_t encoding)

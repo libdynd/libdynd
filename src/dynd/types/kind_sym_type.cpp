@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::kind_sym_type::kind_sym_type(type_kind_t kind)
-    : base_type(kind_sym_type_id, kind_kind, 0, 1, type_flag_symbolic, 0, 0, 0),
+    : base_type(kind_sym_id, kind_kind, 0, 1, type_flag_symbolic, 0, 0, 0),
       m_kind(kind)
 {
   if (kind < bool_kind || kind > tuple_kind) {
@@ -73,7 +73,7 @@ bool ndt::kind_sym_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   } else {
-    return rhs.get_type_id() == kind_sym_type_id &&
+    return rhs.get_id() == kind_sym_id &&
            m_kind == static_cast<const kind_sym_type &>(rhs).m_kind;
   }
 }

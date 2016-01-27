@@ -123,7 +123,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<bool_type_id> : base_kernel<parse_kernel<bool_type_id>, 2> {
+    struct parse_kernel<bool_id> : base_kernel<parse_kernel<bool_id>, 2> {
       void single(char *ret, char *const *args)
       {
         *reinterpret_cast<bool1 *>(ret) =
@@ -132,7 +132,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<string_type_id> : base_kernel<parse_kernel<string_type_id>, 2> {
+    struct parse_kernel<string_id> : base_kernel<parse_kernel<string_id>, 2> {
       void single(char *res, char *const *args)
       {
         const char *&rbegin = *reinterpret_cast<const char **>(args[0]);
@@ -213,7 +213,7 @@ namespace nd {
     */
 
     template <>
-    struct parse_kernel<option_type_id> : base_kernel<parse_kernel<option_type_id>> {
+    struct parse_kernel<option_id> : base_kernel<parse_kernel<option_id>> {
       intptr_t parse_offset;
 
       ~parse_kernel()
@@ -259,7 +259,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<struct_type_id> : base_kernel<parse_kernel<struct_type_id>, 2> {
+    struct parse_kernel<struct_id> : base_kernel<parse_kernel<struct_id>, 2> {
       ndt::type res_tp;
       size_t field_count;
       const size_t *data_offsets;
@@ -350,7 +350,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<fixed_dim_type_id> : base_kernel<parse_kernel<fixed_dim_type_id>> {
+    struct parse_kernel<fixed_dim_id> : base_kernel<parse_kernel<fixed_dim_id>> {
       ndt::type ret_tp;
       size_t size;
       intptr_t stride;
@@ -400,7 +400,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<var_dim_type_id> : base_kernel<parse_kernel<var_dim_type_id>> {
+    struct parse_kernel<var_dim_id> : base_kernel<parse_kernel<var_dim_id>> {
       typedef ndt::var_dim_type::data_type ret_type;
 
       ndt::type ret_tp;

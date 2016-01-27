@@ -455,7 +455,7 @@ TEST_P(FFT2D, Linear)
 
   EXPECT_ARRAY_NEAR(y0 + y1, y, rel_err_max<double>());
 
-  if (tp.get_type_id() != cuda_device_type_id) {
+  if (tp.get_id() != cuda_device_id) {
     axes.clear();
     axes.push_back(1);
 
@@ -489,7 +489,7 @@ TEST_P(FFT2D, Inverse)
   #endif
   */
 
-  if (tp.get_type_id() != cuda_device_type_id) {
+  if (tp.get_id() != cuda_device_id) {
 
     vector<intptr_t> axes;
     axes.push_back(0);

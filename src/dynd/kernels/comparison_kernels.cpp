@@ -16,7 +16,7 @@ void dynd::make_comparison_kernel(nd::kernel_builder *ckb, const ndt::type &src0
 {
   if (src0_dt.is_builtin()) {
     if (src1_dt.is_builtin()) {
-      make_builtin_type_comparison_kernel(ckb, src0_dt.get_type_id(), src1_dt.get_type_id(), comptype);
+      make_builtin_type_comparison_kernel(ckb, src0_dt.get_id(), src1_dt.get_id(), comptype);
       return;
     }
     else {
@@ -30,7 +30,7 @@ void dynd::make_comparison_kernel(nd::kernel_builder *ckb, const ndt::type &src0
   }
 }
 
-static kernel_single_t compare_kernel_table[builtin_type_id_count - 2][builtin_type_id_count - 2][7] = {
+static kernel_single_t compare_kernel_table[builtin_id_count - 2][builtin_id_count - 2][7] = {
 #define INNER_LEVEL(src0_type, src1_type)                                                                              \
   {                                                                                                                    \
     &single_comparison_builtin<src0_type, src1_type>::sorting_less,                                                    \
@@ -60,17 +60,17 @@ static kernel_single_t compare_kernel_table[builtin_type_id_count - 2][builtin_t
 #undef INNER_LEVEL
 };
 
-void dynd::make_builtin_type_comparison_kernel(nd::kernel_builder *ckb, type_id_t src0_type_id, type_id_t src1_type_id,
+void dynd::make_builtin_type_comparison_kernel(nd::kernel_builder *ckb, type_id_t src0_id, type_id_t src1_id,
                                                comparison_type_t comptype)
 {
   // Do a table lookup for the built-in range of dynd types
-  if (src0_type_id >= bool_type_id && src0_type_id <= complex_float64_type_id && src1_type_id >= bool_type_id &&
-      src1_type_id <= complex_float64_type_id && comptype >= 0 && comptype <= comparison_type_greater) {
+  if (src0_id >= bool_id && src0_id <= complex_float64_id && src1_id >= bool_id &&
+      src1_id <= complex_float64_id && comptype >= 0 && comptype <= comparison_type_greater) {
     // No need to reserve more space, the space for a leaf is already there
     ckb->emplace_back<ckernel_prefix>(reinterpret_cast<void *>(
-        compare_kernel_table[src0_type_id - bool_type_id][src1_type_id - bool_type_id][comptype]));
+        compare_kernel_table[src0_id - bool_id][src1_id - bool_id][comptype]));
   }
   else {
-    throw not_comparable_error(ndt::type(src0_type_id), ndt::type(src1_type_id), comptype);
+    throw not_comparable_error(ndt::type(src0_id), ndt::type(src1_id), comptype);
   }
 }

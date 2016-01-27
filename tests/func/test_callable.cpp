@@ -261,7 +261,7 @@ TEST(Callable, AssignmentAsExpr)
 TEST(Callable, LLVM)
 {
   nd::callable f = nd::functional::apply([](int x, int y) { return x + y; });
-  // nd::callable f = nd::add::children[int32_type_id][int32_type_id];
+  // nd::callable f = nd::add::children[int32_id][int32_id];
 
   std::cout << f->ir << std::endl;
 

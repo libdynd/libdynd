@@ -342,13 +342,13 @@ namespace ndt {
      * inspired by the approach in NumPy, and the intention is
      * to have the default
      */
-    type_id_t get_type_id() const
+    type_id_t get_id() const
     {
       if (is_builtin()) {
         return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr));
       }
       else {
-        return m_ptr->get_type_id();
+        return m_ptr->get_id();
       }
     }
 
@@ -356,9 +356,9 @@ namespace ndt {
      * For when it is known that the type is a builtin type,
      * to simply retrieve that type id.
      *
-     * WARNING: Normally just use get_type_id().
+     * WARNING: Normally just use get_id().
      */
-    type_id_t unchecked_get_builtin_type_id() const
+    type_id_t unchecked_get_builtin_id() const
     {
       return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr));
     }
@@ -366,7 +366,7 @@ namespace ndt {
     /** The 'kind' of the type (int, uint, float, etc) */
     type_kind_t get_kind() const { return get_base_type_kind(m_ptr); }
 
-    type_id_t get_base_type_id() const;
+    type_id_t get_base_id() const;
 
     /** The alignment of the type */
     size_t get_data_alignment() const { return get_base_type_alignment(m_ptr); }
@@ -455,7 +455,7 @@ namespace ndt {
         return get_kind() == void_kind;
       }
 
-      return m_ptr->get_type_id() == cuda_device_type_id;
+      return m_ptr->get_id() == cuda_device_id;
     }
 
 #endif
@@ -1073,7 +1073,7 @@ namespace ndt {
 
     static const bool is_same_layout = false;
 
-    static type equivalent() { return type(string_type_id); }
+    static type equivalent() { return type(string_id); }
   };
 
   template <size_t N>
@@ -1082,7 +1082,7 @@ namespace ndt {
 
     static const bool is_same_layout = false;
 
-    static type equivalent() { return type(string_type_id); }
+    static type equivalent() { return type(string_id); }
   };
 
   template <size_t N>
@@ -1091,7 +1091,7 @@ namespace ndt {
 
     static const bool is_same_layout = false;
 
-    static type equivalent() { return type(string_type_id); }
+    static type equivalent() { return type(string_id); }
   };
 
   template <>
@@ -1100,7 +1100,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(type_type_id); }
+    static type equivalent() { return type(type_id); }
   };
 
   template <typename T>

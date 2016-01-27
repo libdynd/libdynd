@@ -18,7 +18,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::string_type::string_type()
-    : base_string_type(string_type_id, sizeof(string), alignof(string), type_flag_zeroinit | type_flag_destructor, 0)
+    : base_string_type(string_id, sizeof(string), alignof(string), type_flag_zeroinit | type_flag_destructor, 0)
 {
 }
 
@@ -117,7 +117,7 @@ bool ndt::string_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != string_type_id) {
+  else if (rhs.get_id() != string_id) {
     return false;
   }
   else {

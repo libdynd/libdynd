@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::categorical_kind_type::categorical_kind_type()
-    : base_type(categorical_type_id, kind_kind, 0, 0, type_flag_symbolic, 0, 0,
+    : base_type(categorical_id, kind_kind, 0, 0, type_flag_symbolic, 0, 0,
                 0)
 {
 }
@@ -68,7 +68,7 @@ bool ndt::categorical_kind_type::operator==(const base_type &rhs) const
     return true;
   } else {
     return rhs.get_kind() == kind_kind &&
-           rhs.get_type_id() == categorical_type_id;
+           rhs.get_id() == categorical_id;
   }
 }
 
@@ -136,5 +136,5 @@ bool ndt::categorical_kind_type::match(
     const char *DYND_UNUSED(candidate_arrmeta),
     std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
 {
-  return candidate_tp.get_type_id() == categorical_type_id;
+  return candidate_tp.get_id() == categorical_id;
 }

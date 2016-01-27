@@ -111,7 +111,7 @@ struct take_by_pointer_virtual_ck : nd::base_kernel<take_by_pointer_virtual_ck> 
     */
 
     ndt::type idx_el_tp = src_tp[1].get_dtype();
-    if (idx_el_tp.get_type_id() != (type_id_t)type_id_of<intptr_t>::value) {
+    if (idx_el_tp.get_id() != (type_id_t)type_id_of<intptr_t>::value) {
       stringstream ss;
       ss << "take: unsupported type for the index " << idx_el_tp << ", need intptr";
       throw invalid_argument(ss.str());

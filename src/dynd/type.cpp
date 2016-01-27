@@ -49,7 +49,7 @@ namespace ndt {
       std::string name;
       type_make_t func;
     } data[101];
-    static size_t size = dim_fragment_type_id + 1;
+    static size_t size = dim_fragment_id + 1;
 
   } // namespace dynd::ndt::registry
 } // namespace dynd::ndt
@@ -240,7 +240,7 @@ const ndt::type &ndt::type::storage_type() const
   if (is_builtin() || m_ptr->get_kind() != expr_kind) {
     return *this;
   }
-  else if (get_type_id() == adapt_type_id) {
+  else if (get_id() == adapt_id) {
     return extended<ndt::adapt_type>()->get_storage_type();
   }
   else {
@@ -259,7 +259,7 @@ const ndt::type &ndt::type::value_type() const
   if (is_builtin() || m_ptr->get_kind() != expr_kind) {
     return *this;
   }
-  else if (get_type_id() == adapt_type_id) {
+  else if (get_id() == adapt_id) {
     return extended<ndt::adapt_type>()->get_value_type();
   }
   else {
@@ -356,9 +356,9 @@ namespace {
 const std::map<std::string, nd::callable> &complex32_array_properties()
 {
   static const std::map<std::string, nd::callable> complex_array_properties{
-      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float32_type_id>>())},
-      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<float32_type_id>>())},
-      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<float32_type_id>>())}};
+      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float32_id>>())},
+      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<float32_id>>())},
+      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<float32_id>>())}};
 
   return complex_array_properties;
 }
@@ -366,9 +366,9 @@ const std::map<std::string, nd::callable> &complex32_array_properties()
 const std::map<std::string, nd::callable> &complex64_array_properties()
 {
   static const std::map<std::string, nd::callable> complex_array_properties{
-      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float64_type_id>>())},
-      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<float64_type_id>>())},
-      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<float64_type_id>>())}};
+      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float64_id>>())},
+      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<float64_id>>())},
+      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<float64_id>>())}};
 
   return complex_array_properties;
 }
@@ -380,10 +380,10 @@ std::map<std::string, nd::callable> ndt::type::get_array_properties() const
   std::map<std::string, nd::callable> array_properties;
   if (is_builtin()) {
     switch (static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr))) {
-    case complex_float32_type_id:
+    case complex_float32_id:
       array_properties = complex32_array_properties();
       break;
-    case complex_float64_type_id:
+    case complex_float64_id:
       array_properties = complex64_array_properties();
       break;
     default:
@@ -443,28 +443,28 @@ bool ndt::type::data_layout_compatible_with(const ndt::type &rhs) const
     return storage_type().data_layout_compatible_with(rhs.storage_type());
   }
   // Rules for the rest of the types
-  switch (get_type_id()) {
-  case string_type_id:
-  case bytes_type_id:
-    switch (rhs.get_type_id()) {
-    case string_type_id:
-    case bytes_type_id:
+  switch (get_id()) {
+  case string_id:
+  case bytes_id:
+    switch (rhs.get_id()) {
+    case string_id:
+    case bytes_id:
       // All of string, bytes, json are compatible
       return true;
     default:
       return false;
     }
-  case fixed_dim_type_id:
-    if (rhs.get_type_id() == fixed_dim_type_id) {
+  case fixed_dim_id:
+    if (rhs.get_id() == fixed_dim_id) {
       return extended<fixed_dim_type>()->get_fixed_dim_size() == rhs.extended<fixed_dim_type>()->get_fixed_dim_size() &&
              extended<fixed_dim_type>()->get_element_type().data_layout_compatible_with(
                  rhs.extended<fixed_dim_type>()->get_element_type());
     }
     break;
-  case var_dim_type_id:
+  case var_dim_id:
     // For var dimensions, it's data layout
     // compatible if the element is
-    if (rhs.get_type_id() == var_dim_type_id) {
+    if (rhs.get_id() == var_dim_id) {
       const base_dim_type *budd = static_cast<const base_dim_type *>(extended());
       const base_dim_type *rhs_budd = rhs.extended<base_dim_type>();
       return budd->get_element_type().data_layout_compatible_with(rhs_budd->get_element_type());
@@ -479,99 +479,99 @@ bool ndt::type::data_layout_compatible_with(const ndt::type &rhs) const
 std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
 {
   switch (tid) {
-  case uninitialized_type_id:
+  case uninitialized_id:
     return (o << "uninitialized");
-  case bool_type_id:
+  case bool_id:
     return (o << "bool");
-  case int8_type_id:
+  case int8_id:
     return (o << "int8");
-  case int16_type_id:
+  case int16_id:
     return (o << "int16");
-  case int32_type_id:
+  case int32_id:
     return (o << "int32");
-  case int64_type_id:
+  case int64_id:
     return (o << "int64");
-  case int128_type_id:
+  case int128_id:
     return (o << "int128");
-  case uint8_type_id:
+  case uint8_id:
     return (o << "uint8");
-  case uint16_type_id:
+  case uint16_id:
     return (o << "uint16");
-  case uint32_type_id:
+  case uint32_id:
     return (o << "uint32");
-  case uint64_type_id:
+  case uint64_id:
     return (o << "uint64");
-  case uint128_type_id:
+  case uint128_id:
     return (o << "uint128");
-  case float16_type_id:
+  case float16_id:
     return (o << "float16");
-  case float32_type_id:
+  case float32_id:
     return (o << "float32");
-  case float64_type_id:
+  case float64_id:
     return (o << "float64");
-  case float128_type_id:
+  case float128_id:
     return (o << "float128");
-  case complex_float32_type_id:
+  case complex_float32_id:
     return (o << "complex_float32");
-  case complex_float64_type_id:
+  case complex_float64_id:
     return (o << "complex_float64");
-  case void_type_id:
+  case void_id:
     return (o << "void");
-  case pointer_type_id:
+  case pointer_id:
     return (o << "pointer");
-  case bytes_type_id:
+  case bytes_id:
     return (o << "bytes");
-  case fixed_bytes_type_id:
+  case fixed_bytes_id:
     return (o << "fixed_bytes");
-  case string_type_id:
+  case string_id:
     return (o << "string");
-  case fixed_string_type_id:
+  case fixed_string_id:
     return (o << "fixed_string");
-  case categorical_type_id:
+  case categorical_id:
     return (o << "categorical");
-  case date_type_id:
+  case date_id:
     return (o << "date");
-  case time_type_id:
+  case time_id:
     return (o << "time");
-  case datetime_type_id:
+  case datetime_id:
     return (o << "datetime");
-  case busdate_type_id:
+  case busdate_id:
     return (o << "busdate");
-  case fixed_dim_type_id:
+  case fixed_dim_id:
     return (o << "fixed_dim");
-  case var_dim_type_id:
+  case var_dim_id:
     return (o << "var_dim");
-  case struct_type_id:
+  case struct_id:
     return (o << "struct");
-  case tuple_type_id:
+  case tuple_id:
     return (o << "tuple");
-  case c_contiguous_type_id:
+  case c_contiguous_id:
     return (o << "C");
-  case option_type_id:
+  case option_id:
     return (o << "option");
-  case adapt_type_id:
+  case adapt_id:
     return o << "adapt";
-  case kind_sym_type_id:
+  case kind_sym_id:
     return (o << "kind_sym");
-  case int_sym_type_id:
+  case int_sym_id:
     return (o << "int_sym");
-  case convert_type_id:
+  case convert_id:
     return (o << "convert");
-  case view_type_id:
+  case view_id:
     return (o << "view");
-  case expr_type_id:
+  case expr_id:
     return (o << "expr");
-  case type_type_id:
+  case type_id:
     return (o << "type");
-  case callable_type_id:
+  case callable_id:
     return (o << "callable");
-  case typevar_type_id:
+  case typevar_id:
     return (o << "typevar");
-  case typevar_constructed_type_id:
+  case typevar_constructed_id:
     return (o << "typevar_constructed");
-  case typevar_dim_type_id:
+  case typevar_dim_id:
     return (o << "typevar_dim");
-  case ellipsis_dim_type_id:
+  case ellipsis_dim_id:
     return (o << "ellipsis_dim");
   default:
     return o << ndt::registry::data[tid].name;
@@ -580,62 +580,62 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
 
 std::ostream &dynd::ndt::operator<<(std::ostream &o, const ndt::type &rhs)
 {
-  switch (rhs.get_type_id()) {
-  case uninitialized_type_id:
+  switch (rhs.get_id()) {
+  case uninitialized_id:
     o << "uninitialized";
     break;
-  case bool_type_id:
+  case bool_id:
     o << "bool";
     break;
-  case int8_type_id:
+  case int8_id:
     o << "int8";
     break;
-  case int16_type_id:
+  case int16_id:
     o << "int16";
     break;
-  case int32_type_id:
+  case int32_id:
     o << "int32";
     break;
-  case int64_type_id:
+  case int64_id:
     o << "int64";
     break;
-  case int128_type_id:
+  case int128_id:
     o << "int128";
     break;
-  case uint8_type_id:
+  case uint8_id:
     o << "uint8";
     break;
-  case uint16_type_id:
+  case uint16_id:
     o << "uint16";
     break;
-  case uint32_type_id:
+  case uint32_id:
     o << "uint32";
     break;
-  case uint64_type_id:
+  case uint64_id:
     o << "uint64";
     break;
-  case uint128_type_id:
+  case uint128_id:
     o << "uint128";
     break;
-  case float16_type_id:
+  case float16_id:
     o << "float16";
     break;
-  case float32_type_id:
+  case float32_id:
     o << "float32";
     break;
-  case float64_type_id:
+  case float64_id:
     o << "float64";
     break;
-  case float128_type_id:
+  case float128_id:
     o << "float128";
     break;
-  case complex_float32_type_id:
+  case complex_float32_id:
     o << "complex[float32]";
     break;
-  case complex_float64_type_id:
+  case complex_float64_id:
     o << "complex[float64]";
     break;
-  case void_type_id:
+  case void_id:
     o << "void";
     break;
   default:
@@ -938,58 +938,58 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp, const 
 void dynd::print_builtin_scalar(type_id_t type_id, std::ostream &o, const char *data)
 {
   switch (type_id) {
-  case bool_type_id:
+  case bool_id:
     o << (*data ? "True" : "False");
     break;
-  case int8_type_id:
+  case int8_id:
     print_as<int8, int32>(o, data);
     break;
-  case int16_type_id:
+  case int16_id:
     print_as<int16, int32>(o, data);
     break;
-  case int32_type_id:
+  case int32_id:
     print_as<int32, int32>(o, data);
     break;
-  case int64_type_id:
+  case int64_id:
     print_as<int64, int64>(o, data);
     break;
-  case int128_type_id:
+  case int128_id:
     print_as<int128, int128>(o, data);
     break;
-  case uint8_type_id:
+  case uint8_id:
     print_as<uint8, uint32>(o, data);
     break;
-  case uint16_type_id:
+  case uint16_id:
     print_as<uint16, uint32>(o, data);
     break;
-  case uint32_type_id:
+  case uint32_id:
     print_as<uint32, uint32>(o, data);
     break;
-  case uint64_type_id:
+  case uint64_id:
     print_as<uint64, uint64>(o, data);
     break;
-  case uint128_type_id:
+  case uint128_id:
     print_as<uint128, uint128>(o, data);
     break;
-  case float16_type_id:
+  case float16_id:
     print_as<float16, float32>(o, data);
     break;
-  case float32_type_id:
+  case float32_id:
     print_as<float32, float32>(o, data);
     break;
-  case float64_type_id:
+  case float64_id:
     print_as<float64, float64>(o, data);
     break;
-  case float128_type_id:
+  case float128_id:
     print_as<float128, float128>(o, data);
     break;
-  case complex_float32_type_id:
+  case complex_float32_id:
     print_as<complex<float>, complex<float>>(o, data);
     break;
-  case complex_float64_type_id:
+  case complex_float64_id:
     print_as<complex<double>, complex<double>>(o, data);
     break;
-  case void_type_id:
+  case void_id:
     o << "(void)";
     break;
   default:
@@ -1002,14 +1002,14 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream &o, const char *
 void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *data) const
 {
   if (is_builtin()) {
-    print_builtin_scalar(get_type_id(), o, data);
+    print_builtin_scalar(get_id(), o, data);
   }
   else {
     extended()->print_data(o, arrmeta, data);
   }
 }
 
-type_id_t ndt::type::get_base_type_id() const { return type_registry[get_type_id()].bases[0]; }
+type_id_t ndt::type::get_base_id() const { return type_registry[get_id()].bases[0]; }
 
 std::map<std::array<type_id_t, 2>, ndt::common_type::child_type> ndt::common_type::children;
 
@@ -1028,22 +1028,22 @@ struct ndt::common_type::init {
 
 ndt::common_type::common_type()
 {
-  typedef type_id_sequence<int32_type_id, float64_type_id, int64_type_id, float32_type_id> I;
+  typedef type_id_sequence<int32_id, float64_id, int64_id, float32_id> I;
   for_each<typename outer<I, I>::type>(init());
 
-  typedef type_id_sequence<int32_type_id, float64_type_id, int64_type_id, float32_type_id, fixed_dim_type_id> J;
+  typedef type_id_sequence<int32_id, float64_id, int64_id, float32_id, fixed_dim_id> J;
 
   for (type_id_t tp_id : i2a<J>()) {
-    children[{{option_type_id, tp_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
+    children[{{option_id, tp_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
       return make_type<option_type>(ndt::common_type(tp0.extended<option_type>()->get_value_type(), tp1));
     };
-    children[{{tp_id, option_type_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
+    children[{{tp_id, option_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
       return make_type<option_type>(ndt::common_type(tp0, tp1.extended<option_type>()->get_value_type()));
     };
-    children[{{any_kind_type_id, tp_id}}] = [](const ndt::type &DYND_UNUSED(tp0), const ndt::type &tp1) { return tp1; };
-    children[{{tp_id, any_kind_type_id}}] = [](const ndt::type &tp0, const ndt::type &DYND_UNUSED(tp1)) { return tp0; };
+    children[{{any_kind_id, tp_id}}] = [](const ndt::type &DYND_UNUSED(tp0), const ndt::type &tp1) { return tp1; };
+    children[{{tp_id, any_kind_id}}] = [](const ndt::type &tp0, const ndt::type &DYND_UNUSED(tp1)) { return tp0; };
   }
-  children[{{fixed_dim_type_id, fixed_dim_type_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
+  children[{{fixed_dim_id, fixed_dim_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
     if (tp0.extended<fixed_dim_type>()->get_fixed_dim_size() != tp1.extended<fixed_dim_type>()->get_fixed_dim_size()) {
       return ndt::var_dim_type::make(ndt::common_type(tp0.extended<fixed_dim_type>()->get_element_type(),
                                                       tp1.extended<fixed_dim_type>()->get_element_type()));
@@ -1052,16 +1052,16 @@ ndt::common_type::common_type()
                                ndt::common_type(tp0.extended<fixed_dim_type>()->get_element_type(),
                                                 tp1.extended<fixed_dim_type>()->get_element_type()));
   };
-  children[{{fixed_dim_type_id, var_dim_type_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
+  children[{{fixed_dim_id, var_dim_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
     return ndt::var_dim_type::make(ndt::common_type(tp0.extended<fixed_dim_type>()->get_element_type(),
                                                     tp1.extended<fixed_dim_type>()->get_element_type()));
   };
-  children[{{var_dim_type_id, fixed_dim_type_id}}] = children[{{fixed_dim_type_id, var_dim_type_id}}];
+  children[{{var_dim_id, fixed_dim_id}}] = children[{{fixed_dim_id, var_dim_id}}];
 }
 
 ndt::type ndt::common_type::operator()(const ndt::type &tp0, const ndt::type &tp1) const
 {
-  child_type child = children[{{tp0.get_type_id(), tp1.get_type_id()}}];
+  child_type child = children[{{tp0.get_id(), tp1.get_id()}}];
   if (child == NULL) {
     return type();
   }

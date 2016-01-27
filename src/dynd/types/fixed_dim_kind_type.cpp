@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::fixed_dim_kind_type::fixed_dim_kind_type(const type &element_tp)
-    : base_dim_type(fixed_dim_type_id, kind_kind, element_tp, 0, element_tp.get_data_alignment(), sizeof(size_stride_t),
+    : base_dim_type(fixed_dim_id, kind_kind, element_tp, 0, element_tp.get_data_alignment(), sizeof(size_stride_t),
                     type_flag_symbolic, true)
 {
   // Propagate the inherited flags from the element
@@ -116,7 +116,7 @@ bool ndt::fixed_dim_kind_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != fixed_dim_type_id) {
+  else if (rhs.get_id() != fixed_dim_id) {
     return false;
   }
   else if (rhs.get_kind() != kind_kind) {
@@ -186,8 +186,8 @@ void ndt::fixed_dim_kind_type::data_destruct_strided(const char *DYND_UNUSED(arr
 bool ndt::fixed_dim_kind_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                                      std::map<std::string, type> &tp_vars) const
 {
-  switch (candidate_tp.get_type_id()) {
-  case fixed_dim_type_id:
+  switch (candidate_tp.get_id()) {
+  case fixed_dim_id:
     if (candidate_tp.get_kind() == kind_kind) {
       return m_element_tp.match(arrmeta, candidate_tp.extended<fixed_dim_kind_type>()->get_element_type(),
                                 candidate_arrmeta, tp_vars);
@@ -196,7 +196,7 @@ bool ndt::fixed_dim_kind_type::match(const char *arrmeta, const type &candidate_
       return m_element_tp.match(arrmeta, candidate_tp.extended<fixed_dim_type>()->get_element_type(),
                                 DYND_INC_IF_NOT_NULL(candidate_arrmeta, sizeof(fixed_dim_type_arrmeta)), tp_vars);
     }
-  case any_kind_type_id:
+  case any_kind_id:
     return true;
   default:
     return false;
@@ -246,7 +246,7 @@ struct static_strided_dims {
   ndt::fixed_dim_kind_type bt17;
   ndt::fixed_dim_kind_type bt18;
 
-  ndt::type static_builtins_instance[builtin_type_id_count];
+  ndt::type static_builtins_instance[builtin_id_count];
 
   static_strided_dims()
       : bt1(ndt::type((type_id_t)1)), bt2(ndt::type((type_id_t)2)), bt3(ndt::type((type_id_t)3)),
@@ -287,7 +287,7 @@ ndt::type ndt::make_fixed_dim_kind(const type &element_tp)
   static static_strided_dims ssd;
 
   if (element_tp.is_builtin()) {
-    return ssd.static_builtins_instance[element_tp.get_type_id()];
+    return ssd.static_builtins_instance[element_tp.get_id()];
   }
   else {
     return type(new fixed_dim_kind_type(element_tp), false);

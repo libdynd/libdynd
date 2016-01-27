@@ -242,7 +242,7 @@ namespace nd {
           value = kwds_values[i].second;
 
           ndt::type expected_tp = self_tp->get_kwd_type(j);
-          if (expected_tp.get_type_id() == option_type_id) {
+          if (expected_tp.get_id() == option_id) {
             expected_tp = expected_tp.p("value_type").as<ndt::type>();
           }
 
