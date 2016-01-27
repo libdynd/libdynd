@@ -71,7 +71,7 @@ TEST(StructType, CreateOneField)
   // Struct with one field
   dt = ndt::struct_type::make({"x"}, {ndt::make_type<int32_t>()});
   EXPECT_EQ(struct_id, dt.get_id());
-  EXPECT_EQ(struct_kind, dt.get_kind());
+  EXPECT_EQ(tuple_id, dt.get_base_id());
   EXPECT_EQ(0u, dt.get_data_size()); // No size
   EXPECT_EQ(4u, dt.extended()->get_default_data_size());
   EXPECT_EQ(4u, dt.get_data_alignment());
@@ -187,9 +187,9 @@ TEST(StructType, CanonicalType)
                                                  nd::byteswap::get(), nd::byteswap::get());
   ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_32);
   dt = ndt::struct_type::make({"x", "y", "z"}, {d1, d2, d3});
-  EXPECT_EQ(ndt::struct_type::make({"x", "y", "z"},
-                                   {ndt::make_type<dynd::complex<double>>(), ndt::make_type<int32_t>(), d3}),
-            dt.get_canonical_type());
+  EXPECT_EQ(
+      ndt::struct_type::make({"x", "y", "z"}, {ndt::make_type<dynd::complex<double>>(), ndt::make_type<int32_t>(), d3}),
+      dt.get_canonical_type());
 }
 
 TEST(StructType, IsExpression)
@@ -253,8 +253,8 @@ TEST(StructType, DifferentTypeAssign)
   a(1, 1).vals() = 7.25;
   a(1, 2).vals() = 8;
 
-  ndt::type dt2 = ndt::struct_type::make(
-      {"y", "z", "x"}, {ndt::make_type<float>(), ndt::make_type<int>(), ndt::make_type<uint8_t>()});
+  ndt::type dt2 = ndt::struct_type::make({"y", "z", "x"},
+                                         {ndt::make_type<float>(), ndt::make_type<int>(), ndt::make_type<uint8_t>()});
   nd::array b = nd::empty(2, dt2);
   b.assign(a);
   EXPECT_EQ(3, b(0, 2).as<int>());

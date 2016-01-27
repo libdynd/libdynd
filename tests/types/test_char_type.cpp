@@ -24,7 +24,7 @@ TEST(CharDType, Create)
   // Chars of various encodings
   d = ndt::make_type<ndt::char_type>();
   EXPECT_EQ(char_id, d.get_id());
-  EXPECT_EQ(char_kind, d.get_kind());
+  EXPECT_EQ(string_kind_id, d.get_base_id());
   EXPECT_EQ(4u, d.get_data_size());
   EXPECT_EQ(4u, d.get_data_alignment());
   EXPECT_FALSE(d.is_expression());

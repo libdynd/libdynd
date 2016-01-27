@@ -17,7 +17,7 @@ TEST(FixedBytesKindType, Construction)
 {
   ndt::type tp = ndt::fixed_bytes_kind_type::make();
   EXPECT_EQ(fixed_bytes_id, tp.get_id());
-  EXPECT_EQ(kind_kind, tp.get_kind());
+  EXPECT_EQ(bytes_kind_id, tp.get_base_id());
   EXPECT_EQ(0u, tp.get_data_alignment());
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_FALSE(tp.is_expression());
