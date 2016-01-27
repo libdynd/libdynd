@@ -71,7 +71,7 @@ namespace nd {
   };
 
   template <>
-  struct index_kernel<fixed_dim_type_id> : base_index_kernel<index_kernel<fixed_dim_type_id>> {
+  struct index_kernel<fixed_dim_id> : base_index_kernel<index_kernel<fixed_dim_id>> {
     intptr_t index;
     intptr_t stride;
 

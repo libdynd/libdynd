@@ -63,9 +63,9 @@ intrusive_ptr<memory_block_data> dynd::make_zeroinit_memory_block(const ndt::typ
 {
   // This is a temporary hack until the new bytes and string types are working
   size_t data_size;
-  switch (element_tp.get_type_id()) {
-  case bytes_type_id:
-  case string_type_id:
+  switch (element_tp.get_id()) {
+  case bytes_id:
+  case string_id:
     data_size = 1;
     break;
   default:

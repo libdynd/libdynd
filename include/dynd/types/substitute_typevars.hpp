@@ -28,7 +28,7 @@ namespace ndt {
   {
     // This check for whether ``pattern`` is symbolic is put here in
     // the inline function to avoid the call overhead in this case
-    if (!pattern.is_symbolic() && pattern.get_type_id() != callable_type_id) {
+    if (!pattern.is_symbolic() && pattern.get_id() != callable_id) {
       return pattern;
     }
     else {

@@ -250,7 +250,7 @@ TEST(JSON, DiscoverFloat64)
   EXPECT_EQ(ndt::make_type<float64>(), ndt::json::discover("3.14"));
 }
 
-TEST(JSON, DiscoverString) { EXPECT_EQ(ndt::type(string_type_id), ndt::json::discover("\"Hello, world!\"")); }
+TEST(JSON, DiscoverString) { EXPECT_EQ(ndt::type(string_id), ndt::json::discover("\"Hello, world!\"")); }
 
 TEST(JSON, DiscoverOption) { EXPECT_EQ(ndt::type("?Any"), ndt::json::discover("null")); }
 

@@ -60,7 +60,7 @@ ndt::tuple_type::tuple_type(type_id_t type_id, const nd::array &field_types, fla
 }
 
 ndt::tuple_type::tuple_type(const nd::array &field_types, bool variadic)
-    : tuple_type(tuple_type_id, field_types, type_flag_none, true, variadic)
+    : tuple_type(tuple_id, field_types, type_flag_none, true, variadic)
 {
 }
 
@@ -318,7 +318,7 @@ bool ndt::tuple_type::is_lossless_assignment(const type &dst_tp, const type &src
     if (src_tp.extended() == this) {
       return true;
     }
-    else if (src_tp.get_type_id() == tuple_type_id) {
+    else if (src_tp.get_id() == tuple_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -348,7 +348,7 @@ bool ndt::tuple_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != tuple_type_id) {
+  else if (rhs.get_id() != tuple_id) {
     return false;
   }
   else {

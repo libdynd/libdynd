@@ -13,7 +13,7 @@ using namespace dynd;
 #ifdef DYND_CUDA
 
 cuda_device_type::cuda_device_type(const ndt::type &element_tp)
-    : base_memory_type(cuda_device_type_id, element_tp, element_tp.get_data_size(),
+    : base_memory_type(cuda_device_id, element_tp, element_tp.get_data_size(),
                        get_cuda_device_data_alignment(element_tp), 0,
                        element_tp.get_flags() | type_flag_not_host_readable)
 {
@@ -26,7 +26,7 @@ void cuda_device_type::print_data(std::ostream &o, const char *arrmeta, const ch
   nd::array a = nd::empty(m_element_tp);
 
   if (m_element_tp.is_builtin()) {
-    print_builtin_scalar(m_element_tp.get_type_id(), o, a.get_readonly_originptr());
+    print_builtin_scalar(m_element_tp.get_id(), o, a.get_readonly_originptr());
   }
   else {
     m_element_tp.extended()->print_data(o, a.get_arrmeta(), a.get_readonly_originptr());
@@ -40,7 +40,7 @@ bool cuda_device_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != cuda_device_type_id) {
+  else if (rhs.get_id() != cuda_device_id) {
     return false;
   }
   else {

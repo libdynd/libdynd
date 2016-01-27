@@ -72,7 +72,7 @@ struct time_get_microsecond_kernel : nd::base_kernel<time_get_microsecond_kernel
 }
 
 ndt::time_type::time_type(datetime_tz_t timezone)
-    : base_type(time_type_id, datetime_kind, 8, alignof(int64_t), type_flag_none, 0, 0, 0), m_timezone(timezone)
+    : base_type(time_id, datetime_kind, 8, alignof(int64_t), type_flag_none, 0, 0, 0), m_timezone(timezone)
 {
 }
 
@@ -154,7 +154,7 @@ bool ndt::time_type::is_lossless_assignment(const type &dst_tp, const type &src_
     if (src_tp.extended() == this) {
       return true;
     }
-    else if (src_tp.get_type_id() == time_type_id) {
+    else if (src_tp.get_id() == time_id) {
       // There is only one possibility for the time type (TODO: timezones!)
       return true;
     }
@@ -172,7 +172,7 @@ bool ndt::time_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != time_type_id) {
+  else if (rhs.get_id() != time_id) {
     return false;
   }
   else {
@@ -188,7 +188,7 @@ void ndt::time_type::make_comparison_kernel(nd::kernel_builder *ckb, const type 
 {
   if (this == src0_tp.extended()) {
     if (*this == *src1_tp.extended()) {
-      make_builtin_type_comparison_kernel(ckb, int64_type_id, int64_type_id, comptype);
+      make_builtin_type_comparison_kernel(ckb, int64_id, int64_id, comptype);
       return;
     }
     else if (!src1_tp.is_builtin()) {

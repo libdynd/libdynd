@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::fixed_dim_type::fixed_dim_type(intptr_t dim_size, const type &element_tp)
-    : base_dim_type(fixed_dim_type_id, element_tp, 0, element_tp.get_data_alignment(), sizeof(fixed_dim_type_arrmeta),
+    : base_dim_type(fixed_dim_id, element_tp, 0, element_tp.get_data_alignment(), sizeof(fixed_dim_type_arrmeta),
                     type_flag_none, true),
       m_dim_size(dim_size)
 {
@@ -272,7 +272,7 @@ bool ndt::fixed_dim_type::is_lossless_assignment(const type &dst_tp, const type 
     if (src_tp.extended() == this) {
       return true;
     }
-    else if (src_tp.get_type_id() == fixed_dim_type_id) {
+    else if (src_tp.get_id() == fixed_dim_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -285,7 +285,7 @@ bool ndt::fixed_dim_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != fixed_dim_type_id) {
+  else if (rhs.get_id() != fixed_dim_id) {
     return false;
   }
   else if (rhs.get_kind() == kind_kind) {
@@ -491,7 +491,7 @@ ndt::type ndt::make_fixed_dim(intptr_t ndim, const intptr_t *shape, const type &
 void ndt::fixed_dim_type::reorder_default_constructed_strides(char *dst_arrmeta, const type &src_tp,
                                                               const char *src_arrmeta) const
 {
-  if (m_element_tp.get_type_id() != fixed_dim_type_id) {
+  if (m_element_tp.get_id() != fixed_dim_id) {
     // Nothing to do if there's just one reorderable dimension
     return;
   }
@@ -500,7 +500,7 @@ void ndt::fixed_dim_type::reorder_default_constructed_strides(char *dst_arrmeta,
     // If the destination has more dimensions than the source,
     // do the reordering starting from where they match, to
     // follow the broadcasting rules.
-    if (m_element_tp.get_type_id() == fixed_dim_type_id) {
+    if (m_element_tp.get_id() == fixed_dim_id) {
       const fixed_dim_type *sdd = m_element_tp.extended<fixed_dim_type>();
       sdd->reorder_default_constructed_strides(dst_arrmeta + sizeof(fixed_dim_type_arrmeta), src_tp, src_arrmeta);
     }
@@ -515,7 +515,7 @@ void ndt::fixed_dim_type::reorder_default_constructed_strides(char *dst_arrmeta,
   do {
     ++ndim;
     last_dt = last_dt.extended<fixed_dim_type>()->get_element_type();
-  } while (last_dt.get_type_id() == fixed_dim_type_id);
+  } while (last_dt.get_id() == fixed_dim_id);
 
   dimvector strides(ndim);
   type last_src_tp = src_tp;
@@ -525,8 +525,8 @@ void ndt::fixed_dim_type::reorder_default_constructed_strides(char *dst_arrmeta,
   bool c_order = true;
   for (size_t i = 0; i < ndim; ++i) {
     intptr_t stride;
-    switch (last_src_tp.get_type_id()) {
-    case fixed_dim_type_id: {
+    switch (last_src_tp.get_id()) {
+    case fixed_dim_id: {
       const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta);
       stride = md->stride;
       last_src_tp = last_src_tp.extended<base_dim_type>()->get_element_type();
@@ -606,8 +606,8 @@ void ndt::fixed_dim_type::reorder_default_constructed_strides(char *dst_arrmeta,
 bool ndt::fixed_dim_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                                 std::map<std::string, type> &tp_vars) const
 {
-  switch (candidate_tp.get_type_id()) {
-  case fixed_dim_type_id:
+  switch (candidate_tp.get_id()) {
+  case fixed_dim_id:
     // TODO XXX If the arrmeta is not NULL, the strides should be checked too
     return get_fixed_dim_size() == candidate_tp.extended<fixed_dim_type>()->get_fixed_dim_size() &&
            m_element_tp.match((arrmeta == NULL) ? arrmeta : (arrmeta + sizeof(fixed_dim_type_arrmeta)),
@@ -615,7 +615,7 @@ bool ndt::fixed_dim_type::match(const char *arrmeta, const type &candidate_tp, c
                               (candidate_arrmeta == NULL) ? candidate_arrmeta
                                                           : (candidate_arrmeta + sizeof(fixed_dim_type_arrmeta)),
                               tp_vars);
-  case c_contiguous_type_id:
+  case c_contiguous_id:
     return is_c_contiguous(arrmeta) &&
            match(arrmeta, candidate_tp.extended<c_contiguous_type>()->get_child_type(), candidate_arrmeta, tp_vars);
   default:

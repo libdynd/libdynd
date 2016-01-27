@@ -147,7 +147,7 @@ namespace ndt {
     /** Makes an callable type with just positional arguments */
     static type make(const type &ret_tp, const type &tuple_tp)
     {
-      if (tuple_tp.get_type_id() != tuple_type_id) {
+      if (tuple_tp.get_id() != tuple_id) {
         return make(ret_tp, tuple_type::make({tuple_tp}), struct_type::make());
       }
 

@@ -30,7 +30,7 @@ nd::callable nd::functional::permute(const callable &child,
     }
 
     if (j == -1) {
-      if (child_tp->get_return_type().get_type_id() != void_type_id) {
+      if (child_tp->get_return_type().get_id() != void_id) {
         throw std::invalid_argument("a positional argument can only be "
                                     "permuted to the return if it is "
                                     "originally void");

@@ -143,7 +143,7 @@ void nd::functional::rolling_ck::resolve_dst_type(char *_static_data, char *data
     child_dst_tp = static_data->window_op.get_type()->get_return_type();
   }
 
-  if (src_tp[0].get_type_id() == var_dim_type_id) {
+  if (src_tp[0].get_id() == var_dim_id) {
     dst_tp = ndt::var_dim_type::make(child_dst_tp);
   }
   else {

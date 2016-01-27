@@ -130,7 +130,7 @@ namespace ndt {
     inline int32_t get_use_count() const { return m_use_count; }
 
     /** The type's type id */
-    inline type_id_t get_type_id() const { return static_cast<type_id_t>(type_id); }
+    inline type_id_t get_id() const { return static_cast<type_id_t>(type_id); }
     /** The type's kind */
     inline type_kind_t get_kind() const { return static_cast<type_kind_t>(kind); }
     /** The size of one instance of the type, or 0 if there is not one fixed
@@ -581,9 +581,9 @@ namespace ndt {
   inline long intrusive_ptr_use_count(const base_type *ptr) { return ptr->m_use_count; }
 
   namespace detail {
-    extern DYND_API uint8_t builtin_data_sizes[builtin_type_id_count];
-    extern DYND_API uint8_t builtin_kinds[builtin_type_id_count];
-    extern DYND_API uint8_t builtin_data_alignments[builtin_type_id_count];
+    extern DYND_API uint8_t builtin_data_sizes[builtin_id_count];
+    extern DYND_API uint8_t builtin_kinds[builtin_id_count];
+    extern DYND_API uint8_t builtin_data_alignments[builtin_id_count];
   } // namespace dynd::ndt::detail
 
   /**

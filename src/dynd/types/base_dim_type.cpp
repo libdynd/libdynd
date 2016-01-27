@@ -25,7 +25,7 @@ void ndt::base_dim_type::get_element_types(std::size_t ndim, const type **elemen
 bool ndt::base_dim_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                                std::map<std::string, type> &tp_vars) const
 {
-  if (get_type_id() != candidate_tp.get_type_id()) {
+  if (get_id() != candidate_tp.get_id()) {
     return false;
   }
 

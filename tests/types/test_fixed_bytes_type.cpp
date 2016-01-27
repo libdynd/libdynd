@@ -19,7 +19,7 @@ TEST(FixedBytesDType, Create)
 
   // Strings with various encodings and sizes
   d = ndt::make_fixed_bytes(7, 1);
-  EXPECT_EQ(fixed_bytes_type_id, d.get_type_id());
+  EXPECT_EQ(fixed_bytes_id, d.get_id());
   EXPECT_EQ(bytes_kind, d.get_kind());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(7u, d.get_data_size());
@@ -29,7 +29,7 @@ TEST(FixedBytesDType, Create)
 
   // Strings with various encodings and sizes
   d = ndt::make_fixed_bytes(12, 4);
-  EXPECT_EQ(fixed_bytes_type_id, d.get_type_id());
+  EXPECT_EQ(fixed_bytes_id, d.get_id());
   EXPECT_EQ(bytes_kind, d.get_kind());
   EXPECT_EQ(4u, d.get_data_alignment());
   EXPECT_EQ(12u, d.get_data_size());

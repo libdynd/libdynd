@@ -23,7 +23,7 @@ TEST(FixedstringDType, Create)
 
   // Strings with various encodings and sizes
   d = ndt::fixed_string_type::make(3, string_encoding_utf_8);
-  EXPECT_EQ(fixed_string_type_id, d.get_type_id());
+  EXPECT_EQ(fixed_string_id, d.get_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(3u, d.get_data_size());
@@ -32,7 +32,7 @@ TEST(FixedstringDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::fixed_string_type::make(129, string_encoding_utf_8);
-  EXPECT_EQ(fixed_string_type_id, d.get_type_id());
+  EXPECT_EQ(fixed_string_id, d.get_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(129u, d.get_data_size());
@@ -40,7 +40,7 @@ TEST(FixedstringDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::fixed_string_type::make(129, string_encoding_ascii);
-  EXPECT_EQ(fixed_string_type_id, d.get_type_id());
+  EXPECT_EQ(fixed_string_id, d.get_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(129u, d.get_data_size());
@@ -48,7 +48,7 @@ TEST(FixedstringDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::fixed_string_type::make(129, string_encoding_utf_16);
-  EXPECT_EQ(fixed_string_type_id, d.get_type_id());
+  EXPECT_EQ(fixed_string_id, d.get_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(2u, d.get_data_alignment());
   EXPECT_EQ(2u * 129u, d.get_data_size());
@@ -56,7 +56,7 @@ TEST(FixedstringDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::fixed_string_type::make(129, string_encoding_utf_32);
-  EXPECT_EQ(fixed_string_type_id, d.get_type_id());
+  EXPECT_EQ(fixed_string_id, d.get_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(4u, d.get_data_alignment());
   EXPECT_EQ(4u * 129u, d.get_data_size());

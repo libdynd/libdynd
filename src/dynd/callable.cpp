@@ -58,7 +58,7 @@ void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i, const nd
 
   ndt::type expected_tp = af_tp->get_pos_type(i);
   ndt::type candidate_tp = actual_tp;
-  if (actual_tp.get_type_id() != pointer_type_id) {
+  if (actual_tp.get_id() != pointer_id) {
     candidate_tp = candidate_tp.value_type();
   }
 

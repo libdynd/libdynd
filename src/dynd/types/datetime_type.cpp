@@ -403,7 +403,7 @@ struct datetime_get_tick_kernel : nd::base_kernel<datetime_get_tick_kernel, 1> {
 } // anonymous namespace
 
 ndt::datetime_type::datetime_type(datetime_tz_t timezone)
-    : base_type(datetime_type_id, datetime_kind, 8, alignof(int64_t), type_flag_none, 0, 0, 0), m_timezone(timezone)
+    : base_type(datetime_id, datetime_kind, 8, alignof(int64_t), type_flag_none, 0, 0, 0), m_timezone(timezone)
 {
 }
 
@@ -524,7 +524,7 @@ bool ndt::datetime_type::is_lossless_assignment(const type &dst_tp, const type &
     if (src_tp.extended() == this) {
       return true;
     }
-    else if (src_tp.get_type_id() == date_type_id) {
+    else if (src_tp.get_id() == date_id) {
       // There is only one possibility for the datetime type (TODO: timezones!)
       return true;
     }
@@ -542,7 +542,7 @@ bool ndt::datetime_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != datetime_type_id) {
+  else if (rhs.get_id() != datetime_id) {
     return false;
   }
   else {

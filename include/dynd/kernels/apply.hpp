@@ -61,7 +61,7 @@ namespace nd {
       apply_kwd(nd::array val)
       //        : m_val(val.as<T>())
       {
-        if (val.get_type().get_type_id() == pointer_type_id) {
+        if (val.get_type().get_id() == pointer_id) {
           m_val = val.f("dereference").as<T>();
         }
         else {

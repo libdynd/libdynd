@@ -10,7 +10,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::typevar_type::typevar_type(const std::string &name)
-    : base_type(typevar_type_id, pattern_kind, 0, 1, type_flag_symbolic, 0, 0, 0), m_name(name)
+    : base_type(typevar_id, pattern_kind, 0, 1, type_flag_symbolic, 0, 0, 0), m_name(name)
 {
   if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");
@@ -62,7 +62,7 @@ bool ndt::typevar_type::is_lossless_assignment(const type &dst_tp, const type &s
     if (src_tp.extended() == this) {
       return true;
     }
-    else if (src_tp.get_type_id() == typevar_type_id) {
+    else if (src_tp.get_id() == typevar_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -75,7 +75,7 @@ bool ndt::typevar_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != typevar_type_id) {
+  else if (rhs.get_id() != typevar_id) {
     return false;
   }
   else {
@@ -104,11 +104,11 @@ void ndt::typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 bool ndt::typevar_type::match(const char *DYND_UNUSED(arrmeta), const type &candidate_tp,
                               const char *DYND_UNUSED(candidate_arrmeta), std::map<std::string, type> &tp_vars) const
 {
-  if (candidate_tp.get_type_id() == typevar_type_id) {
+  if (candidate_tp.get_id() == typevar_id) {
     return *this == *candidate_tp.extended();
   }
 
-  if (candidate_tp.get_ndim() > 0 || candidate_tp.get_type_id() == any_kind_type_id) {
+  if (candidate_tp.get_ndim() > 0 || candidate_tp.get_id() == any_kind_id) {
     return false;
   }
 

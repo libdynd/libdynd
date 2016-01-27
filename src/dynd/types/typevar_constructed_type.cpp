@@ -13,7 +13,7 @@ using namespace dynd;
 
 ndt::typevar_constructed_type::typevar_constructed_type(const std::string &name,
                                                         const type &arg)
-    : base_type(typevar_constructed_type_id, pattern_kind, 0, 1,
+    : base_type(typevar_constructed_id, pattern_kind, 0, 1,
                 type_flag_symbolic, 0, arg.get_ndim(), arg.get_strided_ndim()),
       m_name(name), m_arg(arg)
 {
@@ -90,7 +90,7 @@ ndt::typevar_constructed_type::is_lossless_assignment(const type &dst_tp,
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    } else if (src_tp.get_type_id() == typevar_constructed_type_id) {
+    } else if (src_tp.get_id() == typevar_constructed_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -102,7 +102,7 @@ bool ndt::typevar_constructed_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != typevar_constructed_type_id) {
+  } else if (rhs.get_id() != typevar_constructed_id) {
     return false;
   } else {
     const typevar_constructed_type *tvt =
@@ -134,7 +134,7 @@ bool ndt::typevar_constructed_type::match(
     const char *arrmeta, const type &candidate_tp,
     const char *candidate_arrmeta, std::map<std::string, type> &tp_vars) const
 {
-  if (candidate_tp.get_type_id() == typevar_constructed_type_id) {
+  if (candidate_tp.get_id() == typevar_constructed_id) {
     return m_arg.match(arrmeta,
                        candidate_tp.extended<typevar_constructed_type>()->m_arg,
                        candidate_arrmeta, tp_vars);

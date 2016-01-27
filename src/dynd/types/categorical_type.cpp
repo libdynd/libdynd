@@ -135,7 +135,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques, c
 }
 
 ndt::categorical_type::categorical_type(const nd::array &categories, bool presorted)
-    : base_type(categorical_type_id, custom_kind, 4, 4, type_flag_none, 0, 0, 0)
+    : base_type(categorical_id, custom_kind, 4, 4, type_flag_none, 0, 0, 0)
 {
   intptr_t category_count;
   if (presorted) {
@@ -154,7 +154,7 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
   else {
     // Process the categories array to make sure it's valid
     const type &cdt = categories.get_type();
-    if (cdt.get_type_id() != fixed_dim_type_id) {
+    if (cdt.get_id() != fixed_dim_id) {
       throw dynd::type_error("categorical_type only supports construction from "
                              "a fixed-dim array of categories");
     }
@@ -230,14 +230,14 @@ void ndt::categorical_type::print_data(std::ostream &o, const char *DYND_UNUSED(
 {
   intptr_t category_count = m_categories.get_dim_size();
   uint32_t value;
-  switch (m_storage_type.get_type_id()) {
-  case uint8_type_id:
+  switch (m_storage_type.get_id()) {
+  case uint8_id:
     value = *reinterpret_cast<const uint8_t *>(data);
     break;
-  case uint16_type_id:
+  case uint16_id:
     value = *reinterpret_cast<const uint16_t *>(data);
     break;
-  case uint32_type_id:
+  case uint32_id:
     value = *reinterpret_cast<const uint32_t *>(data);
     break;
   default:
@@ -374,7 +374,7 @@ bool ndt::categorical_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs)
     return true;
-  if (rhs.get_type_id() != categorical_type_id)
+  if (rhs.get_id() != categorical_id)
     return false;
   if (!m_categories.equals_exact(static_cast<const categorical_type &>(rhs).m_categories))
     return false;

@@ -9,7 +9,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::c_contiguous_type::c_contiguous_type(const type &child_tp)
-    : base_type(c_contiguous_type_id, kind_kind, 0, 1,
+    : base_type(c_contiguous_id, kind_kind, 0, 1,
                 type_flag_symbolic |
                     (child_tp.get_flags() & (type_flags_value_inherited |
                                              type_flags_operand_inherited)),
@@ -18,7 +18,7 @@ ndt::c_contiguous_type::c_contiguous_type(const type &child_tp)
 {
   // Restrict c_contiguous_type to fixed_dim_type (and, eventually, tuple_type
   // and struct_type)
-  if (m_child_tp.get_type_id() != fixed_dim_type_id) {
+  if (m_child_tp.get_id() != fixed_dim_id) {
     throw std::invalid_argument(
         "c_contiguous_type must have a child that is a fixed_dim_type");
   }
@@ -109,7 +109,7 @@ bool ndt::c_contiguous_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != c_contiguous_type_id) {
+  } else if (rhs.get_id() != c_contiguous_id) {
     return false;
   } else {
     const c_contiguous_type *tp = static_cast<const c_contiguous_type *>(&rhs);
@@ -144,7 +144,7 @@ bool ndt::c_contiguous_type::match(const char *arrmeta,
                                    const char *candidate_arrmeta,
                                    std::map<std::string, type> &tp_vars) const
 {
-  if (candidate_tp.get_type_id() == c_contiguous_type_id) {
+  if (candidate_tp.get_id() == c_contiguous_id) {
     return m_child_tp.match(
         arrmeta, candidate_tp.extended<c_contiguous_type>()->m_child_tp,
         candidate_arrmeta, tp_vars);

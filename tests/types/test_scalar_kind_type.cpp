@@ -18,7 +18,7 @@ using namespace dynd;
 TEST(ScalarKindType, Basic)
 {
   ndt::type tp = ndt::scalar_kind_type::make();
-  EXPECT_EQ(scalar_kind_type_id, tp.get_type_id());
+  EXPECT_EQ(scalar_kind_id, tp.get_id());
   EXPECT_TRUE(tp.is_scalar());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_EQ(0, tp.get_ndim());

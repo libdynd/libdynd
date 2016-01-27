@@ -11,7 +11,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::typevar_dim_type::typevar_dim_type(const std::string &name, const type &element_type)
-    : base_dim_type(typevar_dim_type_id, pattern_kind, element_type, 0, 1, 0, type_flag_symbolic, false), m_name(name)
+    : base_dim_type(typevar_dim_id, pattern_kind, element_type, 0, 1, 0, type_flag_symbolic, false), m_name(name)
 {
   if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");
@@ -54,7 +54,7 @@ bool ndt::typevar_dim_type::is_lossless_assignment(const type &dst_tp, const typ
     if (src_tp.extended() == this) {
       return true;
     }
-    else if (src_tp.get_type_id() == typevar_dim_type_id) {
+    else if (src_tp.get_id() == typevar_dim_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -67,7 +67,7 @@ bool ndt::typevar_dim_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != typevar_dim_type_id) {
+  else if (rhs.get_id() != typevar_dim_id) {
     return false;
   }
   else {
@@ -129,11 +129,11 @@ bool ndt::typevar_dim_type::match(const char *arrmeta, const type &candidate_tp,
   else {
     // Make sure the type matches previous
     // instances of the type var
-    if (candidate_tp.get_type_id() != tv_type.get_type_id()) {
+    if (candidate_tp.get_id() != tv_type.get_id()) {
       return false;
     }
-    switch (candidate_tp.get_type_id()) {
-    case fixed_dim_type_id:
+    switch (candidate_tp.get_id()) {
+    case fixed_dim_id:
       if (candidate_tp.extended<fixed_dim_type>()->get_fixed_dim_size() !=
           tv_type.extended<fixed_dim_type>()->get_fixed_dim_size()) {
         return false;

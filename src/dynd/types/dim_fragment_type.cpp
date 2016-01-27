@@ -13,7 +13,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::dim_fragment_type::dim_fragment_type(intptr_t ndim, const intptr_t *tagged_dims)
-    : base_dim_type(dim_fragment_type_id, pattern_kind, make_type<void>(), 0, 1, 0, type_flag_symbolic, false),
+    : base_dim_type(dim_fragment_id, pattern_kind, make_type<void>(), 0, 1, 0, type_flag_symbolic, false),
       m_tagged_dims(ndim, tagged_dims)
 {
   this->ndim = static_cast<uint8_t>(ndim);
@@ -23,8 +23,8 @@ static inline ndt::type get_tagged_dims_from_type(intptr_t ndim, const ndt::type
 {
   ndt::type dtp = tp.without_memory_type();
   for (int i = 0; i < ndim; ++i) {
-    switch (dtp.get_type_id()) {
-    case fixed_dim_type_id:
+    switch (dtp.get_id()) {
+    case fixed_dim_id:
       if (dtp.get_kind() == kind_kind) {
         out_tagged_dims[i] = -2;
       }
@@ -32,7 +32,7 @@ static inline ndt::type get_tagged_dims_from_type(intptr_t ndim, const ndt::type
         out_tagged_dims[i] = dtp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
       }
       break;
-    case var_dim_type_id:
+    case var_dim_id:
       out_tagged_dims[i] = -1;
       break;
     default: {
@@ -52,8 +52,8 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp, 
   tp = tp.without_memory_type();
   for (intptr_t i = 0; i < ndim; ++i) {
     intptr_t tagged_dim = tagged_dims[i], dim_size;
-    switch (tp.get_type_id()) {
-    case fixed_dim_type_id:
+    switch (tp.get_id()) {
+    case fixed_dim_id:
       if (tp.get_kind() == kind_kind) {
         if (tagged_dim < 0) {
           out_tagged_dims[i] = -2;
@@ -69,7 +69,7 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp, 
         }
       }
       break;
-    case var_dim_type_id:
+    case var_dim_id:
       // All broadcasting is done dynamically for var
       break;
     default: {
@@ -84,7 +84,7 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp, 
 }
 
 ndt::dim_fragment_type::dim_fragment_type(intptr_t ndim, const type &tp)
-    : base_dim_type(dim_fragment_type_id, make_type<void>(), 0, 1, 0, type_flag_symbolic, false), m_tagged_dims(ndim)
+    : base_dim_type(dim_fragment_id, make_type<void>(), 0, 1, 0, type_flag_symbolic, false), m_tagged_dims(ndim)
 {
   if (ndim > tp.get_ndim()) {
     stringstream ss;
@@ -218,7 +218,7 @@ bool ndt::dim_fragment_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != dim_fragment_type_id) {
+  else if (rhs.get_id() != dim_fragment_id) {
     return false;
   }
   else {

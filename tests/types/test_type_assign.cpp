@@ -35,95 +35,95 @@ TEST(TypeAssign, FixedSizeTestsNoExcept)
   char *s_ptr;
 
   // Test bool -> each builtin type
-  s_dt = ndt::type(bool_type_id);
+  s_dt = ndt::type(bool_id);
   s_ptr = (char *)&v_b;
   v_b = true;
 #define ONE_TEST(tid, v, m)                                                                                            \
   typed_data_assign(ndt::type(tid), NULL, (char *) & v, s_dt, NULL, s_ptr, assign_error_nocheck);                      \
   EXPECT_EQ(m, v)
-  ONE_TEST(int8_type_id, v_i8, 1);
-  ONE_TEST(int16_type_id, v_i16, 1);
-  ONE_TEST(int32_type_id, v_i32, 1);
-  ONE_TEST(int64_type_id, v_i64, 1);
-  ONE_TEST(uint8_type_id, v_u8, 1u);
-  ONE_TEST(uint16_type_id, v_u16, 1u);
-  ONE_TEST(uint32_type_id, v_u32, 1u);
-  ONE_TEST(uint64_type_id, v_u64, 1u);
-  ONE_TEST(float32_type_id, v_f32, 1);
-  ONE_TEST(float64_type_id, v_f64, 1);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(1));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(1));
+  ONE_TEST(int8_id, v_i8, 1);
+  ONE_TEST(int16_id, v_i16, 1);
+  ONE_TEST(int32_id, v_i32, 1);
+  ONE_TEST(int64_id, v_i64, 1);
+  ONE_TEST(uint8_id, v_u8, 1u);
+  ONE_TEST(uint16_id, v_u16, 1u);
+  ONE_TEST(uint32_id, v_u32, 1u);
+  ONE_TEST(uint64_id, v_u64, 1u);
+  ONE_TEST(float32_id, v_f32, 1);
+  ONE_TEST(float64_id, v_f64, 1);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(1));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(1));
 #undef ONE_TEST
 
   // Test int8 -> each builtin type
-  s_dt = ndt::type(int8_type_id);
+  s_dt = ndt::type(int8_id);
   s_ptr = (char *)&v_i8;
   v_i8 = 127;
 #define ONE_TEST(tid, v, m)                                                                                            \
   typed_data_assign(ndt::type(tid), NULL, (char *) & v, s_dt, NULL, s_ptr, assign_error_nocheck);                      \
   EXPECT_EQ(m, v)
-  ONE_TEST(bool_type_id, v_b, true);
-  ONE_TEST(int16_type_id, v_i16, 127);
-  ONE_TEST(int32_type_id, v_i32, 127);
-  ONE_TEST(int64_type_id, v_i64, 127);
-  ONE_TEST(uint8_type_id, v_u8, 127u);
-  ONE_TEST(uint16_type_id, v_u16, 127u);
-  ONE_TEST(uint32_type_id, v_u32, 127u);
-  ONE_TEST(uint64_type_id, v_u64, 127u);
-  ONE_TEST(float32_type_id, v_f32, 127);
-  ONE_TEST(float64_type_id, v_f64, 127);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(127));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(127));
+  ONE_TEST(bool_id, v_b, true);
+  ONE_TEST(int16_id, v_i16, 127);
+  ONE_TEST(int32_id, v_i32, 127);
+  ONE_TEST(int64_id, v_i64, 127);
+  ONE_TEST(uint8_id, v_u8, 127u);
+  ONE_TEST(uint16_id, v_u16, 127u);
+  ONE_TEST(uint32_id, v_u32, 127u);
+  ONE_TEST(uint64_id, v_u64, 127u);
+  ONE_TEST(float32_id, v_f32, 127);
+  ONE_TEST(float64_id, v_f64, 127);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(127));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(127));
 #undef ONE_TEST
 
   // Test float64 -> each builtin type
-  s_dt = ndt::type(float64_type_id);
+  s_dt = ndt::type(float64_id);
   s_ptr = (char *)&v_f64;
   v_f64 = -10.25;
 #define ONE_TEST(tid, v, m)                                                                                            \
   typed_data_assign(ndt::type(tid), NULL, (char *) & v, s_dt, NULL, s_ptr, assign_error_nocheck);                      \
   EXPECT_EQ(m, v)
-  ONE_TEST(bool_type_id, v_b, true);
-  ONE_TEST(int8_type_id, v_i8, -10);
-  ONE_TEST(int16_type_id, v_i16, -10);
-  ONE_TEST(int32_type_id, v_i32, -10);
-  ONE_TEST(int64_type_id, v_i64, -10);
-  ONE_TEST(uint8_type_id, v_u8, (uint8_t)-10);
-  ONE_TEST(uint16_type_id, v_u16, (uint16_t)-10);
-  ONE_TEST(uint32_type_id, v_u32, (uint32_t)-10);
+  ONE_TEST(bool_id, v_b, true);
+  ONE_TEST(int8_id, v_i8, -10);
+  ONE_TEST(int16_id, v_i16, -10);
+  ONE_TEST(int32_id, v_i32, -10);
+  ONE_TEST(int64_id, v_i64, -10);
+  ONE_TEST(uint8_id, v_u8, (uint8_t)-10);
+  ONE_TEST(uint16_id, v_u16, (uint16_t)-10);
+  ONE_TEST(uint32_id, v_u32, (uint32_t)-10);
   // This float64 -> uint64 if commented out because it
   // behaves differently on linux 32. The behavior is
   // not well-defined according to C/C++, so that should
   // be ok.
-  // ONE_TEST(uint64_type_id, v_u64, (uint64_t)-10);
-  ONE_TEST(float32_type_id, v_f32, -10.25);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-10.25));
+  // ONE_TEST(uint64_id, v_u64, (uint64_t)-10);
+  ONE_TEST(float32_id, v_f32, -10.25);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(-10.25f));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(-10.25));
 #undef ONE_TEST
 
   // Test dynd_complex<float64> -> each builtin type
-  s_dt = ndt::type(complex_float64_type_id);
+  s_dt = ndt::type(complex_float64_id);
   s_ptr = (char *)&v_cf64;
   v_cf64 = dynd::complex<double>(-10.25, 1.5);
 #define ONE_TEST(tid, v, m)                                                                                            \
   typed_data_assign(ndt::type(tid), NULL, (char *) & v, s_dt, NULL, s_ptr, assign_error_nocheck);                      \
   EXPECT_EQ(m, v)
-  ONE_TEST(bool_type_id, v_b, true);
-  ONE_TEST(int8_type_id, v_i8, -10);
-  ONE_TEST(int16_type_id, v_i16, -10);
-  ONE_TEST(int32_type_id, v_i32, -10);
-  ONE_TEST(int64_type_id, v_i64, -10);
-  ONE_TEST(uint8_type_id, v_u8, (uint8_t)-10);
-  ONE_TEST(uint16_type_id, v_u16, (uint16_t)-10);
-  ONE_TEST(uint32_type_id, v_u32, (uint32_t)-10);
+  ONE_TEST(bool_id, v_b, true);
+  ONE_TEST(int8_id, v_i8, -10);
+  ONE_TEST(int16_id, v_i16, -10);
+  ONE_TEST(int32_id, v_i32, -10);
+  ONE_TEST(int64_id, v_i64, -10);
+  ONE_TEST(uint8_id, v_u8, (uint8_t)-10);
+  ONE_TEST(uint16_id, v_u16, (uint16_t)-10);
+  ONE_TEST(uint32_id, v_u32, (uint32_t)-10);
   // This float64 -> uint64 if commented out because it
   // behaves differently on linux 32. The behavior is
   // not well-defined according to C/C++, so that should
   // be ok.
-  // ONE_TEST(uint64_type_id, v_u64, (uint64_t)-10);
-  ONE_TEST(float32_type_id, v_f32, -10.25);
-  ONE_TEST(float64_type_id, v_f64, -10.25);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f, 1.5f));
+  // ONE_TEST(uint64_id, v_u64, (uint64_t)-10);
+  ONE_TEST(float32_id, v_f32, -10.25);
+  ONE_TEST(float64_id, v_f64, -10.25);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(-10.25f, 1.5f));
 #undef ONE_TEST
 }
 
@@ -147,24 +147,24 @@ TEST(TypeAssign, FixedSizeTests_Bool)
   char *s_ptr;
 
   // Test bool -> each type
-  s_dt = ndt::type(bool_type_id);
+  s_dt = ndt::type(bool_id);
   s_ptr = (char *)&v_b;
   v_b = true;
 #define ONE_TEST(tid, v, m)                                                                                            \
   typed_data_assign(ndt::type(tid), NULL, (char *) & v, s_dt, NULL, s_ptr);                                            \
   EXPECT_EQ(m, v)
-  ONE_TEST(int8_type_id, v_i8, 1);
-  ONE_TEST(int16_type_id, v_i16, 1);
-  ONE_TEST(int32_type_id, v_i32, 1);
-  ONE_TEST(int64_type_id, v_i64, 1);
-  ONE_TEST(uint8_type_id, v_u8, 1u);
-  ONE_TEST(uint16_type_id, v_u16, 1u);
-  ONE_TEST(uint32_type_id, v_u32, 1u);
-  ONE_TEST(uint64_type_id, v_u64, 1u);
-  ONE_TEST(float32_type_id, v_f32, 1);
-  ONE_TEST(float64_type_id, v_f64, 1);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(1));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(1));
+  ONE_TEST(int8_id, v_i8, 1);
+  ONE_TEST(int16_id, v_i16, 1);
+  ONE_TEST(int32_id, v_i32, 1);
+  ONE_TEST(int64_id, v_i64, 1);
+  ONE_TEST(uint8_id, v_u8, 1u);
+  ONE_TEST(uint16_id, v_u16, 1u);
+  ONE_TEST(uint32_id, v_u32, 1u);
+  ONE_TEST(uint64_id, v_u64, 1u);
+  ONE_TEST(float32_id, v_f32, 1);
+  ONE_TEST(float64_id, v_f64, 1);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(1));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(1));
 #undef ONE_TEST
 }
 
@@ -188,39 +188,39 @@ TEST(TypeAssign, FixedSizeTests_Int8)
   char *s_ptr;
 
   // Test int8 -> types with success
-  s_dt = ndt::type(int8_type_id);
+  s_dt = ndt::type(int8_id);
   s_ptr = (char *)&v_i8;
   v_i8 = 127;
 #define ONE_TEST(tid, v, m)                                                                                            \
   typed_data_assign(ndt::type(tid), NULL, (char *) & v, s_dt, NULL, s_ptr);                                            \
   EXPECT_EQ(m, v)
-  EXPECT_THROW(typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
-  ONE_TEST(int16_type_id, v_i16, 127);
-  ONE_TEST(int32_type_id, v_i32, 127);
-  ONE_TEST(int64_type_id, v_i64, 127);
-  ONE_TEST(uint8_type_id, v_u8, 127u);
-  ONE_TEST(uint16_type_id, v_u16, 127u);
-  ONE_TEST(uint32_type_id, v_u32, 127u);
-  ONE_TEST(uint64_type_id, v_u64, 127u);
-  ONE_TEST(float32_type_id, v_f32, 127);
-  ONE_TEST(float64_type_id, v_f64, 127);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(127));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(127));
+  EXPECT_THROW(typed_data_assign(ndt::type(bool_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
+  ONE_TEST(int16_id, v_i16, 127);
+  ONE_TEST(int32_id, v_i32, 127);
+  ONE_TEST(int64_id, v_i64, 127);
+  ONE_TEST(uint8_id, v_u8, 127u);
+  ONE_TEST(uint16_id, v_u16, 127u);
+  ONE_TEST(uint32_id, v_u32, 127u);
+  ONE_TEST(uint64_id, v_u64, 127u);
+  ONE_TEST(float32_id, v_f32, 127);
+  ONE_TEST(float64_id, v_f64, 127);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(127));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(127));
 #undef ONE_TEST
 
   // Test int8 -> bool variants
   v_i8 = -33;
-  EXPECT_THROW(typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
+  EXPECT_THROW(typed_data_assign(ndt::type(bool_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
   v_i8 = -1;
-  EXPECT_THROW(typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
-  EXPECT_THROW(typed_data_assign(ndt::type(uint8_type_id), NULL, (char *)&v_u8, s_dt, NULL, s_ptr), runtime_error);
+  EXPECT_THROW(typed_data_assign(ndt::type(bool_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
+  EXPECT_THROW(typed_data_assign(ndt::type(uint8_id), NULL, (char *)&v_u8, s_dt, NULL, s_ptr), runtime_error);
   v_i8 = 2;
-  EXPECT_THROW(typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
+  EXPECT_THROW(typed_data_assign(ndt::type(bool_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
   v_i8 = 0;
-  typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+  typed_data_assign(ndt::type(bool_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
   EXPECT_FALSE(v_b);
   v_i8 = 1;
-  typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+  typed_data_assign(ndt::type(bool_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
   EXPECT_TRUE(v_b);
 }
 
@@ -243,7 +243,7 @@ TEST(TypeAssign, FixedSizeTests_Float64)
   ndt::type s_dt, d_dt;
   const char *s_ptr;
 
-  s_dt = ndt::type(float64_type_id);
+  s_dt = ndt::type(float64_id);
   s_ptr = reinterpret_cast<char *>(&v_f64);
   v_f64 = -10.25;
 #define ONE_TEST(tid, v, m)                                                                                            \
@@ -257,18 +257,18 @@ TEST(TypeAssign, FixedSizeTests_Float64)
   //            runtime_error);
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact),
   //            runtime_error)
-  ONE_TEST_THROW(bool_type_id, v_b);
-  ONE_TEST_THROW(int8_type_id, v_i8);
-  ONE_TEST_THROW(int16_type_id, v_i16);
-  ONE_TEST_THROW(int32_type_id, v_i32);
-  ONE_TEST_THROW(int64_type_id, v_i64);
-  ONE_TEST_THROW(uint8_type_id, v_u8);
-  ONE_TEST_THROW(uint16_type_id, v_u16);
-  ONE_TEST_THROW(uint32_type_id, v_u32);
-  ONE_TEST_THROW(uint64_type_id, v_u64);
-  ONE_TEST(float32_type_id, v_f32, -10.25);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-10.25));
+  ONE_TEST_THROW(bool_id, v_b);
+  ONE_TEST_THROW(int8_id, v_i8);
+  ONE_TEST_THROW(int16_id, v_i16);
+  ONE_TEST_THROW(int32_id, v_i32);
+  ONE_TEST_THROW(int64_id, v_i64);
+  ONE_TEST_THROW(uint8_id, v_u8);
+  ONE_TEST_THROW(uint16_id, v_u16);
+  ONE_TEST_THROW(uint32_id, v_u32);
+  ONE_TEST_THROW(uint64_id, v_u64);
+  ONE_TEST(float32_id, v_f32, -10.25);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(-10.25f));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(-10.25));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -276,45 +276,45 @@ TEST(TypeAssign, FixedSizeTests_Float64)
   // when using the assign_error_inexact mode
   v_f64 = 1 / 3.0;
   EXPECT_THROW(
-      typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact),
+      typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact),
       runtime_error);
-  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
+  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
                                  assign_error_inexact),
                runtime_error);
-  typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_fractional);
+  typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_fractional);
   EXPECT_EQ((float)v_f64, v_f32);
-  typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
+  typed_data_assign(ndt::type(complex_float32_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
                     assign_error_fractional);
   EXPECT_EQ(dynd::complex<float>((float)v_f64), v_cf32);
 
   // Since this is a float -> double conversion, it should be exact coming back to float
   v_f64 = 1 / 3.0f;
-  typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact);
+  typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact);
   EXPECT_EQ(v_f64, v_f32);
-  typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_inexact);
+  typed_data_assign(ndt::type(complex_float32_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_inexact);
   EXPECT_EQ(dynd::complex<double>(v_f64), dynd::complex<double>(v_cf32));
 
   // This should overflow converting to float
   v_f64 = -1.5e250;
   EXPECT_THROW(
-      typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact),
+      typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact),
       runtime_error);
   EXPECT_THROW(
-      typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_fractional),
+      typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_fractional),
       runtime_error);
   EXPECT_THROW(
-      typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_overflow),
+      typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_overflow),
       runtime_error);
-  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
+  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
                                  assign_error_inexact),
                runtime_error);
-  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
+  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
                                  assign_error_fractional),
                runtime_error);
-  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
+  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
                                  assign_error_overflow),
                runtime_error);
-  typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_nocheck);
+  typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_nocheck);
 #ifdef _MSC_VER
   EXPECT_TRUE(_fpclass(v_f32) == _FPCLASS_NINF);
 #else
@@ -343,7 +343,7 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32)
   ndt::type s_dt, d_dt;
   const char *s_ptr;
 
-  s_dt = ndt::type(complex_float32_type_id);
+  s_dt = ndt::type(complex_float32_id);
   s_ptr = reinterpret_cast<char *>(&v_ref);
 
   // Test the value 0.0
@@ -351,20 +351,20 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32)
 #define ONE_TEST(tid, v, m)                                                                                            \
   typed_data_assign(ndt::type(tid), NULL, (char *) & v, s_dt, NULL, s_ptr);                                            \
   EXPECT_EQ(m, v)
-  typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+  typed_data_assign(ndt::type(bool_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
   EXPECT_FALSE(v_b);
-  ONE_TEST(int8_type_id, v_i8, 0);
-  ONE_TEST(int16_type_id, v_i16, 0);
-  ONE_TEST(int32_type_id, v_i32, 0);
-  ONE_TEST(int64_type_id, v_i64, 0);
-  ONE_TEST(uint8_type_id, v_u8, 0u);
-  ONE_TEST(uint16_type_id, v_u16, 0u);
-  ONE_TEST(uint32_type_id, v_u32, 0u);
-  ONE_TEST(uint64_type_id, v_u64, 0u);
-  ONE_TEST(float32_type_id, v_f32, 0);
-  ONE_TEST(float64_type_id, v_f64, 0);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(0));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(0));
+  ONE_TEST(int8_id, v_i8, 0);
+  ONE_TEST(int16_id, v_i16, 0);
+  ONE_TEST(int32_id, v_i32, 0);
+  ONE_TEST(int64_id, v_i64, 0);
+  ONE_TEST(uint8_id, v_u8, 0u);
+  ONE_TEST(uint16_id, v_u16, 0u);
+  ONE_TEST(uint32_id, v_u32, 0u);
+  ONE_TEST(uint64_id, v_u64, 0u);
+  ONE_TEST(float32_id, v_f32, 0);
+  ONE_TEST(float64_id, v_f64, 0);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(0));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(0));
 #undef ONE_TEST
 
   // Test the value 1.0
@@ -372,20 +372,20 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32)
 #define ONE_TEST(tid, v, m)                                                                                            \
   typed_data_assign(ndt::type(tid), NULL, (char *) & v, s_dt, NULL, s_ptr);                                            \
   EXPECT_EQ(m, v)
-  typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+  typed_data_assign(ndt::type(bool_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
   EXPECT_TRUE(v_b);
-  ONE_TEST(int8_type_id, v_i8, 1);
-  ONE_TEST(int16_type_id, v_i16, 1);
-  ONE_TEST(int32_type_id, v_i32, 1);
-  ONE_TEST(int64_type_id, v_i64, 1);
-  ONE_TEST(uint8_type_id, v_u8, 1u);
-  ONE_TEST(uint16_type_id, v_u16, 1u);
-  ONE_TEST(uint32_type_id, v_u32, 1u);
-  ONE_TEST(uint64_type_id, v_u64, 1u);
-  ONE_TEST(float32_type_id, v_f32, 1);
-  ONE_TEST(float64_type_id, v_f64, 1);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(1));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(1));
+  ONE_TEST(int8_id, v_i8, 1);
+  ONE_TEST(int16_id, v_i16, 1);
+  ONE_TEST(int32_id, v_i32, 1);
+  ONE_TEST(int64_id, v_i64, 1);
+  ONE_TEST(uint8_id, v_u8, 1u);
+  ONE_TEST(uint16_id, v_u16, 1u);
+  ONE_TEST(uint32_id, v_u32, 1u);
+  ONE_TEST(uint64_id, v_u64, 1u);
+  ONE_TEST(float32_id, v_f32, 1);
+  ONE_TEST(float64_id, v_f64, 1);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(1));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(1));
 #undef ONE_TEST
 
   // Test the value 2.0
@@ -399,19 +399,19 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32)
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional),
   //            runtime_error);
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-  ONE_TEST_THROW(bool_type_id, v_b);
-  ONE_TEST(int8_type_id, v_i8, 2);
-  ONE_TEST(int16_type_id, v_i16, 2);
-  ONE_TEST(int32_type_id, v_i32, 2);
-  ONE_TEST(int64_type_id, v_i64, 2);
-  ONE_TEST(uint8_type_id, v_u8, 2u);
-  ONE_TEST(uint16_type_id, v_u16, 2u);
-  ONE_TEST(uint32_type_id, v_u32, 2u);
-  ONE_TEST(uint64_type_id, v_u64, 2u);
-  ONE_TEST(float32_type_id, v_f32, 2);
-  ONE_TEST(float64_type_id, v_f64, 2);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(2));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(2));
+  ONE_TEST_THROW(bool_id, v_b);
+  ONE_TEST(int8_id, v_i8, 2);
+  ONE_TEST(int16_id, v_i16, 2);
+  ONE_TEST(int32_id, v_i32, 2);
+  ONE_TEST(int64_id, v_i64, 2);
+  ONE_TEST(uint8_id, v_u8, 2u);
+  ONE_TEST(uint16_id, v_u16, 2u);
+  ONE_TEST(uint32_id, v_u32, 2u);
+  ONE_TEST(uint64_id, v_u64, 2u);
+  ONE_TEST(float32_id, v_f32, 2);
+  ONE_TEST(float64_id, v_f64, 2);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(2));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(2));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -426,19 +426,19 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32)
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional),
   //            runtime_error);
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-  ONE_TEST_THROW(bool_type_id, v_b);
-  ONE_TEST(int8_type_id, v_i8, -1);
-  ONE_TEST(int16_type_id, v_i16, -1);
-  ONE_TEST(int32_type_id, v_i32, -1);
-  ONE_TEST(int64_type_id, v_i64, -1);
-  ONE_TEST_THROW(uint8_type_id, v_b);
-  ONE_TEST_THROW(uint16_type_id, v_b);
-  ONE_TEST_THROW(uint32_type_id, v_b);
-  ONE_TEST_THROW(uint64_type_id, v_b);
-  ONE_TEST(float32_type_id, v_f32, -1);
-  ONE_TEST(float64_type_id, v_f64, -1);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-1));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-1));
+  ONE_TEST_THROW(bool_id, v_b);
+  ONE_TEST(int8_id, v_i8, -1);
+  ONE_TEST(int16_id, v_i16, -1);
+  ONE_TEST(int32_id, v_i32, -1);
+  ONE_TEST(int64_id, v_i64, -1);
+  ONE_TEST_THROW(uint8_id, v_b);
+  ONE_TEST_THROW(uint16_id, v_b);
+  ONE_TEST_THROW(uint32_id, v_b);
+  ONE_TEST_THROW(uint64_id, v_b);
+  ONE_TEST(float32_id, v_f32, -1);
+  ONE_TEST(float64_id, v_f64, -1);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(-1));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(-1));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -453,19 +453,19 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32)
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional),
   //            runtime_error);
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-  ONE_TEST_THROW(bool_type_id, v_b);
-  ONE_TEST_THROW(int8_type_id, v_i8);
-  ONE_TEST_THROW(int16_type_id, v_i16);
-  ONE_TEST_THROW(int32_type_id, v_i32);
-  ONE_TEST_THROW(int64_type_id, v_i64);
-  ONE_TEST_THROW(uint8_type_id, v_u8);
-  ONE_TEST_THROW(uint16_type_id, v_u16);
-  ONE_TEST_THROW(uint32_type_id, v_u32);
-  ONE_TEST_THROW(uint64_type_id, v_u64);
-  ONE_TEST(float32_type_id, v_f32, -10.25);
-  ONE_TEST(float64_type_id, v_f64, -10.25);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-10.25));
+  ONE_TEST_THROW(bool_id, v_b);
+  ONE_TEST_THROW(int8_id, v_i8);
+  ONE_TEST_THROW(int16_id, v_i16);
+  ONE_TEST_THROW(int32_id, v_i32);
+  ONE_TEST_THROW(int64_id, v_i64);
+  ONE_TEST_THROW(uint8_id, v_u8);
+  ONE_TEST_THROW(uint16_id, v_u16);
+  ONE_TEST_THROW(uint32_id, v_u32);
+  ONE_TEST_THROW(uint64_id, v_u64);
+  ONE_TEST(float32_id, v_f32, -10.25);
+  ONE_TEST(float64_id, v_f64, -10.25);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(-10.25f));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(-10.25));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -480,19 +480,19 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32)
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional),
   //            runtime_error);
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-  ONE_TEST_THROW(bool_type_id, v_b);
-  ONE_TEST_THROW(int8_type_id, v_i8);
-  ONE_TEST_THROW(int16_type_id, v_i16);
-  ONE_TEST_THROW(int32_type_id, v_i32);
-  ONE_TEST_THROW(int64_type_id, v_i64);
-  ONE_TEST_THROW(uint8_type_id, v_u8);
-  ONE_TEST_THROW(uint16_type_id, v_u16);
-  ONE_TEST_THROW(uint32_type_id, v_u32);
-  ONE_TEST_THROW(uint64_type_id, v_u64);
-  ONE_TEST(float32_type_id, v_f32, 1e21f);
-  ONE_TEST(float64_type_id, v_f64, 1e21f);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(1e21f));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(1e21f));
+  ONE_TEST_THROW(bool_id, v_b);
+  ONE_TEST_THROW(int8_id, v_i8);
+  ONE_TEST_THROW(int16_id, v_i16);
+  ONE_TEST_THROW(int32_id, v_i32);
+  ONE_TEST_THROW(int64_id, v_i64);
+  ONE_TEST_THROW(uint8_id, v_u8);
+  ONE_TEST_THROW(uint16_id, v_u16);
+  ONE_TEST_THROW(uint32_id, v_u32);
+  ONE_TEST_THROW(uint64_id, v_u64);
+  ONE_TEST(float32_id, v_f32, 1e21f);
+  ONE_TEST(float64_id, v_f64, 1e21f);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(1e21f));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(1e21f));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -507,19 +507,19 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32)
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional),
   //            runtime_error);
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-  ONE_TEST_THROW(bool_type_id, v_b);
-  ONE_TEST_THROW(int8_type_id, v_i8);
-  ONE_TEST_THROW(int16_type_id, v_i16);
-  ONE_TEST_THROW(int32_type_id, v_i32);
-  ONE_TEST_THROW(int64_type_id, v_i64);
-  ONE_TEST_THROW(uint8_type_id, v_u8);
-  ONE_TEST_THROW(uint16_type_id, v_u16);
-  ONE_TEST_THROW(uint32_type_id, v_u32);
-  ONE_TEST_THROW(uint64_type_id, v_u64);
-  ONE_TEST_THROW(float32_type_id, v_f32);
-  ONE_TEST_THROW(float64_type_id, v_f64);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f, 0.125f));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-10.25, 0.125));
+  ONE_TEST_THROW(bool_id, v_b);
+  ONE_TEST_THROW(int8_id, v_i8);
+  ONE_TEST_THROW(int16_id, v_i16);
+  ONE_TEST_THROW(int32_id, v_i32);
+  ONE_TEST_THROW(int64_id, v_i64);
+  ONE_TEST_THROW(uint8_id, v_u8);
+  ONE_TEST_THROW(uint16_id, v_u16);
+  ONE_TEST_THROW(uint32_id, v_u32);
+  ONE_TEST_THROW(uint64_id, v_u64);
+  ONE_TEST_THROW(float32_id, v_f32);
+  ONE_TEST_THROW(float64_id, v_f64);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(-10.25f, 0.125f));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(-10.25, 0.125));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 }
@@ -544,7 +544,7 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64)
   ndt::type s_dt, d_dt;
   const char *s_ptr;
 
-  s_dt = ndt::type(complex_float64_type_id);
+  s_dt = ndt::type(complex_float64_id);
   s_ptr = reinterpret_cast<char *>(&v_ref);
 
   // Test the value 0.0
@@ -552,20 +552,20 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64)
 #define ONE_TEST(tid, v, m)                                                                                            \
   typed_data_assign(ndt::type(tid), NULL, (char *) & v, s_dt, NULL, s_ptr);                                            \
   EXPECT_EQ(m, v)
-  typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+  typed_data_assign(ndt::type(bool_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
   EXPECT_FALSE(v_b);
-  ONE_TEST(int8_type_id, v_i8, 0);
-  ONE_TEST(int16_type_id, v_i16, 0);
-  ONE_TEST(int32_type_id, v_i32, 0);
-  ONE_TEST(int64_type_id, v_i64, 0);
-  ONE_TEST(uint8_type_id, v_u8, 0u);
-  ONE_TEST(uint16_type_id, v_u16, 0u);
-  ONE_TEST(uint32_type_id, v_u32, 0u);
-  ONE_TEST(uint64_type_id, v_u64, 0u);
-  ONE_TEST(float32_type_id, v_f32, 0);
-  ONE_TEST(float64_type_id, v_f64, 0);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(0));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(0));
+  ONE_TEST(int8_id, v_i8, 0);
+  ONE_TEST(int16_id, v_i16, 0);
+  ONE_TEST(int32_id, v_i32, 0);
+  ONE_TEST(int64_id, v_i64, 0);
+  ONE_TEST(uint8_id, v_u8, 0u);
+  ONE_TEST(uint16_id, v_u16, 0u);
+  ONE_TEST(uint32_id, v_u32, 0u);
+  ONE_TEST(uint64_id, v_u64, 0u);
+  ONE_TEST(float32_id, v_f32, 0);
+  ONE_TEST(float64_id, v_f64, 0);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(0));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(0));
 #undef ONE_TEST
 
   // Test the value 1.0
@@ -573,20 +573,20 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64)
 #define ONE_TEST(tid, v, m)                                                                                            \
   typed_data_assign(ndt::type(tid), NULL, (char *) & v, s_dt, NULL, s_ptr);                                            \
   EXPECT_EQ(m, v)
-  typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+  typed_data_assign(ndt::type(bool_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
   EXPECT_TRUE(v_b);
-  ONE_TEST(int8_type_id, v_i8, 1);
-  ONE_TEST(int16_type_id, v_i16, 1);
-  ONE_TEST(int32_type_id, v_i32, 1);
-  ONE_TEST(int64_type_id, v_i64, 1);
-  ONE_TEST(uint8_type_id, v_u8, 1u);
-  ONE_TEST(uint16_type_id, v_u16, 1u);
-  ONE_TEST(uint32_type_id, v_u32, 1u);
-  ONE_TEST(uint64_type_id, v_u64, 1u);
-  ONE_TEST(float32_type_id, v_f32, 1);
-  ONE_TEST(float64_type_id, v_f64, 1);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(1));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(1));
+  ONE_TEST(int8_id, v_i8, 1);
+  ONE_TEST(int16_id, v_i16, 1);
+  ONE_TEST(int32_id, v_i32, 1);
+  ONE_TEST(int64_id, v_i64, 1);
+  ONE_TEST(uint8_id, v_u8, 1u);
+  ONE_TEST(uint16_id, v_u16, 1u);
+  ONE_TEST(uint32_id, v_u32, 1u);
+  ONE_TEST(uint64_id, v_u64, 1u);
+  ONE_TEST(float32_id, v_f32, 1);
+  ONE_TEST(float64_id, v_f64, 1);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(1));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(1));
 #undef ONE_TEST
 
   // Test the value 2.0
@@ -602,19 +602,19 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64)
   //            runtime_error);
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact),
   //            runtime_error)
-  ONE_TEST_THROW(bool_type_id, v_b);
-  ONE_TEST(int8_type_id, v_i8, 2);
-  ONE_TEST(int16_type_id, v_i16, 2);
-  ONE_TEST(int32_type_id, v_i32, 2);
-  ONE_TEST(int64_type_id, v_i64, 2);
-  ONE_TEST(uint8_type_id, v_u8, 2u);
-  ONE_TEST(uint16_type_id, v_u16, 2u);
-  ONE_TEST(uint32_type_id, v_u32, 2u);
-  ONE_TEST(uint64_type_id, v_u64, 2u);
-  ONE_TEST(float32_type_id, v_f32, 2);
-  ONE_TEST(float64_type_id, v_f64, 2);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(2));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(2));
+  ONE_TEST_THROW(bool_id, v_b);
+  ONE_TEST(int8_id, v_i8, 2);
+  ONE_TEST(int16_id, v_i16, 2);
+  ONE_TEST(int32_id, v_i32, 2);
+  ONE_TEST(int64_id, v_i64, 2);
+  ONE_TEST(uint8_id, v_u8, 2u);
+  ONE_TEST(uint16_id, v_u16, 2u);
+  ONE_TEST(uint32_id, v_u32, 2u);
+  ONE_TEST(uint64_id, v_u64, 2u);
+  ONE_TEST(float32_id, v_f32, 2);
+  ONE_TEST(float64_id, v_f64, 2);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(2));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(2));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -631,19 +631,19 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64)
   //            runtime_error);
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact),
   //            runtime_error)
-  ONE_TEST_THROW(bool_type_id, v_b);
-  ONE_TEST(int8_type_id, v_i8, -1);
-  ONE_TEST(int16_type_id, v_i16, -1);
-  ONE_TEST(int32_type_id, v_i32, -1);
-  ONE_TEST(int64_type_id, v_i64, -1);
-  ONE_TEST_THROW(uint8_type_id, v_b);
-  ONE_TEST_THROW(uint16_type_id, v_b);
-  ONE_TEST_THROW(uint32_type_id, v_b);
-  ONE_TEST_THROW(uint64_type_id, v_b);
-  ONE_TEST(float32_type_id, v_f32, -1);
-  ONE_TEST(float64_type_id, v_f64, -1);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-1));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-1));
+  ONE_TEST_THROW(bool_id, v_b);
+  ONE_TEST(int8_id, v_i8, -1);
+  ONE_TEST(int16_id, v_i16, -1);
+  ONE_TEST(int32_id, v_i32, -1);
+  ONE_TEST(int64_id, v_i64, -1);
+  ONE_TEST_THROW(uint8_id, v_b);
+  ONE_TEST_THROW(uint16_id, v_b);
+  ONE_TEST_THROW(uint32_id, v_b);
+  ONE_TEST_THROW(uint64_id, v_b);
+  ONE_TEST(float32_id, v_f32, -1);
+  ONE_TEST(float64_id, v_f64, -1);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(-1));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(-1));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -660,19 +660,19 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64)
   //            runtime_error);
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact),
   //            runtime_error)
-  ONE_TEST_THROW(bool_type_id, v_b);
-  ONE_TEST_THROW(int8_type_id, v_i8);
-  ONE_TEST_THROW(int16_type_id, v_i16);
-  ONE_TEST_THROW(int32_type_id, v_i32);
-  ONE_TEST_THROW(int64_type_id, v_i64);
-  ONE_TEST_THROW(uint8_type_id, v_u8);
-  ONE_TEST_THROW(uint16_type_id, v_u16);
-  ONE_TEST_THROW(uint32_type_id, v_u32);
-  ONE_TEST_THROW(uint64_type_id, v_u64);
-  ONE_TEST(float32_type_id, v_f32, -10.25);
-  ONE_TEST(float64_type_id, v_f64, -10.25);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-10.25));
+  ONE_TEST_THROW(bool_id, v_b);
+  ONE_TEST_THROW(int8_id, v_i8);
+  ONE_TEST_THROW(int16_id, v_i16);
+  ONE_TEST_THROW(int32_id, v_i32);
+  ONE_TEST_THROW(int64_id, v_i64);
+  ONE_TEST_THROW(uint8_id, v_u8);
+  ONE_TEST_THROW(uint16_id, v_u16);
+  ONE_TEST_THROW(uint32_id, v_u32);
+  ONE_TEST_THROW(uint64_id, v_u64);
+  ONE_TEST(float32_id, v_f32, -10.25);
+  ONE_TEST(float64_id, v_f64, -10.25);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(-10.25f));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(-10.25));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -689,19 +689,19 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64)
   //            runtime_error);
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact),
   //            runtime_error)
-  ONE_TEST_THROW(bool_type_id, v_b);
-  ONE_TEST_THROW(int8_type_id, v_i8);
-  ONE_TEST_THROW(int16_type_id, v_i16);
-  ONE_TEST_THROW(int32_type_id, v_i32);
-  ONE_TEST_THROW(int64_type_id, v_i64);
-  ONE_TEST_THROW(uint8_type_id, v_u8);
-  ONE_TEST_THROW(uint16_type_id, v_u16);
-  ONE_TEST_THROW(uint32_type_id, v_u32);
-  ONE_TEST_THROW(uint64_type_id, v_u64);
-  ONE_TEST(float32_type_id, v_f32, float(1e21));
-  ONE_TEST(float64_type_id, v_f64, 1e21);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(float(1e21)));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(1e21));
+  ONE_TEST_THROW(bool_id, v_b);
+  ONE_TEST_THROW(int8_id, v_i8);
+  ONE_TEST_THROW(int16_id, v_i16);
+  ONE_TEST_THROW(int32_id, v_i32);
+  ONE_TEST_THROW(int64_id, v_i64);
+  ONE_TEST_THROW(uint8_id, v_u8);
+  ONE_TEST_THROW(uint16_id, v_u16);
+  ONE_TEST_THROW(uint32_id, v_u32);
+  ONE_TEST_THROW(uint64_id, v_u64);
+  ONE_TEST(float32_id, v_f32, float(1e21));
+  ONE_TEST(float64_id, v_f64, 1e21);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(float(1e21)));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(1e21));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -718,19 +718,19 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64)
   //            runtime_error);
   //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact),
   //            runtime_error)
-  ONE_TEST_THROW(bool_type_id, v_b);
-  ONE_TEST_THROW(int8_type_id, v_i8);
-  ONE_TEST_THROW(int16_type_id, v_i16);
-  ONE_TEST_THROW(int32_type_id, v_i32);
-  ONE_TEST_THROW(int64_type_id, v_i64);
-  ONE_TEST_THROW(uint8_type_id, v_u8);
-  ONE_TEST_THROW(uint16_type_id, v_u16);
-  ONE_TEST_THROW(uint32_type_id, v_u32);
-  ONE_TEST_THROW(uint64_type_id, v_u64);
-  ONE_TEST_THROW(float32_type_id, v_f32);
-  ONE_TEST_THROW(float64_type_id, v_f64);
-  ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f, 0.125f));
-  ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-10.25, 0.125));
+  ONE_TEST_THROW(bool_id, v_b);
+  ONE_TEST_THROW(int8_id, v_i8);
+  ONE_TEST_THROW(int16_id, v_i16);
+  ONE_TEST_THROW(int32_id, v_i32);
+  ONE_TEST_THROW(int64_id, v_i64);
+  ONE_TEST_THROW(uint8_id, v_u8);
+  ONE_TEST_THROW(uint16_id, v_u16);
+  ONE_TEST_THROW(uint32_id, v_u32);
+  ONE_TEST_THROW(uint64_id, v_u64);
+  ONE_TEST_THROW(float32_id, v_f32);
+  ONE_TEST_THROW(float64_id, v_f64);
+  ONE_TEST(complex_float32_id, v_cf32, dynd::complex<float>(-10.25f, 0.125f));
+  ONE_TEST(complex_float64_id, v_cf64, dynd::complex<double>(-10.25, 0.125));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -738,50 +738,50 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64)
   // when using the assign_error_inexact mode
   v_cf64 = 1 / 3.0;
   v_f32 = 0.f;
-  EXPECT_THROW(typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id),
+  EXPECT_THROW(typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, ndt::type(complex_float64_id),
                                  NULL, (char *)&v_cf64, assign_error_inexact),
                runtime_error);
   v_cf32 = 0.f;
-  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32,
-                                 ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact),
+  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_id), NULL, (char *)&v_cf32,
+                                 ndt::type(complex_float64_id), NULL, (char *)&v_cf64, assign_error_inexact),
                runtime_error);
-  typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL,
+  typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, ndt::type(complex_float64_id), NULL,
                     (char *)&v_cf64, assign_error_fractional);
   EXPECT_EQ((float)v_cf64.real(), v_f32);
-  typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, ndt::type(complex_float64_type_id), NULL,
+  typed_data_assign(ndt::type(complex_float32_id), NULL, (char *)&v_cf32, ndt::type(complex_float64_id), NULL,
                     (char *)&v_cf64, assign_error_fractional);
   EXPECT_EQ(dynd::complex<float>((float)v_cf64.real()), v_cf32);
 
   // Since this is a float -> double conversion, it should be exact coming back to float
   v_cf64 = 1 / 3.0f;
-  typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL,
+  typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, ndt::type(complex_float64_id), NULL,
                     (char *)&v_cf64, assign_error_inexact);
   EXPECT_EQ(v_cf64, dynd::complex<double>(v_f32));
-  typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, ndt::type(complex_float64_type_id), NULL,
+  typed_data_assign(ndt::type(complex_float32_id), NULL, (char *)&v_cf32, ndt::type(complex_float64_id), NULL,
                     (char *)&v_cf64, assign_error_inexact);
   EXPECT_EQ(v_cf64, dynd::complex<double>(v_cf32));
 
   // This should overflow converting to float
   v_cf64 = -1.5e250;
-  EXPECT_THROW(typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id),
+  EXPECT_THROW(typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, ndt::type(complex_float64_id),
                                  NULL, (char *)&v_cf64, assign_error_inexact),
                runtime_error);
-  EXPECT_THROW(typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id),
+  EXPECT_THROW(typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, ndt::type(complex_float64_id),
                                  NULL, (char *)&v_cf64, assign_error_fractional),
                runtime_error);
-  EXPECT_THROW(typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id),
+  EXPECT_THROW(typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, ndt::type(complex_float64_id),
                                  NULL, (char *)&v_cf64, assign_error_overflow),
                runtime_error);
-  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32,
-                                 ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact),
+  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_id), NULL, (char *)&v_cf32,
+                                 ndt::type(complex_float64_id), NULL, (char *)&v_cf64, assign_error_inexact),
                runtime_error);
-  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32,
-                                 ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_fractional),
+  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_id), NULL, (char *)&v_cf32,
+                                 ndt::type(complex_float64_id), NULL, (char *)&v_cf64, assign_error_fractional),
                runtime_error);
-  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32,
-                                 ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_overflow),
+  EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_id), NULL, (char *)&v_cf32,
+                                 ndt::type(complex_float64_id), NULL, (char *)&v_cf64, assign_error_overflow),
                runtime_error);
-  typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL,
+  typed_data_assign(ndt::type(float32_id), NULL, (char *)&v_f32, ndt::type(complex_float64_id), NULL,
                     (char *)&v_cf64, assign_error_nocheck);
 #ifdef _MSC_VER
   EXPECT_TRUE(_fpclass(v_f32) == _FPCLASS_NINF);

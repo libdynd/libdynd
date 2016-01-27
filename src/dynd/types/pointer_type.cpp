@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::pointer_type::pointer_type(const type &target_tp)
-    : base_expr_type(pointer_type_id, expr_kind, sizeof(void *), sizeof(void *),
+    : base_expr_type(pointer_id, expr_kind, sizeof(void *), sizeof(void *),
                      inherited_flags(target_tp.get_flags(), type_flag_zeroinit | type_flag_blockref),
                      sizeof(pointer_type_arrmeta) + target_tp.get_arrmeta_size(), target_tp.get_ndim()),
       m_target_tp(target_tp)
@@ -24,7 +24,7 @@ ndt::pointer_type::pointer_type(const type &target_tp)
   // I'm not 100% sure how blockref pointer types should interact with
   // the computational subsystem, the details will have to shake out
   // when we want to actually do something with them.
-  if (target_tp.get_kind() == expr_kind && target_tp.get_type_id() != pointer_type_id) {
+  if (target_tp.get_kind() == expr_kind && target_tp.get_id() != pointer_id) {
     stringstream ss;
     ss << "A dynd pointer type's target cannot be the expression type ";
     ss << target_tp;
@@ -85,7 +85,7 @@ const ndt::type &ndt::pointer_type::get_operand_type() const
 {
   static type vpt = make(make_type<void>());
 
-  if (m_target_tp.get_type_id() == pointer_type_id) {
+  if (m_target_tp.get_id() == pointer_id) {
     return m_target_tp;
   }
   else {
@@ -209,7 +209,7 @@ bool ndt::pointer_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != pointer_type_id) {
+  else if (rhs.get_id() != pointer_id) {
     return false;
   }
   else {
@@ -323,7 +323,7 @@ nd::array ndt::pointer_type::get_option_nafunc() const
 bool ndt::pointer_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                               std::map<std::string, type> &tp_vars) const
 {
-  if (candidate_tp.get_type_id() != pointer_type_id) {
+  if (candidate_tp.get_id() != pointer_id) {
     return false;
   }
 
@@ -387,7 +387,7 @@ struct dereference_kernel : nd::base_kernel<dereference_kernel> {
     }
     uint64_t flags = self.get()->flags;
 
-    while (dt.get_type_id() == pointer_type_id) {
+    while (dt.get_id() == pointer_id) {
       const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
       dt = dt.extended<ndt::pointer_type>()->get_target_type();
       arrmeta += sizeof(pointer_type_arrmeta);
@@ -439,7 +439,7 @@ struct static_pointer {
   ndt::pointer_type bt16;
   ndt::pointer_type bt17;
 
-  ndt::type static_builtins_instance[builtin_type_id_count];
+  ndt::type static_builtins_instance[builtin_id_count];
 
   static_pointer()
       : bt1(ndt::type((type_id_t)1)), bt2(ndt::type((type_id_t)2)), bt3(ndt::type((type_id_t)3)),
@@ -479,7 +479,7 @@ ndt::type ndt::pointer_type::make(const type &target_tp)
   static static_pointer sp;
 
   if (target_tp.is_builtin()) {
-    return sp.static_builtins_instance[target_tp.get_type_id()];
+    return sp.static_builtins_instance[target_tp.get_id()];
   }
   else {
     return type(new pointer_type(target_tp), false);

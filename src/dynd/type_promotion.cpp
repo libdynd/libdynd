@@ -58,7 +58,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
       case real_kind:
         // The bool type doesn't affect float type sizes, except
         // require at least float32
-        return tp1_val.unchecked_get_builtin_type_id() != float16_type_id ? tp1_val : ndt::make_type<float>();
+        return tp1_val.unchecked_get_builtin_id() != float16_id ? tp1_val : ndt::make_type<float>();
       default:
         return tp1_val;
       }
@@ -84,7 +84,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
       case real_kind:
         // Integer type sizes don't affect float type sizes, except
         // require at least float32
-        return tp1_val.unchecked_get_builtin_type_id() != float16_type_id ? tp1_val : ndt::make_type<float>();
+        return tp1_val.unchecked_get_builtin_id() != float16_id ? tp1_val : ndt::make_type<float>();
       case complex_kind:
         // Integer type sizes don't affect complex type sizes
         return tp1_val;
@@ -116,7 +116,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
       case real_kind:
         // Integer type sizes don't affect float type sizes, except
         // require at least float32
-        return tp1_val.unchecked_get_builtin_type_id() != float16_type_id ? tp1_val : ndt::make_type<float>();
+        return tp1_val.unchecked_get_builtin_id() != float16_id ? tp1_val : ndt::make_type<float>();
       case complex_kind:
         // Integer type sizes don't affect complex type sizes
         return tp1_val;
@@ -134,11 +134,11 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
       case uint_kind:
         return tp0_val;
       case real_kind:
-        return ndt::type(max(max(tp0_val.unchecked_get_builtin_type_id(), tp1_val.unchecked_get_builtin_type_id()),
-                             float32_type_id));
+        return ndt::type(max(max(tp0_val.unchecked_get_builtin_id(), tp1_val.unchecked_get_builtin_id()),
+                             float32_id));
       case complex_kind:
-        if (tp0_val.get_type_id() == float64_type_id && tp1_val.get_type_id() == complex_float32_type_id) {
-          return ndt::type(complex_float64_type_id);
+        if (tp0_val.get_id() == float64_id && tp1_val.get_id() == complex_float32_id) {
+          return ndt::type(complex_float64_id);
         }
         else {
           return tp1_val;
@@ -156,9 +156,9 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
       case sint_kind:
       case uint_kind:
       case real_kind:
-        if (tp0_val.unchecked_get_builtin_type_id() == complex_float32_type_id &&
-            tp1_val.unchecked_get_builtin_type_id() == float64_type_id) {
-          return ndt::type(complex_float64_type_id);
+        if (tp0_val.unchecked_get_builtin_id() == complex_float32_id &&
+            tp1_val.unchecked_get_builtin_id() == float64_id) {
+          return ndt::type(complex_float64_id);
         }
         else {
           return tp0_val;
@@ -184,16 +184,16 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
 
   // HACK for getting simple string type promotions.
   // TODO: Do this properly in a pluggable manner.
-  if ((tp0_val.get_type_id() == string_type_id || tp0_val.get_type_id() == fixed_string_type_id) &&
-      (tp1_val.get_type_id() == string_type_id || tp1_val.get_type_id() == fixed_string_type_id)) {
+  if ((tp0_val.get_id() == string_id || tp0_val.get_id() == fixed_string_id) &&
+      (tp1_val.get_id() == string_id || tp1_val.get_id() == fixed_string_id)) {
     // Always promote to the default utf-8 string (for now, maybe return
     // encoding, etc later?)
     return ndt::make_type<ndt::string_type>();
   }
 
   // the value underneath the option type promotes
-  if (tp0_val.get_type_id() == option_type_id) {
-    if (tp1_val.get_type_id() == option_type_id) {
+  if (tp0_val.get_id() == option_id) {
+    if (tp1_val.get_id() == option_id) {
       return ndt::make_type<ndt::option_type>(
           promote_types_arithmetic(tp0_val.extended<ndt::option_type>()->get_value_type(),
                                    tp1_val.extended<ndt::option_type>()->get_value_type()));
@@ -203,31 +203,31 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
           promote_types_arithmetic(tp0_val.extended<ndt::option_type>()->get_value_type(), tp1_val));
     }
   }
-  else if (tp1_val.get_type_id() == option_type_id) {
+  else if (tp1_val.get_id() == option_id) {
     return ndt::make_type<ndt::option_type>(
         promote_types_arithmetic(tp0_val, tp1_val.extended<ndt::option_type>()->get_value_type()));
   }
 
   // type, string -> type
-  if (tp0_val.get_type_id() == type_type_id && tp1_val.get_kind() == string_kind) {
+  if (tp0_val.get_id() == type_id && tp1_val.get_kind() == string_kind) {
     return tp0_val;
   }
   // string, type -> type
-  if (tp0_val.get_kind() == string_kind && tp1_val.get_type_id() == type_type_id) {
+  if (tp0_val.get_kind() == string_kind && tp1_val.get_id() == type_id) {
     return tp1_val;
   }
 
   // In general, if one type is void, just return the other type
-  if (tp0_val.get_type_id() == void_type_id) {
+  if (tp0_val.get_id() == void_id) {
     return tp1_val;
   }
-  else if (tp1_val.get_type_id() == void_type_id) {
+  else if (tp1_val.get_id() == void_id) {
     return tp0_val;
   }
 
   // Promote some dimension types
-  if ((tp0_val.get_type_id() == var_dim_type_id && tp1_val.get_kind() == dim_kind) ||
-      (tp1_val.get_type_id() == var_dim_type_id && tp0_val.get_kind() == dim_kind)) {
+  if ((tp0_val.get_id() == var_dim_id && tp1_val.get_kind() == dim_kind) ||
+      (tp1_val.get_id() == var_dim_id && tp0_val.get_kind() == dim_kind)) {
     return ndt::var_dim_type::make(
         promote_types_arithmetic(tp0_val.extended<ndt::base_dim_type>()->get_element_type(),
                                  tp1_val.extended<ndt::base_dim_type>()->get_element_type()));

@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::var_dim_type::var_dim_type(const type &element_tp)
-    : base_dim_type(var_dim_type_id, element_tp, sizeof(data_type), alignof(data_type), sizeof(metadata_type),
+    : base_dim_type(var_dim_id, element_tp, sizeof(data_type), alignof(data_type), sizeof(metadata_type),
                     type_flag_zeroinit | type_flag_blockref, false)
 {
   // NOTE: The element type may have type_flag_destructor set. In this case,
@@ -352,7 +352,7 @@ bool ndt::var_dim_type::is_lossless_assignment(const type &dst_tp, const type &s
     if (src_tp.extended() == this) {
       return true;
     }
-    else if (src_tp.get_type_id() == var_dim_type_id) {
+    else if (src_tp.get_id() == var_dim_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -365,7 +365,7 @@ bool ndt::var_dim_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != var_dim_type_id) {
+  else if (rhs.get_id() != var_dim_id) {
     return false;
   }
   else {
@@ -583,7 +583,7 @@ ndt::type ndt::var_dim_type::with_element_type(const type &element_tp) const { r
 
 void ndt::var_dim_element_initialize(const type &tp, const char *arrmeta, char *data, intptr_t count)
 {
-  if (tp.get_type_id() != var_dim_type_id) {
+  if (tp.get_id() != var_dim_id) {
     stringstream ss;
     ss << "internal error: expected a var_dim type, not " << tp;
     throw dynd::type_error(ss.str());
@@ -627,7 +627,7 @@ void ndt::var_dim_element_initialize(const type &tp, const char *arrmeta, char *
 
 void ndt::var_dim_element_resize(const type &tp, const char *arrmeta, char *data, intptr_t count)
 {
-  if (tp.get_type_id() != var_dim_type_id) {
+  if (tp.get_id() != var_dim_id) {
     stringstream ss;
     ss << "internal error: expected a var_dim type, not " << tp;
     throw dynd::type_error(ss.str());

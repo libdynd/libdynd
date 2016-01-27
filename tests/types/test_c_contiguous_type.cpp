@@ -20,7 +20,7 @@ TEST(CContiguousType, Basic)
 {
   ndt::type tp = ndt::c_contiguous_type::make(ndt::type("10 * int32"));
 
-  EXPECT_EQ(c_contiguous_type_id, tp.get_type_id());
+  EXPECT_EQ(c_contiguous_id, tp.get_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_FALSE(tp.is_expression());
   EXPECT_EQ(tp, ndt::type("C[10 * int32]"));
@@ -69,7 +69,7 @@ TEST(CFixedDimType, Create) {
 
     // Strings with various encodings and sizes
     d = ndt::make_cfixed_dim(3, ndt::make_type<int32_t>());
-    EXPECT_EQ(cfixed_dim_type_id, d.get_type_id());
+    EXPECT_EQ(cfixed_dim_id, d.get_id());
     EXPECT_EQ(dim_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(12u, d.get_data_size());
@@ -90,7 +90,7 @@ TEST(CFixedDimType, Create) {
     EXPECT_EQ(d, ndt::type(d.str()));
 
     d = ndt::make_cfixed_dim(1, ndt::make_type<int32_t>());
-    EXPECT_EQ(cfixed_dim_type_id, d.get_type_id());
+    EXPECT_EQ(cfixed_dim_id, d.get_id());
     EXPECT_EQ(dim_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(4u, d.get_data_size());
@@ -103,7 +103,7 @@ TEST(CFixedDimType, Create) {
 
     // With the stride != element type size
     d = ndt::make_cfixed_dim(3, ndt::make_type<int32_t>(), 8);
-    EXPECT_EQ(cfixed_dim_type_id, d.get_type_id());
+    EXPECT_EQ(cfixed_dim_id, d.get_id());
     EXPECT_EQ(dim_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(20u, d.get_data_size());
@@ -121,7 +121,7 @@ TEST(CFixedDimType, CreateCOrder) {
 NULL);
     EXPECT_EQ(3, d.get_ndim());
     EXPECT_EQ(3, d.get_strided_ndim());
-    EXPECT_EQ(cfixed_dim_type_id, d.get_type_id());
+    EXPECT_EQ(cfixed_dim_id, d.get_id());
     EXPECT_EQ(ndt::make_cfixed_dim(2, shape+1, ndt::make_type<int16_t>(), NULL),
 d.at(0));
     EXPECT_EQ(ndt::make_cfixed_dim(1, shape+2, ndt::make_type<int16_t>(), NULL),
@@ -148,10 +148,10 @@ axis_perm);
     EXPECT_EQ(3, d.get_ndim());
     EXPECT_EQ(3, d.get_strided_ndim());
     EXPECT_EQ(48u, d.get_data_size());
-    EXPECT_EQ(cfixed_dim_type_id, d.get_type_id());
-    EXPECT_EQ(cfixed_dim_type_id, d.at(0).get_type_id());
-    EXPECT_EQ(cfixed_dim_type_id, d.at(0,0).get_type_id());
-    EXPECT_EQ(int16_type_id, d.at(0,0,0).get_type_id());
+    EXPECT_EQ(cfixed_dim_id, d.get_id());
+    EXPECT_EQ(cfixed_dim_id, d.at(0).get_id());
+    EXPECT_EQ(cfixed_dim_id, d.at(0,0).get_id());
+    EXPECT_EQ(int16_id, d.at(0,0,0).get_id());
     // Check that the shape is right and the strides are in F-order
     EXPECT_EQ(2, d.extended<cfixed_dim_type>()->get_fixed_dim_size());
     EXPECT_EQ(2, d.extended<cfixed_dim_type>()->get_fixed_stride());
@@ -224,7 +224,7 @@ TEST(CFixedDimType, AssignKernel_ScalarToFixed) {
     a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
     b = 9.0;
-    EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(cfixed_dim_id, a.get_type().get_id());
     make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get()->metadata(),
 b.get_type(),
                            b.get()->metadata(), kernel_request_single,
@@ -244,8 +244,8 @@ TEST(CFixedDimType, AssignKernel_FixedToFixed) {
     a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
     b = parse_json("cfixed[3] * int32", "[3, 5, 7]");
-    EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
+    EXPECT_EQ(cfixed_dim_id, a.get_type().get_id());
+    EXPECT_EQ(cfixed_dim_id, b.get_type().get_id());
     make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get()->metadata(),
 b.get_type(),
                            b.get()->metadata(), kernel_request_single,
@@ -264,7 +264,7 @@ TEST(CFixedDimType, AssignKernel_FixedToScalarError) {
     // Assignment fixed array -> scalar
     a = 9.0;
     b = parse_json("cfixed[3] * int32", "[3, 5, 7]");
-    EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
+    EXPECT_EQ(cfixed_dim_id, b.get_type().get_id());
     EXPECT_THROW(make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(),
 a.get()->metadata(),
                                         b.get_type(), b.get()->metadata(),
@@ -284,8 +284,8 @@ TEST(CFixedDimType, AssignCFixedToFixedKernel) {
     a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
     b = vals_int;
-    EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+    EXPECT_EQ(cfixed_dim_id, a.get_type().get_id());
+    EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
     make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get()->metadata(),
 b.get_type(),
                            b.get()->metadata(), kernel_request_single,
@@ -301,8 +301,8 @@ b.get_type(),
     a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
     b = vals_int_single;
-    EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+    EXPECT_EQ(cfixed_dim_id, a.get_type().get_id());
+    EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
     make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get()->metadata(),
 b.get_type(),
                            b.get()->metadata(), kernel_request_single,
@@ -318,8 +318,8 @@ b.get_type(),
     a = nd::empty<float[3]>();
     a.vals() = 0;
     b = parse_json("cfixed[3] * int32", "[3, 5, 7]");
-    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_id, a.get_type().get_id());
+    EXPECT_EQ(cfixed_dim_id, b.get_type().get_id());
     make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get()->metadata(),
 b.get_type(),
                            b.get()->metadata(), kernel_request_single,
@@ -335,8 +335,8 @@ b.get_type(),
     a = nd::empty<float[3]>();
     a.vals() = 0;
     b = parse_json("cfixed[1] * int32", "[9]");
-    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_id, a.get_type().get_id());
+    EXPECT_EQ(cfixed_dim_id, b.get_type().get_id());
     make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get()->metadata(),
 b.get_type(),
                            b.get()->metadata(), kernel_request_single,

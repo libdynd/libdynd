@@ -63,11 +63,11 @@ DYND_API void make_comparison_kernel(nd::kernel_builder *ckb, const ndt::type &s
  *
  * \param ckb  The hierarchical assignment kernel being constructed.
  * \param ckb_offset  The offset within 'ckb'.
- * \param src0_type_id  The first dynd type id.
- * \param src1_type_id  The second dynd type id.
+ * \param src0_id  The first dynd type id.
+ * \param src1_id  The second dynd type id.
  * \param comptype  The type of comparison to do.
  */
-DYND_API void make_builtin_type_comparison_kernel(nd::kernel_builder *ckb, type_id_t src0_type_id,
-                                                  type_id_t src1_type_id, comparison_type_t comptype);
+DYND_API void make_builtin_type_comparison_kernel(nd::kernel_builder *ckb, type_id_t src0_id,
+                                                  type_id_t src1_id, comparison_type_t comptype);
 
 } // namespace dynd

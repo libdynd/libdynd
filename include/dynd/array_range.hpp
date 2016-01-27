@@ -87,12 +87,12 @@ namespace nd {
 
   inline nd::array linspace(float start, float stop, intptr_t count = 50)
   {
-    return linspace(ndt::type(float32_type_id), &start, &stop, count);
+    return linspace(ndt::type(float32_id), &start, &stop, count);
   }
 
   inline nd::array linspace(double start, double stop, intptr_t count = 50)
   {
-    return linspace(ndt::type(float64_type_id), &start, &stop, count);
+    return linspace(ndt::type(float64_id), &start, &stop, count);
   }
 
   template <class T>

@@ -13,7 +13,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::fixed_bytes_type::fixed_bytes_type(intptr_t data_size, intptr_t data_alignment)
-    : base_bytes_type(fixed_bytes_type_id, bytes_kind, data_size, data_alignment, type_flag_none, 0)
+    : base_bytes_type(fixed_bytes_id, bytes_kind, data_size, data_alignment, type_flag_none, 0)
 {
   if (data_alignment > data_size) {
     std::stringstream ss;
@@ -66,7 +66,7 @@ bool ndt::fixed_bytes_type::is_lossless_assignment(const type &dst_tp, const typ
     if (src_tp.extended() == this) {
       return true;
     }
-    else if (src_tp.get_type_id() == fixed_bytes_type_id) {
+    else if (src_tp.get_id() == fixed_bytes_id) {
       const fixed_bytes_type *src_fs = static_cast<const fixed_bytes_type *>(src_tp.extended());
       return get_data_size() == src_fs->get_data_size();
     }
@@ -84,7 +84,7 @@ bool ndt::fixed_bytes_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != fixed_bytes_type_id) {
+  else if (rhs.get_id() != fixed_bytes_id) {
     return false;
   }
   else {

@@ -17,7 +17,7 @@ using namespace dynd;
 TEST(ArrayType, Constructor)
 {
   ndt::type array_tp = ndt::array_type::make(ndt::make_type<int32>());
-  EXPECT_EQ(array_type_id, array_tp.get_type_id());
+  EXPECT_EQ(array_id, array_tp.get_id());
   EXPECT_EQ(expr_kind, array_tp.get_kind());
   EXPECT_EQ(sizeof(nd::array), array_tp.get_data_size());
   EXPECT_EQ(sizeof(nd::array), array_tp.get_data_alignment());

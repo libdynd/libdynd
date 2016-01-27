@@ -89,7 +89,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(string_type_id); }
+    static type equivalent() { return type(string_id); }
 
     static string na() { return string(); }
   };

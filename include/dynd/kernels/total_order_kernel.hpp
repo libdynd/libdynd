@@ -16,8 +16,8 @@ namespace nd {
     struct total_order_kernel;
 
     template <>
-    struct total_order_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind>
-        : base_kernel<total_order_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind>, 2> {
+    struct total_order_kernel<bool_id, bool_kind, bool_id, bool_kind>
+        : base_kernel<total_order_kernel<bool_id, bool_kind, bool_id, bool_kind>, 2> {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<int *>(dst) =
@@ -26,8 +26,8 @@ namespace nd {
     };
 
     template <>
-    struct total_order_kernel<int32_type_id, sint_kind, int32_type_id, sint_kind>
-        : base_kernel<total_order_kernel<int32_type_id, sint_kind, int32_type_id, sint_kind>, 2> {
+    struct total_order_kernel<int32_id, sint_kind, int32_id, sint_kind>
+        : base_kernel<total_order_kernel<int32_id, sint_kind, int32_id, sint_kind>, 2> {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<int *>(dst) = *reinterpret_cast<int *>(src[0]) < *reinterpret_cast<int *>(src[1]);
@@ -35,8 +35,8 @@ namespace nd {
     };
 
     template <>
-    struct total_order_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind>
-        : base_kernel<total_order_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind>, 2> {
+    struct total_order_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind>
+        : base_kernel<total_order_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind>, 2> {
       size_t size;
 
       total_order_kernel(size_t size) : size(size) {}
@@ -55,8 +55,8 @@ namespace nd {
     };
 
     template <>
-    struct total_order_kernel<string_type_id, string_kind, string_type_id, string_kind>
-        : base_kernel<total_order_kernel<string_type_id, string_kind, string_type_id, string_kind>, 2> {
+    struct total_order_kernel<string_id, string_kind, string_id, string_kind>
+        : base_kernel<total_order_kernel<string_id, string_kind, string_id, string_kind>, 2> {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<int *>(dst) = std::lexicographical_compare(

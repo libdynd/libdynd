@@ -158,11 +158,11 @@ public:
 /**
  * An exception for an invalid type ID.
  */
-class DYND_API invalid_type_id : public type_error {
+class DYND_API invalid_id : public type_error {
 public:
-  invalid_type_id(int type_id);
+  invalid_id(int type_id);
 
-  virtual ~invalid_type_id() throw() {}
+  virtual ~invalid_id() throw() {}
 };
 
 /**

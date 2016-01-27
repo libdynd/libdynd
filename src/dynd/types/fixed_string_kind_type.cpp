@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::fixed_string_kind_type::fixed_string_kind_type()
-    : base_string_type(fixed_string_type_id, kind_kind, 0, 0, type_flag_symbolic, 0)
+    : base_string_type(fixed_string_id, kind_kind, 0, 0, type_flag_symbolic, 0)
 {
 }
 
@@ -80,7 +80,7 @@ bool ndt::fixed_string_kind_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   } else {
-    return rhs.get_kind() == kind_kind && rhs.get_type_id() == fixed_string_type_id;
+    return rhs.get_kind() == kind_kind && rhs.get_id() == fixed_string_id;
   }
 }
 
@@ -140,5 +140,5 @@ bool ndt::fixed_string_kind_type::match(const char *DYND_UNUSED(arrmeta), const 
                                         const char *DYND_UNUSED(candidate_arrmeta),
                                         std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
 {
-  return candidate_tp.get_type_id() == fixed_string_type_id;
+  return candidate_tp.get_id() == fixed_string_id;
 }

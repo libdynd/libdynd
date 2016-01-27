@@ -23,7 +23,7 @@ TEST(BytesDType, Create)
 
   // Strings with various alignments
   d = ndt::bytes_type::make(1);
-  EXPECT_EQ(bytes_type_id, d.get_type_id());
+  EXPECT_EQ(bytes_id, d.get_id());
   EXPECT_EQ(bytes_kind, d.get_kind());
   EXPECT_EQ(alignof(bytes), d.get_data_alignment());
   EXPECT_EQ(sizeof(bytes), d.get_data_size());
@@ -34,7 +34,7 @@ TEST(BytesDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::bytes_type::make(2);
-  EXPECT_EQ(bytes_type_id, d.get_type_id());
+  EXPECT_EQ(bytes_id, d.get_id());
   EXPECT_EQ(bytes_kind, d.get_kind());
   EXPECT_EQ(alignof(bytes), d.get_data_alignment());
   EXPECT_EQ(sizeof(bytes), d.get_data_size());
@@ -44,7 +44,7 @@ TEST(BytesDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::bytes_type::make(4);
-  EXPECT_EQ(bytes_type_id, d.get_type_id());
+  EXPECT_EQ(bytes_id, d.get_id());
   EXPECT_EQ(bytes_kind, d.get_kind());
   EXPECT_EQ(alignof(bytes), d.get_data_alignment());
   EXPECT_EQ(sizeof(bytes), d.get_data_size());
@@ -54,7 +54,7 @@ TEST(BytesDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::bytes_type::make(8);
-  EXPECT_EQ(bytes_type_id, d.get_type_id());
+  EXPECT_EQ(bytes_id, d.get_id());
   EXPECT_EQ(bytes_kind, d.get_kind());
   EXPECT_EQ(alignof(bytes), d.get_data_alignment());
   EXPECT_EQ(sizeof(bytes), d.get_data_size());
@@ -64,7 +64,7 @@ TEST(BytesDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::bytes_type::make(16);
-  EXPECT_EQ(bytes_type_id, d.get_type_id());
+  EXPECT_EQ(bytes_id, d.get_id());
   EXPECT_EQ(bytes_kind, d.get_kind());
   EXPECT_EQ(alignof(bytes), d.get_data_alignment());
   EXPECT_EQ(16u, d.extended<ndt::bytes_type>()->get_target_alignment());

@@ -84,7 +84,7 @@ namespace nd {
   };
 
   template <>
-  struct equal_kernel<tuple_type_id, tuple_type_id> : base_kernel<equal_kernel<tuple_type_id, tuple_type_id>, 2> {
+  struct equal_kernel<tuple_id, tuple_id> : base_kernel<equal_kernel<tuple_id, tuple_id>, 2> {
     typedef equal_kernel extra_type;
 
     size_t field_count;
@@ -160,8 +160,8 @@ namespace nd {
   };
 
   template <>
-  struct not_equal_kernel<tuple_type_id, tuple_type_id>
-      : base_kernel<not_equal_kernel<tuple_type_id, tuple_type_id>, 2> {
+  struct not_equal_kernel<tuple_id, tuple_id>
+      : base_kernel<not_equal_kernel<tuple_id, tuple_id>, 2> {
     typedef not_equal_kernel extra_type;
 
     size_t field_count;

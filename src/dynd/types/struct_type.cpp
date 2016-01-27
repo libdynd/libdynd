@@ -19,7 +19,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::struct_type::struct_type(const nd::array &field_names, const nd::array &field_types, bool variadic)
-    : tuple_type(struct_type_id, field_types, type_flag_none, true, variadic), m_field_names(field_names)
+    : tuple_type(struct_id, field_types, type_flag_none, true, variadic), m_field_names(field_names)
 {
   /*
     if (!nd::ensure_immutable_contig<std::string>(m_field_names)) {
@@ -169,7 +169,7 @@ bool ndt::struct_type::is_lossless_assignment(const type &dst_tp, const type &sr
     if (src_tp.extended() == this) {
       return true;
     }
-    else if (src_tp.get_type_id() == struct_type_id) {
+    else if (src_tp.get_id() == struct_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -199,7 +199,7 @@ bool ndt::struct_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != struct_type_id) {
+  else if (rhs.get_id() != struct_id) {
     return false;
   }
   else {
@@ -426,7 +426,7 @@ static nd::array make_self_types()
   return result;
 }
 
-ndt::struct_type::struct_type(int, int) : tuple_type(struct_type_id, make_self_types(), type_flag_none, false, false)
+ndt::struct_type::struct_type(int, int) : tuple_type(struct_id, make_self_types(), type_flag_none, false, false)
 {
   // Equivalent to ndt::struct_type::make(ndt::make_ndarrayarg(), "self");
   // but hardcoded to break the dependency of struct_type::array_parameters_type

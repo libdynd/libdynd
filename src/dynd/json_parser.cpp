@@ -292,7 +292,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrme
   for (intptr_t i = 0; i < field_count; ++i) {
     if (!populated_fields[i]) {
       const ndt::type &field_tp = fsd->get_field_type(i);
-      if (field_tp.get_type_id() == option_type_id) {
+      if (field_tp.get_id() == option_id) {
         field_tp.extended<ndt::option_type>()->assign_na(arrmeta + arrmeta_offsets[i], out_data + data_offsets[i],
                                                          &eval::default_eval_context);
       }
@@ -413,7 +413,7 @@ static void parse_bool_json(const ndt::type &tp, const char *DYND_UNUSED(arrmeta
   }
 
   if (value < 2) {
-    if (tp.get_type_id() == bool_type_id) {
+    if (tp.get_id() == bool_id) {
       *out_data = value;
     }
     else {
@@ -477,14 +477,14 @@ static void parse_datetime_json(const ndt::type &tp, const char *arrmeta, char *
   const char *strbegin, *strend;
   bool escaped;
   if (option && parse_token(begin, end, "null")) {
-    switch (tp.get_type_id()) {
-    case date_type_id:
+    switch (tp.get_id()) {
+    case date_id:
       *reinterpret_cast<int32_t *>(out_data) = DYND_DATE_NA;
       return;
-    case time_type_id:
+    case time_id:
       *reinterpret_cast<int64_t *>(out_data) = DYND_TIME_NA;
       return;
-    case datetime_type_id:
+    case datetime_id:
       *reinterpret_cast<int64_t *>(out_data) = DYND_DATETIME_NA;
       return;
     default:
@@ -527,8 +527,8 @@ static void parse_type(const ndt::type &tp, const char *DYND_UNUSED(arrmeta), ch
   const char *strbegin, *strend;
   bool escaped;
   if (option && parse_token(begin, end, "null")) {
-    switch (tp.get_type_id()) {
-    case type_type_id:
+    switch (tp.get_id()) {
+    case type_id:
       *reinterpret_cast<ndt::type *>(out_data) = ndt::type();
       return;
     default:
@@ -566,11 +566,11 @@ static void parse_type(const ndt::type &tp, const char *DYND_UNUSED(arrmeta), ch
 static void parse_dim_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&begin,
                            const char *end, const eval::eval_context *ectx)
 {
-  switch (tp.get_type_id()) {
-  case fixed_dim_type_id:
+  switch (tp.get_id()) {
+  case fixed_dim_id:
     parse_strided_dim_json(tp, arrmeta, out_data, begin, end, ectx);
     break;
-  case var_dim_type_id:
+  case var_dim_id:
     parse_var_dim_json(tp, arrmeta, out_data, begin, end, ectx);
     break;
   default: {
@@ -640,7 +640,7 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
       else if (value_tp.get_kind() == sint_kind || value_tp.get_kind() == uint_kind ||
                value_tp.get_kind() == real_kind || value_tp.get_kind() == complex_kind) {
         if (json::parse_number(begin, end, strbegin, strend)) {
-          string_to_number(out_data, value_tp.get_type_id(), strbegin, strend, ectx->errmode);
+          string_to_number(out_data, value_tp.get_id(), strbegin, strend, ectx->errmode);
         }
         else {
           throw json_parse_error(begin, "expected a number", tp);
@@ -910,7 +910,7 @@ static ndt::type discover_type(const char *&begin, const char *end)
     if (!parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
       throw parse_error(begin, "invalid string");
     }
-    return ndt::type(string_type_id);
+    return ndt::type(string_id);
   }
   case 'T':
   case 't':

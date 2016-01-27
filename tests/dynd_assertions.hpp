@@ -35,7 +35,7 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
 {
   using namespace dynd;
 
-  if (val1.get_type().get_type_id() == cuda_device_type_id && val2.get_type().get_type_id() == cuda_device_type_id) {
+  if (val1.get_type().get_id() == cuda_device_id && val2.get_type().get_id() == cuda_device_id) {
     return CompareDyNDArrays(expr1, expr2, val1.to_host(), val2.to_host());
   }
 
@@ -334,7 +334,7 @@ inline ::testing::AssertionResult AssertArrayNear(const char *expected_expr, con
 {
   const dynd::ndt::type &expected_tp = expected.get_type();
   const dynd::ndt::type &actual_tp = actual.get_type();
-  if (expected_tp.get_type_id() == dynd::cuda_device_type_id && actual_tp.get_type_id() == dynd::cuda_device_type_id) {
+  if (expected_tp.get_id() == dynd::cuda_device_id && actual_tp.get_id() == dynd::cuda_device_id) {
     return AssertArrayNear(expected_expr, actual_expr, rel_error_max_expr, expected.to_host(), actual.to_host(),
                            rel_error_max);
   }

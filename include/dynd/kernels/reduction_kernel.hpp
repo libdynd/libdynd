@@ -230,8 +230,8 @@ namespace nd {
     struct reduction_kernel;
 
     template <>
-    struct reduction_kernel<fixed_dim_type_id, false, false>
-        : base_reduction_kernel<reduction_kernel<fixed_dim_type_id, false, false>> {
+    struct reduction_kernel<fixed_dim_id, false, false>
+        : base_reduction_kernel<reduction_kernel<fixed_dim_id, false, false>> {
       std::intptr_t src0_element_size;
       std::intptr_t src0_element_stride;
 
@@ -355,8 +355,8 @@ namespace nd {
      *
      */
     template <>
-    struct reduction_kernel<fixed_dim_type_id, false, true>
-        : base_reduction_kernel<reduction_kernel<fixed_dim_type_id, false, true>> {
+    struct reduction_kernel<fixed_dim_id, false, true>
+        : base_reduction_kernel<reduction_kernel<fixed_dim_id, false, true>> {
       // The code assumes that size >= 1
       intptr_t size_first;
       intptr_t src_stride_first;
@@ -489,8 +489,8 @@ namespace nd {
     };
 
     template <>
-    struct reduction_kernel<var_dim_type_id, false, true>
-        : base_reduction_kernel<reduction_kernel<var_dim_type_id, false, true>> {
+    struct reduction_kernel<var_dim_id, false, true>
+        : base_reduction_kernel<reduction_kernel<var_dim_id, false, true>> {
       intptr_t src0_inner_stride;
       intptr_t src0_inner_stride_first;
       intptr_t init_offset;
@@ -602,8 +602,8 @@ namespace nd {
      *
      */
     template <>
-    struct reduction_kernel<fixed_dim_type_id, true, false>
-        : base_reduction_kernel<reduction_kernel<fixed_dim_type_id, true, false>> {
+    struct reduction_kernel<fixed_dim_id, true, false>
+        : base_reduction_kernel<reduction_kernel<fixed_dim_id, true, false>> {
       intptr_t size;
       intptr_t dst_stride, src_stride;
 
@@ -710,8 +710,8 @@ namespace nd {
      *
      */
     template <>
-    struct reduction_kernel<fixed_dim_type_id, true, true>
-        : base_reduction_kernel<reduction_kernel<fixed_dim_type_id, true, true>> {
+    struct reduction_kernel<fixed_dim_id, true, true>
+        : base_reduction_kernel<reduction_kernel<fixed_dim_id, true, true>> {
       // The code assumes that size >= 1
       intptr_t size;
       intptr_t dst_stride, src_stride;
@@ -853,11 +853,11 @@ namespace nd {
                                                const std::map<std::string, ndt::type> &tp_vars)
     {
       static const callable_instantiate_t table[2][2][2] = {
-          {{reduction_kernel<fixed_dim_type_id, false, false>::instantiate,
-            reduction_kernel<fixed_dim_type_id, false, true>::instantiate},
-           {reduction_kernel<fixed_dim_type_id, true, false>::instantiate,
-            reduction_kernel<fixed_dim_type_id, true, true>::instantiate}},
-          {{NULL, reduction_kernel<var_dim_type_id, false, true>::instantiate}, {NULL, NULL}}};
+          {{reduction_kernel<fixed_dim_id, false, false>::instantiate,
+            reduction_kernel<fixed_dim_id, false, true>::instantiate},
+           {reduction_kernel<fixed_dim_id, true, false>::instantiate,
+            reduction_kernel<fixed_dim_id, true, true>::instantiate}},
+          {{NULL, reduction_kernel<var_dim_id, false, true>::instantiate}, {NULL, NULL}}};
 
       if (reinterpret_cast<data_type *>(data)->ndim == 0) {
         callable &child = reinterpret_cast<static_data_type *>(static_data)->child;
@@ -879,8 +879,8 @@ namespace nd {
         return;
       }
 
-      table[src_tp[0].get_type_id() -
-            fixed_dim_type_id][reinterpret_cast<data_type *>(data)->is_broadcast()][reinterpret_cast<data_type *>(data)
+      table[src_tp[0].get_id() -
+            fixed_dim_id][reinterpret_cast<data_type *>(data)->is_broadcast()][reinterpret_cast<data_type *>(data)
                                                                                         ->is_inner()](
           static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
     }

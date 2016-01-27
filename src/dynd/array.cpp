@@ -94,7 +94,7 @@ static void as_storage_type(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_of
 {
   // If the type is a simple POD, switch it to a bytes type. Otherwise, keep it
   // the same so that the arrmeta layout is identical.
-  if (dt.is_scalar() && dt.get_type_id() != pointer_type_id) {
+  if (dt.is_scalar() && dt.get_id() != pointer_id) {
     const ndt::type &storage_dt = dt.storage_type();
     if (storage_dt.is_builtin()) {
       out_transformed_tp = ndt::make_fixed_bytes(storage_dt.get_data_size(), storage_dt.get_data_alignment());
@@ -104,7 +104,7 @@ static void as_storage_type(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_of
       out_transformed_tp = ndt::make_fixed_bytes(storage_dt.get_data_size(), storage_dt.get_data_alignment());
       out_was_transformed = true;
     }
-    else if (storage_dt.get_type_id() == string_type_id) {
+    else if (storage_dt.get_id() == string_id) {
       out_transformed_tp =
           ndt::bytes_type::make(static_cast<const ndt::string_type *>(storage_dt.extended())->get_target_alignment());
       out_was_transformed = true;
@@ -267,7 +267,7 @@ nd::array nd::array::eval() const
     // Create a canonical type for the result
     const ndt::type &dt = current_tp.get_canonical_type();
     array result(empty(dt));
-    if (dt.get_type_id() == fixed_dim_type_id) {
+    if (dt.get_id() == fixed_dim_id) {
       // Reorder strides of output strided dimensions in a KEEPORDER fashion
       dt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), get_type(),
                                                                               get()->metadata());
@@ -287,7 +287,7 @@ nd::array nd::array::eval_immutable() const
     // Create a canonical type for the result
     const ndt::type &dt = current_tp.get_canonical_type();
     array result(nd::empty(dt));
-    if (dt.get_type_id() == fixed_dim_type_id) {
+    if (dt.get_id() == fixed_dim_id) {
       // Reorder strides of output strided dimensions in a KEEPORDER fashion
       dt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), get_type(),
                                                                               get()->metadata());
@@ -303,7 +303,7 @@ nd::array nd::array::eval_copy(uint32_t access_flags) const
   const ndt::type &current_tp = get_type();
   const ndt::type &dt = current_tp.get_canonical_type();
   array result(nd::empty(dt));
-  if (dt.get_type_id() == fixed_dim_type_id) {
+  if (dt.get_id() == fixed_dim_id) {
     // Reorder strides of output strided dimensions in a KEEPORDER fashion
     dt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), get_type(),
                                                                             get()->metadata());
@@ -350,7 +350,7 @@ nd::array nd::array::to_cuda_device() const
 bool nd::array::is_missing() const
 {
   ndt::type tp = get_type();
-  if (tp.get_type_id() == option_type_id) {
+  if (tp.get_id() == option_id) {
     return !tp.extended<ndt::option_type>()->is_avail(get()->metadata(), cdata(), &eval::default_eval_context);
   }
 
@@ -368,7 +368,7 @@ bool nd::array::equals_exact(const array &rhs) const
   else if (get_ndim() == 0) {
     return (*this == rhs).as<bool>();
   }
-  else if (get_type().get_type_id() == var_dim_type_id) {
+  else if (get_type().get_id() == var_dim_id) {
     // If there's a leading var dimension, convert it to strided and compare
     // (Note: this is an inefficient hack)
     ndt::type tp = ndt::make_fixed_dim(get_shape()[0], get_type().extended<ndt::base_dim_type>()->get_element_type());
@@ -437,12 +437,12 @@ static void cast_dtype(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_offset)
     if (replace_ndim > 0) {
       // If the dimension we're replacing doesn't change, then
       // avoid creating the convert type at this level
-      if (dt.get_type_id() == e->replacement_tp.get_type_id()) {
+      if (dt.get_id() == e->replacement_tp.get_id()) {
         bool can_keep_dim = false;
         ndt::type child_dt, child_replacement_tp;
-        switch (dt.get_type_id()) {
+        switch (dt.get_id()) {
         /*
-                case cfixed_dim_type_id: {
+                case cfixed_dim_id: {
                   const cfixed_dim_type *dt_fdd =
            dt.extended<cfixed_dim_type>();
                   const cfixed_dim_type *r_fdd = static_cast<const
@@ -457,7 +457,7 @@ static void cast_dtype(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_offset)
                   }
                 }
         */
-        case var_dim_type_id: {
+        case var_dim_id: {
           const ndt::base_dim_type *dt_budd = dt.extended<ndt::base_dim_type>();
           const ndt::base_dim_type *r_budd = static_cast<const ndt::base_dim_type *>(e->replacement_tp.extended());
           can_keep_dim = true;
@@ -763,12 +763,12 @@ static void view_scalar_types(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_
     // If things aren't simple, use a view_type
     if (dt.get_kind() == expr_kind || dt.get_data_size() != e->get_data_size() || !dt.is_pod() || !e->is_pod()) {
       // Some special cases that have the same memory layouts
-      switch (dt.get_type_id()) {
-      case string_type_id:
-      case bytes_type_id:
-        switch (e->get_type_id()) {
-        case string_type_id:
-        case bytes_type_id:
+      switch (dt.get_id()) {
+      case string_id:
+      case bytes_id:
+        switch (e->get_id()) {
+        case string_id:
+        case bytes_id:
           // All these types have the same data/arrmeta layout,
           // allow a view whenever the alignment allows it
           if (e->get_data_alignment() <= dt.get_data_alignment()) {
@@ -807,7 +807,7 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const
   // First check if we're dealing with a simple one dimensional block of memory
   // we can reinterpret
   // at will.
-  if (uniform_ndim == 1 && array_type.get_type_id() == fixed_dim_type_id) {
+  if (uniform_ndim == 1 && array_type.get_id() == fixed_dim_id) {
     const ndt::fixed_dim_type *sad = array_type.extended<ndt::fixed_dim_type>();
     const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(get()->metadata());
     const ndt::type &edt = sad->get_element_type();
@@ -913,7 +913,7 @@ std::ostream &nd::operator<<(std::ostream &o, const array &rhs)
     o << "array(";
     array v = rhs.eval();
     if (v.get()->tp.is_builtin()) {
-      print_builtin_scalar(v.get()->tp.get_type_id(), o, v.get()->data);
+      print_builtin_scalar(v.get()->tp.get_id(), o, v.get()->data);
     }
     else {
       stringstream ss;
@@ -1022,7 +1022,7 @@ nd::array nd::empty_like(const nd::array &rhs, const ndt::type &uniform_tp)
     rhs.get_shape(shape.get());
     array result = empty(make_fixed_dim(ndim, shape.get(), uniform_tp));
     // Reorder strides of output strided dimensions in a KEEPORDER fashion
-    if (result.get_type().get_type_id() == fixed_dim_type_id) {
+    if (result.get_type().get_id() == fixed_dim_id) {
       result.get_type().extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(
           result.get()->metadata(), rhs.get_type(), rhs.get()->metadata());
     }
@@ -1034,7 +1034,7 @@ nd::array nd::empty_like(const nd::array &rhs)
 {
   ndt::type dt;
   if (rhs.get()->tp.is_builtin()) {
-    dt = ndt::type(rhs.get()->tp.get_type_id());
+    dt = ndt::type(rhs.get()->tp.get_id());
   }
   else {
     dt = rhs.get()->tp->get_canonical_type();
@@ -1049,7 +1049,7 @@ nd::array nd::empty_like(const nd::array &rhs)
     rhs.get_shape(shape.get());
     nd::array result = empty(make_fixed_dim(ndim, shape.get(), dt.get_dtype()));
     // Reorder strides of output strided dimensions in a KEEPORDER fashion
-    if (result.get_type().get_type_id() == fixed_dim_type_id) {
+    if (result.get_type().get_id() == fixed_dim_id) {
       result.get_type().extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(
           result.get()->metadata(), rhs.get_type(), rhs.get()->metadata());
     }

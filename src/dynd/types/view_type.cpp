@@ -13,7 +13,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::view_type::view_type(const type &value_type, const type &operand_type)
-    : base_expr_type(view_type_id, expr_kind, operand_type.get_data_size(), operand_type.get_data_alignment(),
+    : base_expr_type(view_id, expr_kind, operand_type.get_data_size(), operand_type.get_data_alignment(),
                      inherited_flags(value_type.get_flags(), operand_type.get_flags()),
                      operand_type.get_arrmeta_size()),
       m_value_type(value_type), m_operand_type(operand_type)
@@ -35,7 +35,7 @@ void ndt::view_type::print_data(std::ostream &o, const char *arrmeta, const char
 {
   // Allow calling print_data in the special case that the view
   // is being used just to align the data
-  if (m_operand_type.get_type_id() == fixed_bytes_type_id) {
+  if (m_operand_type.get_id() == fixed_bytes_id) {
     switch (m_operand_type.get_data_size()) {
     case 1:
       m_value_type.print_data(o, arrmeta, data);
@@ -77,7 +77,7 @@ void ndt::view_type::print_data(std::ostream &o, const char *arrmeta, const char
 void ndt::view_type::print_type(std::ostream &o) const
 {
   // Special case printing of alignment to make it more human-readable
-  if (m_value_type.get_data_alignment() != 1 && m_operand_type.get_type_id() == fixed_bytes_type_id &&
+  if (m_value_type.get_data_alignment() != 1 && m_operand_type.get_id() == fixed_bytes_id &&
       m_operand_type.get_data_alignment() == 1) {
     o << "unaligned[" << m_value_type << "]";
   }
@@ -115,7 +115,7 @@ bool ndt::view_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != view_type_id) {
+  else if (rhs.get_id() != view_id) {
     return false;
   }
   else {

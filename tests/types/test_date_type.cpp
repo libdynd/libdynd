@@ -129,9 +129,9 @@ TEST(DateType, DateProperties)
   nd::array a;
 
   a = nd::array("1955-03-13").ucast(d).eval();
-  EXPECT_EQ(adapt_type_id, a.p("year").get_type().get_type_id());
-  EXPECT_EQ(adapt_type_id, a.p("month").get_type().get_type_id());
-  EXPECT_EQ(adapt_type_id, a.p("day").get_type().get_type_id());
+  EXPECT_EQ(adapt_id, a.p("year").get_type().get_id());
+  EXPECT_EQ(adapt_id, a.p("month").get_type().get_id());
+  EXPECT_EQ(adapt_id, a.p("day").get_type().get_id());
   EXPECT_EQ(1955, a.p("year").as<int32_t>());
   EXPECT_EQ(3, a.p("month").as<int32_t>());
   EXPECT_EQ(13, a.p("day").as<int32_t>());
@@ -162,7 +162,7 @@ TEST(DateType, DatePropertyConvertOfString)
 
   // year property
   c = b.p("year");
-  EXPECT_EQ(adapt_type_id, c.get_dtype().get_type_id());
+  EXPECT_EQ(adapt_id, c.get_dtype().get_id());
   c = c.eval();
   EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<int>()), c.get_type());
   EXPECT_EQ(1931, c(0).as<int>());
@@ -171,7 +171,7 @@ TEST(DateType, DatePropertyConvertOfString)
 
   // weekday function
   c = b.f("weekday");
-  EXPECT_EQ(adapt_type_id, c.get_dtype().get_type_id());
+  EXPECT_EQ(adapt_id, c.get_dtype().get_id());
   c = c.eval();
   EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<int>()), c.get_type());
   EXPECT_EQ(5, c(0).as<int>());
@@ -186,7 +186,7 @@ TEST(DateType, ToStructFunction)
 
   a = nd::array("1955-03-13").ucast(d).eval();
   b = a.f("to_struct");
-  EXPECT_EQ(adapt_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(adapt_id, b.get_type().get_id());
   b = b.eval();
   EXPECT_EQ(ndt::struct_type::make({"year", "month", "day"},
                                    {ndt::make_type<int16_t>(), ndt::make_type<int8_t>(), ndt::make_type<int8_t>()}),

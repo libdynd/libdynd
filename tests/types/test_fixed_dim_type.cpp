@@ -24,7 +24,7 @@ TEST(FixedDimType, Create)
 
   // Strings with various encodings and sizes
   d = ndt::make_fixed_dim(3, ndt::make_type<int32_t>());
-  EXPECT_EQ(fixed_dim_type_id, d.get_type_id());
+  EXPECT_EQ(fixed_dim_id, d.get_id());
   EXPECT_EQ(dim_kind, d.get_kind());
   EXPECT_EQ(4u, d.get_data_alignment());
   EXPECT_EQ(0u, d.get_data_size());
@@ -44,7 +44,7 @@ TEST(FixedDimType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   d = ndt::make_fixed_dim(1, ndt::make_type<int32_t>());
-  EXPECT_EQ(fixed_dim_type_id, d.get_type_id());
+  EXPECT_EQ(fixed_dim_id, d.get_id());
   EXPECT_EQ(dim_kind, d.get_kind());
   EXPECT_EQ(4u, d.get_data_alignment());
   EXPECT_EQ(0u, d.get_data_size());
@@ -110,7 +110,7 @@ TEST(FixedDimType, AssignKernel_ScalarToFixed)
   a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
   a.vals() = 0;
   b = 9.0;
-  EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
+  EXPECT_EQ(fixed_dim_id, a.get_type().get_id());
   make_assignment_kernel(&k, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
   kernel_single_t fn = k.get()->get_function<kernel_single_t>();
@@ -130,8 +130,8 @@ TEST(FixedDimType, AssignKernel_FixedToFixed)
   a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
   a.vals() = 0;
   b = parse_json("3 * int32", "[3, 5, 7]");
-  EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-  EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(fixed_dim_id, a.get_type().get_id());
+  EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
   make_assignment_kernel(&k, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
   kernel_single_t fn = k.get()->get_function<kernel_single_t>();
@@ -150,7 +150,7 @@ TEST(FixedDimType, AssignKernel_FixedToScalarError)
   // Assignment fixed array -> scalar
   a = 9.0;
   b = parse_json("3 * int32", "[3, 5, 7]");
-  EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
+  EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
   EXPECT_THROW(make_assignment_kernel(&k, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                                       kernel_request_single, &eval::default_eval_context),
                broadcast_error);

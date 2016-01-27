@@ -22,7 +22,7 @@ nd::callable nd::functional::compose(const nd::callable &first, const nd::callab
     throw invalid_argument(ss.str());
   }
 
-  if (buf_tp.get_type_id() == uninitialized_type_id) {
+  if (buf_tp.get_id() == uninitialized_id) {
     throw runtime_error("Chaining functions without a provided intermediate "
                         "type is not implemented");
   }

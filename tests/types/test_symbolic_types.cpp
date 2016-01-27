@@ -30,7 +30,7 @@ TEST(SymbolicTypes, CreateFuncProto)
 
   // Function prototype from C++ template parameter
   tp = ndt::make_type<int64_t(float, int32_t, double)>();
-  EXPECT_EQ(callable_type_id, tp.get_type_id());
+  EXPECT_EQ(callable_id, tp.get_id());
   EXPECT_EQ(sizeof(ndt::callable_type::data_type), tp.get_data_size());
   EXPECT_EQ(alignof(nd::callable), tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
@@ -84,7 +84,7 @@ TEST(SymbolicTypes, CreateTypeVar)
 
   // Simple TypeVar
   tp = ndt::typevar_type::make("Blah");
-  EXPECT_EQ(typevar_type_id, tp.get_type_id());
+  EXPECT_EQ(typevar_id, tp.get_id());
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_EQ(1u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
@@ -115,7 +115,7 @@ TEST(SymbolicTypes, CreateTypeVarDim)
 
   // Simple Dimension TypeVar
   tp = ndt::typevar_dim_type::make("Blah", ndt::make_type<int>());
-  EXPECT_EQ(typevar_dim_type_id, tp.get_type_id());
+  EXPECT_EQ(typevar_dim_id, tp.get_id());
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_EQ(1u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
@@ -147,7 +147,7 @@ TEST(SymbolicTypes, CreateEllipsisDim)
 
   // Named Ellipsis Dimension
   tp = ndt::make_ellipsis_dim("Blah", ndt::make_type<int>());
-  EXPECT_EQ(ellipsis_dim_type_id, tp.get_type_id());
+  EXPECT_EQ(ellipsis_dim_id, tp.get_id());
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_EQ(1u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
@@ -166,7 +166,7 @@ TEST(SymbolicTypes, CreateEllipsisDim)
 
   // Unnamed Ellipsis Dimension
   tp = ndt::make_ellipsis_dim(ndt::make_type<int>());
-  EXPECT_EQ(ellipsis_dim_type_id, tp.get_type_id());
+  EXPECT_EQ(ellipsis_dim_id, tp.get_id());
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_EQ(1u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
@@ -198,7 +198,7 @@ TEST(SymbolicTypes, AnySym)
   ndt::type tp;
 
   tp = ndt::any_kind_type::make();
-  EXPECT_EQ(any_kind_type_id, tp.get_type_id());
+  EXPECT_EQ(any_kind_id, tp.get_id());
   EXPECT_EQ("Any", tp.str());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.is_variadic());
@@ -252,7 +252,7 @@ TEST(SymbolicTypes, KindSym)
       {bool_kind, "Bool"}, {uint_kind, "UInt"}, {sint_kind, "SInt"}, {real_kind, "Real"}, {complex_kind, "Complex"}};
   for (auto &p : cases) {
     tp = ndt::make_kind_sym(p.first);
-    EXPECT_EQ(kind_sym_type_id, tp.get_type_id());
+    EXPECT_EQ(kind_sym_id, tp.get_id());
     EXPECT_EQ(p.second, tp.str());
     EXPECT_TRUE(tp.is_symbolic());
     EXPECT_FALSE(tp.is_variadic());
@@ -261,7 +261,7 @@ TEST(SymbolicTypes, KindSym)
 
   // "Int" matches both signed and unsigned int types
   tp = ndt::make_int_kind_sym();
-  EXPECT_EQ(int_sym_type_id, tp.get_type_id());
+  EXPECT_EQ(int_sym_id, tp.get_id());
   EXPECT_EQ("Int", tp.str());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_FALSE(tp.is_variadic());
@@ -300,14 +300,14 @@ TEST(SymbolicTypes, VariadicTuple)
   ndt::type tp;
 
   tp = ndt::tuple_type::make({ndt::make_type<int>(), ndt::make_type<float>()}, true);
-  EXPECT_EQ(tuple_type_id, tp.get_type_id());
+  EXPECT_EQ(tuple_id, tp.get_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.extended<ndt::tuple_type>()->is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   tp = ndt::type("(type, int32, T, ...)");
-  EXPECT_EQ(tuple_type_id, tp.get_type_id());
+  EXPECT_EQ(tuple_id, tp.get_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_JSON_EQ_ARR("[\"type\", \"int32\", \"T\"]", tp.p("field_types"));
   EXPECT_TRUE(tp.is_symbolic());
@@ -320,7 +320,7 @@ TEST(SymbolicTypes, VariadicStruct)
   ndt::type tp;
 
   tp = ndt::struct_type::make({"x", "y"}, {ndt::make_type<int>(), ndt::make_type<float>()}, true);
-  EXPECT_EQ(struct_type_id, tp.get_type_id());
+  EXPECT_EQ(struct_id, tp.get_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.extended<ndt::struct_type>()->is_variadic());
@@ -329,7 +329,7 @@ TEST(SymbolicTypes, VariadicStruct)
   tp = ndt::type("{x: type, y: int32, z: T, ...}");
   EXPECT_JSON_EQ_ARR("[\"type\", \"int32\", \"T\"]", tp.p("field_types"));
   EXPECT_JSON_EQ_ARR("[\"x\", \"y\", \"z\"]", tp.p("field_names"));
-  EXPECT_EQ(struct_type_id, tp.get_type_id());
+  EXPECT_EQ(struct_id, tp.get_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.extended<ndt::struct_type>()->is_variadic());

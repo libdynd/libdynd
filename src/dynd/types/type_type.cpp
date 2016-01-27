@@ -13,13 +13,13 @@ using namespace std;
 using namespace dynd;
 
 ndt::type_type::type_type()
-    : base_type(type_type_id, type_kind, sizeof(ndt::type), sizeof(ndt::type),
+    : base_type(dynd::type_id, type_kind, sizeof(ndt::type), sizeof(ndt::type),
                 type_flag_zeroinit | type_flag_destructor, 0, 0, 0)
 {
 }
 
 ndt::type_type::type_type(const type &pattern_tp)
-    : base_type(type_type_id, type_kind, sizeof(ndt::type), sizeof(ndt::type),
+    : base_type(dynd::type_id, type_kind, sizeof(ndt::type), sizeof(ndt::type),
                 type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
       m_pattern_tp(pattern_tp)
 {
@@ -48,7 +48,7 @@ bool ndt::type_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != type_type_id) {
+  else if (rhs.get_id() != type_id) {
     return false;
   }
   else {

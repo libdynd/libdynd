@@ -75,7 +75,7 @@ static void format_json(output_data &out, const ndt::type &dt, const char *arrme
 static void format_json_bool(output_data &out, const ndt::type &dt, const char *DYND_UNUSED(arrmeta), const char *data)
 {
   bool1 value(false);
-  if (dt.get_type_id() == bool_type_id) {
+  if (dt.get_id() == bool_id) {
     value = (*data != 0);
   }
   else {
@@ -194,9 +194,9 @@ static void format_json_option(output_data &out, const ndt::type &dt, const char
 
 static void format_json_datetime(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
 {
-  switch (dt.get_type_id()) {
-  case date_type_id:
-  case datetime_type_id: {
+  switch (dt.get_id()) {
+  case date_id:
+  case datetime_id: {
     stringstream ss;
     dt.print_data(ss, arrmeta, data);
     std::string s = ss.str();
@@ -213,8 +213,8 @@ static void format_json_datetime(output_data &out, const ndt::type &dt, const ch
 
 static void format_json_type(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
 {
-  switch (dt.get_type_id()) {
-  case type_type_id: {
+  switch (dt.get_id()) {
+  case type_id: {
     stringstream ss;
     dt.print_data(ss, arrmeta, data);
     std::string s = ss.str();
@@ -264,8 +264,8 @@ static void format_json_struct(output_data &out, const ndt::type &dt, const char
 static void format_json_dim(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
 {
   out.write('[');
-  switch (dt.get_type_id()) {
-  case fixed_dim_type_id: {
+  switch (dt.get_id()) {
+  case fixed_dim_id: {
     const ndt::base_dim_type *sad = dt.extended<ndt::base_dim_type>();
     const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
     ndt::type element_tp = sad->get_element_type();
@@ -279,7 +279,7 @@ static void format_json_dim(output_data &out, const ndt::type &dt, const char *a
     }
     break;
   }
-  case var_dim_type_id: {
+  case var_dim_id: {
     const ndt::var_dim_type *vad = dt.extended<ndt::var_dim_type>();
     const ndt::var_dim_type::metadata_type *md = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(arrmeta);
     const ndt::var_dim_type::data_type *d = reinterpret_cast<const ndt::var_dim_type::data_type *>(data);

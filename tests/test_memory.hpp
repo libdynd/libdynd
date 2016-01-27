@@ -88,7 +88,7 @@ typedef ::testing::Types< ::testing::Types2<None, None> > DefaultMemoryPairs;
 
 template <>
 class Memory<cuda_host_type> : public ::testing::Test {
-    static const type_id_t TypeID = cuda_host_type_id;
+    static const type_id_t TypeID = cuda_host_id;
 public:
     typedef cuda_host_type Type;
 
@@ -112,7 +112,7 @@ public:
 
 template <>
 class Memory<cuda_device_type> : public ::testing::Test {
-    static const type_id_t TypeID = cuda_device_type_id;
+    static const type_id_t TypeID = cuda_device_id;
 public:
     typedef cuda_device_type Type;
 

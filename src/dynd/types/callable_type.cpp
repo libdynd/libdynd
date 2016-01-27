@@ -34,18 +34,18 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
 }
 
 ndt::callable_type::callable_type(const type &ret_type, const type &pos_types, const type &kwd_types)
-    : base_type(callable_type_id, function_kind, sizeof(data_type), alignof(data_type),
+    : base_type(callable_id, function_kind, sizeof(data_type), alignof(data_type),
                 type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
       m_return_type(ret_type), m_pos_tuple(pos_types), m_kwd_struct(kwd_types)
 {
-  if (m_pos_tuple.get_type_id() != tuple_type_id) {
+  if (m_pos_tuple.get_id() != tuple_id) {
     stringstream ss;
     ss << "dynd callable positional arg types require a tuple type, got a "
           "type \""
        << m_pos_tuple << "\"";
     throw invalid_argument(ss.str());
   }
-  if (m_kwd_struct.get_type_id() != struct_type_id) {
+  if (m_kwd_struct.get_id() != struct_id) {
     stringstream ss;
     ss << "dynd callable keyword arg types require a struct type, got a "
           "type \""
@@ -54,7 +54,7 @@ ndt::callable_type::callable_type(const type &ret_type, const type &pos_types, c
   }
 
   for (intptr_t i = 0, i_end = get_nkwd(); i < i_end; ++i) {
-    if (m_kwd_struct.extended<tuple_type>()->get_field_type(i).get_type_id() == option_type_id) {
+    if (m_kwd_struct.extended<tuple_type>()->get_field_type(i).get_id() == option_id) {
       m_opt_kwd_indices.push_back(i);
     }
   }
@@ -183,7 +183,7 @@ bool ndt::callable_type::is_lossless_assignment(const type &dst_tp, const type &
     if (src_tp.extended() == this) {
       return true;
     }
-    else if (src_tp.get_type_id() == callable_type_id) {
+    else if (src_tp.get_id() == callable_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -196,7 +196,7 @@ bool ndt::callable_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != callable_type_id) {
+  else if (rhs.get_id() != callable_id) {
     return false;
   }
   else {
@@ -239,7 +239,7 @@ void ndt::callable_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
 bool ndt::callable_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                                std::map<std::string, type> &tp_vars) const
 {
-  if (candidate_tp.get_type_id() != callable_type_id) {
+  if (candidate_tp.get_id() != callable_id) {
     return false;
   }
 
