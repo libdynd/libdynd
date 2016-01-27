@@ -389,10 +389,8 @@ namespace nd {
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        intptr_t ckb_offset = ckb->m_size;
         ckb->emplace_back<parse_kernel>(kernreq, dst_tp, reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size,
                                         reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride);
-        ckb_offset = ckb->m_size;
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, child_dst_tp,
@@ -461,11 +459,9 @@ namespace nd {
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        intptr_t ckb_offset = ckb->m_size;
         ckb->emplace_back<parse_kernel>(
             kernreq, dst_tp, reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->blockref,
             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->stride);
-        ckb_offset = ckb->m_size;
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::var_dim_type>()->get_element_type();
         json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, child_dst_tp,
