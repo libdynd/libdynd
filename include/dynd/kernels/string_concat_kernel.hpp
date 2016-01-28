@@ -37,7 +37,6 @@ namespace dynd {
 
     struct string_concatenation_kernel
       : base_kernel<string_concatenation_kernel, 2> {
-      typedef string_concatenation_kernel extra_type;
 
       void single(char *dst, char *const *src) {
         dynd::string *d = reinterpret_cast<dynd::string *>(dst);
@@ -53,7 +52,7 @@ namespace dynd {
 
     template<>
     struct traits<dynd::nd::string_concatenation_kernel> {
-      static type equivalent() { return callable_type::make(make_type<dynd::string>(), {type(string_id), type(string_id)}); }
+      static type equivalent() { return callable_type::make(type(string_id), {type(string_id), type(string_id)}); }
     };
 
   } // namespace ndt
