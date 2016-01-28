@@ -45,8 +45,6 @@ namespace nd {
   DYND_DEF_BINARY_OP_KERNEL(+, add)
   DYND_DEF_BINARY_OP_KERNEL(-, subtract)
   DYND_DEF_BINARY_OP_KERNEL(*, multiply)
-  DYND_DEF_BINARY_OP_KERNEL(/, divide)
-  DYND_DEF_BINARY_OP_KERNEL(%, mod)
   DYND_DEF_BINARY_OP_KERNEL(&, bitwise_and)
   DYND_DEF_BINARY_OP_KERNEL(&&, logical_and)
   DYND_DEF_BINARY_OP_KERNEL(|, bitwise_or)
@@ -54,6 +52,8 @@ namespace nd {
   DYND_DEF_BINARY_OP_KERNEL (^, bitwise_xor)
   DYND_DEF_BINARY_OP_KERNEL(<<, left_shift)
   DYND_DEF_BINARY_OP_KERNEL(>>, right_shift)
+
+#undef DYND_DeclBinopKernel
 
   namespace detail {
     template <type_id_t Src0TypeID, type_id_t Src1TypeID>
@@ -68,7 +68,30 @@ namespace nd {
                                          &detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f> {
   };
 
-#undef DYND_DeclBinopKernel
+#define DYND_DEF_BINARY_OP_KERNEL_ZEROCHECK_INT(OP, NAME)                                                              \
+  namespace detail {                                                                                                   \
+    template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                              \
+    struct inline_##NAME {                                                                                             \
+      typedef typename type_of<Src0TypeID>::type T0;                                                                   \
+      typedef typename type_of<Src1TypeID>::type T1;                                                                   \
+      static auto f(T0 a, T1 b) {                                                                                      \
+        if((b == 0) && std::is_integral<T0>::value && std::is_integral<T1>::value) {                                   \
+          throw dynd::zero_division_error("Integer division or modulo by zero.");                                      \
+        }                                                                                                              \
+        return a OP b;                                                                                                 \
+      }                                                                                                                \
+    };                                                                                                                 \
+  } /* namespace detail */                                                                                             \
+                                                                                                                       \
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
+  struct NAME##_kernel : functional::as_apply_function_ck<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f), \
+                                                          &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f> {         \
+  };
+
+  DYND_DEF_BINARY_OP_KERNEL_ZEROCHECK_INT(/, divide)
+  DYND_DEF_BINARY_OP_KERNEL_ZEROCHECK_INT(%, mod)
+
+#undef DYND_DEF_BINARY_OP_KERNEL_ZEROCHECK_INT
 
   template <typename FuncType, bool Src0IsOption, bool Src1IsOption>
   struct option_arithmetic_kernel;
