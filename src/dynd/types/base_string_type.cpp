@@ -7,8 +7,6 @@
 #include <dynd/type.hpp>
 #include <dynd/shape_tools.hpp>
 
-#include <dynd/kernels/string_algorithm_kernels.hpp>
-
 using namespace std;
 using namespace dynd;
 

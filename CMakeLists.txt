@@ -325,7 +325,6 @@ set(libdynd_SRC
     src/dynd/kernels/option_assignment_kernels.cpp
     src/dynd/kernels/pointer_assignment_kernels.cpp
     src/dynd/kernels/rolling_kernel.cpp
-    src/dynd/kernels/string_algorithm_kernels.cpp
     src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/take_kernel.cpp
@@ -359,8 +358,7 @@ set(libdynd_SRC
     include/dynd/kernels/reduction_kernel.hpp
     include/dynd/kernels/rolling_kernel.hpp
     include/dynd/kernels/sort_kernel.hpp
-    include/dynd/kernels/string_algorithm_kernels.hpp
-    include/dynd/kernels/string_comparison_kernels.hpp
+    include/dynd/kernels/string_concat_kernel.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp
     include/dynd/kernels/take_kernel.hpp
     include/dynd/kernels/tuple_assignment_kernels.hpp
@@ -414,6 +412,7 @@ set(libdynd_SRC
     src/dynd/parse.cpp
     src/dynd/shape_tools.cpp
     src/dynd/special.cpp
+    src/dynd/string.cpp
     src/dynd/string_encodings.cpp
     src/dynd/uint128.cpp
     src/dynd/view.cpp
@@ -441,6 +440,7 @@ set(libdynd_SRC
     include/dynd/logic.hpp
     include/dynd/math.hpp
     include/dynd/sort.hpp
+    include/dynd/string.hpp
     include/dynd/type.hpp
     include/dynd/type_registry.hpp
     include/dynd/type_sequence.hpp

@@ -9,11 +9,14 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
+#include <dynd/string.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/json_parser.hpp>
+
+#include "dynd_assertions.hpp"
 
 using namespace std;
 using namespace dynd;
@@ -427,30 +430,30 @@ TEST(StringType, Comparisons)
     */
 }
 
-/*
-TODO: Reenable this.
 
 TEST(StringType, Concatenation) {
     nd::array a, b, c;
 
     a = "first";
     b = "second";
-    c = a + b;
-    EXPECT_EQ("firstsecond", c.as<string>());
+    c = nd::string_concatenation(a, b);
+    EXPECT_ARRAY_EQ("firstsecond", c);
+
+    // c = a + b;
+    // EXPECT_ARRAY_EQ("firstsecond", c);
 
     const char *a_arr[3] = {"testing", "one", "two"};
     const char *b_arr[3] = {"alpha", "beta", "gamma"};
 
     a = a_arr;
     b = b_arr;
-    c = (a + b).eval();
+    c = nd::string_concatenation(a, b);
     ASSERT_EQ(ndt::type("3 * string"), c.get_type());
     EXPECT_EQ(3, c.get_dim_size());
-    EXPECT_EQ("testingalpha", c(0).as<string>());
-    EXPECT_EQ("onebeta", c(1).as<string>());
-    EXPECT_EQ("twogamma", c(2).as<string>());
+    EXPECT_ARRAY_EQ("testingalpha", c(0));
+    EXPECT_ARRAY_EQ("onebeta", c(1));
+    EXPECT_ARRAY_EQ("twogamma", c(2));
 }
-*/
 
 /*
 TEST(StringType, Find1) {
