@@ -81,10 +81,6 @@ namespace ndt {
     virtual void make_value_to_operand_assignment_kernel(nd::kernel_builder *ckb, const char *dst_arrmeta,
                                                          const char *src_arrmeta, kernel_request_t kernreq,
                                                          const eval::eval_context *ectx) const;
-
-    void make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_dt, const char *src0_arrmeta,
-                                const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
-                                const eval::eval_context *ectx) const;
   };
 
 } // namespace dynd::ndt

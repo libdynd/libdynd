@@ -319,7 +319,6 @@ set(libdynd_SRC
     src/dynd/kernels/compare_kernels.cpp
     src/dynd/kernels/copy_kernel.cpp
     src/dynd/kernels/expression_assignment_kernels.cpp
-    src/dynd/kernels/expression_comparison_kernels.cpp
     src/dynd/kernels/fft_kernel.cpp
     src/dynd/kernels/kernel_builder.cpp
     src/dynd/kernels/multidispatch_kernel.cpp
@@ -348,7 +347,6 @@ set(libdynd_SRC
     include/dynd/kernels/cuda_launch.hpp
     include/dynd/kernels/elwise.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
-    include/dynd/kernels/expression_comparison_kernels.hpp
     include/dynd/kernels/fft_kernel.hpp
     include/dynd/kernels/index_kernel.hpp
     include/dynd/kernels/is_missing_kernel.hpp

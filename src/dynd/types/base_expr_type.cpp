@@ -7,7 +7,6 @@
 
 #include <dynd/type.hpp>
 #include <dynd/kernels/expression_assignment_kernels.hpp>
-#include <dynd/kernels/expression_comparison_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -73,11 +72,4 @@ void ndt::base_expr_type::make_value_to_operand_assignment_kernel(nd::kernel_bui
   stringstream ss;
   ss << "dynd type " << type(this, true) << " does not support writing to its values";
   throw dynd::type_error(ss.str());
-}
-
-void ndt::base_expr_type::make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_dt, const char *src0_arrmeta,
-                                                 const type &src1_dt, const char *src1_arrmeta,
-                                                 comparison_type_t comptype, const eval::eval_context *ectx) const
-{
-  make_expression_comparison_kernel(ckb, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype, ectx);
 }
