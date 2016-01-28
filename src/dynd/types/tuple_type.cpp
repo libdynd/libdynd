@@ -7,7 +7,6 @@
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
-#include <dynd/kernels/tuple_comparison_kernels.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/option_type.hpp>
@@ -324,20 +323,6 @@ bool ndt::tuple_type::is_lossless_assignment(const type &dst_tp, const type &src
   }
 
   return false;
-}
-
-void ndt::tuple_type::make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_tp, const char *src0_arrmeta,
-                                             const type &src1_tp, const char *src1_arrmeta, comparison_type_t comptype,
-                                             const eval::eval_context *ectx) const
-{
-  if (this == src0_tp.extended()) {
-    if (*this == *src1_tp.extended()) {
-      make_tuple_comparison_kernel(ckb, src0_tp, src0_arrmeta, src1_arrmeta, comptype, ectx);
-      return;
-    }
-  }
-
-  throw not_comparable_error(src0_tp, src1_tp, comptype);
 }
 
 bool ndt::tuple_type::operator==(const base_type &rhs) const
