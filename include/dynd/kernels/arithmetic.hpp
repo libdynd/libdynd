@@ -70,25 +70,36 @@ namespace nd {
 
 #define DYND_DEF_BINARY_OP_KERNEL_ZEROCHECK_INT(OP, NAME)                                                              \
   namespace detail {                                                                                                   \
-    template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                              \
-    struct inline_##NAME {                                                                                             \
+    template <type_id_t Src0TypeID, type_id_t Src1TypeID,                                                              \
+              type_id_t Src0Base = base_id_of<Src0TypeID>::value,                                                      \
+              type_id_t Src1Base = base_id_of<Src1TypeID>::value,                                                      \
+              bool check = ((Src0Base == bool_kind_id) || (Src0Base == int_kind_id) || (Src0Base == uint_kind_id)) &&  \
+                           ((Src1Base == bool_kind_id) || (Src1Base == int_kind_id) || (Src1Base == uint_kind_id))>    \
+    struct inline_##NAME;                                                                                              \
+                                                                                                                       \
+    template <type_id_t Src0TypeID, type_id_t Src1TypeID, type_id_t Src0Base, type_id_t Src1Base>                      \
+    struct inline_##NAME<Src0TypeID, Src1TypeID, Src0Base, Src1Base, true> {                                           \
       typedef typename type_of<Src0TypeID>::type T0;                                                                   \
       typedef typename type_of<Src1TypeID>::type T1;                                                                   \
-      typedef typename decltype(std::declval<T0>() / std::declval<T1>()) R;                                            \
-      template<bool check = std::is_integral<T0>::value && std::is_integral<T1>::value>                                \
-      static R f(T0 a, T1 b);                                                                                          \
-      template<>                                                                                                       \
-      static R f<true>(T0 a, T1 b) {                                                                                     \
+      typedef decltype(std::declval<T0>() OP std::declval<T1>()) R;                                                    \
+      static R f(T0 a, T1 b) {                                                                                         \
         if(b == 0) {                                                                                                   \
           throw dynd::zero_division_error("Integer division or modulo by zero.");                                      \
         }                                                                                                              \
         return a OP b;                                                                                                 \
       }                                                                                                                \
-      template<>                                                                                                       \
-      static R f<false>(T0 a, T1 b) {                                                                               \
+    };                                                                                                                 \
+                                                                                                                       \
+    template <type_id_t Src0TypeID, type_id_t Src1TypeID, type_id_t Src0Base, type_id_t Src1Base>                      \
+    struct inline_##NAME<Src0TypeID, Src1TypeID, Src0Base, Src1Base, false> {                                          \
+      typedef typename type_of<Src0TypeID>::type T0;                                                                   \
+      typedef typename type_of<Src1TypeID>::type T1;                                                                   \
+      typedef decltype(std::declval<T0>() OP std::declval<T1>()) R;                                                    \
+      static R f(T0 a, T1 b) {                                                                                         \
         return a OP b;                                                                                                 \
       }                                                                                                                \
     };                                                                                                                 \
+                                                                                                                       \
   } /* namespace detail */                                                                                             \
                                                                                                                        \
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
