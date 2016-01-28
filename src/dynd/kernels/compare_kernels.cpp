@@ -9,44 +9,33 @@
 using namespace std;
 using namespace dynd;
 
-void nd::equal_kernel<tuple_id, tuple_id>::instantiate(
-    char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+void nd::equal_kernel<tuple_id, tuple_id>::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data),
+                                                       kernel_builder *ckb, const ndt::type &dst_tp,
+                                                       const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                                                       const char *const *src_arrmeta, kernel_request_t kernreq,
+                                                       intptr_t nkwd, const nd::array *kwds,
+                                                       const std::map<std::string, ndt::type> &tp_vars)
 {
-  intptr_t ckb_offset = ckb->m_size;
-  intptr_t root_ckb_offset = ckb_offset;
-  auto bsd = src_tp->extended<ndt::tuple_type>();
-  size_t field_count = bsd->get_field_count();
-  ckb->emplace_back<extra_type>(kernel_request_host | kernel_request_single, field_count,
-                                bsd->get_data_offsets(src_arrmeta[0]), bsd->get_data_offsets(src_arrmeta[1]));
-  extra_type *e = ckb->get_at<extra_type>(root_ckb_offset);
-  ckb_offset = ckb->m_size;
-  ckb->reserve(ckb_offset);
-  e = ckb->get_at<equal_kernel>(ckb_offset);
-  ckb_offset += nd::kernel_builder::aligned_size(field_count * sizeof(size_t));
-  ckb->m_size += nd::kernel_builder::aligned_size(field_count * sizeof(size_t));
-  //      e->field_count = field_count;
-  //    e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
-  //  e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
-  size_t *field_kernel_offsets;
-  const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
+  intptr_t self_offset = ckb->size();
+  size_t field_count = src_tp[0].extended<ndt::tuple_type>()->get_field_count();
+
+  ckb->emplace_back<equal_kernel>(kernel_request_single, field_count,
+                                  src_tp[0].extended<ndt::tuple_type>()->get_data_offsets(src_arrmeta[0]),
+                                  src_tp[0].extended<ndt::tuple_type>()->get_data_offsets(src_arrmeta[1]));
+  ckb->emplace_back(field_count * sizeof(size_t));
+
+  equal_kernel *self = ckb->get_at<equal_kernel>(self_offset);
+  const uintptr_t *arrmeta_offsets = src_tp[0].extended<ndt::tuple_type>()->get_arrmeta_offsets_raw();
   for (size_t i = 0; i != field_count; ++i) {
-    const ndt::type &ft = bsd->get_field_type(i);
-    // Reserve space for the child, and save the offset to this
-    // field comparison kernel. Have to re-get
-    // the pointer because creating the field comparison kernel may
-    // move the memory.
-    ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
-    e = reinterpret_cast<kernel_builder *>(ckb)->get_at<extra_type>(root_ckb_offset);
-    field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
-    field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
+    self = ckb->get_at<equal_kernel>(self_offset);
+    const ndt::type &ft = src_tp[0].extended<ndt::tuple_type>()->get_field_type(i);
+    size_t *field_kernel_offsets = self->get_offsets();
+    field_kernel_offsets[i] = ckb->size() - self_offset;
     const char *field_arrmeta = src_arrmeta[0] + arrmeta_offsets[i];
     ndt::type child_src_tp[2] = {ft, ft};
     const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
-    equal::get().get()->instantiate(equal::get().get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc,
-                                    child_src_tp, child_src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-    ckb_offset = ckb->m_size;
+    equal::get()->instantiate(equal::get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp,
+                              child_src_arrmeta, kernreq, nkwd, kwds, tp_vars);
   }
 }
 
@@ -59,8 +48,8 @@ void nd::not_equal_kernel<tuple_id, tuple_id>::instantiate(
   intptr_t root_ckb_offset = ckb_offset;
   auto bsd = src_tp->extended<ndt::tuple_type>();
   size_t field_count = bsd->get_field_count();
-  ckb->emplace_back<extra_type>(kernel_request_host | kernel_request_single, field_count,
-                                bsd->get_data_offsets(src_arrmeta[0]), bsd->get_data_offsets(src_arrmeta[1]));
+  ckb->emplace_back<extra_type>(kernel_request_single, field_count, bsd->get_data_offsets(src_arrmeta[0]),
+                                bsd->get_data_offsets(src_arrmeta[1]));
   extra_type *e = ckb->get_at<extra_type>(root_ckb_offset);
   ckb_offset = ckb->m_size;
   ckb->reserve(ckb_offset);
