@@ -86,6 +86,18 @@ public:
   {
     return m_size != rhs.m_size || std::memcmp(m_data, rhs.m_data, m_size) != 0;
   }
+
+  const bytes operator+(const bytes& rhs)
+  {
+      bytes result;
+
+      result.resize(size() + rhs.size());
+
+      DYND_MEMCPY(result.begin(), begin(), size());
+      DYND_MEMCPY(result.begin() + size(), rhs.begin(), rhs.size());
+
+      return result;
+  }
 };
 
 namespace detail {
