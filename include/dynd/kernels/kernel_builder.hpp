@@ -54,6 +54,10 @@ namespace nd {
 
     ~kernel_builder() { destroy(); }
 
+    size_t size() const { return m_size; }
+
+    size_t capacity() const { return m_capacity; }
+
     void reset()
     {
       destroy();
@@ -130,8 +134,11 @@ namespace nd {
 
     void *set(void *dst, int value, size_t size) { return std::memset(dst, value, size); }
 
-    /** For debugging/informational purposes */
-    intptr_t get_capacity() const { return m_capacity; }
+    void emplace_back(size_t size)
+    {
+      m_size += aligned_size(size);
+      reserve(m_size);
+    }
 
     /**
      * Creates the kernel, and increments ``m_size`` to the position after it.

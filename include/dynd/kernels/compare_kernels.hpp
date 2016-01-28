@@ -85,8 +85,6 @@ namespace nd {
 
   template <>
   struct equal_kernel<tuple_id, tuple_id> : base_kernel<equal_kernel<tuple_id, tuple_id>, 2> {
-    typedef equal_kernel extra_type;
-
     size_t field_count;
     const size_t *src0_data_offsets, *src1_data_offsets;
     // After this are field_count sorting_less kernel offsets, for
@@ -97,6 +95,16 @@ namespace nd {
         : field_count(field_count), src0_data_offsets(src0_data_offsets), src1_data_offsets(src1_data_offsets)
     {
     }
+
+    ~equal_kernel()
+    {
+      size_t *kernel_offsets = get_offsets();
+      for (size_t i = 0; i != field_count; ++i) {
+        get_child(kernel_offsets[i])->destroy();
+      }
+    }
+
+    size_t *get_offsets() { return reinterpret_cast<size_t *>(this + 1); }
 
     void single(char *dst, char *const *src)
     {
@@ -116,16 +124,6 @@ namespace nd {
         }
       }
       *reinterpret_cast<bool1 *>(dst) = true;
-    }
-
-    static void destruct(ckernel_prefix *self)
-    {
-      extra_type *e = reinterpret_cast<extra_type *>(self);
-      const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-      size_t field_count = e->field_count;
-      for (size_t i = 0; i != field_count; ++i) {
-        self->get_child(kernel_offsets[i])->destroy();
-      }
     }
 
     static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
@@ -149,21 +147,19 @@ namespace nd {
     }
   };
 
-  template <type_id_t I0>
-  struct not_equal_kernel<I0, I0> : base_kernel<not_equal_kernel<I0, I0>, 2> {
-    typedef typename type_of<I0>::type A0;
+  template <type_id_t Arg0ID>
+  struct not_equal_kernel<Arg0ID, Arg0ID> : base_kernel<not_equal_kernel<Arg0ID, Arg0ID>, 2> {
+    typedef typename type_of<Arg0ID>::type arg0_type;
 
-    void single(char *dst, char *const *src)
+    void single(char *res, char *const *args)
     {
-      *reinterpret_cast<bool1 *>(dst) = *reinterpret_cast<A0 *>(src[0]) != *reinterpret_cast<A0 *>(src[1]);
+      *reinterpret_cast<bool1 *>(res) =
+          *reinterpret_cast<arg0_type *>(args[0]) != *reinterpret_cast<arg0_type *>(args[1]);
     }
   };
 
   template <>
-  struct not_equal_kernel<tuple_id, tuple_id>
-      : base_kernel<not_equal_kernel<tuple_id, tuple_id>, 2> {
-    typedef not_equal_kernel extra_type;
-
+  struct not_equal_kernel<tuple_id, tuple_id> : base_kernel<not_equal_kernel<tuple_id, tuple_id>, 2> {
     size_t field_count;
     const size_t *src0_data_offsets, *src1_data_offsets;
     // After this are field_count sorting_less kernel offsets, for
@@ -173,6 +169,14 @@ namespace nd {
     not_equal_kernel(size_t field_count, const size_t *src0_data_offsets, const size_t *src1_data_offsets)
         : field_count(field_count), src0_data_offsets(src0_data_offsets), src1_data_offsets(src1_data_offsets)
     {
+    }
+
+    ~not_equal_kernel()
+    {
+      size_t *kernel_offsets = reinterpret_cast<size_t *>(this + 1);
+      for (size_t i = 0; i != field_count; ++i) {
+        get_child(kernel_offsets[i])->destroy();
+      }
     }
 
     void single(char *dst, char *const *src)
@@ -193,16 +197,6 @@ namespace nd {
         }
       }
       *reinterpret_cast<bool1 *>(dst) = false;
-    }
-
-    static void destruct(ckernel_prefix *self)
-    {
-      extra_type *e = reinterpret_cast<extra_type *>(self);
-      const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-      size_t field_count = e->field_count;
-      for (size_t i = 0; i != field_count; ++i) {
-        self->get_child(kernel_offsets[i])->destroy();
-      }
     }
 
     static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,
