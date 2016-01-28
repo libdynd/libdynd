@@ -13,7 +13,7 @@ namespace nd {
 
   extern DYND_API struct DYND_API string_concatenation : declfunc<string_concatenation> {
     static callable make();
-  } view;
+  } string_concatenation;
 
 } // namespace dynd::nd
 } // namespace dynd
