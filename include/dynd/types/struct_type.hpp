@@ -85,10 +85,6 @@ namespace ndt {
                                 size_t current_i, const type &root_tp, bool leading_dimension, char **inout_data,
                                 intrusive_ptr<memory_block_data> &inout_dataref) const;
 
-    void make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_dt, const char *src0_arrmeta,
-                                const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
-                                const eval::eval_context *ectx) const;
-
     std::map<std::string, nd::callable> get_dynamic_type_properties() const;
     std::map<std::string, nd::callable> get_dynamic_array_properties() const;
 

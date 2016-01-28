@@ -319,7 +319,6 @@ set(libdynd_SRC
     src/dynd/kernels/compare_kernels.cpp
     src/dynd/kernels/copy_kernel.cpp
     src/dynd/kernels/expression_assignment_kernels.cpp
-    src/dynd/kernels/expression_comparison_kernels.cpp
     src/dynd/kernels/fft_kernel.cpp
     src/dynd/kernels/kernel_builder.cpp
     src/dynd/kernels/multidispatch_kernel.cpp
@@ -332,7 +331,6 @@ set(libdynd_SRC
     src/dynd/kernels/take_kernel.cpp
     src/dynd/kernels/single_comparer_builtin.hpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
-    src/dynd/kernels/tuple_comparison_kernels.cpp
     include/dynd/kernels/apply.hpp
     include/dynd/kernels/arithmetic.hpp
     include/dynd/kernels/assign_na_kernel.hpp
@@ -348,7 +346,6 @@ set(libdynd_SRC
     include/dynd/kernels/cuda_launch.hpp
     include/dynd/kernels/elwise.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
-    include/dynd/kernels/expression_comparison_kernels.hpp
     include/dynd/kernels/fft_kernel.hpp
     include/dynd/kernels/index_kernel.hpp
     include/dynd/kernels/is_missing_kernel.hpp
@@ -367,7 +364,6 @@ set(libdynd_SRC
     include/dynd/kernels/struct_assignment_kernels.hpp
     include/dynd/kernels/take_kernel.hpp
     include/dynd/kernels/tuple_assignment_kernels.hpp
-    include/dynd/kernels/tuple_comparison_kernels.hpp
     include/dynd/kernels/uniform_kernel.hpp
     include/dynd/kernels/view_kernel.hpp
     # MemBlock

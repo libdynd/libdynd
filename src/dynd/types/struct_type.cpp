@@ -12,7 +12,6 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
-#include <dynd/kernels/tuple_comparison_kernels.hpp>
 #include <dynd/func/assignment.hpp>
 
 using namespace std;
@@ -175,23 +174,6 @@ bool ndt::struct_type::is_lossless_assignment(const type &dst_tp, const type &sr
   }
 
   return false;
-}
-
-void ndt::struct_type::make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_dt, const char *src0_arrmeta,
-                                              const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
-                                              const eval::eval_context *ectx) const
-{
-  if (this == src0_dt.extended()) {
-    if (*this == *src1_dt.extended()) {
-      make_tuple_comparison_kernel(ckb, src0_dt, src0_arrmeta, src1_arrmeta, comptype, ectx);
-      return;
-    }
-    else if (src1_dt.get_kind() == struct_kind) {
-      // TODO
-    }
-  }
-
-  throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
 bool ndt::struct_type::operator==(const base_type &rhs) const
