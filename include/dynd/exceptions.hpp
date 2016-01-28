@@ -142,6 +142,15 @@ public:
 };
 
 /**
+ * An exception for zero division
+ */
+class DYND_API zero_division_error : public dynd_exception {
+public:
+  zero_division_error(const std::string &msg) : dynd_exception("zero division error", msg) {}
+  virtual ~zero_division_error() throw() {}
+};
+
+/**
  * An exception for errors related to types.
  */
 class DYND_API type_error : public dynd_exception {

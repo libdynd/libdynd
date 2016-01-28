@@ -45,8 +45,6 @@ namespace nd {
   DYND_DEF_BINARY_OP_KERNEL(+, add)
   DYND_DEF_BINARY_OP_KERNEL(-, subtract)
   DYND_DEF_BINARY_OP_KERNEL(*, multiply)
-  DYND_DEF_BINARY_OP_KERNEL(/, divide)
-  DYND_DEF_BINARY_OP_KERNEL(%, mod)
   DYND_DEF_BINARY_OP_KERNEL(&, bitwise_and)
   DYND_DEF_BINARY_OP_KERNEL(&&, logical_and)
   DYND_DEF_BINARY_OP_KERNEL(|, bitwise_or)
@@ -54,6 +52,8 @@ namespace nd {
   DYND_DEF_BINARY_OP_KERNEL (^, bitwise_xor)
   DYND_DEF_BINARY_OP_KERNEL(<<, left_shift)
   DYND_DEF_BINARY_OP_KERNEL(>>, right_shift)
+
+#undef DYND_DeclBinopKernel
 
   namespace detail {
     template <type_id_t Src0TypeID, type_id_t Src1TypeID>
@@ -68,7 +68,52 @@ namespace nd {
                                          &detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f> {
   };
 
-#undef DYND_DeclBinopKernel
+  namespace detail {
+    template<type_id_t Src0TypeID, type_id_t Src1TypeID>
+    constexpr bool needs_zero_check() {
+        using Base0 = base_id_of<Src0TypeID>;
+        using Base1 = base_id_of<Src1TypeID>;
+        return ((Base0::value == bool_kind_id) || (Base0::value == int_kind_id) || (Base0::value == uint_kind_id)) &&
+               ((Base1::value == bool_kind_id) || (Base1::value == int_kind_id) || (Base1::value == uint_kind_id));
+    }
+  }
+
+#define DYND_DEF_BINARY_OP_KERNEL_ZEROCHECK_INT(OP, NAME)                                                             \
+  namespace detail {                                                                                                  \
+    template <type_id_t Src0TypeID, type_id_t Src1TypeID, bool check>                                                 \
+    struct inline_##NAME##_base;                                                                                      \
+                                                                                                                      \
+    template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                             \
+    struct inline_##NAME##_base<Src0TypeID, Src1TypeID, true> {                                                       \
+      static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) {                     \
+        if(b == 0) {                                                                                                  \
+          throw dynd::zero_division_error("Integer division or modulo by zero.");                                     \
+        }                                                                                                             \
+        return a OP b;                                                                                                \
+      }                                                                                                               \
+    };                                                                                                                \
+                                                                                                                      \
+    template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                             \
+    struct inline_##NAME##_base<Src0TypeID, Src1TypeID, false> {                                                      \
+      static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) {                     \
+        return a OP b;                                                                                                \
+      }                                                                                                               \
+    };                                                                                                                \
+                                                                                                                      \
+    template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                             \
+    using inline_##NAME = inline_##NAME##_base<Src0TypeID, Src1TypeID, needs_zero_check<Src0TypeID, Src1TypeID>()>;   \
+                                                                                                                      \
+  } /* namespace detail */                                                                                            \
+                                                                                                                      \
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                               \
+  struct NAME##_kernel : functional::as_apply_function_ck<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),\
+                                                          &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f> {        \
+  };
+
+  DYND_DEF_BINARY_OP_KERNEL_ZEROCHECK_INT(/, divide)
+  DYND_DEF_BINARY_OP_KERNEL_ZEROCHECK_INT(%, mod)
+
+#undef DYND_DEF_BINARY_OP_KERNEL_ZEROCHECK_INT
 
   template <typename FuncType, bool Src0IsOption, bool Src1IsOption>
   struct option_arithmetic_kernel;
