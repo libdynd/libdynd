@@ -74,10 +74,18 @@ namespace nd {
     struct inline_##NAME {                                                                                             \
       typedef typename type_of<Src0TypeID>::type T0;                                                                   \
       typedef typename type_of<Src1TypeID>::type T1;                                                                   \
-      static auto f(T0 a, T1 b) {                                                                                      \
-        if((b == 0) && std::is_integral<T0>::value && std::is_integral<T1>::value) {                                   \
+      typedef typename decltype(std::declval<T0>() / std::declval<T1>()) R;                                            \
+      template<bool check = std::is_integral<T0>::value && std::is_integral<T1>::value>                                \
+      static R f(T0 a, T1 b);                                                                                          \
+      template<>                                                                                                       \
+      static R f<true>(T0 a, T1 b) {                                                                                     \
+        if(b == 0) {                                                                                                   \
           throw dynd::zero_division_error("Integer division or modulo by zero.");                                      \
         }                                                                                                              \
+        return a OP b;                                                                                                 \
+      }                                                                                                                \
+      template<>                                                                                                       \
+      static R f<false>(T0 a, T1 b) {                                                                               \
         return a OP b;                                                                                                 \
       }                                                                                                                \
     };                                                                                                                 \
