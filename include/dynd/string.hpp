@@ -6,7 +6,6 @@
 #pragma once
 
 #include <dynd/callable.hpp>
-#include <dynd/kernels/string_concat_kernel.hpp>
 
 namespace dynd {
 namespace nd {

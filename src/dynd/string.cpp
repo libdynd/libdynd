@@ -4,6 +4,7 @@
 //
 
 #include <dynd/string.hpp>
+#include <dynd/kernels/string_concat_kernel.hpp>
 #include <dynd/func/elwise.hpp>
 
 using namespace std;
