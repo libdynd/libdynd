@@ -25,7 +25,6 @@
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
