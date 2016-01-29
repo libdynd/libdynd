@@ -431,6 +431,22 @@ TEST(StringType, Comparisons)
 }
 
 
+TEST(StringType, ConcatenationScalar) {
+    dynd::string a("first");
+    dynd::string b("second");
+
+    dynd::string c(a + b);
+    ASSERT_EQ(dynd::string("firstsecond"), c);
+
+    a = dynd::string("foo");
+    a += dynd::string("bar");
+
+    printf("%s\n", a.begin());
+
+    ASSERT_EQ(dynd::string("foobar"), a);
+}
+
+
 TEST(StringType, Concatenation) {
     nd::array a, b, c;
 

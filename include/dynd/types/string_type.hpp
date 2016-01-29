@@ -22,6 +22,8 @@ public:
 
   string(const std::string &other) : string(other.data(), other.size()) {}
 
+  string(const bytes &other) : string(other.data(), other.size()) {}
+
   bool operator<(const string &rhs) const
   {
     return std::lexicographical_compare(begin(), end(), rhs.begin(), rhs.end());
