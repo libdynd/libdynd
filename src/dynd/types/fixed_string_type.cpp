@@ -153,26 +153,3 @@ bool ndt::fixed_string_type::operator==(const base_type &rhs) const
     return m_encoding == dt->m_encoding && m_stringsize == dt->m_stringsize;
   }
 }
-
-void ndt::fixed_string_type::make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_dt,
-                                                    const char *src0_arrmeta, const type &src1_dt,
-                                                    const char *src1_arrmeta, comparison_type_t comptype,
-                                                    const eval::eval_context *ectx) const
-{
-  if (this == src0_dt.extended()) {
-    if (*this == *src1_dt.extended()) {
-      make_fixed_string_comparison_kernel(ckb, m_stringsize, m_encoding, comptype, ectx);
-      return;
-    }
-    else if (src1_dt.get_base_id() == string_kind_id) {
-      make_general_string_comparison_kernel(ckb, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype, ectx);
-      return;
-    }
-    else if (!src1_dt.is_builtin()) {
-      src1_dt.extended()->make_comparison_kernel(ckb, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype, ectx);
-      return;
-    }
-  }
-
-  throw not_comparable_error(src0_dt, src1_dt, comptype);
-}

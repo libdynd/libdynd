@@ -55,10 +55,6 @@ namespace ndt {
                              const std::string &DYND_UNUSED(indent)) const
     {
     }
-
-    void make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_dt, const char *src0_arrmeta,
-                                const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
-                                const eval::eval_context *ectx) const;
   };
 
 } // namespace dynd::ndt

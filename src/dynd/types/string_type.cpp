@@ -138,25 +138,3 @@ void ndt::string_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), c
     data += stride;
   }
 }
-
-void ndt::string_type::make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_dt, const char *src0_arrmeta,
-                                              const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
-                                              const eval::eval_context *ectx) const
-{
-  if (this == src0_dt.extended()) {
-    if (*this == *src1_dt.extended()) {
-      make_string_comparison_kernel(ckb, string_encoding_utf_8, comptype, ectx);
-      return;
-    }
-    else if (src1_dt.get_base_id() == string_kind_id) {
-      make_general_string_comparison_kernel(ckb, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype, ectx);
-      return;
-    }
-    else if (!src1_dt.is_builtin()) {
-      src1_dt.extended()->make_comparison_kernel(ckb, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype, ectx);
-      return;
-    }
-  }
-
-  throw not_comparable_error(src0_dt, src1_dt, comptype);
-}

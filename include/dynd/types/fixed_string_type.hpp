@@ -52,10 +52,6 @@ namespace ndt {
     {
     }
 
-    void make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_dt, const char *src0_arrmeta,
-                                const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
-                                const eval::eval_context *ectx) const;
-
     static type make(intptr_t stringsize, string_encoding_t encoding = string_encoding_utf_8)
     {
       return type(new fixed_string_type(stringsize, encoding), false);
