@@ -146,6 +146,8 @@ a little-endian architecture is
 
 ```cpp
 struct string_memory_layout {
+    // Two 64-bit integers on all platforms, the data size is 16 bytes on
+    // both 32-bit and 64-bit platforms.
     int64_t m_pointer;
     int64_t m_size;
 
@@ -154,22 +156,77 @@ struct string_memory_layout {
         return m_size < 0;
     }
 
-    intptr_t inline_size() const {
-        return (static_cast<uint64_t>(m_size) >> 56) & 0x7f;
+    size_t inline_size() const {
+        return static_cast<size_t>((static_cast<uint64_t>(m_size) >> 56) & 0x7f);
     }
 
-    intptr_t size() const {
-        return is_inline() ? inline_size() : m_size;
+    size_t size() const {
+        return is_inline() ? inline_size() : static_cast<size_t>(m_size);
     }
 
-    intptr_t capacity() const {
-        return is_inline() ? 15
-                           : *reinterpret_cast<const intptr_t *>(m_pointer);
+    size_t capacity() const {
+        return is_inline() ? 15u
+                           : *reinterpret_cast<const size_t *>(m_pointer);
     }
 
     const char *data() const {
         return is_inline() ? reinterpret_cast<const char *>(this)
-                           : reinterpret_cast<const char *>(m_pointer);
+                           : (reinterpret_cast<const char *>(m_pointer) + sizeof(size_t));
+    }
+
+	// Make sure the capacity is at least `capacity`
+    void reserve(size_t new_capacity) {
+        if (capacity() < new_capacity) {
+            size_t current_size = size();
+            // Allocate space for `capacity` and the buffer
+            char *new_data = new char[sizeof(size_t) + new_capacity];
+            // Fill the new data
+            *reinterpret_cast<size_t *>(new_data) = new_capacity;
+            memcpy(new_data + sizeof(size_t), data(), current_size);
+            // Free the old memory
+            if (!is_inline()) {
+                delete[] reinterpret_cast<const char *>(m_pointer);
+            }
+            // Overwrite the current data
+            m_size = current_size;
+            m_pointer = reinterpret_cast<intptr_t>(new_data);
+        }
+    }
+
+	// Make sure the capacity is at least `capacity`, growing the buffer exponentially
+    void reserve_grow(size_t new_capacity) {
+        // Grow capacity with a factor of 1.5
+        reserve(std::max(new_capacity, capacity() * 3 / 2));
+    }
+
+    // Change the size of the string
+    void resize(size_t new_size) {
+        reserve(new_size + 1);
+        if (is_inline()) {
+            m_size = (static_cast<uint64_t>(m_size) | 0x80) << 56;
+        } else {
+            m_size = new_size;
+        }
+        data()[new_size] = 0;
+    }
+
+    // Change the size of the string, growing the buffer exponentially
+    void resize_grow(size_t new_size) {
+        reserve_grow(new_size + 1);
+        if (is_inline()) {
+            m_size = (static_cast<uint64_t>(m_size) | 0x80) << 56;
+        } else {
+            m_size = new_size;
+        }
+        data()[new_size] = 0;
+    }
+
+    // Roughly how concatenation should look
+    string_memory_layout& operator+=(const string_memory_layout& rhs) {
+        size_t current_size = size();
+        resize_grow(current_size + rhs.size());
+        memcpy(data() + current_size, rhs.data(), rhs.size());
+        return *this;
     }
 };
 ```
@@ -177,11 +234,9 @@ struct string_memory_layout {
 And the heap allocated string data looks like
 
 ```
-// For holding a string encoded into N bytes or fewer
-template<int N>
 struct string_heap_memory {
-    intptr_t m_capacity; // Contains the value N+1
-    char m_string[N+1];
+    size_t m_capacity; // Contains the size of the buffer m_string
+    char m_string[1];
 };
 ```
 
