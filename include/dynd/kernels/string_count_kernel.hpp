@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-// Implement a string concatenation kernel
+// String count kernel
 
 #pragma once
 
@@ -15,14 +15,14 @@
 namespace dynd {
   namespace nd {
 
-    struct string_concatenation_kernel
-      : base_kernel<string_concatenation_kernel, 2> {
+    struct string_count_kernel
+      : base_kernel<string_count_kernel, 2> {
 
       void single(char *dst, char *const *src) {
-        dynd::string *d = reinterpret_cast<dynd::string *>(dst);
+        intptr_t *d = reinterpret_cast<intptr_t *>(dst);
         const dynd::string *const *s = reinterpret_cast<const dynd::string *const *>(src);
 
-        string_concat(2, d, s);
+        *d = dynd::string_count(s[0], s[1]);
       }
     };
 
@@ -31,8 +31,10 @@ namespace dynd {
   namespace ndt {
 
     template<>
-    struct traits<dynd::nd::string_concatenation_kernel> {
-      static type equivalent() { return callable_type::make(type(string_id), {type(string_id), type(string_id)}); }
+    struct traits<dynd::nd::string_count_kernel> {
+      /* TODO: Rather than int64_id, I really want the id that corresponds to
+               intptr_t... */
+      static type equivalent() { return callable_type::make(type(int64_id), {type(string_id), type(string_id)}); }
     };
 
   } // namespace ndt

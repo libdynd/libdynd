@@ -469,41 +469,146 @@ TEST(StringType, Concatenation) {
     EXPECT_ARRAY_EQ("twogamma", c(2));
 }
 
-/*
+
 TEST(StringType, Find1) {
-    nd::array a, b, c;
+  nd::array a, b, c;
 
-    const char *a_arr[4] = {"abc", "ababc", "ababab", "abd"};
-    a = a_arr;
-    b = "abc";
+  const char *a_arr[4] = {"abc", "ababc", "ababab", "abd"};
+  a = a_arr;
+  b = "abc";
 
-    c = a.f("find", b).eval();
-    ASSERT_EQ(ndt::type("4 * intptr"), c.get_type());
-    ASSERT_EQ(4, c.get_shape()[0]);
-    EXPECT_EQ(0, c(0).as<intptr_t>());
-    EXPECT_EQ(2, c(1).as<intptr_t>());
-    EXPECT_EQ(-1, c(2).as<intptr_t>());
-    EXPECT_EQ(-1, c(3).as<intptr_t>());
+  c = nd::string_find(a, b);
+  ASSERT_EQ(ndt::type("4 * intptr"), c.get_type());
+  ASSERT_EQ(4, c.get_shape()[0]);
+  EXPECT_ARRAY_EQ(0l, c(0));
+  EXPECT_ARRAY_EQ(2l, c(1));
+  EXPECT_ARRAY_EQ(-1l, c(2));
+  EXPECT_ARRAY_EQ(-1l, c(3));
 }
+
 
 TEST(StringType, Find2) {
-    nd::array a, b, c;
+  nd::array a, b, c;
 
-    const char *b_arr[6] = {"a", "b", "c", "bc", "d", "cd"};
-    a = "abc";
-    b = b_arr;
+  const char *b_arr[6] = {"a", "b", "c", "bc", "d", "cd"};
+  a = "abc";
+  b = b_arr;
 
-    c = a.f("find", b).eval();
-    ASSERT_EQ(ndt::type("6 * intptr"), c.get_type());
-    ASSERT_EQ(6, c.get_shape()[0]);
-    EXPECT_EQ(0, c(0).as<intptr_t>());
-    EXPECT_EQ(1, c(1).as<intptr_t>());
-    EXPECT_EQ(2, c(2).as<intptr_t>());
-    EXPECT_EQ(1, c(3).as<intptr_t>());
-    EXPECT_EQ(-1, c(4).as<intptr_t>());
-    EXPECT_EQ(-1, c(5).as<intptr_t>());
+  c = nd::string_find(a, b);
+  ASSERT_EQ(ndt::type("6 * intptr"), c.get_type());
+  ASSERT_EQ(6, c.get_shape()[0]);
+  EXPECT_ARRAY_EQ(0l, c(0));
+  EXPECT_ARRAY_EQ(1l, c(1));
+  EXPECT_ARRAY_EQ(2l, c(2));
+  EXPECT_ARRAY_EQ(1l, c(3));
+  EXPECT_ARRAY_EQ(-1l, c(4));
+  EXPECT_ARRAY_EQ(-1l, c(5));
 }
-*/
+
+
+TEST(StringType, Find3) {
+  /* This tests the "fast path" where the needle is a single
+     character */
+  nd::array a, b, c;
+
+  const char *a_arr[5] = {"a", "bbbb", "bbbba", "0123456789bb", "0123456789a"};
+  a = a_arr;
+  b = "a";
+
+  c = nd::string_find(a, b);
+  ASSERT_EQ(ndt::type("5 * intptr"), c.get_type());
+  ASSERT_EQ(5, c.get_shape()[0]);
+  EXPECT_ARRAY_EQ(0l, c(0));
+  EXPECT_ARRAY_EQ(-1l, c(1));
+  EXPECT_ARRAY_EQ(4l, c(2));
+  EXPECT_ARRAY_EQ(-1l, c(3));
+  EXPECT_ARRAY_EQ(10l, c(4));
+}
+
+
+TEST(StringType, Count1) {
+  nd::array a, b, c;
+
+  const char *a_arr[4] = {"abc", "xxxabcxxxabcxxx", "ababab", "abd"};
+  a = a_arr;
+  b = "abc";
+
+  c = nd::string_count(a, b);
+  ASSERT_EQ(ndt::type("4 * intptr"), c.get_type());
+  ASSERT_EQ(4, c.get_shape()[0]);
+  EXPECT_ARRAY_EQ(1l, c(0));
+  EXPECT_ARRAY_EQ(2l, c(1));
+  EXPECT_ARRAY_EQ(0l, c(2));
+  EXPECT_ARRAY_EQ(0l, c(3));
+}
+
+
+TEST(StringType, Count2) {
+  nd::array a, b, c;
+
+  const char *b_arr[6] = {"a", "b", "c", "bc", "d", "cd"};
+  a = "abc";
+  b = b_arr;
+
+  c = nd::string_count(a, b);
+  ASSERT_EQ(ndt::type("6 * intptr"), c.get_type());
+  ASSERT_EQ(6, c.get_shape()[0]);
+  EXPECT_ARRAY_EQ(1l, c(0));
+  EXPECT_ARRAY_EQ(1l, c(1));
+  EXPECT_ARRAY_EQ(1l, c(2));
+  EXPECT_ARRAY_EQ(1l, c(3));
+  EXPECT_ARRAY_EQ(0l, c(4));
+  EXPECT_ARRAY_EQ(0l, c(5));
+}
+
+
+TEST(StringType, Count3) {
+  /* This tests the "fast path" where the needle is a single
+     character */
+  nd::array a, b, c;
+
+  const char *a_arr[4] = {"a", "baab", "0123456789bb", "0123456789aaa"};
+  a = a_arr;
+  b = "a";
+
+  c = nd::string_count(a, b);
+  ASSERT_EQ(ndt::type("4 * intptr"), c.get_type());
+  ASSERT_EQ(4, c.get_shape()[0]);
+  EXPECT_ARRAY_EQ(1l, c(0));
+  EXPECT_ARRAY_EQ(2l, c(1));
+  EXPECT_ARRAY_EQ(0l, c(2));
+  EXPECT_ARRAY_EQ(3l, c(3));
+}
+
+
+TEST(StringType, Replace) {
+  nd::array a, b, c, d;
+
+  /* Tests the five main code paths:
+       - old is length 0
+       - old and new are length 1
+       - old and new are same length
+       - old.size() > new.size()
+       - old.size() < new.size()
+  */
+
+  const char *a_arr[5] = {"xaxxbxxxc", "xxxabcxxxabcxxx", "cabababc", "cabababc", "foobar"};
+  const char *b_arr[5] = {"x",         "abc",             "ab",       "ab",       ""};
+  const char *c_arr[5] = {"y",         "ABC",             "aabb",     "a",        "x"};
+  a = a_arr;
+  b = b_arr;
+  c = c_arr;
+
+  d = nd::string_replace(a, b, c);
+  ASSERT_EQ(ndt::type("5 * string"), d.get_type());
+  ASSERT_EQ(5, d.get_shape()[0]);
+  EXPECT_ARRAY_EQ("yayybyyyc", d(0));
+  EXPECT_ARRAY_EQ("xxxABCxxxABCxxx", d(1));
+  EXPECT_ARRAY_EQ("caabbaabbaabbc", d(2));
+  EXPECT_ARRAY_EQ("caaac", d(3));
+  EXPECT_ARRAY_EQ("foobar", d(4));
+}
+
 
 template <class T>
 static bool ascii_T_compare(const char *x, const T *y, intptr_t count)
