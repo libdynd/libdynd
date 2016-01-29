@@ -315,7 +315,6 @@ set(libdynd_SRC
     # Kernels
     src/dynd/kernels/base_kernel.cpp
     src/dynd/kernels/byteswap_kernels.cpp
-    src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/compare_kernels.cpp
     src/dynd/kernels/copy_kernel.cpp
     src/dynd/kernels/expression_assignment_kernels.cpp
@@ -327,7 +326,6 @@ set(libdynd_SRC
     src/dynd/kernels/rolling_kernel.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/take_kernel.cpp
-    src/dynd/kernels/single_comparer_builtin.hpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
     include/dynd/kernels/apply.hpp
     include/dynd/kernels/arithmetic.hpp
@@ -336,7 +334,7 @@ set(libdynd_SRC
     include/dynd/kernels/base_kernel.hpp
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/ckernel_prefix.hpp
-    include/dynd/kernels/comparison_kernels.hpp
+    include/dynd/kernels/compare_kernels.hpp
     include/dynd/kernels/compose_kernel.hpp
     include/dynd/kernels/compound_kernel.hpp
     include/dynd/kernels/copy_kernel.hpp

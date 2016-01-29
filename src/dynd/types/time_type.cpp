@@ -182,24 +182,6 @@ bool ndt::time_type::operator==(const base_type &rhs) const
   }
 }
 
-void ndt::time_type::make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_tp, const char *src0_arrmeta,
-                                            const type &src1_tp, const char *src1_arrmeta, comparison_type_t comptype,
-                                            const eval::eval_context *ectx) const
-{
-  if (this == src0_tp.extended()) {
-    if (*this == *src1_tp.extended()) {
-      make_builtin_type_comparison_kernel(ckb, int64_id, int64_id, comptype);
-      return;
-    }
-    else if (!src1_tp.is_builtin()) {
-      src1_tp.extended()->make_comparison_kernel(ckb, src0_tp, src0_arrmeta, src1_tp, src1_arrmeta, comptype, ectx);
-      return;
-    }
-  }
-
-  throw not_comparable_error(src0_tp, src1_tp, comptype);
-}
-
 ///////// properties on the nd::array
 
 std::map<std::string, nd::callable> ndt::time_type::get_dynamic_array_properties() const

@@ -13,7 +13,7 @@
 #include <dynd/types/type_id.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/memory_block.hpp>
-#include <dynd/kernels/comparison_kernels.hpp>
+#include <dynd/kernels/ckernel_prefix.hpp>
 
 namespace dynd {
 
@@ -459,23 +459,6 @@ namespace ndt {
                                       const intptr_t *shape, ndt::type &out_uniform_tp) const;
     /** Destructs any references or other state contained in the iterdata */
     virtual size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
-
-    /**
-     * Creates a comparison kernel for one data value from one
-     * type/arrmeta to another type/arrmeta. This adds the
-     * kernel at the 'ckb_offset' position in 'ckb's data, as part
-     * of a hierarchy matching the type's hierarchy.
-     *
-     * This function should always be called with this == src0_dt first,
-     * and types which don't support the particular comparison should
-     * then call the corresponding function with this == src1_dt.
-     *
-     * \returns  The offset at the end of 'ckb' after adding this
-     *           kernel.
-     */
-    virtual void make_comparison_kernel(nd::kernel_builder *ckb, const ndt::type &src0_dt, const char *src0_arrmeta,
-                                        const ndt::type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
-                                        const eval::eval_context *ectx) const;
 
     virtual bool match(const char *arrmeta, const ndt::type &candidate_tp, const char *candidate_arrmeta,
                        std::map<std::string, ndt::type> &tp_vars) const;
