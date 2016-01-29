@@ -89,14 +89,22 @@ public:
 
   const bytes operator+(const bytes& rhs)
   {
-      bytes result;
+    bytes result;
 
-      result.resize(size() + rhs.size());
+    result.resize(size() + rhs.size());
 
-      DYND_MEMCPY(result.begin(), begin(), size());
-      DYND_MEMCPY(result.begin() + size(), rhs.begin(), rhs.size());
+    DYND_MEMCPY(result.begin(), begin(), size());
+    DYND_MEMCPY(result.begin() + size(), rhs.begin(), rhs.size());
 
-      return result;
+    return result;
+  }
+
+  bytes &operator+=(const bytes& rhs)
+  {
+    size_t orig_size = size();
+    resize(size() + rhs.size());
+    DYND_MEMCPY(begin() + orig_size, rhs.begin(), rhs.size());
+    return *this;
   }
 };
 
