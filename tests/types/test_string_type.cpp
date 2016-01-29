@@ -441,8 +441,6 @@ TEST(StringType, ConcatenationScalar) {
     a = dynd::string("foo");
     a += dynd::string("bar");
 
-    printf("%s\n", a.begin());
-
     ASSERT_EQ(dynd::string("foobar"), a);
 }
 
