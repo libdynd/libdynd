@@ -530,7 +530,7 @@ namespace nd {
     template <kernel_request_t kernreq, typename func_type, func_type func, typename... T>
     callable apply(T &&... names)
     {
-      typedef as_apply_function_ck<func_type, func, arity_of<func_type>::value - sizeof...(T)> CKT;
+      typedef apply_function_kernel<func_type, func, arity_of<func_type>::value - sizeof...(T)> CKT;
 
       ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
 
@@ -551,7 +551,7 @@ namespace nd {
     template <kernel_request_t kernreq, typename func_type, typename... T>
     typename std::enable_if<!is_function_pointer<func_type>::value, callable>::type apply(func_type func, T &&... names)
     {
-      typedef as_apply_callable_ck<func_type, arity_of<func_type>::value - sizeof...(T)> ck_type;
+      typedef apply_callable_kernel<func_type, arity_of<func_type>::value - sizeof...(T)> ck_type;
 
       ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
 
@@ -568,7 +568,7 @@ namespace nd {
     template <kernel_request_t kernreq, typename func_type, typename... T>
     callable apply(func_type *func, T &&... names)
     {
-      typedef as_apply_callable_ck<func_type *, arity_of<func_type>::value - sizeof...(T)> ck_type;
+      typedef apply_callable_kernel<func_type *, arity_of<func_type>::value - sizeof...(T)> ck_type;
 
       ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
 
@@ -584,7 +584,7 @@ namespace nd {
     template <kernel_request_t kernreq, typename T, typename R, typename... A, typename... S>
     callable apply(T *obj, R (T::*mem_func)(A...), S &&... names)
     {
-      typedef as_apply_member_function_ck<T *, R (T::*)(A...), sizeof...(A) - sizeof...(S)> ck_type;
+      typedef apply_member_function_kernel<T *, R (T::*)(A...), sizeof...(A) - sizeof...(S)> ck_type;
 
       ndt::type self_tp = ndt::make_type<typename funcproto_of<R (T::*)(A...)>::type>(std::forward<S>(names)...);
 
@@ -604,7 +604,7 @@ namespace nd {
     template <kernel_request_t kernreq, typename func_type, typename... K, typename... T>
     callable apply(T &&... names)
     {
-      typedef as_construct_then_apply_callable_ck<func_type, K...> ck_type;
+      typedef construct_then_apply_callable_kernel<func_type, K...> ck_type;
 
       ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type, K...>::type>(std::forward<T>(names)...);
 

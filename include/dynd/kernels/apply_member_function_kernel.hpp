@@ -11,20 +11,20 @@
 namespace dynd {
 namespace nd {
   namespace functional {
+    namespace detail {
 
-    template <typename T, typename mem_func_type, typename R, typename A, typename I, typename K, typename J>
-    struct apply_member_function_ck;
+      template <typename T, typename mem_func_type, typename R, typename A, typename I, typename K, typename J>
+      struct apply_member_function_kernel;
 
-#define APPLY_MEMBER_FUNCTION_CK(...)                                                                                  \
+#define APPLY_MEMBER_FUNCTION_KERNEL(...)                                                                              \
   template <typename T, typename mem_func_type, typename R, typename... A, size_t... I, typename... K, size_t... J>    \
-  struct apply_member_function_ck<T *, mem_func_type, R, type_sequence<A...>, index_sequence<I...>,                    \
-                                  type_sequence<K...>, index_sequence<J...>>                                           \
-      : base_kernel<apply_member_function_ck<T *, mem_func_type, R, type_sequence<A...>, index_sequence<I...>,         \
-                                             type_sequence<K...>, index_sequence<J...>>,                               \
+  struct apply_member_function_kernel<T *, mem_func_type, R, type_sequence<A...>, index_sequence<I...>,                \
+                                      type_sequence<K...>, index_sequence<J...>>                                       \
+      : base_kernel<apply_member_function_kernel<T *, mem_func_type, R, type_sequence<A...>, index_sequence<I...>,     \
+                                                 type_sequence<K...>, index_sequence<J...>>,                           \
                     sizeof...(A)>,                                                                                     \
         apply_args<type_sequence<A...>, index_sequence<I...>>,                                                         \
         apply_kwds<type_sequence<K...>, index_sequence<J...>> {                                                        \
-    typedef apply_member_function_ck self_type;                                                                        \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
     typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;                                           \
     typedef std::pair<T *, mem_func_type> data_type;                                                                   \
@@ -34,7 +34,7 @@ namespace nd {
     T *obj;                                                                                                            \
     mem_func_type mem_func;                                                                                            \
                                                                                                                        \
-    __VA_ARGS__ apply_member_function_ck(T *obj, mem_func_type mem_func, args_type args, kwds_type kwds)               \
+    __VA_ARGS__ apply_member_function_kernel(T *obj, mem_func_type mem_func, args_type args, kwds_type kwds)           \
         : args_type(args), kwds_type(kwds), obj(obj), mem_func(mem_func)                                               \
     {                                                                                                                  \
     }                                                                                                                  \
@@ -63,34 +63,27 @@ namespace nd {
       }                                                                                                                \
     }                                                                                                                  \
                                                                                                                        \
-    static void instantiate_without_cuda_launch(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,       \
-                                                const ndt::type &DYND_UNUSED(dst_tp),                                  \
-                                                const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
-                                                const ndt::type *src_tp, const char *const *src_arrmeta,               \
-                                                kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,        \
-                                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
+    static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,                           \
+                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),                \
+                            intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,       \
+                            kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,                            \
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))                              \
     {                                                                                                                  \
-      ckb->emplace_back<self_type>(                                                                                    \
+      ckb->emplace_back<apply_member_function_kernel>(                                                                 \
           kernreq, reinterpret_cast<data_type *>(static_data)->first,                                                  \
           dynd::detail::make_value_wrapper(reinterpret_cast<data_type *>(static_data)->second),                        \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                                                \
     }                                                                                                                  \
-                                                                                                                       \
-    static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,              \
-                            const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,  \
-                            const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,                   \
-                            const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);                   \
   };                                                                                                                   \
                                                                                                                        \
   template <typename T, typename mem_func_type, typename... A, size_t... I, typename... K, size_t... J>                \
-  struct apply_member_function_ck<T *, mem_func_type, void, type_sequence<A...>, index_sequence<I...>,                 \
-                                  type_sequence<K...>, index_sequence<J...>>                                           \
-      : base_kernel<apply_member_function_ck<T *, mem_func_type, void, type_sequence<A...>, index_sequence<I...>,      \
-                                             type_sequence<K...>, index_sequence<J...>>,                               \
+  struct apply_member_function_kernel<T *, mem_func_type, void, type_sequence<A...>, index_sequence<I...>,             \
+                                      type_sequence<K...>, index_sequence<J...>>                                       \
+      : base_kernel<apply_member_function_kernel<T *, mem_func_type, void, type_sequence<A...>, index_sequence<I...>,  \
+                                                 type_sequence<K...>, index_sequence<J...>>,                           \
                     sizeof...(A)>,                                                                                     \
         apply_args<type_sequence<A...>, index_sequence<I...>>,                                                         \
         apply_kwds<type_sequence<K...>, index_sequence<J...>> {                                                        \
-    typedef apply_member_function_ck self_type;                                                                        \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
     typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;                                           \
     typedef std::pair<T *, mem_func_type> data_type;                                                                   \
@@ -100,7 +93,7 @@ namespace nd {
     T *obj;                                                                                                            \
     mem_func_type mem_func;                                                                                            \
                                                                                                                        \
-    __VA_ARGS__ apply_member_function_ck(T *obj, mem_func_type mem_func, args_type args, kwds_type kwds)               \
+    __VA_ARGS__ apply_member_function_kernel(T *obj, mem_func_type mem_func, args_type args, kwds_type kwds)           \
         : args_type(args), kwds_type(kwds), obj(obj), mem_func(mem_func)                                               \
     {                                                                                                                  \
     }                                                                                                                  \
@@ -128,65 +121,31 @@ namespace nd {
       }                                                                                                                \
     }                                                                                                                  \
                                                                                                                        \
-    static void instantiate_without_cuda_launch(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,       \
-                                                const ndt::type &DYND_UNUSED(dst_tp),                                  \
-                                                const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
-                                                const ndt::type *src_tp, const char *const *src_arrmeta,               \
-                                                kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,        \
-                                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
+    static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,                           \
+                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),                \
+                            intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,       \
+                            kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,                            \
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))                              \
     {                                                                                                                  \
-      ckb->emplace_back<self_type>(                                                                                    \
+      ckb->emplace_back<apply_member_function_kernel>(                                                                 \
           kernreq, reinterpret_cast<data_type *>(static_data)->first,                                                  \
           dynd::detail::make_value_wrapper(reinterpret_cast<data_type *>(static_data)->second),                        \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(nkwd, kwds));                                                \
     }                                                                                                                  \
-                                                                                                                       \
-    static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,              \
-                            const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,  \
-                            const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,                   \
-                            const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);                   \
   }
 
-    APPLY_MEMBER_FUNCTION_CK();
+      APPLY_MEMBER_FUNCTION_KERNEL();
 
-    template <typename T, typename mem_func_type, typename R, typename... A, size_t... I, typename... K, size_t... J>
-    void apply_member_function_ck<T *, mem_func_type, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>,
-                                  index_sequence<J...>>::instantiate(char *static_data, char *DYND_UNUSED(data),
-                                                                     kernel_builder *ckb, const ndt::type &dst_tp,
-                                                                     const char *dst_arrmeta, intptr_t nsrc,
-                                                                     const ndt::type *src_tp,
-                                                                     const char *const *src_arrmeta,
-                                                                     kernel_request_t kernreq, intptr_t nkwd,
-                                                                     const nd::array *kwds,
-                                                                     const std::map<std::string, ndt::type> &tp_vars)
-    {
-      instantiate_without_cuda_launch(static_data, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
-                                      nkwd, kwds, tp_vars);
-    }
+#undef APPLY_MEMBER_FUNCTION_KERNEL
 
-    template <typename T, typename mem_func_type, typename... A, size_t... I, typename... K, size_t... J>
-    void
-    apply_member_function_ck<T *, mem_func_type, void, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>,
-                             index_sequence<J...>>::instantiate(char *static_data, char *DYND_UNUSED(data),
-                                                                kernel_builder *ckb, const ndt::type &dst_tp,
-                                                                const char *dst_arrmeta, intptr_t nsrc,
-                                                                const ndt::type *src_tp, const char *const *src_arrmeta,
-                                                                kernel_request_t kernreq, intptr_t nkwd,
-                                                                const nd::array *kwds,
-                                                                const std::map<std::string, ndt::type> &tp_vars)
-    {
-      instantiate_without_cuda_launch(static_data, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
-                                      nkwd, kwds, tp_vars);
-    }
-
-#undef APPLY_MEMBER_FUNCTION_CK
+    } // namespace dynd::nd::functional::detail
 
     template <typename T, typename mem_func_type, int N>
-    using as_apply_member_function_ck =
-        apply_member_function_ck<T, mem_func_type, typename return_of<mem_func_type>::type,
-                                 as_apply_arg_sequence<mem_func_type, N>, make_index_sequence<N>,
-                                 as_apply_kwd_sequence<mem_func_type, N>,
-                                 make_index_sequence<arity_of<mem_func_type>::value - N>>;
+    using apply_member_function_kernel =
+        detail::apply_member_function_kernel<T, mem_func_type, typename return_of<mem_func_type>::type,
+                                             as_apply_arg_sequence<mem_func_type, N>, make_index_sequence<N>,
+                                             as_apply_kwd_sequence<mem_func_type, N>,
+                                             make_index_sequence<arity_of<mem_func_type>::value - N>>;
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
