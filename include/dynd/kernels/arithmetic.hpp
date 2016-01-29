@@ -128,9 +128,9 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      auto is_missing = this->get_child();
+      auto is_na = this->get_child();
       bool1 child_dst;
-      is_missing->single(reinterpret_cast<char *>(&child_dst), &src[0]);
+      is_na->single(reinterpret_cast<char *>(&child_dst), &src[0]);
       if (!child_dst) {
         this->get_child(arith_offset)->single(dst, src);
       }
@@ -159,9 +159,9 @@ namespace nd {
       ckb->emplace_back<option_arithmetic_kernel>(kernreq);
       ckb_offset = ckb->m_size;
 
-      auto is_missing = is_missing::get();
-      is_missing.get()->instantiate(is_missing.get()->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp,
-                                    src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+      auto is_na = is_na::get();
+      is_na.get()->instantiate(is_na.get()->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
+                               kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->m_size;
       option_arithmetic_kernel *self = ckb->get_at<option_arithmetic_kernel>(option_arith_offset);
       self->arith_offset = ckb_offset - option_arith_offset;
@@ -187,9 +187,9 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      auto is_missing = this->get_child();
+      auto is_na = this->get_child();
       bool1 child_dst;
-      is_missing->single(reinterpret_cast<char *>(&child_dst), &src[1]);
+      is_na->single(reinterpret_cast<char *>(&child_dst), &src[1]);
       if (!child_dst) {
         this->get_child(arith_offset)->single(dst, src);
       }
@@ -218,9 +218,9 @@ namespace nd {
       ckb->emplace_back<option_arithmetic_kernel>(kernreq);
       ckb_offset = ckb->m_size;
 
-      auto is_missing = is_missing::get();
-      is_missing.get()->instantiate(is_missing.get()->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp[1],
-                                    &src_arrmeta[1], kernel_request_single, nkwd, kwds, tp_vars);
+      auto is_na = is_na::get();
+      is_na.get()->instantiate(is_na.get()->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp[1],
+                               &src_arrmeta[1], kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->m_size;
       option_arithmetic_kernel *self = ckb->get_at<option_arithmetic_kernel>(option_arith_offset);
       self->arith_offset = ckb_offset - option_arith_offset;
@@ -241,18 +241,18 @@ namespace nd {
   template <typename FuncType>
   struct option_arithmetic_kernel<FuncType, true, true>
       : base_kernel<option_arithmetic_kernel<FuncType, true, true>, 2> {
-    intptr_t is_missing_rhs_offset;
+    intptr_t is_na_rhs_offset;
     intptr_t arith_offset;
     intptr_t assign_na_offset;
 
     void single(char *dst, char *const *src)
     {
-      auto is_missing_lhs = this->get_child();
-      auto is_missing_rhs = this->get_child(is_missing_rhs_offset);
+      auto is_na_lhs = this->get_child();
+      auto is_na_rhs = this->get_child(is_na_rhs_offset);
       bool child_dst_lhs;
       bool child_dst_rhs;
-      is_missing_lhs->single(reinterpret_cast<char *>(&child_dst_lhs), &src[0]);
-      is_missing_rhs->single(reinterpret_cast<char *>(&child_dst_rhs), &src[1]);
+      is_na_lhs->single(reinterpret_cast<char *>(&child_dst_lhs), &src[0]);
+      is_na_rhs->single(reinterpret_cast<char *>(&child_dst_rhs), &src[1]);
       if (!child_dst_lhs && !child_dst_rhs) {
         this->get_child(arith_offset)->single(dst, src);
       }
@@ -282,15 +282,15 @@ namespace nd {
       ckb->emplace_back<option_arithmetic_kernel>(kernreq);
       ckb_offset = ckb->m_size;
 
-      auto is_missing_lhs = is_missing::get();
-      is_missing_lhs.get()->instantiate(is_missing_lhs.get()->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc,
-                                        src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+      auto is_na_lhs = is_na::get();
+      is_na_lhs.get()->instantiate(is_na_lhs.get()->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp,
+                                   src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->m_size;
       option_arithmetic_kernel *self = ckb->get_at<option_arithmetic_kernel>(option_arith_offset);
-      self->is_missing_rhs_offset = ckb_offset - option_arith_offset;
-      auto is_missing_rhs = is_missing::get();
-      is_missing_rhs.get()->instantiate(is_missing_rhs.get()->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc,
-                                        src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+      self->is_na_rhs_offset = ckb_offset - option_arith_offset;
+      auto is_na_rhs = is_na::get();
+      is_na_rhs.get()->instantiate(is_na_rhs.get()->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp,
+                                   src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->m_size;
       self = ckb->get_at<option_arithmetic_kernel>(option_arith_offset);
       self->arith_offset = ckb_offset - option_arith_offset;

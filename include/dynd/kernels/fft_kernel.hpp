@@ -156,7 +156,7 @@ namespace nd {
                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       int flags;
-      if (kwds[2].is_missing()) {
+      if (kwds[2].is_na()) {
         flags = FFTW_ESTIMATE;
       }
       else {
@@ -164,14 +164,14 @@ namespace nd {
       }
 
       nd::array shape = kwds[0];
-      if (!shape.is_missing()) {
+      if (!shape.is_na()) {
         if (shape.get_type().get_id() == pointer_id) {
           shape = shape;
         }
       }
 
       nd::array axes;
-      if (!kwds[1].is_missing()) {
+      if (!kwds[1].is_na()) {
         axes = kwds[1];
         if (axes.get_type().get_id() == pointer_id) {
           axes = axes;
@@ -188,7 +188,7 @@ namespace nd {
       shortvector<fftw_iodim> dims(rank);
       for (intptr_t i = 0; i < rank; ++i) {
         intptr_t j = axes(i).as<intptr_t>();
-        dims[i].n = shape.is_missing() ? src_size_stride[j].dim_size : shape(j).as<intptr_t>();
+        dims[i].n = shape.is_na() ? src_size_stride[j].dim_size : shape(j).as<intptr_t>();
         dims[i].is = src_size_stride[j].stride / sizeof(fftw_src_type);
         dims[i].os = dst_size_stride[j].stride / sizeof(fftw_dst_type);
       }
@@ -198,7 +198,7 @@ namespace nd {
       for (intptr_t i = 0, j = 0, k = 0; i < howmany_rank; ++i, ++j) {
         for (; k < rank && j == axes(k).as<intptr_t>(); ++j, ++k) {
         }
-        howmany_dims[i].n = shape.is_missing() ? src_size_stride[j].dim_size : shape(j).as<intptr_t>();
+        howmany_dims[i].n = shape.is_na() ? src_size_stride[j].dim_size : shape(j).as<intptr_t>();
         howmany_dims[i].is = src_size_stride[j].stride / sizeof(fftw_src_type);
         howmany_dims[i].os = dst_size_stride[j].stride / sizeof(fftw_dst_type);
       }
@@ -234,7 +234,7 @@ namespace nd {
                       const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds[0];
-      if (shape.is_missing()) {
+      if (shape.is_na()) {
         dst_tp = src_tp[0];
       }
       else {

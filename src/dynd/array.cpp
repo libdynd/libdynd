@@ -346,7 +346,7 @@ nd::array nd::array::to_cuda_device() const
 
 #endif // DYND_CUDA
 
-bool nd::array::is_missing() const
+bool nd::array::is_na() const
 {
   ndt::type tp = get_type();
   if (tp.get_id() == option_id) {

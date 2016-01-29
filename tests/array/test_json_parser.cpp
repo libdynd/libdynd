@@ -216,15 +216,15 @@ TEST(JSON, ParserWithMissingValue)
 {
   nd::array a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{\"x\": 7}");
   EXPECT_ARRAY_VALS_EQ(a.p("x"), 7);
-  EXPECT_TRUE(a.p("y").is_missing());
+  EXPECT_TRUE(a.p("y").is_na());
 
   a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{\"x\": 7, \"y\": 11.5}");
   EXPECT_ARRAY_VALS_EQ(a.p("x"), 7);
   EXPECT_ARRAY_VALS_EQ(a.p("y"), 11.5);
 
   a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{}");
-  EXPECT_TRUE(a.p("x").is_missing());
-  EXPECT_TRUE(a.p("y").is_missing());
+  EXPECT_TRUE(a.p("x").is_na());
+  EXPECT_TRUE(a.p("y").is_na());
 }
 
 /*

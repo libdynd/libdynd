@@ -80,11 +80,11 @@ namespace nd {
         char *data = reinterpret_cast<char *>(new data_type());
 
         const array &identity = kwds[1];
-        if (!identity.is_missing()) {
+        if (!identity.is_na()) {
           reinterpret_cast<data_type *>(data)->identity = identity;
         }
 
-        if (kwds[0].is_missing()) {
+        if (kwds[0].is_na()) {
           reinterpret_cast<data_type *>(data)->naxis =
               src_tp[0].get_ndim() -
               reinterpret_cast<static_data_type *>(static_data)->child.get_type()->get_return_type().get_ndim();
@@ -95,7 +95,7 @@ namespace nd {
           reinterpret_cast<data_type *>(data)->axes = reinterpret_cast<const int *>(kwds[0].cdata());
         }
 
-        if (kwds[2].is_missing()) {
+        if (kwds[2].is_na()) {
           reinterpret_cast<data_type *>(data)->keepdims = false;
         }
         else {
@@ -879,9 +879,8 @@ namespace nd {
         return;
       }
 
-      table[src_tp[0].get_id() -
-            fixed_dim_id][reinterpret_cast<data_type *>(data)->is_broadcast()][reinterpret_cast<data_type *>(data)
-                                                                                        ->is_inner()](
+      table[src_tp[0].get_id() - fixed_dim_id][reinterpret_cast<data_type *>(data)
+                                                   ->is_broadcast()][reinterpret_cast<data_type *>(data)->is_inner()](
           static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
     }
 

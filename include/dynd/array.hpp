@@ -684,7 +684,7 @@ namespace nd {
     array to_cuda_device() const;
 #endif // DYND_CUDA
 
-    bool is_missing() const;
+    bool is_na() const;
 
     /** Sorting comparison between two arrays. (Returns a bool, does not
      * broadcast) */
