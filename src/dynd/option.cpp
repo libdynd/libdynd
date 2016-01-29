@@ -6,7 +6,7 @@
 #include <dynd/functional.hpp>
 #include <dynd/option.hpp>
 #include <dynd/kernels/assign_na_kernel.hpp>
-#include <dynd/kernels/is_missing_kernel.hpp>
+#include <dynd/kernels/is_na_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
