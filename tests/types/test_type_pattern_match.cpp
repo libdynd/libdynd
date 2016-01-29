@@ -152,6 +152,7 @@ TEST(TypePatternMatch, Option)
       ndt::type("100 * {x: ?int32, y: ?int32, u: ?int16, v: int16}")));
 }
 
+/*
 TEST(TypePatternMatch, Categorical)
 {
   const char *a_vals[] = {"foo", "bar", "baz"};
@@ -162,6 +163,7 @@ TEST(TypePatternMatch, Categorical)
   EXPECT_TRUE(ndt::type("Categorical").match(ndt::type("Categorical")));
   EXPECT_FALSE(ndt::type("Categorical").match(ndt::type("int32")));
 }
+*/
 
 TEST(TypePatternMatch, FixedBytes)
 {

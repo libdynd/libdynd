@@ -6,7 +6,6 @@
 #include <dynd/types/char_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/func/assignment.hpp>
-#include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/exceptions.hpp>
 
 #include <algorithm>
@@ -96,26 +95,4 @@ bool ndt::char_type::operator==(const base_type &rhs) const
     const char_type *dt = static_cast<const char_type *>(&rhs);
     return m_encoding == dt->m_encoding;
   }
-}
-
-void ndt::char_type::make_comparison_kernel(nd::kernel_builder *ckb, const type &src0_dt, const char *src0_arrmeta,
-                                            const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
-                                            const eval::eval_context *ectx) const
-{
-  if (this == src0_dt.extended()) {
-    if (*this == *src1_dt.extended()) {
-      make_string_comparison_kernel(ckb, m_encoding, comptype, ectx);
-      return;
-    }
-    else if (src1_dt.get_kind() == string_kind) {
-      make_general_string_comparison_kernel(ckb, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype, ectx);
-      return;
-    }
-    else if (!src1_dt.is_builtin()) {
-      src1_dt.extended()->make_comparison_kernel(ckb, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta, comptype, ectx);
-      return;
-    }
-  }
-
-  throw not_comparable_error(src0_dt, src1_dt, comptype);
 }

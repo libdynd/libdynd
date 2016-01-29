@@ -325,7 +325,6 @@ set(libdynd_SRC
     src/dynd/kernels/option_assignment_kernels.cpp
     src/dynd/kernels/pointer_assignment_kernels.cpp
     src/dynd/kernels/rolling_kernel.cpp
-    src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/take_kernel.cpp
     src/dynd/kernels/single_comparer_builtin.hpp
