@@ -68,7 +68,7 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
   }
   else {
     nd::kernel_builder ckb;
-    nd::callable &af = nd::is_missing::get();
+    nd::callable &af = nd::is_na::get();
     type src_tp[1] = {type(this, true)};
     af.get()->instantiate(af->static_data(), NULL, &ckb, make_type<bool1>(), NULL, 1, src_tp, &arrmeta,
                           kernel_request_single, 0, NULL, std::map<std::string, type>());

@@ -14,9 +14,9 @@ namespace nd {
     static callable make();
   } assign_na;
 
-  extern DYND_API struct DYND_API is_missing : declfunc<is_missing> {
+  extern DYND_API struct DYND_API is_na : declfunc<is_na> {
     static callable make();
-  } is_missing;
+  } is_na;
 
 } // namespace dynd::nd
 } // namespace dynd

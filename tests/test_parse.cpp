@@ -366,7 +366,7 @@ TEST(JSONParse, String)
 
 #define EXPECT_MISSING(TP, ACTUAL)                                                                                     \
   EXPECT_EQ(TP, ACTUAL.get_type());                                                                                    \
-  EXPECT_TRUE(ACTUAL.is_missing());
+  EXPECT_TRUE(ACTUAL.is_na());
 
 #define EXPECT_AVAILABLE(EXPECTED, ACTUAL)                                                                             \
   EXPECT_ARRAY_VALS_EQ(EXPECTED, ACTUAL);                                                                              \
@@ -513,30 +513,30 @@ TEST(JSONParse, FixedDim)
   nd::array actual =
       nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(9, ndt::make_type<ndt::option_type>(ndt::make_type<int>())),
                       "[null, 3, null, -1000, 1, 3, null, null, null]");
-  EXPECT_TRUE(actual(0).is_missing());
+  EXPECT_TRUE(actual(0).is_na());
   EXPECT_EQ(3, actual(1).as<int>());
-  EXPECT_TRUE(actual(2).is_missing());
+  EXPECT_TRUE(actual(2).is_na());
   EXPECT_EQ(-1000, actual(3).as<int>());
   EXPECT_EQ(1, actual(4).as<int>());
   EXPECT_EQ(3, actual(5).as<int>());
-  EXPECT_TRUE(actual(6).is_missing());
-  EXPECT_TRUE(actual(7).is_missing());
-  EXPECT_TRUE(actual(8).is_missing());
+  EXPECT_TRUE(actual(6).is_na());
+  EXPECT_TRUE(actual(7).is_na());
+  EXPECT_TRUE(actual(8).is_na());
 
   /*
     actual =
         nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(9,
     ndt::make_type<ndt::option_type>(ndt::make_type<long>())),
                         "[null, 3, null, -1000, 1, 3, null, null, null]");
-    EXPECT_TRUE(actual(0).is_missing());
+    EXPECT_TRUE(actual(0).is_na());
     EXPECT_EQ(3, actual(1).as<long>());
-    EXPECT_TRUE(actual(2).is_missing());
+    EXPECT_TRUE(actual(2).is_na());
     EXPECT_EQ(-1000, actual(3).as<long>());
     EXPECT_EQ(1, actual(4).as<long>());
     EXPECT_EQ(3, actual(5).as<long>());
-    EXPECT_TRUE(actual(6).is_missing());
-    EXPECT_TRUE(actual(7).is_missing());
-    EXPECT_TRUE(actual(8).is_missing());
+    EXPECT_TRUE(actual(6).is_na());
+    EXPECT_TRUE(actual(7).is_na());
+    EXPECT_TRUE(actual(8).is_na());
   */
 
   actual = nd::json::parse(ndt::make_fixed_dim(3, ndt::var_dim_type::make(ndt::make_type<int>())),
@@ -602,21 +602,21 @@ TEST(JSONParse, ListOfOption)
 
   tp = ndt::make_type<ndt::fixed_dim_type>(3, ndt::make_type<ndt::option_type>(ndt::make_type<int>()));
   a = nd::json::parse(tp, "[null, 1, 2]");
-  EXPECT_TRUE(a(0).is_missing());
+  EXPECT_TRUE(a(0).is_na());
   EXPECT_EQ(1, a(1).as<int>());
   EXPECT_EQ(2, a(2).as<int>());
 
   tp = ndt::make_type<ndt::fixed_dim_type>(3, ndt::make_type<ndt::option_type>(ndt::make_type<int>()));
   a = nd::json::parse(tp, "[0, null, 2]");
   EXPECT_EQ(0, a(0).as<int>());
-  EXPECT_TRUE(a(1).is_missing());
+  EXPECT_TRUE(a(1).is_na());
   EXPECT_EQ(2, a(2).as<int>());
 
   tp = ndt::make_type<ndt::fixed_dim_type>(3, ndt::make_type<ndt::option_type>(ndt::make_type<int>()));
   a = nd::json::parse(tp, "[0, 1, null]");
   EXPECT_EQ(0, a(0).as<int>());
   EXPECT_EQ(1, a(1).as<int>());
-  EXPECT_TRUE(a(2).is_missing());
+  EXPECT_TRUE(a(2).is_na());
 }
 
 TEST(JSONParse, ListOfLists)

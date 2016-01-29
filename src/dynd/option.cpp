@@ -6,7 +6,7 @@
 #include <dynd/functional.hpp>
 #include <dynd/option.hpp>
 #include <dynd/kernels/assign_na_kernel.hpp>
-#include <dynd/kernels/is_missing_kernel.hpp>
+#include <dynd/kernels/is_na_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -47,16 +47,16 @@ DYND_API nd::callable nd::assign_na::make()
 
 DYND_API struct nd::assign_na nd::assign_na;
 
-DYND_API nd::callable nd::is_missing::make()
+DYND_API nd::callable nd::is_na::make()
 {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint32_id, float32_id, float64_id,
                            complex_float32_id, complex_float64_id, void_id, string_id, fixed_dim_id, date_id, time_id,
                            datetime_id> type_ids;
 
-  std::map<type_id_t, callable> children = callable::make_all<is_missing_kernel, type_ids>();
+  std::map<type_id_t, callable> children = callable::make_all<is_na_kernel, type_ids>();
   std::array<callable, 2> dim_children;
 
-  callable self = functional::call<is_missing>(ndt::type("(Any) -> Any"));
+  callable self = functional::call<is_na>(ndt::type("(Any) -> Any"));
 
   for (auto tp_id : {fixed_dim_id, var_dim_id}) {
     dim_children[tp_id - fixed_dim_id] = functional::elwise(self);
@@ -79,4 +79,4 @@ DYND_API nd::callable nd::is_missing::make()
                               });
 }
 
-DYND_API struct nd::is_missing nd::is_missing;
+DYND_API struct nd::is_na nd::is_na;

@@ -49,12 +49,12 @@ namespace nd {
            &DYND_UNUSED(tp_vars))
             {
               nd::array a = kwds.p("a");
-              if (a.is_missing()) {
+              if (a.is_na()) {
                 a.val_assign(0);
               }
 
               nd::array b = kwds.p("b");
-              if (b.is_missing()) {
+              if (b.is_na()) {
                 b.val_assign(std::numeric_limits<R>::max());
               }
             }
@@ -70,7 +70,7 @@ namespace nd {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
           R a;
-          if (kwds[0].is_missing()) {
+          if (kwds[0].is_na()) {
             a = 0;
           }
           else {
@@ -78,7 +78,7 @@ namespace nd {
           }
 
           R b;
-          if (kwds[1].is_missing()) {
+          if (kwds[1].is_na()) {
             b = std::numeric_limits<R>::max();
           }
           else {
@@ -118,12 +118,12 @@ namespace nd {
            &DYND_UNUSED(tp_vars))
             {
               nd::array a = kwds.p("a");
-              if (a.is_missing()) {
+              if (a.is_na()) {
                 a.val_assign(0);
               }
 
               nd::array b = kwds.p("b");
-              if (b.is_missing()) {
+              if (b.is_na()) {
                 b.val_assign(1);
               }
             }
@@ -139,7 +139,7 @@ namespace nd {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
           R a;
-          if (kwds[0].is_missing()) {
+          if (kwds[0].is_na()) {
             a = 0;
           }
           else {
@@ -147,7 +147,7 @@ namespace nd {
           }
 
           R b;
-          if (kwds[1].is_missing()) {
+          if (kwds[1].is_na()) {
             b = 1;
           }
           else {
@@ -184,12 +184,12 @@ namespace nd {
            &DYND_UNUSED(tp_vars))
             {
               nd::array a = kwds.p("a");
-              if (a.is_missing()) {
+              if (a.is_na()) {
                 a.val_assign(R(0, 0));
               }
 
               nd::array b = kwds.p("b");
-              if (b.is_missing()) {
+              if (b.is_na()) {
                 b.val_assign(R(1, 1));
               }
             }
@@ -205,7 +205,7 @@ namespace nd {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
           R a;
-          if (kwds[0].is_missing()) {
+          if (kwds[0].is_na()) {
             a = R(0, 0);
           }
           else {
@@ -213,7 +213,7 @@ namespace nd {
           }
 
           R b;
-          if (kwds[1].is_missing()) {
+          if (kwds[1].is_na()) {
             b = R(1, 1);
           }
           else {

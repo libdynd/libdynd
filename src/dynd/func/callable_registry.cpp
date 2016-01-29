@@ -195,7 +195,7 @@ std::map<std::string, nd::callable> &func::get_regfunctions()
     registry["uniform"] = nd::random::uniform::get();
     registry["take"] = nd::take::get();
     registry["sum"] = nd::sum::get();
-    registry["is_missing"] = nd::is_missing::get();
+    registry["is_na"] = nd::is_na::get();
     registry["min"] = nd::min::get();
     registry["max"] = nd::max::get();
     registry["assign"] = nd::assign::get();

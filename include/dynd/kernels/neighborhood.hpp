@@ -148,7 +148,7 @@ namespace nd {
       {
         char *data = reinterpret_cast<char *>(
             new data_type(src_tp, kwds[0].get_dim_size(), reinterpret_cast<int *>(kwds[0].data()),
-                          kwds[1].is_missing() ? NULL : reinterpret_cast<int *>(kwds[1].data())));
+                          kwds[1].is_na() ? NULL : reinterpret_cast<int *>(kwds[1].data())));
 
         reinterpret_cast<data_type *>(data)->child_src_tp = ndt::substitute_shape(
             reinterpret_cast<callable *>(static_data)->get_arg_type(0), reinterpret_cast<data_type *>(data)->ndim,
