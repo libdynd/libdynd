@@ -313,7 +313,6 @@ set(libdynd_SRC
     include/dynd/func/take_by_pointer.hpp
     include/dynd/func/view.hpp
     # Kernels
-    src/dynd/kernels/base_kernel.cpp
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/compare_kernels.cpp
     src/dynd/kernels/copy_kernel.cpp
