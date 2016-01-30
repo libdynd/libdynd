@@ -360,7 +360,7 @@ namespace nd {
       // The code assumes that size >= 1
       intptr_t size_first;
       intptr_t src_stride_first;
-      intptr_t size;
+      intptr_t _size;
       intptr_t src_stride;
       size_t init_offset;
 
@@ -423,7 +423,7 @@ namespace nd {
         // No initialization, all reduction
         char *src0 = src[0];
         for (size_t i = 0; i != count; ++i) {
-          reduce_child->strided(dst, 0, &src0, &this->src_stride, size);
+          reduce_child->strided(dst, 0, &src0, &this->src_stride, _size);
           dst += dst_stride;
           src0 += src_stride[0];
         }
@@ -450,13 +450,13 @@ namespace nd {
         reduction_kernel *e = ckb->get_at<reduction_kernel>(root_ckb_offset);
         // The striding parameters
         e->src_stride = src_stride;
-        e->size = src_size;
+        e->_size = src_size;
         if (reinterpret_cast<data_type *>(data)->identity.is_null()) {
-          e->size_first = e->size - 1;
+          e->size_first = e->_size - 1;
           e->src_stride_first = e->src_stride;
         }
         else {
-          e->size_first = e->size;
+          e->size_first = e->_size;
           e->src_stride_first = 0;
         }
 
@@ -604,11 +604,11 @@ namespace nd {
     template <>
     struct reduction_kernel<fixed_dim_id, true, false>
         : base_reduction_kernel<reduction_kernel<fixed_dim_id, true, false>> {
-      intptr_t size;
+      intptr_t _size;
       intptr_t dst_stride, src_stride;
 
       reduction_kernel(std::intptr_t size, std::intptr_t dst_stride, std::intptr_t src_stride)
-          : size(size), dst_stride(dst_stride), src_stride(src_stride)
+          : _size(size), dst_stride(dst_stride), src_stride(src_stride)
       {
       }
 
@@ -617,7 +617,7 @@ namespace nd {
       void single_first(char *dst, char *const *src)
       {
         reduction_kernel_prefix *child = get_reduction_child();
-        child->strided_first(dst, dst_stride, src, &src_stride, size);
+        child->strided_first(dst, dst_stride, src, &src_stride, _size);
       }
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
@@ -625,7 +625,7 @@ namespace nd {
         reduction_kernel_prefix *echild = reinterpret_cast<reduction_kernel_prefix *>(this->get_child());
         kernel_strided_t opchild_first_call = echild->get_first_call_function<kernel_strided_t>();
         kernel_strided_t opchild_followup_call = echild->get_followup_call_function();
-        intptr_t inner_size = this->size;
+        intptr_t inner_size = this->_size;
         intptr_t inner_dst_stride = this->dst_stride;
         intptr_t inner_src_stride = this->src_stride;
         char *src0 = src[0];
@@ -660,7 +660,7 @@ namespace nd {
 
         char *src0 = src[0];
         for (size_t i = 0; i != count; ++i) {
-          reduction_child->strided_followup(dst, this->dst_stride, &src0, &this->src_stride, this->size);
+          reduction_child->strided_followup(dst, this->dst_stride, &src0, &this->src_stride, this->_size);
           dst += dst_stride;
           src0 += src_stride[0];
         }
@@ -713,7 +713,7 @@ namespace nd {
     struct reduction_kernel<fixed_dim_id, true, true>
         : base_reduction_kernel<reduction_kernel<fixed_dim_id, true, true>> {
       // The code assumes that size >= 1
-      intptr_t size;
+      intptr_t _size;
       intptr_t dst_stride, src_stride;
       size_t dst_init_kernel_offset;
 
@@ -734,10 +734,10 @@ namespace nd {
       void single_first(char *dst, char *const *src)
       {
         // Initialize the dst values
-        get_child(dst_init_kernel_offset)->strided(dst, dst_stride, src, &src_stride_first, size);
+        get_child(dst_init_kernel_offset)->strided(dst, dst_stride, src, &src_stride_first, _size);
         if (src_stride_first == 0) {
           // Then do the accumulation
-          get_child()->strided(dst, dst_stride, src, &src_stride, size);
+          get_child()->strided(dst, dst_stride, src, &src_stride, _size);
         }
       }
 
@@ -746,7 +746,7 @@ namespace nd {
         ckernel_prefix *init_child = get_child(dst_init_kernel_offset);
         ckernel_prefix *reduction_child = get_child();
 
-        intptr_t inner_size = this->size;
+        intptr_t inner_size = this->_size;
         intptr_t inner_dst_stride = this->dst_stride;
         intptr_t inner_src_stride = this->src_stride;
         char *src0 = src[0];
@@ -765,9 +765,9 @@ namespace nd {
         else {
           // With a non-zero stride, every iteration is an initialization
           for (size_t i = 0; i != count; ++i) {
-            init_child->strided(dst, inner_dst_stride, &src0, &src_stride_first, size);
+            init_child->strided(dst, inner_dst_stride, &src0, &src_stride_first, _size);
             if (src_stride_first == 0) {
-              reduction_child->strided(dst, inner_dst_stride, &src0, &inner_src_stride, size);
+              reduction_child->strided(dst, inner_dst_stride, &src0, &inner_src_stride, _size);
             }
 
             dst += dst_stride;
@@ -781,7 +781,7 @@ namespace nd {
         ckernel_prefix *echild_reduce = get_child();
         // No initialization, all reduction
         kernel_strided_t opchild_reduce = echild_reduce->get_function<kernel_strided_t>();
-        intptr_t inner_size = this->size;
+        intptr_t inner_size = this->_size;
         intptr_t inner_dst_stride = this->dst_stride;
         intptr_t inner_src_stride = this->src_stride;
         char *src0 = src[0];
@@ -820,16 +820,16 @@ namespace nd {
         reduction_kernel *self = ckb->get_at<reduction_kernel>(root_ckb_offset);
 
         // The striding parameters
-        self->size = src_size;
+        self->_size = src_size;
 
         // Need to retrieve 'e' again because it may have moved
         if (identity.is_null()) {
-          self->size_first = self->size - 1;
+          self->size_first = self->_size - 1;
           self->dst_stride_first = self->dst_stride;
           self->src_stride_first = self->src_stride;
         }
         else {
-          self->size_first = self->size;
+          self->size_first = self->_size;
           self->dst_stride_first = 0;
           self->src_stride_first = 0;
         }

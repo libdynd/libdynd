@@ -9,6 +9,7 @@
 
 #include <dynd/kernels/adapt_kernel.hpp>
 #include <dynd/kernels/call_kernel.hpp>
+#include <dynd/kernels/forward_na_kernel.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/outer.hpp>
 #include <dynd/func/permute.hpp>
@@ -208,6 +209,14 @@ namespace nd {
     {
       return callable::make<adapt_kernel>(ndt::callable_type::make(value_tp, {ndt::type("Any")}),
                                           adapt_kernel::static_data_type{value_tp, forward});
+    }
+
+    template <int... I>
+    callable forward_na(const callable &child)
+    {
+      ndt::type tp = ndt::callable_type::make(ndt::make_type<ndt::option_type>(child.get_ret_type()),
+                                              {ndt::type("Any"), ndt::type("Any")});
+      return callable::make<forward_na_kernel<I...>>(tp, child);
     }
 
   } // namespace dynd::nd::functional
