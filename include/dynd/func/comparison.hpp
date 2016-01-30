@@ -15,9 +15,8 @@ namespace nd {
   struct comparison_operator : declfunc<FuncType> {
     static decltype(auto) make_children()
     {
-      typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, uint8_id,
-                               uint16_id, uint32_id, uint64_id, float32_id,
-                               float64_id> numeric_ids;
+      typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, uint8_id, uint16_id, uint32_id,
+                               uint64_id, float32_id, float64_id> numeric_ids;
 
       auto children = callable::make_all<KernelType, numeric_ids, numeric_ids>();
 
@@ -31,8 +30,8 @@ namespace nd {
       }
 
       for (type_id_t i : i2a<numeric_ids>()) {
-        children[{{option_id, i}}] = callable::make<option_comparison_kernel<FuncType, true, false>>();
-        children[{{i, option_id}}] = callable::make<option_comparison_kernel<FuncType, false, true>>();
+        children[{{option_id, i}}] = functional::forward_na<0>(self);
+        children[{{i, option_id}}] = functional::forward_na<1>(self);
       }
       children[{{option_id, option_id}}] = callable::make<option_comparison_kernel<FuncType, true, true>>();
 

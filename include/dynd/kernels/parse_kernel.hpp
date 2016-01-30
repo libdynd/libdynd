@@ -352,12 +352,12 @@ namespace nd {
     template <>
     struct parse_kernel<fixed_dim_id> : base_kernel<parse_kernel<fixed_dim_id>> {
       ndt::type ret_tp;
-      size_t size;
+      size_t _size;
       intptr_t stride;
 
       ~parse_kernel() { get_child()->destroy(); }
 
-      parse_kernel(const ndt::type &ret_tp, size_t size, intptr_t stride) : ret_tp(ret_tp), size(size), stride(stride)
+      parse_kernel(const ndt::type &ret_tp, size_t size, intptr_t stride) : ret_tp(ret_tp), _size(size), stride(stride)
       {
       }
 
@@ -369,9 +369,9 @@ namespace nd {
         skip_whitespace(args);
 
         ckernel_prefix *child = get_child();
-        for (size_t i = 0; i < size; ++i) {
+        for (size_t i = 0; i < _size; ++i) {
           child->single(ret, args);
-          if (i < size - 1 && !parse_token(args, ",")) {
+          if (i < _size - 1 && !parse_token(args, ",")) {
             throw json_parse_error(args, "array is too short, expected ',' list item separator", ret_tp);
           }
           skip_whitespace(args);
