@@ -38,6 +38,26 @@ namespace nd {
       }
     }
 
+    static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
+                                 const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
+                                 const std::map<std::string, ndt::type> &tp_vars)
+    {
+      callable &child = reinterpret_cast<static_data_type *>(static_data)->child;
+
+      ndt::type child_src_tp[2];
+      child_src_tp[I] = src_tp[I].extended<ndt::option_type>()->get_value_type();
+      child_src_tp[1 - I] = src_tp[1 - I];
+
+      const ndt::type &child_dst_tp = child.get_ret_type();
+      if (child_dst_tp.is_symbolic()) {
+        child->resolve_dst_type(child->static_data(), data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
+      }
+      else {
+        dst_tp = child_dst_tp;
+      }
+      dst_tp = ndt::make_type<ndt::option_type>(dst_tp);
+    }
+
     static void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                             const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
@@ -55,13 +75,8 @@ namespace nd {
                                 src_arrmeta + I, kernel_request_single, nkwd, kwds, tp_vars);
 
       ndt::type child_src_tp[2];
-      for (int i = 0; i < I; ++i) {
-        child_src_tp[i] = src_tp[i];
-      }
       child_src_tp[I] = src_tp[I].extended<ndt::option_type>()->get_value_type();
-      for (int i = I + 1; i < 2; ++i) {
-        child_src_tp[i] = src_tp[i];
-      }
+      child_src_tp[1 - I] = src_tp[1 - I];
 
       child_offsets[0] = ckb->size() - self_offset;
       assign_na::get()->instantiate(assign_na::get()->static_data(), data, ckb,
@@ -144,16 +159,6 @@ namespace nd {
 } // namespace dynd::nd
 
 namespace ndt {
-
-  template <>
-  struct traits<nd::forward_na_kernel<0>> {
-    static type equivalent() { return type("(?Scalar, Scalar) -> ?bool"); }
-  };
-
-  template <>
-  struct traits<nd::forward_na_kernel<1>> {
-    static type equivalent() { return type("(Scalar, ?Scalar) -> ?bool"); }
-  };
 
   template <typename FuncType>
   struct traits<nd::option_comparison_kernel<FuncType, true, true>> {
