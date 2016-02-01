@@ -27,9 +27,9 @@ using namespace dynd;
 /**
  * Substitutes the field types for contiguous array of types
  */
-static const std::vector<ndt::type> substitute_type_array(const nd::array &type_array,
-                                                          const std::map<std::string, ndt::type> &typevars,
-                                                          bool concrete)
+static std::vector<ndt::type> substitute_type_array(const nd::array &type_array,
+                                                    const std::map<std::string, ndt::type> &typevars,
+                                                    bool concrete)
 {
   intptr_t field_count = type_array.get_dim_size();
   const ndt::type *field_types = reinterpret_cast<const ndt::type *>(type_array.cdata());

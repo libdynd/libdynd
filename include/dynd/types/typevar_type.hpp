@@ -54,7 +54,7 @@ namespace ndt {
     static type make(const std::string &name) { return type(new typevar_type(name), false); }
   }; // class typevar_type
 
-  const std::vector<ndt::type> make_typevar_range(const char *name, intptr_t count);
+  std::vector<ndt::type> make_typevar_range(const char *name, intptr_t count);
 
   /**
    * Checks if the provided string range is a valid typevar name.

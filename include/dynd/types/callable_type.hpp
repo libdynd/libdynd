@@ -49,7 +49,7 @@ namespace ndt {
 
     const std::vector<type> &get_pos_types() const { return m_pos_tuple.extended<tuple_type>()->get_field_types(); }
 
-    const std::vector<type> pos_types_as_slice(size_t start, size_t end = SIZE_MAX) const {
+    std::vector<type> pos_types_as_slice(size_t start, size_t end = SIZE_MAX) const {
       const std::vector<type> &fields = get_pos_types();
 
       if (end == SIZE_MAX || end > fields.size()) {

@@ -402,7 +402,7 @@ namespace nd {
 
 } // namespace dynd
 
-static const std::vector<ndt::type> make_self_types()
+static std::vector<ndt::type> make_self_types()
 {
   std::vector<ndt::type> result(1);
   result[0] = ndt::any_kind_type::make();

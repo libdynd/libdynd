@@ -154,7 +154,7 @@ bool ndt::is_valid_typevar_name(const char *begin, const char *end)
   }
 }
 
-const std::vector<ndt::type> ndt::make_typevar_range(const char *name, intptr_t count)
+std::vector<ndt::type> ndt::make_typevar_range(const char *name, intptr_t count)
 {
   std::vector<ndt::type> result(count);
   std::string s(name);
