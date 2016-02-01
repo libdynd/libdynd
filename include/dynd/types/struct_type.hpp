@@ -31,7 +31,7 @@ namespace ndt {
     uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const { return reinterpret_cast<uintptr_t *>(arrmeta); }
 
   public:
-    struct_type(const nd::array &field_names, const nd::array &field_types, bool variadic = false);
+    struct_type(const nd::array &field_names, const std::vector<type> &field_types, bool variadic = false);
 
     virtual ~struct_type();
 
@@ -92,7 +92,7 @@ namespace ndt {
                        std::map<std::string, type> &tp_vars) const;
 
     /** Makes a struct type with the specified fields */
-    static type make(const nd::array &field_names, const nd::array &field_types, bool variadic = false)
+    static type make(const nd::array &field_names, const std::vector<type> &field_types, bool variadic = false)
     {
       return type(new struct_type(field_names, field_types, variadic), false);
     }
@@ -100,7 +100,7 @@ namespace ndt {
     /** Makes an empty struct type */
     static type make(bool variadic = false)
     {
-      return make(nd::empty(0, make_type<string_type>()), nd::empty(0, make_type<type_type>()), variadic);
+      return make(nd::empty(0, make_type<string_type>()), std::vector<type>(), variadic);
     }
   };
 

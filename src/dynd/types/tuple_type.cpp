@@ -15,11 +15,11 @@
 using namespace std;
 using namespace dynd;
 
-ndt::tuple_type::tuple_type(type_id_t type_id, const nd::array &field_types, flags_type flags, bool layout_in_arrmeta,
+ndt::tuple_type::tuple_type(type_id_t type_id, const std::vector<type> &field_types, flags_type flags, bool layout_in_arrmeta,
                             bool variadic)
     : base_type(type_id, variadic ? kind_kind : tuple_kind, 0, 1,
                 flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
-      m_field_count(field_types.get_dim_size()), m_field_types(field_types),
+      m_field_count(field_types.size()), m_field_types(field_types),
       m_arrmeta_offsets(nd::empty(m_field_count, make_type<uintptr_t>())), m_variadic(variadic)
 {
   /*
@@ -58,7 +58,7 @@ ndt::tuple_type::tuple_type(type_id_t type_id, const nd::array &field_types, fla
   m_arrmeta_offsets.flag_as_immutable();
 }
 
-ndt::tuple_type::tuple_type(const nd::array &field_types, bool variadic)
+ndt::tuple_type::tuple_type(const std::vector<type> &field_types, bool variadic)
     : tuple_type(tuple_id, field_types, type_flag_none, true, variadic)
 {
 }
@@ -184,16 +184,14 @@ ndt::type ndt::tuple_type::apply_linear_index(intptr_t nindices, const irange *i
     }
     else {
       // Take the subset of the fields in-place
-      nd::array tmp_field_types(nd::empty(dimension_size, make_type<type_type>()));
-      type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
+      std::vector<ndt::type> tmp_field_types(dimension_size);
 
       for (intptr_t i = 0; i < dimension_size; ++i) {
         intptr_t idx = start_index + i * index_stride;
-        tmp_field_types_raw[i] =
+        tmp_field_types[i] =
             get_field_type(idx).apply_linear_index(nindices - 1, indices + 1, current_i + 1, root_tp, false);
       }
 
-      tmp_field_types.flag_as_immutable();
       return tuple_type::make(tmp_field_types);
     }
   }
@@ -280,16 +278,18 @@ void ndt::tuple_type::print_type(std::ostream &o) const
 void ndt::tuple_type::transform_child_types(type_transform_fn_t transform_fn, intptr_t arrmeta_offset, void *extra,
                                             type &out_transformed_tp, bool &out_was_transformed) const
 {
-  nd::array tmp_field_types(nd::empty(m_field_count, make_type<type_type>()));
-  type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
-
+  std::vector<ndt::type> tmp_field_types(m_field_count);
   bool was_transformed = false;
+
+  for (intptr_t i = 0; i < m_field_count; ++i) {
+    tmp_field_types[i] = make_type<type_type>();
+  }
+
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
-    transform_fn(get_field_type(i), arrmeta_offset + get_arrmeta_offset(i), extra, tmp_field_types_raw[i],
+    transform_fn(get_field_type(i), arrmeta_offset + get_arrmeta_offset(i), extra, tmp_field_types[i],
                  was_transformed);
   }
   if (was_transformed) {
-    tmp_field_types.flag_as_immutable();
     out_transformed_tp = make(tmp_field_types, m_variadic);
     out_was_transformed = true;
   }
@@ -300,14 +300,12 @@ void ndt::tuple_type::transform_child_types(type_transform_fn_t transform_fn, in
 
 ndt::type ndt::tuple_type::get_canonical_type() const
 {
-  nd::array tmp_field_types(nd::empty(m_field_count, make_type<type_type>()));
-  type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
+  std::vector<ndt::type> tmp_field_types(m_field_count);
 
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
-    tmp_field_types_raw[i] = get_field_type(i).get_canonical_type();
+    tmp_field_types[i] = get_field_type(i).get_canonical_type();
   }
 
-  tmp_field_types.flag_as_immutable();
   return make(tmp_field_types, m_variadic);
 }
 
@@ -335,7 +333,7 @@ bool ndt::tuple_type::operator==(const base_type &rhs) const
   }
   else {
     const tuple_type *dt = static_cast<const tuple_type *>(&rhs);
-    return get_data_alignment() == dt->get_data_alignment() && m_field_types.equals_exact(dt->m_field_types) &&
+    return get_data_alignment() == dt->get_data_alignment() && m_field_types == dt->m_field_types &&
            m_variadic == dt->m_variadic;
   }
 }
@@ -518,8 +516,8 @@ bool ndt::tuple_type::match(const char *arrmeta, const type &candidate_tp, const
 std::map<std::string, nd::callable> ndt::tuple_type::get_dynamic_type_properties() const
 {
   std::map<std::string, nd::callable> properties;
-  properties["field_types"] = nd::callable::make<nd::get_then_copy_kernel<tuple_type, &tuple_type::get_field_types>>(
-      ndt::callable_type::make(m_field_types.get_type(), ndt::tuple_type::make(),
+  properties["field_types"] = nd::callable::make<nd::get_then_copy_kernel2<tuple_type, &tuple_type::get_field_types>>(
+      ndt::callable_type::make(this->get_type(), ndt::tuple_type::make(),
                                ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
   properties["metadata_offsets"] =
       nd::callable::make<nd::get_then_copy_kernel<tuple_type, &tuple_type::get_arrmeta_offsets>>(

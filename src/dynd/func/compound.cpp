@@ -12,13 +12,13 @@ using namespace dynd;
 nd::callable nd::functional::left_compound(const callable &child)
 {
   return callable::make<left_compound_kernel>(
-      ndt::callable_type::make(child.get_type()->get_return_type(), child.get_type()->get_pos_types()(irange() < 1)),
+      ndt::callable_type::make(child.get_type()->get_return_type(), child.get_type()->pos_types_as_slice(0, 1)), // head element or empty
       child);
 }
 
 nd::callable nd::functional::right_compound(const callable &child)
 {
   return callable::make<right_compound_kernel>(
-      ndt::callable_type::make(child.get_type()->get_return_type(), child.get_type()->get_pos_types()(1 >= irange())),
+      ndt::callable_type::make(child.get_type()->get_return_type(), child.get_type()->pos_types_as_slice(1, SIZE_MAX)), // tail elements or empty
       child);
 }
