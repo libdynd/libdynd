@@ -456,53 +456,31 @@ TEST(StringType, Concatenation) {
     // c = a + b;
     // EXPECT_ARRAY_EQ("firstsecond", c);
 
-    const char *a_arr[3] = {"testing", "one", "two"};
-    const char *b_arr[3] = {"alpha", "beta", "gamma"};
-
-    a = a_arr;
-    b = b_arr;
-    c = nd::string_concatenation(a, b);
-    ASSERT_EQ(ndt::type("3 * string"), c.get_type());
-    EXPECT_EQ(3, c.get_dim_size());
-    EXPECT_ARRAY_EQ("testingalpha", c(0));
-    EXPECT_ARRAY_EQ("onebeta", c(1));
-    EXPECT_ARRAY_EQ("twogamma", c(2));
+    a = {"testing", "one", "two"};
+    b = {"alpha", "beta", "gamma"};
+    EXPECT_ARRAY_EQ(nd::array({"testingalpha", "onebeta", "twogamma"}),
+                    nd::string_concatenation(a, b));
 }
 
 
 TEST(StringType, Find1) {
   nd::array a, b, c;
 
-  const char *a_arr[4] = {"abc", "ababc", "ababab", "abd"};
-  a = a_arr;
+  a = {"abc", "ababc", "ababab", "abd"};
   b = "abc";
 
-  c = nd::string_find(a, b);
-  ASSERT_EQ(ndt::type("4 * intptr"), c.get_type());
-  ASSERT_EQ(4, c.get_shape()[0]);
-  EXPECT_ARRAY_EQ(0l, c(0));
-  EXPECT_ARRAY_EQ(2l, c(1));
-  EXPECT_ARRAY_EQ(-1l, c(2));
-  EXPECT_ARRAY_EQ(-1l, c(3));
+  EXPECT_ARRAY_EQ(nd::array({0l, 2l, -1l, -1l}), nd::string_find(a, b));
 }
 
 
 TEST(StringType, Find2) {
   nd::array a, b, c;
 
-  const char *b_arr[6] = {"a", "b", "c", "bc", "d", "cd"};
   a = "abc";
-  b = b_arr;
+  b = {"a", "b", "c", "bc", "d", "cd"};
 
-  c = nd::string_find(a, b);
-  ASSERT_EQ(ndt::type("6 * intptr"), c.get_type());
-  ASSERT_EQ(6, c.get_shape()[0]);
-  EXPECT_ARRAY_EQ(0l, c(0));
-  EXPECT_ARRAY_EQ(1l, c(1));
-  EXPECT_ARRAY_EQ(2l, c(2));
-  EXPECT_ARRAY_EQ(1l, c(3));
-  EXPECT_ARRAY_EQ(-1l, c(4));
-  EXPECT_ARRAY_EQ(-1l, c(5));
+  EXPECT_ARRAY_EQ(nd::array({0l, 1l, 2l, 1l, -1l, -1l}),
+                  nd::string_find(a, b));
 }
 
 
@@ -511,54 +489,33 @@ TEST(StringType, Find3) {
      character */
   nd::array a, b, c;
 
-  const char *a_arr[5] = {"a", "bbbb", "bbbba", "0123456789bb", "0123456789a"};
-  a = a_arr;
+  a = {"a", "bbbb", "bbbba", "0123456789bb", "0123456789a"};
   b = "a";
 
-  c = nd::string_find(a, b);
-  ASSERT_EQ(ndt::type("5 * intptr"), c.get_type());
-  ASSERT_EQ(5, c.get_shape()[0]);
-  EXPECT_ARRAY_EQ(0l, c(0));
-  EXPECT_ARRAY_EQ(-1l, c(1));
-  EXPECT_ARRAY_EQ(4l, c(2));
-  EXPECT_ARRAY_EQ(-1l, c(3));
-  EXPECT_ARRAY_EQ(10l, c(4));
+  EXPECT_ARRAY_EQ(nd::array({0l, -1l, 4l, -1l, 10l}),
+                  nd::string_find(a, b));
 }
 
 
 TEST(StringType, Count1) {
   nd::array a, b, c;
 
-  const char *a_arr[4] = {"abc", "xxxabcxxxabcxxx", "ababab", "abd"};
-  a = a_arr;
+  a = {"abc", "xxxabcxxxabcxxx", "ababab", "abd"};
   b = "abc";
 
-  c = nd::string_count(a, b);
-  ASSERT_EQ(ndt::type("4 * intptr"), c.get_type());
-  ASSERT_EQ(4, c.get_shape()[0]);
-  EXPECT_ARRAY_EQ(1l, c(0));
-  EXPECT_ARRAY_EQ(2l, c(1));
-  EXPECT_ARRAY_EQ(0l, c(2));
-  EXPECT_ARRAY_EQ(0l, c(3));
+  EXPECT_ARRAY_EQ(nd::array({1l, 2l, 0l, 0l}),
+                  nd::string_count(a, b));
 }
 
 
 TEST(StringType, Count2) {
   nd::array a, b, c;
 
-  const char *b_arr[6] = {"a", "b", "c", "bc", "d", "cd"};
   a = "abc";
-  b = b_arr;
+  b = {"a", "b", "c", "bc", "d", "cd"};
 
-  c = nd::string_count(a, b);
-  ASSERT_EQ(ndt::type("6 * intptr"), c.get_type());
-  ASSERT_EQ(6, c.get_shape()[0]);
-  EXPECT_ARRAY_EQ(1l, c(0));
-  EXPECT_ARRAY_EQ(1l, c(1));
-  EXPECT_ARRAY_EQ(1l, c(2));
-  EXPECT_ARRAY_EQ(1l, c(3));
-  EXPECT_ARRAY_EQ(0l, c(4));
-  EXPECT_ARRAY_EQ(0l, c(5));
+  EXPECT_ARRAY_EQ(nd::array({1l, 1l, 1l, 1l, 0l, 0l}),
+                  nd::string_count(a, b));
 }
 
 
@@ -567,17 +524,11 @@ TEST(StringType, Count3) {
      character */
   nd::array a, b, c;
 
-  const char *a_arr[4] = {"a", "baab", "0123456789bb", "0123456789aaa"};
-  a = a_arr;
+  a = {"a", "baab", "0123456789bb", "0123456789aaa"};
   b = "a";
 
-  c = nd::string_count(a, b);
-  ASSERT_EQ(ndt::type("4 * intptr"), c.get_type());
-  ASSERT_EQ(4, c.get_shape()[0]);
-  EXPECT_ARRAY_EQ(1l, c(0));
-  EXPECT_ARRAY_EQ(2l, c(1));
-  EXPECT_ARRAY_EQ(0l, c(2));
-  EXPECT_ARRAY_EQ(3l, c(3));
+  EXPECT_ARRAY_EQ(nd::array({1l, 2l, 0l, 3l}),
+                  nd::string_count(a, b));
 }
 
 
@@ -592,21 +543,12 @@ TEST(StringType, Replace) {
        - old.size() < new.size()
   */
 
-  const char *a_arr[5] = {"xaxxbxxxc", "xxxabcxxxabcxxx", "cabababc", "cabababc", "foobar"};
-  const char *b_arr[5] = {"x",         "abc",             "ab",       "ab",       ""};
-  const char *c_arr[5] = {"y",         "ABC",             "aabb",     "a",        "x"};
-  a = a_arr;
-  b = b_arr;
-  c = c_arr;
+  a = {"xaxxbxxxc", "xxxabcxxxabcxxx", "cabababc", "cabababc", "foobar"};
+  b = {"x",         "abc",             "ab",       "ab",       ""};
+  c = {"y",         "ABC",             "aabb",     "a",        "x"};
 
-  d = nd::string_replace(a, b, c);
-  ASSERT_EQ(ndt::type("5 * string"), d.get_type());
-  ASSERT_EQ(5, d.get_shape()[0]);
-  EXPECT_ARRAY_EQ("yayybyyyc", d(0));
-  EXPECT_ARRAY_EQ("xxxABCxxxABCxxx", d(1));
-  EXPECT_ARRAY_EQ("caabbaabbaabbc", d(2));
-  EXPECT_ARRAY_EQ("caaac", d(3));
-  EXPECT_ARRAY_EQ("foobar", d(4));
+  EXPECT_ARRAY_EQ(nd::array({"yayybyyyc", "xxxABCxxxABCxxx", "caabbaabbaabbc", "caaac", "foobar"}),
+                  nd::string_replace(a, b, c));
 }
 
 
