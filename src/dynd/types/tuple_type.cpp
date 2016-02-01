@@ -517,7 +517,7 @@ std::map<std::string, nd::callable> ndt::tuple_type::get_dynamic_type_properties
 {
   std::map<std::string, nd::callable> properties;
   properties["field_types"] = nd::callable::make<nd::get_then_copy_kernel2<tuple_type, &tuple_type::get_field_types>>(
-      ndt::callable_type::make(this->get_type(), ndt::tuple_type::make(),
+      ndt::callable_type::make(get_type(), ndt::tuple_type::make(),
                                ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
   properties["metadata_offsets"] =
       nd::callable::make<nd::get_then_copy_kernel<tuple_type, &tuple_type::get_arrmeta_offsets>>(
