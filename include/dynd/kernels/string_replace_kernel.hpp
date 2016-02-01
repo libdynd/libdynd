@@ -19,8 +19,8 @@ namespace dynd {
       : base_kernel<string_replace_kernel, 3> {
 
       void single(char *dst, char *const *src) {
-        dynd::string *d = reinterpret_cast<dynd::string *>(dst);
-        const dynd::string *const *s = reinterpret_cast<const dynd::string *const *>(src);
+        string *d = reinterpret_cast<string *>(dst);
+        const string *const *s = reinterpret_cast<const string *const *>(src);
 
         dynd::string_replace(d, s[0], s[1], s[2]);
       }

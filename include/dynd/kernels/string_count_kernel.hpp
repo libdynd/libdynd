@@ -20,7 +20,7 @@ namespace dynd {
 
       void single(char *dst, char *const *src) {
         intptr_t *d = reinterpret_cast<intptr_t *>(dst);
-        const dynd::string *const *s = reinterpret_cast<const dynd::string *const *>(src);
+        const string *const *s = reinterpret_cast<const string *const *>(src);
 
         *d = dynd::string_count(s[0], s[1]);
       }
