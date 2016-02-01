@@ -40,12 +40,12 @@ void dynd::string_concat(size_t nop, dynd::string *d, const dynd::string *const 
 
 template<class SelfType>
 struct string_search_base {
-  inline void bloom_add(uint64_t &mask, const char ch)
+  void bloom_add(uint64_t &mask, const char ch)
   {
     mask |= 1UL << ((ch) & (64 - 1));
   }
 
-  inline uint64_t bloom(const uint64_t &mask, const char ch)
+  uint64_t bloom(const uint64_t &mask, const char ch)
   {
     return mask & (1UL << ((ch) & (64 - 1)));
   }
@@ -54,7 +54,7 @@ struct string_search_base {
      According to effbot's numbers, for haystacks < 10 characters, a
      naive loop is fastest.  Larger than that, using POSIX `memchr` is
      faster. */
-  inline void find_1char(const char *haystack, size_t n, char needle)
+  void find_1char(const char *haystack, size_t n, char needle)
   {
     SelfType *self = (SelfType *)this;
 
