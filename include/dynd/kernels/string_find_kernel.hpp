@@ -8,9 +8,6 @@
 #pragma once
 
 #include <dynd/string.hpp>
-#include <dynd/callable.hpp>
-#include <dynd/kernels/kernel_builder.hpp>
-#include <dynd/types/string_type.hpp>
 
 namespace dynd {
   namespace nd {

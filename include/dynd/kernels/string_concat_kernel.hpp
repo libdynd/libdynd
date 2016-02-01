@@ -8,9 +8,6 @@
 #pragma once
 
 #include <dynd/string.hpp>
-#include <dynd/callable.hpp>
-#include <dynd/kernels/kernel_builder.hpp>
-#include <dynd/types/string_type.hpp>
 
 namespace dynd {
   namespace nd {
@@ -19,8 +16,8 @@ namespace dynd {
       : base_kernel<string_concatenation_kernel, 2> {
 
       void single(char *dst, char *const *src) {
-        string_concat(2, reinterpret_cast<string *>(dst),
-                      reinterpret_cast<const string *const *>(src));
+        dynd::string_concat(2, reinterpret_cast<string *>(dst),
+                            reinterpret_cast<const string *const *>(src));
       }
     };
 

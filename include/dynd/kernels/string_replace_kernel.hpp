@@ -8,9 +8,6 @@
 #pragma once
 
 #include <dynd/string.hpp>
-#include <dynd/callable.hpp>
-#include <dynd/kernels/kernel_builder.hpp>
-#include <dynd/types/string_type.hpp>
 
 namespace dynd {
   namespace nd {
@@ -33,8 +30,9 @@ namespace dynd {
     template<>
     struct traits<dynd::nd::string_replace_kernel> {
       static type equivalent() {
-        return callable_type::make(type(string_id),
-                                   {type(string_id), type(string_id), type(string_id)});
+        return callable_type::make(
+          type(string_id),
+          {type(string_id), type(string_id), type(string_id)});
       }
     };
 
