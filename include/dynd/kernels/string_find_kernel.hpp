@@ -32,9 +32,9 @@ namespace dynd {
 
     template<>
     struct traits<dynd::nd::string_find_kernel> {
-      /* TODO: Rather than int64_id, I really want the id that corresponds to
-               intptr_t... */
-      static type equivalent() { return callable_type::make(type(int64_id), {type(string_id), type(string_id)}); }
+      static type equivalent() {
+        return callable_type::make(ndt::make_type<intptr_t>(), {type(string_id), type(string_id)});
+      }
     };
 
   } // namespace ndt
