@@ -17,31 +17,36 @@ using namespace dynd;
 ////////////////////////////////////////////////////////////
 // String kernels
 
+namespace dynd {
+  namespace nd {
 
-DYND_API nd::callable nd::string_concatenation::make()
-{
-  return nd::functional::elwise(nd::callable::make<nd::string_concatenation_kernel>());
-}
+    DYND_API callable string_concatenation::make()
+    {
+      return functional::elwise(callable::make<string_concatenation_kernel>());
+    }
 
-DYND_API struct nd::string_concatenation nd::string_concatenation;
+    DYND_API struct string_concatenation string_concatenation;
 
-DYND_API nd::callable nd::string_count::make()
-{
-  return nd::functional::elwise(nd::callable::make<nd::string_count_kernel>());
-}
+    DYND_API callable string_count::make()
+    {
+      return functional::elwise(callable::make<string_count_kernel>());
+    }
 
-DYND_API struct nd::string_count nd::string_count;
+    DYND_API struct string_count string_count;
 
-DYND_API nd::callable nd::string_find::make()
-{
-  return nd::functional::elwise(nd::callable::make<nd::string_find_kernel>());
-}
+    DYND_API callable string_find::make()
+    {
+      return functional::elwise(callable::make<string_find_kernel>());
+    }
 
-DYND_API struct nd::string_find nd::string_find;
+    DYND_API struct string_find string_find;
 
-DYND_API nd::callable nd::string_replace::make()
-{
-  return nd::functional::elwise(nd::callable::make<nd::string_replace_kernel>());
-}
+    DYND_API callable string_replace::make()
+    {
+      return functional::elwise(callable::make<string_replace_kernel>());
+    }
 
-DYND_API struct nd::string_replace nd::string_replace;
+    DYND_API struct string_replace string_replace;
+
+  } // namespace nd
+} // namespace dynd
