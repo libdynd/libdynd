@@ -16,7 +16,7 @@ namespace dynd {
       : base_kernel<string_concatenation_kernel, 2> {
 
       void single(char *dst, char *const *src) {
-        dynd::string_concat(2, reinterpret_cast<string *>(dst),
+        dynd::string_concat(2, *reinterpret_cast<string *>(dst),
                             reinterpret_cast<const string *const *>(src));
       }
     };

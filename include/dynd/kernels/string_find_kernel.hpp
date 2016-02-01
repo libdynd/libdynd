@@ -19,7 +19,7 @@ namespace dynd {
         intptr_t *d = reinterpret_cast<intptr_t *>(dst);
         const string *const *s = reinterpret_cast<const string *const *>(src);
 
-        *d = dynd::string_find(s[0], s[1]);
+        *d = dynd::string_find(*(s[0]), *(s[1]));
       }
     };
 

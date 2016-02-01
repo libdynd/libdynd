@@ -440,6 +440,7 @@ set(libdynd_SRC
     include/dynd/math.hpp
     include/dynd/sort.hpp
     include/dynd/string.hpp
+    include/dynd/string_search.hpp
     include/dynd/type.hpp
     include/dynd/type_registry.hpp
     include/dynd/type_sequence.hpp
