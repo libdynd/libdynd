@@ -17,7 +17,7 @@
 using namespace std;
 using namespace dynd;
 
-ndt::struct_type::struct_type(const nd::array &field_names, const nd::array &field_types, bool variadic)
+ndt::struct_type::struct_type(const nd::array &field_names, const std::vector<type> &field_types, bool variadic)
     : tuple_type(struct_id, field_types, type_flag_none, true, variadic), m_field_names(field_names)
 {
   /*
@@ -115,16 +115,18 @@ void ndt::struct_type::print_type(std::ostream &o) const
 void ndt::struct_type::transform_child_types(type_transform_fn_t transform_fn, intptr_t arrmeta_offset, void *extra,
                                              type &out_transformed_tp, bool &out_was_transformed) const
 {
-  nd::array tmp_field_types(nd::empty(m_field_count, make_type<type_type>()));
-  type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
-
+  std::vector<type> tmp_field_types(m_field_count);
   bool was_transformed = false;
+
+  for (intptr_t i = 0; i < m_field_count; ++i) {
+    tmp_field_types[i] = make_type<type_type>();
+  }
+
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
-    transform_fn(get_field_type(i), arrmeta_offset + get_arrmeta_offset(i), extra, tmp_field_types_raw[i],
+    transform_fn(get_field_type(i), arrmeta_offset + get_arrmeta_offset(i), extra, tmp_field_types[i],
                  was_transformed);
   }
   if (was_transformed) {
-    tmp_field_types.flag_as_immutable();
     out_transformed_tp = struct_type::make(m_field_names, tmp_field_types, m_variadic);
     out_was_transformed = true;
   }
@@ -135,14 +137,16 @@ void ndt::struct_type::transform_child_types(type_transform_fn_t transform_fn, i
 
 ndt::type ndt::struct_type::get_canonical_type() const
 {
-  nd::array tmp_field_types(nd::empty(m_field_count, make_type<type_type>()));
-  type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
+  std::vector<type> tmp_field_types(m_field_count);
 
-  for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
-    tmp_field_types_raw[i] = get_field_type(i).get_canonical_type();
+  for (intptr_t i = 0; i < m_field_count; ++i) {
+    tmp_field_types[i] = make_type<type_type>();
   }
 
-  tmp_field_types.flag_as_immutable();
+  for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    tmp_field_types[i] = get_field_type(i).get_canonical_type();
+  }
+
   return struct_type::make(m_field_names, tmp_field_types, m_variadic);
 }
 
@@ -186,7 +190,7 @@ bool ndt::struct_type::operator==(const base_type &rhs) const
   }
   else {
     const struct_type *dt = static_cast<const struct_type *>(&rhs);
-    return get_data_alignment() == dt->get_data_alignment() && m_field_types.equals_exact(dt->m_field_types) &&
+    return get_data_alignment() == dt->get_data_alignment() && m_field_types == dt->m_field_types &&
            m_field_names.equals_exact(dt->m_field_names) && m_variadic == dt->m_variadic;
   }
 }
@@ -237,8 +241,7 @@ ndt::type ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *
     }
     else {
       // Take the subset of the fields in-place
-      nd::array tmp_field_types(nd::empty(dimension_size, make_type<type_type>()));
-      type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
+      std::vector<type> tmp_field_types(dimension_size);
 
       // Make an "N * string" array without copying the actual
       // string text data. TODO: encapsulate this into a function.
@@ -250,12 +253,11 @@ ndt::type ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *
 
       for (intptr_t i = 0; i < dimension_size; ++i) {
         intptr_t idx = start_index + i * index_stride;
-        tmp_field_types_raw[i] =
+        tmp_field_types[i] =
             get_field_type(idx).apply_linear_index(nindices - 1, indices + 1, current_i + 1, root_tp, false);
         string_arr_ptr[i] = get_field_name_raw(idx);
       }
 
-      tmp_field_types.flag_as_immutable();
       return struct_type::make(tmp_field_names, tmp_field_types);
     }
   }
@@ -324,8 +326,8 @@ intptr_t ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *i
 std::map<std::string, nd::callable> ndt::struct_type::get_dynamic_type_properties() const
 {
   std::map<std::string, nd::callable> properties;
-  properties["field_types"] = nd::callable::make<nd::get_then_copy_kernel<tuple_type, &tuple_type::get_field_types>>(
-      ndt::callable_type::make(m_field_types.get_type(), ndt::tuple_type::make(),
+  properties["field_types"] = nd::callable::make<nd::get_then_copy_kernel2<tuple_type, &tuple_type::get_field_types>>(
+      ndt::callable_type::make(this->get_type(), ndt::tuple_type::make(),
                                ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
   properties["metadata_offsets"] =
       nd::callable::make<nd::get_then_copy_kernel<tuple_type, &tuple_type::get_arrmeta_offsets>>(
@@ -400,11 +402,10 @@ namespace nd {
 
 } // namespace dynd
 
-static nd::array make_self_types()
+static std::vector<ndt::type> make_self_types()
 {
-  nd::array result = nd::empty(1, ndt::make_type<ndt::type_type>());
-  ndt::unchecked_fixed_dim_get_rw<ndt::type>(result, 0) = ndt::any_kind_type::make();
-  result.flag_as_immutable();
+  std::vector<ndt::type> result(1);
+  result[0] = ndt::any_kind_type::make();
   return result;
 }
 

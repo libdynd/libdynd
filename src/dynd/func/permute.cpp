@@ -54,7 +54,7 @@ nd::callable nd::functional::permute(const callable &child,
   }
 
   ndt::type self_tp = ndt::callable_type::make(
-      ret_tp, ndt::tuple_type::make(nd::array(pos_tp.data(), npos)),
+      ret_tp, ndt::tuple_type::make({pos_tp.begin(), pos_tp.begin()+npos}),
       child_tp->get_kwd_struct());
 
   switch (child_tp->get_npos()) {

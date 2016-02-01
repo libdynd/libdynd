@@ -27,7 +27,7 @@ namespace ndt {
     /**
      * Immutable contiguous array of field types. Always has type "N * type".
      */
-    nd::array m_field_types;
+    const std::vector<type> m_field_types;
 
     /**
      * Immutable contiguous array of arrmeta offsets. Always has type "N *
@@ -43,13 +43,13 @@ namespace ndt {
 
     std::vector<std::pair<std::string, nd::callable>> m_array_properties;
 
-    tuple_type(type_id_t type_id, const nd::array &field_types, flags_type flags, bool layout_in_arrmeta,
+    tuple_type(type_id_t type_id, const std::vector<type> &field_types, flags_type flags, bool layout_in_arrmeta,
                bool variadic);
 
     uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const { return reinterpret_cast<uintptr_t *>(arrmeta); }
 
   public:
-    tuple_type(const nd::array &field_types, bool variadic);
+    tuple_type(const std::vector<type> &field_types, bool variadic);
 
     virtual ~tuple_type();
 
@@ -63,9 +63,12 @@ namespace ndt {
      * arrays.
      */
     intptr_t get_field_count() const { return m_field_count; }
-    /** The array of the field types */
-    const nd::array &get_field_types() const { return m_field_types; }
-    const type *get_field_types_raw() const { return reinterpret_cast<const type *>(m_field_types.cdata()); }
+    /** The type of the tuple */
+    const ndt::type get_type() const { return ndt::type_for(m_field_types); }
+    /** The field types */
+    const std::vector<type> &get_field_types() const { return m_field_types; }
+
+    const type *get_field_types_raw() const { return &m_field_types[0]; }
     /** The array of the field arrmeta offsets */
     const nd::array &get_arrmeta_offsets() const { return m_arrmeta_offsets; }
     const uintptr_t *get_arrmeta_offsets_raw() const
@@ -73,7 +76,7 @@ namespace ndt {
       return reinterpret_cast<const uintptr_t *>(m_arrmeta_offsets.cdata());
     }
 
-    const type &get_field_type(intptr_t i) const { return unchecked_fixed_dim_get<type>(m_field_types, i); }
+    const type &get_field_type(intptr_t i) const { return m_field_types[i]; }
     const uintptr_t &get_arrmeta_offset(intptr_t i) const
     {
       return unchecked_fixed_dim_get<uintptr_t>(m_arrmeta_offsets, i);
@@ -145,13 +148,13 @@ namespace ndt {
     }
 
     /** Makes a tuple type with the specified types */
-    static type make(const nd::array &field_types, bool variadic = false)
+    static type make(const std::vector<type> &field_types, bool variadic = false)
     {
       return type(new tuple_type(field_types, variadic), false);
     }
 
     /** Makes an empty tuple */
-    static type make(bool variadic = false) { return make(nd::empty(0, make_type<type_type>()), variadic); }
+    static type make(bool variadic = false) { return make(std::vector<type>(), variadic); }
   };
 
 } // namespace dynd::ndt

@@ -266,12 +266,12 @@ bool ndt::callable_type::match(const char *arrmeta, const type &candidate_tp, co
 std::map<std::string, nd::callable> ndt::callable_type::get_dynamic_type_properties() const
 {
   std::map<std::string, nd::callable> properties;
-  properties["pos_types"] = nd::callable::make<nd::get_then_copy_kernel<callable_type, &callable_type::get_pos_types>>(
-      ndt::callable_type::make(m_pos_tuple.extended<ndt::tuple_type>()->get_field_types().get_type(),
+  properties["pos_types"] = nd::callable::make<nd::get_then_copy_kernel2<callable_type, &callable_type::get_pos_types>>(
+      ndt::callable_type::make(m_pos_tuple.extended<ndt::tuple_type>()->get_type(),
                                ndt::tuple_type::make(),
                                ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["kwd_types"] = nd::callable::make<nd::get_then_copy_kernel<callable_type, &callable_type::get_kwd_types>>(
-      ndt::callable_type::make(m_kwd_struct.extended<ndt::struct_type>()->get_field_types().get_type(),
+  properties["kwd_types"] = nd::callable::make<nd::get_then_copy_kernel2<callable_type, &callable_type::get_kwd_types>>(
+      ndt::callable_type::make(m_kwd_struct.extended<ndt::struct_type>()->get_type(),
                                ndt::tuple_type::make(),
                                ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
   properties["kwd_names"] = nd::callable::make<nd::get_then_copy_kernel<callable_type, &callable_type::get_kwd_names>>(
