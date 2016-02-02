@@ -82,14 +82,18 @@ if(WIN32)
     set(DYND_BUILD_BENCHMARKS OFF)
 endif()
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+if(${MSVC} OR "${CMAKE_CXX_SIMULATED_ID}" STREQUAL "MSVC")
     # -WX: Treat warnings as errors
     # -bigobj: Allow lots of symbols (assignment_kernels.cpp and assignment_kernels.cu need this flag)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc -bigobj -wd4503")
-
-    if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        # If this is the clang-cl compiler have it act like MSVC 2015 and not 2013.
+        # Don't enable -WX here yet.
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHsc -bigobj -wd4503 -fms-compatibility-version=19.00.23506")
+    elseif(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19)
         message(FATAL_ERROR "Only MSVC 2015 (Version 19.0) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
-    endif ()
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc -bigobj -wd4503")
+    endif()
 else()
     if(WIN32)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++14 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers")
