@@ -5,14 +5,11 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <dynd/type.hpp>
-#include <dynd/types/base_type.hpp>
-#include <dynd/types/type_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/memblock/memory_block.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -41,8 +38,6 @@ namespace ndt {
      */
     bool m_variadic;
 
-    std::vector<std::pair<std::string, nd::callable>> m_array_properties;
-
     tuple_type(type_id_t type_id, const std::vector<type> &field_types, flags_type flags, bool layout_in_arrmeta,
                bool variadic);
 
@@ -50,8 +45,6 @@ namespace ndt {
 
   public:
     tuple_type(const std::vector<type> &field_types, bool variadic);
-
-    virtual ~tuple_type();
 
     /** The array of the field data offsets */
     inline const uintptr_t *get_data_offsets(const char *arrmeta) const
@@ -65,6 +58,7 @@ namespace ndt {
     intptr_t get_field_count() const { return m_field_count; }
     /** The type of the tuple */
     const ndt::type get_type() const { return ndt::type_for(m_field_types); }
+
     /** The field types */
     const std::vector<type> &get_field_types() const { return m_field_types; }
 

@@ -6,6 +6,7 @@
 #include <dynd/arrmeta_holder.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/outer.hpp>
+#include <dynd/types/typevar_constructed_type.hpp>
 
 using namespace std;
 using namespace dynd;

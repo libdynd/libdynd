@@ -46,7 +46,7 @@ TEST(Callable, Assignment)
   // Instantiate a single ckernel
   nd::kernel_builder ckb;
   af.get()->instantiate(af.get()->static_data(), NULL, &ckb, af.get_type()->get_return_type(), NULL,
-                        af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
+                        af.get_type()->get_npos(), af.get_type()->get_pos_types().data(), src_arrmeta,
                         kernel_request_single, 0, NULL, std::map<std::string, ndt::type>());
   int int_out = 0;
   char str_in[16] = "3251";
@@ -58,7 +58,7 @@ TEST(Callable, Assignment)
   // Instantiate a strided ckernel
   ckb.reset();
   af.get()->instantiate(af.get()->static_data(), NULL, &ckb, af.get_type()->get_return_type(), NULL,
-                        af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
+                        af.get_type()->get_npos(), af.get_type()->get_pos_types().data(), src_arrmeta,
                         kernel_request_strided, 0, NULL, std::map<std::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};
@@ -225,7 +225,7 @@ TEST(Callable, AssignmentAsExpr)
   // Instantiate a single ckernel
   nd::kernel_builder ckb;
   af.get()->instantiate(af.get()->static_data(), NULL, &ckb, af.get_type()->get_return_type(), NULL,
-                        af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
+                        af.get_type()->get_npos(), af.get_type()->get_pos_types().data(), src_arrmeta,
                         kernel_request_single, 0, NULL, std::map<std::string, ndt::type>());
   int int_out = 0;
   char str_in[16] = "3251";
@@ -237,7 +237,7 @@ TEST(Callable, AssignmentAsExpr)
   // Instantiate a strided ckernel
   ckb.reset();
   af.get()->instantiate(af.get()->static_data(), NULL, &ckb, af.get_type()->get_return_type(), NULL,
-                        af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
+                        af.get_type()->get_npos(), af.get_type()->get_pos_types().data(), src_arrmeta,
                         kernel_request_strided, 0, NULL, std::map<std::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};

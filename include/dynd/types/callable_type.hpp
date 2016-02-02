@@ -5,16 +5,11 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
-#include <dynd/types/string_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/typevar_constructed_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -36,8 +31,6 @@ namespace ndt {
 
     callable_type(const type &ret_type, const type &pos_types, const type &kwd_types);
 
-    virtual ~callable_type() {}
-
     const string &get_kwd_name_raw(intptr_t i) const
     {
       return m_kwd_struct.extended<struct_type>()->get_field_name_raw(i);
@@ -49,17 +42,6 @@ namespace ndt {
 
     const std::vector<type> &get_pos_types() const { return m_pos_tuple.extended<tuple_type>()->get_field_types(); }
 
-    std::vector<type> pos_types_as_slice(size_t start, size_t end = SIZE_MAX) const {
-      const std::vector<type> &fields = get_pos_types();
-
-      if (end == SIZE_MAX || end > fields.size()) {
-        end = fields.size();
-      }
-      start = start > end ? end : start;
-
-      return {fields.begin() + start, fields.begin() + end};
-    }
-
     bool is_pos_variadic() const { return m_pos_tuple.extended<tuple_type>()->is_variadic(); }
 
     bool is_kwd_variadic() const { return m_kwd_struct.extended<struct_type>()->is_variadic(); }
@@ -69,8 +51,6 @@ namespace ndt {
     const std::vector<type> &get_kwd_types() const { return m_kwd_struct.extended<struct_type>()->get_field_types(); }
 
     const nd::array &get_kwd_names() const { return m_kwd_struct.extended<struct_type>()->get_field_names(); }
-
-    const type *get_pos_types_raw() const { return m_pos_tuple.extended<tuple_type>()->get_field_types_raw(); }
 
     const type &get_pos_type(intptr_t i) const
     {
@@ -150,7 +130,8 @@ namespace ndt {
     }
 
     /** Makes an callable type with both positional and keyword arguments */
-    static type make(const type &ret_tp, const std::vector<type> &pos_tp, const nd::array &kwd_names, const std::vector<type> &kwd_tp)
+    static type make(const type &ret_tp, const std::vector<type> &pos_tp, const nd::array &kwd_names,
+                     const std::vector<type> &kwd_tp)
     {
       return make(ret_tp, tuple_type::make(pos_tp), struct_type::make(kwd_names, kwd_tp));
     }
@@ -188,9 +169,9 @@ namespace ndt {
     static type equivalent(const T &... names)
     {
       size_t num_pos = 1 + sizeof...(A) - sizeof...(T);
-      const std::vector<type> tp {make_type<A0>(), make_type<A>()...};
-      const std::vector<type> pos(tp.begin(), tp.begin()+num_pos);
-      const std::vector<type> kwargs(tp.begin()+num_pos, tp.end());
+      const std::vector<type> tp{make_type<A0>(), make_type<A>()...};
+      const std::vector<type> pos(tp.begin(), tp.begin() + num_pos);
+      const std::vector<type> kwargs(tp.begin() + num_pos, tp.end());
 
       return callable_type::make(make_type<R>(), pos, {names...}, kwargs);
     }
