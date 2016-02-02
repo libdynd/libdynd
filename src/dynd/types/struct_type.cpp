@@ -123,8 +123,7 @@ void ndt::struct_type::transform_child_types(type_transform_fn_t transform_fn, i
   }
 
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
-    transform_fn(get_field_type(i), arrmeta_offset + get_arrmeta_offset(i), extra, tmp_field_types[i],
-                 was_transformed);
+    transform_fn(get_field_type(i), arrmeta_offset + get_arrmeta_offset(i), extra, tmp_field_types[i], was_transformed);
   }
   if (was_transformed) {
     out_transformed_tp = struct_type::make(m_field_names, tmp_field_types, m_variadic);

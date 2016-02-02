@@ -49,10 +49,7 @@ namespace ndt {
     bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;
 
-    static type make()
-    {
-      return type(new fixed_string_kind_type(), false);
-    }
+    static type make() { return type(new fixed_string_kind_type(), false); }
   };
 
 } // namespace dynd::ndt

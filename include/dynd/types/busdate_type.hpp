@@ -43,8 +43,7 @@ namespace ndt {
     nd::array m_holidays;
 
   public:
-    busdate_type(busdate_roll_t roll, const bool *weekmask,
-                 const nd::array &holidays);
+    busdate_type(busdate_roll_t roll, const bool *weekmask, const nd::array &holidays);
 
     virtual ~busdate_type();
 
@@ -58,15 +57,14 @@ namespace ndt {
 
     bool is_default_workweek() const
     {
-      return m_workweek[0] && m_workweek[1] && m_workweek[2] && m_workweek[3] &&
-             m_workweek[4] && !m_workweek[5] && !m_workweek[6];
+      return m_workweek[0] && m_workweek[1] && m_workweek[2] && m_workweek[3] && m_workweek[4] && !m_workweek[5] &&
+             !m_workweek[6];
     }
 
     void print_workweek(std::ostream &o) const;
     void print_holidays(std::ostream &o) const;
 
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;
 
@@ -74,24 +72,18 @@ namespace ndt {
 
     bool operator==(const base_type &rhs) const;
 
-    void arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                                   bool DYND_UNUSED(blockref_alloc)) const
-    {
-    }
-    void arrmeta_copy_construct(
-        char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-        const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
+    void arrmeta_default_construct(char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const {}
+    void arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+                                const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
     {
     }
     void arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
-    void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta),
-                             std::ostream &DYND_UNUSED(o),
+    void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
                              const std::string &DYND_UNUSED(indent)) const
     {
     }
 
-    static type make(busdate_roll_t roll = busdate_roll_following,
-                     const bool *weekmask = NULL,
+    static type make(busdate_roll_t roll = busdate_roll_following, const bool *weekmask = NULL,
                      const nd::array &holidays = nd::array())
     {
       return type(new busdate_type(roll, weekmask, holidays), false);

@@ -22,38 +22,28 @@ namespace ndt {
     size_t m_element_arrmeta_offset;
 
   public:
-    base_dim_type(type_id_t type_id, type_kind_t tp_kind,
-                  const type &element_tp, size_t data_size, size_t alignment,
+    base_dim_type(type_id_t type_id, type_kind_t tp_kind, const type &element_tp, size_t data_size, size_t alignment,
                   size_t element_arrmeta_offset, flags_type flags, bool strided)
-        : base_type(type_id, tp_kind, data_size, alignment,
-                    flags | type_flag_indexable,
-                    element_arrmeta_offset + element_tp.get_arrmeta_size(),
-                    1 + element_tp.get_ndim(),
+        : base_type(type_id, tp_kind, data_size, alignment, flags | type_flag_indexable,
+                    element_arrmeta_offset + element_tp.get_arrmeta_size(), 1 + element_tp.get_ndim(),
                     strided ? (1 + element_tp.get_strided_ndim()) : 0),
-          m_element_tp(element_tp),
-          m_element_arrmeta_offset(element_arrmeta_offset)
+          m_element_tp(element_tp), m_element_arrmeta_offset(element_arrmeta_offset)
     {
       if (m_element_tp.get_kind() == memory_kind) {
-        throw std::invalid_argument(
-            "a memory_type cannot be an element of a dim_type");
+        throw std::invalid_argument("a memory_type cannot be an element of a dim_type");
       }
     }
 
-    base_dim_type(type_id_t tp_id, const type &element_tp, size_t data_size,
-                  size_t data_alignment, size_t element_arrmeta_offset,
-                  flags_type flags, bool strided)
-        : base_dim_type(tp_id, dim_kind, element_tp, data_size, data_alignment,
-                        element_arrmeta_offset, flags, strided)
+    base_dim_type(type_id_t tp_id, const type &element_tp, size_t data_size, size_t data_alignment,
+                  size_t element_arrmeta_offset, flags_type flags, bool strided)
+        : base_dim_type(tp_id, dim_kind, element_tp, data_size, data_alignment, element_arrmeta_offset, flags, strided)
     {
     }
 
     virtual ~base_dim_type();
 
     /** The element type. */
-    const type &get_element_type() const
-    {
-      return m_element_tp;
-    }
+    const type &get_element_type() const { return m_element_tp; }
 
     void get_element_types(std::size_t ndim, const type **element_tp) const;
 
@@ -71,9 +61,11 @@ namespace ndt {
       intptr_t this_ndim = get_ndim(), stp_ndim = subarray_tp.get_ndim();
       if (this_ndim > stp_ndim) {
         return get_element_type().is_type_subarray(subarray_tp);
-      } else if (this_ndim == stp_ndim) {
+      }
+      else if (this_ndim == stp_ndim) {
         return (*this) == (*subarray_tp.extended());
-      } else {
+      }
+      else {
         return false;
       }
     }
@@ -82,10 +74,7 @@ namespace ndt {
      * The offset to add to the arrmeta to get to the
      * element type's arrmeta.
      */
-    size_t get_element_arrmeta_offset() const
-    {
-      return m_element_arrmeta_offset;
-    }
+    size_t get_element_arrmeta_offset() const { return m_element_arrmeta_offset; }
 
     /**
      * The dimension size, or -1 if it can't be determined
@@ -96,8 +85,7 @@ namespace ndt {
      *
      * \returns  The size of the dimension, or -1.
      */
-    virtual intptr_t get_dim_size(const char *arrmeta = NULL,
-                                  const char *data = NULL) const = 0;
+    virtual intptr_t get_dim_size(const char *arrmeta = NULL, const char *data = NULL) const = 0;
 
     intptr_t get_size(const char *arrmeta) const
     {
@@ -109,10 +97,7 @@ namespace ndt {
       return dim_size * m_element_tp.get_size(NULL);
     }
 
-    virtual void get_vars(std::unordered_set<std::string> &vars) const
-    {
-      m_element_tp.get_vars(vars);
-    }
+    virtual void get_vars(std::unordered_set<std::string> &vars) const { m_element_tp.get_vars(vars); }
 
     /**
      * Constructs the nd::array arrmeta for one dimension of this type, leaving
@@ -128,12 +113,10 @@ namespace ndt {
      *                            when putting it in a new nd::array, need to
      *                            hold a reference to that memory.
      */
-    virtual size_t arrmeta_copy_construct_onedim(
-        char *dst_arrmeta, const char *src_arrmeta,
-        const intrusive_ptr<memory_block_data> &embedded_reference) const = 0;
+    virtual size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
+                                                 const intrusive_ptr<memory_block_data> &embedded_reference) const = 0;
 
-    virtual bool match(const char *arrmeta, const type &candidate_tp,
-                       const char *candidate_arrmeta,
+    virtual bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                        std::map<std::string, type> &tp_vars) const;
 
     virtual type with_element_type(const type &element_tp) const = 0;

@@ -20,7 +20,7 @@ namespace dynd {
 enum {
   dim_fragment_var = -1,
   dim_fragment_fixed_sym = -2
-                           // values >= 0 mean fixed[N]
+  // values >= 0 mean fixed[N]
 };
 
 namespace ndt {
@@ -41,10 +41,7 @@ namespace ndt {
      *   -2 : strided
      *   N >= 0 : fixed[N]
      */
-    inline const intptr_t *get_tagged_dims() const
-    {
-      return m_tagged_dims.get();
-    }
+    inline const intptr_t *get_tagged_dims() const { return m_tagged_dims.get(); }
 
     /**
      * Broadcasts this dim_fragment with some dimensions of
@@ -58,20 +55,15 @@ namespace ndt {
      */
     type apply_to_dtype(const type &dtp) const;
 
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;
 
-    type apply_linear_index(intptr_t nindices, const irange *indices,
-                            size_t current_i, const type &root_tp,
+    type apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i, const type &root_tp,
                             bool leading_dimension) const;
-    intptr_t apply_linear_index(intptr_t nindices, const irange *indices,
-                                const char *arrmeta, const type &result_tp,
-                                char *out_arrmeta,
-                                const intrusive_ptr<memory_block_data> &embedded_reference,
-                                size_t current_i, const type &root_tp,
-                                bool leading_dimension, char **inout_data,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta, const type &result_tp,
+                                char *out_arrmeta, const intrusive_ptr<memory_block_data> &embedded_reference,
+                                size_t current_i, const type &root_tp, bool leading_dimension, char **inout_data,
                                 intrusive_ptr<memory_block_data> &inout_dataref) const;
 
     intptr_t get_dim_size(const char *arrmeta, const char *data) const;
@@ -83,9 +75,8 @@ namespace ndt {
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                 const intrusive_ptr<memory_block_data> &embedded_reference) const;
-    size_t
-    arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                  const intrusive_ptr<memory_block_data> &embedded_reference) const;
+    size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
+                                         const intrusive_ptr<memory_block_data> &embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
 
     virtual type with_element_type(const type &element_tp) const;
@@ -99,7 +90,8 @@ namespace ndt {
   {
     if (ndim > 0) {
       return type(new dim_fragment_type(ndim, tagged_dims), false);
-    } else {
+    }
+    else {
       return make_dim_fragment();
     }
   }
@@ -109,7 +101,8 @@ namespace ndt {
   {
     if (ndim > 0) {
       return type(new dim_fragment_type(ndim, tp), false);
-    } else {
+    }
+    else {
       return make_dim_fragment();
     }
   }
