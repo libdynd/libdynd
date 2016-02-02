@@ -15,12 +15,12 @@ namespace dynd {
     struct string_search_base {
       void bloom_add(uint64_t &mask, const char ch)
       {
-        mask |= 1UL << ((ch) & (64 - 1));
+        mask |= static_cast<uint64_t>(1) << ((ch) & (64 - 1));
       }
 
       uint64_t bloom(const uint64_t &mask, const char ch)
       {
-        return mask & (1UL << ((ch) & (64 - 1)));
+        return mask & (static_cast<uint64_t>(1) << ((ch) & (64 - 1)));
       }
 
       /* Special case path where the needle is only a single character.
