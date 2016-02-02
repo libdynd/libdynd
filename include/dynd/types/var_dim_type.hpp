@@ -107,20 +107,5 @@ namespace ndt {
 
   inline type make_var_dim(const type &element_tp) { return var_dim_type::make(element_tp); }
 
-  /**
-   * A helper function for resizing the allocated space in a var dim
-   * element. The element's `begin` pointer and
-   * `size` count must not have been modified since the last
-   * initialize/resize operation. If the element has not been
-   * initialized previously, it is initialized to the requested count.
-   *
-   * \param tp  This must be a var_dim type.
-   * \param arrmeta  Arrmeta for `tp`.
-   * \param data  Array data for the `tp`, `arrmeta` pair, this
-   *              is written to.
-   * \param count  The number of elements to resize to.
-   */
-  DYND_API void var_dim_element_resize(const type &tp, const char *arrmeta, char *data, intptr_t count);
-
 } // namespace dynd::ndt
 } // namespace dynd

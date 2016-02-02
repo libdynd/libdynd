@@ -44,8 +44,10 @@ void nd::masked_take_ck::single(char *dst, char *const *src)
       dst_count += run_count;
     }
   }
-  // Shrink the var dim element to fit
-  ndt::var_dim_element_resize(m_dst_tp, m_dst_meta, dst, dst_count);
+
+  vdd->begin =
+      reinterpret_cast<const ndt::var_dim_type::metadata_type *>(m_dst_meta)->blockref->resize(vdd->begin, dst_count);
+  vdd->size = dst_count;
 }
 
 void nd::masked_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
