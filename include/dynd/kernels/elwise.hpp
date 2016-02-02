@@ -759,18 +759,9 @@ namespace nd {
           }
           // Allocate the output
           memory_block_data *memblock = m_dst_memblock;
-          if (memblock->m_type == objectarray_memory_block_type) {
-            memory_block_data::api *allocator = memblock->get_api();
-
-            // Allocate the output array data
-            dst_vddd->begin = allocator->allocate(memblock, dim_size);
-          }
-          else {
-            memory_block_data::api *allocator = memblock->get_api();
-
-            // Allocate the output array data
-            dst_vddd->begin = allocator->allocate(memblock, dim_size);
-          }
+          memory_block_data::api *allocator = memblock->get_api();
+          // Allocate the output array data
+          dst_vddd->begin = allocator->allocate(memblock, dim_size);
           modified_dst = dst_vddd->begin;
           dst_vddd->size = dim_size;
         }
@@ -914,18 +905,9 @@ namespace nd {
           dim_size = 1;
           // Allocate the output
           memory_block_data *memblock = m_dst_memblock;
-          if (memblock->m_type == objectarray_memory_block_type) {
-            memory_block_data::api *allocator = memblock->get_api();
-
-            // Allocate the output array data
-            dst_vddd->begin = allocator->allocate(memblock, dim_size);
-          }
-          else {
-            memory_block_data::api *allocator = memblock->get_api();
-
-            // Allocate the output array data
-            dst_vddd->begin = allocator->allocate(memblock, dim_size);
-          }
+          memory_block_data::api *allocator = memblock->get_api();
+          // Allocate the output array data
+          dst_vddd->begin = allocator->allocate(memblock, dim_size);
           modified_dst = dst_vddd->begin;
           dst_vddd->size = dim_size;
         }
