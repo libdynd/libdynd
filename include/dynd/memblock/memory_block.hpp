@@ -50,31 +50,9 @@ struct DYND_API memory_block_data {
    * data within a memory_block.
    */
   struct DYND_API api {
-    /**
-     * Allocates the requested amount of memory from the memory_block, returning
-     * a pointer.
-     *
-     * Call this once per output variable.
-     */
     char *(*allocate)(memory_block_data *self, size_t count);
-
-    /**
-     * Resizes the most recently allocated memory from the memory_block.
-     */
     char *(*resize)(memory_block_data *self, char *previous_allocated, size_t count);
-
-    /**
-     * Finalizes the memory block so it can no longer be used to allocate more
-     * memory.
-     */
     void (*finalize)(memory_block_data *self);
-
-    /**
-     * When a memory block is being used as a temporary buffer, resets it to
-     * a state throwing away existing used memory. This allows the same memory
-     * to be used for variable-sized data to be reused repeatedly in such
-     * a temporary buffer.
-     */
     void (*reset)(memory_block_data *self);
   };
 
@@ -91,6 +69,33 @@ struct DYND_API memory_block_data {
    * Returns a pointer to a memory allocator API for the type of the memory block.
    */
   api *get_api();
+
+  /**
+   * Allocates the requested amount of memory from the memory_block, returning
+   * a pointer.
+   *
+   * Call this once per output variable.
+   */
+  char *alloc(size_t count) { return get_api()->allocate(this, count); }
+
+  /**
+   * Resizes the most recently allocated memory from the memory_block.
+   */
+  char *resize(char *previous_allocated, size_t count) { return get_api()->resize(this, previous_allocated, count); }
+
+  /**
+   * Finalizes the memory block so it can no longer be used to allocate more
+   * memory.
+   */
+  void finalize() { get_api()->finalize(this); }
+
+  /**
+   * When a memory block is being used as a temporary buffer, resets it to
+   * a state throwing away existing used memory. This allows the same memory
+   * to be used for variable-sized data to be reused repeatedly in such
+   * a temporary buffer.
+   */
+  void reset() { get_api()->reset(this); }
 };
 
 /**
@@ -114,15 +119,9 @@ namespace detail {
   DYND_API void memory_block_free(memory_block_data *memblock);
 } // namespace detail
 
-inline long intrusive_ptr_use_count(memory_block_data *ptr)
-{
-  return ptr->m_use_count;
-}
+inline long intrusive_ptr_use_count(memory_block_data *ptr) { return ptr->m_use_count; }
 
-inline void intrusive_ptr_retain(memory_block_data *ptr)
-{
-  ++ptr->m_use_count;
-}
+inline void intrusive_ptr_retain(memory_block_data *ptr) { ++ptr->m_use_count; }
 
 inline void intrusive_ptr_release(memory_block_data *ptr)
 {
