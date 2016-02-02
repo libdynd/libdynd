@@ -20,8 +20,9 @@ void nd::masked_take_ck::single(char *dst, char *const *src)
   intptr_t dim_size = m_dim_size, src0_stride = m_src0_stride, mask_stride = m_mask_stride;
   // Start with the dst matching the dim size. (Maybe better to
   // do smaller? This means no resize required in the loop.)
-  ndt::var_dim_element_initialize(m_dst_tp, m_dst_meta, dst, dim_size);
   ndt::var_dim_type::data_type *vdd = reinterpret_cast<ndt::var_dim_type::data_type *>(dst);
+  vdd->begin = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(m_dst_meta)->blockref->alloc(dim_size);
+  vdd->size = dim_size;
   char *dst_ptr = vdd->begin;
   intptr_t dst_stride = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(m_dst_meta)->stride;
   intptr_t dst_count = 0;
@@ -43,8 +44,10 @@ void nd::masked_take_ck::single(char *dst, char *const *src)
       dst_count += run_count;
     }
   }
-  // Shrink the var dim element to fit
-  ndt::var_dim_element_resize(m_dst_tp, m_dst_meta, dst, dst_count);
+
+  vdd->begin =
+      reinterpret_cast<const ndt::var_dim_type::metadata_type *>(m_dst_meta)->blockref->resize(vdd->begin, dst_count);
+  vdd->size = dst_count;
 }
 
 void nd::masked_take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,

@@ -40,7 +40,10 @@ void nd::functional::var_rolling_ck::single(char *dst, char *const *src)
   char *src_arr_ptr = src_dat->begin + m_src_offset;
   intptr_t dim_size = src_dat->size;
   // Allocate the output data
-  ndt::var_dim_element_initialize(m_dst_tp, m_dst_meta, dst, dim_size);
+
+  dst_dat->begin = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(m_dst_meta)->blockref->alloc(dim_size);
+  dst_dat->size = dim_size;
+
   char *dst_arr_ptr = dst_dat->begin;
 
   // Fill in NA/NaN at the beginning
