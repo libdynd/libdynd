@@ -516,11 +516,12 @@ bool ndt::tuple_type::match(const char *arrmeta, const type &candidate_tp, const
 std::map<std::string, nd::callable> ndt::tuple_type::get_dynamic_type_properties() const
 {
   std::map<std::string, nd::callable> properties;
-  properties["field_types"] = nd::callable::make<nd::get_then_copy_kernel2<tuple_type, &tuple_type::get_field_types>>(
-      ndt::callable_type::make(get_type(), ndt::tuple_type::make(),
-                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
+  properties["field_types"] =
+      nd::callable::make<nd::get_then_copy_kernel<const std::vector<type> &, tuple_type, &tuple_type::get_field_types>>(
+          ndt::callable_type::make(get_type(), ndt::tuple_type::make(),
+                                   ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
   properties["metadata_offsets"] =
-      nd::callable::make<nd::get_then_copy_kernel<tuple_type, &tuple_type::get_arrmeta_offsets>>(
+      nd::callable::make<nd::get_then_copy_kernel<const nd::array &, tuple_type, &tuple_type::get_arrmeta_offsets>>(
           ndt::callable_type::make(m_arrmeta_offsets.get_type(), ndt::tuple_type::make(),
                                    ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
 
