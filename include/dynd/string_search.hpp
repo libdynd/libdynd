@@ -82,7 +82,7 @@ namespace dynd {
         size_t n = haystack.size();
         size_t m = needle.size();
 
-        size_t w = n - m;
+        intptr_t w = n - m;
         if (w < 0) {
           return;
         }
@@ -97,15 +97,15 @@ namespace dynd {
           return;
         }
 
-        size_t mlast = m - 1;
-        size_t skip = mlast - 1;
+        intptr_t mlast = m - 1;
+        intptr_t skip = mlast - 1;
         uint64_t mask = 0;
 
         const char *ss = s + m - 1;
         const char *pp = p + m - 1;
 
-        size_t i;
-        size_t j;
+        intptr_t i;
+        intptr_t j;
 
         /* create compressed boyer-moore delta 1 table */
 
@@ -137,14 +137,14 @@ namespace dynd {
               i = i + mlast;
             }
             /* miss: check if next character is part of pattern */
-            if (!bloom(mask, ss[i+1])) {
+            if (i < w && !bloom(mask, ss[i+1])) {
               i = i + m;
             } else {
               i = i + skip;
             }
           } else {
             /* skip: check if next character is part of pattern */
-            if (!bloom(mask, ss[i+1])) {
+            if (i < w && !bloom(mask, ss[i+1])) {
               i = i + m;
             }
           }
