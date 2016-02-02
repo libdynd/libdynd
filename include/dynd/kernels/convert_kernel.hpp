@@ -205,7 +205,7 @@ namespace nd {
       {
         intptr_t ckb_offset = ckb->m_size;
         callable &af = *reinterpret_cast<callable *>(static_data);
-        const ndt::type *src_tp_for_af = af.get_type()->get_pos_types_raw();
+        const std::vector<ndt::type> &src_tp_for_af = af.get_type()->get_pos_types();
 
         intptr_t root_ckb_offset = ckb_offset;
         ckb->emplace_back<convert_kernel>(kernreq, nsrc);
@@ -222,7 +222,7 @@ namespace nd {
           }
         }
         // Instantiate the callable being buffered
-        af.get()->instantiate(af.get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp_for_af,
+        af.get()->instantiate(af.get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp_for_af.data(),
                               &buffered_arrmeta[0], kernreq, nkwd, kwds, tp_vars);
         ckb_offset = ckb->m_size;
         reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
