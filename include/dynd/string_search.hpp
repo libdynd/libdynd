@@ -202,7 +202,7 @@ namespace dynd {
         m_new_str(new_str) { }
 
       bool handle_match(const size_t match) {
-        memcpy(m_dst.begin() + match, m_new_str.begin(), m_new_str.size());
+        DYND_MEMCPY(m_dst.begin() + match, m_new_str.begin(), m_new_str.size());
         return false;
       }
     };
@@ -236,9 +236,9 @@ namespace dynd {
       bool handle_match(const size_t match) {
         size_t src_chunk_size = match - m_last_src_start;
 
-        memcpy(m_dst, m_src + m_last_src_start, src_chunk_size);
+        DYND_MEMCPY(m_dst, m_src + m_last_src_start, src_chunk_size);
         m_dst += src_chunk_size;
-        memcpy(m_dst, m_new_str, m_new_str_size);
+        DYND_MEMCPY(m_dst, m_new_str, m_new_str_size);
         m_dst += m_new_str_size;
         m_last_src_start = match + m_old_str_size;
 
@@ -246,7 +246,7 @@ namespace dynd {
       }
 
       void finish() {
-        memcpy(m_dst, m_src + m_last_src_start, m_src_size - m_last_src_start);
+        DYND_MEMCPY(m_dst, m_src + m_last_src_start, m_src_size - m_last_src_start);
       }
     };
 
