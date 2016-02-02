@@ -156,9 +156,7 @@ namespace nd {
       case var_dim_id:
         memblock = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(metadata)->blockref;
         closure = [](const container_init *self, char *data, const std::initializer_list<ValueType> &values) {
-          memory_block_data::api *allocator = self->memblock->get_api();
-          reinterpret_cast<ndt::var_dim_type::data_type *>(data)->begin =
-              allocator->allocate(self->memblock.get(), values.size());
+          reinterpret_cast<ndt::var_dim_type::data_type *>(data)->begin = self->memblock->alloc(values.size());
           reinterpret_cast<ndt::var_dim_type::data_type *>(data)->size = values.size();
           self->child.contiguous(reinterpret_cast<ndt::var_dim_type::data_type *>(data)->begin, values.begin(),
                                  values.size());

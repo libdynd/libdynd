@@ -437,13 +437,11 @@ void ndt::var_dim_type::arrmeta_reset_buffers(char *arrmeta) const
   if (md->blockref) {
     uint32_t br_type = md->blockref->m_type;
     if (br_type == zeroinit_memory_block_type || br_type == pod_memory_block_type) {
-      memory_block_data::api *allocator = get_memory_block_pod_allocator_api(md->blockref.get());
-      allocator->reset(md->blockref.get());
+      md->blockref->reset();
       return;
     }
     else if (br_type == objectarray_memory_block_type) {
-      memory_block_data::api *allocator = md->blockref->get_api();
-      allocator->reset(md->blockref.get());
+      md->blockref->reset();
       return;
     }
   }
@@ -472,16 +470,10 @@ void ndt::var_dim_type::arrmeta_finalize_buffers(char *arrmeta) const
   if (md->blockref) {
     // Finalize the memory block
     if (m_element_tp.get_flags() & type_flag_destructor) {
-      memory_block_data::api *allocator = md->blockref->get_api();
-      if (allocator != NULL) {
-        allocator->finalize(md->blockref.get());
-      }
+      md->blockref->finalize();
     }
     else {
-      memory_block_data::api *allocator = md->blockref->get_api();
-      if (allocator != NULL) {
-        allocator->finalize(md->blockref.get());
-      }
+      md->blockref->finalize();
     }
   }
 }
@@ -603,17 +595,13 @@ void ndt::var_dim_element_initialize(const type &tp, const char *arrmeta, char *
     throw runtime_error("internal error: var_dim arrmeta has no memblock");
   }
   else if (memblock->m_type == objectarray_memory_block_type) {
-    memory_block_data::api *allocator = memblock->get_api();
-
     // Allocate the output array data
-    d->begin = allocator->allocate(memblock, count);
+    d->begin = memblock->alloc(count);
     d->size = count;
   }
   else if (memblock->m_type == pod_memory_block_type || memblock->m_type == zeroinit_memory_block_type) {
-    memory_block_data::api *allocator = get_memory_block_pod_allocator_api(memblock);
-
     // Allocate the output array data
-    d->begin = allocator->allocate(memblock, count);
+    d->begin = memblock->alloc(count);
     d->size = count;
   }
   else {
@@ -645,17 +633,13 @@ void ndt::var_dim_element_resize(const type &tp, const char *arrmeta, char *data
     throw runtime_error("internal error: var_dim arrmeta has no memblock");
   }
   else if (memblock->m_type == objectarray_memory_block_type) {
-    memory_block_data::api *allocator = memblock->get_api();
-
     // Resize the output array data
-    d->begin = allocator->resize(memblock, d->begin, count);
+    d->begin = memblock->resize(d->begin, count);
     d->size = count;
   }
   else if (memblock->m_type == pod_memory_block_type || memblock->m_type == zeroinit_memory_block_type) {
-    memory_block_data::api *allocator = memblock->get_api();
-
     // Resize the output array data
-    d->begin = allocator->resize(memblock, d->begin, count);
+    d->begin = memblock->resize(d->begin, count);
     d->size = count;
   }
   else {

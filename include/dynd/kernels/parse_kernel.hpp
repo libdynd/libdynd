@@ -421,9 +421,8 @@ namespace nd {
         }
         skip_whitespace(args);
 
-        memory_block_data::api *allocator = blockref->get_api();
         size_t size = 0, allocated_size = 8;
-        reinterpret_cast<ret_type *>(ret)->begin = allocator->allocate(blockref.get(), allocated_size);
+        reinterpret_cast<ret_type *>(ret)->begin = blockref->alloc(allocated_size);
 
         ckernel_prefix *child = get_child();
         for (char *data = reinterpret_cast<ret_type *>(ret)->begin;; data += stride) {
@@ -431,7 +430,7 @@ namespace nd {
           if (size == allocated_size) {
             allocated_size *= 2;
             reinterpret_cast<ret_type *>(ret)->begin =
-                allocator->resize(blockref.get(), reinterpret_cast<ret_type *>(ret)->begin, allocated_size);
+                blockref->resize(reinterpret_cast<ret_type *>(ret)->begin, allocated_size);
           }
           ++size;
           reinterpret_cast<ndt::var_dim_type::data_type *>(ret)->size = size;
@@ -449,8 +448,7 @@ namespace nd {
         }
 
         // Shrink-wrap the memory to just fit the string
-        reinterpret_cast<ret_type *>(ret)->begin =
-            allocator->resize(blockref.get(), reinterpret_cast<ret_type *>(ret)->begin, size);
+        reinterpret_cast<ret_type *>(ret)->begin = blockref->resize(reinterpret_cast<ret_type *>(ret)->begin, size);
         reinterpret_cast<ret_type *>(ret)->size = size;
       }
 

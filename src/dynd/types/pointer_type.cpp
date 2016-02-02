@@ -261,10 +261,7 @@ void ndt::pointer_type::arrmeta_finalize_buffers(char *arrmeta) const
   pointer_type_arrmeta *md = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
   if (md->blockref) {
     // Finalize the memory block
-    memory_block_data::api *allocator = md->blockref->get_api();
-    if (allocator != NULL) {
-      allocator->finalize(md->blockref.get());
-    }
+    md->blockref->finalize();
   }
 }
 
