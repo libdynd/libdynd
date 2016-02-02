@@ -20,8 +20,9 @@ void nd::masked_take_ck::single(char *dst, char *const *src)
   intptr_t dim_size = m_dim_size, src0_stride = m_src0_stride, mask_stride = m_mask_stride;
   // Start with the dst matching the dim size. (Maybe better to
   // do smaller? This means no resize required in the loop.)
-  ndt::var_dim_element_initialize(m_dst_tp, m_dst_meta, dst, dim_size);
   ndt::var_dim_type::data_type *vdd = reinterpret_cast<ndt::var_dim_type::data_type *>(dst);
+  vdd->begin = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(m_dst_meta)->blockref->alloc(dim_size);
+  vdd->size = dim_size;
   char *dst_ptr = vdd->begin;
   intptr_t dst_stride = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(m_dst_meta)->stride;
   intptr_t dst_count = 0;

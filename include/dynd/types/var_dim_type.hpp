@@ -108,19 +108,6 @@ namespace ndt {
   inline type make_var_dim(const type &element_tp) { return var_dim_type::make(element_tp); }
 
   /**
-   * A helper function for reserving initial space in a var dim element.
-   * This requires that the element being created (at `data`) is NULL, and
-   * it allocates `count` elements to start of the var element.
-   *
-   * \param tp  This must be a var_dim type.
-   * \param arrmeta  Arrmeta for `tp`.
-   * \param data  Array data for the `tp`, `arrmeta` pair, this
-   *              is written to.
-   * \param count  The number of elements to start off with.
-   */
-  DYND_API void var_dim_element_initialize(const type &tp, const char *arrmeta, char *data, intptr_t count);
-
-  /**
    * A helper function for resizing the allocated space in a var dim
    * element. The element's `begin` pointer and
    * `size` count must not have been modified since the last

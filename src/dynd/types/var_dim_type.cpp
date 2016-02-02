@@ -573,46 +573,6 @@ std::map<std::string, nd::callable> ndt::var_dim_type::get_dynamic_array_functio
 
 ndt::type ndt::var_dim_type::with_element_type(const type &element_tp) const { return make(element_tp); }
 
-void ndt::var_dim_element_initialize(const type &tp, const char *arrmeta, char *data, intptr_t count)
-{
-  if (tp.get_id() != var_dim_id) {
-    stringstream ss;
-    ss << "internal error: expected a var_dim type, not " << tp;
-    throw dynd::type_error(ss.str());
-  }
-  const var_dim_type::metadata_type *md = reinterpret_cast<const var_dim_type::metadata_type *>(arrmeta);
-  var_dim_type::data_type *d = reinterpret_cast<var_dim_type::data_type *>(data);
-  if (d->begin != NULL) {
-    throw runtime_error("internal error: var_dim element data must be NULL to initialize");
-  }
-  if (md->offset != 0) {
-    throw runtime_error("internal error: var_dim arrmeta offset must be "
-                        "zero to initialize");
-  }
-  // Allocate the element
-  memory_block_data *memblock = md->blockref.get();
-  if (!memblock) {
-    throw runtime_error("internal error: var_dim arrmeta has no memblock");
-  }
-  else if (memblock->m_type == objectarray_memory_block_type) {
-    // Allocate the output array data
-    d->begin = memblock->alloc(count);
-    d->size = count;
-  }
-  else if (memblock->m_type == pod_memory_block_type || memblock->m_type == zeroinit_memory_block_type) {
-    // Allocate the output array data
-    d->begin = memblock->alloc(count);
-    d->size = count;
-  }
-  else {
-    stringstream ss;
-    ss << "var_dim_element_initialize internal error: ";
-    ss << "var_dim arrmeta has memblock type " << (memory_block_type_t)memblock->m_type;
-    ss << " that is not writable";
-    throw runtime_error(ss.str());
-  }
-}
-
 void ndt::var_dim_element_resize(const type &tp, const char *arrmeta, char *data, intptr_t count)
 {
   if (tp.get_id() != var_dim_id) {
@@ -624,7 +584,8 @@ void ndt::var_dim_element_resize(const type &tp, const char *arrmeta, char *data
   var_dim_type::data_type *d = reinterpret_cast<var_dim_type::data_type *>(data);
   if (d->begin == NULL) {
     // Allow resize to do the initialization as well
-    var_dim_element_initialize(tp, arrmeta, data, count);
+    d->begin = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(arrmeta)->blockref->alloc(count);
+    d->size = count;
     return;
   }
   // Resize the element
