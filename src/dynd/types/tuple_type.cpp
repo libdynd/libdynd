@@ -15,8 +15,8 @@
 using namespace std;
 using namespace dynd;
 
-ndt::tuple_type::tuple_type(type_id_t type_id, const std::vector<type> &field_types, flags_type flags, bool layout_in_arrmeta,
-                            bool variadic)
+ndt::tuple_type::tuple_type(type_id_t type_id, const std::vector<type> &field_types, flags_type flags,
+                            bool layout_in_arrmeta, bool variadic)
     : base_type(type_id, variadic ? kind_kind : tuple_kind, 0, 1,
                 flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
       m_field_count(field_types.size()), m_field_types(field_types),
@@ -62,8 +62,6 @@ ndt::tuple_type::tuple_type(const std::vector<type> &field_types, bool variadic)
     : tuple_type(tuple_id, field_types, type_flag_none, true, variadic)
 {
 }
-
-ndt::tuple_type::~tuple_type() {}
 
 void ndt::tuple_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const
 {
@@ -286,8 +284,7 @@ void ndt::tuple_type::transform_child_types(type_transform_fn_t transform_fn, in
   }
 
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
-    transform_fn(get_field_type(i), arrmeta_offset + get_arrmeta_offset(i), extra, tmp_field_types[i],
-                 was_transformed);
+    transform_fn(get_field_type(i), arrmeta_offset + get_arrmeta_offset(i), extra, tmp_field_types[i], was_transformed);
   }
   if (was_transformed) {
     out_transformed_tp = make(tmp_field_types, m_variadic);
@@ -342,10 +339,10 @@ void ndt::tuple_type::arrmeta_default_construct(char *arrmeta, bool blockref_all
 {
   const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
   uintptr_t *data_offsets = get_arrmeta_data_offsets(arrmeta);
-  const type *field_tps = get_field_types_raw();
+  const vector<type> &field_tps = get_field_types();
   // If the arrmeta has data offsets, fill them in
   if (data_offsets != NULL) {
-    fill_default_data_offsets(get_field_count(), field_tps, data_offsets);
+    fill_default_data_offsets(get_field_count(), field_tps.data(), data_offsets);
   }
 
   // Default construct the arrmeta for all the fields

@@ -18,6 +18,7 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/tuple_type.hpp>
+#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 
