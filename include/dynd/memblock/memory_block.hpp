@@ -66,11 +66,6 @@ struct DYND_API memory_block_data {
   }
 
   /**
-   * Returns a pointer to a memory allocator API for the type of the memory block.
-   */
-  api *get_api();
-
-  /**
    * Allocates the requested amount of memory from the memory_block, returning
    * a pointer.
    *
@@ -96,6 +91,12 @@ struct DYND_API memory_block_data {
    * a temporary buffer.
    */
   void reset() { get_api()->reset(this); }
+
+  /**
+   * Returns a pointer to a memory allocator API for the type of the memory block.
+   */
+private:
+  api *get_api();
 };
 
 /**
