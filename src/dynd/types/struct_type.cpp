@@ -461,10 +461,9 @@ bool ndt::struct_type::match(const char *arrmeta, const type &candidate_tp, cons
       }
     }
 
-    const type *fields = get_field_types_raw();
-    const type *candidate_fields = candidate_tp.extended<struct_type>()->get_field_types_raw();
+    const std::vector<type> &candidate_fields = candidate_tp.extended<struct_type>()->get_field_types();
     for (intptr_t i = 0; i < m_field_count; ++i) {
-      if (!fields[i].match(arrmeta, candidate_fields[i], candidate_arrmeta, tp_vars)) {
+      if (!m_field_types[i].match(arrmeta, candidate_fields[i], candidate_arrmeta, tp_vars)) {
         return false;
       }
     }

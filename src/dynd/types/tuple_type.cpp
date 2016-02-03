@@ -479,11 +479,10 @@ bool ndt::tuple_type::match(const char *arrmeta, const type &candidate_tp, const
   if ((m_field_count == candidate_field_count && !candidate_variadic) ||
       ((candidate_field_count >= m_field_count) && m_variadic)) {
     // Match against the types
-    const type *fields = get_field_types_raw();
-    const type *candidate_fields = candidate_tp.extended<tuple_type>()->get_field_types_raw();
+    const std::vector<type> &candidate_fields = candidate_tp.extended<tuple_type>()->get_field_types();
     for (intptr_t i = 0; i != m_field_count; ++i) {
-      if (!fields[i].match(DYND_INC_IF_NOT_NULL(arrmeta, m_arrmeta_offsets[i]), candidate_fields[i], candidate_arrmeta,
-                           tp_vars)) {
+      if (!m_field_types[i].match(DYND_INC_IF_NOT_NULL(arrmeta, m_arrmeta_offsets[i]), candidate_fields[i],
+                                  candidate_arrmeta, tp_vars)) {
         return false;
       }
     }

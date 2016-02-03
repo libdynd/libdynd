@@ -46,7 +46,7 @@ void dynd::make_struct_assignment_kernel(nd::kernel_builder *ckb, const ndt::typ
     throw runtime_error(ss.str());
   }
 
-  const ndt::type *src_fields_tp_orig = src_sd->get_field_types_raw();
+  const std::vector<ndt::type> &src_fields_tp_orig = src_sd->get_field_types();
   const std::vector<uintptr_t> &src_arrmeta_offsets_orig = src_sd->get_arrmeta_offsets();
   const uintptr_t *src_data_offsets_orig = src_sd->get_data_offsets(src_arrmeta);
   vector<ndt::type> src_fields_tp(field_count);
@@ -75,7 +75,7 @@ void dynd::make_struct_assignment_kernel(nd::kernel_builder *ckb, const ndt::typ
   }
 
   make_tuple_unary_op_ckernel(nd::copy::get().get(), nd::copy::get().get_type(), ckb, field_count,
-                              dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types_raw(),
+                              dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types().data(),
                               dst_fields_arrmeta.get(), src_data_offsets.get(), &src_fields_tp[0],
                               src_fields_arrmeta.get(), kernreq);
 }

@@ -133,8 +133,8 @@ void dynd::make_tuple_identical_assignment_kernel(nd::kernel_builder *ckb, const
   }
 
   make_tuple_unary_op_ckernel(nd::copy::get().get(), nd::copy::get().get_type(), ckb, field_count,
-                              sd->get_data_offsets(dst_arrmeta), sd->get_field_types_raw(), dst_fields_arrmeta.get(),
-                              sd->get_data_offsets(src_arrmeta), sd->get_field_types_raw(), src_fields_arrmeta.get(),
+                              sd->get_data_offsets(dst_arrmeta), sd->get_field_types().data(), dst_fields_arrmeta.get(),
+                              sd->get_data_offsets(src_arrmeta), sd->get_field_types().data(), src_fields_arrmeta.get(),
                               kernreq);
 }
 
@@ -181,9 +181,9 @@ void dynd::make_tuple_assignment_kernel(nd::kernel_builder *ckb, const ndt::type
   }
 
   make_tuple_unary_op_ckernel(nd::copy::get().get(), nd::copy::get().get_type(), ckb, field_count,
-                              dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types_raw(),
+                              dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types().data(),
                               dst_fields_arrmeta.get(), src_sd->get_data_offsets(src_arrmeta),
-                              src_sd->get_field_types_raw(), src_fields_arrmeta.get(), kernreq);
+                              src_sd->get_field_types().data(), src_fields_arrmeta.get(), kernreq);
 }
 
 /////////////////////////////////////////
@@ -216,7 +216,7 @@ void dynd::make_broadcast_to_tuple_assignment_kernel(nd::kernel_builder *ckb, co
   vector<uintptr_t> src_data_offsets(field_count, 0);
 
   make_tuple_unary_op_ckernel(nd::copy::get().get(), nd::copy::get().get_type(), ckb, field_count,
-                              dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types_raw(),
+                              dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types().data(),
                               dst_fields_arrmeta.get(), &src_data_offsets[0], &src_fields_tp[0], &src_fields_arrmeta[0],
                               kernreq);
 }
