@@ -12,6 +12,10 @@
 
 namespace dynd {
 
+struct fixed_size_pod_memory_block : memory_block_data {
+  fixed_size_pod_memory_block(long use_count) : memory_block_data(use_count, fixed_size_pod_memory_block_type) {}
+};
+
 /**
  * Creates a memory block of a pre-determined fixed size. A pointer to the
  * memory allocated for data is placed in the output parameter.
