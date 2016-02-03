@@ -16,7 +16,6 @@
 #include <dynd/kernels/struct_assignment_kernels.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/option_assignment_kernels.hpp>
-#include <dynd/kernels/pointer_assignment_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/types/type_id.hpp>
 #include <dynd/types/datetime_type.hpp>
@@ -2993,17 +2992,11 @@ namespace nd {
       {
         if (dst_tp == src_tp[0]) {
           make_pod_typed_data_assignment_kernel(ckb, dst_tp.get_data_size(), dst_tp.get_data_alignment(), kernreq);
-          return;
         }
         else {
-          ndt::type dst_target_tp = dst_tp.extended<ndt::pointer_type>()->get_target_type();
-          if (dst_target_tp == src_tp[0]) {
-            make_value_to_pointer_assignment_kernel(ckb, dst_target_tp, kernreq);
-            return;
-          }
+          make_expression_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
+                                            &eval::default_eval_context);
         }
-        make_expression_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                          &eval::default_eval_context);
       }
     };
 

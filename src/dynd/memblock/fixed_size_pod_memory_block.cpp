@@ -13,10 +13,7 @@ using namespace dynd;
 namespace dynd {
 namespace detail {
 
-  void free_fixed_size_pod_memory_block(memory_block_data *memblock)
-  {
-    delete[] reinterpret_cast<char *>(memblock);
-  }
+  void free_fixed_size_pod_memory_block(memory_block_data *memblock) { delete[] reinterpret_cast<char *>(memblock); }
 }
 } // namespace dynd::detail
 
@@ -34,7 +31,7 @@ intrusive_ptr<memory_block_data> dynd::make_fixed_size_pod_memory_block(intptr_t
   // Give back the data pointer
   *out_datapointer = result + start;
   // Use placement new to initialize and return the memory block
-  return intrusive_ptr<memory_block_data>(new (result) memory_block_data(1, fixed_size_pod_memory_block_type), false);
+  return intrusive_ptr<memory_block_data>(new (result) fixed_size_pod_memory_block(1), false);
 }
 
 void dynd::fixed_size_pod_memory_block_debug_print(const memory_block_data *DYND_UNUSED(memblock),

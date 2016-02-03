@@ -182,52 +182,9 @@ void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostr
       break;
     }
     o << indent << "------" << endl;
-  } else {
+  }
+  else {
     o << indent << "------ NULL memory block" << endl;
-  }
-}
-
-memory_block_data::api *dynd::get_memory_block_pod_allocator_api(memory_block_data *memblock)
-{
-  switch (memblock->m_type) {
-  case external_memory_block_type:
-    throw runtime_error("Cannot get a POD allocator API from an external_memory_block");
-  case fixed_size_pod_memory_block_type:
-    throw runtime_error("Cannot get a POD allocator API from an fixed_size_pod_memory_block");
-  case pod_memory_block_type:
-    return &dynd::detail::pod_memory_block_allocator_api;
-  case zeroinit_memory_block_type:
-    return &dynd::detail::zeroinit_memory_block_allocator_api;
-  case objectarray_memory_block_type:
-    throw runtime_error("Cannot get a POD allocator API from an objectarray_memory_block");
-  case executable_memory_block_type:
-    throw runtime_error("Cannot get a POD allocator API from an executable_memory_block");
-  case memmap_memory_block_type:
-    throw runtime_error("Cannot get a POD allocator API from a memmap_memory_block");
-  default:
-    throw runtime_error("unknown memory block type");
-  }
-}
-
-memory_block_data::api *dynd::get_memory_block_objectarray_allocator_api(memory_block_data *memblock)
-{
-  switch (memblock->m_type) {
-  case external_memory_block_type:
-    throw runtime_error("Cannot get an objectarray allocator API from an external_memory_block");
-  case fixed_size_pod_memory_block_type:
-    throw runtime_error("Cannot get an objectarray allocator API from an fixed_size_pod_memory_block");
-  case pod_memory_block_type:
-    throw runtime_error("Cannot get an objectarray allocator API from a pod_memory_block");
-  case zeroinit_memory_block_type:
-    throw runtime_error("Cannot get an objectarray allocator API from a zeroinit_memory_block");
-  case objectarray_memory_block_type:
-    return &dynd::detail::objectarray_memory_block_allocator_api;
-  case executable_memory_block_type:
-    throw runtime_error("Cannot get an objectarray allocator API from an executable_memory_block");
-  case memmap_memory_block_type:
-    throw runtime_error("Cannot get an objectarray allocator API from a memmap_memory_block");
-  default:
-    throw runtime_error("unknown memory block type");
   }
 }
 

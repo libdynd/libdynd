@@ -65,6 +65,8 @@ struct DYND_API memory_block_data {
     // std::cout << "memblock " << (void *)this << " cre: " << this->m_use_count << std::endl;
   }
 
+  //  virtual ~memory_block_data() {}
+
   /**
    * Allocates the requested amount of memory from the memory_block, returning
    * a pointer.
@@ -98,18 +100,6 @@ struct DYND_API memory_block_data {
 private:
   api *get_api();
 };
-
-/**
- * Returns a pointer to a static POD memory allocator API,
- * for the type of the memory block.
- */
-DYND_API memory_block_data::api *get_memory_block_pod_allocator_api(memory_block_data *memblock);
-
-/**
- * Returns a pointer to a static objectarray memory allocator API,
- * for the type of the memory block.
- */
-DYND_API memory_block_data::api *get_memory_block_objectarray_allocator_api(memory_block_data *memblock);
 
 namespace detail {
   /**

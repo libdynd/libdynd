@@ -321,7 +321,6 @@ set(libdynd_SRC
     src/dynd/kernels/kernel_builder.cpp
     src/dynd/kernels/multidispatch_kernel.cpp
     src/dynd/kernels/option_assignment_kernels.cpp
-    src/dynd/kernels/pointer_assignment_kernels.cpp
     src/dynd/kernels/rolling_kernel.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/take_kernel.cpp
@@ -350,7 +349,6 @@ set(libdynd_SRC
     include/dynd/kernels/multidispatch_kernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
     include/dynd/kernels/outer.hpp
-    include/dynd/kernels/pointer_assignment_kernels.hpp
     include/dynd/kernels/reduction_kernel.hpp
     include/dynd/kernels/rolling_kernel.hpp
     include/dynd/kernels/sort_kernel.hpp
