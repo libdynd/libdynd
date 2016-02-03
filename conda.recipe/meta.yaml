@@ -1,6 +1,6 @@
 package:
   name: libdynd
-  version: 0.7.0
+  version: 0.7.1
 
 build:
   number: {{environ.get('TRAVIS_BUILD_NUMBER', 0)}}    # [unix]

@@ -5,6 +5,30 @@ DyND is a C++ library for array programming with a dynamic
 type system. It is currently in a preview state, and nothing
 about the API or the ABI is guaranteed to stay the same.
 
+Version 0.7.1
+-------------
+
+Commits by author since last release:
+
+  2409  Irwin Zaid
+   250  Mark Wiebe
+   194  Ian Henriksen
+    35  Phillip Cloud
+    17  Michael Droettboom
+    11  Stefan Krah
+     1  Jeff Reback
+     1  Stephan Hoyer
+     1  Brandon Burton
+
+- An extensive refactoring of DyND has occurred since the last release. At a very high-level,
+this consisted of making it easy to define and call nd::callable, dramatically simplifying
+how to write kernels, and the removal of unneeded types and features.
+- Change the supported C++ compiler to C++14 and later, in part because of expression SFINAE.
+- Moved to using a .dll on Windows
+- Irwin Zaid has taken the development lead position pushing forward on all fronts towards a 1.0 goal,
+while Mark Wiebe remains active providing design guidance and some code.
+- Ian Henriksen joined the developer team, initially as a GSoC student with support from NumFOCUS.
+
 Version 0.6.6
 -------------
 
