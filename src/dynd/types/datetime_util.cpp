@@ -17,7 +17,8 @@ std::string datetime_struct::to_str() const
 {
   if (is_valid()) {
     return ymd.to_str() + "T" + hmst.to_str();
-  } else {
+  }
+  else {
     return std::string();
   }
 }
@@ -39,6 +40,6 @@ const ndt::type &datetime_struct::type()
   static ndt::type tp = ndt::struct_type::make(
       {"year", "month", "day", "hour", "minute", "second", "tick"},
       {ndt::make_type<int16_t>(), ndt::make_type<int8_t>(), ndt::make_type<int8_t>(), ndt::make_type<int8_t>(),
-       ndt::make_type<int8_t>(),  ndt::make_type<int8_t>(), ndt::make_type<int32_t>()});
+       ndt::make_type<int8_t>(), ndt::make_type<int8_t>(), ndt::make_type<int32_t>()});
   return tp;
 }

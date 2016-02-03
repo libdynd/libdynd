@@ -21,20 +21,20 @@ namespace dynd {
  */
 DYND_API ndt::type type_from_datashape(const char *datashape_begin, const char *datashape_end);
 
-inline ndt::type type_from_datashape(const std::string& datashape)
+inline ndt::type type_from_datashape(const std::string &datashape)
 {
-    return type_from_datashape(datashape.data(), datashape.data() + datashape.size());
+  return type_from_datashape(datashape.data(), datashape.data() + datashape.size());
 }
 
 inline ndt::type type_from_datashape(const char *datashape)
 {
-    return type_from_datashape(datashape, datashape + strlen(datashape));
+  return type_from_datashape(datashape, datashape + strlen(datashape));
 }
 
-template<int N>
-inline ndt::type type_from_datashape(const char (&datashape)[N])
+template <int N>
+inline ndt::type type_from_datashape(const char(&datashape)[N])
 {
-    return type_from_datashape(datashape, datashape + N - 1);
+  return type_from_datashape(datashape, datashape + N - 1);
 }
 
 /**
@@ -43,7 +43,8 @@ inline ndt::type type_from_datashape(const char (&datashape)[N])
  * Returns a NULL nd::array if there is no arg list, and an nd::array with datashape
  *   "{pos: N * arg, kw: {name: arg, ...}}" otherwise.
  */
-DYND_API nd::array parse_type_constr_args(const char *&rbegin, const char *end, std::map<std::string, ndt::type> &symtable);
+DYND_API nd::array parse_type_constr_args(const char *&rbegin, const char *end,
+                                          std::map<std::string, ndt::type> &symtable);
 
 DYND_API nd::array parse_type_constr_args(const std::string &str);
 

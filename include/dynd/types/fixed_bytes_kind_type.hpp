@@ -19,8 +19,7 @@ namespace ndt {
 
     size_t get_default_data_size() const;
 
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;
 
@@ -30,8 +29,7 @@ namespace ndt {
 
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
-    void get_bytes_range(const char **out_begin, const char **out_end,
-                         const char *arrmeta, const char *data) const;
+    void get_bytes_range(const char **out_begin, const char **out_end, const char *arrmeta, const char *data) const;
 
     bool operator==(const base_type &rhs) const;
 
@@ -41,15 +39,12 @@ namespace ndt {
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                             const std::string &indent) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
     void data_destruct(const char *arrmeta, char *data) const;
-    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride,
-                               size_t count) const;
+    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
 
-    bool match(const char *arrmeta, const type &candidate_tp,
-               const char *candidate_arrmeta,
+    bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;
 
     static type make() { return type(new fixed_bytes_kind_type(), false); }

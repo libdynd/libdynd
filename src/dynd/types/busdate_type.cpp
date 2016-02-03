@@ -14,10 +14,8 @@
 using namespace std;
 using namespace dynd;
 
-ndt::busdate_type::busdate_type(busdate_roll_t roll, const bool *weekmask,
-                                const nd::array &holidays)
-    : base_type(busdate_id, datetime_kind, 4, 4, type_flag_none, 0, 0, 0),
-      m_roll(roll)
+ndt::busdate_type::busdate_type(busdate_roll_t roll, const bool *weekmask, const nd::array &holidays)
+    : base_type(busdate_id, datetime_kind, 4, 4, type_flag_none, 0, 0, 0), m_roll(roll)
 {
   memcpy(m_workweek, weekmask, sizeof(m_workweek));
   m_busdays_in_weekmask = 0;
@@ -31,9 +29,7 @@ ndt::busdate_type::busdate_type(busdate_roll_t roll, const bool *weekmask,
   }
 }
 
-ndt::busdate_type::~busdate_type()
-{
-}
+ndt::busdate_type::~busdate_type() {}
 
 void ndt::busdate_type::print_workweek(std::ostream &o) const
 {
@@ -58,26 +54,25 @@ void ndt::busdate_type::print_holidays(std::ostream & /*o*/) const
   throw std::runtime_error("busdate_type::print_holidays to be implemented");
 }
 
-void ndt::busdate_type::print_data(std::ostream &o,
-                                   const char *DYND_UNUSED(arrmeta),
-                                   const char *data) const
+void ndt::busdate_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
   date_ymd ymd;
   ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
   std::string s = ymd.to_str();
   if (s.empty()) {
     o << "NA";
-  } else {
+  }
+  else {
     o << s;
   }
 }
 
 void ndt::busdate_type::print_type(std::ostream &o) const
 {
-  if (m_roll == busdate_roll_following && is_default_workweek() &&
-      m_holidays.is_null()) {
+  if (m_roll == busdate_roll_following && is_default_workweek() && m_holidays.is_null()) {
     o << "busdate";
-  } else {
+  }
+  else {
     bool comma = false;
     o << "date<";
     if (m_roll != busdate_roll_following) {
@@ -102,23 +97,24 @@ void ndt::busdate_type::print_type(std::ostream &o) const
   }
 }
 
-bool ndt::busdate_type::is_lossless_assignment(const type &dst_tp,
-                                               const type &src_tp) const
+bool ndt::busdate_type::is_lossless_assignment(const type &dst_tp, const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    } else if (src_tp.get_id() == date_id) {
-      const busdate_type *src_fs =
-          static_cast<const busdate_type *>(src_tp.extended());
+    }
+    else if (src_tp.get_id() == date_id) {
+      const busdate_type *src_fs = static_cast<const busdate_type *>(src_tp.extended());
       // No need to compare the roll policy, just the weekmask and holidays
       // determine this
       return memcmp(m_workweek, src_fs->m_workweek, sizeof(m_workweek)) == 0 &&
              m_holidays.equals_exact(src_fs->m_holidays);
-    } else {
+    }
+    else {
       return false;
     }
-  } else {
+  }
+  else {
     return false;
   }
 }
@@ -127,12 +123,13 @@ bool ndt::busdate_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_id() != busdate_id) {
+  }
+  else if (rhs.get_id() != busdate_id) {
     return false;
-  } else {
+  }
+  else {
     const busdate_type *dt = static_cast<const busdate_type *>(&rhs);
-    return m_roll == dt->m_roll &&
-           memcmp(m_workweek, dt->m_workweek, sizeof(m_workweek)) == 0 &&
+    return m_roll == dt->m_roll && memcmp(m_workweek, dt->m_workweek, sizeof(m_workweek)) == 0 &&
            m_holidays.equals_exact(dt->m_holidays);
   }
 }

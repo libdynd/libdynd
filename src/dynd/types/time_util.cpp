@@ -17,9 +17,10 @@ using namespace dynd;
 int64_t time_hmst::to_ticks(int hour, int minute, int second, int tick)
 {
   if (is_valid(hour, minute, second, tick)) {
-    return static_cast<int64_t>(tick) + second * DYND_TICKS_PER_SECOND +
-           minute * DYND_TICKS_PER_MINUTE + hour * DYND_TICKS_PER_HOUR;
-  } else {
+    return static_cast<int64_t>(tick) + second * DYND_TICKS_PER_SECOND + minute * DYND_TICKS_PER_MINUTE +
+           hour * DYND_TICKS_PER_HOUR;
+  }
+  else {
     return DYND_TIME_NA;
   }
 }
@@ -48,10 +49,12 @@ std::string time_hmst::to_str(int hour, int minute, int second, int tick)
           ++i;
         }
         s.resize(i);
-      } else {
+      }
+      else {
         s.resize(8);
       }
-    } else {
+    }
+    else {
       s.resize(5);
     }
   }
@@ -67,13 +70,13 @@ void time_hmst::set_from_ticks(int64_t ticks)
     ticks = ticks / 60;
     minute = static_cast<int8_t>(ticks % 60);
     hour = static_cast<int8_t>(ticks / 60);
-  } else {
+  }
+  else {
     set_to_na();
   }
 }
 
-void time_hmst::set_from_str(const char *begin, const char *end,
-                             const char *&out_tz_begin, const char *&out_tz_end)
+void time_hmst::set_from_str(const char *begin, const char *end, const char *&out_tz_begin, const char *&out_tz_end)
 {
   if (!string_to_time(begin, end, *this, out_tz_begin, out_tz_end)) {
     stringstream ss;
@@ -115,7 +118,6 @@ const ndt::type &time_hmst::type()
 {
   static ndt::type tp = ndt::struct_type::make(
       {"hour", "minute", "second", "tick"},
-      {ndt::make_type<int8_t>(), ndt::make_type<int8_t>(),
-       ndt::make_type<int8_t>(), ndt::make_type<int32_t>()});
+      {ndt::make_type<int8_t>(), ndt::make_type<int8_t>(), ndt::make_type<int8_t>(), ndt::make_type<int32_t>()});
   return tp;
 }

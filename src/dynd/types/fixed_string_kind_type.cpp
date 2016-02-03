@@ -16,9 +16,7 @@ ndt::fixed_string_kind_type::fixed_string_kind_type()
 {
 }
 
-ndt::fixed_string_kind_type::~fixed_string_kind_type()
-{
-}
+ndt::fixed_string_kind_type::~fixed_string_kind_type() {}
 
 size_t ndt::fixed_string_kind_type::get_default_data_size() const
 {
@@ -33,25 +31,13 @@ void ndt::fixed_string_kind_type::print_data(std::ostream &DYND_UNUSED(o), const
   throw type_error("Cannot store data of symbolic fixed_string_kind type");
 }
 
-void ndt::fixed_string_kind_type::print_type(std::ostream &o) const
-{
-  o << "FixedString";
-}
+void ndt::fixed_string_kind_type::print_type(std::ostream &o) const { o << "FixedString"; }
 
-bool ndt::fixed_string_kind_type::is_expression() const
-{
-  return false;
-}
+bool ndt::fixed_string_kind_type::is_expression() const { return false; }
 
-bool ndt::fixed_string_kind_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
-{
-  return false;
-}
+bool ndt::fixed_string_kind_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const { return false; }
 
-ndt::type ndt::fixed_string_kind_type::get_canonical_type() const
-{
-  return type(this, true);
-}
+ndt::type ndt::fixed_string_kind_type::get_canonical_type() const { return type(this, true); }
 
 bool ndt::fixed_string_kind_type::is_lossless_assignment(const type &DYND_UNUSED(dst_tp),
                                                          const type &DYND_UNUSED(src_tp)) const
@@ -79,7 +65,8 @@ bool ndt::fixed_string_kind_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else {
+  }
+  else {
     return rhs.get_kind() == kind_kind && rhs.get_id() == fixed_string_id;
   }
 }
@@ -92,26 +79,20 @@ void ndt::fixed_string_kind_type::arrmeta_default_construct(char *DYND_UNUSED(ar
   throw runtime_error(ss.str());
 }
 
-void ndt::fixed_string_kind_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta),
-                                                         const char *DYND_UNUSED(src_arrmeta),
-                                                         const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
+void ndt::fixed_string_kind_type::arrmeta_copy_construct(
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   stringstream ss;
   ss << "Cannot copy construct arrmeta for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void ndt::fixed_string_kind_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
-{
-}
+void ndt::fixed_string_kind_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const {}
 
-void ndt::fixed_string_kind_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
-{
-}
+void ndt::fixed_string_kind_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const {}
 
-void ndt::fixed_string_kind_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
-{
-}
+void ndt::fixed_string_kind_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
 
 void ndt::fixed_string_kind_type::arrmeta_debug_print(const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
                                                       const std::string &DYND_UNUSED(indent)) const

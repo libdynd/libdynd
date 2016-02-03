@@ -11,8 +11,8 @@ using namespace dynd;
 #ifdef DYND_CUDA
 
 cuda_host_type::cuda_host_type(const ndt::type &element_tp, unsigned int cuda_host_flags)
-    : base_memory_type(cuda_host_id, element_tp, element_tp.get_data_size(),
-                       get_cuda_device_data_alignment(element_tp), 0, element_tp.get_flags()),
+    : base_memory_type(cuda_host_id, element_tp, element_tp.get_data_size(), get_cuda_device_data_alignment(element_tp),
+                       0, element_tp.get_flags()),
       m_cuda_host_flags(cuda_host_flags)
 {
 }

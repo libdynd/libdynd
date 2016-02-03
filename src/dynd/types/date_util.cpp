@@ -14,13 +14,11 @@ using namespace std;
 using namespace dynd;
 
 const int date_ymd::month_lengths[2][12] = {
-    {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
-    {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
+    {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}, {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
 };
 
-const int date_ymd::month_starts[2][13] = {
-    {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365},
-    {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366}};
+const int date_ymd::month_starts[2][13] = {{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365},
+                                           {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366}};
 
 std::ostream &dynd::operator<<(std::ostream &o, date_parse_order_t date_order)
 {
@@ -45,17 +43,17 @@ int32_t date_ymd::to_days(int year, int month, int day)
     int result = (year - 1970) * 365;
     // Use the inclusion-exclusion principle to count leap years
     if (result >= 0) {
-      result += ((year - (1968 + 1)) / 4) - ((year - (1900 + 1)) / 100) +
-                ((year - (1600 + 1)) / 400);
-    } else {
-      result +=
-          ((year - 1972) / 4) - ((year - 2000) / 100) + ((year - 2000) / 400);
+      result += ((year - (1968 + 1)) / 4) - ((year - (1900 + 1)) / 100) + ((year - (1600 + 1)) / 400);
+    }
+    else {
+      result += ((year - 1972) / 4) - ((year - 2000) / 100) + ((year - 2000) / 400);
     }
     // Add in the months and days
     result += month_starts[is_leap_year(year)][month - 1];
     result += day - 1;
     return result;
-  } else {
+  }
+  else {
     return DYND_DATE_NA;
   }
 }
@@ -77,12 +75,14 @@ std::string date_ymd::to_str(int year, int month, int day)
       s[7] = '-';
       s[8] = '0' + (day / 10);
       s[9] = '0' + (day % 10);
-    } else {
+    }
+    else {
       // Expanded ISO 8601 date, using +/- 6 digit year
       s.resize(13);
       if (year >= 0) {
         s[0] = '+';
-      } else {
+      }
+      else {
         s[0] = '-';
         year = -year;
       }
@@ -113,9 +113,9 @@ void date_ymd::set_from_days(int32_t days)
     if (days >= 0) {
       yearcalc = 400 * (days / (400 * 365 + 100 - 4 + 1));
       days = days % (400 * 365 + 100 - 4 + 1);
-    } else {
-      yearcalc =
-          400 * ((days - (400 * 365 + 100 - 4)) / (400 * 365 + 100 - 4 + 1));
+    }
+    else {
+      yearcalc = 400 * ((days - (400 * 365 + 100 - 4)) / (400 * 365 + 100 - 4 + 1));
       days = days % (400 * 365 + 100 - 4 + 1);
       if (days < 0) {
         days += (400 * 365 + 100 - 4 + 1);
@@ -138,23 +138,21 @@ void date_ymd::set_from_days(int32_t days)
     }
     // Search for the month
     const int *monthstart = month_starts[is_leap_year(yearcalc)];
-    const int *monthfound =
-        std::upper_bound(monthstart + 1, monthstart + 13, days);
+    const int *monthfound = std::upper_bound(monthstart + 1, monthstart + 13, days);
     // Set the ymd
     year = yearcalc;
     month = static_cast<int8_t>(monthfound - monthstart);
     day = days - *(monthfound - 1) + 1;
-  } else {
+  }
+  else {
     year = 0;
     month = -128;
     day = 0;
   }
 }
 
-void date_ymd::set_from_str(const char *begin, const char *end,
-                            date_parse_order_t ambig = date_parse_no_ambig,
-                            int century_window = 70,
-                            assign_error_mode errmode = assign_error_fractional)
+void date_ymd::set_from_str(const char *begin, const char *end, date_parse_order_t ambig = date_parse_no_ambig,
+                            int century_window = 70, assign_error_mode errmode = assign_error_fractional)
 {
   if (!string_to_date(begin, end, *this, ambig, century_window, errmode)) {
     stringstream ss;
@@ -172,7 +170,8 @@ int date_ymd::resolve_2digit_year_fixed_window(int year, int year_start)
 
   if (year >= year_start_in_century) {
     return century_start + year;
-  } else {
+  }
+  else {
     return century_start + 100 + year;
   }
 }
@@ -190,9 +189,9 @@ int date_ymd::resolve_2digit_year_sliding_window(int year, int years_ago)
 #endif
   if (rawtime >= 0) {
     current_date_days = static_cast<int32_t>(rawtime / DYND_SECONDS_PER_DAY);
-  } else {
-    current_date_days = static_cast<int32_t>(
-        (rawtime - (DYND_SECONDS_PER_DAY - 1)) / DYND_SECONDS_PER_DAY);
+  }
+  else {
+    current_date_days = static_cast<int32_t>((rawtime - (DYND_SECONDS_PER_DAY - 1)) / DYND_SECONDS_PER_DAY);
   }
   date_ymd current_date;
   current_date.set_from_days(current_date_days);
@@ -205,9 +204,11 @@ int date_ymd::resolve_2digit_year(int year, int century_window)
 {
   if (century_window >= 1 && century_window <= 99) {
     return date_ymd::resolve_2digit_year_sliding_window(year, century_window);
-  } else if (century_window >= 1000) {
+  }
+  else if (century_window >= 1000) {
     return date_ymd::resolve_2digit_year_fixed_window(year, century_window);
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "invalid century_window value " << century_window
        << ", must be 1-99 for a sliding window, or >= 1000 for a fixed "
@@ -243,9 +244,8 @@ date_ymd date_ymd::get_current_local_date()
 
 const ndt::type &date_ymd::type()
 {
-  static ndt::type tp = ndt::struct_type::make({"year", "month", "day"},
-                                               std::vector<ndt::type>{ndt::make_type<int16_t>(),
-                                                                      ndt::make_type<int8_t>(),
-                                                                      ndt::make_type<int8_t>()});
+  static ndt::type tp = ndt::struct_type::make(
+      {"year", "month", "day"},
+      std::vector<ndt::type>{ndt::make_type<int16_t>(), ndt::make_type<int8_t>(), ndt::make_type<int8_t>()});
   return tp;
 }
