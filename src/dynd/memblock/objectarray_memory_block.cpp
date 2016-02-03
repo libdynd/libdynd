@@ -13,70 +13,9 @@
 using namespace std;
 using namespace dynd;
 
-namespace {
-struct memory_chunk {
-  char *memory;
-  size_t used_count, capacity_count;
-};
-
-struct objectarray_memory_block {
-  /** Every memory block object needs this at the front */
-  memory_block_data m_mbd;
-  ndt::type m_dt;
-  size_t arrmeta_size;
-  const char *m_arrmeta;
-  intptr_t m_stride;
-  size_t m_total_allocated_count;
-  bool m_finalized;
-  /** The malloc'd memory */
-  vector<memory_chunk> m_memory_handles;
-
-  /**
-   * Allocates some new memory from which to dole out
-   * more. Adds it to the memory handles vector.
-   */
-  void append_memory(intptr_t count)
-  {
-    m_memory_handles.push_back(memory_chunk());
-    memory_chunk &mc = m_memory_handles.back();
-    mc.used_count = 0;
-    mc.capacity_count = count;
-    char *memory = reinterpret_cast<char *>(malloc(m_stride * count));
-    mc.memory = memory;
-    if (memory == NULL) {
-      m_memory_handles.pop_back();
-      throw bad_alloc();
-    }
-    m_total_allocated_count += count;
-  }
-
-  objectarray_memory_block(const ndt::type &dt, size_t arrmeta_size, const char *arrmeta, intptr_t stride,
-                           intptr_t initial_count)
-      : m_mbd(1, objectarray_memory_block_type), m_dt(dt), arrmeta_size(arrmeta_size), m_arrmeta(arrmeta),
-        m_stride(stride), m_total_allocated_count(0), m_finalized(false), m_memory_handles()
-  {
-    if ((dt.get_flags() & type_flag_destructor) == 0) {
-      stringstream ss;
-      ss << "Cannot create objectarray memory block with dynd type " << dt;
-      ss << " because it does not have a destructor, use a POD memory block instead";
-      throw runtime_error(ss.str());
-    }
-    append_memory(initial_count);
-  }
-
-  ~objectarray_memory_block()
-  {
-    for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
-      memory_chunk &mc = m_memory_handles[i];
-      m_dt.extended()->data_destruct_strided(m_arrmeta + arrmeta_size, mc.memory, m_stride, mc.used_count);
-      free(mc.memory);
-    }
-  }
-};
-} // anonymous namespace
-
-intrusive_ptr<memory_block_data> dynd::make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta, intptr_t stride,
-                                                  intptr_t initial_count, size_t arrmeta_size)
+intrusive_ptr<memory_block_data> dynd::make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta,
+                                                                     intptr_t stride, intptr_t initial_count,
+                                                                     size_t arrmeta_size)
 {
   objectarray_memory_block *pmb = new objectarray_memory_block(dt, arrmeta_size, arrmeta, stride, initial_count);
   return intrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(pmb), false);
@@ -106,7 +45,8 @@ namespace detail {
     mc->used_count += count;
     if ((emb->m_dt.get_flags() & type_flag_zeroinit) != 0) {
       memset(result, 0, emb->m_stride * count);
-    } else {
+    }
+    else {
       // TODO: Add a default data constructor to base_type
       //       as well, with a flag for it
       stringstream ss;
@@ -143,11 +83,13 @@ namespace detail {
       mc = &emb->m_memory_handles.back();
       result = mc->memory;
       mc->used_count = count;
-    } else {
+    }
+    else {
       // Adjust the used count (this may mean to grow it or shrink it)
       if (count >= previous_count) {
         mc->used_count += (count - previous_count);
-      } else {
+      }
+      else {
         // Call the destructor on the elements no longer used
         emb->m_dt.extended()->data_destruct_strided(emb->m_arrmeta + emb->arrmeta_size,
                                                     previous_allocated + emb->m_stride * count, emb->m_stride,
@@ -162,7 +104,8 @@ namespace detail {
       if (new_count > 0) {
         memset(mc->memory + emb->m_stride * previous_count, 0, emb->m_stride * new_count);
       }
-    } else {
+    }
+    else {
       // TODO: Add a default data constructor to base_type
       //       as well, with a flag for it
       stringstream ss;
@@ -214,7 +157,8 @@ void dynd::objectarray_memory_block_debug_print(const memory_block_data *membloc
   o << " stride: " << emb->m_stride << "\n";
   if (!emb->m_finalized) {
     o << indent << " allocated count: " << emb->m_total_allocated_count << "\n";
-  } else {
+  }
+  else {
     o << indent << " finalized count: " << emb->m_total_allocated_count << "\n";
   }
 }

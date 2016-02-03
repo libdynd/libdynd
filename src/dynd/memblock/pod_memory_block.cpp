@@ -13,52 +13,6 @@
 using namespace std;
 using namespace dynd;
 
-namespace {
-struct pod_memory_block {
-  /** Every memory block object needs this at the front */
-  memory_block_data m_mbd;
-  size_t data_size;
-  intptr_t data_alignment;
-  intptr_t m_total_allocated_capacity;
-  /** The malloc'd memory */
-  vector<char *> m_memory_handles;
-  /** The current malloc'd memory being doled out */
-  char *m_memory_begin, *m_memory_current, *m_memory_end;
-
-  /**
-   * Allocates some new memory from which to dole out
-   * more. Adds it to the memory handles vector.
-   */
-  void append_memory(intptr_t capacity_bytes)
-  {
-    m_memory_handles.push_back(NULL);
-    m_memory_begin = reinterpret_cast<char *>(malloc(capacity_bytes));
-    m_memory_handles.back() = m_memory_begin;
-    if (m_memory_begin == NULL) {
-      m_memory_handles.pop_back();
-      throw bad_alloc();
-    }
-    m_memory_current = m_memory_begin;
-    m_memory_end = m_memory_current + capacity_bytes;
-    m_total_allocated_capacity += capacity_bytes;
-  }
-
-  pod_memory_block(size_t data_size, intptr_t data_alignment, intptr_t initial_capacity_bytes)
-      : m_mbd(1, pod_memory_block_type), data_size(data_size), data_alignment(data_alignment),
-        m_total_allocated_capacity(0), m_memory_handles()
-  {
-    append_memory(initial_capacity_bytes);
-  }
-
-  ~pod_memory_block()
-  {
-    for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
-      free(m_memory_handles[i]);
-    }
-  }
-};
-} // anonymous namespace
-
 intrusive_ptr<memory_block_data> dynd::make_pod_memory_block(const ndt::type &tp, intptr_t initial_capacity_bytes)
 {
   pod_memory_block *pmb =
@@ -119,7 +73,8 @@ namespace detail {
       // If it fits, just adjust the current allocation point
       emb->m_memory_current = end;
       *inout_end = end;
-    } else {
+    }
+    else {
       // If it doesn't fit, need to copy to newly malloc'd memory
       char *old_current = inout_begin, *old_end = *inout_end;
       // Allocate memory to double the amount used so far, or the requested size, whichever is larger
@@ -180,7 +135,8 @@ void dynd::pod_memory_block_debug_print(const memory_block_data *memblock, std::
   const pod_memory_block *emb = reinterpret_cast<const pod_memory_block *>(memblock);
   if (emb->m_memory_begin != NULL) {
     o << indent << " allocated: " << emb->m_total_allocated_capacity << "\n";
-  } else {
+  }
+  else {
     o << indent << " finalized: " << emb->m_total_allocated_capacity << "\n";
   }
 }

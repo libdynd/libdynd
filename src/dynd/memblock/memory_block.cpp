@@ -7,7 +7,6 @@
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/memblock/zeroinit_memory_block.hpp>
 #include <dynd/memblock/fixed_size_pod_memory_block.hpp>
-#include <dynd/memblock/executable_memory_block.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
 #include <dynd/memblock/external_memory_block.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
@@ -40,11 +39,7 @@ namespace detail {
    * This should only be called by the memory_block decref code.
    */
   void free_zeroinit_memory_block(memory_block_data *memblock);
-  /**
-   * INTERNAL: Frees a memory_block created by make_executable_memory_block.
-   * This should only be called by the memory_block decref code.
-   */
-  void free_executable_memory_block(memory_block_data *memblock);
+
   /**
    * INTERNAL: Frees a memory_block created by make_array_memory_block.
    * This should only be called by the memory_block decref code.
@@ -100,9 +95,6 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
     free_objectarray_memory_block(memblock);
     return;
   }
-  case executable_memory_block_type:
-    free_executable_memory_block(memblock);
-    return;
   case array_memory_block_type:
     free_array_memory_block(memblock);
     return;
@@ -133,9 +125,6 @@ std::ostream &dynd::operator<<(std::ostream &o, memory_block_type_t mbt)
     break;
   case objectarray_memory_block_type:
     o << "objectarray";
-    break;
-  case executable_memory_block_type:
-    o << "executable";
     break;
   case array_memory_block_type:
     o << "array";
@@ -170,9 +159,6 @@ void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostr
       break;
     case objectarray_memory_block_type:
       // objectarray_memory_block_debug_print(memblock, o, indent);
-      break;
-    case executable_memory_block_type:
-      executable_memory_block_debug_print(memblock, o, indent);
       break;
     case array_memory_block_type:
       array_memory_block_debug_print(memblock, o, indent);

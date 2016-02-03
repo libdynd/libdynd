@@ -10,22 +10,6 @@
 
 using namespace dynd;
 
-namespace {
-struct external_memory_block {
-  /** Every memory block object needs this at the front */
-  memory_block_data m_mbd;
-  /** A void pointer for the external object */
-  void *m_object;
-  /** A function which frees the external object */
-  external_memory_block_free_t m_free_fn;
-
-  external_memory_block(void *object, external_memory_block_free_t free_fn)
-      : m_mbd(1, external_memory_block_type), m_object(object), m_free_fn(free_fn)
-  {
-  }
-};
-} // anonymous namespace
-
 intrusive_ptr<memory_block_data> dynd::make_external_memory_block(void *object, external_memory_block_free_t free_fn)
 {
   external_memory_block *emb = new external_memory_block(object, free_fn);

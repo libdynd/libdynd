@@ -13,52 +13,6 @@
 using namespace std;
 using namespace dynd;
 
-namespace {
-struct zeroinit_memory_block {
-  /** Every memory block object needs this at the front */
-  memory_block_data m_mbd;
-  size_t data_size;
-  intptr_t data_alignment;
-  intptr_t m_total_allocated_capacity;
-  /** The malloc'd memory */
-  vector<char *> m_memory_handles;
-  /** The current malloc'd memory being doled out */
-  char *m_memory_begin, *m_memory_current, *m_memory_end;
-
-  /**
-   * Allocates some new memory from which to dole out
-   * more. Adds it to the memory handles vector.
-   */
-  void append_memory(intptr_t capacity_bytes)
-  {
-    m_memory_handles.push_back(NULL);
-    m_memory_begin = reinterpret_cast<char *>(malloc(capacity_bytes));
-    m_memory_handles.back() = m_memory_begin;
-    if (m_memory_begin == NULL) {
-      m_memory_handles.pop_back();
-      throw bad_alloc();
-    }
-    m_memory_current = m_memory_begin;
-    m_memory_end = m_memory_current + capacity_bytes;
-    m_total_allocated_capacity += capacity_bytes;
-  }
-
-  zeroinit_memory_block(size_t data_size, intptr_t data_alignment, intptr_t initial_capacity_bytes)
-      : m_mbd(1, zeroinit_memory_block_type), data_size(data_size), data_alignment(data_alignment),
-        m_total_allocated_capacity(0), m_memory_handles()
-  {
-    append_memory(initial_capacity_bytes);
-  }
-
-  ~zeroinit_memory_block()
-  {
-    for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
-      free(m_memory_handles[i]);
-    }
-  }
-};
-} // anonymous namespace
-
 intrusive_ptr<memory_block_data> dynd::make_zeroinit_memory_block(const ndt::type &element_tp, intptr_t initial_capacity_bytes)
 {
   // This is a temporary hack until the new bytes and string types are working
