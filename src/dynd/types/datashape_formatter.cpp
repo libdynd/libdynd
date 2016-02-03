@@ -27,7 +27,7 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &tp, const 
   }
   const ndt::struct_type *bsd = tp.extended<ndt::struct_type>();
   size_t field_count = bsd->get_field_count();
-  const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &arrmeta_offsets = bsd->get_arrmeta_offsets();
   const uintptr_t *data_offsets = NULL;
   if (data != NULL) {
     data_offsets = bsd->get_data_offsets(arrmeta);

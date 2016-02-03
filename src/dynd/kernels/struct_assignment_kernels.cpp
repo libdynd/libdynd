@@ -47,7 +47,7 @@ void dynd::make_struct_assignment_kernel(nd::kernel_builder *ckb, const ndt::typ
   }
 
   const ndt::type *src_fields_tp_orig = src_sd->get_field_types_raw();
-  const uintptr_t *src_arrmeta_offsets_orig = src_sd->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &src_arrmeta_offsets_orig = src_sd->get_arrmeta_offsets();
   const uintptr_t *src_data_offsets_orig = src_sd->get_data_offsets(src_arrmeta);
   vector<ndt::type> src_fields_tp(field_count);
   shortvector<uintptr_t> src_data_offsets(field_count);
@@ -68,7 +68,7 @@ void dynd::make_struct_assignment_kernel(nd::kernel_builder *ckb, const ndt::typ
     src_fields_arrmeta[i] = src_arrmeta + src_arrmeta_offsets_orig[src_i];
   }
 
-  const uintptr_t *dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets();
   shortvector<const char *> dst_fields_arrmeta(field_count);
   for (intptr_t i = 0; i != field_count; ++i) {
     dst_fields_arrmeta[i] = dst_arrmeta + dst_arrmeta_offsets[i];

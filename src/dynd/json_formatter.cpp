@@ -234,7 +234,7 @@ static void format_json_struct(output_data &out, const ndt::type &dt, const char
   const ndt::struct_type *bsd = dt.extended<ndt::struct_type>();
   intptr_t field_count = bsd->get_field_count();
   const size_t *data_offsets = bsd->get_data_offsets(arrmeta);
-  const size_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &arrmeta_offsets = bsd->get_arrmeta_offsets();
 
   if (out.struct_as_list) {
     out.write('[');

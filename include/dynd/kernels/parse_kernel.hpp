@@ -332,7 +332,7 @@ namespace nd {
       {
         intptr_t ckb_offset = ckb->m_size;
         size_t field_count = dst_tp.extended<ndt::struct_type>()->get_field_count();
-        const size_t *arrmeta_offsets = dst_tp.extended<ndt::struct_type>()->get_arrmeta_offsets_raw();
+        const std::vector<uintptr_t> &arrmeta_offsets = dst_tp.extended<ndt::struct_type>()->get_arrmeta_offsets();
 
         intptr_t self_offset = ckb_offset;
         ckb->emplace_back<parse_kernel>(kernreq, dst_tp, field_count,
