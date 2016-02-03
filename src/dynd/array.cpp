@@ -1093,8 +1093,7 @@ nd::array nd::reshape(const nd::array &a, const nd::array &shape)
   if (old_size != size) {
     stringstream ss;
     ss << "dynd reshape: cannot reshape to a different total number of "
-          "elements, from "
-       << old_size << " to " << size;
+          "elements, from " << old_size << " to " << size;
     throw invalid_argument(ss.str());
   }
 
@@ -1168,8 +1167,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
 
   array result(
       reinterpret_cast<array_preamble *>(make_array_memory_block(fsd->get_arrmeta_size(), fsd->get_default_data_size(),
-                                                                 fsd->get_data_alignment(), &data_ptr)
-                                             .get()),
+                                                                 fsd->get_data_alignment(), &data_ptr).get()),
       true);
   // Set the array properties
   result.get()->tp = result_type;
@@ -1185,7 +1183,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
   }
 
   // Copy all the needed arrmeta
-  const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &arrmeta_offsets = fsd->get_arrmeta_offsets();
   for (size_t i = 0; i != field_count; ++i) {
     pointer_type_arrmeta *pmeta;
     pmeta = reinterpret_cast<pointer_type_arrmeta *>(result.get()->metadata() + arrmeta_offsets[i]);

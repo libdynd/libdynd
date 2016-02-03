@@ -156,7 +156,7 @@ ndt::type ndt::struct_type::at_single(intptr_t i0, const char **inout_arrmeta, c
   if (inout_arrmeta) {
     char *arrmeta = const_cast<char *>(*inout_arrmeta);
     // Modify the arrmeta
-    *inout_arrmeta += get_arrmeta_offsets_raw()[i0];
+    *inout_arrmeta += m_arrmeta_offsets[i0];
     // If requested, modify the data
     if (inout_data) {
       *inout_data += get_arrmeta_data_offsets(arrmeta)[i0];
@@ -206,7 +206,6 @@ void ndt::struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
     }
   }
   o << "\n";
-  const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
   for (intptr_t i = 0; i < m_field_count; ++i) {
     const type &field_dt = get_field_type(i);
     if (!field_dt.is_builtin() && field_dt.extended()->get_arrmeta_size() > 0) {
@@ -214,7 +213,7 @@ void ndt::struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
       const string &fnr = get_field_name_raw(i);
       o.write(fnr.begin(), fnr.end() - fnr.begin());
       o << ") arrmeta:\n";
-      field_dt.extended()->arrmeta_debug_print(arrmeta + arrmeta_offsets[i], o, indent + "  ");
+      field_dt.extended()->arrmeta_debug_print(arrmeta + m_arrmeta_offsets[i], o, indent + "  ");
     }
   }
 }
@@ -275,7 +274,6 @@ intptr_t ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *i
   }
   else {
     const uintptr_t *offsets = get_data_offsets(arrmeta);
-    const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
     bool remove_dimension;
     intptr_t start_index, index_stride, dimension_size;
     apply_single_linear_index(*indices, m_field_count, current_i, &root_tp, remove_dimension, start_index, index_stride,
@@ -289,15 +287,15 @@ intptr_t ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *i
           // the data pointer, so that it's pointing at the right element
           // for the collapsing of leading dimensions to work correctly.
           *inout_data += offset;
-          offset = dt.extended()->apply_linear_index(nindices - 1, indices + 1, arrmeta + arrmeta_offsets[start_index],
-                                                     result_tp, out_arrmeta, embedded_reference, current_i + 1, root_tp,
-                                                     true, inout_data, inout_dataref);
+          offset = dt.extended()->apply_linear_index(
+              nindices - 1, indices + 1, arrmeta + m_arrmeta_offsets[start_index], result_tp, out_arrmeta,
+              embedded_reference, current_i + 1, root_tp, true, inout_data, inout_dataref);
         }
         else {
           intrusive_ptr<memory_block_data> tmp;
-          offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1, arrmeta + arrmeta_offsets[start_index],
-                                                      result_tp, out_arrmeta, embedded_reference, current_i + 1,
-                                                      root_tp, false, NULL, tmp);
+          offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
+                                                      arrmeta + m_arrmeta_offsets[start_index], result_tp, out_arrmeta,
+                                                      embedded_reference, current_i + 1, root_tp, false, NULL, tmp);
         }
       }
       return offset;
@@ -312,7 +310,7 @@ intptr_t ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *i
         const type &dt = result_e_dt->get_field_type(i);
         if (!dt.is_builtin()) {
           out_offsets[i] +=
-              dt.extended()->apply_linear_index(nindices - 1, indices + 1, arrmeta + arrmeta_offsets[idx], dt,
+              dt.extended()->apply_linear_index(nindices - 1, indices + 1, arrmeta + m_arrmeta_offsets[idx], dt,
                                                 out_arrmeta + result_e_dt->get_arrmeta_offset(i), embedded_reference,
                                                 current_i + 1, root_tp, false, NULL, tmp);
         }
@@ -329,10 +327,10 @@ std::map<std::string, nd::callable> ndt::struct_type::get_dynamic_type_propertie
       nd::callable::make<nd::get_then_copy_kernel<const std::vector<type> &, tuple_type, &tuple_type::get_field_types>>(
           ndt::callable_type::make(get_type(), ndt::tuple_type::make(),
                                    ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["metadata_offsets"] =
-      nd::callable::make<nd::get_then_copy_kernel<const nd::array &, tuple_type, &tuple_type::get_arrmeta_offsets>>(
-          ndt::callable_type::make(m_arrmeta_offsets.get_type(), ndt::tuple_type::make(),
-                                   ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
+  properties["metadata_offsets"] = nd::callable::make<
+      nd::get_then_copy_kernel<const std::vector<uintptr_t> &, tuple_type, &tuple_type::get_arrmeta_offsets>>(
+      ndt::callable_type::make(ndt::type_for(m_arrmeta_offsets), ndt::tuple_type::make(),
+                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
   properties["field_names"] =
       nd::callable::make<nd::get_then_copy_kernel<const nd::array &, struct_type, &struct_type::get_field_names>>(
           ndt::callable_type::make(m_field_names.get_type(), ndt::tuple_type::make(),
@@ -414,8 +412,7 @@ ndt::struct_type::struct_type(int, int) : tuple_type(struct_id, make_self_types(
 {
   // Equivalent to ndt::struct_type::make(ndt::make_ndarrayarg(), "self");
   // but hardcoded to break the dependency of struct_type::array_parameters_type
-  uintptr_t metaoff[1] = {0};
-  m_arrmeta_offsets = nd::array(metaoff);
+  m_arrmeta_offsets = {0};
   // The data offsets also consist of one zero
   //    m_data_offsets = m_arrmeta_offsets;
   // Inherit any operand flags from the fields

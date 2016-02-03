@@ -25,7 +25,7 @@ void nd::equal_kernel<tuple_id, tuple_id>::instantiate(char *DYND_UNUSED(static_
   ckb->emplace_back(field_count * sizeof(size_t));
 
   equal_kernel *self = ckb->get_at<equal_kernel>(self_offset);
-  const uintptr_t *arrmeta_offsets = src_tp[0].extended<ndt::tuple_type>()->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &arrmeta_offsets = src_tp[0].extended<ndt::tuple_type>()->get_arrmeta_offsets();
   for (size_t i = 0; i != field_count; ++i) {
     self = ckb->get_at<equal_kernel>(self_offset);
     const ndt::type &ft = src_tp[0].extended<ndt::tuple_type>()->get_field_type(i);
@@ -54,7 +54,7 @@ void nd::not_equal_kernel<tuple_id, tuple_id>::instantiate(
 
   not_equal_kernel *e = ckb->get_at<not_equal_kernel>(self_offset);
   size_t *field_kernel_offsets;
-  const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &arrmeta_offsets = bsd->get_arrmeta_offsets();
   for (size_t i = 0; i != field_count; ++i) {
     const ndt::type &ft = bsd->get_field_type(i);
     // Reserve space for the child, and save the offset to this

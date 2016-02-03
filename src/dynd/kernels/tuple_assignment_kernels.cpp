@@ -122,7 +122,7 @@ void dynd::make_tuple_identical_assignment_kernel(nd::kernel_builder *ckb, const
 
   auto sd = val_tup_tp.extended<ndt::tuple_type>();
   intptr_t field_count = sd->get_field_count();
-  const uintptr_t *arrmeta_offsets = sd->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &arrmeta_offsets = sd->get_arrmeta_offsets();
   shortvector<const char *> dst_fields_arrmeta(field_count);
   for (intptr_t i = 0; i != field_count; ++i) {
     dst_fields_arrmeta[i] = dst_arrmeta + arrmeta_offsets[i];
@@ -168,13 +168,13 @@ void dynd::make_tuple_assignment_kernel(nd::kernel_builder *ckb, const ndt::type
     throw type_error(ss.str());
   }
 
-  const uintptr_t *src_arrmeta_offsets = src_sd->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &src_arrmeta_offsets = src_sd->get_arrmeta_offsets();
   shortvector<const char *> src_fields_arrmeta(field_count);
   for (intptr_t i = 0; i != field_count; ++i) {
     src_fields_arrmeta[i] = src_arrmeta + src_arrmeta_offsets[i];
   }
 
-  const uintptr_t *dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets();
   shortvector<const char *> dst_fields_arrmeta(field_count);
   for (intptr_t i = 0; i != field_count; ++i) {
     dst_fields_arrmeta[i] = dst_arrmeta + dst_arrmeta_offsets[i];
@@ -206,7 +206,7 @@ void dynd::make_broadcast_to_tuple_assignment_kernel(nd::kernel_builder *ckb, co
   auto dst_sd = dst_tuple_tp.extended<ndt::tuple_type>();
   intptr_t field_count = dst_sd->get_field_count();
 
-  const uintptr_t *dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets();
   shortvector<const char *> dst_fields_arrmeta(field_count);
   for (intptr_t i = 0; i != field_count; ++i) {
     dst_fields_arrmeta[i] = dst_arrmeta + dst_arrmeta_offsets[i];

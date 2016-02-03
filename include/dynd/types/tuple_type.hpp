@@ -22,15 +22,14 @@ namespace ndt {
     intptr_t m_field_count;
 
     /**
-     * Immutable contiguous array of field types. Always has type "N * type".
+     * Immutable vector of field types. Always has type "N * type".
      */
     const std::vector<type> m_field_types;
 
     /**
-     * Immutable contiguous array of arrmeta offsets. Always has type "N *
-     * intptr".
+     * Immutable vector of arrmeta offsets. Always has type "N * uintptr".
      */
-    nd::array m_arrmeta_offsets;
+    std::vector<uintptr_t> m_arrmeta_offsets;
 
     /**
      * If true, the tuple is variadic, which means it is symbolic, and matches
@@ -63,18 +62,12 @@ namespace ndt {
     const std::vector<type> &get_field_types() const { return m_field_types; }
 
     const type *get_field_types_raw() const { return &m_field_types[0]; }
-    /** The array of the field arrmeta offsets */
-    const nd::array &get_arrmeta_offsets() const { return m_arrmeta_offsets; }
-    const uintptr_t *get_arrmeta_offsets_raw() const
-    {
-      return reinterpret_cast<const uintptr_t *>(m_arrmeta_offsets.cdata());
-    }
+    /** The field arrmeta offsets */
+    const std::vector<uintptr_t> &get_arrmeta_offsets() const { return m_arrmeta_offsets; }
+    const uintptr_t *get_arrmeta_offsets_raw() const { return m_arrmeta_offsets.data(); }
 
     const type &get_field_type(intptr_t i) const { return m_field_types[i]; }
-    const uintptr_t &get_arrmeta_offset(intptr_t i) const
-    {
-      return unchecked_fixed_dim_get<uintptr_t>(m_arrmeta_offsets, i);
-    }
+    uintptr_t get_arrmeta_offset(intptr_t i) const { return m_arrmeta_offsets[i]; }
 
     bool is_variadic() const { return m_variadic; }
 

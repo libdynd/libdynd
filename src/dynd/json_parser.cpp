@@ -56,8 +56,7 @@ static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref, const 
   default: {
     stringstream ss;
     ss << "Input for JSON parsing must be either bytes (interpreted as UTF-8) "
-          "or a string, not \""
-       << json_type << "\"";
+          "or a string, not \"" << json_type << "\"";
     throw runtime_error(ss.str());
     break;
   }
@@ -243,7 +242,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrme
   const ndt::struct_type *fsd = tp.extended<ndt::struct_type>();
   intptr_t field_count = fsd->get_field_count();
   const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
-  const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &arrmeta_offsets = fsd->get_arrmeta_offsets();
 
   // Keep track of which fields we've seen
   shortvector<bool> populated_fields(field_count);
@@ -319,7 +318,7 @@ static bool parse_tuple_json_from_list(const ndt::type &tp, const char *arrmeta,
   auto fsd = tp.extended<ndt::tuple_type>();
   intptr_t field_count = fsd->get_field_count();
   const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
-  const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
+  const std::vector<uintptr_t> &arrmeta_offsets = fsd->get_arrmeta_offsets();
 
   // Loop through all the fields
   for (intptr_t i = 0; i != field_count; ++i) {
