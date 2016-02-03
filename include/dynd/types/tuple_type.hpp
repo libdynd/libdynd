@@ -61,7 +61,7 @@ namespace ndt {
     /** The field types */
     const std::vector<type> &get_field_types() const { return m_field_types; }
 
-    const type *get_field_types_raw() const { return &m_field_types[0]; }
+    const type *get_field_types_raw() const { return m_field_types.data(); }
     /** The field arrmeta offsets */
     const std::vector<uintptr_t> &get_arrmeta_offsets() const { return m_arrmeta_offsets; }
     const uintptr_t *get_arrmeta_offsets_raw() const { return m_arrmeta_offsets.data(); }
