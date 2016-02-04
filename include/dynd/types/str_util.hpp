@@ -3,7 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-static inline bool is_simple_identifier_name(const std::string &s)
+namespace dynd {
+
+inline bool is_simple_identifier_name(const std::string &s)
 {
   if (s.empty()) {
     return false;
@@ -21,3 +23,5 @@ static inline bool is_simple_identifier_name(const std::string &s)
     return true;
   }
 }
+
+} // namespace dynd

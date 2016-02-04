@@ -47,15 +47,11 @@ ndt::struct_type::struct_type(const std::vector<std::string> &field_names, const
 
 ndt::struct_type::~struct_type() {}
 
-intptr_t ndt::struct_type::get_field_index(const char *field_name_begin, const char *field_name_end) const
+intptr_t ndt::struct_type::get_field_index(const std::string &name) const
 {
-  size_t size = field_name_end - field_name_begin;
-
-  for (intptr_t i = 0; i < m_field_count; ++i) {
-    const std::string &name = m_field_names[i];
-    if (name.compare(0, std::string::npos, field_name_begin, size) == 0) {
-      return i;
-    }
+  auto it = std::find(m_field_names.begin(), m_field_names.end(), name);
+  if (it != m_field_names.end()) {
+    return it - m_field_names.begin();
   }
 
   return -1;

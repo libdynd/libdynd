@@ -46,14 +46,10 @@ namespace ndt {
      *
      * \param field_name  The name of the field.
      *
-     * \returns  The field index, or -1 if there is not field
+     * \returns  The field index, or -1 if there is no field
      *           of the given name.
      */
-    inline intptr_t get_field_index(const std::string &field_name) const
-    {
-      return get_field_index(field_name.data(), field_name.data() + field_name.size());
-    }
-    intptr_t get_field_index(const char *field_name_begin, const char *field_name_end) const;
+    intptr_t get_field_index(const std::string &field_name) const;
 
     inline const uintptr_t *get_data_offsets(const char *arrmeta) const
     {

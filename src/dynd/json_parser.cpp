@@ -267,7 +267,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrme
         i = fsd->get_field_index(name);
       }
       else {
-        i = fsd->get_field_index(strbegin, strend);
+        i = fsd->get_field_index(std::string(strbegin, strend));
       }
       if (i == -1) {
         // TODO: Add an error policy to this parser of whether to throw an error
