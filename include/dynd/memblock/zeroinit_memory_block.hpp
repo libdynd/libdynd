@@ -13,6 +13,48 @@
 
 namespace dynd {
 
+struct zeroinit_memory_block : memory_block_data {
+  size_t data_size;
+  intptr_t data_alignment;
+  intptr_t m_total_allocated_capacity;
+  /** The malloc'd memory */
+  std::vector<char *> m_memory_handles;
+  /** The current malloc'd memory being doled out */
+  char *m_memory_begin, *m_memory_current, *m_memory_end;
+
+  zeroinit_memory_block(size_t data_size, intptr_t data_alignment, intptr_t initial_capacity_bytes)
+      : memory_block_data(1, zeroinit_memory_block_type), data_size(data_size), data_alignment(data_alignment),
+        m_total_allocated_capacity(0), m_memory_handles()
+  {
+    append_memory(initial_capacity_bytes);
+  }
+
+  ~zeroinit_memory_block()
+  {
+    for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
+      free(m_memory_handles[i]);
+    }
+  }
+
+  /**
+   * Allocates some new memory from which to dole out
+   * more. Adds it to the memory handles vector.
+   */
+  void append_memory(intptr_t capacity_bytes)
+  {
+    m_memory_handles.push_back(NULL);
+    m_memory_begin = reinterpret_cast<char *>(malloc(capacity_bytes));
+    m_memory_handles.back() = m_memory_begin;
+    if (m_memory_begin == NULL) {
+      m_memory_handles.pop_back();
+      throw std::bad_alloc();
+    }
+    m_memory_current = m_memory_begin;
+    m_memory_end = m_memory_current + capacity_bytes;
+    m_total_allocated_capacity += capacity_bytes;
+  }
+};
+
 /**
  * Creates a memory block which can be used to allocate zero-initialized
  * POD output memory for blockref types.
