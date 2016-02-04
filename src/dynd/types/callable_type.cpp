@@ -6,32 +6,13 @@
 #include <dynd/callable.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/str_util.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/get_then_copy_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
-
-static bool is_simple_identifier_name(const char *begin, const char *end)
-{
-  if (begin == end) {
-    return false;
-  }
-  else {
-    char c = *begin++;
-    if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
-      return false;
-    }
-    while (begin < end) {
-      c = *begin++;
-      if (!(('0' <= c && c <= '9') || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
-        return false;
-      }
-    }
-    return true;
-  }
-}
 
 ndt::callable_type::callable_type(const type &ret_type, const type &pos_types, const type &kwd_types)
     : base_type(callable_id, function_kind, sizeof(data_type), alignof(data_type),
@@ -106,12 +87,12 @@ void ndt::callable_type::print_type(std::ostream &o) const
 
     // TODO: names should be validated on input, not just
     //       printed specially like in struct_type.
-    const string &an = get_kwd_name_raw(i);
-    if (is_simple_identifier_name(an.begin(), an.end())) {
-      o.write(an.begin(), an.end() - an.begin());
+    const std::string &name = get_kwd_name(i);
+    if (is_simple_identifier_name(name)) {
+      o << name;
     }
     else {
-      print_escaped_utf8_string(o, an.begin(), an.end(), true);
+      print_escaped_utf8_string(o, name, true);
     }
     o << ": " << get_kwd_type(i);
   }
@@ -272,11 +253,11 @@ std::map<std::string, nd::callable> ndt::callable_type::get_dynamic_type_propert
       nd::get_then_copy_kernel<const std::vector<type> &, callable_type, &callable_type::get_kwd_types>>(
       ndt::callable_type::make(m_kwd_struct.extended<ndt::struct_type>()->get_type(), ndt::tuple_type::make(),
                                ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["kwd_names"] =
-      nd::callable::make<nd::get_then_copy_kernel<const nd::array &, callable_type, &callable_type::get_kwd_names>>(
-          ndt::callable_type::make(m_kwd_struct.extended<ndt::struct_type>()->get_field_names().get_type(),
-                                   ndt::tuple_type::make(),
-                                   ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
+  properties["kwd_names"] = nd::callable::make<
+      nd::get_then_copy_kernel<const std::vector<std::string> &, callable_type, &callable_type::get_kwd_names>>(
+      ndt::callable_type::make(ndt::type_for(m_kwd_struct.extended<ndt::struct_type>()->get_field_names()),
+                               ndt::tuple_type::make(),
+                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
   properties["return_type"] = nd::callable([](type self) { return self.extended<callable_type>()->get_return_type(); });
 
   return properties;

@@ -55,8 +55,8 @@ void dynd::make_struct_assignment_kernel(nd::kernel_builder *ckb, const ndt::typ
 
   // Match up the fields
   for (intptr_t i = 0; i != field_count; ++i) {
-    const string &dst_name = dst_sd->get_field_name_raw(i);
-    intptr_t src_i = src_sd->get_field_index(dst_name.begin(), dst_name.end());
+    const std::string &dst_name = dst_sd->get_field_name(i);
+    intptr_t src_i = src_sd->get_field_index(dst_name);
     if (src_i < 0) {
       stringstream ss;
       ss << "cannot assign dynd struct " << src_struct_tp << " to " << dst_struct_tp;

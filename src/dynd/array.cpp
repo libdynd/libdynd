@@ -929,7 +929,7 @@ std::ostream &nd::operator<<(std::ostream &o, const array &rhs)
 
 nd::array nd::as_struct(size_t size, const pair<const char *, array> *pairs)
 {
-  std::vector<const char *> names(size);
+  std::vector<std::string> names(size);
   std::vector<ndt::type> types(size);
   for (size_t i = 0; i < size; ++i) {
     names[i] = pairs[i].first;
