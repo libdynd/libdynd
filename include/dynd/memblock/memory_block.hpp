@@ -30,8 +30,6 @@ enum memory_block_type_t {
    * For when the data is object (requires destruction),
    * and the amount of memory needs to grow */
   objectarray_memory_block_type,
-  /** For memory used by code generation */
-  executable_memory_block_type,
   /** Wraps memory mapped files */
   memmap_memory_block_type
 };
@@ -65,7 +63,7 @@ struct DYND_API memory_block_data {
     // std::cout << "memblock " << (void *)this << " cre: " << this->m_use_count << std::endl;
   }
 
-  //  virtual ~memory_block_data() {}
+  // virtual ~memory_block_data() {}
 
   /**
    * Allocates the requested amount of memory from the memory_block, returning

@@ -363,9 +363,6 @@ set(libdynd_SRC
     include/dynd/kernels/view_kernel.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp
-    src/dynd/memblock/executable_memory_block_windows_x64.cpp
-    src/dynd/memblock/executable_memory_block_darwin_x64.cpp
-    src/dynd/memblock/executable_memory_block_linux_x64.cpp
     src/dynd/memblock/external_memory_block.cpp
     src/dynd/memblock/fixed_size_pod_memory_block.cpp
     src/dynd/memblock/memmap_memory_block.cpp
@@ -374,7 +371,6 @@ set(libdynd_SRC
     src/dynd/memblock/objectarray_memory_block.cpp
     src/dynd/memblock/zeroinit_memory_block.cpp
     include/dynd/memblock/memory_block.hpp
-    include/dynd/memblock/executable_memory_block.hpp
     include/dynd/memblock/external_memory_block.hpp
     include/dynd/memblock/fixed_size_pod_memory_block.hpp
     include/dynd/memblock/memmap_memory_block.hpp
