@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/type_registry.hpp>
 #include <dynd/types/type_id.hpp>
 
 using namespace std;
@@ -54,4 +55,16 @@ std::ostream &dynd::operator<<(std::ostream &o, type_kind_t kind)
   default:
     return (o << "(unknown kind " << (int)kind << ")");
   }
+}
+
+bool dynd::is_base_id_of(type_id_t base_id, type_id_t id)
+{
+  const ndt::type_info &tp_info = ndt::type_registry[id];
+  for (size_t i = 0; i < tp_info.nbases; ++i) {
+    if (tp_info.bases[i] == base_id) {
+      return true;
+    }
+  }
+
+  return false;
 }
