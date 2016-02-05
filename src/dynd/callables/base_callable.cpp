@@ -82,12 +82,16 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, c
   fn(ckb.get(), dst_data, src_data);
 }
 
-void nd::base_callable::call(const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                             char *DYND_UNUSED(dst_data), intptr_t DYND_UNUSED(nsrc),
-                             const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                             array *const *DYND_UNUSED(src_data), intptr_t DYND_UNUSED(nkwd),
-                             const array *DYND_UNUSED(kwds),
-                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, array *dst, intptr_t nsrc,
+                             const ndt::type *src_tp, const char *const *src_arrmeta, array *const *src, intptr_t nkwd,
+                             const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
-  throw std::runtime_error("view callables are not fully implemented yet");
+  char *data = data_init(static_data(), dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+
+  // Generate and evaluate the ckernel
+  kernel_builder ckb;
+  instantiate(static_data(), data, &ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_call, nkwd,
+              kwds, tp_vars);
+  kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
+  fn(ckb.get(), dst, src);
 }
