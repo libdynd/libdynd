@@ -126,6 +126,8 @@ namespace nd {
     intptr_t arith_offset;
     intptr_t assign_na_offset;
 
+    static const kernel_request_t kernreq = kernel_request_call;
+
     void single(char *dst, char *const *src)
     {
       auto is_na = this->get_child();
@@ -185,6 +187,8 @@ namespace nd {
     intptr_t arith_offset;
     intptr_t assign_na_offset;
 
+    static const kernel_request_t kernreq = kernel_request_call;
+
     void single(char *dst, char *const *src)
     {
       auto is_na = this->get_child();
@@ -241,6 +245,8 @@ namespace nd {
   template <typename FuncType>
   struct option_arithmetic_kernel<FuncType, true, true>
       : base_kernel<option_arithmetic_kernel<FuncType, true, true>, 2> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     intptr_t is_na_rhs_offset;
     intptr_t arith_offset;
     intptr_t assign_na_offset;
