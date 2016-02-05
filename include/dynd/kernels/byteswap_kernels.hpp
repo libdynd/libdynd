@@ -36,6 +36,8 @@ inline uint64_t byteswap_value(uint64_t value)
 namespace nd {
 
   struct byteswap_ck : base_kernel<byteswap_ck, 1> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     size_t data_size;
 
     byteswap_ck(size_t data_size) : data_size(data_size) {}
@@ -69,6 +71,8 @@ namespace nd {
   };
 
   struct pairwise_byteswap_ck : base_kernel<pairwise_byteswap_ck, 1> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     size_t data_size;
 
     pairwise_byteswap_ck(size_t data_size) : data_size(data_size) {}

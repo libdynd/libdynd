@@ -169,7 +169,7 @@ namespace nd {
                array *const *src_data, intptr_t nkwd, const array *kwds,
                const std::map<std::string, ndt::type> &tp_vars);
 
-    void call(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc, const ndt::type *src_tp,
+    void call(const ndt::type &dst_tp, const char *dst_arrmeta, array *dst_data, intptr_t nsrc, const ndt::type *src_tp,
               const char *const *src_arrmeta, array *const *src_data, intptr_t nkwd, const array *kwds,
               const std::map<std::string, ndt::type> &tp_vars);
 

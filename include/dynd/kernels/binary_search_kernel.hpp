@@ -12,6 +12,8 @@ namespace dynd {
 namespace nd {
 
   struct binary_search_kernel : base_kernel<binary_search_kernel, 2> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     const intptr_t src0_size;
     const intptr_t src0_stride;
 
@@ -70,7 +72,8 @@ namespace nd {
       const char *child_src_arrmeta[2] = {n_arrmeta, n_arrmeta};
 
       total_order::get().get()->instantiate(total_order::get().get()->static_data(), data, ckb, ndt::make_type<int>(),
-                                            NULL, 2, child_src_tp, child_src_arrmeta, kernreq, 0, NULL, tp_vars);
+                                            NULL, 2, child_src_tp, child_src_arrmeta,
+                                            kernreq | kernel_request_data_only, 0, NULL, tp_vars);
     }
   };
 

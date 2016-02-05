@@ -20,6 +20,8 @@ namespace nd {
      */
     // All methods are inlined, so this does not need to be declared DYND_API.
     struct compose_kernel : base_kernel<compose_kernel, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       struct static_data {
         callable first;
         callable second;
@@ -130,13 +132,13 @@ namespace nd {
         ckb_offset = ckb->m_size;
         compose_kernel *self = ckb->get_at<compose_kernel>(root_ckb_offset);
         first->instantiate(first->static_data(), data, ckb, buffer_tp, self->buffer_arrmeta.get(), 1, src_tp,
-                           src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+                           src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->m_size;
         self = ckb->get_at<compose_kernel>(root_ckb_offset);
         self->second_offset = ckb_offset - root_ckb_offset;
         const char *buffer_arrmeta = self->buffer_arrmeta.get();
         second->instantiate(second->static_data(), data, ckb, dst_tp, dst_arrmeta, 1, &buffer_tp, &buffer_arrmeta,
-                            kernreq, nkwd, kwds, tp_vars);
+                            kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->m_size;
       }
     };
