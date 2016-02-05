@@ -31,11 +31,6 @@ namespace ndt {
 
     callable_type(const type &ret_type, const type &pos_types, const type &kwd_types);
 
-    const string &get_kwd_name_raw(intptr_t i) const
-    {
-      return m_kwd_struct.extended<struct_type>()->get_field_name_raw(i);
-    }
-
     const type &get_return_type() const { return m_return_type; }
 
     const type &get_pos_tuple() const { return m_pos_tuple; }
@@ -50,7 +45,10 @@ namespace ndt {
 
     const std::vector<type> &get_kwd_types() const { return m_kwd_struct.extended<struct_type>()->get_field_types(); }
 
-    const nd::array &get_kwd_names() const { return m_kwd_struct.extended<struct_type>()->get_field_names(); }
+    const std::vector<std::string> &get_kwd_names() const
+    {
+      return m_kwd_struct.extended<struct_type>()->get_field_names();
+    }
 
     const type &get_pos_type(intptr_t i) const
     {
@@ -130,7 +128,7 @@ namespace ndt {
     }
 
     /** Makes an callable type with both positional and keyword arguments */
-    static type make(const type &ret_tp, const std::vector<type> &pos_tp, const nd::array &kwd_names,
+    static type make(const type &ret_tp, const std::vector<type> &pos_tp, const std::vector<std::string> &kwd_names,
                      const std::vector<type> &kwd_tp)
     {
       return make(ret_tp, tuple_type::make(pos_tp), struct_type::make(kwd_names, kwd_tp));

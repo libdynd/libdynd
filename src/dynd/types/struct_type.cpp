@@ -7,6 +7,7 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/adapt_type.hpp>
+#include <dynd/types/str_util.hpp>
 #include <dynd/kernels/get_then_copy_kernel.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
@@ -17,7 +18,8 @@
 using namespace std;
 using namespace dynd;
 
-ndt::struct_type::struct_type(const nd::array &field_names, const std::vector<type> &field_types, bool variadic)
+ndt::struct_type::struct_type(const std::vector<std::string> &field_names, const std::vector<type> &field_types,
+                              bool variadic)
     : tuple_type(struct_id, field_types, type_flag_none, true, variadic), m_field_names(field_names)
 {
   /*
@@ -30,8 +32,8 @@ ndt::struct_type::struct_type(const nd::array &field_names, const std::vector<ty
   */
 
   // Make sure that the number of names matches
-  intptr_t name_count = reinterpret_cast<const fixed_dim_type_arrmeta *>(m_field_names.get()->metadata())->dim_size;
-  if (name_count != m_field_count) {
+  uintptr_t name_count = field_names.size();
+  if (name_count != (uintptr_t)m_field_count) {
     stringstream ss;
     ss << "dynd struct type requires that the number of names, " << name_count << " matches the number of types, "
        << m_field_count;
@@ -45,46 +47,14 @@ ndt::struct_type::struct_type(const nd::array &field_names, const std::vector<ty
 
 ndt::struct_type::~struct_type() {}
 
-intptr_t ndt::struct_type::get_field_index(const char *field_name_begin, const char *field_name_end) const
+intptr_t ndt::struct_type::get_field_index(const std::string &name) const
 {
-  size_t size = field_name_end - field_name_begin;
-  if (size > 0) {
-    char firstchar = *field_name_begin;
-    intptr_t field_count = get_field_count();
-    const char *fn_ptr = m_field_names.cdata();
-    intptr_t fn_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(m_field_names.get()->metadata())->stride;
-    for (intptr_t i = 0; i != field_count; ++i, fn_ptr += fn_stride) {
-      const string *fn = reinterpret_cast<const string *>(fn_ptr);
-      const char *begin = fn->begin(), *end = fn->end();
-      if ((size_t)(end - begin) == size && *begin == firstchar) {
-        if (memcmp(fn->begin(), field_name_begin, size) == 0) {
-          return i;
-        }
-      }
-    }
+  auto it = std::find(m_field_names.begin(), m_field_names.end(), name);
+  if (it != m_field_names.end()) {
+    return it - m_field_names.begin();
   }
 
   return -1;
-}
-
-static bool is_simple_identifier_name(const char *begin, const char *end)
-{
-  if (begin == end) {
-    return false;
-  }
-  else {
-    char c = *begin++;
-    if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
-      return false;
-    }
-    while (begin < end) {
-      c = *begin++;
-      if (!(('0' <= c && c <= '9') || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
-        return false;
-      }
-    }
-    return true;
-  }
 }
 
 void ndt::struct_type::print_type(std::ostream &o) const
@@ -95,12 +65,12 @@ void ndt::struct_type::print_type(std::ostream &o) const
     if (i != 0) {
       o << ", ";
     }
-    const string &fn = get_field_name_raw(i);
-    if (is_simple_identifier_name(fn.begin(), fn.end())) {
-      o.write(fn.begin(), fn.end() - fn.begin());
+    const std::string &name = m_field_names[i];
+    if (is_simple_identifier_name(name)) {
+      o << name;
     }
     else {
-      print_escaped_utf8_string(o, fn.begin(), fn.end(), true);
+      print_escaped_utf8_string(o, name, true);
     }
     o << ": " << get_field_type(i);
   }
@@ -190,7 +160,7 @@ bool ndt::struct_type::operator==(const base_type &rhs) const
   else {
     const struct_type *dt = static_cast<const struct_type *>(&rhs);
     return get_data_alignment() == dt->get_data_alignment() && m_field_types == dt->m_field_types &&
-           m_field_names.equals_exact(dt->m_field_names) && m_variadic == dt->m_variadic;
+           m_field_names == dt->m_field_names && m_variadic == dt->m_variadic;
   }
 }
 
@@ -210,8 +180,7 @@ void ndt::struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
     const type &field_dt = get_field_type(i);
     if (!field_dt.is_builtin() && field_dt.extended()->get_arrmeta_size() > 0) {
       o << indent << " field " << i << " (name ";
-      const string &fnr = get_field_name_raw(i);
-      o.write(fnr.begin(), fnr.end() - fnr.begin());
+      o << m_field_names[i];
       o << ") arrmeta:\n";
       field_dt.extended()->arrmeta_debug_print(arrmeta + m_arrmeta_offsets[i], o, indent + "  ");
     }
@@ -240,20 +209,13 @@ ndt::type ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *
     else {
       // Take the subset of the fields in-place
       std::vector<type> tmp_field_types(dimension_size);
-
-      // Make an "N * string" array without copying the actual
-      // string text data. TODO: encapsulate this into a function.
-      string *string_arr_ptr;
-      type stp = ndt::make_type<ndt::string_type>();
-      type tp = make_fixed_dim(dimension_size, stp);
-      nd::array tmp_field_names = nd::empty(tp);
-      string_arr_ptr = reinterpret_cast<string *>(tmp_field_names.data());
+      std::vector<std::string> tmp_field_names(dimension_size);
 
       for (intptr_t i = 0; i < dimension_size; ++i) {
         intptr_t idx = start_index + i * index_stride;
         tmp_field_types[i] =
             get_field_type(idx).apply_linear_index(nindices - 1, indices + 1, current_i + 1, root_tp, false);
-        string_arr_ptr[i] = get_field_name_raw(idx);
+        tmp_field_names[i] = m_field_names[idx];
       }
 
       return struct_type::make(tmp_field_names, tmp_field_types);
@@ -331,10 +293,10 @@ std::map<std::string, nd::callable> ndt::struct_type::get_dynamic_type_propertie
       nd::get_then_copy_kernel<const std::vector<uintptr_t> &, tuple_type, &tuple_type::get_arrmeta_offsets>>(
       ndt::callable_type::make(ndt::type_for(m_arrmeta_offsets), ndt::tuple_type::make(),
                                ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["field_names"] =
-      nd::callable::make<nd::get_then_copy_kernel<const nd::array &, struct_type, &struct_type::get_field_names>>(
-          ndt::callable_type::make(m_field_names.get_type(), ndt::tuple_type::make(),
-                                   ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
+  properties["field_names"] = nd::callable::make<
+      nd::get_then_copy_kernel<const std::vector<std::string> &, struct_type, &struct_type::get_field_names>>(
+      ndt::callable_type::make(ndt::type_for(m_field_names), ndt::tuple_type::make(),
+                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
 
   return properties;
 }
@@ -448,19 +410,12 @@ bool ndt::struct_type::match(const char *arrmeta, const type &candidate_tp, cons
   if ((m_field_count == candidate_field_count && !candidate_variadic) ||
       ((candidate_field_count >= m_field_count) && m_variadic)) {
     // Compare the field names
-    if (m_field_count == candidate_field_count) {
-      if (!get_field_names().equals_exact(candidate_tp.extended<struct_type>()->get_field_names())) {
-        return false;
-      }
-    }
-    else {
-      nd::array leading_field_names = get_field_names();
-      if (!leading_field_names.equals_exact(
-              candidate_tp.extended<struct_type>()->get_field_names()(irange() < m_field_count))) {
-        return false;
-      }
+    const std::vector<std::string> &candidate_names = candidate_tp.extended<struct_type>()->get_field_names();
+    if (!std::equal(m_field_names.begin(), m_field_names.end(), candidate_names.begin())) {
+      return false;
     }
 
+    // Compare the field types
     const std::vector<type> &candidate_fields = candidate_tp.extended<struct_type>()->get_field_types();
     for (intptr_t i = 0; i < m_field_count; ++i) {
       if (!m_field_types[i].match(arrmeta, candidate_fields[i], candidate_arrmeta, tp_vars)) {

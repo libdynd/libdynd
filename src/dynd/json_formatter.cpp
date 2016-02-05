@@ -249,8 +249,8 @@ static void format_json_struct(output_data &out, const ndt::type &dt, const char
   else {
     out.write('{');
     for (intptr_t i = 0; i < field_count; ++i) {
-      const dynd::string &fname = bsd->get_field_name_raw(i);
-      format_json_encoded_string(out, fname.begin(), fname.end(), string_encoding_utf_8);
+      const std::string &name = bsd->get_field_name(i);
+      format_json_encoded_string(out, name.data(), name.data() + name.size(), string_encoding_utf_8);
       out.write(':');
       ::format_json(out, bsd->get_field_type(i), arrmeta + arrmeta_offsets[i], data + data_offsets[i]);
       if (i != field_count - 1) {

@@ -309,7 +309,7 @@ namespace nd {
               i = res_tp.extended<ndt::struct_type>()->get_field_index(name);
             }
             else {
-              i = res_tp.extended<ndt::struct_type>()->get_field_index(strbegin, strend);
+              i = res_tp.extended<ndt::struct_type>()->get_field_index(std::string(strbegin, strend));
             }
 
             get_child(child_offsets[i])->single(res + data_offsets[i], args);

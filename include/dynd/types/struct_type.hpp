@@ -18,7 +18,7 @@ namespace dynd {
 namespace ndt {
 
   class DYND_API struct_type : public tuple_type {
-    nd::array m_field_names;
+    const std::vector<std::string> m_field_names;
     std::map<std::string, nd::callable> m_array_properties;
 
     void create_array_properties();
@@ -31,18 +31,14 @@ namespace ndt {
     uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const { return reinterpret_cast<uintptr_t *>(arrmeta); }
 
   public:
-    struct_type(const nd::array &field_names, const std::vector<type> &field_types, bool variadic = false);
+    struct_type(const std::vector<std::string> &field_names, const std::vector<type> &field_types,
+                bool variadic = false);
 
     virtual ~struct_type();
 
     /** The array of the field names */
-    const nd::array &get_field_names() const { return m_field_names; }
-    const string &get_field_name_raw(intptr_t i) const { return unchecked_fixed_dim_get<string>(m_field_names, i); }
-    const std::string get_field_name(intptr_t i) const
-    {
-      const string &std(get_field_name_raw(i));
-      return std::string(std.begin(), std.end());
-    }
+    const std::vector<std::string> &get_field_names() const { return m_field_names; }
+    const std::string &get_field_name(intptr_t i) const { return m_field_names[i]; }
 
     /**
      * Gets the field index for the given name. Returns -1 if
@@ -50,14 +46,10 @@ namespace ndt {
      *
      * \param field_name  The name of the field.
      *
-     * \returns  The field index, or -1 if there is not field
+     * \returns  The field index, or -1 if there is no field
      *           of the given name.
      */
-    inline intptr_t get_field_index(const std::string &field_name) const
-    {
-      return get_field_index(field_name.data(), field_name.data() + field_name.size());
-    }
-    intptr_t get_field_index(const char *field_name_begin, const char *field_name_end) const;
+    intptr_t get_field_index(const std::string &field_name) const;
 
     inline const uintptr_t *get_data_offsets(const char *arrmeta) const
     {
@@ -92,16 +84,14 @@ namespace ndt {
                        std::map<std::string, type> &tp_vars) const;
 
     /** Makes a struct type with the specified fields */
-    static type make(const nd::array &field_names, const std::vector<type> &field_types, bool variadic = false)
+    static type make(const std::vector<std::string> &field_names, const std::vector<type> &field_types,
+                     bool variadic = false)
     {
       return type(new struct_type(field_names, field_types, variadic), false);
     }
 
     /** Makes an empty struct type */
-    static type make(bool variadic = false)
-    {
-      return make(nd::empty(0, make_type<string_type>()), std::vector<type>(), variadic);
-    }
+    static type make(bool variadic = false) { return make(std::vector<std::string>(), std::vector<type>(), variadic); }
   };
 
 } // namespace dynd::ndt
