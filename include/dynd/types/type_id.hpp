@@ -1026,6 +1026,6 @@ struct is_dynd_scalar<std::complex<double>> {
   enum { value = true };
 };
 
-bool is_base_id_of(type_id_t base_id, type_id_t id);
+DYND_API bool is_base_id_of(type_id_t base_id, type_id_t id);
 
 } // namespace dynd
