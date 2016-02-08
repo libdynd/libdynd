@@ -10,8 +10,8 @@
 namespace dynd {
 namespace nd {
 
-  extern DYND_API class DYND_API callable_registry {
-//    std::map<std::string, callable> m_map;
+  extern DYND_API class callable_registry {
+    //    std::map<std::string, callable> m_map;
 
   public:
     callable_registry() {}

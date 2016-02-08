@@ -21,7 +21,7 @@ namespace ndt {
     }
   };
 
-  extern DYND_API class DYND_API type_registry {
+  extern DYND_API class type_registry {
     std::vector<type_info> m_infos;
 
   public:
