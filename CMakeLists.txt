@@ -265,7 +265,7 @@ set(libdynd_SRC
     include/dynd/eval/eval_context.hpp
     # Func
     src/dynd/func/arithmetic.cpp
-    src/dynd/func/callable_registry.cpp
+    src/dynd/callable_registry.cpp
     src/dynd/func/assignment.cpp
     src/dynd/func/comparison.cpp
     src/dynd/func/compose.cpp
@@ -289,7 +289,7 @@ set(libdynd_SRC
     src/dynd/func/take_by_pointer.cpp
     src/dynd/func/view.cpp
     include/dynd/func/arithmetic.hpp
-    include/dynd/func/callable_registry.hpp
+    include/dynd/callable_registry.hpp
     include/dynd/func/assignment.hpp
     include/dynd/func/copy.hpp
     include/dynd/func/comparison.hpp
