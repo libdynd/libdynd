@@ -105,6 +105,7 @@ set(tests_SRC
     array/test_with.cpp
     test_bool1.cpp
     test_config.cpp
+    test_dispatch_map.cpp
     test_float16.cpp
     test_integer_sequence.cpp
     test_iterator.cpp
