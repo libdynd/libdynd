@@ -84,15 +84,14 @@ public:
 
   dispatch_map(const std::initializer_list<value_type> &values) { init(values.begin(), values.end()); }
 
-  // pair(type_id[N], MappedType)
   template <typename Iter>
   void init(Iter begin, Iter end)
   {
     std::vector<std::array<type_id_t, N>> signatures;
-    std::vector<MappedType> m;
+    std::vector<std::pair<std::array<type_id_t, N>, MappedType>> m;
     while (begin != end) {
       signatures.push_back(begin->first);
-      m.push_back(begin->second);
+      m.push_back(*begin);
       ++begin;
     }
 
@@ -105,16 +104,41 @@ public:
       }
     }
 
-    std::vector<MappedType> res(m.size());
+    decltype(m) res(m.size());
     topological_sort(m, edges, res.begin());
+
+    for (auto &val : res) {
+      m_map[val.first] = val.second;
+    }
+
+    m_sorted = res;
   }
 
+  const MappedType &at2(const std::array<type_id_t, N> &key)
+  {
+    auto it = m_map.find(key);
+    if (it != m_map.end()) {
+      return it->second;
+    }
+
+    for (const auto &pair : m_sorted) {
+      if (supercedes(key, pair.first)) {
+//        m_map[key] = pair.second;
+        return pair.second;
+      }
+    }
+
+    return it->second;
+  }
+
+  // look it up in the table, if it's not there then
   const MappedType &at(const std::array<type_id_t, N> &key) const { return m_map.at(key); }
 
   void insert(const value_type &key) { m_map.insert(key); }
 
 private:
   map_type m_map;
+  std::vector<std::pair<std::array<type_id_t, N>, MappedType>> m_sorted;
 };
 
 } // namespace dynd
