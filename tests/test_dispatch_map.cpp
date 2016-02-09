@@ -31,13 +31,15 @@ TEST(Sort, TopologicalSort)
   EXPECT_EQ(0, res[5]);
 }
 
-TEST(Dispatch, Map)
+TEST(DispatchMap, Binary)
 {
-  dispatch_map<int, 2> map{
-      {{{int32_id, int64_id}}, 0}, {{{float32_id, int64_id}}, 1}, {{{scalar_kind_id, int64_id}}, 2}};
+  dispatch_map<int, 2> map{{{int32_id, int64_id}, 0}, {{float32_id, int64_id}, 1}, {{scalar_kind_id, int64_id}, 2}};
 
-  map[{{int32_id, int64_id}}];
-  EXPECT_EQ(0, map.at2({{int32_id, int64_id}}));
-  EXPECT_EQ(1, map.at2({{float32_id, int64_id}}));
-  EXPECT_EQ(2, map.at2({{float64_id, int64_id}}));
+  EXPECT_EQ(0, map.find({int32_id, int64_id})->second);
+  EXPECT_EQ(1, map.find({float32_id, int64_id})->second);
+  //EXPECT_EQ(2, map.find({float64_id, int64_id})->second);
+//  EXPECT_EQ(2, map.find({int64_id, int64_id}));
+  //  EXPECT_EQ(map.end(), map.find({int64_id, int32_id}));
+
+  std::exit(-1);
 }

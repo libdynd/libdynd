@@ -49,7 +49,7 @@ void topological_sort(const std::vector<ValueType> &values, const std::vector<st
 
 template <typename MappedType, size_t N>
 class dispatch_map {
-  bool supercedes(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs)
+  static bool supercedes(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs)
   {
     for (size_t i = 0; i < N; ++i) {
       if (!(lhs[i] == rhs[i] || is_base_id_of(rhs[i], lhs[i]))) {
@@ -60,7 +60,7 @@ class dispatch_map {
     return true;
   }
 
-  bool edge(const std::array<type_id_t, N> &u, const std::array<type_id_t, N> &v)
+  static bool edge(const std::array<type_id_t, N> &u, const std::array<type_id_t, N> &v)
   {
     if (supercedes(u, v)) {
       if (supercedes(v, u)) {
@@ -75,10 +75,19 @@ class dispatch_map {
   }
 
 public:
+  struct key_compare {
+    bool operator()(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs) const
+    {
+      return edge(lhs, rhs);
+    }
+  };
+
+  std::vector<std::pair<std::array<type_id_t, N>, MappedType>> m_sorted;
+
   typedef std::map<std::array<type_id_t, N>, MappedType> map_type;
   typedef typename map_type::key_type key_type;
   typedef typename map_type::value_type value_type;
-  typedef typename map_type::iterator iterator;
+  typedef typename std::vector<std::pair<std::array<type_id_t, N>, MappedType>>::iterator iterator;
 
   dispatch_map() = default;
 
@@ -114,33 +123,43 @@ public:
     m_sorted = res;
   }
 
-  const MappedType &at2(const std::array<type_id_t, N> &key)
-  {
-    auto it = m_map.find(key);
-    if (it != m_map.end()) {
-      return it->second;
-    }
-
-    for (const auto &pair : m_sorted) {
-      if (supercedes(key, pair.first)) {
-        //        m_map[key] = pair.second;
-        return pair.second;
-      }
-    }
-
-    return it->second;
-  }
-
-  // look it up in the table, if it's not there then
   const MappedType &at(const std::array<type_id_t, N> &key) const { return m_map.at(key); }
+
+  iterator find(const std::array<type_id_t, N> &key)
+  {
+    return std::find_if(m_sorted.begin(), m_sorted.end(), [key]());
+//    auto it = m_map.find(key);
+  //  if (it != m_map.end()) {
+    //  return it;
+    //}
+
+    /*
+        for (const auto &pair : m_sorted) {
+          if (supercedes(key, pair.first)) {
+            //        m_map[key] = pair.second;
+            return pair.second;
+          }
+        }
+    */
+
+    return m_sorted.end();
+  }
 
   void insert(const value_type &key) { m_map.insert(key); }
 
-  const MappedType &operator[](const std::array<type_id_t, N> &key) { return at2(key); }
+  const MappedType &operator[](const std::array<type_id_t, N> &key) { return find(key); }
+
+  // operator() -- insert if not found
+  // operator[] -- insert
+  // at() -- lookup exactly, no
+  // find() -- equivalent lookup
+
+//  decltype(auto) begin() { return m_map.begin(); }
+
+//  decltype(auto) end() { return m_map.end(); }
 
 private:
   map_type m_map;
-  std::vector<std::pair<std::array<type_id_t, N>, MappedType>> m_sorted;
 };
 
 } // namespace dynd
