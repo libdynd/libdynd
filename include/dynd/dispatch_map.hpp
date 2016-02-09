@@ -75,19 +75,14 @@ class dispatch_map {
   }
 
 public:
-  struct key_compare {
-    bool operator()(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs) const
-    {
-      return edge(lhs, rhs);
-    }
-  };
+  typedef std::array<type_id_t, N> key_type;
+  typedef MappedType mapped_type;
+  typedef std::pair<key_type, mapped_type> value_type;
 
-  std::vector<std::pair<std::array<type_id_t, N>, MappedType>> m_sorted;
+  typedef typename std::vector<value_type>::iterator iterator;
 
-  typedef std::map<std::array<type_id_t, N>, MappedType> map_type;
-  typedef typename map_type::key_type key_type;
-  typedef typename map_type::value_type value_type;
-  typedef typename std::vector<std::pair<std::array<type_id_t, N>, MappedType>>::iterator iterator;
+  std::vector<value_type> m_values;
+  std::map<key_type, iterator> m_cache;
 
   dispatch_map() = default;
 
@@ -116,50 +111,25 @@ public:
     decltype(m) res(m.size());
     topological_sort(m, edges, res.begin());
 
-    for (auto &val : res) {
-      m_map[val.first] = val.second;
+    m_values = res;
+  }
+
+  iterator find(const key_type &key)
+  {
+    iterator &it = m_cache[key];
+    if (it == iterator()) {
+      it = std::find_if(m_values.begin(), m_values.end(),
+                        [key](const value_type &value) { return value.first == key || supercedes(key, value.first); });
     }
 
-    m_sorted = res;
+    return it;
   }
 
-  const MappedType &at(const std::array<type_id_t, N> &key) const { return m_map.at(key); }
+  iterator begin() { return m_values.begin(); }
 
-  iterator find(const std::array<type_id_t, N> &key)
-  {
-    return std::find_if(m_sorted.begin(), m_sorted.end(), [key]());
-//    auto it = m_map.find(key);
-  //  if (it != m_map.end()) {
-    //  return it;
-    //}
+  iterator end() { return m_values.end(); }
 
-    /*
-        for (const auto &pair : m_sorted) {
-          if (supercedes(key, pair.first)) {
-            //        m_map[key] = pair.second;
-            return pair.second;
-          }
-        }
-    */
-
-    return m_sorted.end();
-  }
-
-  void insert(const value_type &key) { m_map.insert(key); }
-
-  const MappedType &operator[](const std::array<type_id_t, N> &key) { return find(key); }
-
-  // operator() -- insert if not found
-  // operator[] -- insert
-  // at() -- lookup exactly, no
-  // find() -- equivalent lookup
-
-//  decltype(auto) begin() { return m_map.begin(); }
-
-//  decltype(auto) end() { return m_map.end(); }
-
-private:
-  map_type m_map;
+  decltype(auto) cache() { return m_cache; }
 };
 
 } // namespace dynd

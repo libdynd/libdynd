@@ -37,9 +37,21 @@ TEST(DispatchMap, Binary)
 
   EXPECT_EQ(0, map.find({int32_id, int64_id})->second);
   EXPECT_EQ(1, map.find({float32_id, int64_id})->second);
-  //EXPECT_EQ(2, map.find({float64_id, int64_id})->second);
-//  EXPECT_EQ(2, map.find({int64_id, int64_id}));
-  //  EXPECT_EQ(map.end(), map.find({int64_id, int32_id}));
+  EXPECT_EQ(2, map.find({float64_id, int64_id})->second);
+  EXPECT_EQ(2, map.find({int64_id, int64_id})->second);
+  EXPECT_EQ(map.end(), map.find({int64_id, int32_id}));
 
-  std::exit(-1);
+  /*
+    for (auto x : map) {
+      const std::array<type_id_t, 2> &key = x.first;
+      std::cout << "{" << key[0] << ", " << key[1] << "}" << std::endl;
+    }
+  */
+
+  /*
+    for (auto x : map.cache()) {
+      const std::array<type_id_t, 2> &key = x.first;
+      std::cout << "{" << key[0] << ", " << key[1] << "}" << std::endl;
+    }
+  */
 }
