@@ -2,9 +2,7 @@ PREREQUISITES
 =============
 
 You may want to build this library together with its Python
-bindings. The instructions for this can be found here:
-
-    https://github.com/libdynd/dynd-python/blob/master/BUILD_INSTALL.md
+bindings. The instructions for this can be found [here](https://github.com/libdynd/dynd-python/blob/master/BUILD_INSTALL.md).
 
 This library requires a C++11 compiler. On Windows,
 Visual Studio 2013 Update 4 is the minimum supported compiler.
