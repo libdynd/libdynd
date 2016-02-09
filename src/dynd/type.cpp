@@ -25,10 +25,10 @@
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/kernels/real_kernel.hpp>
 #include <dynd/kernels/imag_kernel.hpp>
 #include <dynd/kernels/conj_kernel.hpp>
 #include <dynd/func/elwise.hpp>
+#include <dynd/func/complex.hpp>
 
 #include <sstream>
 #include <cstring>
@@ -356,9 +356,9 @@ namespace {
 const std::map<std::string, nd::callable> &complex32_array_properties()
 {
   static const std::map<std::string, nd::callable> complex_array_properties{
-      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float32_id>>())},
-      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<float32_id>>())},
-      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<float32_id>>())}};
+      {"real", nd::real::get()},
+      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<complex_float32_id>>())},
+      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<complex_float32_id>>())}};
 
   return complex_array_properties;
 }
@@ -366,9 +366,9 @@ const std::map<std::string, nd::callable> &complex32_array_properties()
 const std::map<std::string, nd::callable> &complex64_array_properties()
 {
   static const std::map<std::string, nd::callable> complex_array_properties{
-      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float64_id>>())},
-      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<float64_id>>())},
-      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<float64_id>>())}};
+      {"real", nd::real::get()},
+      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<complex_float64_id>>())},
+      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<complex_float64_id>>())}};
 
   return complex_array_properties;
 }
