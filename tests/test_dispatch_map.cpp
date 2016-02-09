@@ -36,6 +36,7 @@ TEST(Dispatch, Map)
   dispatch_map<int, 2> map{
       {{{int32_id, int64_id}}, 0}, {{{float32_id, int64_id}}, 1}, {{{scalar_kind_id, int64_id}}, 2}};
 
+  map[{{int32_id, int64_id}}];
   EXPECT_EQ(0, map.at2({{int32_id, int64_id}}));
   EXPECT_EQ(1, map.at2({{float32_id, int64_id}}));
   EXPECT_EQ(2, map.at2({{float64_id, int64_id}}));

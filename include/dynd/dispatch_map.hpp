@@ -123,7 +123,7 @@ public:
 
     for (const auto &pair : m_sorted) {
       if (supercedes(key, pair.first)) {
-//        m_map[key] = pair.second;
+        //        m_map[key] = pair.second;
         return pair.second;
       }
     }
@@ -135,6 +135,8 @@ public:
   const MappedType &at(const std::array<type_id_t, N> &key) const { return m_map.at(key); }
 
   void insert(const value_type &key) { m_map.insert(key); }
+
+  const MappedType &operator[](const std::array<type_id_t, N> &key) { return at2(key); }
 
 private:
   map_type m_map;
