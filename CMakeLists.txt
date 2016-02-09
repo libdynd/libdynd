@@ -268,6 +268,7 @@ set(libdynd_SRC
     src/dynd/callable_registry.cpp
     src/dynd/func/assignment.cpp
     src/dynd/func/comparison.cpp
+    src/dynd/func/complex.cpp
     src/dynd/func/compose.cpp
     src/dynd/func/compound.cpp
     src/dynd/func/copy.cpp
@@ -293,6 +294,7 @@ set(libdynd_SRC
     include/dynd/func/assignment.hpp
     include/dynd/func/copy.hpp
     include/dynd/func/comparison.hpp
+    include/dynd/func/complex.hpp
     include/dynd/func/compose.hpp
     include/dynd/func/compound.hpp
     include/dynd/func/constant.hpp

@@ -16,6 +16,7 @@
 #include <dynd/func/sum.hpp>
 #include <dynd/func/min.hpp>
 #include <dynd/func/max.hpp>
+#include <dynd/func/complex.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -141,6 +142,7 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
     registry["min"] = nd::min::get();
     registry["max"] = nd::max::get();
     registry["assign"] = nd::assign::get();
+    registry["real"] = real::get();
   }
 
   return registry;

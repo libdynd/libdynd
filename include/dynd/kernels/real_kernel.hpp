@@ -10,10 +10,10 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t RealTypeID>
-  struct real_kernel : base_kernel<real_kernel<RealTypeID>, 1> {
-    typedef typename type_of<RealTypeID>::type real_type;
-    typedef complex<typename type_of<RealTypeID>::type> complex_type;
+  template <type_id_t Arg0ID>
+  struct real_kernel : base_kernel<real_kernel<Arg0ID>, 1> {
+    typedef typename type_of<Arg0ID>::type complex_type;
+    typedef typename complex_type::value_type real_type;
 
     void single(char *dst, char *const *src)
     {
@@ -25,12 +25,12 @@ namespace nd {
 
 namespace ndt {
 
-  template <type_id_t RealTypeID>
-  struct traits<nd::real_kernel<RealTypeID>> {
+  template <type_id_t Arg0ID>
+  struct traits<nd::real_kernel<Arg0ID>> {
     static type equivalent()
     {
-      return callable_type::make(make_type<typename nd::real_kernel<RealTypeID>::real_type>(),
-                                 {make_type<typename nd::real_kernel<RealTypeID>::complex_type>()});
+      return callable_type::make(make_type<typename nd::real_kernel<Arg0ID>::real_type>(),
+                                 {make_type<typename nd::real_kernel<Arg0ID>::complex_type>()});
     }
   };
 
