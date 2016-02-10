@@ -88,7 +88,7 @@ if(${MSVC} OR "${CMAKE_CXX_SIMULATED_ID}" STREQUAL "MSVC")
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         # If this is the clang-cl compiler have it act like MSVC 2015 and not 2013.
         # Don't enable -WX here yet.
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHsc -bigobj -wd4503 -fms-compatibility-version=19.00.23506")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHsc -bigobj -wd4503")
     elseif(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19)
         message(FATAL_ERROR "Only MSVC 2015 (Version 19.0) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
     else()
