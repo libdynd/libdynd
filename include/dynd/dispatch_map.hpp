@@ -60,26 +60,13 @@ class dispatch_map {
     return true;
   }
 
-  static bool edge(const std::array<type_id_t, N> &u, const std::array<type_id_t, N> &v)
-  {
-    if (supercedes(u, v)) {
-      if (supercedes(v, u)) {
-        return false;
-      }
-      else {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
 public:
   typedef std::array<type_id_t, N> key_type;
   typedef MappedType mapped_type;
   typedef std::pair<key_type, mapped_type> value_type;
 
   typedef typename std::vector<value_type>::iterator iterator;
+  typedef typename std::vector<value_type>::const_iterator const_iterator;
 
   std::vector<value_type> m_values;
   std::map<key_type, iterator> m_cache;
@@ -91,8 +78,8 @@ public:
   template <typename Iter>
   void init(Iter begin, Iter end)
   {
-    std::vector<std::array<type_id_t, N>> signatures;
-    std::vector<std::pair<std::array<type_id_t, N>, MappedType>> m;
+    std::vector<key_type> signatures;
+    std::vector<value_type> m;
     while (begin != end) {
       signatures.push_back(begin->first);
       m.push_back(*begin);
@@ -116,20 +103,37 @@ public:
 
   iterator find(const key_type &key)
   {
-    iterator &it = m_cache[key];
-    if (it == iterator()) {
-      it = std::find_if(m_values.begin(), m_values.end(),
-                        [key](const value_type &value) { return value.first == key || supercedes(key, value.first); });
+    auto it = m_cache.find(key);
+    if (it != m_cache.end()) {
+      return it->second;
     }
 
-    return it;
+    return m_cache[key] = std::find_if(m_values.begin(), m_values.end(), [key](const value_type &value) {
+             return value.first == key || supercedes(key, value.first);
+           });
   }
 
   iterator begin() { return m_values.begin(); }
+  const_iterator begin() const { return m_values.begin(); }
+  const_iterator cbegin() const { return m_values.cbegin(); }
 
   iterator end() { return m_values.end(); }
+  const_iterator end() const { return m_values.end(); }
+  const_iterator cend() const { return m_values.cend(); }
 
-  decltype(auto) cache() { return m_cache; }
+  static bool edge(const key_type &u, const key_type &v)
+  {
+    if (supercedes(u, v)) {
+      if (supercedes(v, u)) {
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
+
+    return false;
+  }
 };
 
 } // namespace dynd

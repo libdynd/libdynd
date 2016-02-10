@@ -33,25 +33,13 @@ TEST(Sort, TopologicalSort)
 
 TEST(DispatchMap, Binary)
 {
-  dispatch_map<int, 2> map{{{int32_id, int64_id}, 0}, {{float32_id, int64_id}, 1}, {{scalar_kind_id, int64_id}, 2}};
+  typedef dispatch_map<int, 2> map_type;
+  typedef typename map_type::value_type value_type;
 
-  EXPECT_EQ(0, map.find({int32_id, int64_id})->second);
-  EXPECT_EQ(1, map.find({float32_id, int64_id})->second);
-  EXPECT_EQ(2, map.find({float64_id, int64_id})->second);
-  EXPECT_EQ(2, map.find({int64_id, int64_id})->second);
+  map_type map{{{int32_id, int64_id}, 0}, {{float32_id, int64_id}, 1}, {{scalar_kind_id, int64_id}, 2}};
+  EXPECT_EQ(value_type({int32_id, int64_id}, 0), *map.find({int32_id, int64_id}));
+  EXPECT_EQ(value_type({float32_id, int64_id}, 1), *map.find({float32_id, int64_id}));
+  EXPECT_EQ(value_type({scalar_kind_id, int64_id}, 2), *map.find({float64_id, int64_id}));
+  EXPECT_EQ(value_type({scalar_kind_id, int64_id}, 2), *map.find({int64_id, int64_id}));
   EXPECT_EQ(map.end(), map.find({int64_id, int32_id}));
-
-  /*
-    for (auto x : map) {
-      const std::array<type_id_t, 2> &key = x.first;
-      std::cout << "{" << key[0] << ", " << key[1] << "}" << std::endl;
-    }
-  */
-
-  /*
-    for (auto x : map.cache()) {
-      const std::array<type_id_t, 2> &key = x.first;
-      std::cout << "{" << key[0] << ", " << key[1] << "}" << std::endl;
-    }
-  */
 }
