@@ -356,9 +356,7 @@ namespace {
 const std::map<std::string, nd::callable> &complex32_array_properties()
 {
   static const std::map<std::string, nd::callable> complex_array_properties{
-      {"real", nd::real::get()},
-      {"imag", nd::imag::get()},
-      {"conj", nd::conj::get()}};
+      {"real", nd::real::get()}, {"imag", nd::imag::get()}, {"conj", nd::conj::get()}};
 
   return complex_array_properties;
 }
@@ -366,9 +364,7 @@ const std::map<std::string, nd::callable> &complex32_array_properties()
 const std::map<std::string, nd::callable> &complex64_array_properties()
 {
   static const std::map<std::string, nd::callable> complex_array_properties{
-      {"real", nd::real::get()},
-      {"imag", nd::imag::get()},
-      {"conj", nd::conj::get()}};
+      {"real", nd::real::get()}, {"imag", nd::imag::get()}, {"conj", nd::conj::get()}};
 
   return complex_array_properties;
 }
@@ -1017,12 +1013,12 @@ struct ndt::common_type::init {
   template <typename TypeIDSequence>
   void on_each()
   {
-    children[{{front<TypeIDSequence>::value, back<TypeIDSequence>::value}}] = [](const ndt::type &DYND_UNUSED(tp0),
-                                                                                 const ndt::type &DYND_UNUSED(tp1)) {
-      return ndt::make_type<
-          typename std::common_type<typename dynd::type_of<front<TypeIDSequence>::value>::type,
-                                    typename dynd::type_of<back<TypeIDSequence>::value>::type>::type>();
-    };
+    children[{{front<TypeIDSequence>::value, back<TypeIDSequence>::value}}] =
+        [](const ndt::type &DYND_UNUSED(tp0), const ndt::type &DYND_UNUSED(tp1)) {
+          return ndt::make_type<
+              typename std::common_type<typename dynd::type_of<front<TypeIDSequence>::value>::type,
+                                        typename dynd::type_of<back<TypeIDSequence>::value>::type>::type>();
+        };
   }
 };
 

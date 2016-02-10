@@ -19,12 +19,11 @@ DYND_API nd::callable nd::real::make()
 
   return functional::elwise(functional::dispatch(
       ndt::type("(Scalar) -> Scalar"),
-      [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                 const ndt::type *src_tp) mutable -> callable & { return children[src_tp[0].get_id()]; }));
+      [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable
+      -> callable &{ return children[src_tp[0].get_id()]; }));
 }
 
 DYND_API struct nd::real nd::real;
-
 
 DYND_API nd::callable nd::imag::make()
 {
@@ -33,12 +32,11 @@ DYND_API nd::callable nd::imag::make()
 
   return functional::elwise(functional::dispatch(
       ndt::type("(Scalar) -> Scalar"),
-      [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                 const ndt::type *src_tp) mutable -> callable & { return children[src_tp[0].get_id()]; }));
+      [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable
+      -> callable &{ return children[src_tp[0].get_id()]; }));
 }
 
 DYND_API struct nd::imag nd::imag;
-
 
 DYND_API nd::callable nd::conj::make()
 {
@@ -47,10 +45,8 @@ DYND_API nd::callable nd::conj::make()
 
   return functional::elwise(functional::dispatch(
       ndt::type("(Scalar) -> Scalar"),
-      [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                 const ndt::type *src_tp) mutable -> callable & { return children[src_tp[0].get_id()]; }));
+      [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable
+      -> callable &{ return children[src_tp[0].get_id()]; }));
 }
 
 DYND_API struct nd::conj nd::conj;
-
-
