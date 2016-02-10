@@ -143,6 +143,8 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
     registry["max"] = nd::max::get();
     registry["assign"] = nd::assign::get();
     registry["real"] = real::get();
+    registry["imag"] = imag::get();
+    registry["conj"] = conj::get();
   }
 
   return registry;
