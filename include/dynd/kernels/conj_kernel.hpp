@@ -16,7 +16,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<complex_type *>(dst) = conj(*reinterpret_cast<complex_type *>(src[0]));
+      *reinterpret_cast<complex_type *>(dst) = dynd::conj(*reinterpret_cast<complex_type *>(src[0]));
     }
   };
 

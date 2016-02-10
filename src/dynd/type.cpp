@@ -357,8 +357,8 @@ const std::map<std::string, nd::callable> &complex32_array_properties()
 {
   static const std::map<std::string, nd::callable> complex_array_properties{
       {"real", nd::real::get()},
-      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<complex_float32_id>>())},
-      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<complex_float32_id>>())}};
+      {"imag", nd::imag::get()},
+      {"conj", nd::conj::get()}};
 
   return complex_array_properties;
 }
@@ -367,8 +367,8 @@ const std::map<std::string, nd::callable> &complex64_array_properties()
 {
   static const std::map<std::string, nd::callable> complex_array_properties{
       {"real", nd::real::get()},
-      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<complex_float64_id>>())},
-      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<complex_float64_id>>())}};
+      {"imag", nd::imag::get()},
+      {"conj", nd::conj::get()}};
 
   return complex_array_properties;
 }
