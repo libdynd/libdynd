@@ -47,14 +47,7 @@ void topological_sort(const std::vector<ValueType> &values, const std::vector<st
   std::reverse(res - values.size(), res);
 }
 
-bool supercedes(type_id_t lhs, type_id_t rhs)
-{
-  if (!(lhs == rhs || is_base_id_of(rhs, lhs))) {
-    return false;
-  }
-
-  return true;
-}
+bool supercedes(type_id_t lhs, type_id_t rhs) { return lhs != rhs && is_base_id_of(rhs, lhs); }
 
 template <size_t N>
 bool supercedes(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs)
