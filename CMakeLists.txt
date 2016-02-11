@@ -394,6 +394,7 @@ set(libdynd_SRC
     src/dynd/option.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp
+    src/dynd/struct.cpp
     src/dynd/type.cpp
     src/dynd/type_registry.cpp
     src/dynd/type_promotion.cpp
@@ -437,6 +438,7 @@ set(libdynd_SRC
     include/dynd/sort.hpp
     include/dynd/string.hpp
     include/dynd/string_search.hpp
+    include/dynd/struct.hpp
     include/dynd/type.hpp
     include/dynd/type_registry.hpp
     include/dynd/type_sequence.hpp
