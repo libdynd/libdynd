@@ -333,7 +333,6 @@ set(libdynd_SRC
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/base_kernel.hpp
     include/dynd/kernels/byteswap_kernels.hpp
-    include/dynd/kernels/ckernel_prefix.hpp
     include/dynd/kernels/compare_kernels.hpp
     include/dynd/kernels/compose_kernel.hpp
     include/dynd/kernels/compound_kernel.hpp
@@ -346,6 +345,7 @@ set(libdynd_SRC
     include/dynd/kernels/index_kernel.hpp
     include/dynd/kernels/is_na_kernel.hpp
     include/dynd/kernels/kernel_builder.hpp
+    include/dynd/kernels/kernel_prefix.hpp
     include/dynd/kernels/max_kernel.hpp
     include/dynd/kernels/min_kernel.hpp
     include/dynd/kernels/multidispatch_kernel.hpp

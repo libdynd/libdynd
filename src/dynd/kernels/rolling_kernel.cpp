@@ -11,8 +11,8 @@ using namespace dynd;
 
 void nd::functional::strided_rolling_ck::single(char *dst, char *const *src)
 {
-  ckernel_prefix *nachild = get_child();
-  ckernel_prefix *wopchild = get_child(m_window_op_offset);
+  kernel_prefix *nachild = get_child();
+  kernel_prefix *wopchild = get_child(m_window_op_offset);
   kernel_strided_t nachild_fn = nachild->get_function<kernel_strided_t>();
   kernel_strided_t wopchild_fn = wopchild->get_function<kernel_strided_t>();
   // Fill in NA/NaN at the beginning
@@ -29,8 +29,8 @@ void nd::functional::strided_rolling_ck::single(char *dst, char *const *src)
 void nd::functional::var_rolling_ck::single(char *dst, char *const *src)
 {
   // Get the child ckernels
-  ckernel_prefix *nachild = get_child();
-  ckernel_prefix *wopchild = get_child(m_window_op_offset);
+  kernel_prefix *nachild = get_child();
+  kernel_prefix *wopchild = get_child(m_window_op_offset);
   kernel_strided_t nachild_fn = nachild->get_function<kernel_strided_t>();
   kernel_strided_t wopchild_fn = wopchild->get_function<kernel_strided_t>();
   // Get pointers to the src and dst data

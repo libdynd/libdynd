@@ -21,7 +21,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      ckernel_prefix *child = get_child();
+      kernel_prefix *child = get_child();
 
       intptr_t first = 0, last = src0_size;
       while (first < last) {

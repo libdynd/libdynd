@@ -28,7 +28,7 @@ namespace kernels {
       char *src_inv_perm[N];
       inv(src_inv_perm, dst, src);
 
-      ckernel_prefix *child = this->get_child();
+      nd::kernel_prefix *child = this->get_child();
       kernel_single_t single = child->get_function<kernel_single_t>();
       single(child, NULL, src_inv_perm);
     }
@@ -42,7 +42,7 @@ namespace kernels {
       intptr_t src_stride_inv_perm[N];
       inv(src_stride_inv_perm, dst_stride, src_stride);
 
-      ckernel_prefix *child = this->get_child();
+      nd::kernel_prefix *child = this->get_child();
       kernel_strided_t strided = child->get_function<kernel_strided_t>();
       strided(child, NULL, 0, src_inv_perm, src_stride_inv_perm, count);
     }
@@ -123,7 +123,7 @@ namespace kernels {
       char *src_inv_perm[N];
       inv_permute(src_inv_perm, src, perm);
 
-      ckernel_prefix *child = this->get_child();
+      nd::kernel_prefix *child = this->get_child();
       kernel_single_t single = child->get_function<kernel_single_t>();
       single(dst, src_inv_perm, child);
     }

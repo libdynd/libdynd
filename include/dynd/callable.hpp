@@ -60,7 +60,7 @@ namespace nd {
     template <typename KernelType>
     kernel_targets_t get_targets()
     {
-      return kernel_targets_t{reinterpret_cast<void *>(static_cast<void (*)(ckernel_prefix *, char *, char *const *)>(
+      return kernel_targets_t{reinterpret_cast<void *>(static_cast<void (*)(kernel_prefix *, char *, char *const *)>(
                                   KernelType::single_wrapper)),
                               NULL, reinterpret_cast<void *>(KernelType::strided_wrapper)};
     }

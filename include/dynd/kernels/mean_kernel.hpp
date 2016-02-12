@@ -27,11 +27,11 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      ckernel_prefix *sum_kernel = get_child();
+      kernel_prefix *sum_kernel = get_child();
       kernel_single_t sum = sum_kernel->get_function<kernel_single_t>();
       sum(sum_kernel, dst, src);
 
-      ckernel_prefix *compound_div_kernel = get_child(compound_div_offset);
+      kernel_prefix *compound_div_kernel = get_child(compound_div_offset);
       kernel_single_t compound_div = compound_div_kernel->get_function<kernel_single_t>();
       char *child_src[1] = {reinterpret_cast<char *>(&count)};
       compound_div(compound_div_kernel, dst, child_src);

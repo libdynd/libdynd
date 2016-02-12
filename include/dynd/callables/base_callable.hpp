@@ -132,8 +132,8 @@ namespace nd {
     }
 
     base_callable(const ndt::type &tp, kernel_targets_t targets)
-        : use_count(0), tp(tp), kernreq(kernel_request_single), targets(targets), data_init(&ckernel_prefix::data_init),
-          resolve_dst_type(NULL), instantiate(&ckernel_prefix::instantiate)
+        : use_count(0), tp(tp), kernreq(kernel_request_single), targets(targets), data_init(&kernel_prefix::data_init),
+          resolve_dst_type(NULL), instantiate(&kernel_prefix::instantiate)
     {
       new (static_data()) kernel_targets_t(targets);
     }

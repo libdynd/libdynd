@@ -26,7 +26,7 @@ namespace nd {
 
     void single(char *DYND_UNUSED(dst), char *const *src)
     {
-      ckernel_prefix *child = get_child();
+      kernel_prefix *child = get_child();
       std::sort(strided_iterator(src[0], src0_element_data_size, src0_stride),
                 strided_iterator(src[0] + src0_size * src0_stride, src0_element_data_size, src0_stride),
                 [child](char *lhs, char *rhs) {
