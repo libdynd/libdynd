@@ -15,4 +15,15 @@
 using namespace std;
 using namespace dynd;
 
-// TEST(Struct, FieldAccess) { nd::field_access(nd::as_struct({{"x", 7}, {"y", 0.5}})); }
+
+TEST(Struct, FieldAccess)
+{
+  nd::array struct_arg = nd::as_struct({{"x", 7}, {"y", 0.5}});
+
+  // XXX: with return type void: exception "no child found"
+  // XXX: with return type Any: exception "The dynd type Any is not concrete as required"
+  // EXPECT_EQ(7, nd::field_access(struct_arg, "x"));
+  // EXPECT_EQ(0.5, nd::field_access(struct_arg, "y"));
+}
+
+
