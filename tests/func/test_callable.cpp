@@ -24,7 +24,7 @@ using namespace dynd;
 
 TEST(Callable, SingleStridedConstructor)
 {
-  nd::callable f(ndt::type("(int32) -> int32"), [](ckernel_prefix *DYND_UNUSED(self), char *dst, char *const *src) {
+  nd::callable f(ndt::type("(int32) -> int32"), [](nd::kernel_prefix *DYND_UNUSED(self), char *dst, char *const *src) {
     *reinterpret_cast<int32 *>(dst) = *reinterpret_cast<int32 *>(src[0]) + 5;
   }, 0);
 

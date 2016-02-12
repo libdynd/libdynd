@@ -13,7 +13,7 @@
 #include <dynd/types/type_id.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/memory_block.hpp>
-#include <dynd/kernels/ckernel_prefix.hpp>
+#include <dynd/kernels/kernel_prefix.hpp>
 
 namespace dynd {
 

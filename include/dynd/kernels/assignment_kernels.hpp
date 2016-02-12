@@ -103,7 +103,7 @@ namespace nd {
       *reinterpret_cast<UIntType *>(dst) = src_val;
     }
 
-    static void destruct(ckernel_prefix *self)
+    static void destruct(kernel_prefix *self)
     {
       self_type *e = reinterpret_cast<self_type *>(self);
       e->dst_cat_tp.~type();
@@ -121,7 +121,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      ckernel_prefix *echild = this->get_child();
+      kernel_prefix *echild = this->get_child();
       kernel_single_t opchild = echild->get_function<kernel_single_t>();
 
       uint32_t value = *reinterpret_cast<const UIntType *>(src[0]);
@@ -130,7 +130,7 @@ namespace nd {
       opchild(echild, dst, &src_val);
     }
 
-    static void destruct(ckernel_prefix *self)
+    static void destruct(kernel_prefix *self)
     {
       extra_type *e = reinterpret_cast<extra_type *>(self);
       e->src_cat_tp.~type();
@@ -1864,19 +1864,19 @@ namespace nd {
         // Check whether the value is available
         // TODO: Would be nice to do this as a predicate
         //       instead of having to go through a dst pointer
-        ckernel_prefix *src_is_na = this->get_child();
+        kernel_prefix *src_is_na = this->get_child();
         kernel_single_t src_is_na_fn = src_is_na->get_function<kernel_single_t>();
         bool1 missing = bool1(false);
         src_is_na_fn(src_is_na, reinterpret_cast<char *>(&missing), src);
         if (!missing) {
           // It's available, copy using value assignment
-          ckernel_prefix *value_assign = this->get_child(m_value_assign_offset);
+          kernel_prefix *value_assign = this->get_child(m_value_assign_offset);
           kernel_single_t value_assign_fn = value_assign->get_function<kernel_single_t>();
           value_assign_fn(value_assign, dst, src);
         }
         else {
           // It's not available, assign an NA
-          ckernel_prefix *dst_assign_na = this->get_child(m_dst_assign_na_offset);
+          kernel_prefix *dst_assign_na = this->get_child(m_dst_assign_na_offset);
           kernel_single_t dst_assign_na_fn = dst_assign_na->get_function<kernel_single_t>();
           dst_assign_na_fn(dst_assign_na, dst, NULL);
         }
@@ -1885,11 +1885,11 @@ namespace nd {
       void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
         // Three child ckernels
-        ckernel_prefix *src_is_na = this->get_child();
+        kernel_prefix *src_is_na = this->get_child();
         kernel_strided_t src_is_na_fn = src_is_na->get_function<kernel_strided_t>();
-        ckernel_prefix *value_assign = this->get_child(m_value_assign_offset);
+        kernel_prefix *value_assign = this->get_child(m_value_assign_offset);
         kernel_strided_t value_assign_fn = value_assign->get_function<kernel_strided_t>();
-        ckernel_prefix *dst_assign_na = this->get_child(m_dst_assign_na_offset);
+        kernel_prefix *dst_assign_na = this->get_child(m_dst_assign_na_offset);
         kernel_strided_t dst_assign_na_fn = dst_assign_na->get_function<kernel_strided_t>();
         // Process in chunks using the dynd default buffer size
         bool1 missing[DYND_BUFFER_CHUNK_SIZE];
@@ -1959,7 +1959,7 @@ namespace nd {
                                  src_arrmeta, kernreq, nkwd, kwds, tp_vars);
         ckb_offset = ckb->m_size;
         // instantiate dst_assign_na
-        ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
+        ckb->reserve(ckb_offset + sizeof(kernel_prefix));
         self_type *self = ckb->get_at<self_type>(root_ckb_offset);
         self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
         nd::callable &assign_na = nd::assign_na::get();
@@ -1967,7 +1967,7 @@ namespace nd {
                                      kernreq, nkwd, kwds, tp_vars);
         ckb_offset = ckb->m_size;
         // instantiate value_assign
-        ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
+        ckb->reserve(ckb_offset + sizeof(kernel_prefix));
         self = ckb->get_at<self_type>(root_ckb_offset);
         self->m_value_assign_offset = ckb_offset - root_ckb_offset;
         make_assignment_kernel(ckb, dst_val_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq,
@@ -2029,13 +2029,13 @@ namespace nd {
         const string *std = reinterpret_cast<string *>(src[0]);
         if (parse_na(std->begin(), std->end())) {
           // It's not available, assign an NA
-          ckernel_prefix *dst_assign_na = get_child(m_dst_assign_na_offset);
+          kernel_prefix *dst_assign_na = get_child(m_dst_assign_na_offset);
           kernel_single_t dst_assign_na_fn = dst_assign_na->get_function<kernel_single_t>();
           dst_assign_na_fn(dst_assign_na, dst, NULL);
         }
         else {
           // It's available, copy using value assignment
-          ckernel_prefix *value_assign = get_child();
+          kernel_prefix *value_assign = get_child();
           kernel_single_t value_assign_fn = value_assign->get_function<kernel_single_t>();
           value_assign_fn(value_assign, dst, src);
         }
@@ -2147,9 +2147,9 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      ckernel_prefix *src_is_na = get_child();
+      kernel_prefix *src_is_na = get_child();
       kernel_single_t src_is_na_fn = src_is_na->get_function<kernel_single_t>();
-      ckernel_prefix *value_assign = get_child(m_value_assign_offset);
+      kernel_prefix *value_assign = get_child(m_value_assign_offset);
       kernel_single_t value_assign_fn = value_assign->get_function<kernel_single_t>();
       // Make sure it's not an NA
       bool1 missing = bool1(false);
@@ -2164,9 +2164,9 @@ namespace nd {
     void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
     {
       // Two child ckernels
-      ckernel_prefix *src_is_na = get_child();
+      kernel_prefix *src_is_na = get_child();
       kernel_strided_t src_is_na_fn = src_is_na->get_function<kernel_strided_t>();
-      ckernel_prefix *value_assign = get_child(m_value_assign_offset);
+      kernel_prefix *value_assign = get_child(m_value_assign_offset);
       kernel_strided_t value_assign_fn = value_assign->get_function<kernel_strided_t>();
       // Process in chunks using the dynd default buffer size
       bool1 missing[DYND_BUFFER_CHUNK_SIZE];
@@ -2206,7 +2206,7 @@ namespace nd {
                                 src_arrmeta, kernreq, 0, nullptr, tp_vars);
       ckb_offset = ckb->m_size;
       // instantiate value_assign
-      ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
+      ckb->reserve(ckb_offset + sizeof(kernel_prefix));
       self_type *self = ckb->get_at<self_type>(root_ckb_offset);
       self->m_value_assign_offset = ckb_offset - root_ckb_offset;
       make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq,

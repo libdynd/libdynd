@@ -142,7 +142,7 @@ namespace nd {
         for (intptr_t i = 0; i < narg; ++i) {
           if (!m_bufs[i].is_null()) {
             m_bufs[i].reset_arrmeta();
-            ckernel_prefix *ck = get_child(m_src_buf_ck_offsets[i]);
+            kernel_prefix *ck = get_child(m_src_buf_ck_offsets[i]);
             ck->single(m_bufs[i].get_storage(), &src[i]);
             buf_src[i] = m_bufs[i].get_storage();
           }
@@ -150,7 +150,7 @@ namespace nd {
             buf_src[i] = src[i];
           }
         }
-        ckernel_prefix *child = get_child();
+        kernel_prefix *child = get_child();
         child->single(dst, &buf_src[0]);
       }
 
@@ -158,7 +158,7 @@ namespace nd {
       {
         std::vector<char *> buf_src(narg);
         std::vector<intptr_t> buf_stride(narg);
-        ckernel_prefix *child = get_child();
+        kernel_prefix *child = get_child();
         kernel_strided_t child_fn = child->get_function<kernel_strided_t>();
 
         for (intptr_t i = 0; i < narg; ++i) {
@@ -177,7 +177,7 @@ namespace nd {
           for (intptr_t i = 0; i < narg; ++i) {
             if (!m_bufs[i].is_null()) {
               m_bufs[i].reset_arrmeta();
-              ckernel_prefix *ck = get_child(m_src_buf_ck_offsets[i]);
+              kernel_prefix *ck = get_child(m_src_buf_ck_offsets[i]);
               kernel_strided_t ck_fn = ck->get_function<kernel_strided_t>();
               ck_fn(ck, m_bufs[i].get_storage(), m_bufs[i].get_stride(), &src[i], &src_stride[i], chunk_size);
             }
@@ -186,7 +186,7 @@ namespace nd {
           for (intptr_t i = 0; i < narg; ++i) {
             if (!m_bufs[i].is_null()) {
               m_bufs[i].reset_arrmeta();
-              ckernel_prefix *ck = get_child(m_src_buf_ck_offsets[i]);
+              kernel_prefix *ck = get_child(m_src_buf_ck_offsets[i]);
               kernel_strided_t ck_fn = ck->get_function<kernel_strided_t>();
               ck_fn(ck, m_bufs[i].get_storage(), buf_stride[i], &src[i], &src_stride[i], chunk_size);
             }
@@ -225,7 +225,7 @@ namespace nd {
         af.get()->instantiate(af.get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp_for_af.data(),
                               &buffered_arrmeta[0], kernreq, nkwd, kwds, tp_vars);
         ckb_offset = ckb->m_size;
-        reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+        reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(kernel_prefix));
         self = reinterpret_cast<kernel_builder *>(ckb)->get_at<convert_kernel>(root_ckb_offset);
         // Instantiate assignments for all the buffered operands
         for (intptr_t i = 0; i < nsrc; ++i) {
@@ -236,7 +236,7 @@ namespace nd {
                                        self->m_bufs[i].get_arrmeta(), 1, src_tp + i, src_arrmeta + i, kernreq, 1,
                                        &error_mode, tp_vars);
             ckb_offset = ckb->m_size;
-            reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
+            reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(kernel_prefix));
             if (i < nsrc - 1) {
               self = reinterpret_cast<kernel_builder *>(ckb)->get_at<convert_kernel>(root_ckb_offset);
             }

@@ -368,7 +368,7 @@ namespace nd {
         }
         skip_whitespace(args);
 
-        ckernel_prefix *child = get_child();
+        kernel_prefix *child = get_child();
         for (size_t i = 0; i < _size; ++i) {
           child->single(ret, args);
           if (i < _size - 1 && !parse_token(args, ",")) {
@@ -424,7 +424,7 @@ namespace nd {
         size_t size = 0, allocated_size = 8;
         reinterpret_cast<ret_type *>(ret)->begin = blockref->alloc(allocated_size);
 
-        ckernel_prefix *child = get_child();
+        kernel_prefix *child = get_child();
         for (char *data = reinterpret_cast<ret_type *>(ret)->begin;; data += stride) {
           // Increase the allocated array size if necessary
           if (size == allocated_size) {

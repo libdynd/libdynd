@@ -10,10 +10,9 @@
 #include <map>
 
 namespace dynd {
-
-struct ckernel_prefix;
-
 namespace nd {
+
+  struct kernel_prefix;
 
   /**
    * Function pointers + data for a hierarchical
@@ -93,7 +92,7 @@ namespace nd {
       }
     }
 
-    ckernel_prefix *get() const { return reinterpret_cast<ckernel_prefix *>(m_data); }
+    kernel_prefix *get() const { return reinterpret_cast<kernel_prefix *>(m_data); }
 
     /**
      * For use during construction, gets the ckernel component
