@@ -102,8 +102,8 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        ckernel_prefix *child = this->get_child();
-        ckernel_prefix *boundary_child = this->get_child(boundary_child_offset);
+        kernel_prefix *child = this->get_child();
+        kernel_prefix *boundary_child = this->get_child(boundary_child_offset);
 
         char *src0 = src[0] + src0_offset;
 

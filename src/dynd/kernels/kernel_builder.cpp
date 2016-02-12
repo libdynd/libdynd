@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/kernels/ckernel_prefix.hpp>
+#include <dynd/kernels/kernel_prefix.hpp>
 #include <dynd/kernels/kernel_builder.hpp>
 
 using namespace std;
@@ -13,7 +13,7 @@ void nd::kernel_builder::destroy()
 {
   if (m_data != NULL) {
     // Destroy whatever was created
-    reinterpret_cast<ckernel_prefix *>(m_data)->destroy();
+    reinterpret_cast<kernel_prefix *>(m_data)->destroy();
     // Free the memory
     free(m_data);
   }
@@ -23,6 +23,6 @@ void nd::kernel_builder::destroy()
 
 ckernel_builder<kernel_request_cuda_device>::pooled_allocator ckernel_builder<kernel_request_cuda_device>::allocator;
 
-__global__ void dynd::cuda_device_destroy(ckernel_prefix *self) { self->destroy(); }
+__global__ void dynd::cuda_device_destroy(kernel_prefix *self) { self->destroy(); }
 
 #endif

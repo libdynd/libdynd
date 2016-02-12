@@ -62,7 +62,7 @@ namespace nd {
       const size_t *kernel_offsets = reinterpret_cast<const size_t *>(this + 1);
       char *child_src[2];
       for (size_t i = 0; i != field_count; ++i) {
-        ckernel_prefix *echild = reinterpret_cast<ckernel_prefix *>(reinterpret_cast<char *>(this) + kernel_offsets[i]);
+        kernel_prefix *echild = reinterpret_cast<kernel_prefix *>(reinterpret_cast<char *>(this) + kernel_offsets[i]);
         kernel_single_t opchild = echild->get_function<kernel_single_t>();
         // if (src0.field_i < src1.field_i) return true
         child_src[0] = src[0] + src0_data_offsets[i];

@@ -18,7 +18,7 @@ namespace {
 struct buffered_kernel_extra {
   typedef buffered_kernel_extra extra_type;
 
-  ckernel_prefix base;
+  nd::kernel_prefix base;
   // Offsets, from the start of &base, to the kernels
   // before and after the buffer
   size_t first_kernel_offset, second_kernel_offset;
@@ -76,17 +76,17 @@ struct buffered_kernel_extra {
     }
   }
 
-  static void single(ckernel_prefix *extra, char *dst, char *const *src)
+  static void single(nd::kernel_prefix *extra, char *dst, char *const *src)
   {
     char *eraw = reinterpret_cast<char *>(extra);
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_prefix *echild_first, *echild_second;
+    nd::kernel_prefix *echild_first, *echild_second;
     kernel_single_t opchild;
     const ndt::base_type *buffer_tp = e->buffer_tp;
     char *buffer_arrmeta = e->buffer_arrmeta;
     char *buffer_data_ptr = eraw + e->buffer_data_offset;
-    echild_first = reinterpret_cast<ckernel_prefix *>(eraw + e->first_kernel_offset);
-    echild_second = reinterpret_cast<ckernel_prefix *>(eraw + e->second_kernel_offset);
+    echild_first = reinterpret_cast<nd::kernel_prefix *>(eraw + e->first_kernel_offset);
+    echild_second = reinterpret_cast<nd::kernel_prefix *>(eraw + e->second_kernel_offset);
 
     // If the type needs it, initialize the buffer data to zero
     if (!is_builtin_type(buffer_tp) && (buffer_tp->get_flags() & type_flag_zeroinit) != 0) {
@@ -103,19 +103,19 @@ struct buffered_kernel_extra {
       buffer_tp->arrmeta_reset_buffers(buffer_arrmeta);
     }
   }
-  static void strided(ckernel_prefix *extra, char *dst, intptr_t dst_stride, char *const *src,
+  static void strided(nd::kernel_prefix *extra, char *dst, intptr_t dst_stride, char *const *src,
                       const intptr_t *src_stride, size_t count)
   {
     char *eraw = reinterpret_cast<char *>(extra);
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_prefix *echild_first, *echild_second;
+    nd::kernel_prefix *echild_first, *echild_second;
     kernel_strided_t opchild_first, opchild_second;
     const ndt::base_type *buffer_tp = e->buffer_tp;
     char *buffer_arrmeta = e->buffer_arrmeta;
     char *buffer_data_ptr = eraw + e->buffer_data_offset;
     intptr_t buffer_stride = e->buffer_stride;
-    echild_first = reinterpret_cast<ckernel_prefix *>(eraw + e->first_kernel_offset);
-    echild_second = reinterpret_cast<ckernel_prefix *>(eraw + e->second_kernel_offset);
+    echild_first = reinterpret_cast<nd::kernel_prefix *>(eraw + e->first_kernel_offset);
+    echild_second = reinterpret_cast<nd::kernel_prefix *>(eraw + e->second_kernel_offset);
 
     opchild_first = echild_first->get_function<kernel_strided_t>();
     opchild_second = echild_second->get_function<kernel_strided_t>();
@@ -140,7 +140,7 @@ struct buffered_kernel_extra {
       count -= chunk_size;
     }
   }
-  static void destruct(ckernel_prefix *self)
+  static void destruct(nd::kernel_prefix *self)
   {
     extra_type *e = reinterpret_cast<extra_type *>(self);
     // Steal the buffer_tp reference count into a type
@@ -190,7 +190,7 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
         intptr_t buffer_data_offset = ckb_offset;
         ckb_offset += nd::kernel_builder::aligned_size(e->buffer_data_size);
         ckb->m_size += nd::kernel_builder::aligned_size(e->buffer_data_size);
-        ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
+        ckb->reserve(ckb_offset + sizeof(nd::kernel_prefix));
         // This may have invalidated the 'e' pointer, so get it again!
         e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
         e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
@@ -228,7 +228,7 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
       intptr_t buffer_data_offset = ckb_offset;
       ckb_offset += nd::kernel_builder::aligned_size(e->buffer_data_size);
       ckb->m_size += nd::kernel_builder::aligned_size(e->buffer_data_size);
-      ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
+      ckb->reserve(ckb_offset + sizeof(nd::kernel_prefix));
       // This may have invalidated the 'e' pointer, so get it again!
       e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
       e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
@@ -266,7 +266,7 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
         size_t buffer_data_offset = ckb_offset;
         ckb_offset += nd::kernel_builder::aligned_size(buffer_data_size);
         ckb->m_size += nd::kernel_builder::aligned_size(buffer_data_size);
-        ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
+        ckb->reserve(ckb_offset + sizeof(nd::kernel_prefix));
         // This may have invalidated the 'e' pointer, so get it again!
         e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
         e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
@@ -295,7 +295,7 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
       size_t buffer_data_offset = ckb_offset;
       ckb_offset += nd::kernel_builder::aligned_size(buffer_data_size);
       ckb->m_size += nd::kernel_builder::aligned_size(buffer_data_size);
-      ckb->reserve(ckb_offset + sizeof(ckernel_prefix));
+      ckb->reserve(ckb_offset + sizeof(nd::kernel_prefix));
       // This may have invalidated the 'e' pointer, so get it again!
       e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
       e->buffer_data_offset = buffer_data_offset - root_ckb_offset;

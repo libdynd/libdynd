@@ -27,7 +27,7 @@ namespace nd {
 
     void call(array *DYND_UNUSED(dst), array *const *src)
     {
-      ckernel_prefix *child = get_child();
+      kernel_prefix *child = get_child();
       size_t new_size =
           (std::unique(strided_iterator(src[0]->data(), src0_element_data_size, src0_stride),
                        strided_iterator(src[0]->data() + src0_size * src0_stride, src0_element_data_size, src0_stride),

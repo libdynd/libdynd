@@ -15,7 +15,7 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct DYND_API reduction_kernel_prefix : ckernel_prefix {
+    struct DYND_API reduction_kernel_prefix : kernel_prefix {
       // This function pointer is for all the calls of the function
       // on a given destination data address after the "first call".
       kernel_strided_t followup_call_function;
@@ -192,19 +192,19 @@ namespace nd {
         return self;
       }
 
-      static void single_first_wrapper(ckernel_prefix *self, char *dst, char *const *src)
+      static void single_first_wrapper(kernel_prefix *self, char *dst, char *const *src)
       {
         return reinterpret_cast<SelfType *>(self)->single_first(dst, src);
       }
 
-      static void strided_first_wrapper(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
+      static void strided_first_wrapper(kernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
                                         const intptr_t *src_stride, size_t count)
 
       {
         return reinterpret_cast<SelfType *>(self)->strided_first(dst, dst_stride, src, src_stride, count);
       }
 
-      static void strided_followup_wrapper(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
+      static void strided_followup_wrapper(kernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
                                            const intptr_t *src_stride, size_t count)
 
       {
@@ -384,8 +384,8 @@ namespace nd {
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
-        ckernel_prefix *init_child = get_child(init_offset);
-        ckernel_prefix *reduction_child = get_child();
+        kernel_prefix *init_child = get_child(init_offset);
+        kernel_prefix *reduction_child = get_child();
 
         char *src0 = src[0];
         if (dst_stride == 0) {
@@ -418,7 +418,7 @@ namespace nd {
 
       void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
-        ckernel_prefix *reduce_child = get_child();
+        kernel_prefix *reduce_child = get_child();
 
         // No initialization, all reduction
         char *src0 = src[0];
@@ -528,8 +528,8 @@ namespace nd {
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
-        ckernel_prefix *init_child = get_child(init_offset);
-        ckernel_prefix *reduction_child = get_child();
+        kernel_prefix *init_child = get_child(init_offset);
+        kernel_prefix *reduction_child = get_child();
 
         char *src0 = src[0];
         for (size_t i = 0; i != count; ++i) {
@@ -551,7 +551,7 @@ namespace nd {
 
       void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t size)
       {
-        ckernel_prefix *child = get_child();
+        kernel_prefix *child = get_child();
 
         char *src0 = src[0];
         for (size_t i = 0; i != size; ++i) {
@@ -743,8 +743,8 @@ namespace nd {
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
-        ckernel_prefix *init_child = get_child(dst_init_kernel_offset);
-        ckernel_prefix *reduction_child = get_child();
+        kernel_prefix *init_child = get_child(dst_init_kernel_offset);
+        kernel_prefix *reduction_child = get_child();
 
         intptr_t inner_size = this->_size;
         intptr_t inner_dst_stride = this->dst_stride;
@@ -778,7 +778,7 @@ namespace nd {
 
       void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
-        ckernel_prefix *echild_reduce = get_child();
+        kernel_prefix *echild_reduce = get_child();
         // No initialization, all reduction
         kernel_strided_t opchild_reduce = echild_reduce->get_function<kernel_strided_t>();
         intptr_t inner_size = this->_size;

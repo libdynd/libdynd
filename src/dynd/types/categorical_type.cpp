@@ -24,10 +24,10 @@ class sorter {
   char *m_originptr;
   intptr_t m_stride;
   const kernel_single_t m_less;
-  ckernel_prefix *m_less_self;
+  nd::kernel_prefix *m_less_self;
 
 public:
-  sorter(const char *originptr, intptr_t stride, const kernel_single_t less, ckernel_prefix *less_self)
+  sorter(const char *originptr, intptr_t stride, const kernel_single_t less, nd::kernel_prefix *less_self)
       : m_originptr(const_cast<char *>(originptr)), m_stride(stride), m_less(less), m_less_self(less_self)
   {
   }
@@ -44,10 +44,10 @@ public:
 
 class cmp {
   const kernel_single_t m_less;
-  ckernel_prefix *m_less_self;
+  nd::kernel_prefix *m_less_self;
 
 public:
-  cmp(const kernel_single_t less, ckernel_prefix *less_self) : m_less(less), m_less_self(less_self) {}
+  cmp(const kernel_single_t less, nd::kernel_prefix *less_self) : m_less(less), m_less_self(less_self) {}
 
   bool operator()(const char *a, const char *b) const
   {

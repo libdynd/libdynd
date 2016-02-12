@@ -8,7 +8,7 @@
 #include <typeinfo>
 
 #include <dynd/array.hpp>
-#include <dynd/kernels/ckernel_prefix.hpp>
+#include <dynd/kernels/kernel_prefix.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
@@ -21,30 +21,30 @@ namespace nd {
     /**
      * Returns the child kernel immediately following this one.
      */
-    DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child(intptr_t offset)
+    DYND_CUDA_HOST_DEVICE kernel_prefix *get_child(intptr_t offset)
     {
-      return ckernel_prefix::get_child(kernel_builder::aligned_size(offset));
+      return kernel_prefix::get_child(kernel_builder::aligned_size(offset));
     }
 
     /**
      * Returns the child kernel immediately following this one.
      */
-    DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child()
+    DYND_CUDA_HOST_DEVICE kernel_prefix *get_child()
     {
-      return ckernel_prefix::get_child(reinterpret_cast<SelfType *>(this)->size());
+      return kernel_prefix::get_child(reinterpret_cast<SelfType *>(this)->size());
     }
 
     template <size_t I>
-    std::enable_if_t<I == 0, ckernel_prefix *> get_child()
+    std::enable_if_t<I == 0, kernel_prefix *> get_child()
     {
       return get_child();
     }
 
     template <size_t I>
-    std::enable_if_t<(I > 0), ckernel_prefix *> get_child()
+    std::enable_if_t<(I > 0), kernel_prefix *> get_child()
     {
       const size_t *offsets = get_offsets();
-      return ckernel_prefix::get_child(offsets[I - 1]);
+      return kernel_prefix::get_child(offsets[I - 1]);
     }
 
     /**
@@ -69,9 +69,9 @@ namespace nd {
 
     /**
      * The ckernel destructor function, which is placed in
-     * the ckernel_prefix destructor.
+     * the kernel_prefix destructor.
      */
-    static void destruct(ckernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }
+    static void destruct(kernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -98,7 +98,7 @@ namespace nd {
    * create kernels.
    *
    * For most ckernels, the structure is not known beyond that
-   * the ckernel_prefix is at the beginning. In some, such
+   * the kernel_prefix is at the beginning. In some, such
    * as the reduction ckernel, more is known, in which case
    * CKP may be overriden.
    */
@@ -116,14 +116,14 @@ namespace nd {
  */
 #define BASE_KERNEL(KERNREQ, ...)                                                                                      \
   template <typename SelfType>                                                                                         \
-  struct base_kernel<SelfType> : kernel_prefix_wrapper<ckernel_prefix, SelfType> {                                     \
+  struct base_kernel<SelfType> : kernel_prefix_wrapper<kernel_prefix, SelfType> {                                      \
     static const kernel_request_t kernreq = kernel_request_single;                                                     \
                                                                                                                        \
-    typedef kernel_prefix_wrapper<ckernel_prefix, SelfType> parent_type;                                               \
+    typedef kernel_prefix_wrapper<kernel_prefix, SelfType> parent_type;                                                \
                                                                                                                        \
-    /** Initializes just the ckernel_prefix function member. */                                                        \
+    /** Initializes just the kernel_prefix function member. */                                                         \
     template <typename... A>                                                                                           \
-    static SelfType *init(ckernel_prefix *rawself, kernel_request_t kernreq, A &&... args)                             \
+    static SelfType *init(kernel_prefix *rawself, kernel_request_t kernreq, A &&... args)                              \
     {                                                                                                                  \
       SelfType *self = parent_type::init(rawself, kernreq, std::forward<A>(args)...);                                  \
       switch (kernreq) {                                                                                               \
@@ -151,7 +151,7 @@ namespace nd {
       throw std::runtime_error(ss.str());                                                                              \
     }                                                                                                                  \
                                                                                                                        \
-    __VA_ARGS__ static void call_wrapper(ckernel_prefix *self, array *dst, array *const *src)                          \
+    __VA_ARGS__ static void call_wrapper(kernel_prefix *self, array *dst, array *const *src)                           \
     {                                                                                                                  \
       reinterpret_cast<SelfType *>(self)->call(dst, src);                                                              \
     }                                                                                                                  \
@@ -163,12 +163,12 @@ namespace nd {
       throw std::runtime_error(ss.str());                                                                              \
     }                                                                                                                  \
                                                                                                                        \
-    __VA_ARGS__ static void DYND_EMIT_LLVM(single_wrapper)(ckernel_prefix * self, char *dst, char *const *src)         \
+    __VA_ARGS__ static void DYND_EMIT_LLVM(single_wrapper)(kernel_prefix * self, char *dst, char *const *src)          \
     {                                                                                                                  \
       reinterpret_cast<SelfType *>(self)->single(dst, src);                                                            \
     }                                                                                                                  \
                                                                                                                        \
-    __VA_ARGS__ static void strided_wrapper(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,    \
+    __VA_ARGS__ static void strided_wrapper(kernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,     \
                                             const intptr_t *src_stride, size_t count)                                  \
     {                                                                                                                  \
       reinterpret_cast<SelfType *>(self)->strided(dst, dst_stride, src, src_stride, count);                            \
