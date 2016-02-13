@@ -64,7 +64,7 @@ namespace nd {
                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                             const std::map<std::string, ndt::type> &tp_vars)
     {
-      intptr_t mean_offset = ckb->m_size;
+      intptr_t mean_offset = ckb->size();
       ckb->emplace_back<mean_kernel>(kernreq, src_tp[0].get_size(src_arrmeta[0]));
 
       nd::sum::get().get()->instantiate(nd::sum::get().get()->static_data(),
@@ -72,7 +72,7 @@ namespace nd {
                                         src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
 
       mean_kernel *self = ckb->get_at<mean_kernel>(mean_offset);
-      self->compound_div_offset = ckb->m_size;
+      self->compound_div_offset = ckb->size();
       nd::compound_div::get().get()->instantiate(
           nd::compound_div::get().get()->static_data(), reinterpret_cast<data_type *>(data)->compound_div_data, ckb,
           dst_tp, dst_arrmeta, 1, reinterpret_cast<ndt::type *>(static_data), NULL, kernreq, nkwd, kwds, tp_vars);

@@ -241,20 +241,20 @@ namespace nd {
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        intptr_t ckb_offset = ckb->m_size;
+        intptr_t ckb_offset = ckb->size();
         intptr_t self_offset = ckb_offset;
         ckb->emplace_back<parse_kernel>(kernreq);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
 
         assign_na::get()->instantiate(assign_na::get()->static_data(), data, ckb, dst_tp, dst_arrmeta, 0, nullptr,
                                       nullptr, kernreq, nkwd, kwds, tp_vars);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
 
         ckb->get_at<parse_kernel>(self_offset)->parse_offset = ckb_offset - self_offset;
         parse::get()->instantiate(parse::get()->static_data(), data, ckb,
                                   dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc, src_tp,
                                   src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
       }
     };
 
@@ -330,21 +330,21 @@ namespace nd {
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        intptr_t ckb_offset = ckb->m_size;
+        intptr_t ckb_offset = ckb->size();
         size_t field_count = dst_tp.extended<ndt::struct_type>()->get_field_count();
         const std::vector<uintptr_t> &arrmeta_offsets = dst_tp.extended<ndt::struct_type>()->get_arrmeta_offsets();
 
         intptr_t self_offset = ckb_offset;
         ckb->emplace_back<parse_kernel>(kernreq, dst_tp, field_count,
                                         dst_tp.extended<ndt::struct_type>()->get_data_offsets(dst_arrmeta));
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
 
         for (size_t i = 0; i < field_count; ++i) {
           ckb->get_at<parse_kernel>(self_offset)->child_offsets[i] = ckb_offset - self_offset;
           json::parse::get()->instantiate(
               json::parse::get()->static_data(), data, ckb, dst_tp.extended<ndt::struct_type>()->get_field_type(i),
               dst_arrmeta + arrmeta_offsets[i], nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-          ckb_offset = ckb->m_size;
+          ckb_offset = ckb->size();
         }
       }
     };
