@@ -153,7 +153,6 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
                                              const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
                                              const eval::eval_context *ectx)
 {
-  intptr_t ckb_offset = ckb->size();
   intptr_t root_ckb_offset = ckb->size();
   if (dst_tp.get_base_id() == expr_kind_id) {
     const ndt::base_expr_type *dst_bed = dst_tp.extended<ndt::base_expr_type>();
@@ -170,16 +169,12 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
         intptr_t saved_ckb_offset = ckb->size();
         ckb->emplace_back<buffered_kernel_extra>(kernreq, buffer_tp, kernreq);
         buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(saved_ckb_offset);
-        ckb_offset = ckb->size();
         // Construct the first kernel (src -> buffer)
         e->first_kernel_offset = ckb->size() - root_ckb_offset;
         dst_bed->make_value_to_operand_assignment_kernel(ckb, e->buffer_arrmeta, src_arrmeta, kernreq, ectx);
-        ckb_offset = ckb->size();
         // Allocate the buffer data
-        ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
         intptr_t buffer_data_offset = ckb->size();
-        ckb_offset += nd::kernel_builder::aligned_size(e->buffer_data_size);
-        ckb->m_size += nd::kernel_builder::aligned_size(e->buffer_data_size);
+        ckb->emplace_back(e->buffer_data_size);
         // This may have invalidated the 'e' pointer, so get it again!
         e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
         e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
@@ -206,16 +201,12 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
       intptr_t saved_ckb_offset = ckb->size();
       ckb->emplace_back<buffered_kernel_extra>(kernreq, buffer_tp, kernreq);
       buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(saved_ckb_offset);
-      ckb_offset = ckb->size();
       // Construct the first kernel (src -> buffer)
       e->first_kernel_offset = ckb->size() - root_ckb_offset;
       ::make_assignment_kernel(ckb, buffer_tp, e->buffer_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
-      ckb_offset = ckb->size();
-      ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
       // Allocate the buffer data
       intptr_t buffer_data_offset = ckb->size();
-      ckb_offset += nd::kernel_builder::aligned_size(e->buffer_data_size);
-      ckb->m_size += nd::kernel_builder::aligned_size(e->buffer_data_size);
+      ckb->emplace_back(e->buffer_data_size);
       // This may have invalidated the 'e' pointer, so get it again!
       e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
       e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
@@ -241,17 +232,12 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
         intptr_t saved_ckb_offset = ckb->size();
         ckb->emplace_back<buffered_kernel_extra>(kernreq, buffer_tp, kernreq);
         buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(saved_ckb_offset);
-        ckb_offset = ckb->size();
-        size_t buffer_data_size = e->buffer_data_size;
         // Construct the first kernel (src -> buffer)
         e->first_kernel_offset = ckb->size() - root_ckb_offset;
         ::make_assignment_kernel(ckb, buffer_tp, e->buffer_arrmeta, opdt, src_arrmeta, kernreq, ectx);
-        ckb_offset = ckb->size();
         // Allocate the buffer data
-        ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
         size_t buffer_data_offset = ckb->size();
-        ckb_offset += nd::kernel_builder::aligned_size(buffer_data_size);
-        ckb->m_size += nd::kernel_builder::aligned_size(buffer_data_size);
+        ckb->emplace_back(e->buffer_data_size);
         // This may have invalidated the 'e' pointer, so get it again!
         e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
         e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
@@ -268,17 +254,12 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
       intptr_t saved_ckb_offset = ckb->size();
       ckb->emplace_back<buffered_kernel_extra>(kernreq, buffer_tp, kernreq);
       buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(saved_ckb_offset);
-      ckb_offset = ckb->size();
-      size_t buffer_data_size = e->buffer_data_size;
       // Construct the first kernel (src -> buffer)
       e->first_kernel_offset = ckb->size() - root_ckb_offset;
       ::make_assignment_kernel(ckb, buffer_tp, e->buffer_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
-      ckb_offset = ckb->size();
       // Allocate the buffer data
-      ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
       size_t buffer_data_offset = ckb->size();
-      ckb_offset += nd::kernel_builder::aligned_size(buffer_data_size);
-      ckb->m_size += nd::kernel_builder::aligned_size(buffer_data_size);
+      ckb->emplace_back(e->buffer_data_size);
       // This may have invalidated the 'e' pointer, so get it again!
       e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
       e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
