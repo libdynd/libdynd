@@ -29,7 +29,7 @@ struct buffered_kernel_extra : nd::base_kernel<buffered_kernel_extra> {
   // Initializes the type and arrmeta for the buffer
   // NOTE: This does NOT initialize the buffer_data_offset,
   //       just the buffer_data_size.
-  void init2(const ndt::type &buffer_tp_, kernel_request_t kernreq)
+  buffered_kernel_extra(const ndt::type &buffer_tp_, kernel_request_t kernreq)
   {
     size_t element_count = 1;
     switch (kernreq) {
@@ -168,10 +168,9 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
         // Chain case, buffer one segment of the chain
         const ndt::type &buffer_tp = static_cast<const ndt::base_expr_type *>(opdt.extended())->get_value_type();
         intptr_t saved_ckb_offset = ckb->m_size;
-        ckb->emplace_back<buffered_kernel_extra>(kernreq);
+        ckb->emplace_back<buffered_kernel_extra>(kernreq, buffer_tp, kernreq);
         buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(saved_ckb_offset);
         ckb_offset = ckb->m_size;
-        e->init2(buffer_tp, kernreq);
         // Construct the first kernel (src -> buffer)
         e->first_kernel_offset = ckb_offset - root_ckb_offset;
         dst_bed->make_value_to_operand_assignment_kernel(ckb, e->buffer_arrmeta, src_arrmeta, kernreq, ectx);
@@ -206,10 +205,9 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
         buffer_tp = src_tp.value_type();
       }
       intptr_t saved_ckb_offset = ckb->m_size;
-      ckb->emplace_back<buffered_kernel_extra>(kernreq);
+      ckb->emplace_back<buffered_kernel_extra>(kernreq, buffer_tp, kernreq);
       buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(saved_ckb_offset);
       ckb_offset = ckb->m_size;
-      e->init2(buffer_tp, kernreq);
       // Construct the first kernel (src -> buffer)
       e->first_kernel_offset = ckb_offset - root_ckb_offset;
       ::make_assignment_kernel(ckb, buffer_tp, e->buffer_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
@@ -243,10 +241,9 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
         // Chain case, buffer one segment of the chain
         const ndt::type &buffer_tp = static_cast<const ndt::base_expr_type *>(opdt.extended())->get_value_type();
         intptr_t saved_ckb_offset = ckb->m_size;
-        ckb->emplace_back<buffered_kernel_extra>(kernreq);
+        ckb->emplace_back<buffered_kernel_extra>(kernreq, buffer_tp, kernreq);
         buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(saved_ckb_offset);
         ckb_offset = ckb->m_size;
-        e->init2(buffer_tp, kernreq);
         size_t buffer_data_size = e->buffer_data_size;
         // Construct the first kernel (src -> buffer)
         e->first_kernel_offset = ckb_offset - root_ckb_offset;
@@ -272,10 +269,9 @@ void dynd::make_expression_assignment_kernel(nd::kernel_builder *ckb, const ndt:
       // to dst value type conversion
       const ndt::type &buffer_tp = src_tp.value_type();
       intptr_t saved_ckb_offset = ckb->m_size;
-      ckb->emplace_back<buffered_kernel_extra>(kernreq);
+      ckb->emplace_back<buffered_kernel_extra>(kernreq, buffer_tp, kernreq);
       buffered_kernel_extra *e = ckb->get_at<buffered_kernel_extra>(saved_ckb_offset);
       ckb_offset = ckb->m_size;
-      e->init2(buffer_tp, kernreq);
       size_t buffer_data_size = e->buffer_data_size;
       // Construct the first kernel (src -> buffer)
       e->first_kernel_offset = ckb_offset - root_ckb_offset;
