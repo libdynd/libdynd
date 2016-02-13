@@ -74,31 +74,27 @@ namespace nd {
   struct base_kernel<SelfType> : kernel_prefix_wrapper<kernel_prefix, SelfType> {                                      \
     static const kernel_request_t kernreq = kernel_request_single;                                                     \
                                                                                                                        \
-    typedef kernel_prefix_wrapper<kernel_prefix, SelfType> parent_type;                                                \
-                                                                                                                       \
-    base_kernel() { this->destructor = &SelfType::destruct; }                                                          \
-                                                                                                                       \
     /** Initializes just the kernel_prefix function member. */                                                         \
-    template <typename... A>                                                                                           \
-    static SelfType *init(kernel_prefix *rawself, kernel_request_t kernreq, A &&... args)                              \
+    template <typename... ArgTypes>                                                                                    \
+    static void init(SelfType *self, kernel_request_t kernreq, ArgTypes &&... args)                                    \
     {                                                                                                                  \
-      SelfType *self = new (rawself) SelfType(args...);                                                                \
+      new (self) SelfType(std::forward<ArgTypes>(args)...);                                                            \
+                                                                                                                       \
+      self->destructor = SelfType::destruct;                                                                           \
       switch (kernreq) {                                                                                               \
       case kernel_request_call:                                                                                        \
-        self->function = reinterpret_cast<void *>(call_wrapper);                                                       \
+        self->function = reinterpret_cast<void *>(SelfType::call_wrapper);                                             \
         break;                                                                                                         \
       case kernel_request_single:                                                                                      \
-        self->function = reinterpret_cast<void *>(single_wrapper);                                                     \
+        self->function = reinterpret_cast<void *>(SelfType::single_wrapper);                                           \
         break;                                                                                                         \
       case kernel_request_strided:                                                                                     \
-        self->function = reinterpret_cast<void *>(strided_wrapper);                                                    \
+        self->function = reinterpret_cast<void *>(SelfType::strided_wrapper);                                          \
         break;                                                                                                         \
       default:                                                                                                         \
         DYND_HOST_THROW(std::invalid_argument,                                                                         \
                         "expr ckernel init: unrecognized ckernel request " + std::to_string(kernreq));                 \
       }                                                                                                                \
-                                                                                                                       \
-      return self;                                                                                                     \
     }                                                                                                                  \
                                                                                                                        \
     /**                                                                                                                \

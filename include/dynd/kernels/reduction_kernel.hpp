@@ -132,33 +132,32 @@ namespace nd {
       typedef kernel_prefix_wrapper<reduction_kernel_prefix, SelfType> wrapper_type;
       typedef reduction_virtual_kernel::data_type data_type;
 
-      base_reduction_kernel() { this->destructor = &SelfType::destruct; }
-
       reduction_kernel_prefix *get_reduction_child()
       {
         return reinterpret_cast<reduction_kernel_prefix *>(this->get_child());
       }
 
-      template <typename... A>
-      static SelfType *init(reduction_kernel_prefix *prefix, kernel_request_t kernreq, A &&... args)
+      template <typename... ArgTypes>
+      static void init(SelfType *self, kernel_request_t kernreq, ArgTypes &&... args)
       {
-        SelfType *self = new (prefix) SelfType(args...);
+        new (self) SelfType(std::forward<ArgTypes>(args)...);
+
+        self->destructor = SelfType::destruct;
         // Get the function pointer for the first_call
-        if (kernreq == kernel_request_single) {
-          prefix->set_first_call_function(&SelfType::single_first_wrapper);
-        }
-        else if (kernreq == kernel_request_strided) {
-          prefix->set_first_call_function(&SelfType::strided_first_wrapper);
-        }
-        else {
+        switch (kernreq) {
+        case kernel_request_single:
+          self->set_first_call_function(SelfType::single_first_wrapper);
+          break;
+        case kernel_request_strided:
+          self->set_first_call_function(SelfType::strided_first_wrapper);
+          break;
+        default:
           std::stringstream ss;
           ss << "make_lifted_reduction_ckernel: unrecognized request " << (int)kernreq;
           throw std::runtime_error(ss.str());
         }
         // The function pointer for followup accumulation calls
-        prefix->set_followup_call_function(&SelfType::strided_followup_wrapper);
-
-        return self;
+        self->set_followup_call_function(SelfType::strided_followup_wrapper);
       }
 
       static void destruct(kernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }
