@@ -67,7 +67,7 @@ void nd::functional::rolling_ck::instantiate(char *_static_data, char *data, ker
   typedef dynd::nd::functional::strided_rolling_ck self_type;
   rolling_callable_data *static_data = *reinterpret_cast<rolling_callable_data **>(_static_data);
 
-  intptr_t root_ckb_offset = ckb->m_size;
+  intptr_t root_ckb_offset = ckb->size();
   ckb->emplace_back<self_type>(kernreq);
   self_type *self = ckb->get_at<self_type>(root_ckb_offset);
   const base_callable *window_af = static_data->window_op.get();
@@ -102,7 +102,7 @@ void nd::functional::rolling_ck::instantiate(char *_static_data, char *data, ker
   // now
   self = reinterpret_cast<kernel_builder *>(ckb)->get_at<self_type>(root_ckb_offset);
   // Create the window op child ckernel
-  self->m_window_op_offset = ckb->m_size - root_ckb_offset;
+  self->m_window_op_offset = ckb->size() - root_ckb_offset;
   // We construct array arrmeta for the window op ckernel to use,
   // without actually creating an nd::array to hold it.
   arrmeta_holder(ndt::make_fixed_dim(static_data->window_size, src_el_tp)).swap(self->m_src_winop_meta);

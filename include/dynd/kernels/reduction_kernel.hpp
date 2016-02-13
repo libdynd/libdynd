@@ -445,7 +445,7 @@ namespace nd {
         intptr_t src_size = src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
         intptr_t src_stride = src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_stride(src_arrmeta[0]);
 
-        intptr_t root_ckb_offset = ckb->m_size;
+        intptr_t root_ckb_offset = ckb->size();
         ckb->emplace_back<reduction_kernel>(kernreq);
         reduction_kernel *e = ckb->get_at<reduction_kernel>(root_ckb_offset);
         // The striding parameters
@@ -570,7 +570,7 @@ namespace nd {
         const ndt::type &src0_element_tp = src_tp[0].extended<ndt::var_dim_type>()->get_element_type();
         const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(ndt::var_dim_type::metadata_type);
 
-        intptr_t root_ckb_offset = ckb->m_size;
+        intptr_t root_ckb_offset = ckb->size();
         ckb->emplace_back<reduction_kernel>(
             kernreq, reinterpret_cast<const ndt::var_dim_type::metadata_type *>(src_arrmeta[0])->stride);
 
@@ -815,7 +815,7 @@ namespace nd {
         const ndt::type &dst_element_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
 
-        intptr_t root_ckb_offset = ckb->m_size;
+        intptr_t root_ckb_offset = ckb->size();
         ckb->emplace_back<reduction_kernel>(kernreq, dst_stride, src_stride);
         reduction_kernel *self = ckb->get_at<reduction_kernel>(root_ckb_offset);
 
@@ -866,7 +866,7 @@ namespace nd {
                                                                                          : kernel_request_strided,
                                  nkwd - 3, kwds + 3, tp_vars);
 
-        reinterpret_cast<data_type *>(data)->init_offset = ckb->m_size;
+        reinterpret_cast<data_type *>(data)->init_offset = ckb->size();
 
         if (reinterpret_cast<data_type *>(data)->identity.is_null()) {
           make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,

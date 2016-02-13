@@ -174,7 +174,7 @@ namespace nd {
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        intptr_t neighborhood_offset = ckb->m_size;
+        intptr_t neighborhood_offset = ckb->size();
         ckb->emplace_back<neighborhood_kernel>(
             kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(dst_arrmeta)->stride,
             reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
@@ -202,7 +202,7 @@ namespace nd {
                                    &reinterpret_cast<data_type *>(data)->child_src_tp, &child_src_arrmeta,
                                    kernel_request_single, nkwd - 3, kwds + 3, tp_vars);
           ckb->get_at<neighborhood_kernel>(neighborhood_offset)->boundary_child_offset =
-              ckb->m_size - neighborhood_offset;
+              ckb->size() - neighborhood_offset;
 
           boundary_child.get()->instantiate(boundary_child.get()->static_data(), NULL, ckb, child_dst_tp,
                                             child_dst_arrmeta, 0, NULL, NULL, kernel_request_single, nkwd - 3, kwds + 3,

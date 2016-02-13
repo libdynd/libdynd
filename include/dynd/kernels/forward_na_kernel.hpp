@@ -122,22 +122,22 @@ namespace nd {
                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                             const std::map<std::string, ndt::type> &tp_vars)
     {
-      intptr_t ckb_offset = ckb->m_size;
+      intptr_t ckb_offset = ckb->size();
       intptr_t option_comp_offset = ckb_offset;
       ckb->emplace_back<option_comparison_kernel>(kernreq);
-      ckb_offset = ckb->m_size;
+      ckb_offset = ckb->size();
 
       auto is_na_lhs = is_na::get();
       is_na_lhs.get()->instantiate(is_na_lhs.get()->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp[0],
                                    &src_arrmeta[0], kernel_request_single, nkwd, kwds, tp_vars);
-      ckb_offset = ckb->m_size;
+      ckb_offset = ckb->size();
       option_comparison_kernel *self = ckb->get_at<option_comparison_kernel>(option_comp_offset);
       self->is_na_rhs_offset = ckb_offset - option_comp_offset;
 
       auto is_na_rhs = is_na::get();
       is_na_rhs.get()->instantiate(is_na_rhs.get()->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp[1],
                                    &src_arrmeta[1], kernel_request_single, nkwd, kwds, tp_vars);
-      ckb_offset = ckb->m_size;
+      ckb_offset = ckb->size();
       self = ckb->get_at<option_comparison_kernel>(option_comp_offset);
       self->comp_offset = ckb_offset - option_comp_offset;
       auto cmp = FuncType::get();
@@ -145,14 +145,14 @@ namespace nd {
                                          src_tp[1].extended<ndt::option_type>()->get_value_type()};
       cmp.get()->instantiate(cmp.get()->static_data(), data, ckb, dst_tp.extended<ndt::option_type>()->get_value_type(),
                              dst_arrmeta, nsrc, child_src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
-      ckb_offset = ckb->m_size;
+      ckb_offset = ckb->size();
       self = ckb->get_at<option_comparison_kernel>(option_comp_offset);
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
       assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb,
                                    ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0, nullptr,
                                    nullptr, kernel_request_single, nkwd, kwds, tp_vars);
-      ckb_offset = ckb->m_size;
+      ckb_offset = ckb->size();
     }
   };
 

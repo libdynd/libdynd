@@ -119,7 +119,7 @@ namespace nd {
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        intptr_t ckb_offset = ckb->m_size;
+        intptr_t ckb_offset = ckb->size();
         const struct static_data *static_data_x = reinterpret_cast<struct static_data *>(static_data);
 
         base_callable *first = const_cast<base_callable *>(static_data_x->first.get());
@@ -129,17 +129,17 @@ namespace nd {
 
         intptr_t root_ckb_offset = ckb_offset;
         ckb->emplace_back<compose_kernel>(kernreq, static_data_x->buffer_tp);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
         compose_kernel *self = ckb->get_at<compose_kernel>(root_ckb_offset);
         first->instantiate(first->static_data(), data, ckb, buffer_tp, self->buffer_arrmeta.get(), 1, src_tp,
                            src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
         self = ckb->get_at<compose_kernel>(root_ckb_offset);
         self->second_offset = ckb_offset - root_ckb_offset;
         const char *buffer_arrmeta = self->buffer_arrmeta.get();
         second->instantiate(second->static_data(), data, ckb, dst_tp, dst_arrmeta, 1, &buffer_tp, &buffer_arrmeta,
                             kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
       }
     };
   } // namespace dynd::nd::functional

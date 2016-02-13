@@ -24,13 +24,11 @@ namespace nd {
    * own address.
    */
   class kernel_builder {
-  public:
-    intptr_t m_size;
-
   protected:
     // Pointer to the kernel function pointers + data
     char *m_data;
     intptr_t m_capacity;
+    intptr_t m_size;
 
     // When the amount of data is small, this static data is used,
     // otherwise dynamic memory is allocated when it gets too big

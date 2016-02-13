@@ -203,13 +203,13 @@ namespace nd {
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        intptr_t ckb_offset = ckb->m_size;
+        intptr_t ckb_offset = ckb->size();
         callable &af = *reinterpret_cast<callable *>(static_data);
         const std::vector<ndt::type> &src_tp_for_af = af.get_type()->get_pos_types();
 
         intptr_t root_ckb_offset = ckb_offset;
         ckb->emplace_back<convert_kernel>(kernreq, nsrc);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
         std::vector<const char *> buffered_arrmeta(nsrc);
         convert_kernel *self = ckb->get_at<convert_kernel>(root_ckb_offset);
         for (intptr_t i = 0; i < nsrc; ++i) {
@@ -224,7 +224,7 @@ namespace nd {
         // Instantiate the callable being buffered
         af.get()->instantiate(af.get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp_for_af.data(),
                               &buffered_arrmeta[0], kernreq, nkwd, kwds, tp_vars);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
         reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(kernel_prefix));
         self = reinterpret_cast<kernel_builder *>(ckb)->get_at<convert_kernel>(root_ckb_offset);
         // Instantiate assignments for all the buffered operands
@@ -235,7 +235,7 @@ namespace nd {
             assign::get()->instantiate(assign::get()->static_data(), NULL, ckb, src_tp_for_af[i],
                                        self->m_bufs[i].get_arrmeta(), 1, src_tp + i, src_arrmeta + i, kernreq, 1,
                                        &error_mode, tp_vars);
-            ckb_offset = ckb->m_size;
+            ckb_offset = ckb->size();
             reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(kernel_prefix));
             if (i < nsrc - 1) {
               self = reinterpret_cast<kernel_builder *>(ckb)->get_at<convert_kernel>(root_ckb_offset);
