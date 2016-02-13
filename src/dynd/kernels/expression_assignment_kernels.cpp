@@ -66,6 +66,22 @@ struct buffered_kernel_extra : nd::base_kernel<buffered_kernel_extra> {
     }
   }
 
+  ~buffered_kernel_extra()
+  {
+    extra_type *e = reinterpret_cast<extra_type *>(this);
+    // Steal the buffer_tp reference count into a type
+    ndt::type buffer_tp(e->buffer_tp, false);
+    char *buffer_arrmeta = e->buffer_arrmeta;
+    // Destruct and free the arrmeta for the buffer
+    if (buffer_arrmeta != NULL) {
+      buffer_tp.extended()->arrmeta_destruct(buffer_arrmeta);
+      free(buffer_arrmeta);
+    }
+    // Destruct the child kernels
+    kernel_prefix::get_child(e->first_kernel_offset)->destroy();
+    kernel_prefix::get_child(e->second_kernel_offset)->destroy();
+  }
+
   void single(char *dst, char *const *src)
   {
     char *eraw = reinterpret_cast<char *>(this);
@@ -129,22 +145,6 @@ struct buffered_kernel_extra : nd::base_kernel<buffered_kernel_extra> {
       src0 += chunk_size * src0_stride;
       count -= chunk_size;
     }
-  }
-
-  static void destruct(nd::kernel_prefix *self)
-  {
-    extra_type *e = reinterpret_cast<extra_type *>(self);
-    // Steal the buffer_tp reference count into a type
-    ndt::type buffer_tp(e->buffer_tp, false);
-    char *buffer_arrmeta = e->buffer_arrmeta;
-    // Destruct and free the arrmeta for the buffer
-    if (buffer_arrmeta != NULL) {
-      buffer_tp.extended()->arrmeta_destruct(buffer_arrmeta);
-      free(buffer_arrmeta);
-    }
-    // Destruct the child kernels
-    self->get_child(e->first_kernel_offset)->destroy();
-    self->get_child(e->second_kernel_offset)->destroy();
   }
 };
 } // anonymous namespace
