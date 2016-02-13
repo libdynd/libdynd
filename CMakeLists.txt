@@ -321,6 +321,7 @@ set(libdynd_SRC
     src/dynd/kernels/expression_assignment_kernels.cpp
     src/dynd/kernels/fft_kernel.cpp
     src/dynd/kernels/kernel_builder.cpp
+    src/dynd/kernels/kernel_prefix.cpp
     src/dynd/kernels/multidispatch_kernel.cpp
     src/dynd/kernels/option_assignment_kernels.cpp
     src/dynd/kernels/rolling_kernel.cpp

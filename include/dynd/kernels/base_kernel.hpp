@@ -9,7 +9,6 @@
 
 #include <dynd/array.hpp>
 #include <dynd/kernels/kernel_prefix.hpp>
-#include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
 namespace nd {
@@ -43,52 +42,8 @@ namespace nd {
     template <size_t I>
     std::enable_if_t<(I > 0), kernel_prefix *> get_child()
     {
-      const size_t *offsets = get_offsets();
+      const size_t *offsets = this->get_offsets();
       return kernel_prefix::get_child(offsets[I - 1]);
-    }
-
-    /**
-     * Returns a pointer to the list of child offsets.
-     */
-    size_t *get_offsets() { return reinterpret_cast<size_t *>(this + 1); }
-
-    /**                                                                        \
-     * Initializes an instance of this ckernel in-place according to the       \
-     * kernel request. This calls the constructor in-place, and initializes    \
-     * the base function and destructor.                                       \
-     */
-    template <typename... A>
-    static SelfType *init(PrefixType *rawself, kernel_request_t DYND_UNUSED(kernreq), A &&... args)
-    {
-      /* Call the constructor in-place. */
-      SelfType *self = new (rawself) SelfType(args...);
-      self->destructor = &SelfType::destruct;
-
-      return self;
-    }
-
-    /**
-     * The ckernel destructor function, which is placed in
-     * the kernel_prefix destructor.
-     */
-    static void destruct(kernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }
-
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                                 const std::map<std::string, ndt::type> &tp_vars)
-    {
-      dst_tp = ndt::substitute(dst_tp, tp_vars, true);
-    }
-
-    static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                            const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                            intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      ckb->emplace_back<SelfType>(kernreq);
     }
   };
 
@@ -121,11 +76,13 @@ namespace nd {
                                                                                                                        \
     typedef kernel_prefix_wrapper<kernel_prefix, SelfType> parent_type;                                                \
                                                                                                                        \
+    base_kernel() { this->destructor = &SelfType::destruct; }                                                          \
+                                                                                                                       \
     /** Initializes just the kernel_prefix function member. */                                                         \
     template <typename... A>                                                                                           \
     static SelfType *init(kernel_prefix *rawself, kernel_request_t kernreq, A &&... args)                              \
     {                                                                                                                  \
-      SelfType *self = parent_type::init(rawself, kernreq, std::forward<A>(args)...);                                  \
+      SelfType *self = new (rawself) SelfType(args...);                                                                \
       switch (kernreq) {                                                                                               \
       case kernel_request_call:                                                                                        \
         self->function = reinterpret_cast<void *>(call_wrapper);                                                       \
@@ -143,6 +100,12 @@ namespace nd {
                                                                                                                        \
       return self;                                                                                                     \
     }                                                                                                                  \
+                                                                                                                       \
+    /**                                                                                                                \
+     * The ckernel destructor function, which is placed in                                                             \
+     * the kernel_prefix destructor.                                                                                   \
+     */                                                                                                                \
+    static void destruct(kernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }                     \
                                                                                                                        \
     void call(array *DYND_UNUSED(dst), array *const *DYND_UNUSED(src))                                                 \
     {                                                                                                                  \
@@ -175,6 +138,16 @@ namespace nd {
     }                                                                                                                  \
                                                                                                                        \
     static const volatile char *DYND_USED(ir);                                                                         \
+                                                                                                                       \
+    static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,              \
+                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),                \
+                            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),                          \
+                            const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,                     \
+                            intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),                                \
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))                              \
+    {                                                                                                                  \
+      ckb->emplace_back<SelfType>(kernreq);                                                                            \
+    }                                                                                                                  \
   };                                                                                                                   \
                                                                                                                        \
   template <typename SelfType>                                                                                         \
