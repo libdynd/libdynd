@@ -128,9 +128,18 @@ namespace nd {
     };
 
     template <typename SelfType>
-    struct base_reduction_kernel : kernel_prefix_wrapper<reduction_kernel_prefix, SelfType> {
-      typedef kernel_prefix_wrapper<reduction_kernel_prefix, SelfType> wrapper_type;
+    struct base_reduction_kernel : reduction_kernel_prefix {
       typedef reduction_virtual_kernel::data_type data_type;
+
+      /**
+       * Returns the child kernel immediately following this one.
+       */
+      DYND_CUDA_HOST_DEVICE kernel_prefix *get_child() { return kernel_prefix::get_child(sizeof(SelfType)); }
+
+      DYND_CUDA_HOST_DEVICE kernel_prefix *get_child(intptr_t offset)
+      {
+        return kernel_prefix::get_child(kernel_builder::aligned_size(offset));
+      }
 
       reduction_kernel_prefix *get_reduction_child()
       {
@@ -161,6 +170,8 @@ namespace nd {
       }
 
       static void destruct(kernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }
+
+      constexpr size_t size() const { return sizeof(SelfType); }
 
       static void single_first_wrapper(kernel_prefix *self, char *dst, char *const *src)
       {

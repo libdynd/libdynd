@@ -13,40 +13,6 @@
 namespace dynd {
 namespace nd {
 
-  template <typename PrefixType, typename SelfType>
-  struct kernel_prefix_wrapper : PrefixType {
-    constexpr size_t size() const { return sizeof(SelfType); }
-
-    /**
-     * Returns the child kernel immediately following this one.
-     */
-    DYND_CUDA_HOST_DEVICE kernel_prefix *get_child(intptr_t offset)
-    {
-      return kernel_prefix::get_child(kernel_builder::aligned_size(offset));
-    }
-
-    /**
-     * Returns the child kernel immediately following this one.
-     */
-    DYND_CUDA_HOST_DEVICE kernel_prefix *get_child()
-    {
-      return kernel_prefix::get_child(reinterpret_cast<SelfType *>(this)->size());
-    }
-
-    template <size_t I>
-    std::enable_if_t<I == 0, kernel_prefix *> get_child()
-    {
-      return get_child();
-    }
-
-    template <size_t I>
-    std::enable_if_t<(I > 0), kernel_prefix *> get_child()
-    {
-      const size_t *offsets = this->get_offsets();
-      return kernel_prefix::get_child(offsets[I - 1]);
-    }
-  };
-
   /**
    * Some common shared implementation details of a CRTP
    * (curiously recurring template pattern) base class to help
@@ -71,8 +37,39 @@ namespace nd {
  */
 #define BASE_KERNEL(KERNREQ, ...)                                                                                      \
   template <typename SelfType>                                                                                         \
-  struct base_kernel<SelfType> : kernel_prefix_wrapper<kernel_prefix, SelfType> {                                      \
+  struct base_kernel<SelfType> : kernel_prefix {                                                                       \
     static const kernel_request_t kernreq = kernel_request_single;                                                     \
+                                                                                                                       \
+    /**                                                                                                                \
+     * Returns the child kernel immediately following this one.                                                        \
+     */                                                                                                                \
+    DYND_CUDA_HOST_DEVICE kernel_prefix *get_child(intptr_t offset)                                                    \
+    {                                                                                                                  \
+      return kernel_prefix::get_child(kernel_builder::aligned_size(offset));                                           \
+    }                                                                                                                  \
+                                                                                                                       \
+    /**                                                                                                                \
+     * Returns the child kernel immediately following this one.                                                        \
+     */                                                                                                                \
+    DYND_CUDA_HOST_DEVICE kernel_prefix *get_child()                                                                   \
+    {                                                                                                                  \
+      return kernel_prefix::get_child(reinterpret_cast<SelfType *>(this)->size());                                     \
+    }                                                                                                                  \
+                                                                                                                       \
+    template <size_t I>                                                                                                \
+    std::enable_if_t<I == 0, kernel_prefix *> get_child()                                                              \
+    {                                                                                                                  \
+      return get_child();                                                                                              \
+    }                                                                                                                  \
+                                                                                                                       \
+    template <size_t I>                                                                                                \
+    std::enable_if_t<(I > 0), kernel_prefix *> get_child()                                                             \
+    {                                                                                                                  \
+      const size_t *offsets = this->get_offsets();                                                                     \
+      return kernel_prefix::get_child(offsets[I - 1]);                                                                 \
+    }                                                                                                                  \
+                                                                                                                       \
+    constexpr size_t size() const { return sizeof(SelfType); }                                                         \
                                                                                                                        \
     /** Initializes just the kernel_prefix function member. */                                                         \
     template <typename... ArgTypes>                                                                                    \
