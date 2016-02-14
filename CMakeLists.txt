@@ -4,11 +4,10 @@
 #
 
 cmake_minimum_required(VERSION 2.8.11)
+project(libdynd)
 
 # this should be prior to project(libdynd), see https://cmake.org/cmake/help/v3.0/variable/CMAKE_OSX_DEPLOYMENT_TARGET.html
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.9)
-
-project(libdynd)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
