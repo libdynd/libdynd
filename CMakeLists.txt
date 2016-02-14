@@ -6,8 +6,6 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(libdynd)
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.9)
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 set(LIB_SUFFIX "" CACHE STRING
