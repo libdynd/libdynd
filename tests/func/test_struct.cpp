@@ -18,12 +18,25 @@ using namespace dynd;
 
 TEST(Struct, FieldAccess)
 {
-  nd::array struct_arg = nd::as_struct({{"x", 7}, {"y", 0.5}});
+  nd::array s1 = nd::as_struct({{"x", 7}, {"y", 0.5}});
+  EXPECT_EQ(s1, s1);
 
-  // XXX: with return type void: exception "no child found"
-  // XXX: with return type Any: exception "The dynd type Any is not concrete as required"
-  // EXPECT_EQ(7, nd::field_access(struct_arg, "x"));
-  // EXPECT_EQ(0.5, nd::field_access(struct_arg, "y"));
+  EXPECT_EQ(7, nd::field_access(s1, "x"));
+  EXPECT_EQ(0.5, nd::field_access(s1, "y"));
+
+  nd::array a = nd::array({1,2,3,4,5,6,7,8,9,10,11,12});
+  nd::array s2 = nd::as_struct({{"a", a}, {"s1", s1}});
+  EXPECT_EQ(a, nd::field_access(s2, "a"));
+  //EXPECT_EQ(s1, nd::field_access(s2, "s1"));
+  EXPECT_EQ(12, nd::field_access(s2, "a")(11));
+  EXPECT_EQ(0.5, nd::field_access(nd::field_access(s2, "s1"), "y"));
+
+  nd::array b = nd::array({{1,2,3,4}, {5,6,7,8}, {9,10,11,12}});
+  nd::array s3 = nd::as_struct({{"b", b}, {"s2", s2}});
+  EXPECT_EQ(b, nd::field_access(s3, "b"));
+  //EXPECT_EQ(s2, nd::field_access(s3, "s2"));
+  EXPECT_EQ(7, nd::field_access(s3, "b")(1)(2));
+  EXPECT_EQ(10, nd::field_access(nd::field_access(s3, "s2"), "a")(9));
 }
 
 
