@@ -36,30 +36,19 @@ namespace nd {
 
     bool using_static_data() const { return m_data == &m_static_data[0]; }
 
-    void init()
-    {
-      m_data = &m_static_data[0];
-      m_size = 0;
-      m_capacity = sizeof(m_static_data);
-      set(m_static_data, 0, sizeof(m_static_data));
-    }
-
     DYND_API void destroy();
 
   public:
-    kernel_builder() { init(); }
+    kernel_builder() : m_data(m_static_data), m_capacity(sizeof(m_static_data)), m_size(0)
+    {
+      set(m_static_data, 0, sizeof(m_static_data));
+    }
 
     ~kernel_builder() { destroy(); }
 
     size_t size() const { return m_size; }
 
     size_t capacity() const { return m_capacity; }
-
-    void reset()
-    {
-      destroy();
-      init();
-    }
 
     /**
      * This function ensures that the ckernel's data
