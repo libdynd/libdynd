@@ -21,7 +21,7 @@ using namespace dynd;
 static void BM_Unary_Dispatch(benchmark::State &state)
 {
   default_random_engine generator;
-  uniform_int_distribution<type_id_t> d(bool_id, ndt::type_registry.max());
+  uniform_int_distribution<underlying_type_t<type_id_t>> d(bool_id, ndt::type_registry.max());
 
   dispatch_map<int, 1> map{{any_kind_id, 0}, {scalar_kind_id, 1}, {bool_id, 2},     {int8_id, 3},     {int16_id, 4},
                            {int32_id, 5},    {int64_id, 6},       {int128_id, 7},   {uint8_id, 8},    {uint16_id, 9},
@@ -29,7 +29,7 @@ static void BM_Unary_Dispatch(benchmark::State &state)
 
   while (state.KeepRunning()) {
     state.PauseTiming();
-    type_id_t id = d(generator);
+    type_id_t id = static_cast<type_id_t>(d(generator));
     state.ResumeTiming();
 
     benchmark::DoNotOptimize(map[id]);
