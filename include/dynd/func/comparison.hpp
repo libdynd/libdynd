@@ -4,9 +4,6 @@
 //
 
 #include <dynd/callable.hpp>
-#include <dynd/functional.hpp>
-#include <dynd/kernels/compare_kernels.hpp>
-#include <dynd/types/option_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -17,46 +14,40 @@ namespace nd {
     static callable make();
   };
 
+  template <type_id_t Arg0ID, type_id_t Arg1ID>
+  struct less_kernel;
+
   extern DYND_API struct DYND_API less : comparison_operator<less, less_kernel> {
   } less;
+
+  template <type_id_t Arg0ID, type_id_t Arg1ID>
+  struct less_equal_kernel;
 
   extern DYND_API struct DYND_API less_equal : comparison_operator<less_equal, less_equal_kernel> {
   } less_equal;
 
-  extern DYND_API struct DYND_API equal : comparison_operator<equal, equal_kernel> {
-    static std::map<std::array<type_id_t, 2>, callable> make_children()
-    {
-      std::map<std::array<type_id_t, 2>, callable> children = comparison_operator::make_children();
-      children[{{complex_float32_id, complex_float32_id}}] =
-          callable::make<equal_kernel<complex_float32_id, complex_float32_id>>(0);
-      children[{{complex_float64_id, complex_float64_id}}] =
-          callable::make<equal_kernel<complex_float64_id, complex_float64_id>>(0);
-      children[{{tuple_id, tuple_id}}] = callable::make<equal_kernel<tuple_id, tuple_id>>(0);
-      children[{{struct_id, struct_id}}] = callable::make<equal_kernel<tuple_id, tuple_id>>(0);
-      children[{{type_id, type_id}}] = callable::make<equal_kernel<type_id, type_id>>(0);
+  template <type_id_t Arg0ID, type_id_t Arg1ID>
+  struct equal_kernel;
 
-      return children;
-    }
+  extern DYND_API struct DYND_API equal : comparison_operator<equal, equal_kernel> {
+    static std::map<std::array<type_id_t, 2>, callable> make_children();
   } equal;
 
-  extern DYND_API struct DYND_API not_equal : comparison_operator<not_equal, not_equal_kernel> {
-    static std::map<std::array<type_id_t, 2>, callable> make_children()
-    {
-      std::map<std::array<type_id_t, 2>, callable> children = comparison_operator::make_children();
-      children[{{complex_float32_id, complex_float32_id}}] =
-          callable::make<not_equal_kernel<complex_float32_id, complex_float32_id>>(0);
-      children[{{complex_float64_id, complex_float64_id}}] =
-          callable::make<not_equal_kernel<complex_float64_id, complex_float64_id>>(0);
-      children[{{tuple_id, tuple_id}}] = callable::make<not_equal_kernel<tuple_id, tuple_id>>(0);
-      children[{{struct_id, struct_id}}] = callable::make<not_equal_kernel<tuple_id, tuple_id>>(0);
-      children[{{type_id, type_id}}] = callable::make<not_equal_kernel<type_id, type_id>>(0);
+  template <type_id_t Arg0ID, type_id_t Arg1ID>
+  struct not_equal_kernel;
 
-      return children;
-    }
+  extern DYND_API struct DYND_API not_equal : comparison_operator<not_equal, not_equal_kernel> {
+    static std::map<std::array<type_id_t, 2>, callable> make_children();
   } not_equal;
+
+  template <type_id_t Arg0ID, type_id_t Arg1ID>
+  struct greater_equal_kernel;
 
   extern DYND_API struct DYND_API greater_equal : comparison_operator<greater_equal, greater_equal_kernel> {
   } greater_equal;
+
+  template <type_id_t Arg0ID, type_id_t Arg1ID>
+  struct greater_kernel;
 
   extern DYND_API struct DYND_API greater : comparison_operator<greater, greater_kernel> {
   } greater;

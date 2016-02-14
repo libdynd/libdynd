@@ -4,6 +4,8 @@
 //
 
 #include <dynd/func/comparison.hpp>
+#include <dynd/functional.hpp>
+#include <dynd/kernels/compare_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -73,9 +75,37 @@ DYND_API struct nd::less_equal nd::less_equal;
 
 nd::array nd::operator<=(const array &a0, const array &a1) { return less_equal(a0, a1); }
 
+map<array<type_id_t, 2>, nd::callable> nd::equal::make_children()
+{
+  std::map<std::array<type_id_t, 2>, callable> children = comparison_operator::make_children();
+  children[{{complex_float32_id, complex_float32_id}}] =
+      callable::make<equal_kernel<complex_float32_id, complex_float32_id>>(0);
+  children[{{complex_float64_id, complex_float64_id}}] =
+      callable::make<equal_kernel<complex_float64_id, complex_float64_id>>(0);
+  children[{{tuple_id, tuple_id}}] = callable::make<equal_kernel<tuple_id, tuple_id>>(0);
+  children[{{struct_id, struct_id}}] = callable::make<equal_kernel<tuple_id, tuple_id>>(0);
+  children[{{type_id, type_id}}] = callable::make<equal_kernel<type_id, type_id>>(0);
+
+  return children;
+}
+
 DYND_API struct nd::equal nd::equal;
 
 nd::array nd::operator==(const array &a0, const array &a1) { return equal(a0, a1); }
+
+map<array<type_id_t, 2>, nd::callable> nd::not_equal::make_children()
+{
+  std::map<std::array<type_id_t, 2>, callable> children = comparison_operator::make_children();
+  children[{{complex_float32_id, complex_float32_id}}] =
+      callable::make<not_equal_kernel<complex_float32_id, complex_float32_id>>(0);
+  children[{{complex_float64_id, complex_float64_id}}] =
+      callable::make<not_equal_kernel<complex_float64_id, complex_float64_id>>(0);
+  children[{{tuple_id, tuple_id}}] = callable::make<not_equal_kernel<tuple_id, tuple_id>>(0);
+  children[{{struct_id, struct_id}}] = callable::make<not_equal_kernel<tuple_id, tuple_id>>(0);
+  children[{{type_id, type_id}}] = callable::make<not_equal_kernel<type_id, type_id>>(0);
+
+  return children;
+}
 
 DYND_API struct nd::not_equal nd::not_equal;
 
