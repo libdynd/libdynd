@@ -32,8 +32,7 @@ static void instantiate_option_as_value_assignment_kernel(char *DYND_UNUSED(stat
   // properly across all the cases would add
   // fairly significant cost, and it seems maybe ok
   // to skip it.
-  ndt::type val_dst_tp =
-      dst_tp.get_id() == option_id ? dst_tp.extended<ndt::option_type>()->get_value_type() : dst_tp;
+  ndt::type val_dst_tp = dst_tp.get_id() == option_id ? dst_tp.extended<ndt::option_type>()->get_value_type() : dst_tp;
   ndt::type val_src_tp =
       src_tp[0].get_id() == option_id ? src_tp[0].extended<ndt::option_type>()->get_value_type() : src_tp[0];
   ::make_assignment_kernel(ckb, val_dst_tp, dst_arrmeta, val_src_tp, src_arrmeta[0], kernreq,

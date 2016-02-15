@@ -14,6 +14,8 @@ namespace nd {
   namespace functional {
 
     struct DYND_API strided_rolling_ck : base_kernel<strided_rolling_ck, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       intptr_t m_window_size;
       intptr_t m_dim_size, m_dst_stride, m_src_stride;
       size_t m_window_op_offset;
@@ -31,6 +33,8 @@ namespace nd {
     };
 
     struct DYND_API var_rolling_ck : base_kernel<var_rolling_ck, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       intptr_t m_window_size;
       intptr_t m_src_stride, m_src_offset;
       ndt::type m_dst_tp;
@@ -49,6 +53,8 @@ namespace nd {
     };
 
     struct DYND_API rolling_ck : base_kernel<rolling_ck> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       struct static_data_type {
         callable window_op;
         intptr_t window_size;

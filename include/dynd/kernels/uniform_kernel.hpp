@@ -27,6 +27,8 @@ namespace nd {
       template <type_id_t ResID, typename GeneratorType>
       struct uniform_kernel<ResID, int_kind_id, GeneratorType>
           : base_kernel<uniform_kernel<ResID, int_kind_id, GeneratorType>, 0> {
+        static const kernel_request_t kernreq = kernel_request_call;
+
         typedef typename type_of<ResID>::type R;
 
         GeneratorType &g;
@@ -96,6 +98,8 @@ namespace nd {
       template <type_id_t ResID, typename GeneratorType>
       struct uniform_kernel<ResID, float_kind_id, GeneratorType>
           : base_kernel<uniform_kernel<ResID, float_kind_id, GeneratorType>, 0> {
+        static const kernel_request_t kernreq = kernel_request_call;
+
         typedef typename type_of<ResID>::type R;
 
         GeneratorType &g;
@@ -161,6 +165,8 @@ namespace nd {
       template <type_id_t ResID, typename GeneratorType>
       struct uniform_kernel<ResID, complex_kind_id, GeneratorType>
           : base_kernel<uniform_kernel<ResID, complex_kind_id, GeneratorType>, 0> {
+        static const kernel_request_t kernreq = kernel_request_call;
+
         typedef typename type_of<ResID>::type R;
 
         GeneratorType &g;

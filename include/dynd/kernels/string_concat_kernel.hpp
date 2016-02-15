@@ -10,26 +10,26 @@
 #include <dynd/string.hpp>
 
 namespace dynd {
-  namespace nd {
+namespace nd {
 
-    struct string_concatenation_kernel
-      : base_kernel<string_concatenation_kernel, 2> {
+  struct string_concatenation_kernel : base_kernel<string_concatenation_kernel, 2> {
+    static const kernel_request_t kernreq = kernel_request_call;
 
-      void single(char *dst, char *const *src) {
-        dynd::string_concat(2, *reinterpret_cast<string *>(dst),
-                            reinterpret_cast<const string *const *>(src));
-      }
-    };
+    void single(char *dst, char *const *src)
+    {
+      dynd::string_concat(2, *reinterpret_cast<string *>(dst), reinterpret_cast<const string *const *>(src));
+    }
+  };
 
-  } // namespace nd
+} // namespace nd
 
-  namespace ndt {
+namespace ndt {
 
-    template<>
-    struct traits<dynd::nd::string_concatenation_kernel> {
-      static type equivalent() { return callable_type::make(type(string_id), {type(string_id), type(string_id)}); }
-    };
+  template <>
+  struct traits<dynd::nd::string_concatenation_kernel> {
+    static type equivalent() { return callable_type::make(type(string_id), {type(string_id), type(string_id)}); }
+  };
 
-  } // namespace ndt
+} // namespace ndt
 
 } // namespace dynd

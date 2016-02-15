@@ -13,6 +13,8 @@ namespace nd {
 
   template <type_id_t I0, type_id_t I1>
   struct greater_equal_kernel : base_kernel<greater_equal_kernel<I0, I1>, 2> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef typename std::common_type<A0, A1>::type T;
@@ -26,6 +28,8 @@ namespace nd {
 
   template <type_id_t I0>
   struct greater_equal_kernel<I0, I0> : base_kernel<greater_equal_kernel<I0, I0>, 2> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     typedef typename type_of<I0>::type A0;
 
     void single(char *dst, char *const *src)

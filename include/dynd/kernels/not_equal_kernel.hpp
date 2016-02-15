@@ -13,6 +13,8 @@ namespace nd {
 
   template <type_id_t I0, type_id_t I1>
   struct not_equal_kernel : base_kernel<not_equal_kernel<I0, I1>, 2> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef typename std::common_type<A0, A1>::type T;
@@ -26,6 +28,8 @@ namespace nd {
 
   template <type_id_t Arg0ID>
   struct not_equal_kernel<Arg0ID, Arg0ID> : base_kernel<not_equal_kernel<Arg0ID, Arg0ID>, 2> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     typedef typename type_of<Arg0ID>::type arg0_type;
 
     void single(char *res, char *const *args)
@@ -37,6 +41,8 @@ namespace nd {
 
   template <>
   struct not_equal_kernel<tuple_id, tuple_id> : base_kernel<not_equal_kernel<tuple_id, tuple_id>, 2> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     size_t field_count;
     const size_t *src0_data_offsets, *src1_data_offsets;
     // After this are field_count sorting_less kernel offsets, for

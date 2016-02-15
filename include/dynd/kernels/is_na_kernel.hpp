@@ -20,6 +20,8 @@ namespace nd {
 
     template <>
     struct is_na_kernel<bool_id, bool_kind> : base_kernel<is_na_kernel<bool_id, bool_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *dst, char *const *src) { *dst = **reinterpret_cast<unsigned char *const *>(src) > 1; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
@@ -39,6 +41,8 @@ namespace nd {
     // NA is the smallest negative value
     template <type_id_t Src0TypeID>
     struct is_na_kernel<Src0TypeID, sint_kind> : base_kernel<is_na_kernel<Src0TypeID, sint_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       typedef typename type_of<Src0TypeID>::type A0;
 
       void single(char *dst, char *const *src)
@@ -60,6 +64,8 @@ namespace nd {
 
     template <type_id_t Src0TypeID>
     struct is_na_kernel<Src0TypeID, uint_kind> : base_kernel<is_na_kernel<Src0TypeID, uint_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       typedef typename type_of<Src0TypeID>::type src0_type;
 
       void single(char *dst, char *const *src)
@@ -84,6 +90,8 @@ namespace nd {
     // Special rule adopted from R: Any NaN is NA
     template <>
     struct is_na_kernel<float32_id, real_kind> : base_kernel<is_na_kernel<float32_id, real_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *dst, char *const *src) { *dst = dynd::isnan(**reinterpret_cast<float *const *>(src)) != 0; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
@@ -103,6 +111,8 @@ namespace nd {
     // Special rule adopted from R: Any NaN is NA
     template <>
     struct is_na_kernel<float64_id, real_kind> : base_kernel<is_na_kernel<float64_id, real_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *dst, char *const *src) { *dst = dynd::isnan(**reinterpret_cast<double *const *>(src)) != 0; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
@@ -122,6 +132,8 @@ namespace nd {
     template <>
     struct is_na_kernel<complex_float32_id, complex_kind>
         : base_kernel<is_na_kernel<complex_float32_id, complex_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *dst, char *const *src)
       {
         *dst = (*reinterpret_cast<uint32_t *const *>(src))[0] == DYND_FLOAT32_NA_AS_UINT &&
@@ -146,6 +158,8 @@ namespace nd {
     template <>
     struct is_na_kernel<complex_float64_id, complex_kind>
         : base_kernel<is_na_kernel<complex_float64_id, complex_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *dst, char *const *src)
       {
         *dst = (*reinterpret_cast<uint64_t *const *>(src))[0] == DYND_FLOAT64_NA_AS_UINT &&
@@ -168,6 +182,8 @@ namespace nd {
 
     template <>
     struct is_na_kernel<void_id, void_kind> : base_kernel<is_na_kernel<void_id, void_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *dst, char *const *DYND_UNUSED(src)) { *dst = 1; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
@@ -182,11 +198,15 @@ namespace nd {
 
     template <>
     struct is_na_kernel<string_id, string_kind> : base_kernel<is_na_kernel<string_id, string_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *dst, char *const *src) { *dst = reinterpret_cast<string *>(src[0])->begin() == NULL; }
     };
 
     template <>
     struct is_na_kernel<date_id, datetime_kind> : base_kernel<is_na_kernel<date_id, datetime_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *dst, char *const *src)
       {
         int32_t date = **reinterpret_cast<int32_t *const *>(src);
@@ -208,6 +228,8 @@ namespace nd {
 
     template <>
     struct is_na_kernel<time_id, datetime_kind> : base_kernel<is_na_kernel<time_id, datetime_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *dst, char *const *src)
       {
         int64_t v = **reinterpret_cast<int64_t *const *>(src);
@@ -229,6 +251,8 @@ namespace nd {
 
     template <>
     struct is_na_kernel<datetime_id, datetime_kind> : base_kernel<is_na_kernel<datetime_id, datetime_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *dst, char *const *src)
       {
         int64_t v = **reinterpret_cast<int64_t *const *>(src);
@@ -250,6 +274,8 @@ namespace nd {
 
     template <>
     struct is_na_kernel<fixed_dim_id, dim_kind> : base_kernel<is_na_kernel<fixed_dim_id, dim_kind>> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                               intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -296,6 +322,8 @@ namespace nd {
 
     template <>
     struct is_na_kernel<pointer_id, expr_kind> : base_kernel<is_na_kernel<pointer_id, expr_kind>, 1> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("is_missing for pointers is not yet implemented");

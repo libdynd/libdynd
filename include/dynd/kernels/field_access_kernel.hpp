@@ -12,6 +12,8 @@ namespace nd {
 
   // This is an example of accessing fields in a struct. It currently assumes that the struct has types {int, double}.
   struct field_access_kernel : base_kernel<field_access_kernel, 1> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     const uintptr_t *data_offsets;
 
     field_access_kernel(const uintptr_t *data_offsets) : data_offsets(data_offsets) {}

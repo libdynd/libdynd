@@ -16,6 +16,8 @@ namespace nd {
 
     template <int N>
     struct neighborhood_kernel : base_kernel<neighborhood_kernel<N>, N> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       struct static_data_type {
         callable child;
         callable boundary_child;

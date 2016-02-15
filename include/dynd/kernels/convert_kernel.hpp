@@ -138,6 +138,15 @@ namespace nd {
 
       convert_kernel(intptr_t narg) : narg(narg), m_src_buf_ck_offsets(this->narg), m_bufs(this->narg) {}
 
+      void call(array *dst, array *const *src)
+      {
+        std::vector<char *> src_data(narg);
+        for (int i = 0; i < narg; ++i) {
+          src_data[i] = const_cast<char *>(src[i]->cdata());
+        }
+        this->single(const_cast<char *>(dst->cdata()), src_data.data());
+      }
+
       void single(char *dst, char *const *src)
       {
         std::vector<char *> buf_src(narg);
@@ -225,7 +234,7 @@ namespace nd {
         }
         // Instantiate the callable being buffered
         af.get()->instantiate(af.get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp_for_af.data(),
-                              &buffered_arrmeta[0], kernreq, nkwd, kwds, tp_vars);
+                              &buffered_arrmeta[0], kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
         reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(kernel_prefix));
         self = reinterpret_cast<kernel_builder *>(ckb)->get_at<convert_kernel>(root_ckb_offset);
@@ -235,8 +244,8 @@ namespace nd {
             self->m_src_buf_ck_offsets[i] = ckb_offset - root_ckb_offset;
             nd::array error_mode = eval::default_eval_context.errmode;
             assign::get()->instantiate(assign::get()->static_data(), NULL, ckb, src_tp_for_af[i],
-                                       self->m_bufs[i].get_arrmeta(), 1, src_tp + i, src_arrmeta + i, kernreq, 1,
-                                       &error_mode, tp_vars);
+                                       self->m_bufs[i].get_arrmeta(), 1, src_tp + i, src_arrmeta + i,
+                                       kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
             ckb_offset = ckb->size();
             reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(kernel_prefix));
             if (i < nsrc - 1) {
