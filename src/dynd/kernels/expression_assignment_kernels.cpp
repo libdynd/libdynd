@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 namespace {
-struct buffered_kernel_extra : nd::base_kernel<buffered_kernel_extra> {
+struct buffered_kernel_extra : nd::base_kernel<buffered_kernel_extra, 1> {
   typedef buffered_kernel_extra extra_type;
 
   // Offsets, from the start of &base, to the kernels

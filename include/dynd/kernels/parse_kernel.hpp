@@ -106,6 +106,8 @@ namespace nd {
 
     template <type_id_t RetTypeID>
     struct parse_kernel : base_kernel<parse_kernel<RetTypeID>, 2> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       typedef typename type_of<RetTypeID>::type ret_type;
 
       void single(char *ret, char *const *args)
@@ -124,6 +126,8 @@ namespace nd {
 
     template <>
     struct parse_kernel<bool_id> : base_kernel<parse_kernel<bool_id>, 2> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *ret, char *const *args)
       {
         *reinterpret_cast<bool1 *>(ret) =
@@ -133,6 +137,8 @@ namespace nd {
 
     template <>
     struct parse_kernel<string_id> : base_kernel<parse_kernel<string_id>, 2> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       void single(char *res, char *const *args)
       {
         const char *&rbegin = *reinterpret_cast<const char **>(args[0]);
@@ -214,6 +220,8 @@ namespace nd {
 
     template <>
     struct parse_kernel<option_id> : base_kernel<parse_kernel<option_id>> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       intptr_t parse_offset;
 
       ~parse_kernel()
@@ -260,6 +268,8 @@ namespace nd {
 
     template <>
     struct parse_kernel<struct_id> : base_kernel<parse_kernel<struct_id>, 2> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       ndt::type res_tp;
       size_t field_count;
       const size_t *data_offsets;
@@ -351,6 +361,8 @@ namespace nd {
 
     template <>
     struct parse_kernel<fixed_dim_id> : base_kernel<parse_kernel<fixed_dim_id>> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       ndt::type ret_tp;
       size_t _size;
       intptr_t stride;
@@ -401,6 +413,8 @@ namespace nd {
 
     template <>
     struct parse_kernel<var_dim_id> : base_kernel<parse_kernel<var_dim_id>> {
+      static const kernel_request_t kernreq = kernel_request_call;
+
       typedef ndt::var_dim_type::data_type ret_type;
 
       ndt::type ret_tp;
