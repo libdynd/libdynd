@@ -9,88 +9,9 @@
 
 #include <dynd/array.hpp>
 #include <dynd/kernels/kernel_prefix.hpp>
-#include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
 namespace nd {
-
-  template <typename PrefixType, typename SelfType>
-  struct kernel_prefix_wrapper : PrefixType {
-    constexpr size_t size() const { return sizeof(SelfType); }
-
-    /**
-     * Returns the child kernel immediately following this one.
-     */
-    DYND_CUDA_HOST_DEVICE kernel_prefix *get_child(intptr_t offset)
-    {
-      return kernel_prefix::get_child(kernel_builder::aligned_size(offset));
-    }
-
-    /**
-     * Returns the child kernel immediately following this one.
-     */
-    DYND_CUDA_HOST_DEVICE kernel_prefix *get_child()
-    {
-      return kernel_prefix::get_child(reinterpret_cast<SelfType *>(this)->size());
-    }
-
-    template <size_t I>
-    std::enable_if_t<I == 0, kernel_prefix *> get_child()
-    {
-      return get_child();
-    }
-
-    template <size_t I>
-    std::enable_if_t<(I > 0), kernel_prefix *> get_child()
-    {
-      const size_t *offsets = get_offsets();
-      return kernel_prefix::get_child(offsets[I - 1]);
-    }
-
-    /**
-     * Returns a pointer to the list of child offsets.
-     */
-    size_t *get_offsets() { return reinterpret_cast<size_t *>(this + 1); }
-
-    /**                                                                        \
-     * Initializes an instance of this ckernel in-place according to the       \
-     * kernel request. This calls the constructor in-place, and initializes    \
-     * the base function and destructor.                                       \
-     */
-    template <typename... A>
-    static SelfType *init(PrefixType *rawself, kernel_request_t DYND_UNUSED(kernreq), A &&... args)
-    {
-      /* Call the constructor in-place. */
-      SelfType *self = new (rawself) SelfType(args...);
-      self->destructor = &SelfType::destruct;
-
-      return self;
-    }
-
-    /**
-     * The ckernel destructor function, which is placed in
-     * the kernel_prefix destructor.
-     */
-    static void destruct(kernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }
-
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                                 const std::map<std::string, ndt::type> &tp_vars)
-    {
-      dst_tp = ndt::substitute(dst_tp, tp_vars, true);
-    }
-
-    static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                            const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                            intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      ckb->emplace_back<SelfType>(kernreq);
-    }
-  };
 
   /**
    * Some common shared implementation details of a CRTP
@@ -116,33 +37,68 @@ namespace nd {
  */
 #define BASE_KERNEL(KERNREQ, ...)                                                                                      \
   template <typename SelfType>                                                                                         \
-  struct base_kernel<SelfType> : kernel_prefix_wrapper<kernel_prefix, SelfType> {                                      \
+  struct base_kernel<SelfType> : kernel_prefix {                                                                       \
     static const kernel_request_t kernreq = kernel_request_single;                                                     \
                                                                                                                        \
-    typedef kernel_prefix_wrapper<kernel_prefix, SelfType> parent_type;                                                \
+    /**                                                                                                                \
+     * Returns the child kernel immediately following this one.                                                        \
+     */                                                                                                                \
+    DYND_CUDA_HOST_DEVICE kernel_prefix *get_child(intptr_t offset)                                                    \
+    {                                                                                                                  \
+      return kernel_prefix::get_child(kernel_builder::aligned_size(offset));                                           \
+    }                                                                                                                  \
+                                                                                                                       \
+    /**                                                                                                                \
+     * Returns the child kernel immediately following this one.                                                        \
+     */                                                                                                                \
+    DYND_CUDA_HOST_DEVICE kernel_prefix *get_child()                                                                   \
+    {                                                                                                                  \
+      return kernel_prefix::get_child(reinterpret_cast<SelfType *>(this)->size());                                     \
+    }                                                                                                                  \
+                                                                                                                       \
+    template <size_t I>                                                                                                \
+    std::enable_if_t<I == 0, kernel_prefix *> get_child()                                                              \
+    {                                                                                                                  \
+      return get_child();                                                                                              \
+    }                                                                                                                  \
+                                                                                                                       \
+    template <size_t I>                                                                                                \
+    std::enable_if_t<(I > 0), kernel_prefix *> get_child()                                                             \
+    {                                                                                                                  \
+      const size_t *offsets = this->get_offsets();                                                                     \
+      return kernel_prefix::get_child(offsets[I - 1]);                                                                 \
+    }                                                                                                                  \
+                                                                                                                       \
+    constexpr size_t size() const { return sizeof(SelfType); }                                                         \
                                                                                                                        \
     /** Initializes just the kernel_prefix function member. */                                                         \
-    template <typename... A>                                                                                           \
-    static SelfType *init(kernel_prefix *rawself, kernel_request_t kernreq, A &&... args)                              \
+    template <typename... ArgTypes>                                                                                    \
+    static void init(SelfType *self, kernel_request_t kernreq, ArgTypes &&... args)                                    \
     {                                                                                                                  \
-      SelfType *self = parent_type::init(rawself, kernreq, std::forward<A>(args)...);                                  \
+      new (self) SelfType(std::forward<ArgTypes>(args)...);                                                            \
+                                                                                                                       \
+      self->destructor = SelfType::destruct;                                                                           \
       switch (kernreq) {                                                                                               \
       case kernel_request_call:                                                                                        \
-        self->function = reinterpret_cast<void *>(call_wrapper);                                                       \
+        self->function = reinterpret_cast<void *>(SelfType::call_wrapper);                                             \
         break;                                                                                                         \
       case kernel_request_single:                                                                                      \
-        self->function = reinterpret_cast<void *>(single_wrapper);                                                     \
+        self->function = reinterpret_cast<void *>(SelfType::single_wrapper);                                           \
         break;                                                                                                         \
       case kernel_request_strided:                                                                                     \
-        self->function = reinterpret_cast<void *>(strided_wrapper);                                                    \
+        self->function = reinterpret_cast<void *>(SelfType::strided_wrapper);                                          \
         break;                                                                                                         \
       default:                                                                                                         \
         DYND_HOST_THROW(std::invalid_argument,                                                                         \
                         "expr ckernel init: unrecognized ckernel request " + std::to_string(kernreq));                 \
       }                                                                                                                \
-                                                                                                                       \
-      return self;                                                                                                     \
     }                                                                                                                  \
+                                                                                                                       \
+    /**                                                                                                                \
+     * The ckernel destructor function, which is placed in                                                             \
+     * the kernel_prefix destructor.                                                                                   \
+     */                                                                                                                \
+    static void destruct(kernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }                     \
                                                                                                                        \
     void call(array *DYND_UNUSED(dst), array *const *DYND_UNUSED(src))                                                 \
     {                                                                                                                  \
@@ -175,6 +131,16 @@ namespace nd {
     }                                                                                                                  \
                                                                                                                        \
     static const volatile char *DYND_USED(ir);                                                                         \
+                                                                                                                       \
+    static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,              \
+                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),                \
+                            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),                          \
+                            const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,                     \
+                            intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),                                \
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))                              \
+    {                                                                                                                  \
+      ckb->emplace_back<SelfType>(kernreq);                                                                            \
+    }                                                                                                                  \
   };                                                                                                                   \
                                                                                                                        \
   template <typename SelfType>                                                                                         \

@@ -31,6 +31,8 @@ namespace ndt {
 
     DYND_API size_t size() const;
 
+    type_id_t max() const { return static_cast<type_id_t>(size() - 1); }
+
     DYND_API type_id_t insert(type_id_t base_id, const type &kind_tp);
 
     DYND_API const type_info &operator[](type_id_t tp_id) const;

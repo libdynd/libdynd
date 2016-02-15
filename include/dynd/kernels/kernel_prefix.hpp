@@ -122,6 +122,11 @@ namespace nd {
       return reinterpret_cast<kernel_prefix *>(reinterpret_cast<char *>(this) + kernel_builder::aligned_size(offset));
     }
 
+    /**
+     * Returns a pointer to the list of child offsets.
+     */
+    size_t *get_offsets() { return reinterpret_cast<size_t *>(this + 1); }
+
     static kernel_prefix *init(kernel_prefix *self, void *func)
     {
       self->function = func;
@@ -135,6 +140,11 @@ namespace nd {
     {
       return NULL;
     }
+
+    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                 intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                                 const std::map<std::string, ndt::type> &tp_vars);
 
     static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,
                             const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),

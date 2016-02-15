@@ -57,11 +57,11 @@ void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const ndt::c
                                        const uintptr_t *src_offsets, const ndt::type *src_tp,
                                        const char *const *src_arrmeta, kernel_request_t kernreq)
 {
-  intptr_t ckb_offset = ckb->m_size;
+  intptr_t ckb_offset = ckb->size();
   intptr_t root_ckb_offset = ckb_offset;
   ckb->emplace_back<tuple_unary_op_ck>(kernreq);
   tuple_unary_op_ck *self = ckb->get_at<tuple_unary_op_ck>(root_ckb_offset);
-  ckb_offset = ckb->m_size;
+  ckb_offset = ckb->size();
   self->m_fields.resize(field_count);
   for (intptr_t i = 0; i < field_count; ++i) {
     self = ckb->get_at<tuple_unary_op_ck>(root_ckb_offset);
@@ -72,7 +72,7 @@ void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const ndt::c
     nd::array error_mode = ndt::traits<assign_error_mode>::na();
     af->instantiate(NULL, NULL, ckb, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i], &src_arrmeta[i], kernel_request_single,
                     1, &error_mode, std::map<std::string, ndt::type>());
-    ckb_offset = ckb->m_size;
+    ckb_offset = ckb->size();
   }
 }
 
@@ -83,11 +83,11 @@ void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *const *af,
                                        const ndt::type *src_tp, const char *const *src_arrmeta,
                                        kernel_request_t kernreq)
 {
-  intptr_t ckb_offset = ckb->m_size;
+  intptr_t ckb_offset = ckb->size();
   intptr_t root_ckb_offset = ckb_offset;
   ckb->emplace_back<tuple_unary_op_ck>(kernreq);
   tuple_unary_op_ck *self = ckb->get_at<tuple_unary_op_ck>(root_ckb_offset);
-  ckb_offset = ckb->m_size;
+  ckb_offset = ckb->size();
   self->m_fields.resize(field_count);
   for (intptr_t i = 0; i < field_count; ++i) {
     self = ckb->get_at<tuple_unary_op_ck>(root_ckb_offset);
@@ -98,7 +98,7 @@ void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *const *af,
     nd::array error_mode = ndt::traits<assign_error_mode>::na();
     af[i]->instantiate(NULL, NULL, ckb, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i], &src_arrmeta[i],
                        kernel_request_single, 1, &error_mode, std::map<std::string, ndt::type>());
-    ckb_offset = ckb->m_size;
+    ckb_offset = ckb->size();
   }
 }
 

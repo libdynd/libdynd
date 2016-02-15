@@ -1941,7 +1941,7 @@ namespace nd {
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        intptr_t ckb_offset = ckb->m_size;
+        intptr_t ckb_offset = ckb->size();
         intptr_t root_ckb_offset = ckb_offset;
         typedef assignment_kernel self_type;
         if (dst_tp.get_id() != option_id || src_tp[0].get_id() != option_id) {
@@ -1952,12 +1952,12 @@ namespace nd {
         const ndt::type &dst_val_tp = dst_tp.extended<ndt::option_type>()->get_value_type();
         const ndt::type &src_val_tp = src_tp[0].extended<ndt::option_type>()->get_value_type();
         ckb->emplace_back<self_type>(kernreq);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
         // instantiate src_is_avail
         nd::callable &is_na = nd::is_na::get();
         is_na.get()->instantiate(is_na->static_data(), NULL, ckb, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
                                  src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
         // instantiate dst_assign_na
         ckb->reserve(ckb_offset + sizeof(kernel_prefix));
         self_type *self = ckb->get_at<self_type>(root_ckb_offset);
@@ -1965,7 +1965,7 @@ namespace nd {
         nd::callable &assign_na = nd::assign_na::get();
         assign_na.get()->instantiate(assign_na->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, NULL, NULL,
                                      kernreq, nkwd, kwds, tp_vars);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
         // instantiate value_assign
         ckb->reserve(ckb_offset + sizeof(kernel_prefix));
         self = ckb->get_at<self_type>(root_ckb_offset);
@@ -2107,14 +2107,14 @@ namespace nd {
 
         // Fall back to an adaptor that checks for a few standard
         // missing value tokens, then uses the standard value assignment
-        intptr_t ckb_offset = ckb->m_size;
+        intptr_t ckb_offset = ckb->size();
         intptr_t root_ckb_offset = ckb_offset;
         ckb->emplace_back<string_to_option_tp_ck>(kernreq);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
         // First child ckernel is the value assignment
         make_assignment_kernel(ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, src_tp[0],
                                src_arrmeta[0], kernreq, &eval::default_eval_context);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
         // Re-acquire self because the address may have changed
         string_to_option_tp_ck *self = ckb->get_at<string_to_option_tp_ck>(root_ckb_offset);
         // Second child ckernel is the NA assignment
@@ -2122,7 +2122,7 @@ namespace nd {
         nd::callable &assign_na = nd::assign_na::get();
         assign_na.get()->instantiate(assign_na->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp,
                                      src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-        ckb_offset = ckb->m_size;
+        ckb_offset = ckb->size();
       }
     };
 
@@ -2191,7 +2191,7 @@ namespace nd {
                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
                             const nd::array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars)
     {
-      intptr_t ckb_offset = ckb->m_size;
+      intptr_t ckb_offset = ckb->size();
       intptr_t root_ckb_offset = ckb_offset;
       typedef dynd::nd::option_to_value_ck self_type;
       if (dst_tp.get_id() == option_id || src_tp[0].get_id() != option_id) {
@@ -2204,7 +2204,7 @@ namespace nd {
       // instantiate src_is_na
       is_na::get()->instantiate(is_na::get()->static_data(), NULL, ckb, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
                                 src_arrmeta, kernreq, 0, nullptr, tp_vars);
-      ckb_offset = ckb->m_size;
+      ckb_offset = ckb->size();
       // instantiate value_assign
       ckb->reserve(ckb_offset + sizeof(kernel_prefix));
       self_type *self = ckb->get_at<self_type>(root_ckb_offset);
@@ -3054,24 +3054,24 @@ namespace nd {
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        intptr_t ckb_offset = ckb->m_size;
+        intptr_t ckb_offset = ckb->size();
         const ndt::type &storage_tp = src_tp[0].storage_type();
         if (storage_tp.is_expression()) {
           const callable &forward = src_tp[0].extended<ndt::adapt_type>()->get_forward();
 
           intptr_t self_offset = ckb_offset;
           ckb->emplace_back<adapt_assign_from_kernel>(kernreq, storage_tp.get_canonical_type());
-          ckb_offset = ckb->m_size;
+          ckb_offset = ckb->size();
 
           nd::assign::get()->instantiate(nd::assign::get()->static_data(), data, ckb, storage_tp.get_canonical_type(),
                                          dst_arrmeta, nsrc, &storage_tp, src_arrmeta, kernel_request_single, nkwd, kwds,
                                          tp_vars);
-          ckb_offset = ckb->m_size;
+          ckb_offset = ckb->size();
           intptr_t forward_offset = ckb_offset - self_offset;
           ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
           forward->instantiate(forward->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp2, src_arrmeta,
                                kernel_request_single, nkwd, kwds, tp_vars);
-          ckb_offset = ckb->m_size;
+          ckb_offset = ckb->size();
           ckb->get_at<adapt_assign_from_kernel>(self_offset)->forward_offset = forward_offset;
         }
         else {
@@ -3080,7 +3080,7 @@ namespace nd {
           ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
           forward->instantiate(forward->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp2, src_arrmeta,
                                kernreq, nkwd, kwds, tp_vars);
-          ckb_offset = ckb->m_size;
+          ckb_offset = ckb->size();
         }
       }
     };

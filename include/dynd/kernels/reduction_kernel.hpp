@@ -10,44 +10,11 @@
 #include <dynd/func/assignment.hpp>
 #include <dynd/func/constant.hpp>
 #include <dynd/kernels/constant_kernel.hpp>
+#include <dynd/kernels/reduction_kernel_prefix.hpp>
 
 namespace dynd {
 namespace nd {
   namespace functional {
-
-    struct DYND_API reduction_kernel_prefix : kernel_prefix {
-      // This function pointer is for all the calls of the function
-      // on a given destination data address after the "first call".
-      kernel_strided_t followup_call_function;
-
-      template <typename T>
-      T get_first_call_function() const
-      {
-        return get_function<T>();
-      }
-
-      template <typename T>
-      void set_first_call_function(T fnptr)
-      {
-        function = reinterpret_cast<void *>(fnptr);
-      }
-
-      kernel_strided_t get_followup_call_function() const { return followup_call_function; }
-
-      void set_followup_call_function(kernel_strided_t fnptr) { followup_call_function = fnptr; }
-
-      void single_first(char *dst, char *const *src) { (*reinterpret_cast<kernel_single_t>(function))(this, dst, src); }
-
-      void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-      {
-        (*reinterpret_cast<kernel_strided_t>(function))(this, dst, dst_stride, src, src_stride, count);
-      }
-
-      void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-      {
-        (*reinterpret_cast<kernel_strided_t>(followup_call_function))(this, dst, dst_stride, src, src_stride, count);
-      }
-    };
 
     struct DYND_API reduction_virtual_kernel : base_kernel<reduction_virtual_kernel> {
       struct static_data_type {
@@ -161,36 +128,50 @@ namespace nd {
     };
 
     template <typename SelfType>
-    struct base_reduction_kernel : kernel_prefix_wrapper<reduction_kernel_prefix, SelfType> {
-      typedef kernel_prefix_wrapper<reduction_kernel_prefix, SelfType> wrapper_type;
+    struct base_reduction_kernel : reduction_kernel_prefix {
       typedef reduction_virtual_kernel::data_type data_type;
+
+      /**
+       * Returns the child kernel immediately following this one.
+       */
+      DYND_CUDA_HOST_DEVICE kernel_prefix *get_child() { return kernel_prefix::get_child(sizeof(SelfType)); }
+
+      DYND_CUDA_HOST_DEVICE kernel_prefix *get_child(intptr_t offset)
+      {
+        return kernel_prefix::get_child(kernel_builder::aligned_size(offset));
+      }
 
       reduction_kernel_prefix *get_reduction_child()
       {
         return reinterpret_cast<reduction_kernel_prefix *>(this->get_child());
       }
 
-      template <typename... A>
-      static SelfType *init(reduction_kernel_prefix *prefix, kernel_request_t kernreq, A &&... args)
+      template <typename... ArgTypes>
+      static void init(SelfType *self, kernel_request_t kernreq, ArgTypes &&... args)
       {
-        SelfType *self = wrapper_type::init(prefix, kernreq, std::forward<A>(args)...);
+        new (self) SelfType(std::forward<ArgTypes>(args)...);
+
+        self->destructor = SelfType::destruct;
         // Get the function pointer for the first_call
-        if (kernreq == kernel_request_single) {
-          prefix->set_first_call_function(&SelfType::single_first_wrapper);
-        }
-        else if (kernreq == kernel_request_strided) {
-          prefix->set_first_call_function(&SelfType::strided_first_wrapper);
-        }
-        else {
+        switch (kernreq) {
+        case kernel_request_single:
+          self->set_first_call_function(SelfType::single_first_wrapper);
+          break;
+        case kernel_request_strided:
+          self->set_first_call_function(SelfType::strided_first_wrapper);
+          break;
+        default:
           std::stringstream ss;
           ss << "make_lifted_reduction_ckernel: unrecognized request " << (int)kernreq;
           throw std::runtime_error(ss.str());
         }
         // The function pointer for followup accumulation calls
-        prefix->set_followup_call_function(&SelfType::strided_followup_wrapper);
-
-        return self;
+        self->set_followup_call_function(SelfType::strided_followup_wrapper);
       }
+
+      static void destruct(kernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }
+
+      constexpr size_t size() const { return sizeof(SelfType); }
 
       static void single_first_wrapper(kernel_prefix *self, char *dst, char *const *src)
       {
@@ -445,7 +426,7 @@ namespace nd {
         intptr_t src_size = src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
         intptr_t src_stride = src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_stride(src_arrmeta[0]);
 
-        intptr_t root_ckb_offset = ckb->m_size;
+        intptr_t root_ckb_offset = ckb->size();
         ckb->emplace_back<reduction_kernel>(kernreq);
         reduction_kernel *e = ckb->get_at<reduction_kernel>(root_ckb_offset);
         // The striding parameters
@@ -570,7 +551,7 @@ namespace nd {
         const ndt::type &src0_element_tp = src_tp[0].extended<ndt::var_dim_type>()->get_element_type();
         const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(ndt::var_dim_type::metadata_type);
 
-        intptr_t root_ckb_offset = ckb->m_size;
+        intptr_t root_ckb_offset = ckb->size();
         ckb->emplace_back<reduction_kernel>(
             kernreq, reinterpret_cast<const ndt::var_dim_type::metadata_type *>(src_arrmeta[0])->stride);
 
@@ -815,7 +796,7 @@ namespace nd {
         const ndt::type &dst_element_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
 
-        intptr_t root_ckb_offset = ckb->m_size;
+        intptr_t root_ckb_offset = ckb->size();
         ckb->emplace_back<reduction_kernel>(kernreq, dst_stride, src_stride);
         reduction_kernel *self = ckb->get_at<reduction_kernel>(root_ckb_offset);
 
@@ -866,7 +847,7 @@ namespace nd {
                                                                                          : kernel_request_strided,
                                  nkwd - 3, kwds + 3, tp_vars);
 
-        reinterpret_cast<data_type *>(data)->init_offset = ckb->m_size;
+        reinterpret_cast<data_type *>(data)->init_offset = ckb->size();
 
         if (reinterpret_cast<data_type *>(data)->identity.is_null()) {
           make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
