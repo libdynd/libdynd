@@ -13,6 +13,8 @@ namespace nd {
 
   template <type_id_t Src0TypeID>
   struct max_kernel : base_kernel<max_kernel<Src0TypeID>, 1> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     typedef typename type_of<Src0TypeID>::type src0_type;
     typedef src0_type dst_type;
 
@@ -40,6 +42,8 @@ namespace nd {
 
   template <>
   struct max_kernel<complex_float32_id> : base_kernel<max_kernel<complex_float32_id>, 1> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     typedef complex<float> src0_type;
     typedef src0_type dst_type;
 
@@ -51,6 +55,8 @@ namespace nd {
 
   template <>
   struct max_kernel<complex_float64_id> : base_kernel<max_kernel<complex_float64_id>, 1> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     typedef complex<double> src0_type;
     typedef src0_type dst_type;
 

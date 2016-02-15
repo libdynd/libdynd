@@ -16,6 +16,8 @@ namespace nd {
 
   template <int I>
   struct forward_na_kernel<I> : base_kernel<forward_na_kernel<I>, 2> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     struct static_data_type {
       callable child;
     };
@@ -97,6 +99,8 @@ namespace nd {
   template <typename FuncType>
   struct option_comparison_kernel<FuncType, true, true>
       : base_kernel<option_comparison_kernel<FuncType, true, true>, 2> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     intptr_t is_na_rhs_offset;
     intptr_t comp_offset;
     intptr_t assign_na_offset;

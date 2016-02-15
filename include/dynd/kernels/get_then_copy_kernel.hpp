@@ -13,6 +13,8 @@ namespace nd {
 
   template <typename ReturnType, typename TypeType, ReturnType (TypeType::*Func)() const>
   struct get_then_copy_kernel : base_kernel<get_then_copy_kernel<ReturnType, TypeType, Func>, 0> {
+    static const kernel_request_t kernreq = kernel_request_call;
+
     ndt::type tp;
 
     get_then_copy_kernel(const ndt::type &tp) : tp(tp) {}
@@ -39,7 +41,7 @@ namespace nd {
 
       static const array error_mode(opt<assign_error_mode>());
       assign::get()->instantiate(assign::get()->static_data(), data, ckb, dst_tp, dst_arrmeta, 1, &dst_tp,
-                                 &src_metadata, kernreq, 1, &error_mode, tp_vars);
+                                 &src_metadata, kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
     }
   };
 
