@@ -26,9 +26,9 @@ namespace nd {
       }
     };
 
-    void call(array *res, array *const *args)
+    void call(array *res, const array *args)
     {
-      res->get()->data = args[0]->get()->data;
+      res->get()->data = args[0]->data;
       reinterpret_cast<SelfType *>(this)->single(res->get()->metadata(), &res->get()->data);
     }
 

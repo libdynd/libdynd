@@ -136,11 +136,11 @@ namespace nd {
 
       convert_kernel(intptr_t narg) : narg(narg), m_src_buf_ck_offsets(this->narg), m_bufs(this->narg) {}
 
-      void call(array *dst, array *const *src)
+      void call(array *dst, const array *src)
       {
         std::vector<char *> src_data(narg);
         for (int i = 0; i < narg; ++i) {
-          src_data[i] = const_cast<char *>(src[i]->cdata());
+          src_data[i] = const_cast<char *>(src[i].cdata());
         }
         this->single(const_cast<char *>(dst->cdata()), src_data.data());
       }

@@ -23,24 +23,23 @@ namespace nd {
 
     ~unique_kernel() { get_child()->destroy(); }
 
-    void call(array *DYND_UNUSED(dst), array *const *src)
+    void call(array *DYND_UNUSED(dst), const array *src)
     {
       kernel_prefix *child = get_child();
       size_t new_size =
-          (std::unique(strided_iterator(src[0]->data(), src0_element_data_size, src0_stride),
-                       strided_iterator(src[0]->data() + src0_size * src0_stride, src0_element_data_size, src0_stride),
+          (std::unique(strided_iterator(src[0].data(), src0_element_data_size, src0_stride),
+                       strided_iterator(src[0].data() + src0_size * src0_stride, src0_element_data_size, src0_stride),
                        [child](char *lhs, char *rhs) {
                          bool1 dst;
                          char *src[2] = {lhs, rhs};
                          child->single(reinterpret_cast<char *>(&dst), src);
                          return dst;
                        }) -
-           src[0]->data()) /
+           src[0].data()) /
           src0_stride;
 
-      src[0]->get()->tp =
-          ndt::make_fixed_dim(new_size, src[0]->get()->tp.extended<ndt::fixed_dim_type>()->get_element_type());
-      reinterpret_cast<size_stride_t *>(src[0]->get()->metadata())->dim_size = new_size;
+      src[0]->tp = ndt::make_fixed_dim(new_size, src[0]->tp.extended<ndt::fixed_dim_type>()->get_element_type());
+      reinterpret_cast<size_stride_t *>(src[0]->metadata())->dim_size = new_size;
     }
 
     static void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb,

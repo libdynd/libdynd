@@ -72,9 +72,7 @@ void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i, const nd
 
 nd::array nd::callable::call(size_t args_size, const array *args_values, size_t kwds_size,
                              const std::pair<const char *, array> *kwds_values)
-{
-  typedef array *DataType;
-
+{ 
   std::map<std::string, ndt::type> tp_vars;
   const ndt::callable_type *self_tp = get_type();
 
@@ -86,14 +84,12 @@ nd::array nd::callable::call(size_t args_size, const array *args_values, size_t 
 
   std::vector<ndt::type> args_tp(args_size);
   std::vector<const char *> args_arrmeta(args_size);
-  std::vector<DataType> args_data(args_size);
 
   for (intptr_t i = 0; i < (self_tp->is_pos_variadic() ? static_cast<intptr_t>(args_size) : self_tp->get_npos()); ++i) {
     detail::check_arg(self_tp, i, args_values[i]->tp, args_values[i]->metadata(), tp_vars);
 
     args_tp[i] = args_values[i]->tp;
     args_arrmeta[i] = args_values[i]->metadata();
-    detail::set_data(args_data[i], args_values[i]);
   }
 
   array dst;
@@ -183,12 +179,12 @@ nd::array nd::callable::call(size_t args_size, const array *args_values, size_t 
   ndt::type dst_tp;
   if (dst.is_null()) {
     dst_tp = self_tp->get_return_type();
-    return get()->call(dst_tp, narg, args_tp.data(), args_arrmeta.data(), args_data.data(), nkwd, kwds_as_vector.data(),
+    return get()->call(dst_tp, narg, args_tp.data(), args_arrmeta.data(), args_values, nkwd, kwds_as_vector.data(),
                        tp_vars);
   }
 
   dst_tp = dst.get_type();
-  get()->call(dst_tp, dst->metadata(), &dst, narg, args_tp.data(), args_arrmeta.data(), args_data.data(), nkwd,
+  get()->call(dst_tp, dst->metadata(), &dst, narg, args_tp.data(), args_arrmeta.data(), args_values, nkwd,
               kwds_as_vector.data(), tp_vars);
   return dst;
 }

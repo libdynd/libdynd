@@ -33,7 +33,7 @@ namespace ndt {
 
 } // namespace dynd::ndt
 
-typedef void (*kernel_call_t)(nd::kernel_prefix *self, nd::array *dst, nd::array *const *src);
+typedef void (*kernel_call_t)(nd::kernel_prefix *self, const nd::array *dst, const nd::array *src);
 typedef void (*kernel_single_t)(nd::kernel_prefix *self, char *dst, char *const *src);
 typedef void (*kernel_strided_t)(nd::kernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
                                  const intptr_t *src_stride, size_t count);

@@ -146,16 +146,16 @@ namespace nd {
         return reinterpret_cast<reduction_kernel_prefix *>(this->get_child());
       }
 
-      void call(array *dst, array *const *src)
+      void call(array *dst, const array *src)
       {
         char *src_data[1];
         for (size_t i = 0; i < 1; ++i) {
-          src_data[i] = const_cast<char *>(src[i]->cdata());
+          src_data[i] = const_cast<char *>(src[i].cdata());
         }
         reinterpret_cast<SelfType *>(this)->single_first(const_cast<char *>(dst->cdata()), src_data);
       }
 
-      static void call_wrapper(kernel_prefix *self, array *dst, array *const *src)
+      static void call_wrapper(kernel_prefix *self, array *dst, array *src)
       {
         reinterpret_cast<SelfType *>(self)->call(dst, src);
       }
