@@ -12,8 +12,6 @@ namespace dynd {
 namespace nd {
 
   struct unique_kernel : base_kernel<unique_kernel> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     const intptr_t src0_size;
     const intptr_t src0_stride;
     const intptr_t src0_element_data_size;

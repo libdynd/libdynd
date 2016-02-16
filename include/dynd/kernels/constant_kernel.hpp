@@ -13,8 +13,6 @@ namespace nd {
   namespace functional {
 
     struct constant_kernel : base_kernel<constant_kernel, 0> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       char *data;
 
       constant_kernel(char *data) : data(data) {}

@@ -12,8 +12,6 @@ namespace nd {
 
   template <typename CallableType>
   struct call_kernel : base_kernel<call_kernel<CallableType>> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     static char *data_init(char *DYND_UNUSED(static_data), const ndt::type &dst_tp, intptr_t nsrc,
                            const ndt::type *src_tp, intptr_t nkwd, const nd::array *kwds,
                            const std::map<std::string, ndt::type> &tp_vars)

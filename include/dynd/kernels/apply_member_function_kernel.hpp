@@ -29,8 +29,6 @@ namespace nd {
     typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;                                           \
     typedef std::pair<T *, mem_func_type> data_type;                                                                   \
                                                                                                                        \
-    static const kernel_request_t kernreq = kernel_request_call;                                                       \
-                                                                                                                       \
     T *obj;                                                                                                            \
     mem_func_type mem_func;                                                                                            \
                                                                                                                        \
@@ -87,8 +85,6 @@ namespace nd {
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
     typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;                                           \
     typedef std::pair<T *, mem_func_type> data_type;                                                                   \
-                                                                                                                       \
-    static const kernel_request_t kernreq = kernel_request_call;                                                       \
                                                                                                                        \
     T *obj;                                                                                                            \
     mem_func_type mem_func;                                                                                            \

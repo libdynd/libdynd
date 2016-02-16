@@ -66,8 +66,6 @@ namespace nd {
     }
 
     struct DYND_API old_multidispatch_ck : base_kernel<old_multidispatch_ck> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
                                    const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                                    const std::map<std::string, ndt::type> &tp_vars);
@@ -81,8 +79,6 @@ namespace nd {
     template <typename DispatcherType>
     struct multidispatch_kernel : base_kernel<multidispatch_kernel<DispatcherType>> {
       typedef DispatcherType static_data_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       static char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                              intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)

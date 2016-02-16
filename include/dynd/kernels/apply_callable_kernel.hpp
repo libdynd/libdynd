@@ -28,8 +28,6 @@ namespace nd {
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
     typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;                                           \
                                                                                                                        \
-    static const kernel_request_t kernreq = kernel_request_call;                                                       \
-                                                                                                                       \
     func_type func;                                                                                                    \
                                                                                                                        \
     __VA_ARGS__ apply_callable_kernel(func_type func, args_type args, kwds_type kwds)                                  \
@@ -83,8 +81,6 @@ namespace nd {
         apply_kwds<type_sequence<K...>, index_sequence<J...>> {                                                        \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
     typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;                                           \
-                                                                                                                       \
-    static const kernel_request_t kernreq = kernel_request_call;                                                       \
                                                                                                                        \
     func_type func;                                                                                                    \
                                                                                                                        \
@@ -144,8 +140,6 @@ namespace nd {
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
     typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;                                           \
                                                                                                                        \
-    static const kernel_request_t kernreq = kernel_request_call;                                                       \
-                                                                                                                       \
     func_type *func;                                                                                                   \
                                                                                                                        \
     __VA_ARGS__ apply_callable_kernel(func_type *func, args_type args, kwds_type kwds)                                 \
@@ -198,8 +192,6 @@ namespace nd {
         apply_kwds<type_sequence<K...>, index_sequence<J...>> {                                                        \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
     typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;                                           \
-                                                                                                                       \
-    static const kernel_request_t kernreq = kernel_request_call;                                                       \
                                                                                                                        \
     func_type *func;                                                                                                   \
                                                                                                                        \

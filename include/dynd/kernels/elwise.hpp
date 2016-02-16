@@ -31,8 +31,6 @@ namespace nd {
      */
     template <int N>
     struct elwise_virtual_ck : base_kernel<elwise_virtual_ck<N>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void resolve_dst_type(char *static_data, char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
                                    const ndt::type *src_tp, intptr_t nkwd, const dynd::nd::array *kwds,
                                    const std::map<std::string, ndt::type> &tp_vars)
@@ -232,8 +230,6 @@ namespace nd {
 
     template <int N>
     struct elwise_ck<fixed_dim_id, fixed_dim_id, N> : base_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, N>, N> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -350,8 +346,6 @@ namespace nd {
 
     template <>
     struct elwise_ck<fixed_dim_id, fixed_dim_id, 0> : base_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, 0>, 0> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -433,8 +427,6 @@ namespace nd {
      */
     template <int N>
     struct elwise_ck<fixed_dim_id, var_dim_id, N> : base_kernel<elwise_ck<fixed_dim_id, var_dim_id, N>, N> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -579,8 +571,6 @@ namespace nd {
 
     template <>
     struct elwise_ck<fixed_dim_id, var_dim_id, 0> : base_kernel<elwise_ck<fixed_dim_id, var_dim_id, 0>, 0> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -657,8 +647,6 @@ namespace nd {
      */
     template <int N>
     struct elwise_ck<var_dim_id, fixed_dim_id, N> : base_kernel<elwise_ck<var_dim_id, fixed_dim_id, N>, N> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       typedef elwise_ck self_type;
 
       memory_block_data *m_dst_memblock;
@@ -873,8 +861,6 @@ namespace nd {
 
     template <>
     struct elwise_ck<var_dim_id, fixed_dim_id, 0> : base_kernel<elwise_ck<var_dim_id, fixed_dim_id, 0>, 0> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       typedef elwise_ck self_type;
 
       memory_block_data *m_dst_memblock;

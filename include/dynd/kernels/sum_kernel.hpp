@@ -13,8 +13,6 @@ namespace nd {
 
   template <type_id_t Src0TypeID>
   struct DYND_API sum_kernel : base_kernel<sum_kernel<Src0TypeID>, 1> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     typedef typename type_of<Src0TypeID>::type src0_type;
     //    typedef decltype(std::declval<src0_type>() +
     //                     std::declval<src0_type>()) dst_type;
