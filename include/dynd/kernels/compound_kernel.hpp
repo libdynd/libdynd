@@ -15,8 +15,6 @@ namespace nd {
     //    dst_(0) = a[n-1]
     //    dst_(i+1) = dst_(i) <OP> a[n-1-(i+1)]
     struct DYND_API left_compound_kernel : base_kernel<left_compound_kernel, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       ~left_compound_kernel() { get_child()->destroy(); }
 
       void single(char *dst, char *const *src)
@@ -55,8 +53,6 @@ namespace nd {
     //    dst_(0) = a[0]
     //    dst_(i+1) = a[i+1] <OP> dst_(i)
     struct DYND_API right_compound_kernel : base_kernel<right_compound_kernel, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       ~right_compound_kernel() { get_child()->destroy(); }
 
       void single(char *dst, char *const *src)

@@ -11,8 +11,6 @@ namespace dynd {
 namespace nd {
 
   struct view_kernel : base_kernel<view_kernel, 1> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     void call(array *dst, array *const *src)
     {
       const ndt::type &dst_tp = dst->get_type();
@@ -22,7 +20,8 @@ namespace nd {
       }
       dst->get()->data = src[0]->get()->data;
 
-      dst->get()->owner = src[0]->get()->owner ? src[0]->get()->owner : intrusive_ptr<memory_block_data>(src[0]->get(), true);
+      dst->get()->owner =
+          src[0]->get()->owner ? src[0]->get()->owner : intrusive_ptr<memory_block_data>(src[0]->get(), true);
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,

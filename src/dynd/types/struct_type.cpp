@@ -305,8 +305,6 @@ namespace dynd {
 namespace nd {
 
   struct get_array_field_kernel : nd::base_kernel<get_array_field_kernel> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     array self;
     intptr_t i;
 

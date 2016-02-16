@@ -15,8 +15,6 @@ namespace nd {
 
   // All methods are inlined, so this does not need to be declared DYND_API.
   struct mean_kernel : base_kernel<mean_kernel, 1> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     std::intptr_t compound_div_offset;
     int64 count;
 

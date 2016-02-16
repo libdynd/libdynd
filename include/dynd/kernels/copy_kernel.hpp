@@ -11,8 +11,6 @@ namespace dynd {
 namespace nd {
 
   struct DYND_API copy_ck : base_kernel<copy_ck> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
                                  const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                                  const std::map<std::string, ndt::type> &tp_vars);

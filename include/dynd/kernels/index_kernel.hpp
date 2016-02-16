@@ -12,8 +12,6 @@ namespace nd {
 
   template <typename SelfType>
   struct base_index_kernel : base_kernel<SelfType, 1> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     struct data_type {
       intptr_t nindices;
       int *indices;

@@ -17,8 +17,6 @@ namespace nd {
   namespace functional {
 
     struct DYND_API reduction_virtual_kernel : base_kernel<reduction_virtual_kernel> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       struct static_data_type {
         callable child;
 

@@ -13,8 +13,6 @@ namespace nd {
   namespace functional {
 
     struct adapt_kernel : base_kernel<adapt_kernel> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       struct static_data_type {
         ndt::type value_tp;
         callable forward;

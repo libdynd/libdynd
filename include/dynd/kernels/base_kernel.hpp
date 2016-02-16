@@ -38,8 +38,6 @@ namespace nd {
 #define BASE_KERNEL(KERNREQ, ...)                                                                                      \
   template <typename SelfType>                                                                                         \
   struct base_kernel<SelfType> : kernel_prefix {                                                                       \
-    static const kernel_request_t kernreq = kernel_request_single;                                                     \
-                                                                                                                       \
     /**                                                                                                                \
      * Returns the child kernel immediately following this one.                                                        \
      */                                                                                                                \

@@ -130,8 +130,6 @@ namespace nd {
     struct convert_kernel : base_kernel<convert_kernel> {
       typedef callable static_data_type;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       intptr_t narg;
       std::vector<intptr_t> m_src_buf_ck_offsets;
       std::vector<buffer_storage> m_bufs;

@@ -13,8 +13,6 @@ namespace dynd {
 namespace nd {
 
   struct string_replace_kernel : base_kernel<string_replace_kernel, 3> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     void single(char *dst, char *const *src)
     {
       string *d = reinterpret_cast<string *>(dst);
