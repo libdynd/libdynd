@@ -63,11 +63,19 @@ DYND_API nd::callable nd::assign::make()
   children[{{string_id, string_id}}] = callable::make<assignment_kernel<string_id, string_id>>();
   children[{{string_id, fixed_string_id}}] = callable::make<assignment_kernel<string_id, fixed_string_id>>();
   children[{{bool_id, string_id}}] = callable::make<assignment_kernel<bool_id, string_id>>();
-  children[{{option_id, option_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(?Any) -> ?Any"));
-  for (type_id_t tp_id : {int32_id, string_id, float64_id, bool_id, int8_id, uint32_id}) {
-    children[{{tp_id, option_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(?Any) -> ?Any"));
-    children[{{option_id, tp_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(?Any) -> ?Any"));
-  }
+  children[{{option_id, option_id}}] = callable::make<assignment_kernel<option_id, option_id>>();
+  children[{{int32_id, option_id}}] = callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"));
+  children[{{string_id, option_id}}] = callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"));
+  children[{{float64_id, option_id}}] = callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"));
+  children[{{bool_id, option_id}}] = callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"));
+  children[{{int8_id, option_id}}] = callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"));
+  children[{{uint32_id, option_id}}] = callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"));
+  children[{{option_id, int32_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"));
+  children[{{option_id, string_id}}] = callable::make<assignment_kernel<option_id, string_id>>();
+  children[{{option_id, float64_id}}] = callable::make<assignment_kernel<option_id, float64_id>>();
+  children[{{option_id, bool_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"));
+  children[{{option_id, int8_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"));
+  children[{{option_id, uint32_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"));
   children[{{string_id, type_id}}] = callable::make<assignment_kernel<string_id, type_id>>();
   children[{{type_id, string_id}}] = callable::make<assignment_kernel<type_id, string_id>>();
   children[{{pointer_id, pointer_id}}] = callable::make<assignment_kernel<pointer_id, pointer_id>>();

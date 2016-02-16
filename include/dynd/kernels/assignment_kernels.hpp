@@ -15,7 +15,6 @@
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/types/type_id.hpp>
 #include <dynd/types/datetime_type.hpp>
@@ -3209,7 +3208,12 @@ namespace nd {
                               intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        kernels::make_option_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq);
+        ndt::type val_dst_tp =
+            dst_tp.get_id() == option_id ? dst_tp.extended<ndt::option_type>()->get_value_type() : dst_tp;
+        ndt::type val_src_tp =
+            src_tp[0].get_id() == option_id ? src_tp[0].extended<ndt::option_type>()->get_value_type() : src_tp[0];
+        make_assignment_kernel(ckb, val_dst_tp, dst_arrmeta, val_src_tp, src_arrmeta[0], kernreq,
+                               &eval::default_eval_context);
       }
     };
 
