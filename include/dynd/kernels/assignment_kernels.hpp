@@ -1955,7 +1955,7 @@ namespace nd {
         // instantiate src_is_avail
         nd::callable &is_na = nd::is_na::get();
         is_na.get()->instantiate(is_na->static_data(), NULL, ckb, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
-                                 src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+                                 src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
         // instantiate dst_assign_na
         ckb->reserve(ckb_offset + sizeof(kernel_prefix));
@@ -1963,14 +1963,14 @@ namespace nd {
         self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
         nd::callable &assign_na = nd::assign_na::get();
         assign_na.get()->instantiate(assign_na->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, NULL, NULL,
-                                     kernreq, nkwd, kwds, tp_vars);
+                                     kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
         // instantiate value_assign
         ckb->reserve(ckb_offset + sizeof(kernel_prefix));
         self = ckb->get_at<self_type>(root_ckb_offset);
         self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-        make_assignment_kernel(ckb, dst_val_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq,
-                               &eval::default_eval_context);
+        make_assignment_kernel(ckb, dst_val_tp, dst_arrmeta, src_val_tp, src_arrmeta[0],
+                               kernreq | kernel_request_data_only, &eval::default_eval_context);
       }
     };
 
@@ -2112,7 +2112,7 @@ namespace nd {
         ckb_offset = ckb->size();
         // First child ckernel is the value assignment
         make_assignment_kernel(ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, src_tp[0],
-                               src_arrmeta[0], kernreq, &eval::default_eval_context);
+                               src_arrmeta[0], kernreq | kernel_request_data_only, &eval::default_eval_context);
         ckb_offset = ckb->size();
         // Re-acquire self because the address may have changed
         string_to_option_tp_ck *self = ckb->get_at<string_to_option_tp_ck>(root_ckb_offset);
@@ -2120,7 +2120,7 @@ namespace nd {
         self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
         nd::callable &assign_na = nd::assign_na::get();
         assign_na.get()->instantiate(assign_na->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp,
-                                     src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+                                     src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
       }
     };
@@ -2202,13 +2202,13 @@ namespace nd {
       ckb->emplace_back<self_type>(kernreq);
       // instantiate src_is_na
       is_na::get()->instantiate(is_na::get()->static_data(), NULL, ckb, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
-                                src_arrmeta, kernreq, 0, nullptr, tp_vars);
+                                src_arrmeta, kernreq | kernel_request_data_only, 0, nullptr, tp_vars);
       ckb_offset = ckb->size();
       // instantiate value_assign
       ckb->reserve(ckb_offset + sizeof(kernel_prefix));
       self_type *self = ckb->get_at<self_type>(root_ckb_offset);
       self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-      make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq,
+      make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq | kernel_request_data_only,
                              &eval::default_eval_context);
     }
   };
