@@ -12,8 +12,6 @@
 namespace dynd {
 namespace nd {
 
-  DYND_HAS(kernreq);
-
   struct kernel_prefix;
 
   /**
@@ -134,8 +132,6 @@ namespace nd {
     template <typename KernelType, typename... ArgTypes>
     void emplace_back(ArgTypes &&... args)
     {
-      static_assert(!has_kernreq<KernelType>::value, "has kernreq");
-
       /* Alignment requirement of the type. */
       static_assert(alignof(KernelType) <= 8, "kernel types require alignment to be at most 8 bytes");
 

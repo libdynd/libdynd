@@ -98,14 +98,14 @@ namespace nd {
      */                                                                                                                \
     static void destruct(kernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }                     \
                                                                                                                        \
-    void call(array *DYND_UNUSED(dst), array *const *DYND_UNUSED(src))                                                 \
+    void call(array *DYND_UNUSED(dst), const array *DYND_UNUSED(src))                                                  \
     {                                                                                                                  \
       std::stringstream ss;                                                                                            \
-      ss << "void call(array *dst, array *const *src) is not implemented in " << typeid(SelfType).name();              \
+      ss << "void call(array *dst, const array *src) is not implemented in " << typeid(SelfType).name();               \
       throw std::runtime_error(ss.str());                                                                              \
     }                                                                                                                  \
                                                                                                                        \
-    __VA_ARGS__ static void call_wrapper(kernel_prefix *self, array *dst, array *const *src)                           \
+    __VA_ARGS__ static void call_wrapper(kernel_prefix *self, array *dst, const array *src)                            \
     {                                                                                                                  \
       reinterpret_cast<SelfType *>(self)->call(dst, src);                                                              \
     }                                                                                                                  \
@@ -146,7 +146,7 @@ namespace nd {
                                                                                                                        \
   template <typename SelfType>                                                                                         \
   struct base_kernel<SelfType, 0> : base_kernel<SelfType> {                                                            \
-    void call(array *dst, array *const *DYND_UNUSED(src))                                                              \
+    void call(array *dst, const array *DYND_UNUSED(src))                                                               \
     {                                                                                                                  \
       reinterpret_cast<SelfType *>(this)->single(const_cast<char *>(dst->cdata()), nullptr);                           \
     }                                                                                                                  \
@@ -163,11 +163,11 @@ namespace nd {
                                                                                                                        \
   template <typename SelfType, size_t N>                                                                               \
   struct base_kernel<SelfType, N> : base_kernel<SelfType> {                                                            \
-    void call(array *dst, array *const *src)                                                                           \
+    void call(array *dst, const array *src)                                                                            \
     {                                                                                                                  \
       char *src_data[N];                                                                                               \
       for (size_t i = 0; i < N; ++i) {                                                                                 \
-        src_data[i] = const_cast<char *>(src[i]->cdata());                                                             \
+        src_data[i] = const_cast<char *>(src[i].cdata());                                                              \
       }                                                                                                                \
       reinterpret_cast<SelfType *>(this)->single(const_cast<char *>(dst->cdata()), src_data);                          \
     }                                                                                                                  \

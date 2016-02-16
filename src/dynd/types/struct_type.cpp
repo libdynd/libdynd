@@ -310,7 +310,7 @@ namespace nd {
 
     get_array_field_kernel(const array &self, intptr_t i) : self(self), i(i) {}
 
-    void call(array *dst, array *const *DYND_UNUSED(src))
+    void call(array *dst, const array *DYND_UNUSED(src))
     {
       array res = helper(self, i);
       *dst = res;
