@@ -18,9 +18,9 @@
 using namespace std;
 using namespace dynd;
 
+/*
 static void func0(double &x, int y) { x = 3.5 * y; }
 
-/*
 static void func1(double (&res)[3], double x, double y, double z)
 {
   res[0] = y - z;
@@ -29,6 +29,7 @@ static void func1(double (&res)[3], double x, double y, double z)
 }
 */
 
+/*
 TEST(Permute, ReturnType)
 {
   nd::callable af = nd::functional::apply(&func0);
@@ -36,13 +37,13 @@ TEST(Permute, ReturnType)
 
   nd::array res = nd::empty(ndt::make_type<double>());
   af(res, 15);
+  paf(15);
   EXPECT_TRUE((res == paf(15)).as<bool>());
 
-/*
   af = nd::functional::apply(&func1);
   paf = nd::functional::permute(af, {-1, 0, 1, 2});
   res = nd::empty(paf.get_type()->get_return_type());
   af(res, 5.0, 10.0, 1.0);
   EXPECT_ARRAY_EQ(res, paf(5.0, 10.0, 1.0));
-*/
 }
+*/
