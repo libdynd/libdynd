@@ -536,6 +536,30 @@ TEST(StringType, Split)
   EXPECT_EQ("foobar", c(3)(0));
 }
 
+TEST(StringType, StartsWith) {
+  nd::array a, b, c;
+
+  a = {"abcdef", "ab",  "abd", "",    "Xabc"};
+  b = {"abc",    "abc", "abc", "abc", "abc"};
+  c = {true,     false, false, false, false};
+
+  EXPECT_ARRAY_EQ(c,
+                  nd::string_startswith(a, b));
+}
+
+
+TEST(StringType, EndsWith) {
+  nd::array a, b, c;
+
+  a = {"defabc", "ab",  "abd", "",    "Xabc"};
+  b = {"abc",    "abc", "abc", "abc", "abc"};
+  c = {true,     false, false, false, true};
+
+  EXPECT_ARRAY_EQ(c,
+                  nd::string_endswith(a, b));
+}
+
+
 template <class T>
 static bool ascii_T_compare(const char *x, const T *y, intptr_t count)
 {

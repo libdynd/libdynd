@@ -317,6 +317,8 @@ set(libdynd_SRC
     include/dynd/kernels/string_find_kernel.hpp
     include/dynd/kernels/string_rfind_kernel.hpp
     include/dynd/kernels/string_replace_kernel.hpp
+    include/dynd/kernels/string_startswith_kernel.hpp
+    include/dynd/kernels/string_endswith_kernel.hpp
     include/dynd/kernels/take_kernel.hpp
     include/dynd/kernels/tuple_assignment_kernels.hpp
     include/dynd/kernels/uniform_kernel.hpp
