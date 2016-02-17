@@ -22,7 +22,6 @@
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/adapt_type.hpp>
-#include <dynd/types/time_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>

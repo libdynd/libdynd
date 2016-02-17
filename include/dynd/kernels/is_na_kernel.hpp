@@ -8,7 +8,7 @@
 #include <dynd/parse.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/types/time_type.hpp>
+#include <dynd/types/datetime_type.hpp>
 #include <dynd/math.hpp>
 
 namespace dynd {
@@ -200,27 +200,6 @@ namespace nd {
         for (size_t i = 0; i != count; ++i) {
           int32_t date = *reinterpret_cast<const int32_t *>(src0);
           *dst = date == DYND_DATE_NA;
-          dst += dst_stride;
-          src0 += src0_stride;
-        }
-      }
-    };
-
-    template <>
-    struct is_na_kernel<time_id, datetime_kind> : base_kernel<is_na_kernel<time_id, datetime_kind>, 1> {
-      void single(char *dst, char *const *src)
-      {
-        int64_t v = **reinterpret_cast<int64_t *const *>(src);
-        *dst = v == DYND_TIME_NA;
-      }
-
-      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-      {
-        char *src0 = src[0];
-        intptr_t src0_stride = src_stride[0];
-        for (size_t i = 0; i != count; ++i) {
-          int64_t v = *reinterpret_cast<int64_t *>(src0);
-          *dst = v == DYND_TIME_NA;
           dst += dst_stride;
           src0 += src0_stride;
         }

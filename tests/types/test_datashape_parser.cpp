@@ -17,7 +17,6 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/date_type.hpp>
-#include <dynd/types/time_type.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
@@ -53,7 +52,6 @@ TEST(DataShapeParser, Basic)
   EXPECT_EQ(ndt::make_type<dynd::complex<float>>(), ndt::type("complex[float32]"));
   EXPECT_EQ(ndt::make_type<dynd::complex<double>>(), ndt::type("complex[float64]"));
   EXPECT_EQ(ndt::date_type::make(), ndt::type("date"));
-  EXPECT_EQ(ndt::time_type::make(), ndt::type("time"));
   EXPECT_EQ(ndt::datetime_type::make(), ndt::type("datetime"));
   // Aliases for some of the above types
   EXPECT_EQ(ndt::make_type<int32_t>(), ndt::type("int"));

@@ -17,7 +17,6 @@
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/time_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
@@ -80,7 +79,7 @@ ndt::type_registry::type_registry()
   insert(string_kind_id, make_type<string_type>());       // string_id
 
   insert(scalar_kind_id, date_type::make());     // date_id
-  insert(scalar_kind_id, time_type::make());     // time_id
+  insert(scalar_kind_id, type());                // time_id
   insert(scalar_kind_id, datetime_type::make()); // datetime_id
   insert(scalar_kind_id, type());                // busdate_id
 
