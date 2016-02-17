@@ -257,7 +257,6 @@ namespace dynd {
       StringType *m_dst;
       const char *m_src;
       size_t m_src_size;
-      size_t m_n;
       size_t m_i;
       size_t m_last_src_start;
       size_t m_split_size;
