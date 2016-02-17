@@ -17,11 +17,9 @@ namespace dynd {
     struct string_split_kernel
       : base_kernel<string_split_kernel, 2> {
 
-      typedef string_split_kernel self_type;
+      intrusive_ptr<memory_block_data> m_dst_memblock;
 
-      memory_block_data *m_dst_memblock;
-
-      string_split_kernel(memory_block_data *dst_memblock) :
+      string_split_kernel(intrusive_ptr<memory_block_data> dst_memblock) :
         m_dst_memblock(dst_memblock) {
 
       }
@@ -34,8 +32,8 @@ namespace dynd {
                               kernel_request_t kernreq, intptr_t DYND_UNUSED(kwd),
                               const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-        ckb->emplace_back<self_type>(
-          kernreq, reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->blockref.get());
+        ckb->emplace_back<string_split_kernel>(
+          kernreq, reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->blockref);
       }
 
       void single(char *dst, char *const *src) {
