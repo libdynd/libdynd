@@ -20,8 +20,6 @@ namespace nd {
      */
     // All methods are inlined, so this does not need to be declared DYND_API.
     struct compose_kernel : base_kernel<compose_kernel, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       struct static_data {
         callable first;
         callable second;

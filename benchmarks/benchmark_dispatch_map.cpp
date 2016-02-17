@@ -24,7 +24,7 @@ class DispatchFixture : public ::benchmark::Fixture {
 public:
   type_id_t ids[N];
 
-  void SetUp()
+  void SetUp(const benchmark::State &DYND_UNUSED(state))
   {
     default_random_engine generator;
     uniform_int_distribution<underlying_type_t<type_id_t>> d(bool_id, float64_id);

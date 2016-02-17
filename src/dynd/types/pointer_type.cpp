@@ -345,13 +345,11 @@ std::map<std::string, nd::callable> ndt::pointer_type::get_dynamic_type_properti
 }
 
 struct dereference_kernel : nd::base_kernel<dereference_kernel> {
-  static const kernel_request_t kernreq = kernel_request_call;
-
   nd::array self;
 
   dereference_kernel(const nd::array &self) : self(self) {}
 
-  void call(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
+  void call(nd::array *dst, const nd::array *DYND_UNUSED(src)) { *dst = helper(self); }
 
   static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
                                intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),

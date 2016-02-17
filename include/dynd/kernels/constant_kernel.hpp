@@ -12,7 +12,7 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct constant_kernel : base_kernel<constant_kernel> {
+    struct constant_kernel : base_kernel<constant_kernel, 0> {
       char *data;
 
       constant_kernel(char *data) : data(data) {}
@@ -38,8 +38,8 @@ namespace nd {
         const array &val = *reinterpret_cast<array *>(static_data);
 
         ckb->emplace_back<constant_kernel>(kernreq, const_cast<char *>(val.cdata()));
-        make_assignment_kernel(ckb, dst_tp, dst_arrmeta, dst_tp, val.get()->metadata(), kernreq,
-                               &eval::default_eval_context);
+        make_assignment_kernel(ckb, dst_tp, dst_arrmeta, dst_tp, val.get()->metadata(),
+                               kernreq | kernel_request_data_only, &eval::default_eval_context);
       }
     };
 

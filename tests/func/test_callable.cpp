@@ -22,6 +22,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 TEST(Callable, SingleStridedConstructor)
 {
   nd::callable f(ndt::type("(int32) -> int32"), [](nd::kernel_prefix *DYND_UNUSED(self), char *dst, char *const *src) {
@@ -30,6 +31,7 @@ TEST(Callable, SingleStridedConstructor)
 
   EXPECT_ARRAY_EQ(8, f(3));
 }
+*/
 
 TEST(Callable, Construction)
 {

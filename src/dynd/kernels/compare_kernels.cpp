@@ -19,7 +19,7 @@ void nd::equal_kernel<tuple_id, tuple_id>::instantiate(char *DYND_UNUSED(static_
   intptr_t self_offset = ckb->size();
   size_t field_count = src_tp[0].extended<ndt::tuple_type>()->get_field_count();
 
-  ckb->emplace_back<equal_kernel>(kernel_request_single, field_count,
+  ckb->emplace_back<equal_kernel>(kernreq, field_count,
                                   src_tp[0].extended<ndt::tuple_type>()->get_data_offsets(src_arrmeta[0]),
                                   src_tp[0].extended<ndt::tuple_type>()->get_data_offsets(src_arrmeta[1]));
   ckb->emplace_back(field_count * sizeof(size_t));
@@ -35,7 +35,7 @@ void nd::equal_kernel<tuple_id, tuple_id>::instantiate(char *DYND_UNUSED(static_
     ndt::type child_src_tp[2] = {ft, ft};
     const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
     equal::get()->instantiate(equal::get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp,
-                              child_src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+                              child_src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
   }
 }
 
@@ -48,7 +48,7 @@ void nd::not_equal_kernel<tuple_id, tuple_id>::instantiate(
   auto bsd = src_tp->extended<ndt::tuple_type>();
   size_t field_count = bsd->get_field_count();
 
-  ckb->emplace_back<not_equal_kernel>(kernel_request_single, field_count, bsd->get_data_offsets(src_arrmeta[0]),
+  ckb->emplace_back<not_equal_kernel>(kernreq, field_count, bsd->get_data_offsets(src_arrmeta[0]),
                                       bsd->get_data_offsets(src_arrmeta[1]));
   ckb->emplace_back(field_count * sizeof(size_t));
 
@@ -68,6 +68,6 @@ void nd::not_equal_kernel<tuple_id, tuple_id>::instantiate(
     ndt::type child_src_tp[2] = {ft, ft};
     const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
     not_equal::get()->instantiate(not_equal::get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp,
-                                  child_src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+                                  child_src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
   }
 }

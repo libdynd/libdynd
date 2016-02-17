@@ -11,8 +11,6 @@ namespace dynd {
 namespace nd {
 
   struct all_kernel : base_kernel<all_kernel, 1> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<bool1 *>(dst) = *reinterpret_cast<bool1 *>(dst) && *reinterpret_cast<bool1 *>(src[0]);

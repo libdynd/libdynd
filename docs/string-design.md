@@ -114,6 +114,8 @@ The small string optimization works by using something like a spare bit
 in the representation to signal whether the data is stored in heap-allocated
 memory, or right in the structure.
 
+* [Small String Optimization Implementation SSO-23](https://github.com/elliotgoodrich/SSO-23)
+
 ## Implementation details
 
 The design choices made still give quite a bit of latitude in the actual
@@ -136,15 +138,17 @@ more space for the inline string. It would be nice for the string size
 to be trivially accessible in both the inline string and heap string cases,
 so lets put the inline string size in the last byte. On a 64-bit system,
 after also reserving the NULL terminator, this gives a maximum inline string
-size of 14 bytes. On a 32-bit system, we have a choice, either to match 64-bit,
-getting the same inline string size, or to go half the size, and only get a
-6 byte maximum inline string. Matching the size seems reasonable, to get
-similar performance on small strings as in 64 bits.
+size of 14 bytes. (NOTE: If we use the idea from SSO-23 linked above, can
+get 15 bytes instead of 14.) On a 32-bit system, we have a choice, either
+to match 64-bit, getting the same inline string size, or to go half the
+size, and only get a 6 byte maximum inline string. Matching the size
+seems reasonable, to get similar performance on small strings as in 64 bits.
 
 The result of this design is that the memory storage of a DyND string on
 a little-endian architecture is
 
 ```cpp
+// TODO: Improve this using SSO-23 ideas
 struct string_memory_layout {
     // Two 64-bit integers on all platforms, the data size is 16 bytes on
     // both 32-bit and 64-bit platforms.

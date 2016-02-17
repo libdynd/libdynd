@@ -39,7 +39,7 @@ namespace nd {
 
       static const array error_mode(opt<assign_error_mode>());
       assign::get()->instantiate(assign::get()->static_data(), data, ckb, dst_tp, dst_arrmeta, 1, &dst_tp,
-                                 &src_metadata, kernreq, 1, &error_mode, tp_vars);
+                                 &src_metadata, kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
     }
   };
 

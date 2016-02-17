@@ -305,14 +305,12 @@ namespace dynd {
 namespace nd {
 
   struct get_array_field_kernel : nd::base_kernel<get_array_field_kernel> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     array self;
     intptr_t i;
 
     get_array_field_kernel(const array &self, intptr_t i) : self(self), i(i) {}
 
-    void call(array *dst, array *const *DYND_UNUSED(src))
+    void call(array *dst, const array *DYND_UNUSED(src))
     {
       array res = helper(self, i);
       *dst = res;

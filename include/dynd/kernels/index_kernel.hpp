@@ -12,8 +12,6 @@ namespace nd {
 
   template <typename SelfType>
   struct base_index_kernel : base_kernel<SelfType, 1> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     struct data_type {
       intptr_t nindices;
       int *indices;
@@ -28,9 +26,9 @@ namespace nd {
       }
     };
 
-    void call(array *res, array *const *args)
+    void call(array *res, const array *args)
     {
-      res->get()->data = args[0]->get()->data;
+      res->get()->data = args[0]->data;
       reinterpret_cast<SelfType *>(this)->single(res->get()->metadata(), &res->get()->data);
     }
 

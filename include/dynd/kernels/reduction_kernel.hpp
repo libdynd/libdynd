@@ -146,6 +146,20 @@ namespace nd {
         return reinterpret_cast<reduction_kernel_prefix *>(this->get_child());
       }
 
+      void call(array *dst, const array *src)
+      {
+        char *src_data[1];
+        for (size_t i = 0; i < 1; ++i) {
+          src_data[i] = const_cast<char *>(src[i].cdata());
+        }
+        reinterpret_cast<SelfType *>(this)->single_first(const_cast<char *>(dst->cdata()), src_data);
+      }
+
+      static void call_wrapper(kernel_prefix *self, array *dst, array *src)
+      {
+        reinterpret_cast<SelfType *>(self)->call(dst, src);
+      }
+
       template <typename... ArgTypes>
       static void init(SelfType *self, kernel_request_t kernreq, ArgTypes &&... args)
       {
@@ -154,6 +168,9 @@ namespace nd {
         self->destructor = SelfType::destruct;
         // Get the function pointer for the first_call
         switch (kernreq) {
+        case kernel_request_call:
+          self->set_first_call_function(SelfType::call_wrapper);
+          break;
         case kernel_request_single:
           self->set_first_call_function(SelfType::single_first_wrapper);
           break;

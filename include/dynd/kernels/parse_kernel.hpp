@@ -247,13 +247,13 @@ namespace nd {
         ckb_offset = ckb->size();
 
         assign_na::get()->instantiate(assign_na::get()->static_data(), data, ckb, dst_tp, dst_arrmeta, 0, nullptr,
-                                      nullptr, kernreq, nkwd, kwds, tp_vars);
+                                      nullptr, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
 
         ckb->get_at<parse_kernel>(self_offset)->parse_offset = ckb_offset - self_offset;
         parse::get()->instantiate(parse::get()->static_data(), data, ckb,
                                   dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc, src_tp,
-                                  src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+                                  src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
       }
     };

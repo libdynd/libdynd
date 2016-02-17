@@ -67,7 +67,7 @@ namespace kernels {
 
       ckb->emplace_back<self_type>(kernreq, detail::make_array_wrapper<N>(perm));
       child->instantiate(const_cast<char *>(child->static_data()), NULL, ckb, ndt::make_type<void>(), NULL, nsrc,
-                         src_tp_inv, src_arrmeta_inv, kernreq, nkwd, kwds, tp_vars);
+                         src_tp_inv, src_arrmeta_inv, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
     }
 
   private:

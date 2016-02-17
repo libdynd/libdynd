@@ -13,8 +13,6 @@ namespace nd {
   namespace functional {
 
     struct adapt_kernel : base_kernel<adapt_kernel> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       struct static_data_type {
         ndt::type value_tp;
         callable forward;
@@ -25,10 +23,9 @@ namespace nd {
 
       adapt_kernel(const ndt::type &value_tp, const callable &forward) : value_tp(value_tp), forward(forward) {}
 
-      void call(array *dst, array *const *src)
+      void call(array *dst, const array *src)
       {
-        *dst =
-            src[0]->replace_dtype(ndt::make_type<ndt::adapt_type>(value_tp, src[0]->get_dtype(), forward, callable()));
+        *dst = src[0].replace_dtype(ndt::make_type<ndt::adapt_type>(value_tp, src[0].get_dtype(), forward, callable()));
       }
 
       static void resolve_dst_type(char *static_data, char *DYND_UNUSED(data), ndt::type &dst_tp,

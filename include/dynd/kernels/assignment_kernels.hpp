@@ -15,7 +15,6 @@
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/types/type_id.hpp>
 #include <dynd/types/datetime_type.hpp>
@@ -91,8 +90,6 @@ namespace nd {
   struct category_to_categorical_kernel_extra : base_kernel<category_to_categorical_kernel_extra<UIntType>, 1> {
     typedef category_to_categorical_kernel_extra self_type;
 
-    static const kernel_request_t kernreq = kernel_request_call;
-
     ndt::type dst_cat_tp;
     const char *src_arrmeta;
 
@@ -114,8 +111,6 @@ namespace nd {
   template <typename UIntType>
   struct categorical_to_other_kernel : base_kernel<categorical_to_other_kernel<UIntType>, 1> {
     typedef categorical_to_other_kernel extra_type;
-
-    static const kernel_request_t kernreq = kernel_request_call;
 
     ndt::type src_cat_tp;
 
@@ -148,8 +143,6 @@ namespace nd {
               assign_error_mode... ErrorMode>
     struct assignment_virtual_kernel
         : base_kernel<assignment_virtual_kernel<DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                               const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
@@ -184,8 +177,6 @@ namespace nd {
               assign_error_mode ErrorMode>
     struct assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind, ErrorMode>
         : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind, ErrorMode>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src_type;
 
@@ -236,8 +227,6 @@ namespace nd {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *dst, char *const *src)
       {
         src0_type s = *reinterpret_cast<src0_type *>(src[0]);
@@ -254,8 +243,6 @@ namespace nd {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *dst, char *const *src)
       {
         src0_type s = *reinterpret_cast<src0_type *>(src[0]);
@@ -271,8 +258,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, real_kind, Src0TypeID, complex_kind, assign_error_nocheck>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -291,8 +276,6 @@ namespace nd {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *dst, char *const *src)
       {
         src0_type s = *reinterpret_cast<src0_type *>(src[0]);
@@ -309,8 +292,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, complex_kind, Src0TypeID, sint_kind, assign_error_inexact>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -333,13 +314,11 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, sint_kind, assign_error_overflow>
         : assignment_kernel<DstTypeID, complex_kind, Src0TypeID, sint_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, sint_kind, assign_error_fractional>
         : assignment_kernel<DstTypeID, complex_kind, Src0TypeID, sint_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Anything -> boolean with no checking
@@ -347,8 +326,6 @@ namespace nd {
     struct assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_nocheck>
         : base_kernel<assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_nocheck>, 1> {
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -366,8 +343,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, real_kind, Src0TypeID, uint_kind, assign_error_inexact>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -390,13 +365,11 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, uint_kind, assign_error_overflow>
         : assignment_kernel<DstTypeID, real_kind, Src0TypeID, uint_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, uint_kind, assign_error_fractional>
         : assignment_kernel<DstTypeID, real_kind, Src0TypeID, uint_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Unsigned int -> complex floating point with no checking
@@ -405,8 +378,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, complex_kind, Src0TypeID, uint_kind, assign_error_nocheck>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
       {
@@ -424,8 +395,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, complex_kind, Src0TypeID, uint_kind, assign_error_inexact>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -448,13 +417,11 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, uint_kind, assign_error_overflow>
         : assignment_kernel<DstTypeID, complex_kind, Src0TypeID, uint_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, uint_kind, assign_error_fractional>
         : assignment_kernel<DstTypeID, complex_kind, Src0TypeID, uint_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Floating point -> signed int with overflow checking
@@ -463,8 +430,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID, real_kind, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -488,8 +453,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID, real_kind, assign_error_fractional>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -518,7 +481,6 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, real_kind, assign_error_inexact>
         : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, real_kind, assign_error_fractional> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Complex floating point -> signed int with overflow checking
@@ -527,8 +489,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID, complex_kind, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -559,8 +519,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID, complex_kind, assign_error_fractional>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -596,7 +554,6 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, complex_kind, assign_error_inexact>
         : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, complex_kind, assign_error_fractional> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Floating point -> unsigned int with overflow checking
@@ -605,8 +562,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, uint_kind, Src0TypeID, real_kind, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -630,8 +585,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, uint_kind, Src0TypeID, real_kind, assign_error_fractional>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -660,7 +613,6 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, real_kind, assign_error_inexact>
         : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, real_kind, assign_error_fractional> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Complex floating point -> unsigned int with overflow checking
@@ -669,8 +621,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, uint_kind, Src0TypeID, complex_kind, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -701,8 +651,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, uint_kind, Src0TypeID, complex_kind, assign_error_fractional>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -738,124 +686,105 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, complex_kind, assign_error_inexact>
         : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, complex_kind, assign_error_fractional> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // float -> float with no checking
     template <>
     struct assignment_kernel<float32_id, real_kind, float32_id, real_kind, assign_error_overflow>
         : assignment_kernel<float32_id, real_kind, float32_id, real_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<float32_id, real_kind, float32_id, real_kind, assign_error_fractional>
         : assignment_kernel<float32_id, real_kind, float32_id, real_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<float32_id, real_kind, float32_id, real_kind, assign_error_inexact>
         : assignment_kernel<float32_id, real_kind, float32_id, real_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // complex<float> -> complex<float> with no checking
     template <>
     struct assignment_kernel<complex_float32_id, complex_kind, complex_float32_id, complex_kind, assign_error_overflow>
         : assignment_kernel<complex_float32_id, complex_kind, complex_float32_id, complex_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<complex_float32_id, complex_kind, complex_float32_id, complex_kind,
                              assign_error_fractional>
         : assignment_kernel<complex_float32_id, complex_kind, complex_float32_id, complex_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<complex_float32_id, complex_kind, complex_float32_id, complex_kind, assign_error_inexact>
         : assignment_kernel<complex_float32_id, complex_kind, complex_float32_id, complex_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // float -> double with no checking
     template <>
     struct assignment_kernel<float64_id, real_kind, float32_id, real_kind, assign_error_overflow>
         : assignment_kernel<float64_id, real_kind, float32_id, real_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<float64_id, real_kind, float32_id, real_kind, assign_error_fractional>
         : assignment_kernel<float64_id, real_kind, float32_id, real_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<float64_id, real_kind, float32_id, real_kind, assign_error_inexact>
         : assignment_kernel<float64_id, real_kind, float32_id, real_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // complex<float> -> complex<double> with no checking
     template <>
     struct assignment_kernel<complex_float64_id, complex_kind, complex_float32_id, complex_kind, assign_error_overflow>
         : assignment_kernel<complex_float64_id, complex_kind, complex_float32_id, complex_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<complex_float64_id, complex_kind, complex_float32_id, complex_kind,
                              assign_error_fractional>
         : assignment_kernel<complex_float64_id, complex_kind, complex_float32_id, complex_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<complex_float64_id, complex_kind, complex_float32_id, complex_kind, assign_error_inexact>
         : assignment_kernel<complex_float64_id, complex_kind, complex_float32_id, complex_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // double -> double with no checking
     template <>
     struct assignment_kernel<float64_id, real_kind, float64_id, real_kind, assign_error_overflow>
         : assignment_kernel<float64_id, real_kind, float64_id, real_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<float64_id, real_kind, float64_id, real_kind, assign_error_fractional>
         : assignment_kernel<float64_id, real_kind, float64_id, real_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<float64_id, real_kind, float64_id, real_kind, assign_error_inexact>
         : assignment_kernel<float64_id, real_kind, float64_id, real_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // complex<double> -> complex<double> with no checking
     template <>
     struct assignment_kernel<complex_float64_id, complex_kind, complex_float64_id, complex_kind, assign_error_overflow>
         : assignment_kernel<complex_float64_id, complex_kind, complex_float64_id, complex_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<complex_float64_id, complex_kind, complex_float64_id, complex_kind,
                              assign_error_fractional>
         : assignment_kernel<complex_float64_id, complex_kind, complex_float64_id, complex_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<complex_float64_id, complex_kind, complex_float64_id, complex_kind, assign_error_inexact>
         : assignment_kernel<complex_float64_id, complex_kind, complex_float64_id, complex_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     /*
@@ -910,8 +839,6 @@ namespace nd {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *dst, char *const *src)
       {
         src0_type s = *reinterpret_cast<src0_type *>(src[0]);
@@ -944,7 +871,6 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, real_kind, assign_error_fractional>
         : assignment_kernel<DstTypeID, real_kind, Src0TypeID, real_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // real -> real with inexact checking
@@ -953,8 +879,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, real_kind, Src0TypeID, real_kind, assign_error_inexact>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -1005,8 +929,6 @@ namespace nd {
         : base_kernel<assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_overflow>, 1> {
       typedef typename type_of<Src0TypeID>::type src0_type;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *dst, char *const *src)
       {
         src0_type s = *reinterpret_cast<src0_type *>(src[0]);
@@ -1032,51 +954,43 @@ namespace nd {
     template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
     struct assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_fractional>
         : assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
     struct assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_inexact>
         : assignment_kernel<bool_id, bool_kind, Src0TypeID, Src0TypeKind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Boolean -> boolean with other error checking
     template <>
     struct assignment_kernel<bool_id, bool_kind, bool_id, bool_kind, assign_error_overflow>
         : assignment_kernel<bool_id, bool_kind, bool_id, bool_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<bool_id, bool_kind, bool_id, bool_kind, assign_error_fractional>
         : assignment_kernel<bool_id, bool_kind, bool_id, bool_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_kernel<bool_id, bool_kind, bool_id, bool_kind, assign_error_inexact>
         : assignment_kernel<bool_id, bool_kind, bool_id, bool_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Boolean -> anything with other error checking
     template <type_id_t DstTypeID, type_kind_t DstTypeKind>
     struct assignment_kernel<DstTypeID, DstTypeKind, bool_id, bool_kind, assign_error_overflow>
         : assignment_kernel<DstTypeID, DstTypeKind, bool_id, bool_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <type_id_t DstTypeID, type_kind_t DstTypeKind>
     struct assignment_kernel<DstTypeID, DstTypeKind, bool_id, bool_kind, assign_error_fractional>
         : assignment_kernel<DstTypeID, DstTypeKind, bool_id, bool_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <type_id_t DstTypeID, type_kind_t DstTypeKind>
     struct assignment_kernel<DstTypeID, DstTypeKind, bool_id, bool_kind, assign_error_inexact>
         : assignment_kernel<DstTypeID, DstTypeKind, bool_id, bool_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Signed int -> signed int with overflow checking
@@ -1085,8 +999,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -1106,13 +1018,11 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind, assign_error_fractional>
         : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind, assign_error_inexact>
         : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Unsigned int -> signed int with overflow checking just when sizeof(dst)
@@ -1123,8 +1033,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -1146,13 +1054,11 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind, assign_error_fractional>
         : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind, assign_error_inexact>
         : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Signed int -> unsigned int with positive overflow checking just when
@@ -1162,8 +1068,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -1185,13 +1089,11 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind, assign_error_fractional>
         : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind, assign_error_inexact>
         : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Unsigned int -> unsigned int with overflow checking just when sizeof(dst)
@@ -1202,8 +1104,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -1225,13 +1125,11 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind, assign_error_fractional>
         : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind, assign_error_inexact>
         : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // Signed int -> floating point with inexact checking
@@ -1240,8 +1138,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, real_kind, Src0TypeID, sint_kind, assign_error_inexact>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -1264,13 +1160,11 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, sint_kind, assign_error_overflow>
         : assignment_kernel<DstTypeID, real_kind, Src0TypeID, sint_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, sint_kind, assign_error_fractional>
         : assignment_kernel<DstTypeID, real_kind, Src0TypeID, sint_kind, assign_error_nocheck> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID, assign_error_mode ErrorMode>
@@ -1278,8 +1172,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, complex_kind, Src0TypeID, real_kind, ErrorMode>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -1297,8 +1189,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, real_kind, Src0TypeID, complex_kind, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -1341,14 +1231,12 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, complex_kind, assign_error_inexact>
         : assignment_kernel<DstTypeID, real_kind, Src0TypeID, complex_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // complex -> real with fractional checking
     template <type_id_t DstTypeID, type_id_t SrcTypeID>
     struct assignment_kernel<DstTypeID, real_kind, SrcTypeID, complex_kind, assign_error_fractional>
         : assignment_kernel<DstTypeID, real_kind, SrcTypeID, complex_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // complex<double> -> float with inexact checking
@@ -1356,8 +1244,6 @@ namespace nd {
     struct assignment_kernel<float32_id, real_kind, complex_float64_id, complex_kind, assign_error_inexact>
         : base_kernel<assignment_kernel<float32_id, real_kind, complex_float64_id, complex_kind, assign_error_inexact>,
                       1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *dst, char *const *src)
       {
         complex<double> s = *reinterpret_cast<complex<double> *>(src[0]);
@@ -1409,8 +1295,6 @@ namespace nd {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *dst, char *const *src)
       {
         src0_type s = *reinterpret_cast<src0_type *>(src[0]);
@@ -1446,7 +1330,6 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, real_kind, assign_error_fractional>
         : assignment_kernel<DstTypeID, complex_kind, Src0TypeID, real_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // real -> complex with inexact checking
@@ -1455,8 +1338,6 @@ namespace nd {
         : base_kernel<assignment_kernel<DstTypeID, complex_kind, Src0TypeID, real_kind, assign_error_inexact>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -1505,8 +1386,6 @@ namespace nd {
       typedef complex<float> dst_type;
       typedef complex<double> src0_type;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *dst, char *const *src)
       {
         DYND_TRACE_ASSIGNMENT(static_cast<complex<float>>(*reinterpret_cast<src0_type *>(src[0])), complex<float>,
@@ -1540,7 +1419,6 @@ namespace nd {
     struct assignment_kernel<complex_float32_id, complex_kind, complex_float64_id, complex_kind,
                              assign_error_fractional>
         : assignment_kernel<complex_float32_id, complex_kind, complex_float64_id, complex_kind, assign_error_overflow> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     // complex<double> -> complex<float> with inexact checking
@@ -1551,8 +1429,6 @@ namespace nd {
                       1> {
       typedef complex<float> dst_type;
       typedef complex<double> src0_type;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       void single(char *dst, char *const *src)
       {
@@ -1607,8 +1483,6 @@ namespace nd {
       date_parse_order_t m_date_parse_order;
       int m_century_window;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       assignment_kernel(const ndt::type &src_tp, const char *src_arrmeta, date_parse_order_t date_parse_order,
                         int century_window)
           : m_src_string_tp(src_tp), m_src_arrmeta(src_arrmeta), m_date_parse_order(date_parse_order),
@@ -1648,8 +1522,6 @@ namespace nd {
       ndt::type m_dst_string_tp;
       const char *m_dst_arrmeta;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       assignment_kernel(const ndt::type &dst_tp, const char *dst_arrmeta)
           : m_dst_string_tp(dst_tp), m_dst_arrmeta(dst_arrmeta)
       {
@@ -1685,8 +1557,6 @@ namespace nd {
       const char *m_src_arrmeta;
       date_parse_order_t m_date_parse_order;
       int m_century_window;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       assignment_kernel(const ndt::type &dst_tp, const ndt::type &src_tp, const char *src_arrmeta,
                         date_parse_order_t date_parse_order, int century_window)
@@ -1729,8 +1599,6 @@ namespace nd {
       const char *m_dst_arrmeta;
       ndt::type m_src_datetime_tp;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       assignment_kernel(const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp)
           : m_dst_string_tp(dst_tp), m_dst_arrmeta(dst_arrmeta), m_src_datetime_tp(src_tp)
       {
@@ -1766,8 +1634,6 @@ namespace nd {
         : base_kernel<assignment_kernel<time_id, datetime_kind, string_id, string_kind, ErrorMode>, 1> {
       ndt::type m_src_string_tp;
       const char *m_src_arrmeta;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       assignment_kernel(const ndt::type &src_tp, const char *src_arrmeta)
           : m_src_string_tp(src_tp), m_src_arrmeta(src_arrmeta)
@@ -1807,8 +1673,6 @@ namespace nd {
       ndt::type m_dst_string_tp;
       const char *m_dst_arrmeta;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       assignment_kernel(const ndt::type &dst_tp, const char *dst_arrmeta)
           : m_dst_string_tp(dst_tp), m_dst_arrmeta(dst_arrmeta)
       {
@@ -1846,8 +1710,6 @@ namespace nd {
       // This child is the dst assign_na ckernel
       size_t m_dst_assign_na_offset;
       size_t m_value_assign_offset;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       ~assignment_kernel()
       {
@@ -1956,7 +1818,7 @@ namespace nd {
         // instantiate src_is_avail
         nd::callable &is_na = nd::is_na::get();
         is_na.get()->instantiate(is_na->static_data(), NULL, ckb, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
-                                 src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+                                 src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
         // instantiate dst_assign_na
         ckb->reserve(ckb_offset + sizeof(kernel_prefix));
@@ -1964,20 +1826,18 @@ namespace nd {
         self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
         nd::callable &assign_na = nd::assign_na::get();
         assign_na.get()->instantiate(assign_na->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, NULL, NULL,
-                                     kernreq, nkwd, kwds, tp_vars);
+                                     kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
         // instantiate value_assign
         ckb->reserve(ckb_offset + sizeof(kernel_prefix));
         self = ckb->get_at<self_type>(root_ckb_offset);
         self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-        make_assignment_kernel(ckb, dst_val_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq,
-                               &eval::default_eval_context);
+        make_assignment_kernel(ckb, dst_val_tp, dst_arrmeta, src_val_tp, src_arrmeta[0],
+                               kernreq | kernel_request_data_only, &eval::default_eval_context);
       }
     };
 
     struct DYND_API string_to_option_bool_ck : nd::base_kernel<string_to_option_bool_ck, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *dst, char *const *src)
       {
         const string *std = reinterpret_cast<string *>(src[0]);
@@ -1988,8 +1848,6 @@ namespace nd {
     struct DYND_API string_to_option_number_ck : nd::base_kernel<string_to_option_number_ck, 1> {
       type_id_t m_tid;
       assign_error_mode m_errmode;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       string_to_option_number_ck() {}
 
@@ -2013,8 +1871,6 @@ namespace nd {
 
     struct DYND_API string_to_option_tp_ck : nd::base_kernel<string_to_option_tp_ck, 1> {
       intptr_t m_dst_assign_na_offset;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       ~string_to_option_tp_ck()
       {
@@ -2044,8 +1900,6 @@ namespace nd {
 
     template <type_id_t Src0TypeID, assign_error_mode ErrorMode>
     struct assignment_kernel<option_id, option_kind, Src0TypeID, real_kind, ErrorMode> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
@@ -2062,8 +1916,6 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<option_id, option_kind, string_id, string_kind, ErrorMode> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
@@ -2113,7 +1965,7 @@ namespace nd {
         ckb_offset = ckb->size();
         // First child ckernel is the value assignment
         make_assignment_kernel(ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, src_tp[0],
-                               src_arrmeta[0], kernreq, &eval::default_eval_context);
+                               src_arrmeta[0], kernreq | kernel_request_data_only, &eval::default_eval_context);
         ckb_offset = ckb->size();
         // Re-acquire self because the address may have changed
         string_to_option_tp_ck *self = ckb->get_at<string_to_option_tp_ck>(root_ckb_offset);
@@ -2121,7 +1973,7 @@ namespace nd {
         self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
         nd::callable &assign_na = nd::assign_na::get();
         assign_na.get()->instantiate(assign_na->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp,
-                                     src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+                                     src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
       }
     };
@@ -2134,8 +1986,6 @@ namespace nd {
   struct DYND_API option_to_value_ck : nd::base_kernel<option_to_value_ck, 1> {
     // The default child is the src_is_na ckernel
     size_t m_value_assign_offset;
-
-    static const kernel_request_t kernreq = kernel_request_call;
 
     ~option_to_value_ck()
     {
@@ -2203,13 +2053,13 @@ namespace nd {
       ckb->emplace_back<self_type>(kernreq);
       // instantiate src_is_na
       is_na::get()->instantiate(is_na::get()->static_data(), NULL, ckb, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
-                                src_arrmeta, kernreq, 0, nullptr, tp_vars);
+                                src_arrmeta, kernreq | kernel_request_data_only, 0, nullptr, tp_vars);
       ckb_offset = ckb->size();
       // instantiate value_assign
       ckb->reserve(ckb_offset + sizeof(kernel_prefix));
       self_type *self = ckb->get_at<self_type>(root_ckb_offset);
       self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-      make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq,
+      make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq | kernel_request_data_only,
                              &eval::default_eval_context);
     }
   };
@@ -2219,15 +2069,11 @@ namespace nd {
 
   template <>
   struct trivial_copy_kernel<1> : base_kernel<trivial_copy_kernel<1>, 1> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     void single(char *dst, char *const *src) { *dst = *src[0]; }
   };
 
   template <>
   struct trivial_copy_kernel<2> : base_kernel<trivial_copy_kernel<2>, 1> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<int16_t *>(dst) = *reinterpret_cast<int16_t *>(src[0]);
@@ -2236,8 +2082,6 @@ namespace nd {
 
   template <>
   struct trivial_copy_kernel<4> : base_kernel<trivial_copy_kernel<4>, 1> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<int32_t *>(dst) = *reinterpret_cast<int32_t *>(src[0]);
@@ -2246,8 +2090,6 @@ namespace nd {
 
   template <>
   struct trivial_copy_kernel<8> : base_kernel<trivial_copy_kernel<8>, 1> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<int64_t *>(dst) = *reinterpret_cast<int64_t *>(src[0]);
@@ -2255,8 +2097,6 @@ namespace nd {
   };
 
   struct unaligned_copy_ck : base_kernel<unaligned_copy_ck, 1> {
-    static const kernel_request_t kernreq = kernel_request_call;
-
     size_t data_size;
 
     unaligned_copy_ck(size_t data_size) : data_size(data_size) {}
@@ -2269,8 +2109,6 @@ namespace nd {
     template <>
     struct assignment_virtual_kernel<date_id, datetime_kind, date_id, datetime_kind>
         : base_kernel<assignment_virtual_kernel<date_id, datetime_kind, date_id, datetime_kind>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
@@ -2284,8 +2122,6 @@ namespace nd {
     template <>
     struct assignment_virtual_kernel<fixed_bytes_id, bytes_kind, fixed_bytes_id, bytes_kind>
         : base_kernel<assignment_virtual_kernel<fixed_bytes_id, bytes_kind, fixed_bytes_id, bytes_kind>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -2304,8 +2140,6 @@ namespace nd {
     template <type_id_t Src0TypeID, assign_error_mode ErrorMode>
     struct assignment_kernel<string_id, string_kind, Src0TypeID, sint_kind, ErrorMode>
         : base_kernel<assignment_kernel<string_id, string_kind, Src0TypeID, sint_kind, ErrorMode>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       ndt::type dst_string_tp;
       type_id_t src_id;
       const char *dst_arrmeta;
@@ -2340,14 +2174,11 @@ namespace nd {
     template <type_id_t Src0TypeID, type_kind_t Src0TypeKind, assign_error_mode ErrorMode>
     struct assignment_kernel<fixed_string_id, string_kind, Src0TypeID, Src0TypeKind, ErrorMode>
         : assignment_kernel<string_id, string_kind, int32_id, sint_kind, ErrorMode> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <>
     struct assignment_virtual_kernel<tuple_id, tuple_kind, tuple_id, tuple_kind>
         : base_kernel<assignment_virtual_kernel<tuple_id, tuple_kind, tuple_id, tuple_kind>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2374,8 +2205,6 @@ namespace nd {
     template <>
     struct assignment_virtual_kernel<struct_id, struct_kind, struct_id, struct_kind>
         : base_kernel<assignment_virtual_kernel<struct_id, struct_kind, struct_id, struct_kind>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2404,8 +2233,6 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<string_id, string_kind, fixed_string_id, string_kind, ErrorMode>
         : base_kernel<assignment_kernel<string_id, string_kind, fixed_string_id, string_kind, ErrorMode>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       string_encoding_t m_dst_encoding, m_src_encoding;
       intptr_t m_src_element_size;
       next_unicode_codepoint_t m_next_fn;
@@ -2487,8 +2314,6 @@ namespace nd {
     template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
     struct assignment_virtual_kernel<view_id, expr_kind, Src0TypeID, Src0TypeKind>
         : base_kernel<assignment_virtual_kernel<view_id, expr_kind, Src0TypeID, Src0TypeKind>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2503,8 +2328,6 @@ namespace nd {
     template <>
     struct assignment_virtual_kernel<view_id, expr_kind, view_id, expr_kind>
         : base_kernel<assignment_virtual_kernel<view_id, expr_kind, view_id, expr_kind>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2519,8 +2342,6 @@ namespace nd {
     template <>
     struct assignment_virtual_kernel<convert_id, expr_kind, convert_id, expr_kind>
         : base_kernel<assignment_virtual_kernel<convert_id, expr_kind, convert_id, expr_kind>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2535,8 +2356,6 @@ namespace nd {
     template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
     struct assignment_virtual_kernel<convert_id, expr_kind, Src0TypeID, Src0TypeKind>
         : base_kernel<assignment_virtual_kernel<convert_id, expr_kind, Src0TypeID, Src0TypeKind>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2551,8 +2370,6 @@ namespace nd {
     template <type_id_t DstTypeID, type_kind_t DstKind, type_id_t Src0TypeID>
     struct assignment_virtual_kernel<DstTypeID, DstKind, Src0TypeID, expr_kind>
         : base_kernel<assignment_virtual_kernel<DstTypeID, DstKind, Src0TypeID, expr_kind>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2567,8 +2384,6 @@ namespace nd {
     template <type_id_t Src0TypeID, assign_error_mode ErrorMode>
     struct assignment_kernel<fixed_string_id, string_kind, Src0TypeID, expr_kind, ErrorMode>
         : base_kernel<assignment_kernel<fixed_string_id, string_kind, Src0TypeID, expr_kind, ErrorMode>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -2583,8 +2398,6 @@ namespace nd {
     template <>
     struct assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_nocheck>
         : base_kernel<assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_nocheck>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2615,8 +2428,6 @@ namespace nd {
     template <>
     struct assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_inexact>
         : base_kernel<assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_inexact>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2647,8 +2458,6 @@ namespace nd {
     template <>
     struct assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_default>
         : base_kernel<assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_default>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2679,8 +2488,6 @@ namespace nd {
     template <>
     struct assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_overflow>
         : base_kernel<assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_overflow>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2711,8 +2518,6 @@ namespace nd {
     template <>
     struct assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_fractional>
         : base_kernel<assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_fractional>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2744,8 +2549,6 @@ namespace nd {
     struct assignment_kernel<Src0TypeID, sint_kind, string_id, string_kind, ErrorMode>
         : base_kernel<assignment_kernel<Src0TypeID, sint_kind, string_id, string_kind, ErrorMode>, 1> {
       typedef typename type_of<Src0TypeID>::type T;
-
-      static const kernel_request_t kernreq = kernel_request_call;
 
       ndt::type src_string_tp;
       const char *src_arrmeta;
@@ -2796,8 +2599,6 @@ namespace nd {
         : base_kernel<assignment_virtual_kernel<DstTypeID, uint_kind, string_id, string_kind>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<dst_type *>(dst) = parse<dst_type>(*reinterpret_cast<string *>(src[0]));
@@ -2810,8 +2611,6 @@ namespace nd {
                       1> {
       typedef typename type_of<DstTypeID>::type dst_type;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<dst_type *>(dst) = parse<dst_type>(*reinterpret_cast<string *>(src[0]), nocheck);
@@ -2821,8 +2620,6 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<float16_id, real_kind, string_id, string_kind, ErrorMode>
         : base_kernel<assignment_kernel<float16_id, real_kind, string_id, string_kind, ErrorMode>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("TODO: implement string_to_float16_single");
@@ -2832,8 +2629,6 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<float32_id, real_kind, string_id, string_kind, ErrorMode>
         : base_kernel<assignment_kernel<float32_id, real_kind, string_id, string_kind, ErrorMode>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2871,8 +2666,6 @@ namespace nd {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
-      static const kernel_request_t kernreq = kernel_request_call;
-
       assignment_kernel(const ndt::type &src_string_tp, const char *src_arrmeta)
           : src_string_tp(src_string_tp), src_arrmeta(src_arrmeta)
       {
@@ -2901,8 +2694,6 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<float128_id, real_kind, string_id, string_kind, ErrorMode>
         : base_kernel<assignment_kernel<float128_id, real_kind, string_id, string_kind, ErrorMode>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("TODO: implement string_to_float128_single");
@@ -2912,8 +2703,6 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<complex_float32_id, complex_kind, string_id, string_kind, ErrorMode>
         : base_kernel<assignment_kernel<complex_float32_id, complex_kind, string_id, string_kind, ErrorMode>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("TODO: implement string_to_complex_float32_single");
@@ -2923,8 +2712,6 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<complex_float64_id, complex_kind, string_id, string_kind, ErrorMode>
         : base_kernel<assignment_kernel<complex_float64_id, complex_kind, string_id, string_kind, ErrorMode>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("TODO: implement string_to_complex_float64_single");
@@ -2934,14 +2721,11 @@ namespace nd {
     template <type_id_t DstTypeID, assign_error_mode ErrorMode>
     struct assignment_kernel<DstTypeID, sint_kind, fixed_string_id, string_kind, ErrorMode>
         : assignment_kernel<DstTypeID, sint_kind, string_id, string_kind, ErrorMode> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind, ErrorMode>
         : base_kernel<assignment_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind, ErrorMode>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       next_unicode_codepoint_t m_next_fn;
       append_unicode_codepoint_t m_append_fn;
       intptr_t m_dst_data_size, m_src_data_size;
@@ -3003,18 +2787,14 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<char_id, char_kind, char_id, char_kind, ErrorMode>
         : assignment_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind, ErrorMode> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<char_id, char_kind, fixed_string_id, string_kind, ErrorMode>
         : assignment_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind, ErrorMode> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     struct adapt_assign_to_kernel : base_kernel<adapt_assign_to_kernel> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                               const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
@@ -3028,8 +2808,6 @@ namespace nd {
     };
 
     struct adapt_assign_from_kernel : base_kernel<adapt_assign_from_kernel, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       intptr_t forward_offset;
       array buffer;
 
@@ -3088,8 +2866,6 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<fixed_string_id, string_kind, string_id, string_kind, ErrorMode>
         : base_kernel<assignment_kernel<fixed_string_id, string_kind, string_id, string_kind, ErrorMode>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       next_unicode_codepoint_t m_next_fn;
       append_unicode_codepoint_t m_append_fn;
       intptr_t m_dst_data_size;
@@ -3144,8 +2920,6 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<char_id, char_kind, string_id, string_kind, ErrorMode>
         : base_kernel<assignment_kernel<char_id, char_kind, string_id, string_kind, ErrorMode>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -3163,14 +2937,11 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<fixed_string_id, string_kind, char_id, char_kind, ErrorMode>
         : assignment_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind, ErrorMode> {
-      static const kernel_request_t kernreq = kernel_request_call;
     };
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<string_id, string_kind, char_id, char_kind, ErrorMode>
         : base_kernel<assignment_kernel<string_id, string_kind, char_id, char_kind, ErrorMode>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -3188,8 +2959,6 @@ namespace nd {
     template <>
     struct assignment_virtual_kernel<time_id, datetime_kind, time_id, datetime_kind>
         : base_kernel<assignment_virtual_kernel<time_id, datetime_kind, time_id, datetime_kind>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
@@ -3201,23 +2970,24 @@ namespace nd {
     };
 
     struct assignment_option_kernel : base_kernel<assignment_option_kernel> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                               intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        kernels::make_option_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq);
+        ndt::type val_dst_tp =
+            dst_tp.get_id() == option_id ? dst_tp.extended<ndt::option_type>()->get_value_type() : dst_tp;
+        ndt::type val_src_tp =
+            src_tp[0].get_id() == option_id ? src_tp[0].extended<ndt::option_type>()->get_value_type() : src_tp[0];
+        make_assignment_kernel(ckb, val_dst_tp, dst_arrmeta, val_src_tp, src_arrmeta[0], kernreq,
+                               &eval::default_eval_context);
       }
     };
 
     template <>
     struct assignment_virtual_kernel<pointer_id, expr_kind, pointer_id, expr_kind>
         : base_kernel<assignment_virtual_kernel<pointer_id, expr_kind, pointer_id, expr_kind>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -3237,8 +3007,6 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<datetime_id, datetime_kind, datetime_id, datetime_kind, ErrorMode>
         : base_kernel<assignment_kernel<datetime_id, datetime_kind, datetime_id, datetime_kind, ErrorMode>> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -3277,8 +3045,6 @@ namespace nd {
     template <>
     struct assignment_virtual_kernel<type_id, type_kind, type_id, type_kind>
         : base_kernel<assignment_virtual_kernel<type_id, type_kind, type_id, type_kind>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<ndt::type *>(dst) = *reinterpret_cast<ndt::type *>(src[0]);
@@ -3288,8 +3054,6 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<type_id, type_kind, string_id, string_kind, ErrorMode>
         : base_kernel<assignment_kernel<type_id, type_kind, string_id, string_kind, ErrorMode>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       ndt::type src_string_dt;
       const char *src_arrmeta;
 
@@ -3318,8 +3082,6 @@ namespace nd {
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<string_id, string_kind, type_id, type_kind, ErrorMode>
         : base_kernel<assignment_kernel<string_id, string_kind, type_id, type_kind, ErrorMode>, 1> {
-      static const kernel_request_t kernreq = kernel_request_call;
-
       ndt::type dst_string_dt;
       const char *dst_arrmeta;
 
@@ -3350,7 +3112,6 @@ namespace nd {
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
   struct assignment_kernel : detail::assignment_virtual_kernel<DstTypeID, type_kind_of<DstTypeID>::value, Src0TypeID,
                                                                type_kind_of<Src0TypeID>::value> {
-    static const kernel_request_t kernreq = kernel_request_call;
   };
 
 } // namespace dynd::nd

@@ -47,16 +47,6 @@ namespace nd {
     DYND_API void check_arg(const ndt::callable_type *af_tp, intptr_t i, const ndt::type &actual_tp,
                             const char *actual_arrmeta, std::map<std::string, ndt::type> &tp_vars);
 
-    inline void set_data(char *&data, array &value) { data = const_cast<char *>(value.cdata()); }
-
-    inline void set_data(char *&data, const array &value) { data = const_cast<char *>(value.cdata()); }
-
-    inline void set_data(array *&data, array &value) { data = &value; }
-
-    inline void set_data(array *&data, const array &value) { data = const_cast<array *>(&value); }
-
-    DYND_HAS(resolve_dst_type);
-
     template <typename KernelType>
     kernel_targets_t get_targets()
     {
@@ -69,23 +59,6 @@ namespace nd {
     const volatile char *get_ir()
     {
       return KernelType::ir;
-    }
-
-    template <typename KernelType>
-    typename std::enable_if<!has_resolve_dst_type<KernelType>::value, callable_resolve_dst_type_t>::type
-    get_resolve_dst_type()
-    {
-      return NULL;
-    }
-
-    template <typename KernelType>
-    typename std::enable_if<
-        has_resolve_dst_type<KernelType>::value &&
-            std::is_same<decltype(&KernelType::resolve_dst_type), callable_resolve_dst_type_t>::value,
-        callable_resolve_dst_type_t>::type
-    get_resolve_dst_type()
-    {
-      return &KernelType::resolve_dst_type;
     }
 
     template <template <type_id_t...> class KernelType>
@@ -114,22 +87,22 @@ namespace nd {
     {
     }
 
-    callable(const ndt::type &self_tp, kernel_request_t kernreq, kernel_targets_t targets, const volatile char *ir,
+    callable(const ndt::type &self_tp, kernel_targets_t targets, const volatile char *ir,
              callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
              callable_instantiate_t instantiate)
         : intrusive_ptr<base_callable>(
-              new base_callable(self_tp, kernreq, targets, ir, data_init, resolve_dst_type, instantiate), true)
+              new base_callable(self_tp, targets, ir, data_init, resolve_dst_type, instantiate), true)
     {
     }
 
     template <typename T>
-    callable(const ndt::type &self_tp, kernel_request_t kernreq, kernel_targets_t targets, const volatile char *ir,
-             T &&static_data, callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
+    callable(const ndt::type &self_tp, kernel_targets_t targets, const volatile char *ir, T &&static_data,
+             callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
              callable_instantiate_t instantiate)
-        : intrusive_ptr<base_callable>(new static_data_callable<typename std::remove_reference<T>::type>(
-                                           self_tp, kernreq, targets, ir, data_init, resolve_dst_type, instantiate,
-                                           std::forward<T>(static_data)),
-                                       true)
+        : intrusive_ptr<base_callable>(
+              new static_data_callable<typename std::remove_reference<T>::type>(
+                  self_tp, targets, ir, data_init, resolve_dst_type, instantiate, std::forward<T>(static_data)),
+              true)
     {
     }
 
@@ -179,263 +152,8 @@ namespace nd {
       set_overload(ret_tp, arg_tp.size(), arg_tp.begin(), value);
     }
 
-    template <typename DataType>
-    std::enable_if_t<std::is_same<DataType, char *>::value, array>
-    call(size_t args_size, const array *args_values, size_t kwds_size,
-         const std::pair<const char *, array> *kwds_values)
-    {
-      std::map<std::string, ndt::type> tp_vars;
-      const ndt::callable_type *self_tp = get_type();
-
-      if (!self_tp->is_pos_variadic() && (static_cast<intptr_t>(args_size) < self_tp->get_npos())) {
-        std::stringstream ss;
-        ss << "callable expected " << self_tp->get_npos() << " positional arguments, but received " << args_size;
-        throw std::invalid_argument(ss.str());
-      }
-
-      std::vector<ndt::type> args_tp(args_size);
-      std::vector<const char *> args_arrmeta(args_size);
-      std::vector<DataType> args_data(args_size);
-
-      for (intptr_t i = 0; i < (self_tp->is_pos_variadic() ? static_cast<intptr_t>(args_size) : self_tp->get_npos());
-           ++i) {
-        detail::check_arg(self_tp, i, args_values[i]->tp, args_values[i]->metadata(), tp_vars);
-
-        args_tp[i] = args_values[i]->tp;
-        args_arrmeta[i] = args_values[i]->metadata();
-        detail::set_data(args_data[i], args_values[i]);
-      }
-
-      array dst;
-
-      intptr_t narg = args_size;
-
-      // ...
-      intptr_t nkwd = args_size - self_tp->get_npos();
-      if (!self_tp->is_kwd_variadic() && nkwd > self_tp->get_nkwd()) {
-        throw std::invalid_argument("too many extra positional arguments");
-      }
-
-      std::vector<array> kwds_as_vector(nkwd + self_tp->get_nkwd());
-      for (intptr_t i = 0; i < nkwd; ++i) {
-        kwds_as_vector[i] = args_values[self_tp->get_npos() + i];
-        --narg;
-      }
-
-      for (size_t i = 0; i < kwds_size; ++i) {
-        intptr_t j = self_tp->get_kwd_index(kwds_values[i].first);
-        if (j == -1) {
-          if (detail::is_special_kwd(self_tp, dst, kwds_values[i].first, kwds_values[i].second)) {
-          }
-          else {
-            std::stringstream ss;
-            ss << "passed an unexpected keyword \"" << kwds_values[i].first << "\" to callable with type " << get()->tp;
-            throw std::invalid_argument(ss.str());
-          }
-        }
-        else {
-          array &value = kwds_as_vector[j];
-          if (!value.is_null()) {
-            std::stringstream ss;
-            ss << "callable passed keyword \"" << kwds_values[i].first << "\" more than once";
-            throw std::invalid_argument(ss.str());
-          }
-          value = kwds_values[i].second;
-
-          ndt::type expected_tp = self_tp->get_kwd_type(j);
-          if (expected_tp.get_id() == option_id) {
-            expected_tp = expected_tp.p("value_type").as<ndt::type>();
-          }
-
-          const ndt::type &actual_tp = value.get_type();
-          if (!expected_tp.match(actual_tp.value_type(), tp_vars)) {
-            std::stringstream ss;
-            ss << "keyword \"" << self_tp->get_kwd_name(j) << "\" does not match, ";
-            ss << "callable expected " << expected_tp << " but passed " << actual_tp;
-            throw std::invalid_argument(ss.str());
-          }
-          ++nkwd;
-        }
-      }
-
-      // Validate the destination type, if it was provided
-      if (!dst.is_null()) {
-        if (!self_tp->get_return_type().match(NULL, dst.get_type(), dst.get()->metadata(), tp_vars)) {
-          std::stringstream ss;
-          ss << "provided \"dst\" type " << dst.get_type() << " does not match callable return type "
-             << self_tp->get_return_type();
-          throw std::invalid_argument(ss.str());
-        }
-      }
-
-      for (intptr_t j : self_tp->get_option_kwd_indices()) {
-        if (kwds_as_vector[j].is_null()) {
-          ndt::type actual_tp = ndt::substitute(self_tp->get_kwd_type(j), tp_vars, false);
-          if (actual_tp.is_symbolic()) {
-            actual_tp = ndt::make_type<ndt::option_type>(ndt::make_type<void>());
-          }
-          kwds_as_vector[j] = empty(actual_tp);
-          kwds_as_vector[j].assign_na();
-          ++nkwd;
-        }
-      }
-
-      if (nkwd < self_tp->get_nkwd()) {
-        std::stringstream ss;
-        // TODO: Provide the missing keyword parameter names in this error
-        //       message
-        ss << "callable requires keyword parameters that were not provided. "
-              "callable signature "
-           << get()->tp;
-        throw std::invalid_argument(ss.str());
-      }
-
-      ndt::type dst_tp;
-      if (dst.is_null()) {
-        dst_tp = self_tp->get_return_type();
-        return get()->call(dst_tp, narg, args_tp.data(), args_arrmeta.data(), args_data.data(), nkwd,
-                           kwds_as_vector.data(), tp_vars);
-      }
-
-      dst_tp = dst.get_type();
-      get()->call(dst_tp, dst->metadata(), dst.data(), narg, args_tp.data(), args_arrmeta.data(), args_data.data(),
-                  nkwd, kwds_as_vector.data(), tp_vars);
-      return dst;
-    }
-
-    template <typename DataType>
-    std::enable_if_t<std::is_same<DataType, array *>::value, array>
-    call(size_t args_size, const array *args_values, size_t kwds_size,
-         const std::pair<const char *, array> *kwds_values)
-    {
-      std::map<std::string, ndt::type> tp_vars;
-      const ndt::callable_type *self_tp = get_type();
-
-      if (!self_tp->is_pos_variadic() && (static_cast<intptr_t>(args_size) < self_tp->get_npos())) {
-        std::stringstream ss;
-        ss << "callable expected " << self_tp->get_npos() << " positional arguments, but received " << args_size;
-        throw std::invalid_argument(ss.str());
-      }
-
-      std::vector<ndt::type> args_tp(args_size);
-      std::vector<const char *> args_arrmeta(args_size);
-      std::vector<DataType> args_data(args_size);
-
-      for (intptr_t i = 0; i < (self_tp->is_pos_variadic() ? static_cast<intptr_t>(args_size) : self_tp->get_npos());
-           ++i) {
-        detail::check_arg(self_tp, i, args_values[i]->tp, args_values[i]->metadata(), tp_vars);
-
-        args_tp[i] = args_values[i]->tp;
-        args_arrmeta[i] = args_values[i]->metadata();
-        detail::set_data(args_data[i], args_values[i]);
-      }
-
-      array dst;
-
-      intptr_t narg = args_size;
-
-      // ...
-      intptr_t nkwd = args_size - self_tp->get_npos();
-      if (!self_tp->is_kwd_variadic() && nkwd > self_tp->get_nkwd()) {
-        throw std::invalid_argument("too many extra positional arguments");
-      }
-
-      std::vector<array> kwds_as_vector(nkwd + self_tp->get_nkwd());
-      for (intptr_t i = 0; i < nkwd; ++i) {
-        kwds_as_vector[i] = args_values[self_tp->get_npos() + i];
-        --narg;
-      }
-
-      for (size_t i = 0; i < kwds_size; ++i) {
-        intptr_t j = self_tp->get_kwd_index(kwds_values[i].first);
-        if (j == -1) {
-          if (detail::is_special_kwd(self_tp, dst, kwds_values[i].first, kwds_values[i].second)) {
-          }
-          else {
-            std::stringstream ss;
-            ss << "passed an unexpected keyword \"" << kwds_values[i].first << "\" to callable with type " << get()->tp;
-            throw std::invalid_argument(ss.str());
-          }
-        }
-        else {
-          array &value = kwds_as_vector[j];
-          if (!value.is_null()) {
-            std::stringstream ss;
-            ss << "callable passed keyword \"" << kwds_values[i].first << "\" more than once";
-            throw std::invalid_argument(ss.str());
-          }
-          value = kwds_values[i].second;
-
-          ndt::type expected_tp = self_tp->get_kwd_type(j);
-          if (expected_tp.get_id() == option_id) {
-            expected_tp = expected_tp.p("value_type").as<ndt::type>();
-          }
-
-          const ndt::type &actual_tp = value.get_type();
-          if (!expected_tp.match(actual_tp.value_type(), tp_vars)) {
-            std::stringstream ss;
-            ss << "keyword \"" << self_tp->get_kwd_name(j) << "\" does not match, ";
-            ss << "callable expected " << expected_tp << " but passed " << actual_tp;
-            throw std::invalid_argument(ss.str());
-          }
-          ++nkwd;
-        }
-      }
-
-      // Validate the destination type, if it was provided
-      if (!dst.is_null()) {
-        if (!self_tp->get_return_type().match(NULL, dst.get_type(), dst.get()->metadata(), tp_vars)) {
-          std::stringstream ss;
-          ss << "provided \"dst\" type " << dst.get_type() << " does not match callable return type "
-             << self_tp->get_return_type();
-          throw std::invalid_argument(ss.str());
-        }
-      }
-
-      for (intptr_t j : self_tp->get_option_kwd_indices()) {
-        if (kwds_as_vector[j].is_null()) {
-          ndt::type actual_tp = ndt::substitute(self_tp->get_kwd_type(j), tp_vars, false);
-          if (actual_tp.is_symbolic()) {
-            actual_tp = ndt::make_type<ndt::option_type>(ndt::make_type<void>());
-          }
-          kwds_as_vector[j] = empty(actual_tp);
-          kwds_as_vector[j].assign_na();
-          ++nkwd;
-        }
-      }
-
-      if (nkwd < self_tp->get_nkwd()) {
-        std::stringstream ss;
-        // TODO: Provide the missing keyword parameter names in this error
-        //       message
-        ss << "callable requires keyword parameters that were not provided. "
-              "callable signature "
-           << get()->tp;
-        throw std::invalid_argument(ss.str());
-      }
-
-      ndt::type dst_tp;
-      if (dst.is_null()) {
-        dst_tp = self_tp->get_return_type();
-        return get()->call(dst_tp, narg, args_tp.data(), args_arrmeta.data(), args_data.data(), nkwd,
-                           kwds_as_vector.data(), tp_vars);
-      }
-
-      dst_tp = dst.get_type();
-      get()->call(dst_tp, dst->metadata(), &dst, narg, args_tp.data(), args_arrmeta.data(), args_data.data(), nkwd,
-                  kwds_as_vector.data(), tp_vars);
-      return dst;
-    }
-
     array call(size_t args_size, const array *args_values, size_t kwds_size,
-               const std::pair<const char *, array> *kwds_values)
-    {
-      if (get()->kernreq == kernel_request_single) {
-        return call<char *>(args_size, args_values, kwds_size, kwds_values);
-      }
-
-      return call<array *>(args_size, args_values, kwds_size, kwds_values);
-    }
+               const std::pair<const char *, array> *kwds_values);
 
     template <typename... ArgTypes>
     array operator()(ArgTypes &&... args)
@@ -463,34 +181,34 @@ namespace nd {
     template <typename KernelType>
     static typename std::enable_if<ndt::has_traits<KernelType>::value, callable>::type make()
     {
-      return callable(ndt::traits<KernelType>::equivalent(), KernelType::kernreq, detail::get_targets<KernelType>(),
-                      detail::get_ir<KernelType>(), &KernelType::data_init, detail::get_resolve_dst_type<KernelType>(),
+      return callable(ndt::traits<KernelType>::equivalent(), detail::get_targets<KernelType>(),
+                      detail::get_ir<KernelType>(), &KernelType::data_init, &KernelType::resolve_dst_type,
                       &KernelType::instantiate);
     }
 
     template <typename KernelType>
     static typename std::enable_if<!ndt::has_traits<KernelType>::value, callable>::type make(const ndt::type &tp)
     {
-      return callable(tp, KernelType::kernreq, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
-                      &KernelType::data_init, detail::get_resolve_dst_type<KernelType>(), &KernelType::instantiate);
+      return callable(tp, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(), &KernelType::data_init,
+                      &KernelType::resolve_dst_type, &KernelType::instantiate);
     }
 
     template <typename KernelType, typename StaticDataType>
     static typename std::enable_if<ndt::has_traits<KernelType>::value, callable>::type
     make(StaticDataType &&static_data)
     {
-      return callable(ndt::traits<KernelType>::equivalent(), KernelType::kernreq, detail::get_targets<KernelType>(),
+      return callable(ndt::traits<KernelType>::equivalent(), detail::get_targets<KernelType>(),
                       detail::get_ir<KernelType>(), std::forward<StaticDataType>(static_data), &KernelType::data_init,
-                      detail::get_resolve_dst_type<KernelType>(), &KernelType::instantiate);
+                      &KernelType::resolve_dst_type, &KernelType::instantiate);
     }
 
     template <typename KernelType, typename StaticDataType>
     static typename std::enable_if<!ndt::has_traits<KernelType>::value, callable>::type
     make(const ndt::type &tp, StaticDataType &&static_data)
     {
-      return callable(tp, KernelType::kernreq, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
-                      std::forward<StaticDataType>(static_data), &KernelType::data_init,
-                      detail::get_resolve_dst_type<KernelType>(), &KernelType::instantiate);
+      return callable(tp, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
+                      std::forward<StaticDataType>(static_data), &KernelType::data_init, &KernelType::resolve_dst_type,
+                      &KernelType::instantiate);
     }
 
     template <template <int> class CKT, typename T>
@@ -547,10 +265,10 @@ namespace nd {
   template <typename CallableType, typename KernelType, typename... ArgTypes>
   std::enable_if_t<ndt::has_traits<KernelType>::value, callable> make_callable(ArgTypes &&... args)
   {
-    return callable(new CallableType(ndt::traits<KernelType>::equivalent(), KernelType::kernreq,
-                                     detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
-                                     &KernelType::data_init, detail::get_resolve_dst_type<KernelType>(),
-                                     &KernelType::instantiate, std::forward<ArgTypes>(args)...),
+    return callable(new CallableType(ndt::traits<KernelType>::equivalent(), detail::get_targets<KernelType>(),
+                                     detail::get_ir<KernelType>(), &KernelType::data_init,
+                                     &KernelType::resolve_dst_type, &KernelType::instantiate,
+                                     std::forward<ArgTypes>(args)...),
                     true);
   }
 
@@ -558,9 +276,8 @@ namespace nd {
   std::enable_if_t<!ndt::has_traits<KernelType>::value, callable> make_callable(const ndt::type &tp,
                                                                                 ArgTypes &&... args)
   {
-    return callable(new CallableType(tp, KernelType::kernreq, detail::get_targets<KernelType>(),
-                                     detail::get_ir<KernelType>(), &KernelType::data_init,
-                                     detail::get_resolve_dst_type<KernelType>(), &KernelType::instantiate,
+    return callable(new CallableType(tp, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
+                                     &KernelType::data_init, &KernelType::resolve_dst_type, &KernelType::instantiate,
                                      std::forward<ArgTypes>(args)...),
                     true);
   }

@@ -6,7 +6,6 @@
 #pragma once
 
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
@@ -333,9 +332,8 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck<N>::instantiate(static_data, data, ckb, child_dst_tp,
-                                                                   child_dst_arrmeta, nsrc, child_src_tp,
-                                                                   child_src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+          return elwise_virtual_ck<N>::instantiate(static_data, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc,
+                                                   child_src_tp, child_src_arrmeta, kernreq, nkwd, kwds, tp_vars);
         }
 
         // Instantiate the elementwise handler
@@ -851,9 +849,9 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck<N>::instantiate(
-              static_data, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-              kernel_request_strided, nkwd, kwds, tp_vars);
+          return elwise_virtual_ck<N>::instantiate(static_data, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc,
+                                                   child_src_tp, child_src_arrmeta, kernel_request_strided, nkwd, kwds,
+                                                   tp_vars);
         }
         // All the types matched, so instantiate the elementwise handler
         return child.get()->instantiate(child.get()->static_data(), NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc,
