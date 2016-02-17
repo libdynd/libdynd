@@ -21,19 +21,18 @@ void nd::equal_kernel<tuple_id, tuple_id>::instantiate(char *DYND_UNUSED(static_
 
   ckb->emplace_back<equal_kernel>(kernreq, field_count,
                                   src_tp[0].extended<ndt::tuple_type>()->get_data_offsets(src_arrmeta[0]),
-                                  src_tp[0].extended<ndt::tuple_type>()->get_data_offsets(src_arrmeta[1]));
+                                  src_tp[1].extended<ndt::tuple_type>()->get_data_offsets(src_arrmeta[1]));
   ckb->emplace_back(field_count * sizeof(size_t));
 
   equal_kernel *self = ckb->get_at<equal_kernel>(self_offset);
   const std::vector<uintptr_t> &arrmeta_offsets = src_tp[0].extended<ndt::tuple_type>()->get_arrmeta_offsets();
   for (size_t i = 0; i != field_count; ++i) {
     self = ckb->get_at<equal_kernel>(self_offset);
-    const ndt::type &ft = src_tp[0].extended<ndt::tuple_type>()->get_field_type(i);
     size_t *field_kernel_offsets = self->get_offsets();
     field_kernel_offsets[i] = ckb->size() - self_offset;
-    const char *field_arrmeta = src_arrmeta[0] + arrmeta_offsets[i];
-    ndt::type child_src_tp[2] = {ft, ft};
-    const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
+    ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::tuple_type>()->get_field_type(i),
+                                 src_tp[1].extended<ndt::tuple_type>()->get_field_type(i)};
+    const char *child_src_arrmeta[2] = {src_arrmeta[0] + arrmeta_offsets[i], src_arrmeta[1] + arrmeta_offsets[i]};
     equal::get()->instantiate(equal::get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp,
                               child_src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
   }
