@@ -309,6 +309,7 @@ set(libdynd_SRC
     include/dynd/kernels/string_concat_kernel.hpp
     include/dynd/kernels/string_count_kernel.hpp
     include/dynd/kernels/string_find_kernel.hpp
+    include/dynd/kernels/string_rfind_kernel.hpp
     include/dynd/kernels/string_replace_kernel.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp
     include/dynd/kernels/take_kernel.hpp

@@ -461,8 +461,18 @@ TEST(StringType, Find3)
   EXPECT_ARRAY_EQ(nd::array(c), nd::string_find(a, b));
 }
 
-TEST(StringType, Count1)
-{
+TEST(StringType, RFind1) {
+  nd::array a, b;
+
+  a = {"abc", "ababc", "abcdabc", "abd"};
+  b = "abc";
+  intptr_t c[] = {0, 2, 4, -1};
+
+  EXPECT_ARRAY_EQ(nd::array(c),
+                  nd::string_rfind(a, b));
+}
+
+TEST(StringType, Count1) {
   nd::array a, b;
 
   a = {"abc", "xxxabcxxxabcxxx", "ababab", "abd"};
