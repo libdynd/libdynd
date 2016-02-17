@@ -34,7 +34,7 @@ cmake \
     -DDYND_BUILD_BENCHMARKS=OFF \
     -DCMAKE_INSTALL_PREFIX=$PREFIX .. || exit 1
 echo Building with make...
-# Use the CPU_COUNT environment variable set by conda-build.
-make -j${CPU_COUNT} || exit 1
+# We should use the CPU_COUNT environment variable set by conda-build, but Travis CI has issues with that.
+make -j3 || exit 1
 echo Installing the build...
 make install || exit 1
