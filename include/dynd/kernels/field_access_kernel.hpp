@@ -45,7 +45,7 @@ namespace nd {
 
       static const array error_mode(opt<assign_error_mode>());
       assign::get()->instantiate(assign::get()->static_data(), data, ckb, dst_tp, dst_arrmeta, 1, field_type,
-                                 field_metadata, kernreq, 1, &error_mode, tp_vars);
+                                 field_metadata, kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
     };
 
     static const ndt::type &get_field_type(const ndt::type *src_tp, const array *kwds)
