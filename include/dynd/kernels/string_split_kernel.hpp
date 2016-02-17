@@ -49,7 +49,7 @@ namespace dynd {
           dst_v->begin = m_dst_memblock->alloc(1);
           dst_v->size = 1;
           string *dst_str = reinterpret_cast<string *>(dst_v->begin);
-          new(&dst_str[0]) string(haystack);
+          dst_str[0] = haystack;
           return;
         }
 

@@ -276,7 +276,7 @@ namespace dynd {
       bool handle_match(const size_t match) {
         size_t new_size = match - m_last_src_start;
 
-        new (&m_dst[m_i]) StringType(m_src + m_last_src_start, new_size);
+        m_dst[m_i].assign(m_src + m_last_src_start, new_size);
         m_last_src_start += new_size + m_split_size;
         m_i++;
 
@@ -286,7 +286,7 @@ namespace dynd {
       void finish() {
         size_t new_size = m_src_size - m_last_src_start;
 
-        new (&m_dst[m_i]) StringType(m_src + m_last_src_start, new_size);
+        m_dst[m_i].assign(m_src + m_last_src_start, new_size);
       }
     };
 
