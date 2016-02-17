@@ -14,7 +14,7 @@ using namespace dynd;
 DYND_API nd::callable nd::assign_na::make()
 {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, float32_id, float64_id,
-                           complex_float32_id, complex_float64_id, void_id, string_id, fixed_dim_id, date_id, time_id,
+                           complex_float32_id, complex_float64_id, void_id, string_id, fixed_dim_id, date_id,
                            datetime_id> type_ids;
 
   std::map<type_id_t, callable> children = callable::make_all<assign_na_kernel, type_ids>();
@@ -50,7 +50,7 @@ DYND_API struct nd::assign_na nd::assign_na;
 DYND_API nd::callable nd::is_na::make()
 {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint32_id, float32_id, float64_id,
-                           complex_float32_id, complex_float64_id, void_id, string_id, fixed_dim_id, date_id, time_id,
+                           complex_float32_id, complex_float64_id, void_id, string_id, fixed_dim_id, date_id,
                            datetime_id> type_ids;
 
   std::map<type_id_t, callable> children = callable::make_all<is_na_kernel, type_ids>();

@@ -10,7 +10,6 @@
 
 #include <dynd/callable.hpp>
 #include <dynd/types/datetime_type.hpp>
-#include <dynd/types/time_type.hpp>
 #include <dynd/types/date_util.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/typevar_type.hpp>
@@ -26,48 +25,6 @@ using namespace std;
 using namespace dynd;
 
 namespace {
-
-struct datetime_get_struct_kernel : nd::base_kernel<datetime_get_struct_kernel, 1> {
-  ndt::type datetime_tp;
-
-  datetime_get_struct_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
-
-  void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-  {
-    throw runtime_error("TODO: get_property_kernel_struct_single");
-  }
-
-  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                          const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    ckb->emplace_back<datetime_get_struct_kernel>(kernreq, src_tp[0]);
-  }
-};
-
-struct datetime_set_struct_kernel : nd::base_kernel<datetime_set_struct_kernel, 1> {
-  ndt::type datetime_tp;
-
-  datetime_set_struct_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
-
-  void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-  {
-    throw runtime_error("TODO: set_property_kernel_struct_single");
-  }
-
-  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                          const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                          intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    ckb->emplace_back<datetime_set_struct_kernel>(kernreq, src_tp[0]);
-  }
-};
 
 struct datetime_get_date_kernel : nd::base_kernel<datetime_get_date_kernel, 1> {
   ndt::type datetime_tp;
@@ -552,50 +509,8 @@ bool ndt::datetime_type::operator==(const base_type &rhs) const
   }
 }
 
-///////// functions on the type
-
-/*
-static nd::array fn_type_now(const ndt::type &DYND_UNUSED(dt))
-{
-  throw runtime_error("TODO: implement datetime.now function");
-  // datetime_struct dts;
-  // fill_current_local_datetime(&fields);
-  // nd::array result = nd::empty(dt);
-  //reinterpret_cast<int64_t *>(result.get_readwrite_originptr()) =
-  // dt.to_ticks();
-  // Make the result immutable (we own the only reference to the data at this
-  // point)
-  // result.flag_as_immutable();
-  // return result;
-}
-*/
-
-/*
-static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
-                                   const nd::array &DYND_UNUSED(year),
-                                   const nd::array &DYND_UNUSED(month),
-                                   const nd::array &DYND_UNUSED(day))
-{
-  throw runtime_error("dynd type datetime __construct__");
-  // Make this like the date version
-}
-*/
-
 std::map<std::string, nd::callable> ndt::datetime_type::get_dynamic_type_functions() const
 {
-  //  static pair<string, nd::callable> datetime_type_functions[] = {
-  /*
-        pair<string, gfunc::callable>("now",
-                                      gfunc::make_callable(&fn_type_now,
-     "self")),
-        pair<string, gfunc::callable>(
-            "__construct__", gfunc::make_callable(&fn_type_construct, "self",
-                                                  "year", "month", "day"))
-  */
-  //};
-
-  //      sizeof(datetime_type_functions) / sizeof(datetime_type_functions[0]);
-
   return std::map<std::string, nd::callable>();
 }
 
@@ -610,28 +525,6 @@ std::map<std::string, nd::callable> ndt::datetime_type::get_dynamic_array_proper
                                               nd::callable::make<datetime_get_month_kernel>(ndt::type("(Any) -> Any")));
   properties["day"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                             nd::callable::make<datetime_get_day_kernel>(ndt::type("(Any) -> Any")));
-  properties["hour"] = nd::functional::adapt(ndt::make_type<int32_t>(),
-                                             nd::callable::make<datetime_get_hour_kernel>(ndt::type("(Any) -> Any")));
-  properties["minute"] = nd::functional::adapt(
-      ndt::make_type<int32_t>(), nd::callable::make<datetime_get_minute_kernel>(ndt::type("(Any) -> Any")));
-  properties["second"] = nd::functional::adapt(
-      ndt::make_type<int32_t>(), nd::callable::make<datetime_get_second_kernel>(ndt::type("(Any) -> Any")));
-  properties["microsecond"] = nd::functional::adapt(
-      ndt::make_type<int32_t>(), nd::callable::make<datetime_get_microsecond_kernel>(ndt::type("(Any) -> Any")));
-  properties["tick"] = nd::functional::adapt(ndt::make_type<int32_t>(),
-                                             nd::callable::make<datetime_get_tick_kernel>(ndt::type("(Any) -> Any")));
 
   return properties;
-}
-
-std::map<std::string, nd::callable> ndt::datetime_type::get_dynamic_array_functions() const
-{
-  std::map<std::string, nd::callable> functions;
-  functions["to_struct"] = nd::functional::adapt(
-      ndt::type("{year: int16, month: int8, day: int8, hour: int8, minute: int8, second: int8, tick: int32}"),
-      nd::callable::make<datetime_get_struct_kernel>(ndt::type("(Any) -> Any")));
-
-  return functions;
-  //      pair<std::string, nd::callable>(
-  //        "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
 }
