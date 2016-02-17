@@ -509,6 +509,42 @@ TEST(StringType, Replace)
                   nd::string_replace(a, b, c));
 }
 
+TEST(StringType, Split) {
+  nd::array a, b, c;
+
+  a = {"xaxxbxxxc", "xxxabcxxxabcxxx", "cabababc", "foobar"};
+  b = {"x",         "abc",             "ab",       ""};
+
+  c = nd::string_split(a, b);
+
+  EXPECT_EQ(1u, c(0).get_shape().size());
+  EXPECT_EQ(7, c(0).get_shape()[0]);
+  EXPECT_EQ("", c(0)(0));
+  EXPECT_EQ("a", c(0)(1));
+  EXPECT_EQ("", c(0)(2));
+  EXPECT_EQ("b", c(0)(3));
+  EXPECT_EQ("", c(0)(4));
+  EXPECT_EQ("", c(0)(5));
+  EXPECT_EQ("c", c(0)(6));
+
+  EXPECT_EQ(1u, c(1).get_shape().size());
+  EXPECT_EQ(3, c(1).get_shape()[0]);
+  EXPECT_EQ("xxx", c(1)(0));
+  EXPECT_EQ("xxx", c(1)(1));
+  EXPECT_EQ("xxx", c(1)(2));
+
+  EXPECT_EQ(1u, c(2).get_shape().size());
+  EXPECT_EQ(4, c(2).get_shape()[0]);
+  EXPECT_EQ("c", c(2)(0));
+  EXPECT_EQ("", c(2)(1));
+  EXPECT_EQ("", c(2)(2));
+  EXPECT_EQ("c", c(2)(3));
+
+  EXPECT_EQ(1u, c(3).get_shape().size());
+  EXPECT_EQ(1, c(3).get_shape()[0]);
+  EXPECT_EQ("foobar", c(3)(0));
+}
+
 template <class T>
 static bool ascii_T_compare(const char *x, const T *y, intptr_t count)
 {
