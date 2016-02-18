@@ -10,7 +10,6 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/char_type.hpp>
-#include <dynd/types/convert_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 

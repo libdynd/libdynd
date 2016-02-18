@@ -17,7 +17,6 @@
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/types/convert_type.hpp>
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>

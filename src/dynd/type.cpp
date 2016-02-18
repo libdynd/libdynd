@@ -12,7 +12,6 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/types/adapt_type.hpp>
-#include <dynd/types/convert_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/any_kind_type.hpp>

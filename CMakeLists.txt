@@ -158,7 +158,6 @@ set(libdynd_SRC
     src/dynd/types/categorical_kind_type.cpp
     src/dynd/types/c_contiguous_type.cpp
     src/dynd/types/char_type.cpp
-    src/dynd/types/convert_type.cpp
     src/dynd/types/cuda_host_type.cpp
     src/dynd/types/cuda_device_type.cpp
     src/dynd/types/datashape_formatter.cpp
@@ -210,7 +209,6 @@ set(libdynd_SRC
     include/dynd/types/categorical_type.hpp
     include/dynd/types/categorical_kind_type.hpp
     include/dynd/types/char_type.hpp
-    include/dynd/types/convert_type.hpp
     include/dynd/types/cuda_host_type.hpp
     include/dynd/types/cuda_device_type.hpp
     include/dynd/types/datashape_formatter.hpp
