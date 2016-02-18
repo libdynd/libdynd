@@ -20,7 +20,6 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/types/type_alignment.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 
 using namespace std;
@@ -103,16 +102,6 @@ TEST(DataShapeParser, StringAtoms)
     EXPECT_EQ(ndt::make_type<ndt::string_type>(string_encoding_ucs_2),
               ndt::type("string['ucs-2']"));
   */
-}
-
-TEST(DataShapeParser, Unaligned)
-{
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<bool1>()), ndt::type("Fixed * unaligned[bool]"));
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_unaligned(ndt::make_type<float>()), 2),
-            ndt::type("Fixed * Fixed * unaligned[float32]"));
-  EXPECT_EQ(ndt::struct_type::make({"x", "y"}, {ndt::make_unaligned(ndt::make_type<int32_t>()),
-                                                ndt::make_unaligned(ndt::make_type<int64_t>())}),
-            ndt::type("{x : unaligned[int32], y : unaligned[int64]}"));
 }
 
 TEST(DataShapeParser, Option)

@@ -187,7 +187,6 @@ set(libdynd_SRC
     src/dynd/types/time_parser.cpp
     src/dynd/types/time_util.cpp
     src/dynd/types/tuple_type.cpp
-    src/dynd/types/type_alignment.cpp
     src/dynd/types/type_id.cpp
     src/dynd/types/type_type.cpp
     src/dynd/types/typevar_constructed_type.cpp
@@ -196,7 +195,6 @@ set(libdynd_SRC
     src/dynd/types/scalar_kind_type.cpp
     src/dynd/types/typevar_type.cpp
     src/dynd/types/var_dim_type.cpp
-    src/dynd/types/view_type.cpp
     include/dynd/types/adapt_type.hpp
     include/dynd/types/any_kind_type.hpp
     include/dynd/types/array_type.hpp
@@ -243,7 +241,6 @@ set(libdynd_SRC
     include/dynd/types/time_parser.hpp
     include/dynd/types/time_util.hpp
     include/dynd/types/tuple_type.hpp
-    include/dynd/types/type_alignment.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/type_type.hpp
     include/dynd/types/typevar_constructed_type.hpp

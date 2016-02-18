@@ -14,14 +14,13 @@
 #include <dynd/array.hpp>
 #include <dynd/array_range.hpp>
 #include <dynd/func/random.hpp>
-#include <dynd/types/type_alignment.hpp>
 #include <dynd/types/convert_type.hpp>
-#include <dynd/types/view_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
+/*
 TEST(ArrayViews, OneDimensionalRawMemory)
 {
   nd::array a, b;
@@ -84,44 +83,7 @@ TEST(ArrayViews, MultiDimensionalRawMemory)
   EXPECT_EQ(std::numeric_limits<int32_t>::min(), b(1, 1).as<int32_t>());
   EXPECT_EQ(0, b(1, 2).as<int32_t>());
 }
-
-TEST(ArrayViews, ExpressionDType)
-{
-  nd::array a, a_u2, b;
-  uint32_t values[2][3] = {{1, 2, 3}, {0xffff, 0x8000, 0}};
-
-  // Create a conversion from uint32_t -> uint16_t, followed by a
-  // view uint16_t -> int16_t
-  a = values;
-  a_u2 = a.ucast<uint16_t>();
-  EXPECT_EQ(ndt::make_fixed_dim(
-                2, ndt::make_fixed_dim(
-                       3, ndt::convert_type::make(ndt::make_type<uint16_t>(),
-                                            ndt::make_type<uint32_t>()))),
-            a_u2.get_type());
-
-  // Wrong size, so should throw
-  EXPECT_THROW(b = a_u2.view_scalars<int32_t>(), dynd::type_error);
-
-  b = a_u2.view_scalars<int16_t>();
-  EXPECT_EQ(ndt::make_fixed_dim(
-                2, ndt::make_fixed_dim(
-                       3, ndt::view_type::make(
-                              ndt::make_type<int16_t>(),
-                              ndt::convert_type::make(ndt::make_type<uint16_t>(),
-                                                ndt::make_type<uint32_t>())))),
-            b.get_type());
-  EXPECT_EQ(2u, b.get_shape().size());
-  EXPECT_EQ(2, b.get_shape()[0]);
-  EXPECT_EQ(3, b.get_shape()[1]);
-  EXPECT_EQ(a.cdata(), b.cdata());
-  EXPECT_EQ(1, b(0, 0).as<int16_t>());
-  EXPECT_EQ(2, b(0, 1).as<int16_t>());
-  EXPECT_EQ(3, b(0, 2).as<int16_t>());
-  EXPECT_EQ(-1, b(1, 0).as<int16_t>());
-  EXPECT_EQ(std::numeric_limits<int16_t>::min(), b(1, 1).as<int16_t>());
-  EXPECT_EQ(0, b(1, 2).as<int16_t>());
-}
+*/
 
 TEST(ArrayViews, OneDimPermute)
 {

@@ -4,7 +4,6 @@
 //
 
 #include <dynd/types/fixed_string_kind_type.hpp>
-#include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 

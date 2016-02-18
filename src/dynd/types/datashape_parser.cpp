@@ -27,7 +27,6 @@
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/types/type_alignment.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
@@ -568,25 +567,6 @@ static ndt::type parse_cuda_device_parameters(const char *&rbegin, const char *e
   else {
     throw datashape_parse_error(begin, "expected opening '['");
   }
-}
-
-static ndt::type parse_unaligned_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
-{
-  const char *begin = rbegin;
-  if (!parse_token_ds(begin, end, '[')) {
-    throw datashape_parse_error(begin, "expected opening '[' after 'unaligned'");
-  }
-  ndt::type tp = parse_datashape(begin, end, symtable);
-  if (tp.is_null()) {
-    throw datashape_parse_error(begin, "expected a data type");
-  }
-  if (!parse_token_ds(begin, end, ']')) {
-    throw datashape_parse_error(begin, "expected closing ']'");
-  }
-  // TODO catch errors, convert them to datashape_parse_error so the position is
-  // shown
-  rbegin = begin;
-  return ndt::make_unaligned(tp);
 }
 
 static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
@@ -1281,9 +1261,6 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
     }
     else if (compare_range_to_literal(nbegin, nend, "complex")) {
       result = parse_complex_parameters(begin, end, symtable);
-    }
-    else if (compare_range_to_literal(nbegin, nend, "unaligned")) {
-      result = parse_unaligned_parameters(begin, end, symtable);
     }
     else if (compare_range_to_literal(nbegin, nend, "pointer")) {
       result = parse_pointer_parameters(begin, end, symtable);
