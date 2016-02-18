@@ -465,56 +465,6 @@ static void parse_string_json(const ndt::type &tp, const char *arrmeta, char *ou
   rbegin = begin;
 }
 
-static void parse_datetime_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&rbegin,
-                                const char *end, bool option, const eval::eval_context *ectx)
-{
-  const char *begin = rbegin;
-  skip_whitespace(begin, end);
-  const char *strbegin, *strend;
-  bool escaped;
-  if (option && parse_token(begin, end, "null")) {
-    switch (tp.get_id()) {
-    case date_id:
-      *reinterpret_cast<int32_t *>(out_data) = DYND_DATE_NA;
-      return;
-    case time_id:
-      *reinterpret_cast<int64_t *>(out_data) = DYND_TIME_NA;
-      return;
-    case datetime_id:
-      *reinterpret_cast<int64_t *>(out_data) = DYND_DATETIME_NA;
-      return;
-    default:
-      break;
-    }
-    stringstream ss;
-    ss << "Unrecognized datetime type " << tp;
-    throw runtime_error(ss.str());
-  }
-  else if (parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
-    std::string val;
-    if (escaped) {
-      unescape_string(strbegin, strend, val);
-      strbegin = val.data();
-      strend = strbegin + val.size();
-    }
-    try {
-      tp.extended()->set_from_utf8_string(arrmeta, out_data, strbegin, strend, ectx);
-    }
-    catch (const std::exception &e) {
-      skip_whitespace(rbegin, begin);
-      throw json_parse_error(rbegin, e.what(), tp);
-    }
-    catch (const dynd::dynd_exception &e) {
-      skip_whitespace(rbegin, begin);
-      throw json_parse_error(rbegin, e.what(), tp);
-    }
-  }
-  else {
-    throw json_parse_error(begin, "expected a string", tp);
-  }
-  rbegin = begin;
-}
-
 static void parse_type(const ndt::type &tp, const char *DYND_UNUSED(arrmeta), char *out_data, const char *&rbegin,
                        const char *end, bool option, const eval::eval_context *DYND_UNUSED(ectx))
 {
@@ -679,9 +629,6 @@ static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data,
     return;
   case string_kind:
     parse_string_json(tp, arrmeta, out_data, begin, end, ectx);
-    return;
-  case datetime_kind:
-    parse_datetime_json(tp, arrmeta, out_data, begin, end, false, ectx);
     return;
   case type_kind:
     parse_type(tp, arrmeta, out_data, begin, end, false, ectx);

@@ -119,15 +119,6 @@ enum type_id_t {
   char_id,         // A single string character
   string_id,       // A variable-sized string type
 
-  // A 32-bit date type
-  date_id,
-  // A 64-bit time type
-  time_id,
-  // A 64-bit datetime type
-  datetime_id,
-  // A 32-bit date type limited to business days
-  busdate_id,
-
   // A tuple type with variable layout
   tuple_id,
   // A struct type with variable layout
@@ -627,21 +618,6 @@ struct type_kind_of<string_id> {
 };
 
 template <>
-struct type_kind_of<date_id> {
-  static const type_kind_t value = datetime_kind;
-};
-
-template <>
-struct type_kind_of<time_id> {
-  static const type_kind_t value = datetime_kind;
-};
-
-template <>
-struct type_kind_of<datetime_id> {
-  static const type_kind_t value = datetime_kind;
-};
-
-template <>
 struct type_kind_of<tuple_id> {
   static const type_kind_t value = tuple_kind;
 };
@@ -801,21 +777,6 @@ struct base_id_of<fixed_string_id> {
 
 template <>
 struct base_id_of<string_id> {
-  static const type_id_t value = scalar_kind_id;
-};
-
-template <>
-struct base_id_of<date_id> {
-  static const type_id_t value = scalar_kind_id;
-};
-
-template <>
-struct base_id_of<time_id> {
-  static const type_id_t value = scalar_kind_id;
-};
-
-template <>
-struct base_id_of<datetime_id> {
   static const type_id_t value = scalar_kind_id;
 };
 

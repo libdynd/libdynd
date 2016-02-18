@@ -76,11 +76,6 @@ ndt::type_registry::type_registry()
   insert(string_kind_id, make_type<char_type>());         // char_id
   insert(string_kind_id, make_type<string_type>());       // string_id
 
-  insert(scalar_kind_id, type()); // date_id
-  insert(scalar_kind_id, type()); // time_id
-  insert(scalar_kind_id, type()); // datetime_id
-  insert(scalar_kind_id, type()); // busdate_id
-
   insert(scalar_kind_id, tuple_type::make(true)); // tuple_id
   insert(tuple_id, struct_type::make(true));      // struct_id
 

@@ -523,10 +523,6 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "fixed_string");
   case categorical_id:
     return (o << "categorical");
-  case date_id:
-    return (o << "date");
-  case busdate_id:
-    return (o << "busdate");
   case fixed_dim_id:
     return (o << "fixed_dim");
   case var_dim_id:

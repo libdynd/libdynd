@@ -32,10 +32,6 @@ DYND_API nd::callable nd::assign::make()
 
   map<std::array<type_id_t, 2>, callable> children =
       callable::make_all<_bind<assign_error_mode, assignment_kernel>::type, numeric_ids, numeric_ids>();
-  children[{{date_id, date_id}}] = callable::make<assignment_kernel<date_id, date_id>>();
-  children[{{date_id, string_id}}] = callable::make<assignment_kernel<date_id, string_id>>();
-  children[{{date_id, fixed_string_id}}] = callable::make<assignment_kernel<date_id, string_id>>();
-  children[{{string_id, date_id}}] = callable::make<assignment_kernel<string_id, date_id>>();
   children[{{string_id, string_id}}] = callable::make<assignment_kernel<string_id, string_id>>();
   children[{{bytes_id, bytes_id}}] = callable::make<assignment_kernel<bytes_id, bytes_id>>();
   children[{{fixed_bytes_id, fixed_bytes_id}}] = callable::make<assignment_kernel<fixed_bytes_id, fixed_bytes_id>>();
@@ -45,8 +41,6 @@ DYND_API nd::callable nd::assign::make()
   children[{{fixed_string_id, char_id}}] = callable::make<assignment_kernel<fixed_string_id, char_id>>();
   children[{{string_id, char_id}}] = callable::make<assignment_kernel<string_id, char_id>>();
   children[{{type_id, type_id}}] = callable::make<assignment_kernel<type_id, type_id>>();
-  children[{{time_id, string_id}}] = callable::make<assignment_kernel<time_id, string_id>>();
-  children[{{string_id, time_id}}] = callable::make<assignment_kernel<string_id, time_id>>();
   children[{{string_id, int32_id}}] = callable::make<assignment_kernel<string_id, int32_id>>();
   children[{{fixed_string_id, fixed_string_id}}] =
       callable::make<assignment_kernel<fixed_string_id, fixed_string_id>>();
@@ -113,7 +107,6 @@ DYND_API nd::callable nd::assign::make()
       nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
   children[{{adapt_id, complex_float64_id}}] =
       nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
-  children[{{adapt_id, date_id}}] = nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
 
   children[{{int32_id, adapt_id}}] = nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"));
   children[{{struct_id, adapt_id}}] = nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"));

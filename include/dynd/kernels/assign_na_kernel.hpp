@@ -215,19 +215,6 @@ namespace nd {
       void single(char *res, char *const *DYND_UNUSED(args)) { reinterpret_cast<string *>(res)->clear(); }
     };
 
-    template <>
-    struct assign_na_kernel<date_id, scalar_kind_id> : base_kernel<assign_na_kernel<date_id, scalar_kind_id>, 1> {
-      void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA; }
-
-      void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
-                   const intptr_t *DYND_UNUSED(src_stride), size_t count)
-      {
-        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
-          *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
-        }
-      }
-    };
-
   } // namespace dynd::nd::detail
 
   template <type_id_t DstTypeID>
