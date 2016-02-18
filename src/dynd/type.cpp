@@ -545,10 +545,6 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "kind_sym");
   case int_sym_id:
     return (o << "int_sym");
-  case convert_id:
-    return (o << "convert");
-  case view_id:
-    return (o << "view");
   case expr_id:
     return (o << "expr");
   case type_id:

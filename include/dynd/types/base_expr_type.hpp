@@ -69,18 +69,6 @@ namespace ndt {
     // Expression types stop the iterdata chain
     // TODO: Maybe it should be more flexible?
     size_t get_iterdata_size(intptr_t ndim) const;
-
-    /** Makes a kernel which converts from (operand_type().value_type()) to
-     * (value_type()) */
-    virtual void make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb, const char *dst_arrmeta,
-                                                         const char *src_arrmeta, kernel_request_t kernreq,
-                                                         const eval::eval_context *ectx) const;
-
-    /** Makes a kernel which converts from (value_type()) to
-     * (operand_type().value_type()) */
-    virtual void make_value_to_operand_assignment_kernel(nd::kernel_builder *ckb, const char *dst_arrmeta,
-                                                         const char *src_arrmeta, kernel_request_t kernreq,
-                                                         const eval::eval_context *ectx) const;
   };
 
 } // namespace dynd::ndt

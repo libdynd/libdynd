@@ -88,12 +88,6 @@ namespace ndt {
     void arrmeta_destruct(char *arrmeta) const;
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
-    void make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb, const char *dst_arrmeta,
-                                                 const char *src_arrmeta, kernel_request_t kernreq,
-                                                 const eval::eval_context *ectx) const;
-
-    nd::array get_option_nafunc() const;
-
     bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;
 

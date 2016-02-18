@@ -99,8 +99,6 @@ ndt::type_registry::type_registry()
   insert(any_kind_id, type());  // expr_kind_id
   insert(expr_kind_id, type()); // adapt_id
   insert(expr_kind_id, type()); // expr_id
-  insert(expr_kind_id, type()); // convert_id
-  insert(expr_kind_id, type()); // view_id
 
   insert(any_kind_id, type()); // c_contiguous_id
 

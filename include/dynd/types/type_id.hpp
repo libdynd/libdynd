@@ -152,8 +152,6 @@ enum type_id_t {
   expr_kind_id,
   adapt_id, // Adapter type
   expr_id,  // Advanced expression types
-  convert_id,
-  view_id,
 
   // A type that enforces C contiguity
   c_contiguous_id,
@@ -669,17 +667,7 @@ struct type_kind_of<categorical_id> {
 };
 
 template <>
-struct type_kind_of<convert_id> {
-  static const type_kind_t value = expr_kind;
-};
-
-template <>
 struct type_kind_of<expr_id> {
-  static const type_kind_t value = expr_kind;
-};
-
-template <>
-struct type_kind_of<view_id> {
   static const type_kind_t value = expr_kind;
 };
 
@@ -857,17 +845,7 @@ struct base_id_of<categorical_id> {
 };
 
 template <>
-struct base_id_of<convert_id> {
-  static const type_id_t value = any_kind_id;
-};
-
-template <>
 struct base_id_of<expr_id> {
-  static const type_id_t value = any_kind_id;
-};
-
-template <>
-struct base_id_of<view_id> {
   static const type_id_t value = any_kind_id;
 };
 

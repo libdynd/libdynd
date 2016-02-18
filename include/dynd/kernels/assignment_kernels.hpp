@@ -10,7 +10,6 @@
 #include <dynd/fpstatus.hpp>
 #include <dynd/type.hpp>
 #include <dynd/func/assignment.hpp>
-#include <dynd/kernels/expression_assignment_kernels.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
@@ -2272,90 +2271,6 @@ namespace nd {
       }
     };
 
-    template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-    struct assignment_virtual_kernel<view_id, expr_kind, Src0TypeID, Src0TypeKind>
-        : base_kernel<assignment_virtual_kernel<view_id, expr_kind, Src0TypeID, Src0TypeKind>> {
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        make_expression_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                          &eval::default_eval_context);
-      }
-    };
-
-    template <>
-    struct assignment_virtual_kernel<view_id, expr_kind, view_id, expr_kind>
-        : base_kernel<assignment_virtual_kernel<view_id, expr_kind, view_id, expr_kind>> {
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        make_expression_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                          &eval::default_eval_context);
-      }
-    };
-
-    template <>
-    struct assignment_virtual_kernel<convert_id, expr_kind, convert_id, expr_kind>
-        : base_kernel<assignment_virtual_kernel<convert_id, expr_kind, convert_id, expr_kind>> {
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        make_expression_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                          &eval::default_eval_context);
-      }
-    };
-
-    template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-    struct assignment_virtual_kernel<convert_id, expr_kind, Src0TypeID, Src0TypeKind>
-        : base_kernel<assignment_virtual_kernel<convert_id, expr_kind, Src0TypeID, Src0TypeKind>> {
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        make_expression_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                          &eval::default_eval_context);
-      }
-    };
-
-    template <type_id_t DstTypeID, type_kind_t DstKind, type_id_t Src0TypeID>
-    struct assignment_virtual_kernel<DstTypeID, DstKind, Src0TypeID, expr_kind>
-        : base_kernel<assignment_virtual_kernel<DstTypeID, DstKind, Src0TypeID, expr_kind>> {
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        make_expression_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                          &eval::default_eval_context);
-      }
-    };
-
-    template <type_id_t Src0TypeID, assign_error_mode ErrorMode>
-    struct assignment_kernel<fixed_string_id, string_kind, Src0TypeID, expr_kind, ErrorMode>
-        : base_kernel<assignment_kernel<fixed_string_id, string_kind, Src0TypeID, expr_kind, ErrorMode>> {
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        make_expression_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                          &eval::default_eval_context);
-      }
-    };
-
     template <>
     struct assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_nocheck>
         : base_kernel<assignment_kernel<bool_id, bool_kind, string_id, string_kind, assign_error_nocheck>, 1> {
@@ -2948,20 +2863,30 @@ namespace nd {
 
     template <>
     struct assignment_virtual_kernel<pointer_id, expr_kind, pointer_id, expr_kind>
-        : base_kernel<assignment_virtual_kernel<pointer_id, expr_kind, pointer_id, expr_kind>> {
+        : base_kernel<assignment_virtual_kernel<pointer_id, expr_kind, pointer_id, expr_kind>, 1> {
+      ~assignment_virtual_kernel() { get_child()->destroy(); }
+
+      void single(char *dst, char *const *src)
+      {
+        kernel_prefix *copy_value = get_child();
+        kernel_single_t copy_value_fn = copy_value->get_function<kernel_single_t>();
+        // The src value is a pointer, and copy_value_fn expects a pointer
+        // to that pointer
+        char **src_ptr = reinterpret_cast<char **>(src[0]);
+        copy_value_fn(copy_value, dst, src_ptr);
+      }
+
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                               intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        if (dst_tp == src_tp[0]) {
-          make_pod_typed_data_assignment_kernel(ckb, dst_tp.get_data_size(), dst_tp.get_data_alignment(), kernreq);
-        }
-        else {
-          make_expression_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                            &eval::default_eval_context);
-        }
+        ckb->emplace_back<assignment_virtual_kernel>(kernreq);
+        make_assignment_kernel(ckb, dst_tp.extended<ndt::pointer_type>()->get_target_type(), dst_arrmeta,
+                               src_tp[0].extended<ndt::pointer_type>()->get_target_type(),
+                               src_arrmeta[0] + sizeof(pointer_type_arrmeta), kernel_request_single,
+                               &eval::default_eval_context);
       }
     };
 
