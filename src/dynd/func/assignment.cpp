@@ -48,9 +48,6 @@ DYND_API nd::callable nd::assign::make()
   children[{{time_id, string_id}}] = callable::make<assignment_kernel<time_id, string_id>>();
   children[{{string_id, time_id}}] = callable::make<assignment_kernel<string_id, time_id>>();
   children[{{string_id, int32_id}}] = callable::make<assignment_kernel<string_id, int32_id>>();
-  children[{{datetime_id, string_id}}] = callable::make<assignment_kernel<datetime_id, string_id>>();
-  children[{{string_id, datetime_id}}] = callable::make<assignment_kernel<string_id, datetime_id>>();
-  children[{{datetime_id, datetime_id}}] = callable::make<assignment_kernel<datetime_id, datetime_id>>();
   children[{{fixed_string_id, fixed_string_id}}] =
       callable::make<assignment_kernel<fixed_string_id, fixed_string_id>>();
   children[{{fixed_string_id, string_id}}] = callable::make<assignment_kernel<fixed_string_id, string_id>>();
@@ -126,7 +123,6 @@ DYND_API nd::callable nd::assign::make()
   children[{{option_id, convert_id}}] = callable::make<assignment_kernel<option_id, convert_id>>();
   children[{{string_id, convert_id}}] = callable::make<assignment_kernel<string_id, convert_id>>();
   children[{{string_id, expr_id}}] = callable::make<assignment_kernel<string_id, expr_id>>();
-  children[{{datetime_id, convert_id}}] = callable::make<assignment_kernel<datetime_id, convert_id>>();
   children[{{fixed_string_id, convert_id}}] = callable::make<assignment_kernel<fixed_string_id, convert_id>>();
   children[{{convert_id, convert_id}}] = callable::make<assignment_kernel<convert_id, convert_id>>();
   children[{{int16_id, view_id}}] = callable::make<assignment_kernel<int16_id, view_id>>();

@@ -143,24 +143,6 @@ TEST(OptionType, Date)
   EXPECT_TRUE(nd::is_na(a(4)).as<bool>());
 }
 
-TEST(OptionType, DateTime)
-{
-  nd::array a = nd::empty("5 * ?datetime");
-
-  parse_json(a, "[null, \"2013-04-05 3:45\", \"NA\", \"\","
-                " \"Jan 3, 2020 05:17:33.1234 PM\"]");
-  EXPECT_TRUE(nd::is_na(a(0)).as<bool>());
-  EXPECT_EQ("2013-04-05T03:45", a(1).as<std::string>());
-  EXPECT_TRUE(nd::is_na(a(2)).as<bool>());
-  EXPECT_TRUE(nd::is_na(a(3)).as<bool>());
-  EXPECT_EQ("2020-01-03T17:17:33.1234", a(4).as<std::string>());
-  // Assigning an empty string assigns NA
-  a.vals_at(1) = "";
-  EXPECT_TRUE(nd::is_na(a(1)).as<bool>());
-  a.vals_at(4) = "NA";
-  EXPECT_TRUE(nd::is_na(a(4)).as<bool>());
-}
-
 /*
 TEST(OptionType, String)
 {

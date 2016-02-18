@@ -22,10 +22,6 @@ TEST(Option, IsAvail)
   x.assign_na();
   EXPECT_TRUE(nd::is_na(x).as<bool>());
 
-  x = nd::empty("?datetime");
-  x.assign_na();
-  EXPECT_TRUE(nd::is_na(x).as<bool>());
-
   x = parse_json("?date", "\"2014-01-10\"");
   EXPECT_FALSE(nd::is_na(x).as<bool>());
 }
@@ -40,23 +36,11 @@ TEST(Option, IsAvailArray)
   expected = {true, true, true};
   EXPECT_ARRAY_EQ(nd::is_na(data), expected);
 
-  data = parse_json("3 * ?datetime", "[null, null, null]");
-  expected = {true, true, true};
-  EXPECT_ARRAY_EQ(nd::is_na(data), expected);
-
   data = parse_json("2 * ?date", "[\"2014-01-31\", null]");
   expected = {false, true};
   EXPECT_ARRAY_EQ(nd::is_na(data), expected);
 
   data = parse_json("2 * ?date", "[null, \"2014-01-31\"]");
-  expected = {true, false};
-  EXPECT_ARRAY_EQ(nd::is_na(data), expected);
-
-  data = parse_json("2 * ?datetime", "[\"2014-01-31T12:13:14Z\", null]");
-  expected = {false, true};
-  EXPECT_ARRAY_EQ(nd::is_na(data), expected);
-
-  data = parse_json("2 * ?datetime", "[null, \"2014-01-31T12:13:14Z\"]");
   expected = {true, false};
   EXPECT_ARRAY_EQ(nd::is_na(data), expected);
 
