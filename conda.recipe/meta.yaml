@@ -2,6 +2,10 @@ package:
   name: libdynd
   version: 0.7.1
 
+requirements:
+  build:
+    - cmake
+
 build:
   number: {{environ.get('TRAVIS_BUILD_NUMBER', 0)}}    # [unix]
   number: {{environ.get('APPVEYOR_BUILD_NUMBER', 0)}}  # [win]
