@@ -7,6 +7,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/date_util.hpp>
+#include <dynd/types/datetime_util.hpp>
 
 namespace dynd {
 namespace ndt {

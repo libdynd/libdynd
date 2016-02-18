@@ -17,7 +17,6 @@
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/types/type_id.hpp>
-#include <dynd/types/datetime_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/char_type.hpp>
@@ -1592,43 +1591,6 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<string_id, string_kind, datetime_id, datetime_kind, ErrorMode>
-        : base_kernel<assignment_kernel<string_id, string_kind, datetime_id, datetime_kind, ErrorMode>, 1> {
-      ndt::type m_dst_string_tp;
-      const char *m_dst_arrmeta;
-      ndt::type m_src_datetime_tp;
-
-      assignment_kernel(const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp)
-          : m_dst_string_tp(dst_tp), m_dst_arrmeta(dst_arrmeta), m_src_datetime_tp(src_tp)
-      {
-      }
-
-      void single(char *dst, char *const *src)
-      {
-        datetime_struct dts;
-        dts.set_from_ticks(*reinterpret_cast<const int64_t *>(src[0]));
-        std::string s = dts.to_str();
-        if (s.empty()) {
-          s = "NA";
-        }
-        else if (m_src_datetime_tp.extended<ndt::datetime_type>()->get_timezone() == tz_utc) {
-          s += "Z";
-        }
-        const ndt::base_string_type *bst = static_cast<const ndt::base_string_type *>(m_dst_string_tp.extended());
-        bst->set_from_utf8_string(m_dst_arrmeta, dst, s, &eval::default_eval_context);
-      }
-
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        ckb->emplace_back<assignment_kernel>(kernreq, dst_tp, dst_arrmeta, src_tp[0]);
-      }
-    };
-
-    template <assign_error_mode ErrorMode>
     struct assignment_kernel<time_id, datetime_kind, string_id, string_kind, ErrorMode>
         : base_kernel<assignment_kernel<time_id, datetime_kind, string_id, string_kind, ErrorMode>, 1> {
       ndt::type m_src_string_tp;
@@ -3000,44 +2962,6 @@ namespace nd {
           make_expression_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
                                             &eval::default_eval_context);
         }
-      }
-    };
-
-    template <assign_error_mode ErrorMode>
-    struct assignment_kernel<datetime_id, datetime_kind, datetime_id, datetime_kind, ErrorMode>
-        : base_kernel<assignment_kernel<datetime_id, datetime_kind, datetime_id, datetime_kind, ErrorMode>> {
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        if (src_tp[0].extended<ndt::datetime_type>()->get_timezone() == tz_abstract) {
-          // TODO: If the destination timezone is not UTC, do an
-          //       appropriate transformation
-          if (dst_tp.extended<ndt::datetime_type>()->get_timezone() == tz_utc) {
-            make_pod_typed_data_assignment_kernel(ckb, dst_tp.get_data_size(), dst_tp.get_data_alignment(), kernreq);
-            return;
-          }
-        }
-        else if (dst_tp.extended<ndt::datetime_type>()->get_timezone() != tz_abstract) {
-          // The value stored is independent of the time zone, so
-          // a straight assignment is fine.
-          make_pod_typed_data_assignment_kernel(ckb, dst_tp.get_data_size(), dst_tp.get_data_alignment(), kernreq);
-          return;
-        }
-        else if (ErrorMode == assign_error_nocheck) {
-          // TODO: If the source timezone is not UTC, do an appropriate
-          //       transformation
-          if (src_tp[0].extended<ndt::datetime_type>()->get_timezone() == tz_utc) {
-            make_pod_typed_data_assignment_kernel(ckb, dst_tp.get_data_size(), dst_tp.get_data_alignment(), kernreq);
-            return;
-          }
-        }
-
-        std::stringstream ss;
-        ss << "Cannot assign from " << src_tp[0] << " to " << dst_tp;
-        throw dynd::type_error(ss.str());
       }
     };
 

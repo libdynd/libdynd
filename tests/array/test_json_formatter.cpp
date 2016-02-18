@@ -14,7 +14,6 @@
 #include <dynd/json_parser.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/date_type.hpp>
-#include <dynd/types/datetime_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/callable_type.hpp>
 
@@ -59,17 +58,6 @@ TEST(JSONFormatter, String)
   EXPECT_EQ("\"testing string\"", format_json(a).as<std::string>());
   a = " \" \\ / \b \f \n \r \t ";
   EXPECT_EQ("\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \"", format_json(a).as<std::string>());
-}
-
-TEST(JSONFormatter, DateTime)
-{
-  nd::array a;
-  a = nd::array("2013-12-15").ucast(ndt::date_type::make());
-  EXPECT_EQ("\"2013-12-15\"", format_json(a).as<std::string>());
-  a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::datetime_type::make());
-  EXPECT_EQ("\"2013-12-15T13:14:22.19\"", format_json(a).as<std::string>());
-  a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::datetime_type::make(tz_utc));
-  EXPECT_EQ("\"2013-12-15T13:14:22.19Z\"", format_json(a).as<std::string>());
 }
 
 TEST(JSONFormatter, UniformDim)

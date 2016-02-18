@@ -23,7 +23,6 @@
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/date_type.hpp>
-#include <dynd/types/datetime_type.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/bytes_type.hpp>
@@ -95,7 +94,6 @@ static const map<std::string, ndt::type> &builtin_types()
     bit["complex128"] = ndt::make_type<dynd::complex<double>>();
     bit["complex"] = ndt::make_type<dynd::complex<double>>();
     bit["date"] = ndt::date_type::make();
-    bit["datetime"] = ndt::datetime_type::make();
     bit["bytes"] = ndt::bytes_type::make(1);
     bit["type"] = ndt::make_type<ndt::type_type>();
   }
@@ -570,48 +568,6 @@ static ndt::type parse_cuda_device_parameters(const char *&rbegin, const char *e
   }
   else {
     throw datashape_parse_error(begin, "expected opening '['");
-  }
-}
-
-// datetime_type : datetime[tz='timezone']
-// This is called after 'datetime' is already matched
-static ndt::type parse_datetime_parameters(const char *&rbegin, const char *end)
-{
-  const char *begin = rbegin;
-  if (parse_token_ds(begin, end, '[')) {
-    datetime_tz_t timezone = tz_abstract;
-    std::string unit_str;
-    const char *saved_begin = begin;
-    // Parse the timezone
-    if (!parse_token_ds(begin, end, "tz")) {
-      throw datashape_parse_error(begin, "expected tz= parameter");
-    }
-    if (!parse_token_ds(begin, end, '=')) {
-      throw datashape_parse_error(begin, "expected '='");
-    }
-    std::string timezone_str;
-    saved_begin = begin;
-    if (!parse_quoted_string(begin, end, timezone_str)) {
-      throw datashape_parse_error(begin, "expected a time zone string");
-    }
-    if (timezone_str == "abstract") {
-      timezone = tz_abstract;
-    }
-    else if (timezone_str == "UTC") {
-      timezone = tz_utc;
-    }
-    else {
-      throw datashape_parse_error(saved_begin, "invalid time zone");
-    }
-    if (!parse_token_ds(begin, end, ']')) {
-      throw datashape_parse_error(begin, "expected closing ']'");
-    }
-
-    rbegin = begin;
-    return ndt::datetime_type::make(timezone);
-  }
-  else {
-    return ndt::datetime_type::make();
   }
 }
 
@@ -1326,9 +1282,6 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
     }
     else if (compare_range_to_literal(nbegin, nend, "complex")) {
       result = parse_complex_parameters(begin, end, symtable);
-    }
-    else if (compare_range_to_literal(nbegin, nend, "datetime")) {
-      result = parse_datetime_parameters(begin, end);
     }
     else if (compare_range_to_literal(nbegin, nend, "unaligned")) {
       result = parse_unaligned_parameters(begin, end, symtable);

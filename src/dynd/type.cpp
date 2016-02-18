@@ -20,7 +20,6 @@
 #include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/date_type.hpp>
-#include <dynd/types/datetime_type.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -526,10 +525,6 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "categorical");
   case date_id:
     return (o << "date");
-  case time_id:
-    return (o << "time");
-  case datetime_id:
-    return (o << "datetime");
   case busdate_id:
     return (o << "busdate");
   case fixed_dim_id:

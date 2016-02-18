@@ -7,7 +7,7 @@
 
 #include <dynd/parse.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/types/datetime_type.hpp>
+#include <dynd/types/date_type.hpp>
 #include <dynd/types/option_type.hpp>
 
 namespace dynd {
@@ -224,20 +224,6 @@ namespace nd {
       {
         for (size_t i = 0; i != count; ++i, dst += dst_stride) {
           *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
-        }
-      }
-    };
-
-    template <>
-    struct assign_na_kernel<datetime_id, scalar_kind_id>
-        : base_kernel<assign_na_kernel<datetime_id, scalar_kind_id>, 1> {
-      void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA; }
-
-      void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
-                   const intptr_t *DYND_UNUSED(src_stride), size_t count)
-      {
-        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
-          *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA;
         }
       }
     };
