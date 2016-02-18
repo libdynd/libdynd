@@ -52,16 +52,14 @@ namespace nd {
     {
       const ndt::struct_type *s = src_tp->extended<ndt::struct_type>();
       const std::string &name = kwds[0].as<std::string>();
-      uintptr_t index = s->get_field_index(name);
-      return s->get_field_type(index);
+      return s->get_field_type(name);
     }
 
     static uintptr_t get_data_offset(const ndt::type *src_tp, const char *const *src_arrmeta, const array *kwds)
     {
       const ndt::struct_type *s = src_tp->extended<ndt::struct_type>();
       const std::string &name = kwds[0].as<std::string>();
-      uintptr_t index = s->get_field_index(name);
-      return s->get_data_offsets(src_arrmeta[0])[index];
+      return s->get_data_offset(src_arrmeta[0], name);
     }
   };
 

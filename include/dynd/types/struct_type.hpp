@@ -51,10 +51,23 @@ namespace ndt {
      */
     intptr_t get_field_index(const std::string &field_name) const;
 
+    /**
+     * Gets the field type for the given name. Raises std::invalid_argument if
+     * the struct doesn't have a field of the given name.
+     *
+     * \param field_name  The name of the field.
+     *
+     * \returns  The field type.
+     */
+    const type &get_field_type(const std::string &field_name) const;
+    const type &get_field_type(intptr_t i) const;
+
     inline const uintptr_t *get_data_offsets(const char *arrmeta) const
     {
       return reinterpret_cast<const uintptr_t *>(arrmeta);
     }
+
+    uintptr_t get_data_offset(const char *arrmeta, const std::string &field_name) const;
 
     void print_type(std::ostream &o) const;
 
