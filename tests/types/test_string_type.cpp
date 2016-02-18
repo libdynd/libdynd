@@ -13,7 +13,6 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/types/convert_type.hpp>
 #include <dynd/json_parser.hpp>
 
 #include "dynd_assertions.hpp"
@@ -101,54 +100,6 @@ TEST(StringType, ArrayCreation)
   EXPECT_EQ("of strings that are various sizes", a(4).as<std::string>());
 }
 
-TEST(StringType, Basic)
-{
-  nd::array a, b;
-
-  // std::string goes in as a utf8 string
-  a = std::string("abcdefg");
-  EXPECT_EQ(ndt::make_type<ndt::string_type>(), a.get_type());
-  EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
-  // Make it a fixed_string for this test
-  a = a.ucast(ndt::fixed_string_type::make(7, string_encoding_utf_8)).eval();
-
-  // Convert to a blockref string type with the same utf8 codec
-  b = a.ucast(ndt::make_type<ndt::string_type>());
-  EXPECT_EQ(ndt::convert_type::make(ndt::make_type<ndt::string_type>(),
-                                    ndt::fixed_string_type::make(7, string_encoding_utf_8)),
-            b.get_type());
-  b = b.eval();
-  EXPECT_EQ(ndt::make_type<ndt::string_type>(), b.get_type());
-  EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
-
-  // Convert to a blockref string type with the utf16 codec
-  b = a.ucast(ndt::make_type<ndt::string_type>());
-  EXPECT_EQ(ndt::convert_type::make(ndt::make_type<ndt::string_type>(),
-                                    ndt::fixed_string_type::make(7, string_encoding_utf_8)),
-            b.get_type());
-  b = b.eval();
-  EXPECT_EQ(ndt::make_type<ndt::string_type>(), b.get_type());
-  EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
-
-  // Convert to a blockref string type with the utf32 codec
-  b = a.ucast(ndt::make_type<ndt::string_type>());
-  EXPECT_EQ(ndt::convert_type::make(ndt::make_type<ndt::string_type>(),
-                                    ndt::fixed_string_type::make(7, string_encoding_utf_8)),
-            b.get_type());
-  b = b.eval();
-  EXPECT_EQ(ndt::make_type<ndt::string_type>(), b.get_type());
-  EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
-
-  // Convert to a blockref string type with the ascii codec
-  b = a.ucast(ndt::make_type<ndt::string_type>());
-  EXPECT_EQ(ndt::convert_type::make(ndt::make_type<ndt::string_type>(),
-                                    ndt::fixed_string_type::make(7, string_encoding_utf_8)),
-            b.get_type());
-  b = b.eval();
-  EXPECT_EQ(ndt::make_type<ndt::string_type>(), b.get_type());
-  EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
-}
-
 TEST(StringType, AccessFlags)
 {
   nd::array a, b;
@@ -158,12 +109,12 @@ TEST(StringType, AccessFlags)
                   "testing one two three four five six seven");
   //  EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag, (int)a.get_access_flags());
   // Turn it into a fixed_string type for this test
-  a = a.ucast(ndt::fixed_string_type::make(95, string_encoding_utf_8)).eval();
+  a = nd::empty(ndt::fixed_string_type::make(95, string_encoding_utf_8)).assign(a);
   EXPECT_EQ(ndt::fixed_string_type::make(95, string_encoding_utf_8), a.get_type());
 
   // Converting to a blockref string of the same encoding produces a reference
   // into the fixed_string value
-  b = a.ucast(ndt::make_type<ndt::string_type>()).eval();
+  b = nd::empty(ndt::make_type<ndt::string_type>()).assign(a);
   EXPECT_EQ(nd::read_access_flag | nd::write_access_flag, (int)b.get_access_flags());
   EXPECT_EQ(ndt::make_type<ndt::string_type>(), b.get_type());
   // The data array for 'a' matches the referenced data for 'b' (TODO: Restore
@@ -321,20 +272,23 @@ TEST(StringType, StringToBool)
 TEST(StringType, StringToInteger)
 {
   // Test the boundary cases of the various integers
-  EXPECT_EQ(-128, nd::array("-128").ucast<int8_t>().as<int8_t>());
-  EXPECT_EQ(127, nd::array("127").ucast<int8_t>().as<int8_t>());
-  EXPECT_THROW(nd::array("-129").ucast<int8_t>().eval(), runtime_error);
-  EXPECT_THROW(nd::array("128").ucast<int8_t>().eval(), runtime_error);
+  nd::array i8 = nd::empty(ndt::make_type<int8_t>());
+  EXPECT_EQ(-128, i8.assign(nd::array("-128")).as<int8_t>());
+  EXPECT_EQ(127, i8.assign(nd::array("127")).as<int8_t>());
+  EXPECT_THROW(i8.assign(nd::array("-129")), runtime_error);
+  EXPECT_THROW(i8.assign(nd::array("128")), runtime_error);
 
-  EXPECT_EQ(-32768, nd::array("-32768").ucast<int16_t>().as<int16_t>());
-  EXPECT_EQ(32767, nd::array("32767").ucast<int16_t>().as<int16_t>());
-  EXPECT_THROW(nd::array("-32769").ucast<int16_t>().eval(), runtime_error);
-  EXPECT_THROW(nd::array("32768").ucast<int16_t>().eval(), runtime_error);
+  nd::array i16 = nd::empty(ndt::make_type<int16_t>());
+  EXPECT_EQ(-32768, i16.assign(nd::array("-32768")).as<int16_t>());
+  EXPECT_EQ(32767, i16.assign(nd::array("32767")).as<int16_t>());
+  EXPECT_THROW(i16.assign(nd::array("-32769")), runtime_error);
+  EXPECT_THROW(i16.assign(nd::array("32768")), runtime_error);
 
-  EXPECT_EQ(-2147483648LL, nd::array("-2147483648").ucast<int32_t>().as<int32_t>());
-  EXPECT_EQ(2147483647, nd::array("2147483647").ucast<int32_t>().as<int32_t>());
-  EXPECT_THROW(nd::array(nd::array("-2147483649").ucast<int32_t>().eval()), runtime_error);
-  EXPECT_THROW(nd::array(nd::array("2147483648").ucast<int32_t>().eval()), runtime_error);
+  nd::array i32 = nd::empty(ndt::make_type<int32_t>());
+  EXPECT_EQ(-2147483648LL, i32.assign(nd::array("-2147483648")).as<int32_t>());
+  EXPECT_EQ(2147483647, i32.assign(nd::array("2147483647")).as<int32_t>());
+  EXPECT_THROW(i32.assign(nd::array("-2147483649")), runtime_error);
+  EXPECT_THROW(i32.assign(nd::array("2147483648")), runtime_error);
 
   /*
     ToDo: Reenable this.
@@ -345,28 +299,32 @@ TEST(StringType, StringToInteger)
     EXPECT_THROW(nd::array("9223372036854775808").ucast<int64_t>().eval(), runtime_error);
   */
 
-  EXPECT_EQ(0u, nd::array("0").ucast<uint8_t>().as<uint8_t>());
-  EXPECT_EQ(255u, nd::array("255").ucast<uint8_t>().as<uint8_t>());
-  EXPECT_THROW(nd::array("-1").ucast<uint8_t>().eval(), invalid_argument);
-  EXPECT_THROW(nd::array("256").ucast<uint8_t>().eval(), out_of_range);
+  nd::array u8 = nd::empty(ndt::make_type<uint8_t>());
+  EXPECT_EQ(0u, u8.assign(nd::array("0")).as<uint8_t>());
+  EXPECT_EQ(255u, u8.assign(nd::array("255")).as<uint8_t>());
+  EXPECT_THROW(u8.assign(nd::array("-1")), invalid_argument);
+  EXPECT_THROW(u8.assign(nd::array("256")), out_of_range);
 
-  EXPECT_EQ(0u, nd::array("0").ucast<uint16_t>().as<uint16_t>());
-  EXPECT_EQ(65535u, nd::array("65535").ucast<uint16_t>().as<uint16_t>());
-  EXPECT_THROW(nd::array("-1").ucast<uint16_t>().eval(), invalid_argument);
-  EXPECT_THROW(nd::array("65536").ucast<uint16_t>().eval(), out_of_range);
+  nd::array u16 = nd::empty(ndt::make_type<uint16_t>());
+  EXPECT_EQ(0u, u16.assign(nd::array("0")).as<uint16_t>());
+  EXPECT_EQ(65535u, u16.assign(nd::array("65535")).as<uint16_t>());
+  EXPECT_THROW(u16.assign(nd::array("-1")), invalid_argument);
+  EXPECT_THROW(u16.assign(nd::array("65536")), out_of_range);
 
-  EXPECT_EQ(0u, nd::array("0").ucast<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(4294967295ULL, nd::array("4294967295").ucast<uint32_t>().as<uint32_t>());
-  EXPECT_THROW(nd::array("-1").ucast<uint32_t>().eval(), invalid_argument);
-  EXPECT_THROW(nd::array("4294967296").ucast<uint32_t>().eval(), out_of_range);
+  nd::array u32 = nd::empty(ndt::make_type<uint32_t>());
+  EXPECT_EQ(0u, u32.assign(nd::array("0")).as<uint32_t>());
+  EXPECT_EQ(4294967295ULL, u32.assign(nd::array("4294967295")).as<uint32_t>());
+  EXPECT_THROW(u32.assign(nd::array("-1")), invalid_argument);
+  EXPECT_THROW(u32.assign(nd::array("4294967296")), out_of_range);
 
-  EXPECT_EQ(0u, nd::array("0").ucast<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(18446744073709551615ULL, nd::array("18446744073709551615").ucast<uint64_t>().as<uint64_t>());
-  EXPECT_THROW(nd::array("-1").ucast<uint64_t>().eval(), invalid_argument);
-  EXPECT_THROW(nd::array("18446744073709551616").ucast<uint64_t>().eval(), out_of_range);
+  nd::array u64 = nd::empty(ndt::make_type<uint64_t>());
+  EXPECT_EQ(0u, u64.assign(nd::array("0")).as<uint64_t>());
+  EXPECT_EQ(18446744073709551615ULL, u64.assign(nd::array("18446744073709551615")).as<uint64_t>());
+  EXPECT_THROW(u64.assign(nd::array("-1")), invalid_argument);
+  EXPECT_THROW(u64.assign(nd::array("18446744073709551616")), out_of_range);
 
-  EXPECT_THROW(nd::array("").ucast<uint64_t>().eval(), invalid_argument);
-  EXPECT_THROW(nd::array("-").ucast<uint64_t>().eval(), invalid_argument);
+  EXPECT_THROW(u64.assign(nd::array("")), invalid_argument);
+  EXPECT_THROW(u64.assign(nd::array("-")), invalid_argument);
 }
 
 TEST(StringType, Comparisons)
@@ -430,64 +388,61 @@ TEST(StringType, Comparisons)
     */
 }
 
+TEST(StringType, ConcatenationScalar)
+{
+  dynd::string a("first");
+  dynd::string b("second");
 
-TEST(StringType, ConcatenationScalar) {
-    dynd::string a("first");
-    dynd::string b("second");
+  dynd::string c(a + b);
+  ASSERT_EQ(dynd::string("firstsecond"), c);
 
-    dynd::string c(a + b);
-    ASSERT_EQ(dynd::string("firstsecond"), c);
+  a = dynd::string("foo");
+  a += dynd::string("bar");
 
-    a = dynd::string("foo");
-    a += dynd::string("bar");
-
-    ASSERT_EQ(dynd::string("foobar"), a);
+  ASSERT_EQ(dynd::string("foobar"), a);
 }
 
+TEST(StringType, Concatenation)
+{
+  nd::array a, b, c;
 
-TEST(StringType, Concatenation) {
-    nd::array a, b, c;
+  a = "first";
+  b = "second";
+  c = nd::string_concatenation(a, b);
+  EXPECT_ARRAY_EQ("firstsecond", c);
 
-    a = "first";
-    b = "second";
-    c = nd::string_concatenation(a, b);
-    EXPECT_ARRAY_EQ("firstsecond", c);
+  // c = a + b;
+  // EXPECT_ARRAY_EQ("firstsecond", c);
 
-    // c = a + b;
-    // EXPECT_ARRAY_EQ("firstsecond", c);
-
-    a = {"testing", "one", "two"};
-    b = {"alpha", "beta", "gamma"};
-    EXPECT_ARRAY_EQ(nd::array({"testingalpha", "onebeta", "twogamma"}),
-                    nd::string_concatenation(a, b));
+  a = {"testing", "one", "two"};
+  b = {"alpha", "beta", "gamma"};
+  EXPECT_ARRAY_EQ(nd::array({"testingalpha", "onebeta", "twogamma"}), nd::string_concatenation(a, b));
 }
 
-
-TEST(StringType, Find1) {
+TEST(StringType, Find1)
+{
   nd::array a, b;
 
   a = {"abc", "ababc", "ababab", "abd"};
   b = "abc";
   intptr_t c[] = {0, 2, -1, -1};
 
-  EXPECT_ARRAY_EQ(nd::array(c),
-                  nd::string_find(a, b));
+  EXPECT_ARRAY_EQ(nd::array(c), nd::string_find(a, b));
 }
 
-
-TEST(StringType, Find2) {
+TEST(StringType, Find2)
+{
   nd::array a, b;
 
   a = "abc";
   b = {"a", "b", "c", "bc", "d", "cd"};
   intptr_t c[] = {0, 1, 2, 1, -1, -1};
 
-  EXPECT_ARRAY_EQ(nd::array(c),
-                  nd::string_find(a, b));
+  EXPECT_ARRAY_EQ(nd::array(c), nd::string_find(a, b));
 }
 
-
-TEST(StringType, Find3) {
+TEST(StringType, Find3)
+{
   /* This tests the "fast path" where the needle is a single
      character */
   nd::array a, b;
@@ -496,36 +451,33 @@ TEST(StringType, Find3) {
   b = "a";
   intptr_t c[] = {0, -1, 4, -1, 10};
 
-  EXPECT_ARRAY_EQ(nd::array(c),
-                  nd::string_find(a, b));
+  EXPECT_ARRAY_EQ(nd::array(c), nd::string_find(a, b));
 }
 
-
-TEST(StringType, Count1) {
+TEST(StringType, Count1)
+{
   nd::array a, b;
 
   a = {"abc", "xxxabcxxxabcxxx", "ababab", "abd"};
   b = "abc";
   intptr_t c[] = {1, 2, 0, 0};
 
-  EXPECT_ARRAY_EQ(nd::array(c),
-                  nd::string_count(a, b));
+  EXPECT_ARRAY_EQ(nd::array(c), nd::string_count(a, b));
 }
 
-
-TEST(StringType, Count2) {
+TEST(StringType, Count2)
+{
   nd::array a, b;
 
   a = "abc";
   b = {"a", "b", "c", "bc", "d", "cd"};
   intptr_t c[] = {1, 1, 1, 1, 0, 0};
 
-  EXPECT_ARRAY_EQ(nd::array(c),
-                  nd::string_count(a, b));
+  EXPECT_ARRAY_EQ(nd::array(c), nd::string_count(a, b));
 }
 
-
-TEST(StringType, Count3) {
+TEST(StringType, Count3)
+{
   /* This tests the "fast path" where the needle is a single
      character */
   nd::array a, b;
@@ -534,12 +486,11 @@ TEST(StringType, Count3) {
   b = "a";
   intptr_t c[] = {1, 2, 0, 3};
 
-  EXPECT_ARRAY_EQ(nd::array(c),
-                  nd::string_count(a, b));
+  EXPECT_ARRAY_EQ(nd::array(c), nd::string_count(a, b));
 }
 
-
-TEST(StringType, Replace) {
+TEST(StringType, Replace)
+{
   nd::array a, b, c, d;
 
   /* Tests the five main code paths:
@@ -551,13 +502,12 @@ TEST(StringType, Replace) {
   */
 
   a = {"xaxxbxxxc", "xxxabcxxxabcxxx", "cabababc", "cabababc", "foobar"};
-  b = {"x",         "abc",             "ab",       "ab",       ""};
-  c = {"y",         "ABC",             "aabb",     "a",        "x"};
+  b = {"x", "abc", "ab", "ab", ""};
+  c = {"y", "ABC", "aabb", "a", "x"};
 
   EXPECT_ARRAY_EQ(nd::array({"yayybyyyc", "xxxABCxxxABCxxx", "caabbaabbaabbc", "caaac", "foobar"}),
                   nd::string_replace(a, b, c));
 }
-
 
 template <class T>
 static bool ascii_T_compare(const char *x, const T *y, intptr_t count)

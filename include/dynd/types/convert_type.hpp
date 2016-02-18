@@ -56,34 +56,6 @@ namespace ndt {
     {
       return m_value_type.get_array_functions();
     }
-
-    /**
-     * Makes a conversion type to convert from the operand_type to the
-     * value_type.
-     * If the value_type has expr_kind, it chains operand_type.value_type()
-     * into value_type.storage_type().
-     */
-    static type make(const type &value_type, const type &operand_type)
-    {
-      if (operand_type.value_type() != value_type) {
-        if (value_type.get_base_id() != expr_kind_id) {
-          // Create a conversion type when the value kind is different
-          return type(new convert_type(value_type, operand_type), false);
-        }
-        else if (value_type.storage_type() == operand_type.value_type()) {
-          // No conversion required at the connection
-          return static_cast<const base_expr_type *>(value_type.extended())->with_replaced_storage_type(operand_type);
-        }
-        else {
-          // A conversion required at the connection
-          return static_cast<const base_expr_type *>(value_type.extended())
-              ->with_replaced_storage_type(type(new convert_type(value_type.storage_type(), operand_type), false));
-        }
-      }
-      else {
-        return operand_type;
-      }
-    }
   };
 
 } // namespace dynd::ndt

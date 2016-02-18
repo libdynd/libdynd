@@ -206,8 +206,8 @@ static void linspace_specialization(dynd::complex<double> start, dynd::complex<d
 
 nd::array dynd::nd::linspace(const nd::array &start, const nd::array &stop, intptr_t count, const ndt::type &dt)
 {
-  nd::array start_cleaned = start.ucast(dt).eval();
-  nd::array stop_cleaned = stop.ucast(dt).eval();
+  nd::array start_cleaned = nd::empty(dt).assign(start);
+  nd::array stop_cleaned = nd::empty(dt).assign(stop);
 
   if (start_cleaned.is_scalar() && stop_cleaned.is_scalar()) {
     return linspace(dt, start_cleaned.cdata(), stop_cleaned.cdata(), count);

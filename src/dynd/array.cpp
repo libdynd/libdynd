@@ -472,7 +472,8 @@ static void cast_dtype(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_offset)
         }
       }
     }
-    out_transformed_tp = ndt::convert_type::make(e->replacement_tp, dt);
+    throw std::runtime_error("trying to make convert_type");
+//    out_transformed_tp = ndt::convert_type::make(e->replacement_tp, dt);
     // Only flag the transformation if this actually created a convert type
     if (out_transformed_tp.extended() != e->replacement_tp.extended()) {
       out_was_transformed = true;

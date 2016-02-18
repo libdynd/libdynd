@@ -170,9 +170,10 @@ struct replace_scalar_type_extra {
 static void replace_scalar_types(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_offset), void *extra,
                                  ndt::type &out_transformed_tp, bool &out_was_transformed)
 {
-  const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
+//  const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
   if (!dt.is_indexable()) {
-    out_transformed_tp = ndt::convert_type::make(e->scalar_tp, dt);
+    throw std::runtime_error("trying to make convert_type");
+//    out_transformed_tp = ndt::convert_type::make(e->scalar_tp, dt);
     out_was_transformed = true;
   }
   else {

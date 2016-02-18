@@ -80,7 +80,8 @@ TEST(CharDType, Assign)
   EXPECT_EQ(a.get_type(), ndt::make_type<ndt::string_type>());
   b = nd::empty(ndt::make_type<ndt::char_type>());
   b.vals() = a;
-  c = b.cast(ndt::make_type<ndt::string_type>()).eval();
+  c = nd::empty(ndt::make_type<ndt::string_type>());
+  c.assign(b);
   EXPECT_EQ(c.get_type(), ndt::make_type<ndt::string_type>());
   EXPECT_EQ("t", c.as<std::string>());
 }
