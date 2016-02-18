@@ -6,7 +6,6 @@
 #include <algorithm>
 
 #include <dynd/type.hpp>
-#include <dynd/kernels/expression_assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -51,25 +50,3 @@ void ndt::base_expr_type::arrmeta_debug_print(const char *arrmeta, std::ostream 
 }
 
 size_t ndt::base_expr_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const { return 0; }
-
-void ndt::base_expr_type::make_operand_to_value_assignment_kernel(nd::kernel_builder *DYND_UNUSED(ckb),
-                                                                  const char *DYND_UNUSED(dst_arrmeta),
-                                                                  const char *DYND_UNUSED(src_arrmeta),
-                                                                  kernel_request_t DYND_UNUSED(kernreq),
-                                                                  const eval::eval_context *DYND_UNUSED(ectx)) const
-{
-  stringstream ss;
-  ss << "dynd type " << type(this, true) << " does not support reading of its values";
-  throw dynd::type_error(ss.str());
-}
-
-void ndt::base_expr_type::make_value_to_operand_assignment_kernel(nd::kernel_builder *DYND_UNUSED(ckb),
-                                                                  const char *DYND_UNUSED(dst_arrmeta),
-                                                                  const char *DYND_UNUSED(src_arrmeta),
-                                                                  kernel_request_t DYND_UNUSED(kernreq),
-                                                                  const eval::eval_context *DYND_UNUSED(ectx)) const
-{
-  stringstream ss;
-  ss << "dynd type " << type(this, true) << " does not support writing to its values";
-  throw dynd::type_error(ss.str());
-}

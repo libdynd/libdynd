@@ -32,10 +32,6 @@ DYND_API nd::callable nd::assign::make()
 
   map<std::array<type_id_t, 2>, callable> children =
       callable::make_all<_bind<assign_error_mode, assignment_kernel>::type, numeric_ids, numeric_ids>();
-  children[{{date_id, date_id}}] = callable::make<assignment_kernel<date_id, date_id>>();
-  children[{{date_id, string_id}}] = callable::make<assignment_kernel<date_id, string_id>>();
-  children[{{date_id, fixed_string_id}}] = callable::make<assignment_kernel<date_id, string_id>>();
-  children[{{string_id, date_id}}] = callable::make<assignment_kernel<string_id, date_id>>();
   children[{{string_id, string_id}}] = callable::make<assignment_kernel<string_id, string_id>>();
   children[{{bytes_id, bytes_id}}] = callable::make<assignment_kernel<bytes_id, bytes_id>>();
   children[{{fixed_bytes_id, fixed_bytes_id}}] = callable::make<assignment_kernel<fixed_bytes_id, fixed_bytes_id>>();
@@ -45,8 +41,6 @@ DYND_API nd::callable nd::assign::make()
   children[{{fixed_string_id, char_id}}] = callable::make<assignment_kernel<fixed_string_id, char_id>>();
   children[{{string_id, char_id}}] = callable::make<assignment_kernel<string_id, char_id>>();
   children[{{type_id, type_id}}] = callable::make<assignment_kernel<type_id, type_id>>();
-  children[{{time_id, string_id}}] = callable::make<assignment_kernel<time_id, string_id>>();
-  children[{{string_id, time_id}}] = callable::make<assignment_kernel<string_id, time_id>>();
   children[{{string_id, int32_id}}] = callable::make<assignment_kernel<string_id, int32_id>>();
   children[{{fixed_string_id, fixed_string_id}}] =
       callable::make<assignment_kernel<fixed_string_id, fixed_string_id>>();
@@ -113,66 +107,9 @@ DYND_API nd::callable nd::assign::make()
       nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
   children[{{adapt_id, complex_float64_id}}] =
       nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
-  children[{{adapt_id, date_id}}] = nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
 
   children[{{int32_id, adapt_id}}] = nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"));
   children[{{struct_id, adapt_id}}] = nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"));
-
-  children[{{fixed_bytes_id, view_id}}] = callable::make<assignment_kernel<fixed_bytes_id, view_id>>();
-  children[{{date_id, expr_id}}] = callable::make<assignment_kernel<date_id, expr_id>>();
-  children[{{option_id, convert_id}}] = callable::make<assignment_kernel<option_id, convert_id>>();
-  children[{{string_id, convert_id}}] = callable::make<assignment_kernel<string_id, convert_id>>();
-  children[{{string_id, expr_id}}] = callable::make<assignment_kernel<string_id, expr_id>>();
-  children[{{fixed_string_id, convert_id}}] = callable::make<assignment_kernel<fixed_string_id, convert_id>>();
-  children[{{convert_id, convert_id}}] = callable::make<assignment_kernel<convert_id, convert_id>>();
-  children[{{int16_id, view_id}}] = callable::make<assignment_kernel<int16_id, view_id>>();
-  children[{{int32_id, view_id}}] = callable::make<assignment_kernel<int32_id, view_id>>();
-  children[{{int64_id, view_id}}] = callable::make<assignment_kernel<int64_id, view_id>>();
-  children[{{categorical_id, convert_id}}] = callable::make<assignment_kernel<categorical_id, convert_id>>();
-  children[{{string_id, convert_id}}] = callable::make<assignment_kernel<string_id, convert_id>>();
-  children[{{bool_id, convert_id}}] = callable::make<assignment_kernel<bool_id, convert_id>>();
-  children[{{type_id, convert_id}}] = callable::make<assignment_kernel<type_id, convert_id>>();
-  children[{{convert_id, convert_id}}] = callable::make<assignment_kernel<convert_id, convert_id>>();
-  children[{{float64_id, convert_id}}] = callable::make<assignment_kernel<float64_id, convert_id>>();
-  children[{{int32_id, convert_id}}] = callable::make<assignment_kernel<int32_id, convert_id>>();
-  children[{{int8_id, convert_id}}] = callable::make<assignment_kernel<int8_id, convert_id>>();
-  children[{{float32_id, convert_id}}] = callable::make<assignment_kernel<float32_id, convert_id>>();
-  children[{{int64_id, convert_id}}] = callable::make<assignment_kernel<int64_id, convert_id>>();
-  children[{{int16_id, convert_id}}] = callable::make<assignment_kernel<int16_id, convert_id>>();
-  children[{{convert_id, float64_id}}] = callable::make<assignment_kernel<convert_id, float64_id>>();
-  children[{{convert_id, int8_id}}] = callable::make<assignment_kernel<convert_id, int8_id>>();
-  children[{{convert_id, int16_id}}] = callable::make<assignment_kernel<convert_id, int16_id>>();
-  children[{{convert_id, int32_id}}] = callable::make<assignment_kernel<convert_id, int32_id>>();
-  children[{{convert_id, int64_id}}] = callable::make<assignment_kernel<convert_id, int64_id>>();
-  children[{{convert_id, uint8_id}}] = callable::make<assignment_kernel<convert_id, uint8_id>>();
-  children[{{convert_id, uint16_id}}] = callable::make<assignment_kernel<convert_id, uint16_id>>();
-  children[{{convert_id, uint32_id}}] = callable::make<assignment_kernel<convert_id, uint32_id>>();
-  children[{{convert_id, uint64_id}}] = callable::make<assignment_kernel<convert_id, uint64_id>>();
-  children[{{view_id, int8_id}}] = callable::make<assignment_kernel<view_id, int8_id>>();
-  children[{{view_id, int16_id}}] = callable::make<assignment_kernel<view_id, int16_id>>();
-  children[{{view_id, int32_id}}] = callable::make<assignment_kernel<view_id, int32_id>>();
-  children[{{view_id, int64_id}}] = callable::make<assignment_kernel<view_id, int64_id>>();
-  children[{{view_id, uint8_id}}] = callable::make<assignment_kernel<view_id, uint8_id>>();
-  children[{{view_id, uint16_id}}] = callable::make<assignment_kernel<view_id, uint16_id>>();
-  children[{{view_id, uint32_id}}] = callable::make<assignment_kernel<view_id, uint32_id>>();
-  children[{{view_id, uint64_id}}] = callable::make<assignment_kernel<view_id, uint64_id>>();
-  children[{{uint8_id, view_id}}] = callable::make<assignment_kernel<uint8_id, view_id>>();
-  children[{{uint16_id, view_id}}] = callable::make<assignment_kernel<uint16_id, view_id>>();
-  children[{{uint32_id, view_id}}] = callable::make<assignment_kernel<uint32_id, view_id>>();
-  children[{{uint64_id, view_id}}] = callable::make<assignment_kernel<uint64_id, view_id>>();
-  children[{{uint8_id, convert_id}}] = callable::make<assignment_kernel<uint8_id, convert_id>>();
-  children[{{uint16_id, convert_id}}] = callable::make<assignment_kernel<uint16_id, convert_id>>();
-  children[{{uint32_id, convert_id}}] = callable::make<assignment_kernel<uint32_id, convert_id>>();
-  children[{{uint64_id, convert_id}}] = callable::make<assignment_kernel<uint64_id, convert_id>>();
-  children[{{fixed_dim_id, convert_id}}] = callable::make<assignment_kernel<fixed_dim_id, convert_id>>();
-  children[{{struct_id, convert_id}}] = callable::make<assignment_kernel<struct_id, convert_id>>();
-  children[{{view_id, int32_id}}] = callable::make<assignment_kernel<view_id, int32_id>>();
-  children[{{view_id, int64_id}}] = callable::make<assignment_kernel<view_id, int64_id>>();
-  children[{{view_id, view_id}}] = callable::make<assignment_kernel<view_id, view_id>>();
-  children[{{complex_float32_id, convert_id}}] = callable::make<assignment_kernel<complex_float32_id, convert_id>>();
-  children[{{complex_float64_id, convert_id}}] = callable::make<assignment_kernel<complex_float64_id, convert_id>>();
-  children[{{time_id, convert_id}}] = callable::make<assignment_kernel<time_id, convert_id>>();
-  children[{{date_id, convert_id}}] = callable::make<assignment_kernel<date_id, convert_id>>();
 
   return functional::dispatch(self_tp, [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                                                   const ndt::type *src_tp) mutable -> callable & {

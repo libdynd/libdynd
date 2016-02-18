@@ -284,38 +284,6 @@ void ndt::pointer_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o
   }
 }
 
-namespace {
-
-struct operand_to_value_ck : nd::base_kernel<operand_to_value_ck, 1> {
-  ~operand_to_value_ck() { get_child()->destroy(); }
-
-  void single(char *dst, char *const *src)
-  {
-    kernel_prefix *copy_value = get_child();
-    kernel_single_t copy_value_fn = copy_value->get_function<kernel_single_t>();
-    // The src value is a pointer, and copy_value_fn expects a pointer
-    // to that pointer
-    char **src_ptr = reinterpret_cast<char **>(src[0]);
-    copy_value_fn(copy_value, dst, src_ptr);
-  }
-};
-
-} // anonymous namespace
-
-void ndt::pointer_type::make_operand_to_value_assignment_kernel(nd::kernel_builder *ckb, const char *dst_arrmeta,
-                                                                const char *src_arrmeta, kernel_request_t kernreq,
-                                                                const eval::eval_context *ectx) const
-{
-  ckb->emplace_back<operand_to_value_ck>(kernreq);
-  ::make_assignment_kernel(ckb, m_target_tp, dst_arrmeta, m_target_tp, src_arrmeta + sizeof(pointer_type_arrmeta),
-                           kernel_request_single, ectx);
-}
-
-nd::array ndt::pointer_type::get_option_nafunc() const
-{
-  throw std::runtime_error("option types for pointers are not implemented");
-}
-
 bool ndt::pointer_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                               std::map<std::string, type> &tp_vars) const
 {

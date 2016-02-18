@@ -186,27 +186,6 @@ namespace nd {
     };
 
     template <>
-    struct is_na_kernel<date_id, datetime_kind> : base_kernel<is_na_kernel<date_id, datetime_kind>, 1> {
-      void single(char *dst, char *const *src)
-      {
-        int32_t date = **reinterpret_cast<int32_t *const *>(src);
-        *dst = date == DYND_DATE_NA;
-      }
-
-      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-      {
-        const char *src0 = src[0];
-        intptr_t src0_stride = src_stride[0];
-        for (size_t i = 0; i != count; ++i) {
-          int32_t date = *reinterpret_cast<const int32_t *>(src0);
-          *dst = date == DYND_DATE_NA;
-          dst += dst_stride;
-          src0 += src0_stride;
-        }
-      }
-    };
-
-    template <>
     struct is_na_kernel<fixed_dim_id, dim_kind> : base_kernel<is_na_kernel<fixed_dim_id, dim_kind>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
