@@ -22,7 +22,6 @@ endif()
 set(tests_SRC
     dynd_assertions.hpp
     types/test_adapt_type.cpp
-    types/test_align_type.cpp
     types/test_array_type.cpp
     types/test_bytes_type.cpp
     types/test_c_contiguous_type.cpp
@@ -35,7 +34,6 @@ set(tests_SRC
     types/test_cuda_device_type.cpp
     types/test_datashape_formatter.cpp
     types/test_datashape_parser.cpp
-    types/test_date_type.cpp
     types/test_fixed_dim_type.cpp
     types/test_fixed_bytes_kind_type.cpp
     types/test_fixed_bytes_type.cpp

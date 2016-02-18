@@ -5,7 +5,6 @@
 
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/type_alignment.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/types/str_util.hpp>
 #include <dynd/kernels/get_then_copy_kernel.hpp>
