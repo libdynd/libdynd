@@ -13,8 +13,6 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/tuple_type.hpp>
-#include <dynd/types/type_alignment.hpp>
-#include <dynd/types/view_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
@@ -783,7 +781,8 @@ static void view_scalar_types(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_
       default:
         break;
       }
-      out_transformed_tp = ndt::view_type::make(*e, dt);
+      throw std::runtime_error("creating a view_type");
+//      out_transformed_tp = ndt::view_type::make(*e, dt);
       out_was_transformed = true;
     }
     else {
@@ -830,7 +829,8 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const
         result_tp = ndt::make_fixed_dim(dim_size, scalar_tp);
       }
       else {
-        result_tp = ndt::make_fixed_dim(dim_size, make_unaligned(scalar_tp));
+        throw std::runtime_error("creating an unaligned type");
+//        result_tp = ndt::make_fixed_dim(dim_size, make_unaligned(scalar_tp));
       }
       array result(
           reinterpret_cast<array_preamble *>(make_array_memory_block(result_tp.extended()->get_arrmeta_size()).get()),

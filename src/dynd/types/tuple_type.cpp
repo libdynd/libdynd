@@ -4,7 +4,6 @@
 //
 
 #include <dynd/types/tuple_type.hpp>
-#include <dynd/types/type_alignment.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/func/assignment.hpp>
