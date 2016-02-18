@@ -18,7 +18,6 @@
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/convert_type.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/type.hpp>
@@ -143,22 +142,6 @@ TEST(StructType, CreateThreeField)
   EXPECT_EQ("z", tdt->get_field_name(2));
 }
 
-TEST(StructType, ReplaceScalarTypes)
-{
-  ndt::type dt, dt2;
-
-  // Struct with three fields
-  ndt::type d1 = ndt::make_type<dynd::complex<double>>();
-  ndt::type d2 = ndt::make_type<int32_t>();
-  ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_8);
-  dt = ndt::struct_type::make({"x", "y", "z"}, {d1, d2, d3});
-  dt2 = dt.with_replaced_scalar_types(ndt::make_type<int16_t>());
-  EXPECT_EQ(ndt::struct_type::make({"x", "y", "z"}, {ndt::convert_type::make(ndt::make_type<int16_t>(), d1),
-                                                     ndt::convert_type::make(ndt::make_type<int16_t>(), d2),
-                                                     ndt::convert_type::make(ndt::make_type<int16_t>(), d3)}),
-            dt2);
-}
-
 TEST(StructType, TypeAt)
 {
   ndt::type dt, dt2;
@@ -174,22 +157,6 @@ TEST(StructType, TypeAt)
   EXPECT_EQ(ndt::struct_type::make({"x", "y"}, {d1, d2}), dt.at(irange() < 2));
   EXPECT_EQ(ndt::struct_type::make({"x", "z"}, {d1, d3}), dt.at(irange(0, 3, 2)));
   EXPECT_EQ(ndt::struct_type::make({"z", "y"}, {d3, d2}), dt.at(irange(2, 0, -1)));
-}
-
-TEST(StructType, CanonicalType)
-{
-  ndt::type dt, dt2;
-
-  // Struct with three fields
-  ndt::type d1 = ndt::convert_type::make(ndt::make_type<dynd::complex<double>>(), ndt::make_type<float>());
-  ndt::type d2 = ndt::make_type<ndt::adapt_type>(ndt::make_type<int32_t>(),
-                                                 ndt::make_fixed_bytes(sizeof(int32_t), alignof(int32_t)),
-                                                 nd::byteswap::get(), nd::byteswap::get());
-  ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_32);
-  dt = ndt::struct_type::make({"x", "y", "z"}, {d1, d2, d3});
-  EXPECT_EQ(
-      ndt::struct_type::make({"x", "y", "z"}, {ndt::make_type<dynd::complex<double>>(), ndt::make_type<int32_t>(), d3}),
-      dt.get_canonical_type());
 }
 
 TEST(StructType, IsExpression)

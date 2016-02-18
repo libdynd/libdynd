@@ -12,7 +12,6 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/types/convert_type.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/func/assignment.hpp>
 

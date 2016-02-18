@@ -16,7 +16,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(DTypeDType, Create)
+TEST(TypeType, Create)
 {
   ndt::type d;
 
@@ -32,7 +32,7 @@ TEST(DTypeDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(DTypeDType, BasicNDArray)
+TEST(TypeType, BasicNDArray)
 {
   nd::array a;
 
@@ -45,11 +45,12 @@ TEST(DTypeDType, StringCasting)
 {
   nd::array a;
 
-  a = nd::array("int32").ucast(ndt::make_type<ndt::type_type>());
-  a = a.eval();
-  EXPECT_EQ(type_id, a.get_type().get_id());
-  EXPECT_EQ(ndt::make_type<int32_t>(), a.as<ndt::type>());
-  EXPECT_EQ("int32", a.as<std::string>());
+  a = nd::array("int32");
+  nd::array b = nd::empty(ndt::make_type<ndt::type_type>());
+  b.assign(a);
+  EXPECT_EQ(type_id, b.get_type().get_id());
+  EXPECT_EQ(ndt::make_type<int32_t>(), b.as<ndt::type>());
+  EXPECT_EQ("int32", b.as<std::string>());
 }
 
 TEST(DTypeDType, ScalarRefCount)

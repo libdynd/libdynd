@@ -10,7 +10,6 @@
 #include <dynd/callable.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/convert_type.hpp>
 #include <dynd/array_range.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/search.hpp>
