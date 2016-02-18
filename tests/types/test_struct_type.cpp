@@ -482,5 +482,3 @@ TEST(StructType, InvalidFieldName)
   EXPECT_THROW(dt.extended<ndt::struct_type>()->get_field_type("z"), std::invalid_argument);
   EXPECT_THROW(dt.extended<ndt::struct_type>()->get_data_offset(arrmeta, "z"), std::invalid_argument);
 }
-
-
