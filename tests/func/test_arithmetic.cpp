@@ -328,10 +328,10 @@ TEST(Arithmetic, OptionArrayLHSInt32)
   EXPECT_ARRAY_EQ(nd::is_na(data * 2), expected);
   EXPECT_ARRAY_EQ(nd::is_na(data / 1), expected);
 
-  auto add = nd::array{1, 41, 2}.ucast(ndt::type("?int32")).eval();
-  auto sub = nd::array{-1, 39, 0}.ucast(ndt::type("?int32")).eval();
-  auto mul = nd::array{0, 80, 2}.ucast(ndt::type("?int32")).eval();
-  auto div = nd::array{0, 40, 1}.ucast(ndt::type("?int32")).eval();
+  nd::array add = nd::empty(ndt::type("3 * ?int32")).assign({1, 41, 2});
+  nd::array sub = nd::empty(ndt::type("3 * ?int32")).assign({-1, 39, 0});
+  nd::array mul = nd::empty(ndt::type("3 * ?int32")).assign({0, 80, 2});
+  nd::array div = nd::empty(ndt::type("3 * ?int32")).assign({0, 40, 1});
 
   for (int i = 0; i < indices.get_dim_size(); ++i) {
     auto ind = indices(i).as<int>();
@@ -353,10 +353,10 @@ TEST(Arithmetic, OptionArrayLHSFloat64)
   EXPECT_ARRAY_EQ(nd::is_na(data * 2.0), expected);
   EXPECT_ARRAY_EQ(nd::is_na(data / 1.0), expected);
 
-  auto add = nd::array{1.0, 41.0, 2.0}.ucast(ndt::type("?float64")).eval();
-  auto sub = nd::array{-1.0, 39.0, 0.0}.ucast(ndt::type("?float64")).eval();
-  auto mul = nd::array{0.0, 80.0, 2.0}.ucast(ndt::type("?float64")).eval();
-  auto div = nd::array{0.0, 40.0, 1.0}.ucast(ndt::type("?float64")).eval();
+  nd::array add = nd::empty(ndt::type("3 * ?float64")).assign({1.0, 41.0, 2.0});
+  nd::array sub = nd::empty(ndt::type("3 * ?float64")).assign({-1.0, 39.0, 0.0});
+  nd::array mul = nd::empty(ndt::type("3 * ?float64")).assign({0.0, 80.0, 2.0});
+  nd::array div = nd::empty(ndt::type("3 * ?float64")).assign({0.0, 40.0, 1.0});
 
   for (int i = 0; i < indices.get_dim_size(); ++i) {
     auto ind = indices(i).as<int>();
@@ -378,10 +378,10 @@ TEST(Arithmetic, OptionArrayRHS)
   EXPECT_ARRAY_EQ(nd::is_na(1 * data), expected);
   EXPECT_ARRAY_EQ(nd::is_na(1 / data), expected);
 
-  auto add = nd::array{0, 41, 2}.ucast(ndt::type("?int32")).eval();
-  auto sub = nd::array{2, -39, 0}.ucast(ndt::type("?int32")).eval();
-  auto mul = nd::array{-2, 80, 2}.ucast(ndt::type("?int32")).eval();
-  auto div = nd::array{-1, 0, 1}.ucast(ndt::type("?int32")).eval();
+  nd::array add = nd::empty(ndt::type("3 * ?int32")).assign({0, 41, 2});
+  nd::array sub = nd::empty(ndt::type("3 * ?int32")).assign({2, -39, 0});
+  nd::array mul = nd::empty(ndt::type("3 * ?int32")).assign({-2, 80, 2});
+  nd::array div = nd::empty(ndt::type("3 * ?int32")).assign({-1, 0, 1});
 
   for (int i = 0; i < indices.get_dim_size(); ++i) {
     auto ind = indices(i).as<int>();
@@ -403,10 +403,10 @@ TEST(Arithmetic, OptionArrayOptionInt32)
   EXPECT_ARRAY_EQ(nd::is_na(data * data), expected);
   EXPECT_ARRAY_EQ(nd::is_na(data / data), expected);
 
-  auto add = nd::array{-2, 80, 2}.ucast(ndt::type("?int32")).eval();
-  auto sub = nd::array{0, 0, 0}.ucast(ndt::type("?int32")).eval();
-  auto mul = nd::array{1, 1600, 1}.ucast(ndt::type("?int32")).eval();
-  auto div = nd::array{1, 1, 1}.ucast(ndt::type("?int32")).eval();
+  nd::array add = nd::empty(ndt::type("3 * ?int32")).assign({-2, 80, 2});
+  nd::array sub = nd::empty(ndt::type("3 * ?int32")).assign({0, 0, 0});
+  nd::array mul = nd::empty(ndt::type("3 * ?int32")).assign({1, 1600, 1});
+  nd::array div = nd::empty(ndt::type("3 * ?int32")).assign({1, 1, 1});
 
   for (int i = 0; i < indices.get_dim_size(); ++i) {
     auto ind = indices(i).as<int>();
@@ -428,12 +428,12 @@ TEST(Arithmetic, OptionArrayOptionFloat64)
   EXPECT_ARRAY_EQ(nd::is_na(data * data), expected);
   EXPECT_ARRAY_EQ(nd::is_na(data / data), expected);
 
-  auto add = nd::array{-2, 80, 2}.ucast(ndt::type("?int32")).eval();
-  auto sub = nd::array{0, 0, 0}.ucast(ndt::type("?int32")).eval();
-  auto mul = nd::array{1, 1600, 1}.ucast(ndt::type("?int32")).eval();
-  auto div = nd::array{1, 1, 1}.ucast(ndt::type("?int32")).eval();
+  nd::array add = nd::empty(ndt::type("3 * ?int32")).assign({-2, 80, 2});
+  nd::array sub = nd::empty(ndt::type("3 * ?int32")).assign({0, 0, 0});
+  nd::array mul = nd::empty(ndt::type("3 * ?int32")).assign({1, 1600, 1});
+  nd::array div = nd::empty(ndt::type("3 * ?int32")).assign({1, 1, 1});
 
-  auto float_data = data.ucast(ndt::type("?float64")).eval();
+  auto float_data = nd::empty(ndt::type("5 * ?float64")).assign(data);
   for (int i = 0; i < indices.get_dim_size(); ++i) {
     auto ind = indices(i).as<int>();
     EXPECT_EQ((data + float_data)(ind).as<double>(), add(i).as<double>());
@@ -455,10 +455,10 @@ TEST(Arithmetic, OptionArrayNotOptionFloat64)
   EXPECT_ARRAY_EQ(nd::is_na(data * not_na_data), expected);
   EXPECT_ARRAY_EQ(nd::is_na(data / not_na_data), expected);
 
-  auto add = nd::array{-2, 80, 2}.ucast(ndt::type("?float64")).eval();
-  auto sub = nd::array{0, 0, 0}.ucast(ndt::type("?float64")).eval();
-  auto mul = nd::array{1, 1600, 1}.ucast(ndt::type("?float64")).eval();
-  auto div = nd::array{1, 1, 1}.ucast(ndt::type("?float64")).eval();
+  nd::array add = nd::empty(ndt::type("3 * ?float64")).assign({-2, 80, 2});
+  nd::array sub = nd::empty(ndt::type("3 * ?float64")).assign({0, 0, 0});
+  nd::array mul = nd::empty(ndt::type("3 * ?float64")).assign({1, 1600, 1});
+  nd::array div = nd::empty(ndt::type("3 * ?float64")).assign({1, 1, 1});
 
   for (int i = 0; i < indices.get_dim_size(); ++i) {
     auto ind = indices(i).as<int>();

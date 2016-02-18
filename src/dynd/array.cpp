@@ -17,7 +17,6 @@
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/types/convert_type.hpp>
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
@@ -472,7 +471,8 @@ static void cast_dtype(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_offset)
         }
       }
     }
-    out_transformed_tp = ndt::convert_type::make(e->replacement_tp, dt);
+    throw std::runtime_error("trying to make convert_type");
+//    out_transformed_tp = ndt::convert_type::make(e->replacement_tp, dt);
     // Only flag the transformation if this actually created a convert type
     if (out_transformed_tp.extended() != e->replacement_tp.extended()) {
       out_was_transformed = true;

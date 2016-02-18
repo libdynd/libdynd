@@ -92,8 +92,8 @@ TEST(OptionType, Cast)
   nd::array a, b;
 
   a = parse_json("3 * string", "[\"null\", \"NA\", \"25\"]");
-  b = a.ucast(ndt::type("?int"));
-  b = b.eval();
+  b = nd::empty(ndt::type("3 * ?int"));
+  b.assign(a);
   EXPECT_ARRAY_EQ(nd::view(parse_json("3 * ?int", "[null, null, 25]"), "3 * int"), nd::view(b, "3 * int"));
 }
 

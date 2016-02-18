@@ -14,7 +14,6 @@
 #include <dynd/array.hpp>
 #include <dynd/array_range.hpp>
 #include <dynd/func/random.hpp>
-#include <dynd/types/convert_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 
 using namespace std;
