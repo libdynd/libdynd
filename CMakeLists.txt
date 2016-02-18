@@ -153,7 +153,6 @@ set(libdynd_SRC
     src/dynd/types/base_memory_type.cpp
     src/dynd/types/base_string_type.cpp
     src/dynd/types/base_dim_type.cpp
-    src/dynd/types/busdate_type.cpp
     src/dynd/types/bytes_type.cpp
     src/dynd/types/categorical_type.cpp
     src/dynd/types/categorical_kind_type.cpp
@@ -165,7 +164,6 @@ set(libdynd_SRC
     src/dynd/types/datashape_formatter.cpp
     src/dynd/types/datashape_parser.cpp
     src/dynd/types/date_parser.cpp
-    src/dynd/types/date_type.cpp
     src/dynd/types/date_util.cpp
     src/dynd/types/datetime_parser.cpp
     src/dynd/types/datetime_util.cpp
@@ -209,7 +207,6 @@ set(libdynd_SRC
     include/dynd/types/base_expr_type.hpp
     include/dynd/types/base_string_type.hpp
     include/dynd/types/base_dim_type.hpp
-    include/dynd/types/busdate_type.hpp
     include/dynd/types/bytes_type.hpp
     include/dynd/types/c_contiguous_type.hpp
     include/dynd/types/categorical_type.hpp

@@ -50,7 +50,6 @@ TEST(DataShapeParser, Basic)
   EXPECT_EQ(ndt::make_type<dynd::complex<double>>(), ndt::type("complex128"));
   EXPECT_EQ(ndt::make_type<dynd::complex<float>>(), ndt::type("complex[float32]"));
   EXPECT_EQ(ndt::make_type<dynd::complex<double>>(), ndt::type("complex[float64]"));
-  EXPECT_EQ(ndt::date_type::make(), ndt::type("date"));
   // Aliases for some of the above types
   EXPECT_EQ(ndt::make_type<int32_t>(), ndt::type("int"));
   EXPECT_EQ(ndt::make_type<double>(), ndt::type("real"));
