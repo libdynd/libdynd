@@ -80,12 +80,13 @@ namespace nd {
     {
       std::map<std::array<type_id_t, 2>, callable> children = comparison_operator::make_children();
       children[{{complex_float32_id, complex_float32_id}}] =
-          callable::make<equal_kernel<complex_float32_id, complex_float32_id>>(0);
+          callable::make<equal_kernel<complex_float32_id, complex_float32_id>>();
       children[{{complex_float64_id, complex_float64_id}}] =
-          callable::make<equal_kernel<complex_float64_id, complex_float64_id>>(0);
-      children[{{tuple_id, tuple_id}}] = callable::make<equal_kernel<tuple_id, tuple_id>>(0);
-      children[{{struct_id, struct_id}}] = callable::make<equal_kernel<tuple_id, tuple_id>>(0);
-      children[{{type_id, type_id}}] = callable::make<equal_kernel<type_id, type_id>>(0);
+          callable::make<equal_kernel<complex_float64_id, complex_float64_id>>();
+      children[{{tuple_id, tuple_id}}] = callable::make<equal_kernel<tuple_id, tuple_id>>();
+      children[{{struct_id, struct_id}}] = callable::make<equal_kernel<tuple_id, tuple_id>>();
+      children[{{type_id, type_id}}] = callable::make<equal_kernel<type_id, type_id>>();
+      children[{{bytes_id, bytes_id}}] = callable::make<equal_kernel<bytes_id, bytes_id>>();
 
       return children;
     }
@@ -96,12 +97,13 @@ namespace nd {
     {
       std::map<std::array<type_id_t, 2>, callable> children = comparison_operator::make_children();
       children[{{complex_float32_id, complex_float32_id}}] =
-          callable::make<not_equal_kernel<complex_float32_id, complex_float32_id>>(0);
+          callable::make<not_equal_kernel<complex_float32_id, complex_float32_id>>();
       children[{{complex_float64_id, complex_float64_id}}] =
-          callable::make<not_equal_kernel<complex_float64_id, complex_float64_id>>(0);
-      children[{{tuple_id, tuple_id}}] = callable::make<not_equal_kernel<tuple_id, tuple_id>>(0);
-      children[{{struct_id, struct_id}}] = callable::make<not_equal_kernel<tuple_id, tuple_id>>(0);
-      children[{{type_id, type_id}}] = callable::make<not_equal_kernel<type_id, type_id>>(0);
+          callable::make<not_equal_kernel<complex_float64_id, complex_float64_id>>();
+      children[{{tuple_id, tuple_id}}] = callable::make<not_equal_kernel<tuple_id, tuple_id>>();
+      children[{{struct_id, struct_id}}] = callable::make<not_equal_kernel<tuple_id, tuple_id>>();
+      children[{{type_id, type_id}}] = callable::make<not_equal_kernel<type_id, type_id>>();
+      children[{{bytes_id, bytes_id}}] = callable::make<not_equal_kernel<bytes_id, bytes_id>>();
 
       return children;
     }

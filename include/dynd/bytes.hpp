@@ -21,12 +21,20 @@ public:
 
   bytes(const char *data, size_t size) : m_data(new char[size]), m_size(size) { memcpy(m_data, data, size); }
 
+  template <size_t N>
+  bytes(const char(&data)[N])
+      : bytes(data, N - 1)
+  {
+  }
+
   bytes(const bytes &other) : m_data(new char[other.m_size]), m_size(other.m_size)
   {
     memcpy(m_data, other.m_data, other.m_size);
   }
 
   ~bytes() { delete[] m_data; }
+
+  bool empty() const { return m_size == 0; }
 
   char *data() { return m_data; }
 

@@ -15,12 +15,20 @@ namespace nd {
 
   template <>
   struct serialize_kernel<scalar_kind_id> : base_kernel<serialize_kernel<scalar_kind_id>, 1> {
-    void single(char *dst, char *const *src) { reinterpret_cast<bytes *>(dst)->append(src[0], sizeof(int32_t)); }
+    size_t data_size;
 
-    void strided(char *DYND_UNUSED(dst), intptr_t DYND_UNUSED(dst_stride), char *const *DYND_UNUSED(src),
-                 const intptr_t *DYND_UNUSED(src_stride), size_t DYND_UNUSED(count))
+    serialize_kernel(size_t data_size) : data_size(data_size) {}
+
+    void single(char *dst, char *const *src) { reinterpret_cast<bytes *>(dst)->append(src[0], data_size); }
+
+    static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                            intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                            const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                            intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      std::cout << "serialize_kernel::strided" << std::endl;
+      ckb->emplace_back<serialize_kernel>(kernreq, src_tp[0].get_data_size());
     }
   };
 

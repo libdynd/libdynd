@@ -71,6 +71,7 @@ namespace nd {
 
         const ndt::type &child_dst_tp =
             reinterpret_cast<static_data_type *>(static_data)->child.get_type()->get_return_type();
+
         if (!dst_tp.is_symbolic()) {
           reinterpret_cast<data_type *>(data)->ndim = src_tp[0].get_ndim() - child_dst_tp.get_ndim();
           reinterpret_cast<data_type *>(data)->stored_ndim = reinterpret_cast<data_type *>(data)->ndim;
@@ -866,6 +867,13 @@ namespace nd {
 
         reinterpret_cast<data_type *>(data)->init_offset = ckb->size();
 
+        // if identity is NULL, assign the first element to the output
+        // otherwise, assign the identity to the output
+        // init()
+
+        // f(Ret, Identity)
+        // f(Ret, Arg0_0)
+        // f(Ret, Arg0_1)
         if (reinterpret_cast<data_type *>(data)->identity.is_null()) {
           make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
                                  &eval::default_eval_context);

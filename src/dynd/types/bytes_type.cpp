@@ -26,8 +26,6 @@ ndt::bytes_type::bytes_type(size_t alignment)
   }
 }
 
-ndt::bytes_type::~bytes_type() {}
-
 void ndt::bytes_type::get_bytes_range(const char **out_begin, const char **out_end, const char *DYND_UNUSED(arrmeta),
                                       const char *data) const
 {
@@ -50,9 +48,14 @@ void ndt::bytes_type::set_bytes_data(const char *DYND_UNUSED(arrmeta), char *dat
 
 void ndt::bytes_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
-  // Print as hexadecimal
-  hexadecimal_print_summarized(o, reinterpret_cast<const bytes *>(data)->data(),
-                               reinterpret_cast<const bytes *>(data)->size(), 80);
+  if (reinterpret_cast<const bytes *>(data)->empty()) {
+    o << "NULL";
+  }
+  else {
+    // Print as hexadecimal
+    hexadecimal_print_summarized(o, reinterpret_cast<const bytes *>(data)->data(),
+                                 reinterpret_cast<const bytes *>(data)->size(), 80);
+  }
 }
 
 void ndt::bytes_type::print_type(std::ostream &o) const
@@ -131,7 +134,6 @@ std::map<std::string, nd::callable> ndt::bytes_type::get_dynamic_type_properties
 {
   std::map<std::string, nd::callable> properties;
   properties["target_alignment"] =
-
       nd::functional::apply([](type self) { return self.extended<bytes_type>()->get_target_alignment(); }, "self");
 
   return properties;

@@ -18,13 +18,6 @@ using namespace dynd;
 
 TEST(IO, Serialize)
 {
-  std::cout << nd::serialize << std::endl;
-
-  std::cout << "--" << std::endl;
-  nd::array a = nd::serialize({3}, {{"identity", nd::empty(ndt::type("bytes"))}});
-  std::cout << "--" << std::endl;
-
-  std::cout << a << std::endl;
-
-//  std::exit(-1);
+  EXPECT_ARRAY_EQ(bytes("\x00\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00"),
+                  nd::serialize({{0, 1, 2, 3, 4}}, {{"identity", nd::empty(ndt::type("bytes"))}}));
 }
