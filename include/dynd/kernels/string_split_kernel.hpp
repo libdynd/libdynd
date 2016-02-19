@@ -53,8 +53,7 @@ namespace nd {
       string *dst_str = reinterpret_cast<string *>(dst_v->begin);
 
       dynd::detail::string_splitter<string> f(dst_str, haystack, needle);
-
-      f(haystack, needle);
+      dynd::detail::string_search(haystack, needle, f);
       f.finish();
     }
   };

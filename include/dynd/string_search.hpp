@@ -318,7 +318,7 @@ namespace detail {
   };
 
   template <class StringType>
-  struct string_splitter : public string_search_base<string_splitter<StringType>, StringType> {
+  struct string_splitter {
     StringType *m_dst;
     const char *m_src;
     size_t m_src_size;
@@ -332,7 +332,7 @@ namespace detail {
     {
     }
 
-    bool handle_match(const size_t match)
+    bool operator()(const size_t match)
     {
       size_t new_size = match - m_last_src_start;
 
