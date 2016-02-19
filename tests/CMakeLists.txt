@@ -175,3 +175,10 @@ endif()
 
 #test_expected_compile_succeed(builderror_includendarray.cpp)
 #test_expected_compile_error(builderror_badassignment.cpp)
+
+if (DYND_COVERAGE)
+  SETUP_TARGET_FOR_COVERAGE(
+    coverage
+    test_libdynd
+    coverage)
+endif()
