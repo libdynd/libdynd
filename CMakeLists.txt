@@ -65,8 +65,8 @@ if(DYND_COVERAGE)
   INCLUDE(CodeCoverage)
 
   SET(CMAKE_BUILD_TYPE "Debug")
-  SET(CMAKE_CXX_FLAGS "-fprofile-arcs -ftest-coverage")
-  SET(CMAKE_C_FLAGS "-fprofile-arcs -ftest-coverage")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_COVERAGE}")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_COVERAGE}")
 endif()
 
 if(DYND_LLVM)
