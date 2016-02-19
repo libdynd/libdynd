@@ -57,48 +57,19 @@ void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const ndt::c
                                        const uintptr_t *src_offsets, const ndt::type *src_tp,
                                        const char *const *src_arrmeta, kernel_request_t kernreq)
 {
-  intptr_t ckb_offset = ckb->size();
-  intptr_t root_ckb_offset = ckb_offset;
+  intptr_t self_offset = ckb->size();
   ckb->emplace_back<tuple_unary_op_ck>(kernreq);
-  tuple_unary_op_ck *self = ckb->get_at<tuple_unary_op_ck>(root_ckb_offset);
-  ckb_offset = ckb->size();
+  tuple_unary_op_ck *self = ckb->get_at<tuple_unary_op_ck>(self_offset);
   self->m_fields.resize(field_count);
   for (intptr_t i = 0; i < field_count; ++i) {
-    self = ckb->get_at<tuple_unary_op_ck>(root_ckb_offset);
+    self = ckb->get_at<tuple_unary_op_ck>(self_offset);
     tuple_unary_op_item &field = self->m_fields[i];
-    field.child_kernel_offset = ckb_offset - root_ckb_offset;
+    field.child_kernel_offset = ckb->size() - self_offset;
     field.dst_data_offset = dst_offsets[i];
     field.src_data_offset = src_offsets[i];
     nd::array error_mode = ndt::traits<assign_error_mode>::na();
     af->instantiate(NULL, NULL, ckb, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i], &src_arrmeta[i], kernel_request_single,
                     1, &error_mode, std::map<std::string, ndt::type>());
-    ckb_offset = ckb->size();
-  }
-}
-
-void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *const *af,
-                                       const ndt::callable_type *const *DYND_UNUSED(af_tp), nd::kernel_builder *ckb,
-                                       intptr_t field_count, const uintptr_t *dst_offsets, const ndt::type *dst_tp,
-                                       const char *const *dst_arrmeta, const uintptr_t *src_offsets,
-                                       const ndt::type *src_tp, const char *const *src_arrmeta,
-                                       kernel_request_t kernreq)
-{
-  intptr_t ckb_offset = ckb->size();
-  intptr_t root_ckb_offset = ckb_offset;
-  ckb->emplace_back<tuple_unary_op_ck>(kernreq);
-  tuple_unary_op_ck *self = ckb->get_at<tuple_unary_op_ck>(root_ckb_offset);
-  ckb_offset = ckb->size();
-  self->m_fields.resize(field_count);
-  for (intptr_t i = 0; i < field_count; ++i) {
-    self = ckb->get_at<tuple_unary_op_ck>(root_ckb_offset);
-    tuple_unary_op_item &field = self->m_fields[i];
-    field.child_kernel_offset = ckb_offset - root_ckb_offset;
-    field.dst_data_offset = dst_offsets[i];
-    field.src_data_offset = src_offsets[i];
-    nd::array error_mode = ndt::traits<assign_error_mode>::na();
-    af[i]->instantiate(NULL, NULL, ckb, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i], &src_arrmeta[i],
-                       kernel_request_single, 1, &error_mode, std::map<std::string, ndt::type>());
-    ckb_offset = ckb->size();
   }
 }
 
