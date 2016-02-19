@@ -29,28 +29,8 @@ void nd::copy_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(
                               intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
-  if (dst_tp.is_builtin()) {
-    if (src_tp[0].is_builtin()) {
-      if (dst_tp.extended() == src_tp[0].extended()) {
-        make_pod_typed_data_assignment_kernel(
-            ckb, dynd::ndt::detail::builtin_data_sizes[dst_tp.unchecked_get_builtin_id()],
-            dynd::ndt::detail::builtin_data_alignments[dst_tp.unchecked_get_builtin_id()], kernreq);
-        return;
-      }
-      else {
-        array error_mode = eval::default_eval_context.errmode;
-        assign::get()->instantiate(assign::get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta,
-                                   kernreq, 1, &error_mode, std::map<std::string, ndt::type>());
-        return;
-      }
-    }
-    else {
-      make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, &eval::default_eval_context);
-      return;
-    }
-  }
-  else {
-    make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, &eval::default_eval_context);
-    return;
-  }
+
+  array error_mode = eval::default_eval_context.errmode;
+  assign::get()->instantiate(assign::get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta,
+                             kernreq, 1, &error_mode, std::map<std::string, ndt::type>());
 }

@@ -408,11 +408,7 @@ bool nd::array::equals_exact(const array &rhs) const
   }
 }
 
-nd::array nd::array::cast(const ndt::type &tp) const
-{
-  // Use the ucast function specifying to replace all dimensions
-  return ucast(tp, get_type().get_ndim());
-}
+nd::array nd::array::cast(const ndt::type &tp) const { return nd::assign({*this}, {{"dst_tp", tp}}); }
 
 namespace {
 struct cast_dtype_extra {
@@ -472,7 +468,7 @@ static void cast_dtype(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_offset)
       }
     }
     throw std::runtime_error("trying to make convert_type");
-//    out_transformed_tp = ndt::convert_type::make(e->replacement_tp, dt);
+    //    out_transformed_tp = ndt::convert_type::make(e->replacement_tp, dt);
     // Only flag the transformation if this actually created a convert type
     if (out_transformed_tp.extended() != e->replacement_tp.extended()) {
       out_was_transformed = true;
@@ -782,7 +778,7 @@ static void view_scalar_types(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_
         break;
       }
       throw std::runtime_error("creating a view_type");
-//      out_transformed_tp = ndt::view_type::make(*e, dt);
+      //      out_transformed_tp = ndt::view_type::make(*e, dt);
       out_was_transformed = true;
     }
     else {
@@ -830,7 +826,7 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const
       }
       else {
         throw std::runtime_error("creating an unaligned type");
-//        result_tp = ndt::make_fixed_dim(dim_size, make_unaligned(scalar_tp));
+        //        result_tp = ndt::make_fixed_dim(dim_size, make_unaligned(scalar_tp));
       }
       array result(
           reinterpret_cast<array_preamble *>(make_array_memory_block(result_tp.extended()->get_arrmeta_size()).get()),
@@ -1093,7 +1089,8 @@ nd::array nd::reshape(const nd::array &a, const nd::array &shape)
   if (old_size != size) {
     stringstream ss;
     ss << "dynd reshape: cannot reshape to a different total number of "
-          "elements, from " << old_size << " to " << size;
+          "elements, from "
+       << old_size << " to " << size;
     throw invalid_argument(ss.str());
   }
 
@@ -1167,7 +1164,8 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
 
   array result(
       reinterpret_cast<array_preamble *>(make_array_memory_block(fsd->get_arrmeta_size(), fsd->get_default_data_size(),
-                                                                 fsd->get_data_alignment(), &data_ptr).get()),
+                                                                 fsd->get_data_alignment(), &data_ptr)
+                                             .get()),
       true);
   // Set the array properties
   result.get()->tp = result_type;

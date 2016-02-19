@@ -14,6 +14,7 @@
 #include <dynd/callable.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>
+#include <dynd/func/assignment.hpp>
 #include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>
 #include "../dynd_assertions.hpp"
@@ -52,36 +53,9 @@ TEST(Elwise, UnaryExpr_VarDim)
 
 TEST(Elwise, UnaryExpr_StridedToVarDim)
 {
-  // Create an callable for converting string to int
-  nd::callable af_base =
-      make_callable_from_assignment(ndt::make_type<int>(), ndt::fixed_string_type::make(16), assign_error_default);
-
-  // Lift the kernel to particular fixed dim arrays
-  nd::callable af = nd::functional::elwise(af_base);
-
-  // Test it on some data
-  ndt::type dst_tp("var * int32");
-  ndt::type src_tp("5 * fixed_string[16]");
-  nd::kernel_builder ckb;
-  nd::array in = nd::empty(src_tp);
-  nd::array out = nd::empty(dst_tp);
-  in(0).vals() = "172";
-  in(1).vals() = "-139";
-  in(2).vals() = "12345";
-  in(3).vals() = "-1111";
-  in(4).vals() = "284";
-  const char *in_ptr = in.cdata();
-  const char *src_arrmeta[1] = {in.get()->metadata()};
-  af.get()->instantiate(af.get()->static_data(), NULL, &ckb, dst_tp, out.get()->metadata(), af.get_type()->get_npos(),
-                        &src_tp, src_arrmeta, kernel_request_single, 0, NULL, std::map<std::string, ndt::type>());
-  kernel_single_t usngo = ckb.get()->get_function<kernel_single_t>();
-  usngo(ckb.get(), out.data(), const_cast<char **>(&in_ptr));
-  EXPECT_EQ(5, out.get_shape()[0]);
-  EXPECT_EQ(172, out(0).as<int>());
-  EXPECT_EQ(-139, out(1).as<int>());
-  EXPECT_EQ(12345, out(2).as<int>());
-  EXPECT_EQ(-1111, out(3).as<int>());
-  EXPECT_EQ(284, out(4).as<int>());
+  nd::callable f = nd::functional::elwise(nd::assign::get().get_overload(ndt::make_type<int>(), {ndt::type("string")}));
+  EXPECT_ARRAY_EQ(nd::array({172, -139, 12345, -1111, 284}).cast(ndt::type("var * int32")),
+                  f({{"172", "-139", "12345", "-1111", "284"}}, {{"dst_tp", ndt::type("var * int32")}}));
 }
 
 TEST(Elwise, UnaryExpr_VarToVarDim)

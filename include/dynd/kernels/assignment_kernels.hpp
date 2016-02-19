@@ -1604,8 +1604,8 @@ namespace nd {
         ckb->reserve(ckb_offset + sizeof(kernel_prefix));
         self = ckb->get_at<self_type>(root_ckb_offset);
         self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-        make_assignment_kernel(ckb, dst_val_tp, dst_arrmeta, src_val_tp, src_arrmeta[0],
-                               kernreq | kernel_request_data_only, &eval::default_eval_context);
+        assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, dst_val_tp, dst_arrmeta, 1, &src_val_tp,
+                                   src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
       }
     };
 
@@ -1721,8 +1721,9 @@ namespace nd {
           return;
         case string_id: {
           // Just a string to string assignment
-          make_assignment_kernel(ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, src_tp[0],
-                                 src_arrmeta[0], kernreq, &eval::default_eval_context);
+          assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb,
+                                     dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc, src_tp,
+                                     src_arrmeta, kernreq, nkwd, kwds, tp_vars);
           return;
         }
         default:
@@ -1736,8 +1737,9 @@ namespace nd {
         ckb->emplace_back<string_to_option_tp_ck>(kernreq);
         ckb_offset = ckb->size();
         // First child ckernel is the value assignment
-        make_assignment_kernel(ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, src_tp[0],
-                               src_arrmeta[0], kernreq | kernel_request_data_only, &eval::default_eval_context);
+        assign::get()->instantiate(assign::get()->static_data(), NULL, ckb,
+                                   dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc, src_tp,
+                                   src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
         // Re-acquire self because the address may have changed
         string_to_option_tp_ck *self = ckb->get_at<string_to_option_tp_ck>(root_ckb_offset);
@@ -1810,8 +1812,8 @@ namespace nd {
 
     static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                             const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                            const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
-                            const nd::array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars)
+                            const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                            const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       intptr_t ckb_offset = ckb->size();
       intptr_t root_ckb_offset = ckb_offset;
@@ -1831,8 +1833,9 @@ namespace nd {
       ckb->reserve(ckb_offset + sizeof(kernel_prefix));
       self_type *self = ckb->get_at<self_type>(root_ckb_offset);
       self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-      make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_val_tp, src_arrmeta[0], kernreq | kernel_request_data_only,
-                             &eval::default_eval_context);
+
+      assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, 1, &src_val_tp,
+                                 src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
     }
   };
 
@@ -1881,18 +1884,21 @@ namespace nd {
     template <>
     struct assignment_virtual_kernel<fixed_bytes_id, bytes_kind, fixed_bytes_id, bytes_kind>
         : base_kernel<assignment_virtual_kernel<fixed_bytes_id, bytes_kind, fixed_bytes_id, bytes_kind>> {
+      size_t data_size;
+
+      assignment_virtual_kernel(size_t data_size) : data_size(data_size) {}
+
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
                               kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        const ndt::fixed_bytes_type *src_fs = src_tp[0].extended<ndt::fixed_bytes_type>();
-        if (dst_tp.get_data_size() != src_fs->get_data_size()) {
+        if (dst_tp.get_data_size() != src_tp[0]->get_data_size()) {
           throw std::runtime_error("cannot assign to a fixed_bytes type of a different size");
         }
-        make_pod_typed_data_assignment_kernel(
-            ckb, dst_tp.get_data_size(), std::min(dst_tp.get_data_alignment(), src_fs->get_data_alignment()), kernreq);
+
+        ckb->emplace_back<assignment_virtual_kernel>(kernreq, dst_tp.get_data_size());
       }
     };
 
@@ -2635,15 +2641,14 @@ namespace nd {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+                              intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         ndt::type val_dst_tp =
             dst_tp.get_id() == option_id ? dst_tp.extended<ndt::option_type>()->get_value_type() : dst_tp;
         ndt::type val_src_tp =
             src_tp[0].get_id() == option_id ? src_tp[0].extended<ndt::option_type>()->get_value_type() : src_tp[0];
-        make_assignment_kernel(ckb, val_dst_tp, dst_arrmeta, val_src_tp, src_arrmeta[0], kernreq,
-                               &eval::default_eval_context);
+        assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, val_dst_tp, dst_arrmeta, 1, &val_src_tp,
+                                   src_arrmeta, kernreq, nkwd, kwds, tp_vars);
       }
     };
 
@@ -2665,14 +2670,15 @@ namespace nd {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+                              intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         ckb->emplace_back<assignment_virtual_kernel>(kernreq);
-        make_assignment_kernel(ckb, dst_tp.extended<ndt::pointer_type>()->get_target_type(), dst_arrmeta,
-                               src_tp[0].extended<ndt::pointer_type>()->get_target_type(),
-                               src_arrmeta[0] + sizeof(pointer_type_arrmeta), kernel_request_single,
-                               &eval::default_eval_context);
+
+        const char *child_src_arrmeta = src_arrmeta[0] + sizeof(pointer_type_arrmeta);
+        assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb,
+                                   dst_tp.extended<ndt::pointer_type>()->get_target_type(), dst_arrmeta, 1,
+                                   &src_tp[0].extended<ndt::pointer_type>()->get_target_type(), &child_src_arrmeta,
+                                   kernel_request_single, nkwd, kwds, tp_vars);
       }
     };
 

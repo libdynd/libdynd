@@ -146,23 +146,10 @@ TEST(Callable, KeywordParsing)
 TEST(Callable, Assignment_CallInterface)
 {
   // Test with the unary operation prototype
-  nd::callable af =
-      make_callable_from_assignment(ndt::make_type<int>(), ndt::make_type<ndt::string_type>(), assign_error_default);
+  nd::callable af = nd::assign::get().get_overload(ndt::make_type<int>(), {ndt::make_type<ndt::string_type>()});
 
   // Call it through the call() interface
   nd::array b = af("12345678");
-  EXPECT_EQ(ndt::make_type<int>(), b.get_type());
-  EXPECT_EQ(12345678, b.as<int>());
-
-  // Call it with some incompatible arguments
-  EXPECT_THROW(af(12345), invalid_argument);
-  EXPECT_THROW(af(false), invalid_argument);
-
-  // Test with the expr operation prototype
-  af = make_callable_from_assignment(ndt::make_type<int>(), ndt::make_type<ndt::string_type>(), assign_error_default);
-
-  // Call it through the call() interface
-  b = af("12345678");
   EXPECT_EQ(ndt::make_type<int>(), b.get_type());
   EXPECT_EQ(12345678, b.as<int>());
 
