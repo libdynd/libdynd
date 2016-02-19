@@ -34,6 +34,22 @@ public:
 
   size_t size() const { return m_size; }
 
+  bytes &append(const char *data, size_t size)
+  {
+    char *old_data = m_data;
+    size_t old_size = m_size;
+
+    m_data = new char[m_size + size];
+    m_size += size;
+
+    memcpy(m_data, old_data, old_size);
+    memcpy(m_data + old_size, data, size);
+
+    delete[] old_data;
+
+    return *this;
+  }
+
   bytes &assign(const char *data, size_t size)
   {
     if (size != m_size) {
@@ -87,7 +103,7 @@ public:
     return m_size != rhs.m_size || std::memcmp(m_data, rhs.m_data, m_size) != 0;
   }
 
-  const bytes operator+(const bytes& rhs)
+  const bytes operator+(const bytes &rhs)
   {
     bytes result;
 
@@ -99,7 +115,7 @@ public:
     return result;
   }
 
-  bytes &operator+=(const bytes& rhs)
+  bytes &operator+=(const bytes &rhs)
   {
     size_t orig_size = size();
     resize(size() + rhs.size());

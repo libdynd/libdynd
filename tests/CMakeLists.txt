@@ -104,6 +104,7 @@ set(tests_SRC
     test_dispatch_map.cpp
     test_float16.cpp
     test_integer_sequence.cpp
+    test_io.cpp
     test_iterator.cpp
     test_shape_tools.cpp
     test_type_sequence.cpp

@@ -211,8 +211,13 @@ namespace nd {
     };
 
     template <>
+    struct assign_na_kernel<bytes_id, scalar_kind_id> : base_kernel<assign_na_kernel<bytes_id, scalar_kind_id>, 1> {
+      void single(char *res, char *const *DYND_UNUSED(args)) { reinterpret_cast<bytes *>(res)->clear(); }
+    };
+
+    template <>
     struct assign_na_kernel<string_id, scalar_kind_id> : base_kernel<assign_na_kernel<string_id, scalar_kind_id>, 1> {
-      void single(char *res, char *const *DYND_UNUSED(args)) { reinterpret_cast<string *>(res)->clear(); }
+      void single(char *res, char *const *DYND_UNUSED(args)) { reinterpret_cast<bytes *>(res)->clear(); }
     };
 
   } // namespace dynd::nd::detail

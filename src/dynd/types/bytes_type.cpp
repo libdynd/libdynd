@@ -50,11 +50,9 @@ void ndt::bytes_type::set_bytes_data(const char *DYND_UNUSED(arrmeta), char *dat
 
 void ndt::bytes_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
-  const char *begin = reinterpret_cast<const char *const *>(data)[0];
-  const char *end = reinterpret_cast<const char *const *>(data)[1];
-
   // Print as hexadecimal
-  hexadecimal_print_summarized(o, begin, end - begin, 80);
+  hexadecimal_print_summarized(o, reinterpret_cast<const bytes *>(data)->data(),
+                               reinterpret_cast<const bytes *>(data)->size(), 80);
 }
 
 void ndt::bytes_type::print_type(std::ostream &o) const
