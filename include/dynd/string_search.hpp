@@ -19,7 +19,9 @@ namespace detail {
 
     void add(const char ch) { m_mask |= static_cast<uint64_t>(1) << ((ch) & (64 - 1)); }
 
-    bool has_char(const char ch) { return m_mask & (static_cast<uint64_t>(1) << ((ch) & (64 - 1))); }
+    bool has_char(const char ch) {
+      return (m_mask & (static_cast<uint64_t>(1) << ((ch) & (64 - 1)))) != 0;
+    }
   };
 
   /* Special case path where the needle is only a single character.
