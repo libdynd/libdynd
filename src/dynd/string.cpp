@@ -8,6 +8,7 @@
 #include <dynd/kernels/string_count_kernel.hpp>
 #include <dynd/kernels/string_find_kernel.hpp>
 #include <dynd/kernels/string_replace_kernel.hpp>
+#include <dynd/kernels/string_split_kernel.hpp>
 #include <dynd/func/elwise.hpp>
 
 using namespace std;
@@ -47,6 +48,13 @@ namespace dynd {
     }
 
     DYND_API struct string_replace string_replace;
+
+    DYND_API callable string_split::make()
+    {
+      return functional::elwise(callable::make<string_split_kernel>());
+    }
+
+    DYND_API struct string_split string_split;
 
   } // namespace nd
 } // namespace dynd

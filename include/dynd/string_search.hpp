@@ -250,5 +250,44 @@ namespace dynd {
       }
     };
 
+    template<class StringType>
+    struct string_splitter :
+      public string_search_base<string_splitter<StringType>, StringType>
+    {
+      StringType *m_dst;
+      const char *m_src;
+      size_t m_src_size;
+      size_t m_i;
+      size_t m_last_src_start;
+      size_t m_split_size;
+
+      string_splitter(StringType *dst, const StringType &src, const StringType& split) :
+        m_dst(dst),
+        m_src(src.begin()),
+        m_src_size(src.size()),
+        m_i(0),
+        m_last_src_start(0),
+        m_split_size(split.size())
+      {
+
+      }
+
+      bool handle_match(const size_t match) {
+        size_t new_size = match - m_last_src_start;
+
+        m_dst[m_i].assign(m_src + m_last_src_start, new_size);
+        m_last_src_start += new_size + m_split_size;
+        m_i++;
+
+        return false;
+      }
+
+      void finish() {
+        size_t new_size = m_src_size - m_last_src_start;
+
+        m_dst[m_i].assign(m_src + m_last_src_start, new_size);
+      }
+    };
+
   } // namespace detail
 } // namespace nd

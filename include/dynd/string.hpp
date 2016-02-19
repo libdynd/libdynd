@@ -126,5 +126,9 @@ namespace dynd {
       static callable make();
     } string_replace;
 
+    extern DYND_API struct DYND_API string_split : declfunc<string_split> {
+      static callable make();
+    } string_split;
+
   } // namespace dynd::nd
 } // namespace dynd
