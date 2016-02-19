@@ -439,3 +439,13 @@ TEST(StructType, SingleCompareDifferentArrmeta)
   //   EXPECT_THROW((b >= a), not_comparable_error);
   //     EXPECT_THROW((b > a), not_comparable_error);
 }
+
+TEST(StructType, InvalidFieldName)
+{
+  const nd::array s = nd::as_struct({{"x", 100}, {"y", 1729.22}});
+  const ndt::type dt = s.get_type();
+  const char *arrmeta = s.get()->metadata();
+
+  EXPECT_THROW(dt.extended<ndt::struct_type>()->get_field_type("z"), std::invalid_argument);
+  EXPECT_THROW(dt.extended<ndt::struct_type>()->get_data_offset(arrmeta, "z"), std::invalid_argument);
+}

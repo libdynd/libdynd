@@ -56,6 +56,28 @@ intptr_t ndt::struct_type::get_field_index(const std::string &name) const
   return -1;
 }
 
+const ndt::type &ndt::struct_type::get_field_type(intptr_t i) const { return m_field_types[i]; }
+
+const ndt::type &ndt::struct_type::get_field_type(const std::string &name) const
+{
+  intptr_t i = get_field_index(name);
+  if (i < 0) {
+    throw std::invalid_argument("no field named'" + name + "'");
+  }
+
+  return get_field_type(i);
+}
+
+uintptr_t ndt::struct_type::get_data_offset(const char *arrmeta, const std::string &name) const
+{
+  intptr_t i = get_field_index(name);
+  if (i < 0) {
+    throw std::invalid_argument("no field named'" + name + "'");
+  }
+
+  return get_data_offsets(arrmeta)[i];
+}
+
 void ndt::struct_type::print_type(std::ostream &o) const
 {
   // Use the record datashape syntax
