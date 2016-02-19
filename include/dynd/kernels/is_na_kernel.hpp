@@ -181,6 +181,11 @@ namespace nd {
     };
 
     template <>
+    struct is_na_kernel<bytes_id, bytes_kind> : base_kernel<is_na_kernel<bytes_id, bytes_kind>, 1> {
+      void single(char *dst, char *const *src) { *dst = reinterpret_cast<bytes *>(src[0])->begin() == NULL; }
+    };
+
+    template <>
     struct is_na_kernel<string_id, string_kind> : base_kernel<is_na_kernel<string_id, string_kind>, 1> {
       void single(char *dst, char *const *src) { *dst = reinterpret_cast<string *>(src[0])->begin() == NULL; }
     };

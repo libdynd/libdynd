@@ -42,6 +42,24 @@ namespace nd {
   };
 
   template <>
+  struct init<bytes> {
+    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+    void single(char *data, const bytes &value) const
+    {
+      reinterpret_cast<bytes *>(data)->assign(value.data(), value.size());
+    }
+
+    void contiguous(char *data, const bytes *values, size_t size) const
+    {
+      for (size_t i = 0; i < size; ++i) {
+        single(data, values[i]);
+        data += sizeof(bytes);
+      }
+    }
+  };
+
+  template <>
   struct init<std::string> {
     init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 

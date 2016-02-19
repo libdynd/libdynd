@@ -310,7 +310,6 @@ set(libdynd_SRC
     src/dynd/kernels/multidispatch_kernel.cpp
     src/dynd/kernels/rolling_kernel.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
-    src/dynd/kernels/take_kernel.cpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
     include/dynd/kernels/apply.hpp
     include/dynd/kernels/arithmetic.hpp
@@ -336,6 +335,7 @@ set(libdynd_SRC
     include/dynd/kernels/outer.hpp
     include/dynd/kernels/reduction_kernel.hpp
     include/dynd/kernels/rolling_kernel.hpp
+    include/dynd/kernels/serialize_kernel.hpp
     include/dynd/kernels/sort_kernel.hpp
     include/dynd/kernels/string_concat_kernel.hpp
     include/dynd/kernels/string_count_kernel.hpp
@@ -374,6 +374,7 @@ set(libdynd_SRC
     src/dynd/float128.cpp
     src/dynd/functional.cpp
     src/dynd/int128.cpp
+    src/dynd/io.cpp
     src/dynd/option.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp
@@ -415,6 +416,7 @@ set(libdynd_SRC
     include/dynd/float16.hpp
     include/dynd/float128.hpp
     include/dynd/int128.hpp
+    include/dynd/io.hpp
     include/dynd/iterator.hpp
     include/dynd/logic.hpp
     include/dynd/math.hpp

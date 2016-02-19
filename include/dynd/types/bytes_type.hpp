@@ -24,8 +24,6 @@ namespace ndt {
 
     bytes_type(size_t alignment);
 
-    virtual ~bytes_type();
-
     /** Alignment of the bytes data being pointed to. */
     size_t get_target_alignment() const { return m_alignment; }
 
@@ -57,6 +55,17 @@ namespace ndt {
     }
 
     static type make(size_t alignment) { return type(new bytes_type(alignment), false); }
+  };
+
+  template <>
+  struct traits<bytes> {
+    static const size_t ndim = 0;
+
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(bytes_id); }
+
+    static bytes na() { return bytes(); }
   };
 
 } // namespace dynd::ndt

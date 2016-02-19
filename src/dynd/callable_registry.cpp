@@ -8,12 +8,13 @@
 
 #include <dynd/callable_registry.hpp>
 #include <dynd/functional.hpp>
-#include <dynd/option.hpp>
-#include <dynd/func/random.hpp>
 #include <dynd/func/arithmetic.hpp>
 #include <dynd/func/assignment.hpp>
-#include <dynd/func/take.hpp>
+#include <dynd/io.hpp>
+#include <dynd/option.hpp>
+#include <dynd/func/random.hpp>
 #include <dynd/func/sum.hpp>
+#include <dynd/func/take.hpp>
 #include <dynd/func/min.hpp>
 #include <dynd/func/max.hpp>
 #include <dynd/func/complex.hpp>
@@ -98,9 +99,6 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
 {
   static map<std::string, nd::callable> registry;
   if (registry.empty()) {
-    registry["add"] = nd::add::get();
-    registry["subtract"] = nd::subtract::get();
-    registry["multiply"] = nd::multiply::get();
     registry["divide"] =
         make_ufunc(::divide<int32_t>(), ::divide<int64_t>(), ::divide<uint32_t>(), ::divide<uint64_t>(),
                    ::divide<float>(), ::divide<double>(), ::divide<complex<float>>(), ::divide<complex<double>>());
@@ -135,16 +133,31 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
 
     registry["power"] = make_ufunc(&powf, static_cast<double (*)(double, double)>(&::pow));
 
-    registry["uniform"] = nd::random::uniform::get();
     registry["take"] = nd::take::get();
     registry["sum"] = nd::sum::get();
-    registry["is_na"] = nd::is_na::get();
     registry["min"] = nd::min::get();
     registry["max"] = nd::max::get();
-    registry["assign"] = nd::assign::get();
     registry["real"] = real::get();
     registry["imag"] = imag::get();
     registry["conj"] = conj::get();
+
+    // arithmetic.cpp
+    registry["add"] = add::get();
+    registry["subtract"] = subtract::get();
+    registry["multiply"] = multiply::get();
+
+    // assign.cpp
+    registry["assign"] = assign::get();
+
+    // io.cpp
+    registry["serialize"] = serialize::get();
+
+    // option.cpp
+    registry["assign_na"] = assign_na::get();
+    registry["is_na"] = is_na::get();
+
+    // random.cpp
+    registry["uniform"] = random::uniform::get();
   }
 
   return registry;

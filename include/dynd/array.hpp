@@ -15,6 +15,7 @@
 #include <dynd/irange.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
 #include <dynd/types/pointer_type.hpp>
+#include <dynd/types/bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/var_dim_type.hpp>

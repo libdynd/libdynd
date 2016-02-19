@@ -21,6 +21,12 @@ public:
 
   bytes(const char *data, size_t size) : m_data(new char[size]), m_size(size) { memcpy(m_data, data, size); }
 
+  template <size_t N>
+  bytes(const char(&data)[N])
+      : bytes(data, N - 1)
+  {
+  }
+
   bytes(const bytes &other) : m_data(new char[other.m_size]), m_size(other.m_size)
   {
     memcpy(m_data, other.m_data, other.m_size);
@@ -28,11 +34,29 @@ public:
 
   ~bytes() { delete[] m_data; }
 
+  bool empty() const { return m_size == 0; }
+
   char *data() { return m_data; }
 
   const char *data() const { return m_data; }
 
   size_t size() const { return m_size; }
+
+  bytes &append(const char *data, size_t size)
+  {
+    char *old_data = m_data;
+    size_t old_size = m_size;
+
+    m_data = new char[m_size + size];
+    m_size += size;
+
+    memcpy(m_data, old_data, old_size);
+    memcpy(m_data + old_size, data, size);
+
+    delete[] old_data;
+
+    return *this;
+  }
 
   bytes &assign(const char *data, size_t size)
   {
@@ -87,7 +111,7 @@ public:
     return m_size != rhs.m_size || std::memcmp(m_data, rhs.m_data, m_size) != 0;
   }
 
-  const bytes operator+(const bytes& rhs)
+  const bytes operator+(const bytes &rhs)
   {
     bytes result;
 
@@ -99,7 +123,7 @@ public:
     return result;
   }
 
-  bytes &operator+=(const bytes& rhs)
+  bytes &operator+=(const bytes &rhs)
   {
     size_t orig_size = size();
     resize(size() + rhs.size());
