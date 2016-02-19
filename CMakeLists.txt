@@ -310,7 +310,6 @@ set(libdynd_SRC
     src/dynd/kernels/multidispatch_kernel.cpp
     src/dynd/kernels/rolling_kernel.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
-    src/dynd/kernels/take_kernel.cpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
     include/dynd/kernels/apply.hpp
     include/dynd/kernels/arithmetic.hpp
