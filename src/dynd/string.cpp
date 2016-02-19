@@ -12,6 +12,8 @@
 #include <dynd/callables/string_split_callable.hpp>
 #include <dynd/callables/string_startswith_callable.hpp>
 #include <dynd/callables/string_endswith_callable.hpp>
+#include <dynd/callables/string_contains_callable.hpp>
+#include <dynd/string.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -32,3 +34,5 @@ DYND_API nd::callable nd::string_split = nd::functional::elwise(nd::make_callabl
 DYND_API nd::callable nd::string_startswith = nd::functional::elwise(nd::make_callable<nd::string_startswith_callable>());
 
 DYND_API nd::callable nd::string_endswith = nd::functional::elwise(nd::make_callable<nd::string_endswith_callable>());
+
+DYND_API nd::callable nd::string_contains = nd::functional::elwise(nd::make_callable<nd::string_contains_callable>());

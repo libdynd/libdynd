@@ -135,7 +135,6 @@ bool string_startswith(const StringType &str, const StringType &sub)
   return memcmp(str.begin(), sub.begin(), sub.size()) == 0;
 }
 
-
 /*
   Returns `true` if `str` ends with `sub`.
 */
@@ -149,6 +148,18 @@ bool string_endswith(const StringType &str, const StringType &sub)
   return memcmp(str.begin() + str.size() - sub.size(), sub.begin(), sub.size()) == 0;
 }
 
+/*
+  Returns `true` if `str` contains `sub`.
+*/
+template <class StringType>
+bool string_contains(const StringType &str, const StringType &sub)
+{
+  detail::string_contains f;
+
+  detail::string_search(str, sub, f);
+
+  return f.finish();
+}
 
 namespace nd {
 
@@ -160,6 +171,7 @@ namespace nd {
   extern DYND_API callable string_split;
   extern DYND_API callable string_startswith;
   extern DYND_API callable string_endswith;
+  extern DYND_API callable string_contains;
 
 } // namespace dynd::nd
 } // namespace dynd

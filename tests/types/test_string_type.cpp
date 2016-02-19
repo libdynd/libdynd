@@ -547,7 +547,6 @@ TEST(StringType, StartsWith) {
                   nd::string_startswith(a, b));
 }
 
-
 TEST(StringType, EndsWith) {
   nd::array a, b, c;
 
@@ -559,6 +558,16 @@ TEST(StringType, EndsWith) {
                   nd::string_endswith(a, b));
 }
 
+TEST(StringType, Contains) {
+  nd::array a, b, c;
+
+  a = {"defabc", "ab",  "abd", "XXabcXX", "Xabc"};
+  b = {"abc",    "abc", "abc", "abc",     "abc"};
+  c = {true,     false, false, true,      true};
+
+  EXPECT_ARRAY_EQ(c,
+                  nd::string_contains(a, b));
+}
 
 template <class T>
 static bool ascii_T_compare(const char *x, const T *y, intptr_t count)
