@@ -19,13 +19,6 @@ namespace ndt {
 
   class DYND_API struct_type : public tuple_type {
     const std::vector<std::string> m_field_names;
-    std::map<std::string, nd::callable> m_array_properties;
-
-    void create_array_properties();
-
-    // Special constructor to break the property parameter cycle in
-    // create_array_properties
-    struct_type(int, int);
 
   protected:
     uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const { return reinterpret_cast<uintptr_t *>(arrmeta); }
@@ -91,7 +84,6 @@ namespace ndt {
                                 intrusive_ptr<memory_block_data> &inout_dataref) const;
 
     std::map<std::string, nd::callable> get_dynamic_type_properties() const;
-    std::map<std::string, nd::callable> get_dynamic_array_properties() const;
 
     virtual bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                        std::map<std::string, type> &tp_vars) const;

@@ -246,11 +246,6 @@ std::map<std::string, nd::callable> ndt::base_type::get_dynamic_type_functions()
   return std::map<std::string, nd::callable>();
 }
 
-std::map<std::string, nd::callable> ndt::base_type::get_dynamic_array_properties() const
-{
-  return std::map<std::string, nd::callable>();
-}
-
 std::map<std::string, nd::callable> ndt::base_type::get_dynamic_array_functions() const
 {
   return std::map<std::string, nd::callable>();

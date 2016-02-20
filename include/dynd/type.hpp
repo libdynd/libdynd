@@ -358,10 +358,7 @@ namespace ndt {
      *
      * WARNING: Normally just use get_id().
      */
-    type_id_t unchecked_get_builtin_id() const
-    {
-      return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr));
-    }
+    type_id_t unchecked_get_builtin_id() const { return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr)); }
 
     /** The 'kind' of the type (int, uint, float, etc) */
     type_kind_t get_kind() const { return get_base_type_kind(m_ptr); }
@@ -633,7 +630,6 @@ namespace ndt {
 
     std::map<std::string, nd::callable> get_properties() const;
     std::map<std::string, nd::callable> get_functions() const;
-    std::map<std::string, nd::callable> get_array_properties() const;
     std::map<std::string, nd::callable> get_array_functions() const;
 
     /**

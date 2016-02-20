@@ -6,10 +6,13 @@
 #include <dynd/array.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/callable.hpp>
+#include <dynd/callable_registry.hpp>
+#include <dynd/func/complex.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/func/comparison.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/option.hpp>
+#include <dynd/struct.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/tuple_type.hpp>
@@ -22,6 +25,7 @@
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/field_access_kernel.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
@@ -224,21 +228,76 @@ void nd::array::flag_as_immutable()
 nd::array nd::array::p(const char *name) const
 {
   if (!is_null()) {
-    ndt::type dt = get_type();
-    std::map<std::string, nd::callable> properties = dt.get_array_properties();
+    const ndt::type &dt = get_dtype();
 
-    callable p = properties[name];
-    if (!p.is_null()) {
-      return p(eval()); // ToDo: Replace eval() here with an implicit cast
+    switch (dt.get_id()) {
+    case complex_float32_id:
+    case complex_float64_id:
+      return callable_registry[name](eval());
+    case struct_id:
+      return nd::make_field_access_kernel(dt, name)(eval());
+    default:
+      throw invalid_argument("dynd array does not have property '" + std::string(name) + "'");
     }
   }
 
-  stringstream ss;
-  ss << "dynd array does not have property " << name;
-  throw runtime_error(ss.str());
+  throw runtime_error("property access on null array");
 }
 
 nd::array nd::array::p(const std::string &name) const { return p(name.c_str()); }
+
+// Begin section dynd-python backwards compatibility.
+namespace {
+
+const std::map<std::string, nd::callable> &complex32_array_properties()
+{
+  static const std::map<std::string, nd::callable> complex_array_properties{
+      {"real", nd::real::get()}, {"imag", nd::imag::get()}, {"conj", nd::conj::get()}};
+
+  return complex_array_properties;
+}
+
+const std::map<std::string, nd::callable> &complex64_array_properties()
+{
+  static const std::map<std::string, nd::callable> complex_array_properties{
+      {"real", nd::real::get()}, {"imag", nd::imag::get()}, {"conj", nd::conj::get()}};
+
+  return complex_array_properties;
+}
+
+std::map<std::string, nd::callable> struct_array_properties(const ndt::type &dt)
+{
+  std::map<std::string, nd::callable> ret;
+
+  for (auto name : dt.extended<ndt::struct_type>()->get_field_names()) {
+    ret.emplace(name, nd::make_field_access_kernel(dt, name));
+  }
+
+  return ret;
+}
+
+}
+
+std::map<std::string, nd::callable> nd::array::get_properties() const
+{
+  if (!is_null()) {
+    const ndt::type &dt = get_dtype();
+
+    switch (dt.get_id()) {
+    case complex_float32_id:
+      return complex32_array_properties();
+    case complex_float64_id:
+      return complex64_array_properties();
+    case struct_id:
+      return struct_array_properties(dt);
+    default:
+      return std::map<std::string, nd::callable>();
+    }
+  }
+
+  throw runtime_error("property access on null array");
+}
+// End section dynd-python backwards compatibility.
 
 nd::callable nd::array::find_dynamic_function(const char *function_name) const
 {

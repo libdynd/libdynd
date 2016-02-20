@@ -12,7 +12,6 @@ namespace dynd {
 namespace ndt {
 
   class DYND_API var_dim_type : public base_dim_type {
-    std::map<std::string, nd::callable> m_array_properties;
     std::map<std::string, nd::callable> m_array_functions;
 
   public:
@@ -87,7 +86,6 @@ namespace ndt {
     void foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback, void *callback_data) const;
 
     std::map<std::string, nd::callable> get_dynamic_type_properties() const;
-    std::map<std::string, nd::callable> get_dynamic_array_properties() const;
     std::map<std::string, nd::callable> get_dynamic_array_functions() const;
 
     virtual type with_element_type(const type &element_tp) const;

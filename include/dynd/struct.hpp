@@ -14,5 +14,7 @@ namespace nd {
     static callable make();
   } field_access;
 
+  extern DYND_API nd::callable make_field_access_kernel(const ndt::type &dt, const std::string &name);
+
 } // namespace dynd::nd
 } // namespace dynd
