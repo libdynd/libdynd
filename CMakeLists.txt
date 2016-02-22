@@ -325,6 +325,7 @@ set(libdynd_SRC
     include/dynd/kernels/copy_kernel.hpp
     include/dynd/kernels/constant_kernel.hpp
     include/dynd/kernels/cuda_launch.hpp
+    include/dynd/kernels/dereference_kernel.hpp
     include/dynd/kernels/elwise.hpp
     include/dynd/kernels/fft_kernel.hpp
     include/dynd/kernels/index_kernel.hpp
