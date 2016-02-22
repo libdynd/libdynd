@@ -12,7 +12,9 @@
 #include <dynd/array_range.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/callable.hpp>
+#include <dynd/callable_registry.hpp>
 #include <dynd/func/reduction.hpp>
+
 
 using namespace std;
 using namespace dynd;
