@@ -363,7 +363,7 @@ namespace nd {
         return intrusive_ptr<memory_block_data>(get(), true);
       }
     }
- 
+
     /**
      * Accesses a dynamic property of the array.
      *
@@ -379,23 +379,11 @@ namespace nd {
     template <typename... ArgTypes>
     array f(const char *name, ArgTypes &&... args);
 
-    template <typename... ArgTypes>
-    array f(const std::string &name, ArgTypes &&... args)
-    {
-      return f(name.c_str(), std::forward<ArgTypes>(args)...);
-    }
-
     /**
      * Calls the dynamic function - #include <dynd/callable_registry.hpp> to use it.
      */
     template <typename... ArgTypes>
     array f(const char *name, ArgTypes &&... args) const;
-
-    template <typename... ArgTypes>
-    array f(const std::string &name, ArgTypes &&... args) const
-    {
-      return f(name.c_str(), std::forward<ArgTypes>(args)...);
-    }
 
     array &operator+=(const array &rhs);
     array &operator-=(const array &rhs);
