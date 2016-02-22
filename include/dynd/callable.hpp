@@ -7,15 +7,15 @@
 
 #include <memory>
 
+#include <dynd/callables/static_data_callable.hpp>
 #include <dynd/config.hpp>
-#include <dynd/kernels/apply_function_kernel.hpp>
 #include <dynd/kernels/apply_callable_kernel.hpp>
+#include <dynd/kernels/apply_function_kernel.hpp>
 #include <dynd/kernels/apply_member_function_kernel.hpp>
 #include <dynd/kernels/construct_then_apply_callable_kernel.hpp>
 #include <dynd/types/callable_type.hpp>
-#include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/callables/static_data_callable.hpp>
+#include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
 namespace nd {
@@ -343,6 +343,27 @@ namespace nd {
   };
 
   template <typename FuncType>
+  struct declfunc2 {
+    template <typename DstType, typename... ArgTypes>
+    array operator()(ArgTypes &&... args)
+    {
+      return FuncType::get().template operator()<DstType>(std::forward<ArgTypes>(args)...);
+    }
+
+    template <typename... ArgTypes>
+    array operator()(ArgTypes &&... args)
+    {
+      return FuncType::get()(std::forward<ArgTypes>(args)...);
+    }
+
+    array operator()(const std::initializer_list<array> &args,
+                     const std::initializer_list<std::pair<const char *, array>> &kwds)
+    {
+      return FuncType::get()(args, kwds);
+    }
+  };
+
+  template <typename FuncType>
   std::ostream &operator<<(std::ostream &o, const declfunc<FuncType> &DYND_UNUSED(rhs))
   {
     return o << FuncType::get();
@@ -466,8 +487,7 @@ namespace nd {
   } // namespace dynd::nd::functional
 
   template <typename CallableType, typename... T, typename>
-  callable::callable(CallableType f, T &&... names)
-      : callable(nd::functional::apply(f, std::forward<T>(names)...))
+  callable::callable(CallableType f, T &&... names) : callable(nd::functional::apply(f, std::forward<T>(names)...))
   {
   }
 
