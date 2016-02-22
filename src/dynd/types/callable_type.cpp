@@ -268,7 +268,3 @@ ndt::type ndt::make_generic_funcproto(intptr_t nargs)
   return callable_type::make(typevar_type::make("R"), make_typevar_range("T", nargs));
 }
 
-std::map<std::string, nd::callable> ndt::callable_type::get_dynamic_array_functions() const
-{
-  return std::map<std::string, nd::callable>();
-}

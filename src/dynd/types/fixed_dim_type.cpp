@@ -22,11 +22,6 @@ ndt::fixed_dim_type::fixed_dim_type(intptr_t dim_size, const type &element_tp)
 {
   // Propagate the inherited flags from the element
   this->flags |= (element_tp.get_flags() & (type_flags_operand_inherited | type_flags_value_inherited));
-
-  if ((get_flags() & type_flag_symbolic) == 0) {
-    std::map<std::string, nd::callable> element_functions = element_tp.get_array_functions();
-    m_array_functions.insert(element_functions.begin(), element_functions.end());
-  }
 }
 
 ndt::fixed_dim_type::~fixed_dim_type() {}
@@ -628,11 +623,6 @@ std::map<std::string, nd::callable> ndt::fixed_dim_type::get_dynamic_type_proper
       [](type self) { return type(self.extended<fixed_dim_type>()->get_element_type()); }, "self");
 
   return properties;
-}
-
-std::map<std::string, nd::callable> ndt::fixed_dim_type::get_dynamic_array_functions() const
-{
-  return m_array_functions;
 }
 
 ndt::type ndt::fixed_dim_type::with_element_type(const type &element_tp) const

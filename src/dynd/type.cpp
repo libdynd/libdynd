@@ -348,16 +348,6 @@ std::map<std::string, nd::callable> ndt::type::get_functions() const
   return functions;
 }
 
-std::map<std::string, nd::callable> ndt::type::get_array_functions() const
-{
-  std::map<std::string, nd::callable> array_functions;
-  if (!is_builtin()) {
-    array_functions = m_ptr->get_dynamic_array_functions();
-  }
-
-  return array_functions;
-}
-
 bool ndt::type::get_as_strided(const char *arrmeta, intptr_t ndim, const size_stride_t **out_size_stride,
                                ndt::type *out_el_tp, const char **out_el_arrmeta) const
 {

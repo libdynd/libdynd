@@ -398,6 +398,9 @@ namespace nd {
      */
     callable find_dynamic_function(const char *function_name) const;
 
+    /* Returns all dynamic functions as a map. */
+    std::map<std::string, nd::callable> get_functions() const;
+
     array &operator+=(const array &rhs);
     array &operator-=(const array &rhs);
     array &operator*=(const array &rhs);

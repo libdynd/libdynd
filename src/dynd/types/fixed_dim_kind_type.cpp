@@ -212,11 +212,6 @@ std::map<std::string, nd::callable> ndt::fixed_dim_kind_type::get_dynamic_type_p
   return properties;
 }
 
-std::map<std::string, nd::callable> ndt::fixed_dim_kind_type::get_dynamic_array_functions() const
-{
-  return m_element_tp.get_array_functions();
-}
-
 namespace {
 // TODO: use the PP meta stuff, but DYND_PP_LEN_MAX is set to 8 right now,
 // would need to be 19

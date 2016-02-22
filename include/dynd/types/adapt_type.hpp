@@ -37,8 +37,6 @@ namespace ndt {
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     bool operator==(const base_type &rhs) const;
-
-    std::map<std::string, nd::callable> get_dynamic_array_functions() const;
   };
 
 } // namespace dynd::ndt
