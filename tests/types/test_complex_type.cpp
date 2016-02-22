@@ -12,6 +12,7 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
+#include <dynd/callable_registry.hpp>
 #include <dynd/math.hpp>
 
 using namespace std;

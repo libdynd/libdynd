@@ -10,13 +10,15 @@
 namespace dynd {
 namespace nd {
 
+  class callable;
+
   extern DYND_API class callable_registry {
     /**
      * Returns a reference to the map of registered callables.
      * NOTE: The internal representation will change, this
      *       function will change.
      */
-    DYND_API std::map<std::string, nd::callable> &get_regfunctions();
+    DYND_API std::map<std::string, callable> &get_regfunctions();
 
     typedef callable mapped_type;
     typedef std::map<std::string, mapped_type> map_type;
@@ -43,14 +45,14 @@ namespace nd {
   template <typename... ArgTypes>
   array array::f(const char *name, ArgTypes &&... args)
   {
-    callable f = callable_registry[name];
+    callable &f = callable_registry[name];
     return f(*this, std::forward<ArgTypes>(args)...);
   }
 
   template <typename... ArgTypes>
   array array::f(const char *name, ArgTypes &&... args) const
   {
-    callable f = callable_registry[name];
+    callable &f = callable_registry[name];
     return f(*this, std::forward<ArgTypes>(args)...);
   }
 
