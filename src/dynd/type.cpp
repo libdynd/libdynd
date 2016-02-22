@@ -25,7 +25,6 @@
 #include <dynd/kernels/imag_kernel.hpp>
 #include <dynd/kernels/conj_kernel.hpp>
 #include <dynd/func/elwise.hpp>
-#include <dynd/func/complex.hpp>
 
 #include <sstream>
 #include <cstring>
@@ -169,10 +168,10 @@ struct replace_scalar_type_extra {
 static void replace_scalar_types(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_offset), void *extra,
                                  ndt::type &out_transformed_tp, bool &out_was_transformed)
 {
-//  const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
+  //  const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
   if (!dt.is_indexable()) {
     throw std::runtime_error("trying to make convert_type");
-//    out_transformed_tp = ndt::convert_type::make(e->scalar_tp, dt);
+    //    out_transformed_tp = ndt::convert_type::make(e->scalar_tp, dt);
     out_was_transformed = true;
   }
   else {
@@ -347,48 +346,6 @@ std::map<std::string, nd::callable> ndt::type::get_functions() const
   }
 
   return functions;
-}
-
-namespace {
-
-const std::map<std::string, nd::callable> &complex32_array_properties()
-{
-  static const std::map<std::string, nd::callable> complex_array_properties{
-      {"real", nd::real::get()}, {"imag", nd::imag::get()}, {"conj", nd::conj::get()}};
-
-  return complex_array_properties;
-}
-
-const std::map<std::string, nd::callable> &complex64_array_properties()
-{
-  static const std::map<std::string, nd::callable> complex_array_properties{
-      {"real", nd::real::get()}, {"imag", nd::imag::get()}, {"conj", nd::conj::get()}};
-
-  return complex_array_properties;
-}
-
-} // anonymous namespace
-
-std::map<std::string, nd::callable> ndt::type::get_array_properties() const
-{
-  std::map<std::string, nd::callable> array_properties;
-  if (is_builtin()) {
-    switch (static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr))) {
-    case complex_float32_id:
-      array_properties = complex32_array_properties();
-      break;
-    case complex_float64_id:
-      array_properties = complex64_array_properties();
-      break;
-    default:
-      break;
-    }
-  }
-  else {
-    array_properties = m_ptr->get_dynamic_array_properties();
-  }
-
-  return array_properties;
 }
 
 std::map<std::string, nd::callable> ndt::type::get_array_functions() const

@@ -183,7 +183,7 @@ TEST(StructType, PropertyAccess)
   EXPECT_EQ(3, a.p("x").as<int>());
   EXPECT_EQ(4.25, a.p("y").as<double>());
   EXPECT_EQ(5, a.p("z").as<short>());
-  EXPECT_THROW(a.p("w"), runtime_error);
+  EXPECT_THROW(a.p("w"), invalid_argument);
 }
 
 TEST(StructType, EqualTypeAssign)
@@ -446,6 +446,7 @@ TEST(StructType, InvalidFieldName)
   const ndt::type dt = s.get_type();
   const char *arrmeta = s.get()->metadata();
 
-  EXPECT_THROW(dt.extended<ndt::struct_type>()->get_field_type("z"), std::invalid_argument);
-  EXPECT_THROW(dt.extended<ndt::struct_type>()->get_data_offset(arrmeta, "z"), std::invalid_argument);
+  EXPECT_THROW(dt.extended<ndt::struct_type>()->get_field_type("z"), invalid_argument);
+  EXPECT_THROW(dt.extended<ndt::struct_type>()->get_data_offset(arrmeta, "z"), invalid_argument);
+  EXPECT_THROW(s.p("z"), invalid_argument);
 }

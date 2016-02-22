@@ -490,16 +490,6 @@ namespace ndt {
     virtual std::map<std::string, nd::callable> get_dynamic_type_functions() const;
 
     /**
-     * Additional dynamic properties exposed by any nd::array of this type as gfunc::callable.
-     *
-     * \note Array types copy these properties from the first non-array data type,
-     *       so such properties must be able to handle the case where they are the
-     *       first non-array data type in an array type, not just strictly of the
-     *       non-array data type.
-     */
-    virtual std::map<std::string, nd::callable> get_dynamic_array_properties() const;
-
-    /**
      * Additional dynamic functions exposed by any nd::array of this type as gfunc::callable.
      *
      * \note Array types copy these functions from the first non-array data

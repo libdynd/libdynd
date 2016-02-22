@@ -119,7 +119,6 @@ namespace ndt {
 
   class DYND_API fixed_dim_type : public base_dim_type {
     intptr_t m_dim_size;
-    std::map<std::string, nd::callable> m_array_properties;
     std::map<std::string, nd::callable> m_array_functions;
 
   public:
@@ -210,7 +209,6 @@ namespace ndt {
                std::map<std::string, type> &tp_vars) const;
 
     std::map<std::string, nd::callable> get_dynamic_type_properties() const;
-    std::map<std::string, nd::callable> get_dynamic_array_properties() const;
     std::map<std::string, nd::callable> get_dynamic_array_functions() const;
 
     virtual type with_element_type(const type &element_tp) const;

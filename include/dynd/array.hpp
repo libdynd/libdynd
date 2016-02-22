@@ -372,6 +372,9 @@ namespace nd {
     array p(const char *name) const;
     array p(const std::string &name) const;
 
+    /* Returns all properties as a map. */
+    std::map<std::string, nd::callable> get_properties() const;
+
     /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
      * use it */
     template <typename... ArgTypes>

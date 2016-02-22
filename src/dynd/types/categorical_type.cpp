@@ -469,19 +469,6 @@ struct get_ints_kernel : nd::base_kernel<get_ints_kernel> {
   }
 };
 
-static const std::map<std::string, nd::callable> &categorical_array_properties()
-{
-  static const std::map<std::string, nd::callable> categorical_array_properties{
-      {"ints", nd::callable::make<get_ints_kernel>(ndt::type("(self: Any) -> Any"))}};
-
-  return categorical_array_properties;
-}
-
-std::map<std::string, nd::callable> ndt::categorical_type::get_dynamic_array_properties() const
-{
-  return categorical_array_properties();
-}
-
 static ndt::type property_type_get_storage_type(ndt::type d)
 {
   const ndt::categorical_type *cd = d.extended<ndt::categorical_type>();
