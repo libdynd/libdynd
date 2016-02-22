@@ -70,7 +70,7 @@ namespace nd {
   typedef std::pair<const char *, array> callable_kwd_t;
 
   /**
-   * Holds a single instance of an callable in an nd::array,
+   * Holds a single instance of a callable in an nd::array,
    * providing some more direct convenient interface.
    */
   class DYND_API callable : public intrusive_ptr<base_callable> {
@@ -365,7 +365,7 @@ namespace nd {
   namespace functional {
 
     /**
-     * Makes an callable out of function ``func``, using the provided keyword
+     * Makes a callable out of function ``func``, using the provided keyword
      * parameter names. This function takes ``func`` as a template
      * parameter, so can call it efficiently.
      */
@@ -386,7 +386,7 @@ namespace nd {
     }
 
     /**
-     * Makes an callable out of the function object ``func``, using the provided
+     * Makes a callable out of the function object ``func``, using the provided
      * keyword parameter names. This version makes a copy of provided ``func``
      * object.
      */
@@ -440,7 +440,7 @@ namespace nd {
     }
 
     /**
-     * Makes an callable out of the provided function object type, specialized
+     * Makes a callable out of the provided function object type, specialized
      * for a memory_type such as cuda_device based on the ``kernreq``.
      */
     template <kernel_request_t kernreq, typename func_type, typename... K, typename... T>
@@ -454,7 +454,7 @@ namespace nd {
     }
 
     /**
-     * Makes an callable out of the provided function object type, which
+     * Makes a callable out of the provided function object type, which
      * constructs and calls the function object on demand.
      */
     template <typename func_type, typename... K, typename... T>
@@ -474,7 +474,7 @@ namespace nd {
 } // namespace dynd::nd
 
 /**
- * Creates an callable which does the assignment from
+ * Creates a callable which does the assignment from
  * data of src_tp to dst_tp.
  *
  * \param dst_tp  The type of the destination.
