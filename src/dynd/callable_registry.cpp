@@ -138,27 +138,31 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
     registry["sum"] = nd::sum::get();
     registry["min"] = nd::min::get();
     registry["max"] = nd::max::get();
-    registry["real"] = real::get();
-    registry["imag"] = imag::get();
-    registry["conj"] = conj::get();
-    registry["dereference"] = dereference::get();
 
-    // arithmetic.cpp
+    // dynd/arithmetic.hpp
     registry["add"] = add::get();
     registry["subtract"] = subtract::get();
     registry["multiply"] = multiply::get();
 
-    // assign.cpp
+    // dynd/assign.hpp
     registry["assign"] = assign::get();
 
-    // io.cpp
+    // dynd/complex.hpp
+    registry["real"] = real::get();
+    registry["imag"] = imag::get();
+    registry["conj"] = conj::get();
+
+    // dynd/io.hpp
     registry["serialize"] = serialize::get();
 
-    // option.cpp
+    // dynd/option.hpp
     registry["assign_na"] = assign_na::get();
     registry["is_na"] = is_na::get();
 
-    // random.cpp
+    // dynd/pointer.hpp
+    registry["dereference"] = dereference::get();
+
+    // dynd/random.hpp
     registry["uniform"] = random::uniform::get();
   }
 

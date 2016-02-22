@@ -198,22 +198,22 @@ TEST(ComplexType, Properties)
   nd::array n;
 
   n = dynd::complex<float>(1.5f, 2.0f);
-  EXPECT_EQ(1.5f, n.p("real").as<float>());
-  EXPECT_EQ(2.0f, n.p("imag").as<float>());
+  EXPECT_EQ(1.5f, n.f("real").as<float>());
+  EXPECT_EQ(2.0f, n.f("imag").as<float>());
 
   n = dynd::complex<double>(2.5, 3.0);
-  EXPECT_EQ(2.5, n.p("real").as<double>());
-  EXPECT_EQ(3.0, n.p("imag").as<double>());
+  EXPECT_EQ(2.5, n.f("real").as<double>());
+  EXPECT_EQ(3.0, n.f("imag").as<double>());
 
   dynd::complex<double> avals[3] = {dynd::complex<double>(1, 2), dynd::complex<double>(-1, 1.5),
                                     dynd::complex<double>(3, 21.75)};
   n = avals;
-  EXPECT_EQ(1., n.p("real")(0).as<double>());
-  EXPECT_EQ(2., n.p("imag")(0).as<double>());
-  EXPECT_EQ(-1., n.p("real")(1).as<double>());
-  EXPECT_EQ(1.5, n.p("imag")(1).as<double>());
-  EXPECT_EQ(3., n.p("real")(2).as<double>());
-  EXPECT_EQ(21.75, n.p("imag")(2).as<double>());
+  EXPECT_EQ(1., n.f("real")(0).as<double>());
+  EXPECT_EQ(2., n.f("imag")(0).as<double>());
+  EXPECT_EQ(-1., n.f("real")(1).as<double>());
+  EXPECT_EQ(1.5, n.f("imag")(1).as<double>());
+  EXPECT_EQ(3., n.f("real")(2).as<double>());
+  EXPECT_EQ(21.75, n.f("imag")(2).as<double>());
 }
 
 TYPED_TEST_P(ComplexType, Arithmetic)
