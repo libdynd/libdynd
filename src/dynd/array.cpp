@@ -1181,3 +1181,5 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
   }
   return result;
 }
+
+nd::callable &nd::find_dynamic_function(const char *name) { return callable_registry[name]; }

@@ -10,8 +10,6 @@
 namespace dynd {
 namespace nd {
 
-  class callable;
-
   extern DYND_API class callable_registry {
     /**
      * Returns a reference to the map of registered callables.
@@ -41,20 +39,6 @@ namespace nd {
     iterator end() { return get_regfunctions().end(); }
     const_iterator cend() { return get_regfunctions().cend(); }
   } callable_registry;
-
-  template <typename... ArgTypes>
-  array array::f(const char *name, ArgTypes &&... args)
-  {
-    callable &f = callable_registry[name];
-    return f(*this, std::forward<ArgTypes>(args)...);
-  }
-
-  template <typename... ArgTypes>
-  array array::f(const char *name, ArgTypes &&... args) const
-  {
-    callable &f = callable_registry[name];
-    return f(*this, std::forward<ArgTypes>(args)...);
-  }
 
 } // namespace dynd::nd
 } // namespace dynd

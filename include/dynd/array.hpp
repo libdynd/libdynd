@@ -27,6 +27,8 @@ namespace ndt {
 } // namespace ndt;
 
 namespace nd {
+  callable &find_dynamic_function(const char *name);
+
   class DYND_API array;
 
   /**
@@ -377,13 +379,11 @@ namespace nd {
      * Calls the dynamic function - #include <dynd/callable_registry.hpp> to use it.
      */
     template <typename... ArgTypes>
-    array f(const char *name, ArgTypes &&... args);
-
-    /**
-     * Calls the dynamic function - #include <dynd/callable_registry.hpp> to use it.
-     */
-    template <typename... ArgTypes>
-    array f(const char *name, ArgTypes &&... args) const;
+    array f(const char *name, ArgTypes &&... args) const
+    {
+      callable &f = find_dynamic_function(name);
+      return f(*this, std::forward<ArgTypes>(args)...);
+    }
 
     array &operator+=(const array &rhs);
     array &operator-=(const array &rhs);

@@ -9,7 +9,6 @@
 #include <cmath>
 
 #include <dynd/config.hpp>
-#include <dynd/callable_registry.hpp>
 
 #include <benchmark/benchmark.h>
 
