@@ -348,20 +348,6 @@ namespace nd {
     return o << FuncType::get();
   }
 
-  template <typename... ArgTypes>
-  array array::f(const char *name, ArgTypes &&... args)
-  {
-    callable f = find_dynamic_function(name);
-    return f(*this, std::forward<ArgTypes>(args)...);
-  }
-
-  template <typename... ArgTypes>
-  array array::f(const char *name, ArgTypes &&... args) const
-  {
-    callable f = find_dynamic_function(name);
-    return f(*this, std::forward<ArgTypes>(args)...);
-  }
-
   namespace functional {
 
     /**

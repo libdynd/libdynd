@@ -27,6 +27,8 @@ namespace ndt {
 } // namespace ndt;
 
 namespace nd {
+  DYND_API callable &find_dynamic_function(const char *name);
+
   class DYND_API array;
 
   /**
@@ -370,36 +372,18 @@ namespace nd {
      * \param name  The property to access.
      */
     array p(const char *name) const;
+
     array p(const std::string &name) const;
 
-    /* Returns all properties as a map. */
-    std::map<std::string, nd::callable> get_properties() const;
-
-    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
-     * use it */
-    template <typename... ArgTypes>
-    array f(const char *name, ArgTypes &&... args);
-
-    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
-     * use it */
-    template <typename... ArgTypes>
-    array f(const char *name, ArgTypes &&... args) const;
-
     /**
-     * Finds the dynamic function of the array. Throws an
-     * exception if it does not exist. To call the function,
-     * use ndobj.f("funcname").call(ndobj, ...). The reason
-     * ndobj.f("funcname", ...) isn't used is due to a circular
-     * dependency between callable and array. A resolution
-     * to this will make calling these functions much more
-     * convenient.
-     *
-     * \param function_name  The name of the function.
+     * Calls the dynamic function - #include <dynd/callable_registry.hpp> to use it.
      */
-    callable find_dynamic_function(const char *function_name) const;
-
-    /* Returns all dynamic functions as a map. */
-    std::map<std::string, nd::callable> get_functions() const;
+    template <typename... ArgTypes>
+    array f(const char *name, ArgTypes &&... args) const
+    {
+      callable &f = find_dynamic_function(name);
+      return f(*this, std::forward<ArgTypes>(args)...);
+    }
 
     array &operator+=(const array &rhs);
     array &operator-=(const array &rhs);
