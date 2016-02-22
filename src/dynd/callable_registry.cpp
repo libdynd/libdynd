@@ -18,6 +18,7 @@
 #include <dynd/func/min.hpp>
 #include <dynd/func/max.hpp>
 #include <dynd/func/complex.hpp>
+#include <dynd/func/pointer.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -140,6 +141,7 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
     registry["real"] = real::get();
     registry["imag"] = imag::get();
     registry["conj"] = conj::get();
+    registry["dereference"] = dereference::get();
 
     // arithmetic.cpp
     registry["add"] = add::get();

@@ -44,7 +44,6 @@ namespace ndt {
     size_t get_iterdata_size(intptr_t ndim) const;
 
     std::map<std::string, nd::callable> get_dynamic_type_properties() const;
-    std::map<std::string, nd::callable> get_dynamic_array_functions() const;
   };
 
 } // namespace dynd::ndt

@@ -269,6 +269,7 @@ set(libdynd_SRC
     src/dynd/func/neighborhood.cpp
     src/dynd/func/outer.cpp
     src/dynd/func/permute.cpp
+    src/dynd/func/pointer.cpp
     src/dynd/func/random.cpp
     src/dynd/func/rolling.cpp
     src/dynd/func/sum.cpp
@@ -294,6 +295,7 @@ set(libdynd_SRC
     include/dynd/func/neighborhood.hpp
     include/dynd/func/outer.hpp
     include/dynd/func/permute.hpp
+    include/dynd/func/pointer.hpp
     include/dynd/func/random.hpp
     include/dynd/func/rolling.hpp
     include/dynd/func/sum.hpp
@@ -323,6 +325,7 @@ set(libdynd_SRC
     include/dynd/kernels/copy_kernel.hpp
     include/dynd/kernels/constant_kernel.hpp
     include/dynd/kernels/cuda_launch.hpp
+    include/dynd/kernels/dereference_kernel.hpp
     include/dynd/kernels/elwise.hpp
     include/dynd/kernels/fft_kernel.hpp
     include/dynd/kernels/index_kernel.hpp

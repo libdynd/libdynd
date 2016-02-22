@@ -26,11 +26,6 @@ ndt::var_dim_type::var_dim_type(const type &element_tp)
   //       not by the var_dim elements.
   // Propagate just the value-inherited flags from the element
   this->flags |= (element_tp.get_flags() & type_flags_value_inherited);
-
-  if ((get_flags() & type_flag_symbolic) == 0) {
-    std::map<std::string, nd::callable> element_functions = element_tp.get_array_functions();
-    m_array_functions.insert(element_functions.begin(), element_functions.end());
-  }
 }
 
 ndt::var_dim_type::~var_dim_type() {}
@@ -559,7 +554,5 @@ std::map<std::string, nd::callable> ndt::var_dim_type::get_dynamic_type_properti
 
   return properties;
 }
-
-std::map<std::string, nd::callable> ndt::var_dim_type::get_dynamic_array_functions() const { return m_array_functions; }
 
 ndt::type ndt::var_dim_type::with_element_type(const type &element_tp) const { return make(element_tp); }

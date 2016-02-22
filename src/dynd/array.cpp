@@ -8,6 +8,7 @@
 #include <dynd/callable.hpp>
 #include <dynd/callable_registry.hpp>
 #include <dynd/func/complex.hpp>
+#include <dynd/func/pointer.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/func/comparison.hpp>
 #include <dynd/func/elwise.hpp>
@@ -246,6 +247,25 @@ nd::array nd::array::p(const char *name) const
 
 nd::array nd::array::p(const std::string &name) const { return p(name.c_str()); }
 
+nd::callable nd::array::find_dynamic_function(const char *function_name) const
+{
+  if (!is_null()) {
+    const ndt::type &dt = get_dtype();
+
+    switch (dt.get_id()) {
+    case pointer_id:
+      if (strcmp(function_name, "dereference") == 0) {
+        return callable_registry["dereference"];
+      }
+      // fall through
+    default:
+      throw invalid_argument("dynd array does not have function '" + std::string(function_name) + "'");
+    }
+  }
+
+  throw runtime_error("property access on null array");
+}
+
 // Begin section dynd-python backwards compatibility.
 namespace {
 
@@ -276,6 +296,13 @@ std::map<std::string, nd::callable> struct_array_properties(const ndt::type &dt)
   return ret;
 }
 
+const std::map<std::string, nd::callable> &pointer_array_functions()
+{
+  static const std::map<std::string, nd::callable> pointer_arrfuncs{{"dereference", nd::dereference::get()}};
+
+  return pointer_arrfuncs;
+}
+
 }
 
 std::map<std::string, nd::callable> nd::array::get_properties() const
@@ -297,20 +324,23 @@ std::map<std::string, nd::callable> nd::array::get_properties() const
 
   throw runtime_error("property access on null array");
 }
-// End section dynd-python backwards compatibility.
 
-nd::callable nd::array::find_dynamic_function(const char *function_name) const
+std::map<std::string, nd::callable> nd::array::get_functions() const
 {
-  ndt::type dt = get_type();
-  if (!dt.is_builtin()) {
-    std::map<std::string, callable> functions = dt->get_dynamic_array_functions();
-    return functions[function_name];
+  if (!is_null()) {
+    const ndt::type &dt = get_dtype();
+
+    switch (dt.get_id()) {
+    case pointer_id:
+      return pointer_array_functions();
+    default:
+      return std::map<std::string, nd::callable>();
+    }
   }
 
-  stringstream ss;
-  ss << "dynd array does not have function " << function_name;
-  throw runtime_error(ss.str());
+  throw runtime_error("property access on null array");
 }
+// End section dynd-python backwards compatibility.
 
 nd::array nd::array::eval() const
 {

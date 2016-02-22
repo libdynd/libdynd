@@ -58,8 +58,3 @@ bool ndt::adapt_type::operator==(const base_type &rhs) const
   return false;
 }
 
-std::map<std::string, nd::callable> ndt::adapt_type::get_dynamic_array_functions() const
-{
-  const type &udt = m_value_tp.get_dtype();
-  return udt.get_array_functions();
-}
