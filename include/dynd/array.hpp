@@ -363,7 +363,7 @@ namespace nd {
         return intrusive_ptr<memory_block_data>(get(), true);
       }
     }
-
+ 
     /**
      * Accesses a dynamic property of the array.
      *
