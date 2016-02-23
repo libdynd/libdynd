@@ -17,25 +17,43 @@ Scalar Types
 
 DyND types that are scalars consist
 
-| Type          | Metadata                                    |
-| ------------- |:-------------------------------------------:|
-| bool          | None.                                       |
-| int8          |                                             |
-| int16         |                                             |    
-| int32         |                                             |
-| int64         |                                             |
-| int128        |                                             |
-| uint8         |                                             |
-| uint16        |                                             |    
-| uint32        |                                             |
-| uint64        |                                             |
-| uint128       |                                             |
-| float16       |                                             |    
-| float32       |                                             |
-| float64       |                                             |
-| float128      |                                             |
-| complex_float32       |                                             |
-| complexfloat64       |                                             |
+| Type                  | Metadata                                    |
+| --------------------- |:-------------------------------------------:|
+| bool                  | None                                        |
+| int8                  | None                                        |
+| int16                 | None                                        |
+| int32                 | None                                        |
+| int64                 | None                                        |
+| int128                | None                                        |
+| uint8                 | None                                        |
+| uint16                | None                                        |   
+| uint32                | None                                        |
+| uint64                | None                                        |
+| uint128               | None                                        |
+| float16               | None                                        |    
+| float32               | None                                        |
+| float64               | None                                        |
+| float128              | None                                        |
+| complex_float32       | None                                        |
+| complex_float64       | None                                        |
+| void                  | None                                        |
+| fixed_bytes           | None                                        |
+| bytes                 | None                                        |
+| char                  | None                                        |
+| fixed_string          | None                                        |
+| string                | None                                                                                 |
+| tuple                 | Offsets (in bytes) to the data of each element, *i.e.* `uintptr_t[N]` for a tuple with `N` fields.
+| struct                | Same as for tuple.
+| fixed_dim             | `size_t, intptr_t`
+| var_dim               |
+| categorical           |
+| option                |
+| pointer               |
+| memory                |
+
+
+
+
 
 
 ```
