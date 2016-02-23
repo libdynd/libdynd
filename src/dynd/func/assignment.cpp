@@ -24,8 +24,8 @@ struct DYND_API _bind {
 DYND_API nd::callable nd::assign::make()
 {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint8_id, uint16_id, uint32_id,
-                           uint64_id, uint128_id, float32_id, float64_id, complex_float32_id,
-                           complex_float64_id> numeric_ids;
+                           uint64_id, uint128_id, float32_id, float64_id, complex_float32_id, complex_float64_id>
+      numeric_ids;
 
   ndt::type self_tp = ndt::callable_type::make(ndt::any_kind_type::make(), {ndt::any_kind_type::make()}, {"error_mode"},
                                                {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())});
@@ -119,6 +119,12 @@ DYND_API nd::callable nd::assign::make()
     }
     return child;
   });
+}
+
+DYND_API nd::callable &nd::assign::get()
+{
+  static nd::callable self = nd::assign::make();
+  return self;
 }
 
 DYND_API struct nd::assign nd::assign;

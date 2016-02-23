@@ -11,8 +11,9 @@
 namespace dynd {
 namespace nd {
 
-  extern DYND_API struct DYND_API assign : declfunc<assign> {
+  extern DYND_API struct DYND_API assign : declfunc2<assign> {
     static callable make();
+    static callable &get();
   } assign;
 
 } // namespace dynd::nd
