@@ -1,21 +1,17 @@
-The DyND ND::Array
-==================
+The DyND Array Metadata
+=======================
 
-The DyND nd::array is a multidimensional data storage container, inspired
-by the NumPy ndarray and based on the Blaze datashape system. Like NumPy,
-it supports strided multidimensional arrays of data with a uniform
-data type, but has the ability to store ragged arrays and data types
-with variable-sized data.
+The DyND `nd::array` is a multidimensional data storage container, inspired
+by the NumPy `ndarray` and based on the Blaze `Datashape` grammar. Like NumPy,
+it supports strided multidimensional arrays of data with a uniform data type,
+but has the ability to store ragged arrays and data types with variable-sized data.
 
+Every DyND type is able to store an arbitrary, but fixed amount, of metadata in the `nd::array` object.
+This is really just a block of bytes (very specifically, a `char *`) that is allocated alongside the `nd::array`, but interpreted and manipulated by the `ndt::type`. The array metadata is the place to store information that doesn't really belong in the type, but is also necessary to fully describe the data encapsulated by the `nd::array`. A classical example of such information is the stride for a dimension type.
 
-Every DyND type is able to store an arbitrary, but fixed amount, of metadata in `nd::array` object.
-This is a place to store information that doesn't really belong in the type, but is also necessary
-to fully describe the data encapsulted by the `nd::array`.
+In DyND, we typically put most of the ty
 
-Scalar Types
-------------
-
-| Type                  | Metadata
+| Datashape (DyND Type) | Low-Level Descriptor (DyND Metadata)
 | --------------------- |:------------------------------------------------------:|
 | bool                  | None
 | int8                  | None
@@ -48,28 +44,10 @@ Scalar Types
 | option                | None
 | pointer               | A reference to which `nd::memory_block` contains the data, *i.e.* a `intrusive_ptr<nd::memory_block>`
 | memory                | None
+| type                  | None
+| callable              | None
+| array                 | None
 
-* The bytes and string types *used* to have metadata that was exactly a reference to an `nd::memory_block`
-that contained their data. This was used to allow views into bytes and strings that were allocated elsewhere.
-While more generic, this model made string processing far too complicated, so we removed it.
+* The bytes and string types *used* to have metadata that was a reference to a `nd::memory_block` that contained their data. This was necessary to allow views into bytes and strings that were allocated elsewhere. While more generic, that model made string processing far too complicated, so we removed it.
 
-
-
-
-```
-struct fixed_dim_type::metadata_type {
-  size_t size;
-  intptr_t stride;
-};
-
-struct var_dim_type::metadata_type {
-  intrusive_ptr<memory_block_data> blockref; // A reference to the memory block which contains the array's data.
-  intptr_t stride;
-  intptr_t offset; // Each pointed-to destination is offset by this amount
-};
-
-struct pointer_type::metadata_type {
-  intrusive_ptr<memory_block_data> blockref; // A reference to the memory block which contains the array's data.
-  intptr_t offset; // Each pointed-to destination is offset by this amount
-};
-````
+Note that the `intrusive_ptr<T>` template mentioned above is a custom smart pointer in DyND based off of `boost::intrusive_ptr<T>`. In C++, it enables smart reference counting with very simple semantics, analogous to `std::shared_ptr<T>` in C++11 but with smaller storage overhead. In the context of a C ABI, an `intrusive_ptr<T>` is equivalent to a `T *`.
