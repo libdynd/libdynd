@@ -118,7 +118,7 @@ bool ndt::fixed_dim_kind_type::operator==(const base_type &rhs) const
   else if (rhs.get_id() != fixed_dim_id) {
     return false;
   }
-  else if (rhs.get_kind() != kind_kind) {
+  else if (!rhs.is_symbolic()) {
     return false;
   }
   else {
@@ -187,7 +187,7 @@ bool ndt::fixed_dim_kind_type::match(const char *arrmeta, const type &candidate_
 {
   switch (candidate_tp.get_id()) {
   case fixed_dim_id:
-    if (candidate_tp.get_kind() == kind_kind) {
+    if (candidate_tp.is_symbolic()) {
       return m_element_tp.match(arrmeta, candidate_tp.extended<fixed_dim_kind_type>()->get_element_type(),
                                 candidate_arrmeta, tp_vars);
     }

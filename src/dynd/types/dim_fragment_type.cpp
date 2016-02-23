@@ -25,7 +25,7 @@ static inline ndt::type get_tagged_dims_from_type(intptr_t ndim, const ndt::type
   for (int i = 0; i < ndim; ++i) {
     switch (dtp.get_id()) {
     case fixed_dim_id:
-      if (dtp.get_kind() == kind_kind) {
+      if (dtp.is_symbolic()) {
         out_tagged_dims[i] = -2;
       }
       else {
@@ -54,7 +54,7 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp, 
     intptr_t tagged_dim = tagged_dims[i], dim_size;
     switch (tp.get_id()) {
     case fixed_dim_id:
-      if (tp.get_kind() == kind_kind) {
+      if (tp.is_symbolic()) {
         if (tagged_dim < 0) {
           out_tagged_dims[i] = -2;
         }

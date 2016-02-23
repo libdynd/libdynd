@@ -119,10 +119,11 @@ void ndt::kind_sym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
   throw runtime_error(ss.str());
 }
 
-bool ndt::kind_sym_type::match(const char *DYND_UNUSED(arrmeta), const type &candidate_tp,
+bool ndt::kind_sym_type::match(const char *DYND_UNUSED(arrmeta), const type &DYND_UNUSED(candidate_tp),
                                const char *DYND_UNUSED(candidate_arrmeta),
                                std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
 {
   // Matches against the 'kind' of the candidate type
-  return candidate_tp.get_kind() == m_kind;
+  //  return candidate_tp.get_kind() == m_kind;
+  return false;
 }

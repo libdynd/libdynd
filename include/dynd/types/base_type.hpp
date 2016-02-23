@@ -367,6 +367,8 @@ namespace ndt {
 
     virtual bool is_c_contiguous(const char *arrmeta) const;
 
+    bool is_symbolic() const { return get_flags() & type_flag_symbolic; }
+
     /**
      * Classifies the order the axes occur in the memory
      * layout of the array.

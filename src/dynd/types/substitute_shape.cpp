@@ -51,7 +51,7 @@ static void substitute_shape_visitor(const ndt::type &tp, intptr_t DYND_UNUSED(a
     }
     switch (tp.get_id()) {
     case fixed_dim_id:
-      if (tp.get_kind() == kind_kind) {
+      if (tp.is_symbolic()) {
         if (dim_size >= 0) {
           out_transformed_tp = ndt::make_fixed_dim(dim_size, subtp);
           out_was_transformed = true;
