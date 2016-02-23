@@ -15,43 +15,43 @@ to fully describe the data encapsulted by the `nd::array`.
 Scalar Types
 ------------
 
-DyND types that are scalars consist
+| Type                  | Metadata
+| --------------------- |:------------------------------------------------------:|
+| bool                  | None
+| int8                  | None
+| int16                 | None
+| int32                 | None
+| int64                 | None
+| int128                | None
+| uint8                 | None
+| uint16                | None
+| uint32                | None
+| uint64                | None
+| uint128               | None
+| float16               | None
+| float32               | None
+| float64               | None
+| float128              | None
+| complex_float32       | None
+| complex_float64       | None
+| void                  | None
+| fixed_bytes           | None
+| bytes*                | None
+| char                  | None
+| fixed_string          | None
+| string*               | None
+| tuple                 | Offsets (in bytes) to the data of each element, *i.e.* `uintptr_t[N]` for a tuple with `N` fields
+| struct                | Same as for tuple
+| fixed_dim             | The size and stride of the dimension, *i.e.* a `size_t` and an `intptr_t`.
+| var_dim               | The stride of the dimension and a reference to which `nd::memory_block` contains the data, *i.e.* an `intptr_t` and a `intrusive_ptr<nd::memory_block>`
+| categorical           | None
+| option                | None
+| pointer               | A reference to which `nd::memory_block` contains the data, *i.e.* a `intrusive_ptr<nd::memory_block>`
+| memory                | None
 
-| Type                  | Metadata                                    |
-| --------------------- |:-------------------------------------------:|
-| bool                  | None                                        |
-| int8                  | None                                        |
-| int16                 | None                                        |
-| int32                 | None                                        |
-| int64                 | None                                        |
-| int128                | None                                        |
-| uint8                 | None                                        |
-| uint16                | None                                        |   
-| uint32                | None                                        |
-| uint64                | None                                        |
-| uint128               | None                                        |
-| float16               | None                                        |    
-| float32               | None                                        |
-| float64               | None                                        |
-| float128              | None                                        |
-| complex_float32       | None                                        |
-| complex_float64       | None                                        |
-| void                  | None                                        |
-| fixed_bytes           | None                                        |
-| bytes                 | None                                        |
-| char                  | None                                        |
-| fixed_string          | None                                        |
-| string                | None                                                                                 |
-| tuple                 | Offsets (in bytes) to the data of each element, *i.e.* `uintptr_t[N]` for a tuple with `N` fields.
-| struct                | Same as for tuple.
-| fixed_dim             | `size_t, intptr_t`
-| var_dim               |
-| categorical           |
-| option                |
-| pointer               |
-| memory                |
-
-
+* The bytes and string types *used* to have metadata that was exactly a reference to an `nd::memory_block`
+that contained their data. This was used to allow views into bytes and strings that were allocated elsewhere.
+While more generic, this model made string processing far too complicated, so we removed it.
 
 
 
