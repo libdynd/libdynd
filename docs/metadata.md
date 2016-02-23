@@ -9,9 +9,43 @@ but has the ability to store ragged arrays and data types with variable-sized da
 Every DyND type is able to store an arbitrary, but fixed amount, of metadata in the `nd::array` object.
 This is really just a block of bytes (very specifically, a `char *`) that is allocated alongside the `nd::array`, but interpreted and manipulated by the `ndt::type`. The array metadata is the place to store information that doesn't really belong in the type, but is also necessary to fully describe the data encapsulated by the `nd::array`. A classical example of such information is the stride for a dimension type.
 
-In DyND, most of the information about how to interpreta type is placed in the `ndt::type` directly.
+In DyND, most of the information about how to interpret a type is placed in the `ndt::type` directly.
 
+```
+  /**
+   * Returns The size of the metadata for this type.
+   */
+  size_t ndt::base_type::get_metadata_size() const;
 
+  /**
+   * Constructs the metadata for this type using default settings.
+   *
+   * \param metadata        The metadata to default construct.
+   * \param blockref_alloc  If ``true``, blockref types should allocate
+   *                        writable memory blocks, and if ``false``, they
+   *                        should set their blockrefs to NULL. The latter
+   *                        indicates the blockref memory is owned by
+   *                        the parent nd::array, and is useful for viewing
+   *                        external memory with compatible layout.
+   */
+  virtual void ndt::base_type::metadata_default_construct(char *metadata, bool blockref_alloc) const;
+
+  /**
+   * Constructs the metadata for this type, copying everything exactly from input metadata for the same type.
+   *
+   * \param dst_metadata        The new metadata memory which is constructed.
+   * \param src_metadata        Existing arrmeta memory from which to copy.
+   * \param embedded_reference  For references which are NULL, add this reference in the output.
+   *                            A NULL means the data was embedded in the original nd::array, so
+   *                            when putting it in a new nd::array, need to hold a reference to
+   *                            that memory.
+   */
+  virtual void ndt::base_type::metadata_copy_construct(char *dst_metadata, const char *src_metadata,
+                                                       const nd::array *embedded_reference) const;
+
+  /** Destructs any references or other state contained in the metadata */
+  virtual void ndt::base_type::metadata_destruct(char *metadata) const;
+```
 
 | Datashape (DyND Type) | Low-Level Descriptor (DyND Metadata)
 | --------------------- |:------------------------------------------------------:|
