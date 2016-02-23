@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-#include <dynd/fpstatus.hpp>
+#include <dynd/fpstatus.hpp> 
 #include <dynd/type.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
