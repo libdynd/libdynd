@@ -16,3 +16,42 @@ Scalar Types
 ------------
 
 DyND types that are scalars consist
+
+| Type          | Metadata                                    |
+| ------------- |:-------------------------------------------:|
+| bool          | None.                                       |
+| int8          |                                             |
+| int16         |                                             |    
+| int32         |                                             |
+| int64         |                                             |
+| int128        |                                             |
+| uint8         |                                             |
+| uint16        |                                             |    
+| uint32        |                                             |
+| uint64        |                                             |
+| uint128       |                                             |
+| float16       |                                             |    
+| float32       |                                             |
+| float64       |                                             |
+| float128      |                                             |
+| complex_float32       |                                             |
+| complexfloat64       |                                             |
+
+
+```
+struct fixed_dim_type::metadata_type {
+  size_t size;
+  intptr_t stride;
+};
+
+struct var_dim_type::metadata_type {
+  intrusive_ptr<memory_block_data> blockref; // A reference to the memory block which contains the array's data.
+  intptr_t stride;
+  intptr_t offset; // Each pointed-to destination is offset by this amount
+};
+
+struct pointer_type::metadata_type {
+  intrusive_ptr<memory_block_data> blockref; // A reference to the memory block which contains the array's data.
+  intptr_t offset; // Each pointed-to destination is offset by this amount
+};
+````
