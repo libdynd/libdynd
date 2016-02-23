@@ -12,12 +12,12 @@ namespace dynd {
 namespace nd {
   namespace detail {
 
-    template <type_id_t Src0TypeID, type_kind_t Src0TypeKind, type_id_t Src1TypeID, type_kind_t Src1TypeKind>
+    template <type_id_t Src0TypeID, type_id_t Src0BaseID, type_id_t Src1TypeID, type_id_t Src1BaseID>
     struct total_order_kernel;
 
     template <>
-    struct total_order_kernel<bool_id, bool_kind, bool_id, bool_kind>
-        : base_kernel<total_order_kernel<bool_id, bool_kind, bool_id, bool_kind>, 2> {
+    struct total_order_kernel<bool_id, bool_kind_id, bool_id, bool_kind_id>
+        : base_kernel<total_order_kernel<bool_id, bool_kind_id, bool_id, bool_kind_id>, 2> {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<int *>(dst) =
@@ -26,8 +26,8 @@ namespace nd {
     };
 
     template <>
-    struct total_order_kernel<int32_id, sint_kind, int32_id, sint_kind>
-        : base_kernel<total_order_kernel<int32_id, sint_kind, int32_id, sint_kind>, 2> {
+    struct total_order_kernel<int32_id, int_kind_id, int32_id, int_kind_id>
+        : base_kernel<total_order_kernel<int32_id, int_kind_id, int32_id, int_kind_id>, 2> {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<int *>(dst) = *reinterpret_cast<int *>(src[0]) < *reinterpret_cast<int *>(src[1]);
@@ -35,8 +35,8 @@ namespace nd {
     };
 
     template <>
-    struct total_order_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind>
-        : base_kernel<total_order_kernel<fixed_string_id, string_kind, fixed_string_id, string_kind>, 2> {
+    struct total_order_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id>
+        : base_kernel<total_order_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id>, 2> {
       size_t size;
 
       total_order_kernel(size_t size) : size(size) {}
@@ -55,8 +55,8 @@ namespace nd {
     };
 
     template <>
-    struct total_order_kernel<string_id, string_kind, string_id, string_kind>
-        : base_kernel<total_order_kernel<string_id, string_kind, string_id, string_kind>, 2> {
+    struct total_order_kernel<string_id, string_kind_id, string_id, string_kind_id>
+        : base_kernel<total_order_kernel<string_id, string_kind_id, string_id, string_kind_id>, 2> {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<int *>(dst) = std::lexicographical_compare(
@@ -68,8 +68,8 @@ namespace nd {
   } // namespace dynd::nd::detail
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct total_order_kernel : detail::total_order_kernel<Src0TypeID, type_kind_of<Src0TypeID>::value, Src1TypeID,
-                                                         type_kind_of<Src1TypeID>::value> {
+  struct total_order_kernel : detail::total_order_kernel<Src0TypeID, base_id_of<Src0TypeID>::value, Src1TypeID,
+                                                         base_id_of<Src1TypeID>::value> {
   };
 
 } // namespace dynd::nd

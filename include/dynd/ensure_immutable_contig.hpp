@@ -33,7 +33,7 @@ namespace nd {
         if (tp.get_ndim() == 1) {
           // It's a 1D array
           const ndt::type &et = tp.get_type_at_dimension(NULL, 1).value_type();
-          if (et.get_kind() == type_kind_of<type_id_of<T>::value>::value) {
+          if (et.get_base_id() == base_id_of<type_id_of<T>::value>::value) {
             // It also has the same array kind as requested
             nd::array tmp = nd::empty(a.get_dim_size(), ndt::make_type<T>());
             tmp.vals() = a;
@@ -91,7 +91,8 @@ namespace nd {
   {
     if (!a.is_null()) {
       return detail::ensure_immutable_contig<T>::run(a);
-    } else {
+    }
+    else {
       return false;
     }
   }

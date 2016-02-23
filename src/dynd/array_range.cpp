@@ -45,7 +45,7 @@ struct range_specialization<int128> {
   }
 };
 
-template <class T, type_kind_t kind>
+template <class T, type_id_t BaseID>
 struct range_counter {
   static intptr_t count(const void *beginval, const void *endval, const void *stepval)
   {
@@ -73,7 +73,7 @@ struct range_counter {
 };
 
 template <class T>
-struct range_counter<T, uint_kind> {
+struct range_counter<T, uint_kind_id> {
   static intptr_t count(const void *beginval, const void *endval, const void *stepval)
   {
     T begin = *reinterpret_cast<const T *>(beginval);
@@ -93,7 +93,7 @@ struct range_counter<T, uint_kind> {
 };
 
 template <class T>
-struct range_counter<T, real_kind> {
+struct range_counter<T, float_kind_id> {
   static intptr_t count(const void *beginval, const void *endval, const void *stepval)
   {
     T begin = *reinterpret_cast<const T *>(beginval);
@@ -129,7 +129,7 @@ nd::array dynd::nd::range(const ndt::type &scalar_tp, const void *beginval, cons
 #define ONE_ARANGE_SPECIALIZATION(type)                                                                                \
   case type_id_of<type>::value: {                                                                                      \
     intptr_t dim_size =                                                                                                \
-        range_counter<type, type_kind_of<type_id_of<type>::value>::value>::count(beginval, endval, stepval);           \
+        range_counter<type, base_id_of<type_id_of<type>::value>::value>::count(beginval, endval, stepval);             \
     nd::array result = nd::empty(dim_size, scalar_tp);                                                                 \
     range_specialization<type>::range(beginval, stepval, result);                                                      \
     return result;                                                                                                     \
