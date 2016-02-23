@@ -223,7 +223,7 @@ ndt::type ndt::type::with_replaced_dtype(const ndt::type &replacement_tp, intptr
 
 ndt::type ndt::type::without_memory_type() const
 {
-  if (get_kind() == memory_kind) {
+  if (get_base_id() == memory_id) {
     return extended<base_memory_type>()->get_element_type();
   }
   else {
@@ -234,7 +234,7 @@ ndt::type ndt::type::without_memory_type() const
 const ndt::type &ndt::type::storage_type() const
 {
   // Only expr_kind types have different storage_type
-  if (is_builtin() || m_ptr->get_kind() != expr_kind) {
+  if (is_builtin() || get_base_id() != expr_kind_id) {
     return *this;
   }
   else if (get_id() == adapt_id) {
@@ -243,7 +243,7 @@ const ndt::type &ndt::type::storage_type() const
   else {
     // Follow the operand type chain to get the storage type
     const type *dt = &static_cast<const base_expr_type *>(m_ptr)->get_operand_type();
-    while (dt->get_kind() == expr_kind) {
+    while (dt->get_base_id() == expr_kind_id) {
       dt = &static_cast<const base_expr_type *>(dt->m_ptr)->get_operand_type();
     }
     return *dt;
@@ -253,7 +253,7 @@ const ndt::type &ndt::type::storage_type() const
 const ndt::type &ndt::type::value_type() const
 {
   // Only expr_kind types have different value_type
-  if (is_builtin() || m_ptr->get_kind() != expr_kind) {
+  if (is_builtin() || get_base_id() != expr_kind_id) {
     return *this;
   }
   else if (get_id() == adapt_id) {
@@ -270,7 +270,7 @@ ndt::type ndt::type::with_new_axis(intptr_t i, intptr_t new_ndim) const
   ndt::type tp = without_memory_type();
 
   tp = tp.with_replaced_dtype(ndt::make_fixed_dim(1, tp.get_type_at_dimension(NULL, i), new_ndim), tp.get_ndim() - i);
-  if (get_kind() == memory_kind) {
+  if (get_base_id() == memory_id) {
     tp = extended<base_memory_type>()->with_replaced_storage_type(tp);
   }
 
@@ -279,10 +279,10 @@ ndt::type ndt::type::with_new_axis(intptr_t i, intptr_t new_ndim) const
 
 intptr_t ndt::type::get_dim_size(const char *arrmeta, const char *data) const
 {
-  if (get_kind() == dim_kind) {
+  if (get_base_id() == dim_kind_id) {
     return static_cast<const base_dim_type *>(get())->get_dim_size(arrmeta, data);
   }
-  else if (get_kind() == struct_kind) {
+  else if (get_id() == struct_id) {
     return static_cast<const struct_type *>(get())->get_field_count();
   }
   else if (get_ndim() > 0) {
@@ -310,7 +310,7 @@ intptr_t ndt::type::get_size(const char *arrmeta) const
 bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size, intptr_t *out_stride, ndt::type *out_el_tp,
                                const char **out_el_arrmeta) const
 {
-  if (get_kind() == memory_kind) {
+  if (get_base_id() == memory_id) {
     bool res = without_memory_type().get_as_strided(arrmeta, out_dim_size, out_stride, out_el_tp, out_el_arrmeta);
     *out_el_tp = extended<base_memory_type>()->with_replaced_storage_type(*out_el_tp);
     return res;
@@ -368,7 +368,7 @@ bool ndt::type::data_layout_compatible_with(const ndt::type &rhs) const
     // If both are POD with no arrmeta, then they're compatible
     return true;
   }
-  if (get_kind() == expr_kind || rhs.get_kind() == expr_kind) {
+  if (get_base_id() == expr_kind_id || rhs.get_base_id() == expr_kind_id) {
     // If either is an expression type, check compatibility with
     // the storage types
     return storage_type().data_layout_compatible_with(rhs.storage_type());
@@ -936,12 +936,12 @@ struct ndt::common_type::init {
   template <typename TypeIDSequence>
   void on_each()
   {
-    children[{{front<TypeIDSequence>::value, back<TypeIDSequence>::value}}] =
-        [](const ndt::type &DYND_UNUSED(tp0), const ndt::type &DYND_UNUSED(tp1)) {
-          return ndt::make_type<
-              typename std::common_type<typename dynd::type_of<front<TypeIDSequence>::value>::type,
-                                        typename dynd::type_of<back<TypeIDSequence>::value>::type>::type>();
-        };
+    children[{{front<TypeIDSequence>::value, back<TypeIDSequence>::value}}] = [](const ndt::type &DYND_UNUSED(tp0),
+                                                                                 const ndt::type &DYND_UNUSED(tp1)) {
+      return ndt::make_type<
+          typename std::common_type<typename dynd::type_of<front<TypeIDSequence>::value>::type,
+                                    typename dynd::type_of<back<TypeIDSequence>::value>::type>::type>();
+    };
   }
 };
 
@@ -997,105 +997,101 @@ class ndt::common_type ndt::common_type;
 bool dynd::is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_tp)
 {
   if (dst_tp.is_builtin() && src_tp.is_builtin()) {
-    switch (src_tp.get_kind()) {
-    case kind_kind: // TODO: raise an error?
-      return true;
-    case pattern_kind: // TODO: raise an error?
-      return true;
-    case bool_kind:
-      switch (dst_tp.get_kind()) {
-      case bool_kind:
-      case sint_kind:
-      case uint_kind:
-      case real_kind:
-      case complex_kind:
+    switch (src_tp.get_base_id()) {
+    case bool_kind_id:
+      switch (dst_tp.get_base_id()) {
+      case bool_kind_id:
+      case int_kind_id:
+      case uint_kind_id:
+      case float_kind_id:
+      case complex_kind_id:
         return true;
-      case bytes_kind:
+      case bytes_kind_id:
         return false;
       default:
         break;
       }
       break;
-    case sint_kind:
-      switch (dst_tp.get_kind()) {
-      case bool_kind:
+    case int_kind_id:
+      switch (dst_tp.get_base_id()) {
+      case bool_kind_id:
         return false;
-      case sint_kind:
+      case int_kind_id:
         return dst_tp.get_data_size() >= src_tp.get_data_size();
-      case uint_kind:
+      case uint_kind_id:
         return false;
-      case real_kind:
+      case float_kind_id:
         return dst_tp.get_data_size() > src_tp.get_data_size();
-      case complex_kind:
+      case complex_kind_id:
         return dst_tp.get_data_size() > 2 * src_tp.get_data_size();
-      case bytes_kind:
+      case bytes_kind_id:
         return false;
       default:
         break;
       }
       break;
-    case uint_kind:
-      switch (dst_tp.get_kind()) {
-      case bool_kind:
+    case uint_kind_id:
+      switch (dst_tp.get_base_id()) {
+      case bool_kind_id:
         return false;
-      case sint_kind:
+      case int_kind_id:
         return dst_tp.get_data_size() > src_tp.get_data_size();
-      case uint_kind:
+      case uint_kind_id:
         return dst_tp.get_data_size() >= src_tp.get_data_size();
-      case real_kind:
+      case float_kind_id:
         return dst_tp.get_data_size() > src_tp.get_data_size();
-      case complex_kind:
+      case complex_kind_id:
         return dst_tp.get_data_size() > 2 * src_tp.get_data_size();
-      case bytes_kind:
+      case bytes_kind_id:
         return false;
       default:
         break;
       }
       break;
-    case real_kind:
-      switch (dst_tp.get_kind()) {
-      case bool_kind:
-      case sint_kind:
-      case uint_kind:
+    case float_kind_id:
+      switch (dst_tp.get_base_id()) {
+      case bool_kind_id:
+      case int_kind_id:
+      case uint_kind_id:
         return false;
-      case real_kind:
+      case float_kind_id:
         return dst_tp.get_data_size() >= src_tp.get_data_size();
-      case complex_kind:
+      case complex_kind_id:
         return dst_tp.get_data_size() >= 2 * src_tp.get_data_size();
-      case bytes_kind:
+      case bytes_kind_id:
         return false;
       default:
         break;
       }
-    case complex_kind:
-      switch (dst_tp.get_kind()) {
-      case bool_kind:
-      case sint_kind:
-      case uint_kind:
-      case real_kind:
+    case complex_kind_id:
+      switch (dst_tp.get_base_id()) {
+      case bool_kind_id:
+      case int_kind_id:
+      case uint_kind_id:
+      case float_kind_id:
         return false;
-      case complex_kind:
+      case complex_kind_id:
         return dst_tp.get_data_size() >= src_tp.get_data_size();
-      case bytes_kind:
+      case bytes_kind_id:
         return false;
       default:
         break;
       }
-    case string_kind:
-      switch (dst_tp.get_kind()) {
-      case bool_kind:
-      case sint_kind:
-      case uint_kind:
-      case real_kind:
-      case complex_kind:
+    case string_kind_id:
+      switch (dst_tp.get_base_id()) {
+      case bool_kind_id:
+      case int_kind_id:
+      case uint_kind_id:
+      case float_kind_id:
+      case complex_kind_id:
         return false;
-      case bytes_kind:
+      case bytes_kind_id:
         return false;
       default:
         break;
       }
-    case bytes_kind:
-      return dst_tp.get_kind() == bytes_kind && dst_tp.get_data_size() == src_tp.get_data_size();
+    case bytes_kind_id:
+      return dst_tp.get_base_id() == bytes_kind_id && dst_tp.get_data_size() == src_tp.get_data_size();
     default:
       break;
     }

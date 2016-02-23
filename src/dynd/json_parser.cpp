@@ -24,8 +24,8 @@ static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref, const 
   // Check the type of 'json', and get pointers to the begin/end of a UTF-8
   // buffer
   ndt::type json_type = json.get_type().value_type();
-  switch (json_type.get_kind()) {
-  case string_kind: {
+  switch (json_type.get_base_id()) {
+  case string_kind_id: {
     const ndt::base_string_type *sdt = json_type.extended<ndt::base_string_type>();
     switch (sdt->get_encoding()) {
     case string_encoding_ascii:
@@ -45,7 +45,7 @@ static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref, const 
     }
     break;
   }
-  case bytes_kind: {
+  case bytes_kind_id: {
     out_tmp_ref = json.eval();
     const ndt::base_bytes_type *bdt = json_type.extended<ndt::base_bytes_type>();
     bdt->get_bytes_range(&begin, &end, out_tmp_ref.get()->metadata(), out_tmp_ref.cdata());
@@ -54,7 +54,8 @@ static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref, const 
   default: {
     stringstream ss;
     ss << "Input for JSON parsing must be either bytes (interpreted as UTF-8) "
-          "or a string, not \"" << json_type << "\"";
+          "or a string, not \""
+       << json_type << "\"";
     throw runtime_error(ss.str());
     break;
   }
@@ -560,7 +561,7 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
           throw json_parse_error(saved_begin, e.what(), tp);
         }
       }
-      else if (value_tp.get_kind() == bool_kind) {
+      else if (value_tp.get_id() == bool_id) {
         if (parse_token(begin, end, "true")) {
           *out_data = 1;
         }
@@ -583,8 +584,8 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
         }
         return;
       }
-      else if (value_tp.get_kind() == sint_kind || value_tp.get_kind() == uint_kind ||
-               value_tp.get_kind() == real_kind || value_tp.get_kind() == complex_kind) {
+      else if (value_tp.get_base_id() == int_kind_id || value_tp.get_base_id() == uint_kind_id ||
+               value_tp.get_base_id() == float_kind_id || value_tp.get_base_id() == complex_kind_id) {
         if (json::parse_number(begin, end, strbegin, strend)) {
           string_to_number(out_data, value_tp.get_id(), strbegin, strend, ectx->errmode);
         }
@@ -608,32 +609,46 @@ static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data,
                        const eval::eval_context *ectx)
 {
   skip_whitespace(begin, end);
-  switch (tp.get_kind()) {
-  case dim_kind:
+  switch (tp.get_id()) {
+  case fixed_dim_id:
+  case var_dim_id:
     parse_dim_json(tp, arrmeta, out_data, begin, end, ectx);
     return;
-  case struct_kind:
+  case struct_id:
     parse_struct_json(tp, arrmeta, out_data, begin, end, ectx);
     return;
-  case tuple_kind:
+  case tuple_id:
     parse_tuple_json(tp, arrmeta, out_data, begin, end, ectx);
     return;
-  case bool_kind:
+  case bool_id:
     parse_bool_json(tp, arrmeta, out_data, begin, end, false, ectx);
     return;
-  case sint_kind:
-  case uint_kind:
-  case real_kind:
-  case complex_kind:
+  case int8_id:
+  case int16_id:
+  case int32_id:
+  case int64_id:
+  case int128_id:
+  case uint8_id:
+  case uint16_id:
+  case uint32_id:
+  case uint64_id:
+  case uint128_id:
+  case float16_id:
+  case float32_id:
+  case float64_id:
+  case float128_id:
+  case complex_float32_id:
+  case complex_float64_id:
     parse_number_json(tp, out_data, begin, end, false, ectx);
     return;
-  case string_kind:
+  case fixed_string_id:
+  case string_id:
     parse_string_json(tp, arrmeta, out_data, begin, end, ectx);
     return;
-  case type_kind:
+  case type_id:
     parse_type(tp, arrmeta, out_data, begin, end, false, ectx);
     return;
-  case option_kind:
+  case option_id:
     parse_option_json(tp, arrmeta, out_data, begin, end, ectx);
     return;
   default:

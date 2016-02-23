@@ -286,29 +286,43 @@ static void format_json_dim(output_data &out, const ndt::type &dt, const char *a
 
 static void format_json(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
 {
-  switch (dt.get_kind()) {
-  case bool_kind:
+  switch (dt.get_id()) {
+  case bool_id:
     format_json_bool(out, dt, arrmeta, data);
     break;
-  case sint_kind:
-  case uint_kind:
-  case real_kind:
-  case complex_kind:
+  case int8_id:
+  case int16_id:
+  case int32_id:
+  case int64_id:
+  case int128_id:
+  case uint8_id:
+  case uint16_id:
+  case uint32_id:
+  case uint64_id:
+  case uint128_id:
+  case float16_id:
+  case float32_id:
+  case float64_id:
+  case float128_id:
+  case complex_float32_id:
+  case complex_float64_id:
     format_json_number(out, dt, arrmeta, data);
     break;
-  case string_kind:
+  case fixed_string_id:
+  case string_id:
     format_json_string(out, dt, arrmeta, data);
     break;
-  case type_kind:
+  case type_id:
     format_json_type(out, dt, arrmeta, data);
     break;
-  case struct_kind:
+  case struct_id:
     format_json_struct(out, dt, arrmeta, data);
     break;
-  case option_kind:
+  case option_id:
     format_json_option(out, dt, arrmeta, data);
     break;
-  case dim_kind:
+  case fixed_dim_id:
+  case var_dim_id:
     format_json_dim(out, dt, arrmeta, data);
     break;
   default: {

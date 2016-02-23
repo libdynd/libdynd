@@ -43,7 +43,7 @@ void ndt::pow_dimsym_type::print_type(std::ostream &o) const
 {
   switch (m_base_tp.get_id()) {
   case fixed_dim_id:
-    if (m_base_tp.get_kind() == kind_kind) {
+    if (m_base_tp.is_symbolic()) {
       o << "Fixed";
     }
     else {
@@ -233,7 +233,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp, 
   type concrete_subtype = candidate_tp;
   switch (base_tp.get_id()) {
   case fixed_dim_id: {
-    if (base_tp.get_kind() == kind_kind) {
+    if (base_tp.is_symbolic()) {
       for (intptr_t i = 0; i < exponent; ++i) {
         switch (concrete_subtype.get_id()) {
         case fixed_dim_id:

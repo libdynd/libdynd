@@ -361,7 +361,7 @@ namespace ndt {
     type_id_t unchecked_get_builtin_id() const { return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr)); }
 
     /** The 'kind' of the type (int, uint, float, etc) */
-//    type_kind_t get_kind() const { return get_base_type_kind(m_ptr); }
+    type_kind_t get_kind() const { return get_base_type_kind(m_ptr); }
 
     type_id_t get_base_id() const;
 
