@@ -762,22 +762,27 @@ struct base_id_of<pointer_id> {
 
 template <>
 struct base_id_of<fixed_bytes_id> {
-  static const type_id_t value = scalar_kind_id;
+  static const type_id_t value = bytes_kind_id;
 };
 
 template <>
 struct base_id_of<bytes_id> {
-  static const type_id_t value = scalar_kind_id;
+  static const type_id_t value = bytes_kind_id;
+};
+
+template <>
+struct base_id_of<char_id> {
+  static const type_id_t value = string_kind_id;
 };
 
 template <>
 struct base_id_of<fixed_string_id> {
-  static const type_id_t value = scalar_kind_id;
+  static const type_id_t value = string_kind_id;
 };
 
 template <>
 struct base_id_of<string_id> {
-  static const type_id_t value = scalar_kind_id;
+  static const type_id_t value = string_kind_id;
 };
 
 template <>
@@ -793,11 +798,6 @@ struct base_id_of<struct_id> {
 template <>
 struct base_id_of<option_id> {
   static const type_id_t value = any_kind_id;
-};
-
-template <>
-struct base_id_of<char_id> {
-  static const type_id_t value = scalar_kind_id;
 };
 
 template <>
