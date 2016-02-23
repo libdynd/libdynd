@@ -488,170 +488,6 @@ struct type_of<type_id> {
   typedef ndt::type type;
 };
 
-// Type trait for the kind
-template <type_id_t TypeID>
-struct type_kind_of;
-
-template <>
-struct type_kind_of<void_id> {
-  static const type_kind_t value = void_kind;
-};
-
-template <>
-struct type_kind_of<bool_id> {
-  static const type_kind_t value = bool_kind;
-};
-
-template <>
-struct type_kind_of<int8_id> {
-  static const type_kind_t value = sint_kind;
-};
-
-template <>
-struct type_kind_of<int16_id> {
-  static const type_kind_t value = sint_kind;
-};
-
-template <>
-struct type_kind_of<int32_id> {
-  static const type_kind_t value = sint_kind;
-};
-
-template <>
-struct type_kind_of<int64_id> {
-  static const type_kind_t value = sint_kind;
-};
-
-template <>
-struct type_kind_of<int128_id> {
-  static const type_kind_t value = sint_kind;
-};
-
-template <>
-struct type_kind_of<uint8_id> {
-  static const type_kind_t value = uint_kind;
-};
-
-template <>
-struct type_kind_of<uint16_id> {
-  static const type_kind_t value = uint_kind;
-};
-
-template <>
-struct type_kind_of<uint32_id> {
-  static const type_kind_t value = uint_kind;
-};
-
-template <>
-struct type_kind_of<uint64_id> {
-  static const type_kind_t value = uint_kind;
-};
-
-template <>
-struct type_kind_of<uint128_id> {
-  static const type_kind_t value = uint_kind;
-};
-
-template <>
-struct type_kind_of<float16_id> {
-  static const type_kind_t value = real_kind;
-};
-
-template <>
-struct type_kind_of<float32_id> {
-  static const type_kind_t value = real_kind;
-};
-
-template <>
-struct type_kind_of<float64_id> {
-  static const type_kind_t value = real_kind;
-};
-
-template <>
-struct type_kind_of<float128_id> {
-  static const type_kind_t value = real_kind;
-};
-
-template <>
-struct type_kind_of<complex_float32_id> {
-  static const type_kind_t value = complex_kind;
-};
-
-template <>
-struct type_kind_of<complex_float64_id> {
-  static const type_kind_t value = complex_kind;
-};
-
-template <>
-struct type_kind_of<fixed_dim_id> {
-  static const type_kind_t value = dim_kind;
-};
-
-template <>
-struct type_kind_of<var_dim_id> {
-  static const type_kind_t value = dim_kind;
-};
-
-template <>
-struct type_kind_of<pointer_id> {
-  static const type_kind_t value = expr_kind;
-};
-
-template <>
-struct type_kind_of<fixed_bytes_id> {
-  static const type_kind_t value = bytes_kind;
-};
-
-template <>
-struct type_kind_of<bytes_id> {
-  static const type_kind_t value = bytes_kind;
-};
-
-template <>
-struct type_kind_of<fixed_string_id> {
-  static const type_kind_t value = string_kind;
-};
-
-template <>
-struct type_kind_of<string_id> {
-  static const type_kind_t value = string_kind;
-};
-
-template <>
-struct type_kind_of<tuple_id> {
-  static const type_kind_t value = tuple_kind;
-};
-
-template <>
-struct type_kind_of<struct_id> {
-  static const type_kind_t value = struct_kind;
-};
-
-template <>
-struct type_kind_of<option_id> {
-  static const type_kind_t value = option_kind;
-};
-
-template <>
-struct type_kind_of<char_id> {
-  static const type_kind_t value = char_kind;
-};
-
-template <>
-struct type_kind_of<categorical_id> {
-  static const type_kind_t value = custom_kind;
-};
-
-template <>
-struct type_kind_of<expr_id> {
-  static const type_kind_t value = expr_kind;
-};
-
-template <>
-struct type_kind_of<type_id> {
-  static const type_kind_t value = type_kind;
-};
-
 template <type_id_t TypeID>
 struct base_id_of;
 
@@ -817,52 +653,52 @@ struct base_id_of<type_id> {
 
 namespace detail {
 
-  template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t SrcTypeID, type_kind_t SrcTypeKind>
+  template <type_id_t DstTypeID, type_id_t DstBaseID, type_id_t SrcTypeID, type_id_t SrcBaseID>
   struct is_lossless_assignable {
     static const bool value = false;
   };
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID>
-  struct is_lossless_assignable<DstTypeID, real_kind, SrcTypeID, sint_kind> {
+  struct is_lossless_assignable<DstTypeID, float_kind_id, SrcTypeID, int_kind_id> {
     static const bool value = true;
   };
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID>
-  struct is_lossless_assignable<DstTypeID, real_kind, SrcTypeID, uint_kind> {
+  struct is_lossless_assignable<DstTypeID, float_kind_id, SrcTypeID, uint_kind_id> {
     static const bool value = true;
   };
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID>
-  struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, bool_kind> {
+  struct is_lossless_assignable<DstTypeID, complex_kind_id, SrcTypeID, bool_kind_id> {
     static const bool value = true;
   };
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID>
-  struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, sint_kind> {
+  struct is_lossless_assignable<DstTypeID, complex_kind_id, SrcTypeID, int_kind_id> {
     static const bool value = false;
   };
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID>
-  struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, uint_kind> {
+  struct is_lossless_assignable<DstTypeID, complex_kind_id, SrcTypeID, uint_kind_id> {
     static const bool value = false;
   };
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID>
-  struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, real_kind> {
+  struct is_lossless_assignable<DstTypeID, complex_kind_id, SrcTypeID, float_kind_id> {
     static const bool value = (sizeof(typename type_of<DstTypeID>::type) / 2) >
                               sizeof(typename type_of<SrcTypeID>::type);
   };
 
-  template <type_id_t DstTypeID, type_id_t SrcTypeID, type_kind_t TypeKind>
-  struct is_lossless_assignable<DstTypeID, TypeKind, SrcTypeID, TypeKind> {
+  template <type_id_t DstTypeID, type_id_t SrcTypeID, type_id_t BaseTypeID>
+  struct is_lossless_assignable<DstTypeID, BaseTypeID, SrcTypeID, BaseTypeID> {
     static const bool value = sizeof(typename type_of<DstTypeID>::type) > sizeof(typename type_of<SrcTypeID>::type);
   };
 
 } // namespace dynd::detail
 
 template <type_id_t DstTypeID, type_id_t Src0TypeID>
-struct is_lossless_assignable : detail::is_lossless_assignable<DstTypeID, type_kind_of<DstTypeID>::value, Src0TypeID,
-                                                               type_kind_of<Src0TypeID>::value> {
+struct is_lossless_assignable : detail::is_lossless_assignable<DstTypeID, base_id_of<DstTypeID>::value, Src0TypeID,
+                                                               base_id_of<Src0TypeID>::value> {
 };
 
 // Metaprogram for determining if a type is a valid C++ scalar
