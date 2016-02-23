@@ -241,11 +241,6 @@ std::map<std::string, nd::callable> ndt::base_type::get_dynamic_type_properties(
   return std::map<std::string, nd::callable>();
 }
 
-std::map<std::string, nd::callable> ndt::base_type::get_dynamic_type_functions() const
-{
-  return std::map<std::string, nd::callable>();
-}
-
 bool ndt::base_type::adapt_type(const type &DYND_UNUSED(operand_tp), const std::string &DYND_UNUSED(op),
                                 nd::callable &DYND_UNUSED(out_forward), nd::callable &DYND_UNUSED(out_reverse)) const
 {

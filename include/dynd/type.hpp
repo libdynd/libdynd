@@ -629,8 +629,6 @@ namespace ndt {
     }
 
     std::map<std::string, nd::callable> get_properties() const;
-    std::map<std::string, nd::callable> get_functions() const;
-    std::map<std::string, nd::callable> get_array_functions() const;
 
     /**
      * Returns a const pointer to the base_type object which
