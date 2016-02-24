@@ -9,7 +9,6 @@
 #include <dynd/func/assignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/kernels/get_then_copy_kernel.hpp>
 
 using namespace std;
 using namespace dynd;

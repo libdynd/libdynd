@@ -7,7 +7,6 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/types/str_util.hpp>
-#include <dynd/kernels/get_then_copy_kernel.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>

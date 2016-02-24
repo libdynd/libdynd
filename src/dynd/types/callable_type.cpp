@@ -9,7 +9,6 @@
 #include <dynd/types/str_util.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
 #include <dynd/types/typevar_type.hpp>
-#include <dynd/kernels/get_then_copy_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
