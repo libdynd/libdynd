@@ -89,8 +89,8 @@ matrix:
       - $HOME/.cache/pip
       - $HOME/dynd-python/build
     before_install:
-#    - export CC=clang-3.5
-#    - export CXX=clang++-3.5
+    - export CC=clang-3.5
+    - export CXX=clang++-3.5
     - travis_retry pip install --install-option="--no-cython-compile" Cython==0.23
     before_script:
     - cd ..
