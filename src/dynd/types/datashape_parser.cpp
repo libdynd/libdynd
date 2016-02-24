@@ -39,7 +39,6 @@
 #include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
-#include <dynd/types/kind_sym_type.hpp>
 #include <dynd/types/int_kind_sym_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -586,25 +585,6 @@ static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end, 
   // shown
   rbegin = begin;
   return ndt::pointer_type::make(tp);
-}
-
-static ndt::type parse_array_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
-{
-  const char *begin = rbegin;
-  if (!parse_token_ds(begin, end, '[')) {
-    throw datashape_parse_error(begin, "expected opening '[' after 'array'");
-  }
-  ndt::type tp = parse_datashape(begin, end, symtable);
-  if (tp.is_null()) {
-    throw datashape_parse_error(begin, "expected a data type");
-  }
-  if (!parse_token_ds(begin, end, ']')) {
-    throw datashape_parse_error(begin, "expected closing ']'");
-  }
-  // TODO catch errors, convert them to datashape_parse_error so the position is
-  // shown
-  rbegin = begin;
-  return ndt::array_type::make(tp);
 }
 
 // datashape_list : datashape COMMA datashape_list RBRACKET
@@ -1266,7 +1246,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       result = parse_pointer_parameters(begin, end, symtable);
     }
     else if (compare_range_to_literal(nbegin, nend, "array")) {
-      result = parse_array_parameters(begin, end, symtable);
+      result = ndt::array_type::make();
     }
     else if (compare_range_to_literal(nbegin, nend, "char")) {
       result = parse_char_parameters(begin, end);
@@ -1307,24 +1287,26 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
     else if (compare_range_to_literal(nbegin, nend, "FixedString")) {
       result = ndt::fixed_string_kind_type::make();
     }
-    else if (compare_range_to_literal(nbegin, nend, "Bool")) {
-      result = ndt::make_kind_sym(bool_kind);
-    }
-    else if (compare_range_to_literal(nbegin, nend, "Int")) {
-      result = ndt::make_int_kind_sym();
-    }
-    else if (compare_range_to_literal(nbegin, nend, "UInt")) {
-      result = ndt::make_kind_sym(uint_kind);
-    }
-    else if (compare_range_to_literal(nbegin, nend, "SInt")) {
-      result = ndt::make_kind_sym(sint_kind);
-    }
-    else if (compare_range_to_literal(nbegin, nend, "Real")) {
-      result = ndt::make_kind_sym(real_kind);
-    }
-    else if (compare_range_to_literal(nbegin, nend, "Complex")) {
-      result = ndt::make_kind_sym(complex_kind);
-    }
+    /*
+        else if (compare_range_to_literal(nbegin, nend, "Bool")) {
+          result = ndt::make_kind_sym(bool_kind);
+        }
+        else if (compare_range_to_literal(nbegin, nend, "Int")) {
+          result = ndt::make_int_kind_sym();
+        }
+        else if (compare_range_to_literal(nbegin, nend, "UInt")) {
+          result = ndt::make_kind_sym(uint_kind);
+        }
+        else if (compare_range_to_literal(nbegin, nend, "Int")) {
+          result = ndt::make_kind_sym(sint_kind);
+        }
+        else if (compare_range_to_literal(nbegin, nend, "Float")) {
+          result = ndt::make_kind_sym(real_kind);
+        }
+        else if (compare_range_to_literal(nbegin, nend, "Complex")) {
+          result = ndt::make_kind_sym(complex_kind);
+        }
+    */
     else if (isupper(*nbegin)) {
       if (!parse_token_ds(begin, end, '[')) {
         result = ndt::typevar_type::make(std::string(nbegin, nend));
