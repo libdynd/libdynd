@@ -103,7 +103,7 @@ in a `nd::array` and thus have no metadata, are excluded. A few concrete types
 | var_dim               | The stride of the dimension, a reference to which `nd::memory_block` contains the data, and an offset into that data; *i.e.* an `intptr_t`, a `intrusive_ptr<nd::memory_block>`, and an `intptr_t`
 | categorical           | None
 | option                | None
-| pointer               | A reference to which `nd::memory_block` contains the data and an offset into that data; *i.e.* a `intrusive_ptr<nd::memory_block>`
+| pointer               | A reference to which `nd::memory_block` contains the data and an offset into that data; *i.e.* a `intrusive_ptr<nd::memory_block>` and an `intptr_t`
 | memory                | None
 | type                  | None
 | callable              | None
