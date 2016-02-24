@@ -1,7 +1,7 @@
 A Brief Primer on Low-Level Datashape and DyND Array Metadata
-===========================================
+=============================================================
 
-The DyND `nd::array` is a multidimensional data storage container, inspired
+The DyND `nd::array` is a multidimensional system for representation of and computation on data, inspired
 by the NumPy `ndarray` and based on the Blaze `Datashape` grammar. Like NumPy,
 it supports strided multidimensional arrays of data with a uniform data type,
 but has the ability to store ragged arrays and data types with variable-sized data.
@@ -9,17 +9,20 @@ This is made possible by a flexible specification of data that consists of
 two parts: a high-level `Datashape` type system and a lower-level description
 (reinterpretable from a `char *`) that comes in the form of arbitrary `nd::array` metadata.
 
-Every DyND type is able to store an arbitrary, but fixed amount, of metadata in the `nd::array` object.
-This is really just a block of bytes (very specifically, a `char *`) that is typically, but not always, allocated alongside the `nd::array`, while being interpreted and manipulated by the `ndt::type`.
+Every DyND type has access to an arbitrary, but fixed amount, of metadata in the `nd::array` object.
+This is really just a block of bytes (very specifically, a `char *`) that is typically (but not required to be) allocated alongside the `nd::array`, while being interpreted and manipulated by the `ndt::type`.
 
 The array metadata is the place to store information that doesn't really belong in the type, but is necessary to fully describe the data encapsulated by the `nd::array`. A classic example of such information is the stride for a dimension type.
 
 At construction, a DyND type (dynamic or otherwise) forwards its total metadata size to the `ndt::base_type` constructor. Its metadata normally consists of whatever specific metadata the type itself needs and the metadata of any child types. For example, the metadata for `10 * int32` has a size that is the size of the metadata for a `ndt::fixed_dim_type` (namely 16 bytes that represents a size and a stride) and the size of the
 metadata for a `int32` (exactly 0 bytes). Analogously, the metadata for a type `20 * 10 * int32` is 32 bytes (a size, a stride, a size, and a stride in that order).
 
-The API for the metadata consists of a set of virtual functions in `ndt::base_type` that are overridable
+When a new DyND `nd::array` is constructed, it requests the metadata size from its type and allocates it
+in the same allocation as the data. It then default-initializes the metadata. In the case of a view, the metadata is allocated by itself. It then initializes the metadata appropriately for the particular view. While no such function exists as present, it would be very easy to provide a function that interprets some external data given a `ndt::type` and its metadata as a  `char *`.
+
+The API for the DyND metadata consists of a set of virtual functions in `ndt::base_type` that are overridable
 by any derived type. These are basically for construction, copy-construction, and destruction of the metadata.
-A C API could be provided for these without any major issues. The API is as follows:
+A C API could be provided for these without any major issues. At present, the relevant API is as follows:
 
 ```
   /**
@@ -84,13 +87,13 @@ Here is
 | char                  | None
 | fixed_string          | None
 | string*               | None
-| tuple                 | Offsets (in bytes) to the data of each element, *i.e.* `uintptr_t[N]` for a tuple with `N` fields
+| tuple                 | Offsets (in bytes) to the data of each element; *i.e.* `uintptr_t[N]` for a tuple with `N` fields
 | struct                | Same as for tuple
-| fixed_dim             | The size and stride of the dimension, *i.e.* a `size_t` and an `intptr_t`.
-| var_dim               | The stride of the dimension and a reference to which `nd::memory_block` contains the data, *i.e.* an `intptr_t` and a `intrusive_ptr<nd::memory_block>`
+| fixed_dim             | The size and stride of the dimension; *i.e.* a `size_t` and an `intptr_t`
+| var_dim               | The stride of the dimension, a reference to which `nd::memory_block` contains the data, and an offset into that data; *i.e.* an `intptr_t`, a `intrusive_ptr<nd::memory_block>`, and an `intptr_t`
 | categorical           | None
 | option                | None
-| pointer               | A reference to which `nd::memory_block` contains the data, *i.e.* a `intrusive_ptr<nd::memory_block>`
+| pointer               | A reference to which `nd::memory_block` contains the data and an offset into that data; *i.e.* a `intrusive_ptr<nd::memory_block>`
 | memory                | None
 | type                  | None
 | callable              | None
