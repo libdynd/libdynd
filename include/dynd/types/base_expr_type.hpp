@@ -11,23 +11,19 @@ namespace dynd {
 namespace ndt {
 
   /**
-   * Base class for all types of expr_kind, and for the pointer_type.
+   * Base class for all types of expr_kind.
    */
   class DYND_API base_expr_type : public base_type {
   public:
     base_expr_type(type_id_t type_id, type_kind_t kind, size_t data_size, size_t alignment, flags_type flags,
-                   size_t arrmeta_size, size_t ndim = 0)
-        : base_type(type_id, kind, data_size, alignment, flags, arrmeta_size, ndim, 0)
-    {
-    }
-
-    virtual ~base_expr_type();
+                   size_t arrmeta_size, size_t ndim = 0);
 
     /**
      * Should return a reference to the type representing the value which
      * is for calculation. This should never be an expression type.
      */
     virtual const type &get_value_type() const = 0;
+
     /**
      * Should return a reference to a type representing the data this type
      * uses to produce the value.

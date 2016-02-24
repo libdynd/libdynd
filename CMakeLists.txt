@@ -173,7 +173,6 @@ set(libdynd_SRC
     src/dynd/types/fixed_string_type.cpp
     src/dynd/types/callable_type.cpp
     src/dynd/types/int_kind_sym_type.cpp
-    src/dynd/types/kind_sym_type.cpp
     src/dynd/types/option_type.cpp
     src/dynd/types/pointer_type.cpp
     src/dynd/types/string_type.cpp
@@ -224,7 +223,6 @@ set(libdynd_SRC
     include/dynd/types/fixed_string_kind_type.hpp
     include/dynd/types/fixed_string_type.hpp
     include/dynd/types/int_kind_sym_type.hpp
-    include/dynd/types/kind_sym_type.hpp
     include/dynd/types/option_type.hpp
     include/dynd/types/pointer_type.hpp
     include/dynd/types/pow_dimsym_type.hpp

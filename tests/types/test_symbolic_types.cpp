@@ -17,7 +17,6 @@
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/types/kind_sym_type.hpp>
 #include <dynd/types/int_kind_sym_type.hpp>
 
 using namespace std;

@@ -307,32 +307,14 @@ namespace ndt {
                             bool leading_dimension) const;
 
     /**
-     * Returns the non-expression type that this
-     * type looks like for the purposes of calculation,
-     * printing, etc.
+     * Returns the non-expression type that this type looks like for the purposes
+     * of calculation, printing, etc.
      */
     const type &value_type() const;
 
     /**
-     * For expression types, returns the operand type,
-     * which is the source type of this type's expression.
-     * This is one link down the expression chain.
-     */
-    const type &operand_type() const
-    {
-      // Only expr_kind types have different operand_type
-      if (is_builtin() || m_ptr->get_kind() != expr_kind) {
-        return *this;
-      }
-      else {
-        return static_cast<const base_expr_type *>(m_ptr)->get_operand_type();
-      }
-    }
-
-    /**
-     * For expression types, returns the storage type,
-     * which is the type of the underlying input data.
-     * This is the bottom of the expression chain.
+     * For expression types, returns the storage type, which is the type of the
+     * underlying input data. This is the bottom of the expression chain.
      */
     const type &storage_type() const;
 
@@ -443,19 +425,6 @@ namespace ndt {
     bool is_indexable() const { return !is_builtin() && m_ptr->is_indexable(); }
 
     bool is_scalar() const { return is_builtin() || m_ptr->is_scalar(); }
-
-#ifdef DYND_CUDA
-
-    bool is_cuda_device_readable() const
-    {
-      if (is_builtin()) {
-        return get_kind() == void_kind;
-      }
-
-      return m_ptr->get_id() == cuda_device_id;
-    }
-
-#endif
 
     /**
      * Returns true if the type contains any expression
