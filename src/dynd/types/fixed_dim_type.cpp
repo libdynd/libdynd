@@ -24,8 +24,6 @@ ndt::fixed_dim_type::fixed_dim_type(intptr_t dim_size, const type &element_tp)
   this->flags |= (element_tp.get_flags() & (type_flags_operand_inherited | type_flags_value_inherited));
 }
 
-ndt::fixed_dim_type::~fixed_dim_type() {}
-
 size_t ndt::fixed_dim_type::get_default_data_size() const
 {
   if (!m_element_tp.is_builtin()) {
@@ -277,9 +275,6 @@ bool ndt::fixed_dim_type::operator==(const base_type &rhs) const
     return true;
   }
   else if (rhs.get_id() != fixed_dim_id) {
-    return false;
-  }
-  else if (rhs.get_kind() == kind_kind) {
     return false;
   }
   else {
