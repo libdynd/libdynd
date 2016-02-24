@@ -295,8 +295,8 @@ namespace ndt {
      *
      * \param name  The property to access.
      */
-    nd::array p(const char *name) const;
-    nd::array p(const std::string &name) const;
+    type_property_t p(const char *name) const;
+    type_property_t p(const std::string &name) const;
 
     /**
      * Indexes into the type, intended for recursive calls from the
@@ -597,7 +597,7 @@ namespace ndt {
       return vars;
     }
 
-    std::map<std::string, nd::callable> get_properties() const;
+    std::map<std::string, type_property_t> get_properties() const;
 
     /**
      * Returns a const pointer to the base_type object which

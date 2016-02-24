@@ -20,7 +20,7 @@ TEST(VarArrayDType, Basic)
 {
   ndt::type d = ndt::var_dim_type::make(ndt::make_type<int32_t>());
 
-  EXPECT_EQ(ndt::make_type<int32_t>(), d.p("element_type").as<ndt::type>());
+  EXPECT_EQ(ndt::make_type<int32_t>(), *d.p("element_type").type);
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 }

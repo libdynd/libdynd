@@ -202,12 +202,10 @@ bool ndt::fixed_dim_kind_type::match(const char *arrmeta, const type &candidate_
   }
 }
 
-static ndt::type get_element_type(ndt::type dt) { return dt.extended<ndt::fixed_dim_kind_type>()->get_element_type(); }
-
-std::map<std::string, nd::callable> ndt::fixed_dim_kind_type::get_dynamic_type_properties() const
+std::map<std::string, type_property_t> ndt::fixed_dim_kind_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, nd::callable> properties;
-  properties["element_type"] = nd::functional::apply(&::get_element_type, "self");
+  std::map<std::string, type_property_t> properties;
+  properties["element_type"] = {.kind = Type_kind, {.type = &m_element_tp}};
 
   return properties;
 }

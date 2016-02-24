@@ -84,7 +84,7 @@ namespace ndt {
 
     void foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback, void *callback_data) const;
 
-    std::map<std::string, nd::callable> get_dynamic_type_properties() const;
+    std::map<std::string, type_property_t> get_dynamic_type_properties() const;
 
     virtual type with_element_type(const type &element_tp) const;
 

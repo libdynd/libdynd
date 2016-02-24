@@ -201,10 +201,10 @@ TEST(DataShapeParser, Callable)
   EXPECT_EQ(ndt::make_type<int(int, int)>("x", "y"), ndt::type("(x: int, y: int) -> int"));
 
   tp = ndt::type("(N * S, func: (M * S) -> T) -> N * T");
-  EXPECT_JSON_EQ_ARR("[\"N * S\"]", tp.p("pos_types"));
-  EXPECT_JSON_EQ_ARR("[\"(M * S) -> T\"]", tp.p("kwd_types"));
-  EXPECT_JSON_EQ_ARR("[\"func\"]", tp.p("kwd_names"));
-  EXPECT_JSON_EQ_ARR("\"N * T\"", tp.p("return_type"));
+  EXPECT_JSON_EQ_ARR("[\"N * S\"]", *tp.p("pos_types").type_vector);
+  EXPECT_JSON_EQ_ARR("[\"(M * S) -> T\"]", *tp.p("kwd_types").type_vector);
+  EXPECT_JSON_EQ_ARR("[\"func\"]", *tp.p("kwd_names").string_vector);
+  EXPECT_JSON_EQ_ARR("\"N * T\"", *tp.p("return_type").type);
 }
 
 TEST(DataShapeParser, ErrorBasic)

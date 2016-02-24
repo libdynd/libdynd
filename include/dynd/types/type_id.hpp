@@ -175,6 +175,35 @@ enum type_id_t {
   static_id_max = dim_fragment_id
 };
 
+enum type_property_kind_t {
+  Int64_kind,
+  Uint64_kind,
+  Size_kind,
+  Intptr_kind,
+  Uintptr_kind,
+  String_kind,
+  Type_kind,
+  UintptrVector_kind,
+  StringVector_kind,
+  TypeVector_kind
+};
+
+typedef struct {
+  type_property_kind_t kind;
+  union {
+    int64_t i64;
+    uint64_t u64;
+    size_t size;
+    intptr_t intptr;
+    uintptr_t uintptr;
+    const std::string *string;
+    const ndt::type *type;
+    const std::vector<uintptr_t> *uintptr_vector;
+    const std::vector<std::string> *string_vector;
+    const std::vector<ndt::type> *type_vector;
+  };
+} type_property_t;
+
 template <type_id_t... I>
 using type_id_sequence = integer_sequence<type_id_t, I...>;
 

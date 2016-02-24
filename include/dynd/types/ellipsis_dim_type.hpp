@@ -17,7 +17,6 @@ namespace ndt {
   type make_ellipsis_dim(const std::string &name, const type &element_type);
 
   class DYND_API ellipsis_dim_type : public base_dim_type {
-    // m_name is either NULL or an immutable array of type "string"
     std::string m_name;
 
   public:
@@ -51,7 +50,7 @@ namespace ndt {
     bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;
 
-    std::map<std::string, nd::callable> get_dynamic_type_properties() const;
+    std::map<std::string, type_property_t> get_dynamic_type_properties() const;
 
     virtual type with_element_type(const type &element_tp) const;
 

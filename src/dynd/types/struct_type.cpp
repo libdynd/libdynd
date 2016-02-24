@@ -301,21 +301,12 @@ intptr_t ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *i
   }
 }
 
-std::map<std::string, nd::callable> ndt::struct_type::get_dynamic_type_properties() const
+std::map<std::string, type_property_t> ndt::struct_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, nd::callable> properties;
-  properties["field_types"] =
-      nd::callable::make<nd::get_then_copy_kernel<const std::vector<type> &, tuple_type, &tuple_type::get_field_types>>(
-          ndt::callable_type::make(get_type(), ndt::tuple_type::make(),
-                                   ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["metadata_offsets"] = nd::callable::make<
-      nd::get_then_copy_kernel<const std::vector<uintptr_t> &, tuple_type, &tuple_type::get_arrmeta_offsets>>(
-      ndt::callable_type::make(ndt::type_for(m_arrmeta_offsets), ndt::tuple_type::make(),
-                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["field_names"] = nd::callable::make<
-      nd::get_then_copy_kernel<const std::vector<std::string> &, struct_type, &struct_type::get_field_names>>(
-      ndt::callable_type::make(ndt::type_for(m_field_names), ndt::tuple_type::make(),
-                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
+  std::map<std::string, type_property_t> properties;
+  properties["field_types"] = {.kind = TypeVector_kind, {.type_vector = &m_field_types}};
+  properties["metadata_offsets"] = {.kind = UintptrVector_kind, {.uintptr_vector = &m_arrmeta_offsets}};
+  properties["field_names"] = {.kind = StringVector_kind, {.string_vector = &m_field_names}};
 
   return properties;
 }

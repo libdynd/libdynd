@@ -484,7 +484,7 @@ namespace ndt {
     /**
      * Additional dynamic properties exposed by the type as gfunc::callable.
      */
-    virtual std::map<std::string, nd::callable> get_dynamic_type_properties() const;
+    virtual std::map<std::string, type_property_t> get_dynamic_type_properties() const;
 
     /**
      * Produces forward and reverse callables for adapting the operand

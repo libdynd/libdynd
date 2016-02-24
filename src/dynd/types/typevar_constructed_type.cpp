@@ -152,24 +152,10 @@ bool ndt::typevar_constructed_type::match(const char *arrmeta, const type &candi
                      tp_vars);
 }
 
-/*
-static nd::array property_get_name(const ndt::type &tp)
+std::map<std::string, type_property_t> ndt::typevar_constructed_type::get_dynamic_type_properties() const
 {
-  return tp.extended<ndt::typevar_constructed_type>()->get_name();
-}
-*/
+  std::map<std::string, type_property_t> properties;
+  properties["name"] = {.kind = String_kind, {.string = &m_name}};
 
-/*
-void ndt::typevar_constructed_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
-    size_t *out_count) const
-{
-  static pair<string, nd::arrfunc> type_properties[] = {
-      pair<string, gfunc::callable>(
-          "name", gfunc::make_callable(&property_get_name, "self")),
-  };
-
-  *out_properties = type_properties;
-  *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+  return properties;
 }
-*/

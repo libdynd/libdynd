@@ -272,30 +272,14 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp, 
   return m_element_tp.match(arrmeta, concrete_subtype, NULL, tp_vars);
 }
 
-/*
-static nd::array property_get_name(const ndt::type& tp) {
-    return tp.extended<typevar_dim_type>()->get_name();
-}
-
-static ndt::type property_get_element_type(const ndt::type& dt) {
-    return dt.extended<typevar_dim_type>()->get_element_type();
-}
-
-void typevar_dim_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
+std::map<std::string, type_property_t> ndt::pow_dimsym_type::get_dynamic_type_properties() const
 {
-    static pair<string, gfunc::callable> type_properties[] = {
-        pair<string, gfunc::callable>(
-            "name", gfunc::make_callable(&property_get_name, "self")),
-        pair<string, gfunc::callable>(
-            "element_type",
-            gfunc::make_callable(&property_get_element_type, "self")), };
+  std::map<std::string, type_property_t> properties;
+  properties["name"] = {.kind = String_kind, {.string = &m_exponent}};
+  properties["element_type"] = {.kind = Type_kind, {.type = &m_element_tp}};
 
-    *out_properties = type_properties;
-    *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+  return properties;
 }
-*/
 
 ndt::type ndt::pow_dimsym_type::with_element_type(const type &element_tp) const
 {

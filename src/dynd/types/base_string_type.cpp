@@ -22,25 +22,10 @@ std::string ndt::base_string_type::get_utf8_string(const char *arrmeta, const ch
 
 size_t ndt::base_string_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const { return 0; }
 
-static void get_extended_string_encoding(const ndt::type &dt)
+std::map<std::string, type_property_t> ndt::base_string_type::get_dynamic_type_properties() const
 {
-  const ndt::base_string_type *d = dt.extended<ndt::base_string_type>();
-  stringstream ss;
-  ss << d->get_encoding();
-  //  return ss.str();
+  std::map<std::string, type_property_t> properties;
+  properties["encoding"] = {.kind = Uint64_kind, {.u64 = get_encoding()}};
+
+  return properties;
 }
-
-static const std::map<std::string, nd::callable> &base_string_type_properties()
-{
-  static const std::map<std::string, nd::callable> base_string_type_properties{
-      {"encoding", nd::functional::apply(&get_extended_string_encoding)}};
-
-  return base_string_type_properties;
-}
-
-std::map<std::string, nd::callable> ndt::base_string_type::get_dynamic_type_properties() const
-{
-  return base_string_type_properties();
-}
-
-

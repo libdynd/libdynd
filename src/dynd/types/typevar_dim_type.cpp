@@ -146,12 +146,11 @@ bool ndt::typevar_dim_type::match(const char *arrmeta, const type &candidate_tp,
   }
 }
 
-std::map<std::string, nd::callable> ndt::typevar_dim_type::get_dynamic_type_properties() const
+std::map<std::string, type_property_t> ndt::typevar_dim_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, nd::callable> properties;
-  properties["name"] = nd::callable([](type self) -> string { return self.extended<typevar_dim_type>()->get_name(); });
-  properties["element_type"] =
-      nd::callable([](type self) { return self.extended<typevar_dim_type>()->get_element_type(); });
+  std::map<std::string, type_property_t> properties;
+  properties["name"] = {.kind = String_kind, {.string = &m_name}};
+  properties["element_type"] = {.kind = Type_kind, {.type = &m_element_tp}};
 
   return properties;
 }

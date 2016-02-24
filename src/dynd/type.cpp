@@ -130,19 +130,13 @@ bool ndt::type::match(const ndt::type &candidate_tp) const
   return match(candidate_tp, tp_vars);
 }
 
-nd::array ndt::type::p(const char *name) const
+type_property_t ndt::type::p(const char *name) const
 {
-  map<std::string, nd::callable> properties(get_properties());
-  if (nd::callable &p = properties[name]) {
-    return p(*this);
-  }
-
-  stringstream ss;
-  ss << "type does not have property " << name;
-  throw runtime_error(ss.str());
+  map<std::string, type_property_t> properties(get_properties());
+  return properties[name];
 }
 
-nd::array ndt::type::p(const std::string &name) const { return p(name.c_str()); }
+type_property_t ndt::type::p(const std::string &name) const { return p(name.c_str()); }
 
 ndt::type ndt::type::apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i,
                                         const ndt::type &root_tp, bool leading_dimension) const
@@ -328,9 +322,9 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size, intp
   }
 }
 
-std::map<std::string, nd::callable> ndt::type::get_properties() const
+std::map<std::string, type_property_t> ndt::type::get_properties() const
 {
-  std::map<std::string, nd::callable> properties;
+  std::map<std::string, type_property_t> properties;
   if (!is_builtin()) {
     return m_ptr->get_dynamic_type_properties();
   }
@@ -936,12 +930,12 @@ struct ndt::common_type::init {
   template <typename TypeIDSequence>
   void on_each()
   {
-    children[{{front<TypeIDSequence>::value, back<TypeIDSequence>::value}}] = [](const ndt::type &DYND_UNUSED(tp0),
-                                                                                 const ndt::type &DYND_UNUSED(tp1)) {
-      return ndt::make_type<
-          typename std::common_type<typename dynd::type_of<front<TypeIDSequence>::value>::type,
-                                    typename dynd::type_of<back<TypeIDSequence>::value>::type>::type>();
-    };
+    children[{{front<TypeIDSequence>::value, back<TypeIDSequence>::value}}] =
+        [](const ndt::type &DYND_UNUSED(tp0), const ndt::type &DYND_UNUSED(tp1)) {
+          return ndt::make_type<
+              typename std::common_type<typename dynd::type_of<front<TypeIDSequence>::value>::type,
+                                        typename dynd::type_of<back<TypeIDSequence>::value>::type>::type>();
+        };
   }
 };
 

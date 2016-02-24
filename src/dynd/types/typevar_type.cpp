@@ -125,10 +125,10 @@ bool ndt::typevar_type::match(const char *DYND_UNUSED(arrmeta), const type &cand
   }
 }
 
-std::map<std::string, nd::callable> ndt::typevar_type::get_dynamic_type_properties() const
+std::map<std::string, type_property_t> ndt::typevar_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, nd::callable> properties;
-  properties["name"] = nd::callable([](type self) -> string { return self.extended<typevar_type>()->get_name(); });
+  std::map<std::string, type_property_t> properties;
+  properties["name"] = {.kind = String_kind, {.string = &m_name}};
 
   return properties;
 }

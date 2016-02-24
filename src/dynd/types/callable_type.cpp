@@ -242,23 +242,17 @@ bool ndt::callable_type::match(const char *arrmeta, const type &candidate_tp, co
   return true;
 }
 
-std::map<std::string, nd::callable> ndt::callable_type::get_dynamic_type_properties() const
+std::map<std::string, type_property_t> ndt::callable_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, nd::callable> properties;
-  properties["pos_types"] = nd::callable::make<
-      nd::get_then_copy_kernel<const std::vector<type> &, callable_type, &callable_type::get_pos_types>>(
-      ndt::callable_type::make(m_pos_tuple.extended<ndt::tuple_type>()->get_type(), ndt::tuple_type::make(),
-                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["kwd_types"] = nd::callable::make<
-      nd::get_then_copy_kernel<const std::vector<type> &, callable_type, &callable_type::get_kwd_types>>(
-      ndt::callable_type::make(m_kwd_struct.extended<ndt::struct_type>()->get_type(), ndt::tuple_type::make(),
-                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["kwd_names"] = nd::callable::make<
-      nd::get_then_copy_kernel<const std::vector<std::string> &, callable_type, &callable_type::get_kwd_names>>(
-      ndt::callable_type::make(ndt::type_for(m_kwd_struct.extended<ndt::struct_type>()->get_field_names()),
-                               ndt::tuple_type::make(),
-                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["return_type"] = nd::callable([](type self) { return self.extended<callable_type>()->get_return_type(); });
+  std::map<std::string, type_property_t> properties;
+
+  properties["pos_types"] = {.kind = TypeVector_kind,
+                             {.type_vector = &m_pos_tuple.extended<tuple_type>()->get_field_types()}};
+  properties["kwd_types"] = {.kind = TypeVector_kind,
+                             {.type_vector = &m_kwd_struct.extended<struct_type>()->get_field_types()}};
+  properties["kwd_names"] = {.kind = StringVector_kind,
+                             {.string_vector = &m_kwd_struct.extended<struct_type>()->get_field_names()}};
+  properties["return_type"] = {.kind = Type_kind, {.type = &m_return_type}};
 
   return properties;
 }
@@ -267,4 +261,3 @@ ndt::type ndt::make_generic_funcproto(intptr_t nargs)
 {
   return callable_type::make(typevar_type::make("R"), make_typevar_range("T", nargs));
 }
-

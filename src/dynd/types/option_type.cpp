@@ -296,16 +296,10 @@ bool ndt::option_type::match(const char *arrmeta, const type &candidate_tp, cons
   return m_value_tp.match(arrmeta, candidate_tp.extended<option_type>()->m_value_tp, candidate_arrmeta, tp_vars);
 }
 
-static ndt::type property_get_value_type(ndt::type tp)
+std::map<std::string, type_property_t> ndt::option_type::get_dynamic_type_properties() const
 {
-  const ndt::option_type *pd = tp.extended<ndt::option_type>();
-  return pd->get_value_type();
-}
-
-std::map<std::string, nd::callable> ndt::option_type::get_dynamic_type_properties() const
-{
-  std::map<std::string, nd::callable> properties;
-  properties["value_type"] = nd::functional::apply(&property_get_value_type, "self");
+  std::map<std::string, type_property_t> properties;
+  properties["value_type"] = {.kind = Type_kind, {.type = &m_value_tp}};
 
   return properties;
 }
