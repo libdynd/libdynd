@@ -9,7 +9,6 @@ but has the ability to store ragged arrays and data types with variable-sized da
 Every DyND type is able to store an arbitrary, but fixed amount, of metadata in the `nd::array` object.
 This is really just a block of bytes (very specifically, a `char *`) that is allocated alongside the `nd::array`, but interpreted and manipulated by the `ndt::type`. The array metadata is the place to store information that doesn't really belong in the type, but is also necessary to fully describe the data encapsulated by the `nd::array`. A classical example of such information is the stride for a dimension type.
 
-In DyND, most of the information about how to interpret a type is placed in the `ndt::type` directly.
 
 ```
   /**
