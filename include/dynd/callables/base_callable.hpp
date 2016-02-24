@@ -13,6 +13,8 @@
 namespace dynd {
 namespace nd {
 
+  typedef array (*callable_alloc_t)(const ndt::type *dst_tp);
+
   /**
    * Resolves any missing keyword arguments for this callable based on
    * the types of the positional arguments and the available keywords arguments.
@@ -118,29 +120,30 @@ namespace nd {
     ndt::type tp;
     kernel_targets_t targets;
     const char *ir;
+    callable_alloc_t alloc;
     callable_data_init_t data_init;
     callable_resolve_dst_type_t resolve_dst_type;
     callable_instantiate_t instantiate;
 
-    base_callable() : use_count(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL) {}
+    base_callable() : use_count(0), alloc(NULL), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL) {}
 
     base_callable(const ndt::type &tp, const base_callable &other)
-        : use_count(0), tp(tp), targets(other.targets), ir(other.ir), data_init(other.data_init),
+        : use_count(0), tp(tp), targets(other.targets), ir(other.ir), alloc(other.alloc), data_init(other.data_init),
           resolve_dst_type(other.resolve_dst_type), instantiate(other.instantiate)
     {
     }
 
     base_callable(const ndt::type &tp, kernel_targets_t targets)
-        : use_count(0), tp(tp), targets(targets), data_init(&kernel_prefix::data_init), resolve_dst_type(NULL),
-          instantiate(&kernel_prefix::instantiate)
+        : use_count(0), tp(tp), targets(targets), alloc(&kernel_prefix::alloc), data_init(&kernel_prefix::data_init),
+          resolve_dst_type(NULL), instantiate(&kernel_prefix::instantiate)
     {
       new (static_data()) kernel_targets_t(targets);
     }
 
-    base_callable(const ndt::type &tp, kernel_targets_t targets, const volatile char *ir,
+    base_callable(const ndt::type &tp, kernel_targets_t targets, const volatile char *ir, callable_alloc_t alloc,
                   callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
                   callable_instantiate_t instantiate)
-        : use_count(0), tp(tp), targets(targets), ir(const_cast<const char *>(ir)), data_init(data_init),
+        : use_count(0), tp(tp), targets(targets), ir(const_cast<const char *>(ir)), alloc(alloc), data_init(data_init),
           resolve_dst_type(resolve_dst_type), instantiate(instantiate)
     {
     }
