@@ -110,6 +110,7 @@ set(tests_SRC
     test_type_sequence.cpp
     test_parse.cpp
     test_platform.cpp
+    test_pointer.cpp
     ../thirdparty/gtest/gtest-all.cc
     ../thirdparty/gtest/gtest_main.cc
     )

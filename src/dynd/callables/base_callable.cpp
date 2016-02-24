@@ -27,7 +27,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   }
 
   // Allocate the destination array
-  array dst = empty(dst_tp);
+  array dst = alloc(&dst_tp);
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
