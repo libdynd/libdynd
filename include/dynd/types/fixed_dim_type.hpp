@@ -125,8 +125,6 @@ namespace ndt {
 
     fixed_dim_type(intptr_t dim_size, const type &element_tp);
 
-    virtual ~fixed_dim_type();
-
     size_t get_default_data_size() const;
 
     intptr_t get_fixed_dim_size() const { return m_dim_size; }

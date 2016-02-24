@@ -66,7 +66,7 @@ bool ndt::fixed_string_kind_type::operator==(const base_type &rhs) const
     return true;
   }
   else {
-    return rhs.get_kind() == kind_kind && rhs.get_id() == fixed_string_id;
+    return rhs.is_symbolic() && rhs.get_id() == fixed_string_id;
   }
 }
 

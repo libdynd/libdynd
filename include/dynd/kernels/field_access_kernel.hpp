@@ -99,7 +99,7 @@ namespace nd {
       // Get the nd::array 'self' parameter
       intptr_t undim = n.get_ndim();
       ndt::type udt = n.get_dtype();
-      if (udt.get_kind() == expr_kind) {
+      if (udt.is_expression()) {
         std::string field_name = udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
         return n.replace_dtype(ndt::make_type<ndt::adapt_type>(
             udt.value_type().extended<ndt::struct_type>()->get_field_type(i), udt, nd::callable(), nd::callable()));
