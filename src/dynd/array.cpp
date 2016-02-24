@@ -939,7 +939,7 @@ nd::array nd::empty_shell(const ndt::type &tp)
     size_t arrmeta_size = tp.extended()->get_arrmeta_size();
     size_t data_size = tp.extended()->get_default_data_size();
     intrusive_ptr<memory_block_data> result;
-    if (tp.get_kind() != memory_kind) {
+    if (tp.get_base_id() != memory_id) {
       // Allocate memory the default way
       result = make_array_memory_block(arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
       if (tp.get_flags() & type_flag_zeroinit) {

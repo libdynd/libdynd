@@ -20,15 +20,6 @@ ndt::pointer_type::pointer_type(const type &target_tp)
                      sizeof(pointer_type_arrmeta) + target_tp.get_arrmeta_size(), target_tp.get_ndim()),
       m_target_tp(target_tp)
 {
-  // I'm not 100% sure how blockref pointer types should interact with
-  // the computational subsystem, the details will have to shake out
-  // when we want to actually do something with them.
-  if (target_tp.get_kind() == expr_kind && target_tp.get_id() != pointer_id) {
-    stringstream ss;
-    ss << "A dynd pointer type's target cannot be the expression type ";
-    ss << target_tp;
-    throw dynd::type_error(ss.str());
-  }
 }
 
 ndt::pointer_type::~pointer_type() {}

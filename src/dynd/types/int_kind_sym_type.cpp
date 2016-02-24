@@ -119,6 +119,6 @@ bool ndt::int_kind_sym_type::match(const char *DYND_UNUSED(arrmeta), const type 
                                    std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
 {
   // Matches against the 'kind' of the candidate type
-  type_kind_t kind = candidate_tp.get_kind();
-  return kind == uint_kind || kind == sint_kind;
+  type_id_t base_id = candidate_tp.get_base_id();
+  return base_id == uint_kind_id || base_id == int_kind_id;
 }

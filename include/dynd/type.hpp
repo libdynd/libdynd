@@ -475,7 +475,7 @@ namespace ndt {
      * Returns true if the type contains a symbolic construct
      * like a type var.
      */
-    bool is_symbolic() const { return !is_builtin() && (m_ptr->get_flags() & type_flag_symbolic); }
+    bool is_symbolic() const { return !is_builtin() && m_ptr->is_symbolic(); }
 
     /**
      * Returns true if the type constains a symbolic dimension

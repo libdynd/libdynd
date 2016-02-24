@@ -80,7 +80,7 @@ void dynd::make_tuple_identical_assignment_kernel(nd::kernel_builder *ckb, const
                                                   const char *dst_arrmeta, const char *src_arrmeta,
                                                   kernel_request_t kernreq)
 {
-  if (val_tup_tp.get_kind() != tuple_kind && val_tup_tp.get_kind() != struct_kind) {
+  if (val_tup_tp.get_id() != tuple_id && val_tup_tp.get_id() != struct_id) {
     stringstream ss;
     ss << "make_tuple_identical_assignment_kernel: provided type " << val_tup_tp << " is not of tuple or struct kind";
     throw runtime_error(ss.str());
@@ -117,12 +117,12 @@ void dynd::make_tuple_assignment_kernel(nd::kernel_builder *ckb, const ndt::type
                                         const ndt::type &src_tuple_tp, const char *src_arrmeta,
                                         kernel_request_t kernreq)
 {
-  if (src_tuple_tp.get_kind() != tuple_kind && src_tuple_tp.get_kind() != struct_kind) {
+  if (src_tuple_tp.get_id() != tuple_id && src_tuple_tp.get_id() != struct_id) {
     stringstream ss;
     ss << "make_tuple_assignment_kernel: provided source type " << src_tuple_tp << " is not of tuple or struct kind";
     throw runtime_error(ss.str());
   }
-  if (dst_tuple_tp.get_kind() != tuple_kind && dst_tuple_tp.get_kind() != struct_kind) {
+  if (dst_tuple_tp.get_id() != tuple_id && dst_tuple_tp.get_id() != struct_id) {
     stringstream ss;
     ss << "make_tuple_assignment_kernel: provided destination type " << dst_tuple_tp
        << " is not of tuple or struct kind";
@@ -168,7 +168,7 @@ void dynd::make_broadcast_to_tuple_assignment_kernel(nd::kernel_builder *ckb, co
   // an offset of 0 for each source value. A kernel tailored to this
   // case can be made if better performance is needed.
 
-  if (dst_tuple_tp.get_kind() != tuple_kind && dst_tuple_tp.get_kind() != struct_kind) {
+  if (dst_tuple_tp.get_id() != tuple_id && dst_tuple_tp.get_id() != struct_id) {
     stringstream ss;
     ss << "make_tuple_assignment_kernel: provided destination type " << dst_tuple_tp
        << " is not of tuple or struct kind";

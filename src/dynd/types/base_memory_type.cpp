@@ -9,7 +9,18 @@
 using namespace std;
 using namespace dynd;
 
-ndt::base_memory_type::~base_memory_type() {}
+ndt::base_memory_type::base_memory_type(type_id_t type_id, const type &element_tp, size_t data_size, size_t alignment,
+                                        size_t storage_arrmeta_offset, flags_type flags)
+    : base_type(type_id, memory_kind, data_size, alignment, flags,
+                storage_arrmeta_offset + element_tp.get_arrmeta_size(), element_tp.get_ndim(), 0),
+      m_element_tp(element_tp), m_storage_arrmeta_offset(storage_arrmeta_offset)
+{
+  if (element_tp.get_base_id() == memory_id) {
+    std::stringstream ss;
+    ss << "a memory space cannot be specified for type " << element_tp;
+    throw std::runtime_error(ss.str());
+  }
+}
 
 size_t ndt::base_memory_type::get_default_data_size() const
 {
@@ -131,7 +142,7 @@ void ndt::base_memory_type::arrmeta_destruct(char *arrmeta) const
 bool ndt::base_memory_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                                   std::map<std::string, type> &tp_vars) const
 {
-  if (candidate_tp.get_kind() != memory_kind) {
+  if (candidate_tp.get_base_id() != memory_id) {
     return false;
   }
 

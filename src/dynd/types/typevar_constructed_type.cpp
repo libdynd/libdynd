@@ -131,7 +131,7 @@ bool ndt::typevar_constructed_type::match(const char *arrmeta, const type &candi
     return m_arg.match(arrmeta, candidate_tp.extended<typevar_constructed_type>()->m_arg, candidate_arrmeta, tp_vars);
   }
 
-  if (candidate_tp.get_kind() != memory_kind) {
+  if (candidate_tp.get_base_id() != memory_id) {
     if (m_arg.match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars)) {
       type &tv_type = tp_vars[m_name];
       if (tv_type.is_null()) {

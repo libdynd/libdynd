@@ -134,8 +134,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
       case uint_kind:
         return tp0_val;
       case real_kind:
-        return ndt::type(max(max(tp0_val.unchecked_get_builtin_id(), tp1_val.unchecked_get_builtin_id()),
-                             float32_id));
+        return ndt::type(max(max(tp0_val.unchecked_get_builtin_id(), tp1_val.unchecked_get_builtin_id()), float32_id));
       case complex_kind:
         if (tp0_val.get_id() == float64_id && tp1_val.get_id() == complex_float32_id) {
           return ndt::type(complex_float64_id);

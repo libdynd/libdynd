@@ -90,7 +90,7 @@ void ndt::bytes_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, 
 bool ndt::bytes_type::is_lossless_assignment(const type &dst_tp, const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
-    if (src_tp.get_kind() == bytes_kind) {
+    if (src_tp.get_base_id() == bytes_kind_id) {
       return true;
     }
     else {
