@@ -1,16 +1,16 @@
 #!/usr/bin/env sh
 
-if [ "$1" == "-lflag" ]; then
+if [ "$1" = "-lflag" ]; then
     echo @DYND_LINK_FLAG@
     exit 0
 fi
 
-if [ "$1" == "-libname" ]; then
+if [ "$1" = "-libname" ]; then
     echo @DYND_LIB_FILE@
     exit 0
 fi
 
-if [ "$1" == "-libpath" ]; then
+if [ "$1" = "-libpath" ]; then
     # This script should be in .../bin relative to .../lib.
     # Note this isn't robust against symbolic links, etc.
     DIR=`dirname $0`
@@ -18,7 +18,7 @@ if [ "$1" == "-libpath" ]; then
     exit 0
 fi
 
-if [ "$1" == "-includedir" ]; then
+if [ "$1" = "-includedir" ]; then
     # This script should be in .../bin relative to .../include.
     # Note this isn't robust against symbolic links, etc.
     DIR=`dirname $0`
@@ -26,12 +26,12 @@ if [ "$1" == "-includedir" ]; then
     exit 0
 fi
 
-if [ "$1" == "-version" ]; then
+if [ "$1" = "-version" ]; then
     echo @DYND_VERSION_STRING@
     exit 0
 fi
 
-if [ "$1" == "-cuda" ]; then
+if [ "$1" = "-cuda" ]; then
     echo @DYND_CUDA@
     exit 0
 fi
