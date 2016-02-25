@@ -261,14 +261,12 @@ TEST(SymbolicTypes, VariadicTuple)
 
   tp = ndt::tuple_type::make({ndt::make_type<int>(), ndt::make_type<float>()}, true);
   EXPECT_EQ(tuple_id, tp.get_id());
-  EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.extended<ndt::tuple_type>()->is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   tp = ndt::type("(type, int32, T, ...)");
   EXPECT_EQ(tuple_id, tp.get_id());
-  EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_JSON_EQ_ARR("[\"type\", \"int32\", \"T\"]", *tp.p("field_types").type_vector);
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.extended<ndt::tuple_type>()->is_variadic());
@@ -281,7 +279,6 @@ TEST(SymbolicTypes, VariadicStruct)
 
   tp = ndt::struct_type::make({"x", "y"}, {ndt::make_type<int>(), ndt::make_type<float>()}, true);
   EXPECT_EQ(struct_id, tp.get_id());
-  EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.extended<ndt::struct_type>()->is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
@@ -290,7 +287,6 @@ TEST(SymbolicTypes, VariadicStruct)
   EXPECT_JSON_EQ_ARR("[\"type\", \"int32\", \"T\"]", *tp.p("field_types").type_vector);
   EXPECT_JSON_EQ_ARR("[\"x\", \"y\", \"z\"]", *tp.p("field_names").string_vector);
   EXPECT_EQ(struct_id, tp.get_id());
-  EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.extended<ndt::struct_type>()->is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));

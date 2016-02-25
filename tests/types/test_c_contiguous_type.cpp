@@ -21,7 +21,6 @@ TEST(CContiguousType, Basic)
   ndt::type tp = ndt::c_contiguous_type::make(ndt::type("10 * int32"));
 
   EXPECT_EQ(c_contiguous_id, tp.get_id());
-  EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_FALSE(tp.is_expression());
   EXPECT_EQ(tp, ndt::type("C[10 * int32]"));
   // Roundtripping through a string
@@ -70,7 +69,6 @@ TEST(CFixedDimType, Create) {
     // Strings with various encodings and sizes
     d = ndt::make_cfixed_dim(3, ndt::make_type<int32_t>());
     EXPECT_EQ(cfixed_dim_id, d.get_id());
-    EXPECT_EQ(dim_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(12u, d.get_data_size());
     EXPECT_EQ(1, d.get_ndim());
@@ -91,7 +89,6 @@ TEST(CFixedDimType, Create) {
 
     d = ndt::make_cfixed_dim(1, ndt::make_type<int32_t>());
     EXPECT_EQ(cfixed_dim_id, d.get_id());
-    EXPECT_EQ(dim_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(4u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
@@ -104,7 +101,6 @@ TEST(CFixedDimType, Create) {
     // With the stride != element type size
     d = ndt::make_cfixed_dim(3, ndt::make_type<int32_t>(), 8);
     EXPECT_EQ(cfixed_dim_id, d.get_id());
-    EXPECT_EQ(dim_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(20u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
