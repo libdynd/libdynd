@@ -363,6 +363,14 @@ namespace nd {
     }
   };
 
+// A macro for defining the get method.
+#define DYND_DEFAULT_DECLFUNC_GET(NAME)                                                                                \
+  DYND_API dynd::nd::callable &NAME::get()                                                                             \
+  {                                                                                                                    \
+    static dynd::nd::callable self = NAME::make();                                                                     \
+    return self;                                                                                                       \
+  }
+
   template <typename FuncType>
   std::ostream &operator<<(std::ostream &o, const declfunc<FuncType> &DYND_UNUSED(rhs))
   {
@@ -473,8 +481,7 @@ namespace nd {
   } // namespace dynd::nd::functional
 
   template <typename CallableType, typename... T, typename>
-  callable::callable(CallableType f, T &&... names)
-      : callable(nd::functional::apply(f, std::forward<T>(names)...))
+  callable::callable(CallableType f, T &&... names) : callable(nd::functional::apply(f, std::forward<T>(names)...))
   {
   }
 
