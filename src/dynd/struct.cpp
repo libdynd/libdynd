@@ -27,7 +27,7 @@ DYND_API nd::callable nd::make_field_access_kernel(const ndt::type &dt, const st
     throw std::invalid_argument("no field named '" + name + "'");
   }
 
-  ndt::type ct = ndt::callable_type::make(ndt::type("Any"), ndt::tuple_type::make(), ndt::struct_type::make({"self"}));
+  ndt::type ct = ndt::callable_type::make(ndt::type("Any"), ndt::tuple_type::make(), ndt::struct_type::make("self"));
   nd::callable c = nd::callable::make<nd::get_array_field_kernel>(ct, i);
 
   return c;
