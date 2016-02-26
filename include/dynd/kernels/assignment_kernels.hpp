@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-#include <dynd/fpstatus.hpp> 
+#include <dynd/fpstatus.hpp>
 #include <dynd/type.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
@@ -2640,8 +2640,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_virtual_kernel<type_id, any_kind_id, type_id, any_kind_id>
-        : base_kernel<assignment_virtual_kernel<type_id, any_kind_id, type_id, any_kind_id>, 1> {
+    struct assignment_virtual_kernel<type_id, scalar_kind_id, type_id, scalar_kind_id>
+        : base_kernel<assignment_virtual_kernel<type_id, scalar_kind_id, type_id, scalar_kind_id>, 1> {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<ndt::type *>(dst) = *reinterpret_cast<ndt::type *>(src[0]);
@@ -2649,8 +2649,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<type_id, any_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<type_id, any_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+    struct assignment_kernel<type_id, scalar_kind_id, string_id, string_kind_id, ErrorMode>
+        : base_kernel<assignment_kernel<type_id, scalar_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
       ndt::type src_string_dt;
       const char *src_arrmeta;
 
@@ -2677,8 +2677,8 @@ namespace nd {
     };
 
     template <assign_error_mode ErrorMode>
-    struct assignment_kernel<string_id, string_kind_id, type_id, any_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<string_id, string_kind_id, type_id, any_kind_id, ErrorMode>, 1> {
+    struct assignment_kernel<string_id, string_kind_id, type_id, scalar_kind_id, ErrorMode>
+        : base_kernel<assignment_kernel<string_id, string_kind_id, type_id, scalar_kind_id, ErrorMode>, 1> {
       ndt::type dst_string_dt;
       const char *dst_arrmeta;
 

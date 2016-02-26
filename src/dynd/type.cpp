@@ -407,96 +407,6 @@ bool ndt::type::data_layout_compatible_with(const ndt::type &rhs) const
   return false;
 }
 
-std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
-{
-  switch (tid) {
-  case uninitialized_id:
-    return (o << "uninitialized");
-  case bool_id:
-    return (o << "bool");
-  case int8_id:
-    return (o << "int8");
-  case int16_id:
-    return (o << "int16");
-  case int32_id:
-    return (o << "int32");
-  case int64_id:
-    return (o << "int64");
-  case int128_id:
-    return (o << "int128");
-  case uint8_id:
-    return (o << "uint8");
-  case uint16_id:
-    return (o << "uint16");
-  case uint32_id:
-    return (o << "uint32");
-  case uint64_id:
-    return (o << "uint64");
-  case uint128_id:
-    return (o << "uint128");
-  case float16_id:
-    return (o << "float16");
-  case float32_id:
-    return (o << "float32");
-  case float64_id:
-    return (o << "float64");
-  case float128_id:
-    return (o << "float128");
-  case complex_float32_id:
-    return (o << "complex_float32");
-  case complex_float64_id:
-    return (o << "complex_float64");
-  case void_id:
-    return (o << "void");
-  case pointer_id:
-    return (o << "pointer");
-  case bytes_id:
-    return (o << "bytes");
-  case fixed_bytes_id:
-    return (o << "fixed_bytes");
-  case string_id:
-    return (o << "string");
-  case fixed_string_id:
-    return (o << "fixed_string");
-  case categorical_id:
-    return (o << "categorical");
-  case fixed_dim_id:
-    return (o << "fixed_dim");
-  case var_dim_id:
-    return (o << "var_dim");
-  case struct_id:
-    return (o << "struct");
-  case tuple_id:
-    return (o << "tuple");
-  case c_contiguous_id:
-    return (o << "C");
-  case option_id:
-    return (o << "option");
-  case adapt_id:
-    return o << "adapt";
-  case kind_sym_id:
-    return (o << "kind_sym");
-  case int_sym_id:
-    return (o << "int_sym");
-  case expr_id:
-    return (o << "expr");
-  case type_id:
-    return (o << "type");
-  case callable_id:
-    return (o << "callable");
-  case typevar_id:
-    return (o << "typevar");
-  case typevar_constructed_id:
-    return (o << "typevar_constructed");
-  case typevar_dim_id:
-    return (o << "typevar_dim");
-  case ellipsis_dim_id:
-    return (o << "ellipsis_dim");
-  default:
-    return o << ndt::registry::data[tid].name;
-  }
-}
-
 std::ostream &dynd::ndt::operator<<(std::ostream &o, const ndt::type &rhs)
 {
   switch (rhs.get_id()) {
@@ -928,7 +838,7 @@ void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *dat
   }
 }
 
-type_id_t ndt::type::get_base_id() const { return type_registry[get_id()].bases[0]; }
+type_id_t ndt::type::get_base_id() const { return type_registry[get_id()]._bases[0]; }
 
 std::map<std::array<type_id_t, 2>, ndt::common_type::child_type> ndt::common_type::children;
 
