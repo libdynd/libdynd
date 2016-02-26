@@ -12,6 +12,7 @@ namespace nd {
 
   extern DYND_API struct DYND_API sum : declfunc<sum> {
     static callable make();
+    static callable &get();
   } sum;
 
 } // namespace dynd::nd

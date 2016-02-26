@@ -45,6 +45,7 @@ namespace nd {
       ss << "no viable overload for dynd::nd::" #NAME " with argument type \"" << src0_type << "\"";                   \
       return ss.str();                                                                                                 \
     }                                                                                                                  \
+    static callable &get();                                                                                            \
   } NAME;
 
   DYND_DEF_UNARY_OP_CALLABLE(plus, arithmetic_ids)
@@ -102,16 +103,18 @@ namespace nd {
          << "\"";                                                                                                      \
       return ss.str();                                                                                                 \
     }                                                                                                                  \
+    static nd::callable &get();                                                                                        \
   } NAME;
 
   namespace detail {
 
-    typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int16_id,
-                             int32_id, int64_id, float32_id, float64_id, complex_float32_id,
-                             complex_float64_id> binop_ids;
+    typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int16_id, int32_id, int64_id,
+                             float32_id, float64_id, complex_float32_id, complex_float64_id>
+        binop_ids;
 
-    typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int16_id,
-                             int32_id, int64_id, float32_id, float64_id> binop_real_ids;
+    typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int16_id, int32_id, int64_id,
+                             float32_id, float64_id>
+        binop_real_ids;
   }
 
   DYND_DEF_BINARY_OP_CALLABLE(add, detail::binop_ids)
@@ -144,20 +147,21 @@ namespace nd {
       }
 
       return functional::dispatch(ndt::type("(Any) -> Any"),
-                                       [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                                                  const ndt::type *src_tp) mutable -> callable & {
-                                         callable &child = children[{{dst_tp.get_id(), src_tp[0].get_id()}}];
-                                         if (child.is_null()) {
-                                           throw std::runtime_error("no child found");
-                                         }
+                                  [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                                             const ndt::type *src_tp) mutable -> callable & {
+                                    callable &child = children[{{dst_tp.get_id(), src_tp[0].get_id()}}];
+                                    if (child.is_null()) {
+                                      throw std::runtime_error("no child found");
+                                    }
 
-                                         return child;
-                                       });
+                                    return child;
+                                  });
     }
   };
 
 #define DYND_DEF_COMPOUND_OP_CALLABLE(NAME, TYPES)                                                                     \
   extern DYND_API struct DYND_API NAME : compound_arithmetic_operator<NAME, NAME##_kernel_t, TYPES> {                  \
+    static nd::callable &get();                                                                                        \
   } NAME;
 
   DYND_DEF_COMPOUND_OP_CALLABLE(compound_add, detail::binop_ids)

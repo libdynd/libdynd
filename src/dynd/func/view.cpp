@@ -9,9 +9,8 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::view::make()
-{
-  return callable::make<view_kernel>(ndt::type("(Any) -> Any"));
-}
+DYND_API nd::callable nd::view::make() { return callable::make<view_kernel>(ndt::type("(Any) -> Any")); }
+
+DYND_DEFAULT_DECLFUNC_GET(nd::view)
 
 DYND_API struct nd::view nd::view;

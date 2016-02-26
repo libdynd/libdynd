@@ -320,33 +320,6 @@ namespace nd {
     template <typename DstType, typename... ArgTypes>
     array operator()(ArgTypes &&... args)
     {
-      return get().operator()<DstType>(std::forward<ArgTypes>(args)...);
-    }
-
-    template <typename... ArgTypes>
-    array operator()(ArgTypes &&... args)
-    {
-      return get()(std::forward<ArgTypes>(args)...);
-    }
-
-    array operator()(const std::initializer_list<array> &args,
-                     const std::initializer_list<std::pair<const char *, array>> &kwds)
-    {
-      return get()(args, kwds);
-    }
-
-    static callable &get()
-    {
-      static callable self = FuncType::make();
-      return self;
-    }
-  };
-
-  template <typename FuncType>
-  struct declfunc2 {
-    template <typename DstType, typename... ArgTypes>
-    array operator()(ArgTypes &&... args)
-    {
       return FuncType::get().template operator()<DstType>(std::forward<ArgTypes>(args)...);
     }
 

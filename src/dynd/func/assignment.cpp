@@ -121,11 +121,7 @@ DYND_API nd::callable nd::assign::make()
   });
 }
 
-DYND_API nd::callable &nd::assign::get()
-{
-  static nd::callable self = nd::assign::make();
-  return self;
-}
+DYND_DEFAULT_DECLFUNC_GET(nd::assign)
 
 DYND_API struct nd::assign nd::assign;
 

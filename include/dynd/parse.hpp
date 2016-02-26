@@ -5,14 +5,14 @@
 
 #pragma once
 
-#include <string>
 #include <stdexcept>
+#include <string>
 
+#include <dynd/callable.hpp>
 #include <dynd/config.hpp>
+#include <dynd/string_encodings.hpp>
 #include <dynd/type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/string_encodings.hpp>
-#include <dynd/callable.hpp>
 
 #define DYND_BOOL_NA (2)
 #define DYND_INT8_NA (std::numeric_limits<int8_t>::min())
@@ -324,7 +324,7 @@ inline bool skip_required_whitespace(const char *&rbegin, const char *end)
  *     }
  */
 template <int N>
-inline bool parse_token(const char *&rbegin, const char *end, const char(&token)[N])
+inline bool parse_token(const char *&rbegin, const char *end, const char (&token)[N])
 {
   const char *begin = rbegin;
   skip_whitespace(begin, end);
@@ -363,7 +363,7 @@ inline bool parse_token(const char *&rbegin, const char *end, char token)
 }
 
 template <int N>
-inline bool parse_token(char *const *src, const char(&token)[N])
+inline bool parse_token(char *const *src, const char (&token)[N])
 {
   return parse_token(*reinterpret_cast<const char **>(src[0]), *reinterpret_cast<const char **>(src[1]), token);
 }
@@ -383,7 +383,7 @@ inline bool parse_token(char *const *src, const char(&token)[N])
  *     }
  */
 template <int N>
-inline bool parse_token_no_ws(const char *&rbegin, const char *end, const char(&token)[N])
+inline bool parse_token_no_ws(const char *&rbegin, const char *end, const char (&token)[N])
 {
   const char *begin = rbegin;
   if (N - 1 <= end - begin && memcmp(begin, token, N - 1) == 0) {
@@ -507,7 +507,7 @@ namespace nd {
  * Does an exact comparison of a byte range to a string literal.
  */
 template <int N>
-inline bool compare_range_to_literal(const char *begin, const char *end, const char(&token)[N])
+inline bool compare_range_to_literal(const char *begin, const char *end, const char (&token)[N])
 {
   return (end - begin) == N - 1 && !memcmp(begin, token, N - 1);
 }
@@ -1139,7 +1139,7 @@ struct DYND_API named_value {
  *     }
  */
 template <int N>
-inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char *end, named_value(&nvt)[N],
+inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char *end, named_value (&nvt)[N],
                                                  int &out_value)
 {
   using namespace std;
@@ -1475,6 +1475,7 @@ namespace nd {
       }
 
       static callable make();
+      static callable &get();
     } parse;
 
   } // namespace dynd::nd::json

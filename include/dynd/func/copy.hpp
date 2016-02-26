@@ -16,6 +16,7 @@ namespace nd {
    */
   DYND_API extern struct DYND_API copy : declfunc<copy> {
     static callable make();
+    static callable &get();
   } copy;
 
 } // namespace dynd::nd

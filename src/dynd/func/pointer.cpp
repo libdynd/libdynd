@@ -15,6 +15,6 @@ DYND_API nd::callable nd::dereference::make()
   return nd::callable::make<dereference_kernel>(ndt::type("(self: Any) -> Any"));
 }
 
+DYND_DEFAULT_DECLFUNC_GET(nd::dereference)
+
 DYND_API struct nd::dereference nd::dereference;
-
-

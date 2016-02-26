@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <dynd/diagnostics.hpp>
 #include <dynd/callable.hpp>
+#include <dynd/diagnostics.hpp>
 
 namespace dynd {
 
@@ -109,10 +109,12 @@ namespace nd {
 
   extern DYND_API struct DYND_API byteswap : declfunc<byteswap> {
     static callable make();
+    static callable &get();
   } byteswap;
 
   extern DYND_API struct DYND_API pairwise_byteswap : declfunc<pairwise_byteswap> {
     static callable make();
+    static callable &get();
   } pairwise_byteswap;
 
 } // namespace dynd::nd
