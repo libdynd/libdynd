@@ -1,6 +1,20 @@
 
 namespace dynd {
 
+bool supercedes(type_id_t lhs, type_id_t rhs) { return is_base_id_of(rhs, lhs); }
+
+template <size_t N>
+bool supercedes(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs)
+{
+  for (size_t i = 0; i < N; ++i) {
+    if (!is_base_id_of(rhs[i], lhs[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 class topological_sort_marker {
   char m_mark;
 
@@ -45,20 +59,6 @@ void topological_sort(const std::vector<ValueType> &values, const std::vector<st
     topological_sort_visit(i, values, edges, markers, res);
   }
   std::reverse(res - values.size(), res);
-}
-
-bool supercedes(type_id_t lhs, type_id_t rhs) { return lhs != rhs && is_base_id_of(rhs, lhs); }
-
-template <size_t N>
-bool supercedes(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs)
-{
-  for (size_t i = 0; i < N; ++i) {
-    if (!(lhs[i] == rhs[i] || is_base_id_of(rhs[i], lhs[i]))) {
-      return false;
-    }
-  }
-
-  return true;
 }
 
 namespace detail {
