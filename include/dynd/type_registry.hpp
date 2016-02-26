@@ -31,7 +31,7 @@ namespace ndt {
 
     const std::vector<type_id_t> &bases() const { return m_bases; }
 
-    static_assert(sizeof(bits) * 8 >= callable_id, "type_info needs more bits");
+    static_assert(sizeof(intptr_t) * 8 >= callable_id, "type_info needs more bits");
   };
 
   extern DYND_API class type_registry {
