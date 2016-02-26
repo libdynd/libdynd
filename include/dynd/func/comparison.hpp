@@ -16,7 +16,8 @@ namespace nd {
     static decltype(auto) make_children()
     {
       typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, uint8_id, uint16_id, uint32_id,
-                               uint64_id, float32_id, float64_id> numeric_ids;
+                               uint64_id, float32_id, float64_id>
+          numeric_ids;
 
       auto children = callable::make_all<KernelType, numeric_ids, numeric_ids>();
 
@@ -70,9 +71,11 @@ namespace nd {
   };
 
   extern DYND_API struct DYND_API less : comparison_operator<less, less_kernel> {
+    static callable &get();
   } less;
 
   extern DYND_API struct DYND_API less_equal : comparison_operator<less_equal, less_equal_kernel> {
+    static callable &get();
   } less_equal;
 
   extern DYND_API struct DYND_API equal : comparison_operator<equal, equal_kernel> {
@@ -90,6 +93,7 @@ namespace nd {
 
       return children;
     }
+    static callable &get();
   } equal;
 
   extern DYND_API struct DYND_API not_equal : comparison_operator<not_equal, not_equal_kernel> {
@@ -107,16 +111,20 @@ namespace nd {
 
       return children;
     }
+    static callable &get();
   } not_equal;
 
   extern DYND_API struct DYND_API greater_equal : comparison_operator<greater_equal, greater_equal_kernel> {
+    static callable &get();
   } greater_equal;
 
   extern DYND_API struct DYND_API greater : comparison_operator<greater, greater_kernel> {
+    static callable &get();
   } greater;
 
   extern DYND_API struct DYND_API total_order : declfunc<total_order> {
     static callable make();
+    static callable &get();
   } total_order;
 
 } // namespace dynd::nd

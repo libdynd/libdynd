@@ -5,8 +5,9 @@
 
 #pragma once
 
-#include <dynd/option.hpp>
 #include <dynd/kernels/base_kernel.hpp>
+#include <dynd/option.hpp>
+#include <dynd/parse.hpp>
 
 namespace dynd {
 namespace nd {

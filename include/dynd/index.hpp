@@ -12,6 +12,7 @@ namespace nd {
 
   extern DYND_API struct DYND_API index : declfunc<index> {
     static callable make();
+    static callable &get();
   } index;
 
 } // namespace dynd::nd

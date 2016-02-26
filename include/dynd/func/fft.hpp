@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <dynd/kernels/fft_kernel.hpp>
 #include <dynd/callable.hpp>
+#include <dynd/kernels/fft_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -84,18 +84,22 @@ namespace nd {
 
   extern DYND_API struct DYND_API fft : declfunc<fft> {
     static callable make();
+    static callable &get();
   } fft;
 
   extern DYND_API struct DYND_API ifft : declfunc<ifft> {
     static callable make();
+    static callable &get();
   } ifft;
 
   extern DYND_API struct DYND_API rfft : declfunc<rfft> {
     static callable make();
+    static callable &get();
   } rfft;
 
   extern DYND_API struct DYND_API irfft : declfunc<irfft> {
     static callable make();
+    static callable &get();
   } irfft;
 
   /**

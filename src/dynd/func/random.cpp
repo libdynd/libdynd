@@ -15,8 +15,9 @@ struct uniform_kernel_alias {
 
 DYND_API nd::callable nd::random::uniform::make()
 {
-  typedef type_id_sequence<int32_id, int64_id, uint32_id, uint64_id, float32_id,
-                           float64_id, complex_float32_id, complex_float64_id> numeric_ids;
+  typedef type_id_sequence<int32_id, int64_id, uint32_id, uint64_id, float32_id, float64_id, complex_float32_id,
+                           complex_float64_id>
+      numeric_ids;
 
   std::random_device random_device;
 
@@ -31,6 +32,8 @@ DYND_API nd::callable nd::random::uniform::make()
         return child;
       }));
 }
+
+DYND_DEFAULT_DECLFUNC_GET(nd::random::uniform)
 
 DYND_API struct nd::random::uniform nd::random::uniform;
 

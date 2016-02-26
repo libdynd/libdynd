@@ -21,4 +21,6 @@ DYND_API nd::callable nd::index::make()
                  const ndt::type *src_tp) mutable -> callable & { return children[src_tp[0].get_id()]; });
 }
 
+DYND_DEFAULT_DECLFUNC_GET(nd::index)
+
 DYND_API struct nd::index nd::index;

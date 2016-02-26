@@ -10,8 +10,12 @@ using namespace dynd;
 
 nd::callable nd::byteswap::make() { return callable::make<byteswap_ck>(ndt::type("(Any) -> Any")); }
 
+DYND_DEFAULT_DECLFUNC_GET(nd::byteswap)
+
 struct nd::byteswap nd::byteswap;
 
 nd::callable nd::pairwise_byteswap::make() { return callable::make<pairwise_byteswap_ck>(ndt::type("(Any) -> Any")); }
+
+DYND_DEFAULT_DECLFUNC_GET(nd::pairwise_byteswap)
 
 struct nd::pairwise_byteswap nd::pairwise_byteswap;

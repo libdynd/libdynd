@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <dynd/shape_tools.hpp>
 #include <dynd/callable.hpp>
+#include <dynd/shape_tools.hpp>
 #include <dynd/types/pointer_type.hpp>
 
 namespace dynd {
@@ -19,6 +19,7 @@ namespace nd {
    */
   extern DYND_API struct DYND_API take_by_pointer : declfunc<take_by_pointer> {
     static callable make();
+    static callable &get();
   } take_by_pointer;
 
 } // namespace dynd::nd
