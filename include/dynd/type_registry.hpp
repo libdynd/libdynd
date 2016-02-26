@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <bitset>
+
 #include <dynd/type.hpp>
 
 namespace dynd {
