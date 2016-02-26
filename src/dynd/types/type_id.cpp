@@ -147,4 +147,4 @@ std::ostream &dynd::operator<<(std::ostream &o, type_kind_t kind)
   }
 }
 
-bool dynd::is_base_id_of(type_id_t base_id, type_id_t id) { return ndt::type_registry[id].bits & (1L << base_id); }
+bool dynd::is_base_id_of(type_id_t base_id, type_id_t id) { return ndt::type_registry[id].bits[base_id]; }

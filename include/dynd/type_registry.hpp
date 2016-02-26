@@ -17,7 +17,7 @@ namespace ndt {
 
     std::vector<type_id_t> m_bases;
 
-    intptr_t bits;
+    std::bitset<64> bits;
 
     type_info(size_t nbases, const type_id_t *bases, const type &kind_tp)
         : nbases(nbases), _bases(bases), kind_tp(kind_tp), bits(0)
@@ -30,8 +30,6 @@ namespace ndt {
     }
 
     const std::vector<type_id_t> &bases() const { return m_bases; }
-
-    static_assert(sizeof(intptr_t) * 8 >= callable_id, "type_info needs more bits");
   };
 
   extern DYND_API class type_registry {
