@@ -9,6 +9,7 @@
 
 #include <dynd/fpstatus.hpp>
 #include <dynd/type.hpp>
+#include <dynd/math.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
