@@ -80,6 +80,178 @@ ndt::type::type(const std::string &rep) { type_from_datashape(rep).swap(*this); 
 
 ndt::type::type(const char *rep_begin, const char *rep_end) { type_from_datashape(rep_begin, rep_end).swap(*this); }
 
+type_kind_t ndt::type::get_kind() const
+{
+  switch (reinterpret_cast<uintptr_t>(m_ptr)) {
+  case uninitialized_id:
+    return void_kind;
+  case bool_id:
+    return bool_kind;
+  case int8_id:
+  case int16_id:
+  case int32_id:
+  case int64_id:
+  case int128_id:
+    return sint_kind;
+  case uint8_id:
+  case uint16_id:
+  case uint32_id:
+  case uint64_id:
+  case uint128_id:
+    return uint_kind;
+  case float16_id:
+  case float32_id:
+  case float64_id:
+  case float128_id:
+    return real_kind;
+  case complex_float32_id:
+  case complex_float64_id:
+    return complex_kind;
+  case void_id:
+    return void_kind;
+  default:
+    return m_ptr->get_kind();
+  }
+}
+
+size_t ndt::type::get_data_alignment() const
+{
+  switch (reinterpret_cast<uintptr_t>(m_ptr)) {
+  case uninitialized_id:
+    return 1;
+  case bool_id:
+    return alignof(bool1);
+  case int8_id:
+    return alignof(int8_t);
+  case int16_id:
+    return alignof(int16_t);
+  case int32_id:
+    return alignof(int32_t);
+  case int64_id:
+    return alignof(int64_t);
+  case int128_id:
+    return alignof(int128);
+  case uint8_id:
+    return alignof(uint8_t);
+  case uint16_id:
+    return alignof(uint16_t);
+  case uint32_id:
+    return alignof(uint32_t);
+  case uint64_id:
+    return alignof(uint64_t);
+  case uint128_id:
+    return alignof(uint128);
+  case float16_id:
+    return alignof(float16);
+  case float32_id:
+    return alignof(float);
+  case float64_id:
+    return alignof(double);
+  case float128_id:
+    return alignof(float128);
+  case complex_float32_id:
+    return alignof(complex<float>);
+  case complex_float64_id:
+    return alignof(complex<double>);
+  case void_id:
+    return 1;
+  default:
+    return m_ptr->get_data_alignment();
+  }
+}
+
+size_t ndt::type::get_data_size() const
+{
+  switch (reinterpret_cast<uintptr_t>(m_ptr)) {
+  case uninitialized_id:
+    return 0;
+  case bool_id:
+    return sizeof(bool1);
+  case int8_id:
+    return sizeof(int8_t);
+  case int16_id:
+    return sizeof(int16_t);
+  case int32_id:
+    return sizeof(int32_t);
+  case int64_id:
+    return sizeof(int64_t);
+  case int128_id:
+    return sizeof(int128);
+  case uint8_id:
+    return sizeof(uint8_t);
+  case uint16_id:
+    return sizeof(uint16_t);
+  case uint32_id:
+    return sizeof(uint32_t);
+  case uint64_id:
+    return sizeof(uint64_t);
+  case uint128_id:
+    return sizeof(uint128);
+  case float16_id:
+    return sizeof(float16);
+  case float32_id:
+    return sizeof(float);
+  case float64_id:
+    return sizeof(double);
+  case float128_id:
+    return sizeof(float128);
+  case complex_float32_id:
+    return sizeof(complex<float>);
+  case complex_float64_id:
+    return sizeof(complex<double>);
+  case void_id:
+    return 0;
+  default:
+    return m_ptr->get_data_size();
+  }
+}
+
+size_t ndt::type::get_default_data_size() const
+{
+  switch (reinterpret_cast<uintptr_t>(m_ptr)) {
+  case uninitialized_id:
+    return 0;
+  case bool_id:
+    return sizeof(bool1);
+  case int8_id:
+    return sizeof(int8_t);
+  case int16_id:
+    return sizeof(int16_t);
+  case int32_id:
+    return sizeof(int32_t);
+  case int64_id:
+    return sizeof(int64_t);
+  case int128_id:
+    return sizeof(int128);
+  case uint8_id:
+    return sizeof(uint8_t);
+  case uint16_id:
+    return sizeof(uint16_t);
+  case uint32_id:
+    return sizeof(uint32_t);
+  case uint64_id:
+    return sizeof(uint64_t);
+  case uint128_id:
+    return sizeof(uint128);
+  case float16_id:
+    return sizeof(float16);
+  case float32_id:
+    return sizeof(float);
+  case float64_id:
+    return sizeof(double);
+  case float128_id:
+    return sizeof(float128);
+  case complex_float32_id:
+    return sizeof(complex<float>);
+  case complex_float64_id:
+    return sizeof(complex<double>);
+  case void_id:
+    return 0;
+  default:
+    return m_ptr->get_default_data_size();
+  }
+}
+
 ndt::type ndt::type::at_array(int nindices, const irange *indices) const
 {
   if (this->is_builtin()) {
