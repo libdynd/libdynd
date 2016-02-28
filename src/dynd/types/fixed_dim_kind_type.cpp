@@ -115,16 +115,17 @@ bool ndt::fixed_dim_kind_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_id() != fixed_dim_id) {
+
+  if (rhs.get_id() != fixed_dim_id) {
     return false;
   }
-  else if (!rhs.is_symbolic()) {
+
+  if (rhs.get_kind() != kind_kind) {
     return false;
   }
-  else {
-    const fixed_dim_kind_type *dt = static_cast<const fixed_dim_kind_type *>(&rhs);
-    return m_element_tp == dt->m_element_tp;
-  }
+
+  const fixed_dim_kind_type *dt = static_cast<const fixed_dim_kind_type *>(&rhs);
+  return m_element_tp == dt->m_element_tp;
 }
 
 void ndt::fixed_dim_kind_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),

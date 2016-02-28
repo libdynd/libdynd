@@ -274,13 +274,17 @@ bool ndt::fixed_dim_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_id() != fixed_dim_id) {
+
+  if (rhs.get_id() != fixed_dim_id) {
     return false;
   }
-  else {
-    const fixed_dim_type *dt = static_cast<const fixed_dim_type *>(&rhs);
-    return m_element_tp == dt->m_element_tp && m_dim_size == dt->m_dim_size;
+
+  if (rhs.get_kind() == kind_kind) {
+    return false;
   }
+
+  const fixed_dim_type *dt = static_cast<const fixed_dim_type *>(&rhs);
+  return m_element_tp == dt->m_element_tp && m_dim_size == dt->m_dim_size;
 }
 
 void ndt::fixed_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
