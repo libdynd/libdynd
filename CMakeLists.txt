@@ -376,7 +376,6 @@ set(libdynd_SRC
     src/dynd/logic.cpp
     src/dynd/parse.cpp
     src/dynd/shape_tools.cpp
-    src/dynd/special.cpp
     src/dynd/string.cpp
     src/dynd/string_encodings.cpp
     src/dynd/uint128.cpp
@@ -425,7 +424,6 @@ set(libdynd_SRC
     include/dynd/platform_definitions.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
-    include/dynd/special.hpp
     include/dynd/string_encodings.hpp
     include/dynd/uint128.hpp
     include/dynd/view.hpp
