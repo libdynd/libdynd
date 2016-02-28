@@ -11,7 +11,6 @@
 
 #include <dynd/irange.hpp>
 #include <dynd/string_encodings.hpp>
-#include <dynd/math.hpp>
 
 namespace dynd {
 

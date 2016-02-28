@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/callable.hpp>
-#include <dynd/func/math.hpp>
+#include <dynd/math.hpp>
 #include <dynd/functional.hpp>
 
 using namespace std;
