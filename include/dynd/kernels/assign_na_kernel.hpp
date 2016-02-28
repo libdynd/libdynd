@@ -7,7 +7,6 @@
 
 #include <dynd/parse.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/types/date_type.hpp>
 #include <dynd/types/option_type.hpp>
 
 namespace dynd {

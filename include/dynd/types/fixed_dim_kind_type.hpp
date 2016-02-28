@@ -7,7 +7,6 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_dim_type.hpp>
-#include <dynd/types/view_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>

@@ -210,7 +210,6 @@ set(libdynd_SRC
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
     include/dynd/types/date_parser.hpp
-    include/dynd/types/date_type.hpp
     include/dynd/types/date_util.hpp
     include/dynd/types/datetime_parser.hpp
     include/dynd/types/datetime_util.hpp
@@ -240,7 +239,6 @@ set(libdynd_SRC
     include/dynd/types/typevar_dim_type.hpp
     include/dynd/types/typevar_type.hpp
     include/dynd/types/var_dim_type.hpp
-    include/dynd/types/view_type.hpp
     # Callables
     src/dynd/callables/base_callable.cpp
     include/dynd/callables/base_callable.hpp

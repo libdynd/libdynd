@@ -12,7 +12,6 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/parse.hpp>
-#include <dynd/types/date_type.hpp>
 
 using namespace std;
 using namespace dynd;
