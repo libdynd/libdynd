@@ -598,6 +598,9 @@ bool ndt::fixed_dim_type::match(const char *arrmeta, const type &candidate_tp, c
 {
   switch (candidate_tp.get_id()) {
   case fixed_dim_id:
+    if (candidate_tp.get_kind() == kind_kind) {
+      return false;
+    }
     // TODO XXX If the arrmeta is not NULL, the strides should be checked too
     return get_fixed_dim_size() == candidate_tp.extended<fixed_dim_type>()->get_fixed_dim_size() &&
            m_element_tp.match((arrmeta == NULL) ? arrmeta : (arrmeta + sizeof(fixed_dim_type_arrmeta)),
