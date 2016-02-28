@@ -100,15 +100,10 @@ else()
     endif()
 endif()
 
-# Embedded libraries
-add_subdirectory(thirdparty/cephes)
-
 # LLVM, disabled for now
 #add_definitions(${LLVM_DEFINITIONS})
 #include_directories(${LLVM_INCLUDE_DIRS})
 #llvm_map_components_to_libnames(LLVM_LINK_LIBS core option target bitreader support profiledata codegen irreader linker instrumentation objcarcopts lto)
-
-set(DYND_LINK_LIBS cephes)
 
 # Get the git revision
 include(GetGitRevisionDescriptionDyND)
@@ -388,7 +383,6 @@ set(libdynd_SRC
     include/dynd/bool1.hpp
     include/dynd/bytes.hpp
     include/dynd/callable.hpp
-    include/dynd/cephes.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
     include/dynd/complex.hpp
@@ -499,20 +493,6 @@ if (DYND_FFTW)
     set(DYND_LINK_LIBS ${DYND_LINK_LIBS} fftw3 fftw3f)
 endif()
 
-if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
-    # If we're making an installable static library,
-    # include the sublibraries source directly because
-    # including static libraries in other static libraries
-    # is a hassle
-    get_directory_property(cephes_SRC
-                           DIRECTORY "thirdparty/cephes"
-                           DEFINITION cephes_SRC)
-    set(libdynd_SRC
-        ${libdynd_SRC}
-        ${cephes_SRC}
-        )
-endif()
-
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 add_library(dynd_OBJ OBJECT ${libdynd_SRC})
@@ -572,12 +552,6 @@ set_property(
 # Add preprocessor definitions from CMake
 configure_file("include/dynd/cmake_config.hpp.in"
                "${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp")
-
-# Copy the headers from cephes that need to be installed with libdynd
-file(COPY thirdparty/cephes/rename.h
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
-file(COPY thirdparty/cephes/protos.h
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
 
 if(WIN32)
     set_target_properties(libdynd
