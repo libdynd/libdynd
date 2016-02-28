@@ -434,4 +434,27 @@ DYND_CUDA_HOST_DEVICE complex<T> sin(complex<T> z)
   return complex<T>(sin(x) * cosh(y), cos(x) * sinh(y));
 }
 
+namespace nd {
+
+  extern DYND_API struct DYND_API cos : declfunc<cos> {
+    static callable make();
+    static callable &get();
+  } cos;
+
+  extern DYND_API struct DYND_API sin : declfunc<sin> {
+    static callable make();
+    static callable &get();
+  } sin;
+
+  extern DYND_API struct DYND_API tan : declfunc<tan> {
+    static callable make();
+    static callable &get();
+  } tan;
+
+  extern DYND_API struct DYND_API exp : declfunc<exp> {
+    static callable make();
+    static callable &get();
+  } exp;
+
+} // namespace dynd::nd
 } // namespace dynd
