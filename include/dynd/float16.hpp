@@ -294,11 +294,6 @@ public:
 
 };
 
-DYND_CUDA_HOST_DEVICE inline bool isfinite(float16 value)
-{
-  return value.isfinite_();
-}
-
 inline float16 operator+(const float16 &DYND_UNUSED(lhs),
                          const float16 &DYND_UNUSED(rhs))
 {

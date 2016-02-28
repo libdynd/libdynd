@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/config.hpp>
+#include <dynd/callable.hpp>
 
 namespace dynd {
 
@@ -279,38 +279,46 @@ DYND_CUDA_HOST_DEVICE complex<T> exp(complex<T> z)
 
     if (isfinite(i)) {
       ret = complex<T>(x * c, x * s);
-    } else {
+    }
+    else {
       ret = complex<T>(_nan<T>(NULL), copysign(_nan<T>(NULL), i));
     }
-  } else if (isnan(r)) {
+  }
+  else if (isnan(r)) {
     // r is nan
     if (i == 0) {
       ret = complex<T>(r, 0);
-    } else {
+    }
+    else {
       ret = complex<T>(r, copysign(_nan<T>(NULL), i));
     }
-  } else {
+  }
+  else {
     // r is +- inf
     if (r > 0) {
       if (i == 0) {
         ret = complex<T>(r, i);
-      } else if (isfinite(i)) {
+      }
+      else if (isfinite(i)) {
         c = cos(i);
         s = sin(i);
 
         ret = complex<T>(r * c, r * s);
-      } else {
+      }
+      else {
         // x = +inf, y = +-inf | nan
         ret = complex<T>(r, _nan<T>(NULL));
       }
-    } else {
+    }
+    else {
       if (isfinite(i)) {
         x = exp(r);
         c = cos(i);
         s = sin(i);
 
         ret = complex<T>(x * c, x * s);
-      } else {
+      }
+      else {
         // x = -inf, y = nan | +i inf
         ret = complex<T>(0, 0);
       }
@@ -331,8 +339,7 @@ DYND_CUDA_HOST_DEVICE inline complex<T> sqrt(complex<T> z)
 {
   using namespace std;
   // We risk spurious overflow for components >= DBL_MAX / (1 + sqrt(2))
-  const T thresh =
-      (std::numeric_limits<T>::max)() / (1 + ::sqrt(static_cast<T>(2)));
+  const T thresh = (std::numeric_limits<T>::max)() / (1 + ::sqrt(static_cast<T>(2)));
 
   complex<T> result;
   T a = z.real(), b = z.imag();
@@ -357,7 +364,8 @@ DYND_CUDA_HOST_DEVICE inline complex<T> sqrt(complex<T> z)
     // csqrt(-inf + y i) = 0 + inf i
     if (signbit(a)) {
       return complex<T>(std::fabs(b - b), copysign(a, b));
-    } else {
+    }
+    else {
       return complex<T>(a, copysign(b - b, b));
     }
   }
@@ -368,7 +376,8 @@ DYND_CUDA_HOST_DEVICE inline complex<T> sqrt(complex<T> z)
     a *= 0.25;
     b *= 0.25;
     scale = true;
-  } else {
+  }
+  else {
     scale = false;
   }
 
@@ -376,7 +385,8 @@ DYND_CUDA_HOST_DEVICE inline complex<T> sqrt(complex<T> z)
   if (a >= 0) {
     t = std::sqrt((a + hypot(a, b)) * 0.5);
     result = complex<T>(t, b / (2 * t));
-  } else {
+  }
+  else {
     t = std::sqrt((-a + hypot(a, b)) * 0.5);
     result = complex<T>(std::fabs(b) / (2 * t), copysign(t, b));
   }
@@ -384,7 +394,8 @@ DYND_CUDA_HOST_DEVICE inline complex<T> sqrt(complex<T> z)
   // Rescale
   if (scale) {
     return complex<T>(result.real() * 2, result.imag());
-  } else {
+  }
+  else {
     return result;
   }
 }
