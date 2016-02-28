@@ -6,7 +6,6 @@
 #include <dynd/json_formatter.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/date_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>

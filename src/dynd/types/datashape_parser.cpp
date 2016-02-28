@@ -22,7 +22,6 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/types/date_type.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/bytes_type.hpp>

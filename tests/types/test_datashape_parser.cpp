@@ -16,7 +16,6 @@
 #include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/date_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/option_type.hpp>

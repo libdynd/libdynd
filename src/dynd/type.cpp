@@ -18,7 +18,6 @@
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/char_type.hpp>
-#include <dynd/types/date_type.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>

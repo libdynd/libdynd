@@ -16,7 +16,6 @@
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/types/type_id.hpp>
-#include <dynd/types/date_type.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/adapt_type.hpp>
