@@ -118,21 +118,6 @@ script:
 after_script:
 - popd
 - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false} == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
-- |
-   declare exitCode;
-   curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.3/lib/travis-after-all.js | node
-   exitCode=$?
-   if [ $exitCode -eq 0 ]; then
-      echo 'Hello, world!'
-   fi
-
-#- ! '
-#  declare exitCode;
-#  exitCode=$?
-#  if [ $exitCode -eq 0 ]; then ./trigger_python.sh $TRAVIS_TOKEN; fi
-#'
-
-#  curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.1/lib/travis-after-all.js | node
 
 notifications:
   email: false

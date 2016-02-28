@@ -102,15 +102,13 @@ endif()
 
 # Embedded libraries
 add_subdirectory(thirdparty/cephes)
-add_subdirectory(thirdparty/datetime)
-include_directories(thirdparty/datetime/include)
 
 # LLVM, disabled for now
 #add_definitions(${LLVM_DEFINITIONS})
 #include_directories(${LLVM_INCLUDE_DIRS})
 #llvm_map_components_to_libnames(LLVM_LINK_LIBS core option target bitreader support profiledata codegen irreader linker instrumentation objcarcopts lto)
 
-set(DYND_LINK_LIBS cephes datetime)
+set(DYND_LINK_LIBS cephes)
 
 # Get the git revision
 include(GetGitRevisionDescriptionDyND)
@@ -159,10 +157,6 @@ set(libdynd_SRC
     src/dynd/types/cuda_device_type.cpp
     src/dynd/types/datashape_formatter.cpp
     src/dynd/types/datashape_parser.cpp
-    src/dynd/types/date_parser.cpp
-    src/dynd/types/date_util.cpp
-    src/dynd/types/datetime_parser.cpp
-    src/dynd/types/datetime_util.cpp
     src/dynd/types/dim_fragment_type.cpp
     src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/fixed_dim_type.cpp
@@ -179,8 +173,6 @@ set(libdynd_SRC
     src/dynd/types/struct_type.cpp
     src/dynd/types/substitute_shape.cpp
     src/dynd/types/substitute_typevars.cpp
-    src/dynd/types/time_parser.cpp
-    src/dynd/types/time_util.cpp
     src/dynd/types/tuple_type.cpp
     src/dynd/types/type_id.cpp
     src/dynd/types/type_type.cpp
@@ -209,10 +201,6 @@ set(libdynd_SRC
     include/dynd/types/cuda_device_type.hpp
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
-    include/dynd/types/date_parser.hpp
-    include/dynd/types/date_util.hpp
-    include/dynd/types/datetime_parser.hpp
-    include/dynd/types/datetime_util.hpp
     include/dynd/types/dim_fragment_type.hpp
     include/dynd/types/ellipsis_dim_type.hpp
     include/dynd/types/fixed_dim_type.hpp
@@ -230,8 +218,6 @@ set(libdynd_SRC
     include/dynd/types/struct_type.hpp
     include/dynd/types/substitute_shape.hpp
     include/dynd/types/substitute_typevars.hpp
-    include/dynd/types/time_parser.hpp
-    include/dynd/types/time_util.hpp
     include/dynd/types/tuple_type.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/type_type.hpp
@@ -523,13 +509,9 @@ if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
     get_directory_property(cephes_SRC
                            DIRECTORY "thirdparty/cephes"
                            DEFINITION cephes_SRC)
-    get_directory_property(datetime_SRC
-                           DIRECTORY "thirdparty/datetime"
-                           DEFINITION datetime_SRC)
     set(libdynd_SRC
         ${libdynd_SRC}
         ${cephes_SRC}
-        ${datetime_SRC}
         )
 endif()
 
