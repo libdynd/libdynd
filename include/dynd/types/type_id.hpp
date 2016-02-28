@@ -170,9 +170,6 @@ enum type_id_t {
 
   // The number of built-in, atomic types (including uninitialized and void)
   builtin_id_count = 19,
-
-  // The number of types
-  static_id_max = dim_fragment_id
 };
 
 template <type_id_t Value>

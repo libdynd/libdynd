@@ -284,7 +284,6 @@ set(libdynd_SRC
     src/dynd/kernels/fft_kernel.cpp
     src/dynd/kernels/kernel_builder.cpp
     src/dynd/kernels/kernel_prefix.cpp
-    src/dynd/kernels/multidispatch_kernel.cpp
     src/dynd/kernels/rolling_kernel.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
@@ -350,7 +349,6 @@ set(libdynd_SRC
     src/dynd/convert.cpp
     src/dynd/float16.cpp
     src/dynd/float128.cpp
-    src/dynd/functional.cpp
     src/dynd/int128.cpp
     src/dynd/io.cpp
     src/dynd/math.cpp

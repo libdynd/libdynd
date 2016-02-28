@@ -17,6 +17,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 int func0(int, float, double) { return 0; }
 int func1(int, double, double) { return 1; }
 int func2(int, float, float) { return 2; }
@@ -112,15 +113,14 @@ TEST(MultiDispatchCallable, Values)
   EXPECT_EQ(ndt::type("3 * float64"), c.get_type());
   EXPECT_JSON_EQ_ARR("[3, 8, 6]", c);
 
-  // Promote to (real, real) -> real
-  /*
-    a = parse_json("3 * int16", "[1, 3, 5]");
-    b = parse_json("3 * float16", "[2, 5, 1]");
-    c = af(a, b);
-    EXPECT_EQ(ndt::type("3 * float64"), c.get_type());
-    EXPECT_JSON_EQ_ARR("[-1, -2, 4]", c);
-  */
+// Promote to (real, real) -> real
+a = parse_json("3 * int16", "[1, 3, 5]");
+b = parse_json("3 * float16", "[2, 5, 1]");
+c = af(a, b);
+EXPECT_EQ(ndt::type("3 * float64"), c.get_type());
+EXPECT_JSON_EQ_ARR("[-1, -2, 4]", c);
 }
+*/
 
 TEST(Multidispatch, Unary)
 {
