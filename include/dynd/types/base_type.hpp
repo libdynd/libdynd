@@ -540,57 +540,6 @@ namespace ndt {
 
   inline long intrusive_ptr_use_count(const base_type *ptr) { return ptr->m_use_count; }
 
-  namespace detail {
-    extern DYND_API uint8_t builtin_data_sizes[builtin_id_count];
-    extern DYND_API uint8_t builtin_kinds[builtin_id_count];
-    extern DYND_API uint8_t builtin_data_alignments[builtin_id_count];
-  } // namespace dynd::ndt::detail
-
-  /**
-   * Returns the data size for the given type.
-   *
-   * \param bt  Pointer to a base_type object, or a builtin type id.
-   */
-  inline intptr_t get_base_type_data_size(const base_type *bt)
-  {
-    if (is_builtin_type(bt)) {
-      return static_cast<intptr_t>(detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(bt)]);
-    }
-    else {
-      return bt->get_data_size();
-    }
-  }
-
-  /**
-   * Returns the kind for the given type.
-   *
-   * \param bt  Pointer to a base_type object, or a builtin type id.
-   */
-  inline type_kind_t get_base_type_kind(const base_type *bt)
-  {
-    if (is_builtin_type(bt)) {
-      return static_cast<type_kind_t>(detail::builtin_kinds[reinterpret_cast<uintptr_t>(bt)]);
-    }
-    else {
-      return bt->get_kind();
-    }
-  }
-
-  /**
-   * Returns the alignment for the given type.
-   *
-   * \param bt  Pointer to a base_type object, or a builtin type id.
-   */
-  inline size_t get_base_type_alignment(const base_type *bt)
-  {
-    if (is_builtin_type(bt)) {
-      return static_cast<size_t>(detail::builtin_data_alignments[reinterpret_cast<uintptr_t>(bt)]);
-    }
-    else {
-      return bt->get_data_alignment();
-    }
-  }
-
 } // namespace dynd::ndt
 
 /**
