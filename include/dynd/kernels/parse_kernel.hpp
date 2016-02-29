@@ -106,7 +106,7 @@ namespace nd {
     }
 
     template <type_id_t RetTypeID>
-    struct parse_kernel : base_kernel<parse_kernel<RetTypeID>, 2> {
+    struct parse_kernel : base_strided_kernel<parse_kernel<RetTypeID>, 2> {
       typedef typename type_of<RetTypeID>::type ret_type;
 
       void single(char *ret, char *const *args)
@@ -124,7 +124,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<bool_id> : base_kernel<parse_kernel<bool_id>, 2> {
+    struct parse_kernel<bool_id> : base_strided_kernel<parse_kernel<bool_id>, 2> {
       void single(char *ret, char *const *args)
       {
         *reinterpret_cast<bool1 *>(ret) =
@@ -133,7 +133,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<string_id> : base_kernel<parse_kernel<string_id>, 2> {
+    struct parse_kernel<string_id> : base_strided_kernel<parse_kernel<string_id>, 2> {
       void single(char *res, char *const *args)
       {
         const char *&rbegin = *reinterpret_cast<const char **>(args[0]);
@@ -214,7 +214,7 @@ namespace nd {
     */
 
     template <>
-    struct parse_kernel<option_id> : base_kernel<parse_kernel<option_id>> {
+    struct parse_kernel<option_id> : base_strided_kernel<parse_kernel<option_id>, 2> {
       intptr_t parse_offset;
 
       ~parse_kernel()
@@ -260,7 +260,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<struct_id> : base_kernel<parse_kernel<struct_id>, 2> {
+    struct parse_kernel<struct_id> : base_strided_kernel<parse_kernel<struct_id>, 2> {
       ndt::type res_tp;
       size_t field_count;
       const size_t *data_offsets;
@@ -351,7 +351,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<fixed_dim_id> : base_kernel<parse_kernel<fixed_dim_id>> {
+    struct parse_kernel<fixed_dim_id> : base_strided_kernel<parse_kernel<fixed_dim_id>, 2> {
       ndt::type ret_tp;
       size_t _size;
       intptr_t stride;
@@ -401,7 +401,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<var_dim_id> : base_kernel<parse_kernel<var_dim_id>> {
+    struct parse_kernel<var_dim_id> : base_strided_kernel<parse_kernel<var_dim_id>, 2> {
       typedef ndt::var_dim_type::data_type ret_type;
 
       ndt::type ret_tp;

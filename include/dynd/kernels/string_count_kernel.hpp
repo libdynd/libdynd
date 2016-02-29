@@ -12,7 +12,7 @@
 namespace dynd {
 namespace nd {
 
-  struct string_count_kernel : base_kernel<string_count_kernel, 2> {
+  struct string_count_kernel : base_strided_kernel<string_count_kernel, 2> {
     void single(char *dst, char *const *src)
     {
       intptr_t *d = reinterpret_cast<intptr_t *>(dst);

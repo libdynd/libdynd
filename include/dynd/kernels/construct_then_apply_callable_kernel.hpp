@@ -20,9 +20,10 @@ namespace nd {
   template <typename func_type, typename R, typename... A, size_t... I, typename... K, size_t... J>                    \
   struct construct_then_apply_callable_kernel<func_type, R, type_sequence<A...>, index_sequence<I...>,                 \
                                               type_sequence<K...>, index_sequence<J...>>                               \
-      : base_kernel<construct_then_apply_callable_kernel<func_type, R, type_sequence<A...>, index_sequence<I...>,      \
-                                                         type_sequence<K...>, index_sequence<J...>>,                   \
-                    sizeof...(A)>,                                                                                     \
+      : base_strided_kernel<                                                                                           \
+            construct_then_apply_callable_kernel<func_type, R, type_sequence<A...>, index_sequence<I...>,              \
+                                                 type_sequence<K...>, index_sequence<J...>>,                           \
+            sizeof...(A)>,                                                                                             \
         apply_args<type_sequence<A...>, index_sequence<I...>> {                                                        \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
     typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;                                           \
@@ -72,9 +73,10 @@ namespace nd {
   template <typename func_type, typename... A, size_t... I, typename... K, size_t... J>                                \
   struct construct_then_apply_callable_kernel<func_type, void, type_sequence<A...>, index_sequence<I...>,              \
                                               type_sequence<K...>, index_sequence<J...>>                               \
-      : base_kernel<construct_then_apply_callable_kernel<func_type, void, type_sequence<A...>, index_sequence<I...>,   \
-                                                         type_sequence<K...>, index_sequence<J...>>,                   \
-                    sizeof...(A)>,                                                                                     \
+      : base_strided_kernel<                                                                                           \
+            construct_then_apply_callable_kernel<func_type, void, type_sequence<A...>, index_sequence<I...>,           \
+                                                 type_sequence<K...>, index_sequence<J...>>,                           \
+            sizeof...(A)>,                                                                                             \
         apply_args<type_sequence<A...>, index_sequence<I...>> {                                                        \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
     typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;                                           \

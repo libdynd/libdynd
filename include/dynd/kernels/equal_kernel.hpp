@@ -12,7 +12,7 @@ namespace dynd {
 namespace nd {
 
   template <type_id_t I0, type_id_t I1>
-  struct equal_kernel : base_kernel<equal_kernel<I0, I1>, 2> {
+  struct equal_kernel : base_strided_kernel<equal_kernel<I0, I1>, 2> {
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef typename std::common_type<A0, A1>::type T;
@@ -25,7 +25,7 @@ namespace nd {
   };
 
   template <type_id_t I0>
-  struct equal_kernel<I0, I0> : base_kernel<equal_kernel<I0, I0>, 2> {
+  struct equal_kernel<I0, I0> : base_strided_kernel<equal_kernel<I0, I0>, 2> {
     typedef typename type_of<I0>::type A0;
 
     void single(char *dst, char *const *src)
@@ -35,7 +35,7 @@ namespace nd {
   };
 
   template <>
-  struct equal_kernel<tuple_id, tuple_id> : base_kernel<equal_kernel<tuple_id, tuple_id>, 2> {
+  struct equal_kernel<tuple_id, tuple_id> : base_strided_kernel<equal_kernel<tuple_id, tuple_id>, 2> {
     size_t field_count;
     const size_t *src0_data_offsets, *src1_data_offsets;
     // After this are field_count sorting_less kernel offsets, for

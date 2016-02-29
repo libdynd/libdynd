@@ -10,7 +10,7 @@
 namespace dynd {
 namespace nd {
 
-  struct all_kernel : base_kernel<all_kernel, 1> {
+  struct all_kernel : base_strided_kernel<all_kernel, 1> {
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<bool1 *>(dst) = *reinterpret_cast<bool1 *>(dst) && *reinterpret_cast<bool1 *>(src[0]);

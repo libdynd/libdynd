@@ -20,9 +20,9 @@ namespace nd {
   template <typename func_type, func_type func, typename R, typename... A, size_t... I, typename... K, size_t... J>    \
   struct apply_function_kernel<func_type, func, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>,     \
                                index_sequence<J...>>                                                                   \
-      : base_kernel<apply_function_kernel<func_type, func, R, type_sequence<A...>, index_sequence<I...>,               \
-                                          type_sequence<K...>, index_sequence<J...>>,                                  \
-                    sizeof...(A)>,                                                                                     \
+      : base_strided_kernel<apply_function_kernel<func_type, func, R, type_sequence<A...>, index_sequence<I...>,       \
+                                                  type_sequence<K...>, index_sequence<J...>>,                          \
+                            sizeof...(A)>,                                                                             \
         apply_args<type_sequence<A...>, index_sequence<I...>>,                                                         \
         apply_kwds<type_sequence<K...>, index_sequence<J...>> {                                                        \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
@@ -67,9 +67,9 @@ namespace nd {
   template <typename func_type, func_type func, typename... A, size_t... I, typename... K, size_t... J>                \
   struct apply_function_kernel<func_type, func, void, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>,  \
                                index_sequence<J...>>                                                                   \
-      : base_kernel<apply_function_kernel<func_type, func, void, type_sequence<A...>, index_sequence<I...>,            \
-                                          type_sequence<K...>, index_sequence<J...>>,                                  \
-                    sizeof...(A)>,                                                                                     \
+      : base_strided_kernel<apply_function_kernel<func_type, func, void, type_sequence<A...>, index_sequence<I...>,    \
+                                                  type_sequence<K...>, index_sequence<J...>>,                          \
+                            sizeof...(A)>,                                                                             \
         apply_args<type_sequence<A...>, index_sequence<I...>>,                                                         \
         apply_kwds<type_sequence<K...>, index_sequence<J...>> {                                                        \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \

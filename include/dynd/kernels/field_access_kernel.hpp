@@ -11,7 +11,7 @@
 namespace dynd {
 namespace nd {
 
-  struct field_access_kernel : base_kernel<field_access_kernel, 1> {
+  struct field_access_kernel : base_strided_kernel<field_access_kernel, 1> {
     const uintptr_t data_offset;
 
     field_access_kernel(uintptr_t data_offset) : data_offset(data_offset) {}

@@ -15,7 +15,7 @@ namespace nd {
   struct forward_na_kernel;
 
   template <int I>
-  struct forward_na_kernel<I> : base_kernel<forward_na_kernel<I>, 2> {
+  struct forward_na_kernel<I> : base_strided_kernel<forward_na_kernel<I>, 2> {
     struct static_data_type {
       callable child;
     };
@@ -96,7 +96,7 @@ namespace nd {
 
   template <typename FuncType>
   struct option_comparison_kernel<FuncType, true, true>
-      : base_kernel<option_comparison_kernel<FuncType, true, true>, 2> {
+      : base_strided_kernel<option_comparison_kernel<FuncType, true, true>, 2> {
     intptr_t is_na_rhs_offset;
     intptr_t comp_offset;
     intptr_t assign_na_offset;

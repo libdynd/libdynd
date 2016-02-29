@@ -14,7 +14,7 @@ namespace nd {
     // Right associative, evaluate the reduction from right to left:
     //    dst_(0) = a[n-1]
     //    dst_(i+1) = dst_(i) <OP> a[n-1-(i+1)]
-    struct DYND_API left_compound_kernel : base_kernel<left_compound_kernel, 1> {
+    struct DYND_API left_compound_kernel : base_strided_kernel<left_compound_kernel, 1> {
       ~left_compound_kernel() { get_child()->destroy(); }
 
       void single(char *dst, char *const *src)
@@ -52,7 +52,7 @@ namespace nd {
     // Left associative, evaluate the reduction from left to right:
     //    dst_(0) = a[0]
     //    dst_(i+1) = a[i+1] <OP> dst_(i)
-    struct DYND_API right_compound_kernel : base_kernel<right_compound_kernel, 1> {
+    struct DYND_API right_compound_kernel : base_strided_kernel<right_compound_kernel, 1> {
       ~right_compound_kernel() { get_child()->destroy(); }
 
       void single(char *dst, char *const *src)

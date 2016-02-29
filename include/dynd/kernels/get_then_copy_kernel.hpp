@@ -12,7 +12,7 @@ namespace dynd {
 namespace nd {
 
   template <typename ReturnType, typename TypeType, ReturnType (TypeType::*Func)() const>
-  struct get_then_copy_kernel : base_kernel<get_then_copy_kernel<ReturnType, TypeType, Func>, 0> {
+  struct get_then_copy_kernel : base_strided_kernel<get_then_copy_kernel<ReturnType, TypeType, Func>, 0> {
     ndt::type tp;
 
     get_then_copy_kernel(const ndt::type &tp) : tp(tp) {}

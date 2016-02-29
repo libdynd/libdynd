@@ -14,7 +14,7 @@
 namespace dynd {
 namespace nd {
 
-  struct string_split_kernel : base_kernel<string_split_kernel, 2> {
+  struct string_split_kernel : base_strided_kernel<string_split_kernel, 2> {
 
     intrusive_ptr<memory_block_data> m_dst_memblock;
 

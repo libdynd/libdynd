@@ -11,7 +11,7 @@
 namespace dynd {
 namespace nd {
 
-  struct binary_search_kernel : base_kernel<binary_search_kernel, 2> {
+  struct binary_search_kernel : base_strided_kernel<binary_search_kernel, 2> {
     const intptr_t src0_size;
     const intptr_t src0_stride;
 

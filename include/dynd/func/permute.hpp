@@ -16,7 +16,7 @@ namespace kernels {
   struct permute_ck;
 
   template <int N>
-  struct permute_ck<N, true> : nd::base_kernel<permute_ck<N, true>, N> {
+  struct permute_ck<N, true> : nd::base_strided_kernel<permute_ck<N, true>, N> {
     typedef permute_ck self_type;
 
     intptr_t perm[N];
@@ -111,7 +111,7 @@ namespace kernels {
   };
 
   template <int N>
-  struct permute_ck<N, false> : nd::base_kernel<permute_ck<N, false>, N> {
+  struct permute_ck<N, false> : nd::base_strided_kernel<permute_ck<N, false>, N> {
     typedef permute_ck self_type;
 
     intptr_t perm[N];

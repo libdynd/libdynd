@@ -20,9 +20,10 @@ namespace nd {
   template <typename T, typename mem_func_type, typename R, typename... A, size_t... I, typename... K, size_t... J>    \
   struct apply_member_function_kernel<T *, mem_func_type, R, type_sequence<A...>, index_sequence<I...>,                \
                                       type_sequence<K...>, index_sequence<J...>>                                       \
-      : base_kernel<apply_member_function_kernel<T *, mem_func_type, R, type_sequence<A...>, index_sequence<I...>,     \
-                                                 type_sequence<K...>, index_sequence<J...>>,                           \
-                    sizeof...(A)>,                                                                                     \
+      : base_strided_kernel<                                                                                           \
+            apply_member_function_kernel<T *, mem_func_type, R, type_sequence<A...>, index_sequence<I...>,             \
+                                         type_sequence<K...>, index_sequence<J...>>,                                   \
+            sizeof...(A)>,                                                                                             \
         apply_args<type_sequence<A...>, index_sequence<I...>>,                                                         \
         apply_kwds<type_sequence<K...>, index_sequence<J...>> {                                                        \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
@@ -77,9 +78,10 @@ namespace nd {
   template <typename T, typename mem_func_type, typename... A, size_t... I, typename... K, size_t... J>                \
   struct apply_member_function_kernel<T *, mem_func_type, void, type_sequence<A...>, index_sequence<I...>,             \
                                       type_sequence<K...>, index_sequence<J...>>                                       \
-      : base_kernel<apply_member_function_kernel<T *, mem_func_type, void, type_sequence<A...>, index_sequence<I...>,  \
-                                                 type_sequence<K...>, index_sequence<J...>>,                           \
-                    sizeof...(A)>,                                                                                     \
+      : base_strided_kernel<                                                                                           \
+            apply_member_function_kernel<T *, mem_func_type, void, type_sequence<A...>, index_sequence<I...>,          \
+                                         type_sequence<K...>, index_sequence<J...>>,                                   \
+            sizeof...(A)>,                                                                                             \
         apply_args<type_sequence<A...>, index_sequence<I...>>,                                                         \
         apply_kwds<type_sequence<K...>, index_sequence<J...>> {                                                        \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
