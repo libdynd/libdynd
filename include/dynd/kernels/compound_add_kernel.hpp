@@ -14,7 +14,8 @@ namespace nd {
   struct compound_add_kernel;
 
   template <typename DstType, typename Src0Type>
-  struct compound_add_kernel<DstType, Src0Type, false> : base_kernel<compound_add_kernel<DstType, Src0Type, false>, 1> {
+  struct compound_add_kernel<DstType, Src0Type, false>
+      : base_strided_kernel<compound_add_kernel<DstType, Src0Type, false>, 1> {
     typedef DstType dst_type;
     typedef Src0Type src0_type;
 
@@ -37,7 +38,8 @@ namespace nd {
   };
 
   template <typename DstType, typename Src0Type>
-  struct compound_add_kernel<DstType, Src0Type, true> : base_kernel<compound_add_kernel<DstType, Src0Type, true>, 1> {
+  struct compound_add_kernel<DstType, Src0Type, true>
+      : base_strided_kernel<compound_add_kernel<DstType, Src0Type, true>, 1> {
     typedef DstType dst_type;
     typedef Src0Type src0_type;
 
@@ -62,7 +64,8 @@ namespace nd {
   };
 
   template <typename Src0Type>
-  struct compound_add_kernel<bool1, Src0Type, true> : base_kernel<compound_add_kernel<bool1, Src0Type, true>, 1> {
+  struct compound_add_kernel<bool1, Src0Type, true>
+      : base_strided_kernel<compound_add_kernel<bool1, Src0Type, true>, 1> {
     typedef bool1 dst_type;
     typedef Src0Type src0_type;
 

@@ -436,39 +436,6 @@ ndt::type ndt::factor_categorical(const nd::array &values)
   return type(new categorical_type(categories, true), false);
 }
 
-struct get_ints_kernel : nd::base_kernel<get_ints_kernel> {
-  nd::array self;
-
-  get_ints_kernel(const nd::array &self) : self(self) {}
-
-  void call(nd::array *dst, const nd::array *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                          const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                          intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                          intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    ckb->emplace_back<get_ints_kernel>(kernreq, kwds[0]);
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    ndt::type udt = n.get_dtype().value_type();
-    const ndt::categorical_type *cd = udt.extended<ndt::categorical_type>();
-    return n.view_scalars(cd->get_storage_type());
-  }
-};
-
 static ndt::type property_type_get_storage_type(ndt::type d)
 {
   const ndt::categorical_type *cd = d.extended<ndt::categorical_type>();

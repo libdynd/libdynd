@@ -17,7 +17,7 @@ namespace nd {
 
     template <>
     struct total_order_kernel<bool_id, bool_kind_id, bool_id, bool_kind_id>
-        : base_kernel<total_order_kernel<bool_id, bool_kind_id, bool_id, bool_kind_id>, 2> {
+        : base_strided_kernel<total_order_kernel<bool_id, bool_kind_id, bool_id, bool_kind_id>, 2> {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<int *>(dst) =
@@ -27,7 +27,7 @@ namespace nd {
 
     template <>
     struct total_order_kernel<int32_id, int_kind_id, int32_id, int_kind_id>
-        : base_kernel<total_order_kernel<int32_id, int_kind_id, int32_id, int_kind_id>, 2> {
+        : base_strided_kernel<total_order_kernel<int32_id, int_kind_id, int32_id, int_kind_id>, 2> {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<int *>(dst) = *reinterpret_cast<int *>(src[0]) < *reinterpret_cast<int *>(src[1]);
@@ -36,7 +36,7 @@ namespace nd {
 
     template <>
     struct total_order_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id>
-        : base_kernel<total_order_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id>, 2> {
+        : base_strided_kernel<total_order_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id>, 2> {
       size_t size;
 
       total_order_kernel(size_t size) : size(size) {}
@@ -56,7 +56,7 @@ namespace nd {
 
     template <>
     struct total_order_kernel<string_id, string_kind_id, string_id, string_kind_id>
-        : base_kernel<total_order_kernel<string_id, string_kind_id, string_id, string_kind_id>, 2> {
+        : base_strided_kernel<total_order_kernel<string_id, string_kind_id, string_id, string_kind_id>, 2> {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<int *>(dst) = std::lexicographical_compare(

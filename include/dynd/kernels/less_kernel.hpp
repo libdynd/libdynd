@@ -12,7 +12,7 @@ namespace dynd {
 namespace nd {
 
   template <type_id_t Arg0ID, type_id_t Arg1ID>
-  struct less_kernel : base_kernel<less_kernel<Arg0ID, Arg1ID>, 2> {
+  struct less_kernel : base_strided_kernel<less_kernel<Arg0ID, Arg1ID>, 2> {
     typedef typename type_of<Arg0ID>::type arg0_type;
     typedef typename type_of<Arg1ID>::type arg1_type;
     typedef typename std::common_type<arg0_type, arg1_type>::type common_type;
@@ -25,7 +25,7 @@ namespace nd {
   };
 
   template <type_id_t ArgID>
-  struct less_kernel<ArgID, ArgID> : base_kernel<less_kernel<ArgID, ArgID>, 2> {
+  struct less_kernel<ArgID, ArgID> : base_strided_kernel<less_kernel<ArgID, ArgID>, 2> {
     typedef typename type_of<ArgID>::type arg_type;
 
     void single(char *dst, char *const *src)

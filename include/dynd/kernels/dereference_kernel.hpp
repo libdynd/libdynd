@@ -10,7 +10,7 @@
 namespace dynd {
 namespace nd {
 
-  struct dereference_kernel : base_kernel<dereference_kernel, 1> {
+  struct dereference_kernel : base_strided_kernel<dereference_kernel, 1> {
     ndt::type dst_tp;
 
     dereference_kernel(const ndt::type &dst_tp) : dst_tp(dst_tp) {}

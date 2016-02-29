@@ -122,7 +122,7 @@ namespace nd {
 
   template <typename FuncType>
   struct option_arithmetic_kernel<FuncType, true, false>
-      : base_kernel<option_arithmetic_kernel<FuncType, true, false>, 2> {
+      : base_strided_kernel<option_arithmetic_kernel<FuncType, true, false>, 2> {
     intptr_t arith_offset;
     intptr_t assign_na_offset;
 
@@ -181,7 +181,7 @@ namespace nd {
 
   template <typename FuncType>
   struct option_arithmetic_kernel<FuncType, false, true>
-      : base_kernel<option_arithmetic_kernel<FuncType, false, true>, 2> {
+      : base_strided_kernel<option_arithmetic_kernel<FuncType, false, true>, 2> {
     intptr_t arith_offset;
     intptr_t assign_na_offset;
 
@@ -240,7 +240,7 @@ namespace nd {
 
   template <typename FuncType>
   struct option_arithmetic_kernel<FuncType, true, true>
-      : base_kernel<option_arithmetic_kernel<FuncType, true, true>, 2> {
+      : base_strided_kernel<option_arithmetic_kernel<FuncType, true, true>, 2> {
     intptr_t is_na_rhs_offset;
     intptr_t arith_offset;
     intptr_t assign_na_offset;

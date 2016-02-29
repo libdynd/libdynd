@@ -12,7 +12,7 @@ namespace dynd {
 namespace nd {
 
   template <type_id_t Src0TypeID>
-  struct min_kernel : base_kernel<min_kernel<Src0TypeID>, 1> {
+  struct min_kernel : base_strided_kernel<min_kernel<Src0TypeID>, 1> {
     typedef typename type_of<Src0TypeID>::type src0_type;
     typedef src0_type dst_type;
 
@@ -39,7 +39,7 @@ namespace nd {
   };
 
   template <>
-  struct min_kernel<complex_float32_id> : base_kernel<min_kernel<complex_float32_id>, 1> {
+  struct min_kernel<complex_float32_id> : base_strided_kernel<min_kernel<complex_float32_id>, 1> {
     typedef complex<float> src0_type;
     typedef src0_type dst_type;
 
@@ -50,7 +50,7 @@ namespace nd {
   };
 
   template <>
-  struct min_kernel<complex_float64_id> : base_kernel<min_kernel<complex_float64_id>, 1> {
+  struct min_kernel<complex_float64_id> : base_strided_kernel<min_kernel<complex_float64_id>, 1> {
     typedef complex<double> src0_type;
     typedef src0_type dst_type;
 

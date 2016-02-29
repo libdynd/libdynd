@@ -50,9 +50,8 @@ namespace nd {
     template <typename KernelType>
     kernel_targets_t get_targets()
     {
-      return kernel_targets_t{reinterpret_cast<void *>(static_cast<void (*)(kernel_prefix *, char *, char *const *)>(
-                                  KernelType::single_wrapper)),
-                              NULL, reinterpret_cast<void *>(KernelType::strided_wrapper)};
+      return kernel_targets_t{reinterpret_cast<void *>(KernelType::single_wrapper), NULL,
+                              reinterpret_cast<void *>(NULL)};
     }
 
     template <typename KernelType>
@@ -454,7 +453,8 @@ namespace nd {
   } // namespace dynd::nd::functional
 
   template <typename CallableType, typename... T, typename>
-  callable::callable(CallableType f, T &&... names) : callable(nd::functional::apply(f, std::forward<T>(names)...))
+  callable::callable(CallableType f, T &&... names)
+      : callable(nd::functional::apply(f, std::forward<T>(names)...))
   {
   }
 

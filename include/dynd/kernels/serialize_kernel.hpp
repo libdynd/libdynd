@@ -14,7 +14,7 @@ namespace nd {
   struct serialize_kernel;
 
   template <>
-  struct serialize_kernel<scalar_kind_id> : base_kernel<serialize_kernel<scalar_kind_id>, 1> {
+  struct serialize_kernel<scalar_kind_id> : base_strided_kernel<serialize_kernel<scalar_kind_id>, 1> {
     size_t data_size;
 
     serialize_kernel(size_t data_size) : data_size(data_size) {}

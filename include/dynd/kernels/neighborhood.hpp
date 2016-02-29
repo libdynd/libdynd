@@ -15,7 +15,7 @@ namespace nd {
   namespace functional {
 
     template <int N>
-    struct neighborhood_kernel : base_kernel<neighborhood_kernel<N>, N> {
+    struct neighborhood_kernel : base_strided_kernel<neighborhood_kernel<N>, N> {
       struct static_data_type {
         callable child;
         callable boundary_child;

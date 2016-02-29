@@ -229,7 +229,7 @@ namespace nd {
     };
 
     template <int N>
-    struct elwise_ck<fixed_dim_id, fixed_dim_id, N> : base_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, N>, N> {
+    struct elwise_ck<fixed_dim_id, fixed_dim_id, N> : base_strided_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, N>, N> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -345,7 +345,7 @@ namespace nd {
     // int N, int K
 
     template <>
-    struct elwise_ck<fixed_dim_id, fixed_dim_id, 0> : base_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, 0>, 0> {
+    struct elwise_ck<fixed_dim_id, fixed_dim_id, 0> : base_strided_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, 0>, 0> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -426,7 +426,7 @@ namespace nd {
      * kernel_request_strided type of kernel.
      */
     template <int N>
-    struct elwise_ck<fixed_dim_id, var_dim_id, N> : base_kernel<elwise_ck<fixed_dim_id, var_dim_id, N>, N> {
+    struct elwise_ck<fixed_dim_id, var_dim_id, N> : base_strided_kernel<elwise_ck<fixed_dim_id, var_dim_id, N>, N> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -570,7 +570,7 @@ namespace nd {
     };
 
     template <>
-    struct elwise_ck<fixed_dim_id, var_dim_id, 0> : base_kernel<elwise_ck<fixed_dim_id, var_dim_id, 0>, 0> {
+    struct elwise_ck<fixed_dim_id, var_dim_id, 0> : base_strided_kernel<elwise_ck<fixed_dim_id, var_dim_id, 0>, 0> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -646,7 +646,7 @@ namespace nd {
      * kernel_request_strided type of kernel.
      */
     template <int N>
-    struct elwise_ck<var_dim_id, fixed_dim_id, N> : base_kernel<elwise_ck<var_dim_id, fixed_dim_id, N>, N> {
+    struct elwise_ck<var_dim_id, fixed_dim_id, N> : base_strided_kernel<elwise_ck<var_dim_id, fixed_dim_id, N>, N> {
       typedef elwise_ck self_type;
 
       memory_block_data *m_dst_memblock;
@@ -860,7 +860,7 @@ namespace nd {
     };
 
     template <>
-    struct elwise_ck<var_dim_id, fixed_dim_id, 0> : base_kernel<elwise_ck<var_dim_id, fixed_dim_id, 0>, 0> {
+    struct elwise_ck<var_dim_id, fixed_dim_id, 0> : base_strided_kernel<elwise_ck<var_dim_id, fixed_dim_id, 0>, 0> {
       typedef elwise_ck self_type;
 
       memory_block_data *m_dst_memblock;
