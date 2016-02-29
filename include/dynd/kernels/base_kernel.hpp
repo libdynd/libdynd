@@ -22,8 +22,11 @@ namespace nd {
    * The classes it generates are the base classes to use for defining ckernels
    * with a single and strided kernel function.
    */
-  template <typename SelfType>
-  struct base_kernel : kernel_prefix {
+  template <typename...>
+  struct base_kernel;
+
+  template <typename PrefixType, typename SelfType>
+  struct base_kernel<PrefixType, SelfType> : PrefixType {
     /**
      * Returns the child kernel immediately following this one.
      */
@@ -63,9 +66,6 @@ namespace nd {
       case kernel_request_single:
         self->function = reinterpret_cast<void *>(SelfType::single_wrapper);
         break;
-      case kernel_request_strided:
-        self->function = reinterpret_cast<void *>(SelfType::strided_wrapper);
-        break;
       default:
         DYND_HOST_THROW(std::invalid_argument,
                         "expr ckernel init: unrecognized ckernel request " + std::to_string(kernreq));
@@ -102,12 +102,6 @@ namespace nd {
       reinterpret_cast<SelfType *>(self)->single(dst, src);
     }
 
-    static void strided_wrapper(kernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
-                                const intptr_t *src_stride, size_t count)
-    {
-      reinterpret_cast<SelfType *>(self)->strided(dst, dst_stride, src, src_stride, count);
-    }
-
     static const volatile char *DYND_USED(ir);
 
     static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
@@ -121,8 +115,12 @@ namespace nd {
     }
   };
 
+  template <typename PrefixType, typename SelfType>
+  const volatile char *DYND_USED((base_kernel<PrefixType, SelfType>::ir)) = NULL;
+
   template <typename SelfType>
-  const volatile char *DYND_USED(base_kernel<SelfType>::ir) = NULL;
+  struct base_kernel<SelfType> : base_kernel<kernel_prefix, SelfType> {
+  };
 
 } // namespace dynd::nd
 } // namespace dynd

@@ -51,7 +51,7 @@ namespace nd {
     kernel_targets_t get_targets()
     {
       return kernel_targets_t{reinterpret_cast<void *>(KernelType::single_wrapper), NULL,
-                              reinterpret_cast<void *>(KernelType::strided_wrapper)};
+                              reinterpret_cast<void *>(NULL)};
     }
 
     template <typename KernelType>

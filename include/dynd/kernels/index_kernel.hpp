@@ -16,7 +16,7 @@ namespace nd {
 
     typedef typename base_index_kernel<index_kernel<Arg0ID>>::data_type data_type;
 
-    void single(char *DYND_UNUSED(metadata), char **DYND_UNUSED(data)) {}
+    void single(char *DYND_UNUSED(metadata), char **DYND_UNUSED(data), const array *DYND_UNUSED(arg0)) {}
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
@@ -47,12 +47,12 @@ namespace nd {
 
     ~index_kernel() { get_child()->destroy(); }
 
-    void single(char *metadata, char **data)
+    void single(char *metadata, char **data, const array *DYND_UNUSED(arg0))
     {
       //      reinterpret_cast<ndt::fixed_dim_type::metadata_type *>(metadata)->stride = stride;
       *data += index * stride;
 
-      get_child()->single(metadata, data);
+      get_child()->single(metadata, data, NULL);
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp, intptr_t nsrc,

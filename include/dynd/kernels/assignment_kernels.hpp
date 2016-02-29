@@ -1854,21 +1854,14 @@ namespace nd {
     template <>
     struct assignment_virtual_kernel<fixed_bytes_id, bytes_kind_id, fixed_bytes_id, bytes_kind_id>
         : base_kernel<assignment_virtual_kernel<fixed_bytes_id, bytes_kind_id, fixed_bytes_id, bytes_kind_id>> {
-      size_t data_size;
-
-      assignment_virtual_kernel(size_t data_size) : data_size(data_size) {}
-
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
+                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        if (dst_tp.get_data_size() != src_tp[0]->get_data_size()) {
-          throw std::runtime_error("cannot assign to a fixed_bytes type of a different size");
-        }
-
-        ckb->emplace_back<assignment_virtual_kernel>(kernreq, dst_tp.get_data_size());
+        throw std::runtime_error("cannot assign to a fixed_bytes type of a different size");
       }
     };
 
@@ -2359,7 +2352,8 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<complex_float32_id, complex_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_strided_kernel<assignment_kernel<complex_float32_id, complex_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<complex_float32_id, complex_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("TODO: implement string_to_complex_float32_single");
@@ -2368,7 +2362,8 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<complex_float64_id, complex_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_strided_kernel<assignment_kernel<complex_float64_id, complex_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<complex_float64_id, complex_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("TODO: implement string_to_complex_float64_single");
@@ -2382,8 +2377,8 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id, ErrorMode>
-        : base_strided_kernel<assignment_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id, ErrorMode>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id, ErrorMode>, 1> {
       next_unicode_codepoint_t m_next_fn;
       append_unicode_codepoint_t m_append_fn;
       intptr_t m_dst_data_size, m_src_data_size;
@@ -2523,7 +2518,8 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<fixed_string_id, string_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_strided_kernel<assignment_kernel<fixed_string_id, string_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<fixed_string_id, string_kind_id, string_id, string_kind_id, ErrorMode>,
+                              1> {
       next_unicode_codepoint_t m_next_fn;
       append_unicode_codepoint_t m_append_fn;
       intptr_t m_dst_data_size;
