@@ -9,7 +9,6 @@ addons:
     - gcc-4.9
     - g++-4.9
     - cmake
-    - doxygen
     - valgrind
     - libfftw3-dev
 cache:
@@ -29,12 +28,14 @@ matrix:
         - gcc-5
         - g++-5
         - cmake
+        - doxygen
         - valgrind
         - libfftw3-dev
     before_install:
     - export CC="gcc-5"
     - export CXX="g++-5"
     script:
+    - cmake -DDYND_BUILD_DOCS=ON -DDYND_FFTW=${DYND_FFTW} ..
     - make -j3 || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
   - compiler: clang
@@ -112,7 +113,7 @@ before_install:
 before_script:
 - mkdir build
 - pushd build
-- cmake -DDYND_BUILD_DOCS=ON -DDYND_FFTW=${DYND_FFTW} ..
+- cmake -DDYND_FFTW=${DYND_FFTW} ..
 script:
 - make -j4 || exit 1
 - ./tests/test_libdynd
