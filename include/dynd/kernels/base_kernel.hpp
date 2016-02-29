@@ -124,47 +124,5 @@ namespace nd {
   template <typename SelfType>
   const volatile char *DYND_USED(base_kernel<SelfType>::ir) = NULL;
 
-  template <typename SelfType, size_t N>
-  struct base_strided_kernel : base_kernel<SelfType> {
-    void call(array *dst, const array *src)
-    {
-      char *src_data[N];
-      for (size_t i = 0; i < N; ++i) {
-        src_data[i] = const_cast<char *>(src[i].cdata());
-      }
-      reinterpret_cast<SelfType *>(this)->single(const_cast<char *>(dst->cdata()), src_data);
-    }
-
-    void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-    {
-      char *src_copy[N];
-      memcpy(src_copy, src, sizeof(src_copy));
-      for (size_t i = 0; i != count; ++i) {
-        reinterpret_cast<SelfType *>(this)->single(dst, src_copy);
-        dst += dst_stride;
-        for (size_t j = 0; j < N; ++j) {
-          src_copy[j] += src_stride[j];
-        }
-      }
-    }
-  };
-
-  template <typename SelfType>
-  struct base_strided_kernel<SelfType, 0> : base_kernel<SelfType> {
-    void call(array *dst, const array *DYND_UNUSED(src))
-    {
-      reinterpret_cast<SelfType *>(this)->single(const_cast<char *>(dst->cdata()), nullptr);
-    }
-
-    void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src), const intptr_t *DYND_UNUSED(src_stride),
-                 size_t count)
-    {
-      for (size_t i = 0; i != count; ++i) {
-        reinterpret_cast<SelfType *>(this)->single(dst, NULL);
-        dst += dst_stride;
-      }
-    }
-  };
-
 } // namespace dynd::nd
 } // namespace dynd
