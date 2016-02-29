@@ -9,6 +9,7 @@ addons:
     - gcc-4.9
     - g++-4.9
     - cmake
+    - doxygen
     - valgrind
     - libfftw3-dev
 cache:
