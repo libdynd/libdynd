@@ -167,9 +167,6 @@ enum type_id_t {
   // A special type which holds a fragment of canonical dimensions
   // for the purpose of broadcasting together named ellipsis type vars.
   dim_fragment_id,
-
-  // The number of built-in, atomic types (including uninitialized and void)
-  builtin_id_count = 19,
 };
 
 template <type_id_t Value>
@@ -240,17 +237,38 @@ enum {
 DYND_API std::ostream &operator<<(std::ostream &o, type_kind_t kind);
 DYND_API std::ostream &operator<<(std::ostream &o, type_id_t tid);
 
-enum {
-  /** A mask within which all the built-in type ids are guaranteed to fit */
-  builtin_id_mask = 0x3f
-};
-
 // Forward declaration so we can make the is_builtin_type function here
 namespace ndt {
   class base_type;
 } // namespace dynd::nd
 
-inline bool is_builtin_type(const ndt::base_type *dt) { return reinterpret_cast<uintptr_t>(dt) < builtin_id_count; }
+inline bool is_builtin_type(const ndt::base_type *dt)
+{
+  switch (reinterpret_cast<uintptr_t>(dt)) {
+  case uninitialized_id:
+  case bool_id:
+  case int8_id:
+  case int16_id:
+  case int32_id:
+  case int64_id:
+  case int128_id:
+  case uint8_id:
+  case uint16_id:
+  case uint32_id:
+  case uint64_id:
+  case uint128_id:
+  case float16_id:
+  case float32_id:
+  case float64_id:
+  case float128_id:
+  case complex_float32_id:
+  case complex_float64_id:
+  case void_id:
+    return true;
+  default:
+    return false;
+  }
+}
 
 namespace detail {
   // Simple metaprogram taking log base 2 of 1, 2, 4, and 8
