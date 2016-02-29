@@ -54,7 +54,6 @@ set(tests_SRC
     types/test_type_pattern_match.cpp
 #    types/test_type_promotion.cpp
     types/test_var_dim_type.cpp
-    func/special_vals.hpp
     func/test_apply.cpp
     func/test_arithmetic.cpp
     func/test_callable.cpp
@@ -80,7 +79,6 @@ set(tests_SRC
     func/test_rolling.cpp
     func/test_search.cpp
     func/test_sort.cpp
-    func/test_special.cpp
     func/test_struct.cpp
     func/test_sum.cpp
     func/test_take.cpp

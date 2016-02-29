@@ -62,34 +62,34 @@ ndt::type_registry::type_registry()
   insert(any_kind_id, type());                                  // dim_kind_id
 
   insert(scalar_kind_id, type()); // bool_kind_id
-  insert(scalar_kind_id, type()); // int_kind_id
-  insert(scalar_kind_id, type()); // uint_kind_id
-  insert(scalar_kind_id, type()); // float_kind_id
+  insert(base_id_of<int_kind_id>::value, type());
+  insert(base_id_of<uint_kind_id>::value, type());
+  insert(base_id_of<float_kind_id>::value, type());
   insert(scalar_kind_id, type()); // complex_kind_id
 
-  insert(scalar_kind_id, type());                       // bytes_kind_id
-  insert(bytes_kind_id, fixed_bytes_kind_type::make()); // fixed_bytes_id
-  insert(bytes_kind_id, bytes_type::make());            // bytes_id
+  insert(base_id_of<bytes_kind_id>::value, type());
+  insert(base_id_of<fixed_bytes_id>::value, fixed_bytes_kind_type::make());
+  insert(base_id_of<bytes_id>::value, bytes_type::make());
 
-  insert(scalar_kind_id, type());                         // string_kind_id
-  insert(string_kind_id, fixed_string_kind_type::make()); // fixed_string_id
-  insert(string_kind_id, make_type<char_type>());         // char_id
-  insert(string_kind_id, make_type<string_type>());       // string_id
+  insert(base_id_of<string_kind_id>::value, type());
+  insert(base_id_of<fixed_string_id>::value, fixed_string_kind_type::make());
+  insert(base_id_of<char_id>::value, make_type<char_type>());
+  insert(base_id_of<string_id>::value, make_type<string_type>());
 
-  insert(scalar_kind_id, tuple_type::make(true)); // tuple_id
-  insert(tuple_id, struct_type::make(true));      // struct_id
+  insert(base_id_of<tuple_id>::value, tuple_type::make(true));
+  insert(base_id_of<struct_id>::value, struct_type::make(true));
 
-  insert(dim_kind_id, fixed_dim_kind_type::make(any_kind_type::make())); // fixed_dim_id
-  insert(dim_kind_id, var_dim_type::make(any_kind_type::make()));        // var_dim_id
+  insert(base_id_of<fixed_dim_id>::value, fixed_dim_kind_type::make(any_kind_type::make()));
+  insert(base_id_of<var_dim_id>::value, var_dim_type::make(any_kind_type::make()));
 
   insert(scalar_kind_id, categorical_kind_type::make());          // categorical_id
   insert(any_kind_id, type("?Any"));                              // option_id
   insert(any_kind_id, pointer_type::make(any_kind_type::make())); // pointer_id
   insert(any_kind_id, type());                                    // memory_id
 
-  insert(scalar_kind_id, make_type<type_type>()); // type_id
-  insert(scalar_kind_id, type());                 // array_id
-  insert(scalar_kind_id, type());                 // callable_id
+  insert(base_id_of<type_id>::value, make_type<type_type>());
+  insert(base_id_of<array_id>::value, type());
+  insert(base_id_of<callable_id>::value, type());
 
   insert(any_kind_id, type());  // expr_kind_id
   insert(expr_kind_id, type()); // adapt_id
@@ -109,13 +109,17 @@ ndt::type_registry::type_registry()
   insert(any_kind_id, type()); // pow_dimsym_id
   insert(any_kind_id, type()); // ellipsis_dim_id
   insert(any_kind_id, type()); // dim_fragment_id
+
+  for (size_t i = 0; i < size(); ++i) {
+    m_infos[i].bits |= 1L << i;
+  }
 }
 
 ndt::type_registry::~type_registry()
 {
   for (auto iter = m_infos.begin() + any_kind_id; iter != m_infos.end(); ++iter) {
-    delete[] iter->bases;
-    iter->bases = nullptr;
+    delete[] iter->_bases;
+    iter->_bases = nullptr;
   }
 }
 
@@ -128,7 +132,7 @@ DYND_API type_id_t ndt::type_registry::insert(type_id_t base_id, const type &kin
 
   size_t nbases = base_tp_info.nbases + 1;
   type_id_t *bases = new type_id_t[nbases]{base_id};
-  memcpy(bases + 1, base_tp_info.bases, base_tp_info.nbases);
+  memcpy(bases + 1, base_tp_info._bases, base_tp_info.nbases);
 
   m_infos.emplace_back(nbases, bases, kind_tp);
 

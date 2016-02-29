@@ -16,7 +16,6 @@
 #include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/date_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/option_type.hpp>
@@ -155,7 +154,7 @@ TEST(DataShapeParser, StridedFixedDim)
 {
   EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_fixed_dim(3, ndt::make_type<float>())),
             ndt::type("Fixed * 3 * float32"));
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim_kind(ndt::make_type<float>())),
+  EXPECT_EQ(ndt::make_fixed_dim(3,  ndt::make_fixed_dim_kind(ndt::make_type<float>())),
             ndt::type("3 * Fixed * float32"));
 }
 

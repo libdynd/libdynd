@@ -343,26 +343,18 @@ namespace ndt {
     type_id_t unchecked_get_builtin_id() const { return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr)); }
 
     /** The 'kind' of the type (int, uint, float, etc) */
-    type_kind_t get_kind() const { return get_base_type_kind(m_ptr); }
+    type_kind_t get_kind() const;
 
     type_id_t get_base_id() const;
 
     /** The alignment of the type */
-    size_t get_data_alignment() const { return get_base_type_alignment(m_ptr); }
+    size_t get_data_alignment() const;
 
     /** The element size of the type */
-    size_t get_data_size() const { return get_base_type_data_size(m_ptr); }
+    size_t get_data_size() const;
 
     /** The element size of the type when default-constructed */
-    size_t get_default_data_size() const
-    {
-      if (is_builtin_type(m_ptr)) {
-        return static_cast<intptr_t>(detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(m_ptr)]);
-      }
-      else {
-        return m_ptr->get_default_data_size();
-      }
-    }
+    size_t get_default_data_size() const;
 
     size_t get_arrmeta_size() const
     {

@@ -127,4 +127,6 @@ DYND_API nd::callable nd::take_by_pointer::make()
       ndt::callable_type::make(ndt::type("R * pointer[T]"), {ndt::type("M * T"), ndt::type("N * Ix")}), 0);
 }
 
+DYND_DEFAULT_DECLFUNC_GET(nd::take_by_pointer)
+
 DYND_API struct nd::take_by_pointer nd::take_by_pointer;

@@ -17,4 +17,6 @@ DYND_API nd::callable nd::take::make()
   return callable::make<take_ck>(ndt::type("(Dims... * T, N * Ix) -> R * T"), 0);
 }
 
+DYND_DEFAULT_DECLFUNC_GET(nd::take)
+
 DYND_API struct nd::take nd::take;

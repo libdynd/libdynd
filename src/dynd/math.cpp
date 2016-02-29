@@ -3,9 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/callable.hpp>
+#include <dynd/math.hpp>
 #include <dynd/functional.hpp>
-#include <dynd/func/math.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -59,8 +58,7 @@ DYND_API nd::callable nd::cos::make()
   #endif
   */
 
-  return functional::elwise(
-      functional::multidispatch(pattern_tp, children.begin(), children.end()));
+  return functional::elwise(functional::multidispatch(pattern_tp, children.begin(), children.end()));
 }
 
 DYND_API nd::callable nd::sin::make()
@@ -86,8 +84,7 @@ DYND_API nd::callable nd::sin::make()
   #endif
   */
 
-  return functional::elwise(
-      functional::multidispatch(pattern_tp, children.begin(), children.end()));
+  return functional::elwise(functional::multidispatch(pattern_tp, children.begin(), children.end()));
 }
 
 DYND_API nd::callable nd::tan::make()
@@ -113,8 +110,7 @@ DYND_API nd::callable nd::tan::make()
   #endif
   */
 
-  return functional::elwise(
-      functional::multidispatch(pattern_tp, children.begin(), children.end()));
+  return functional::elwise(functional::multidispatch(pattern_tp, children.begin(), children.end()));
 }
 
 DYND_API nd::callable nd::exp::make()
@@ -140,9 +136,13 @@ DYND_API nd::callable nd::exp::make()
   #endif
   */
 
-  return functional::elwise(
-      functional::multidispatch(pattern_tp, children.begin(), children.end()));
+  return functional::elwise(functional::multidispatch(pattern_tp, children.begin(), children.end()));
 }
+
+DYND_DEFAULT_DECLFUNC_GET(nd::cos)
+DYND_DEFAULT_DECLFUNC_GET(nd::sin)
+DYND_DEFAULT_DECLFUNC_GET(nd::tan)
+DYND_DEFAULT_DECLFUNC_GET(nd::exp)
 
 DYND_API struct nd::cos nd::cos;
 DYND_API struct nd::sin nd::sin;

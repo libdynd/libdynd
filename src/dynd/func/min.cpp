@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/kernels/min_kernel.hpp>
-#include <dynd/functional.hpp>
-#include <dynd/func/reduction.hpp>
 #include <dynd/func/min.hpp>
+#include <dynd/func/reduction.hpp>
+#include <dynd/functional.hpp>
+#include <dynd/kernels/min_kernel.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
 
 using namespace std;
@@ -28,5 +28,7 @@ DYND_API nd::callable nd::min::make()
                              return child;
                            }));
 }
+
+DYND_DEFAULT_DECLFUNC_GET(nd::min)
 
 DYND_API struct nd::min nd::min;

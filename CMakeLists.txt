@@ -100,17 +100,10 @@ else()
     endif()
 endif()
 
-# Embedded libraries
-add_subdirectory(thirdparty/cephes)
-add_subdirectory(thirdparty/datetime)
-include_directories(thirdparty/datetime/include)
-
 # LLVM, disabled for now
 #add_definitions(${LLVM_DEFINITIONS})
 #include_directories(${LLVM_INCLUDE_DIRS})
 #llvm_map_components_to_libnames(LLVM_LINK_LIBS core option target bitreader support profiledata codegen irreader linker instrumentation objcarcopts lto)
-
-set(DYND_LINK_LIBS cephes datetime)
 
 # Get the git revision
 include(GetGitRevisionDescriptionDyND)
@@ -159,10 +152,6 @@ set(libdynd_SRC
     src/dynd/types/cuda_device_type.cpp
     src/dynd/types/datashape_formatter.cpp
     src/dynd/types/datashape_parser.cpp
-    src/dynd/types/date_parser.cpp
-    src/dynd/types/date_util.cpp
-    src/dynd/types/datetime_parser.cpp
-    src/dynd/types/datetime_util.cpp
     src/dynd/types/dim_fragment_type.cpp
     src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/fixed_dim_type.cpp
@@ -179,8 +168,6 @@ set(libdynd_SRC
     src/dynd/types/struct_type.cpp
     src/dynd/types/substitute_shape.cpp
     src/dynd/types/substitute_typevars.cpp
-    src/dynd/types/time_parser.cpp
-    src/dynd/types/time_util.cpp
     src/dynd/types/tuple_type.cpp
     src/dynd/types/type_id.cpp
     src/dynd/types/type_type.cpp
@@ -209,11 +196,6 @@ set(libdynd_SRC
     include/dynd/types/cuda_device_type.hpp
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
-    include/dynd/types/date_parser.hpp
-    include/dynd/types/date_type.hpp
-    include/dynd/types/date_util.hpp
-    include/dynd/types/datetime_parser.hpp
-    include/dynd/types/datetime_util.hpp
     include/dynd/types/dim_fragment_type.hpp
     include/dynd/types/ellipsis_dim_type.hpp
     include/dynd/types/fixed_dim_type.hpp
@@ -231,8 +213,6 @@ set(libdynd_SRC
     include/dynd/types/struct_type.hpp
     include/dynd/types/substitute_shape.hpp
     include/dynd/types/substitute_typevars.hpp
-    include/dynd/types/time_parser.hpp
-    include/dynd/types/time_util.hpp
     include/dynd/types/tuple_type.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/type_type.hpp
@@ -240,7 +220,6 @@ set(libdynd_SRC
     include/dynd/types/typevar_dim_type.hpp
     include/dynd/types/typevar_type.hpp
     include/dynd/types/var_dim_type.hpp
-    include/dynd/types/view_type.hpp
     # Callables
     src/dynd/callables/base_callable.cpp
     include/dynd/callables/base_callable.hpp
@@ -260,7 +239,6 @@ set(libdynd_SRC
     src/dynd/func/elwise.cpp
     src/dynd/func/fft.cpp
     src/dynd/func/reduction.cpp
-    src/dynd/func/math.cpp
     src/dynd/func/max.cpp
     src/dynd/func/min.cpp
     src/dynd/func/mean.cpp
@@ -286,7 +264,6 @@ set(libdynd_SRC
     include/dynd/func/elwise.hpp
     include/dynd/func/fft.hpp
     include/dynd/func/reduction.hpp
-    include/dynd/func/math.hpp
     include/dynd/func/max.hpp
     include/dynd/func/mean.hpp
     include/dynd/func/min.hpp
@@ -307,7 +284,6 @@ set(libdynd_SRC
     src/dynd/kernels/fft_kernel.cpp
     src/dynd/kernels/kernel_builder.cpp
     src/dynd/kernels/kernel_prefix.cpp
-    src/dynd/kernels/multidispatch_kernel.cpp
     src/dynd/kernels/rolling_kernel.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
@@ -373,9 +349,9 @@ set(libdynd_SRC
     src/dynd/convert.cpp
     src/dynd/float16.cpp
     src/dynd/float128.cpp
-    src/dynd/functional.cpp
     src/dynd/int128.cpp
     src/dynd/io.cpp
+    src/dynd/math.cpp
     src/dynd/option.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp
@@ -392,7 +368,6 @@ set(libdynd_SRC
     src/dynd/logic.cpp
     src/dynd/parse.cpp
     src/dynd/shape_tools.cpp
-    src/dynd/special.cpp
     src/dynd/string.cpp
     src/dynd/string_encodings.cpp
     src/dynd/uint128.cpp
@@ -405,7 +380,6 @@ set(libdynd_SRC
     include/dynd/bool1.hpp
     include/dynd/bytes.hpp
     include/dynd/callable.hpp
-    include/dynd/cephes.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
     include/dynd/complex.hpp
@@ -441,7 +415,6 @@ set(libdynd_SRC
     include/dynd/platform_definitions.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
-    include/dynd/special.hpp
     include/dynd/string_encodings.hpp
     include/dynd/uint128.hpp
     include/dynd/view.hpp
@@ -483,7 +456,7 @@ if (DYND_CUDA)
             # Func
             src/dynd/func/arithmetic.cpp
             src/dynd/func/elwise.cpp
-            src/dynd/func/math.cpp
+            src/dynd/math.cpp
             src/dynd/func/permute.cpp
             src/dynd/func/random.cpp
             # Kernels
@@ -515,24 +488,6 @@ if (DYND_FFTW)
     find_path(FFTW_PATH fftw3.h)
     include_directories(${FFTW_PATH})
     set(DYND_LINK_LIBS ${DYND_LINK_LIBS} fftw3 fftw3f)
-endif()
-
-if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
-    # If we're making an installable static library,
-    # include the sublibraries source directly because
-    # including static libraries in other static libraries
-    # is a hassle
-    get_directory_property(cephes_SRC
-                           DIRECTORY "thirdparty/cephes"
-                           DEFINITION cephes_SRC)
-    get_directory_property(datetime_SRC
-                           DIRECTORY "thirdparty/datetime"
-                           DEFINITION datetime_SRC)
-    set(libdynd_SRC
-        ${libdynd_SRC}
-        ${cephes_SRC}
-        ${datetime_SRC}
-        )
 endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
@@ -594,12 +549,6 @@ set_property(
 # Add preprocessor definitions from CMake
 configure_file("include/dynd/cmake_config.hpp.in"
                "${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp")
-
-# Copy the headers from cephes that need to be installed with libdynd
-file(COPY thirdparty/cephes/rename.h
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
-file(COPY thirdparty/cephes/protos.h
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
 
 if(WIN32)
     set_target_properties(libdynd

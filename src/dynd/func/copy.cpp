@@ -9,9 +9,8 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::copy::make()
-{
-  return callable::make<copy_ck>(ndt::type("(A... * S) -> B... * T"), 0);
-}
+DYND_API nd::callable nd::copy::make() { return callable::make<copy_ck>(ndt::type("(A... * S) -> B... * T"), 0); }
+
+DYND_DEFAULT_DECLFUNC_GET(nd::copy)
 
 DYND_API struct nd::copy nd::copy;

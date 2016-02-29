@@ -18,6 +18,7 @@ namespace nd {
    */
   extern DYND_API struct DYND_API binary_search : declfunc<binary_search> {
     static callable make();
+    static callable &get();
   } binary_search;
 
 } // namespace dynd::nd

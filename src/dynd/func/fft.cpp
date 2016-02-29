@@ -4,8 +4,8 @@
 //
 
 #include <dynd/func/fft.hpp>
-#include <dynd/functional.hpp>
 #include <dynd/func/take.hpp>
+#include <dynd/functional.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -20,8 +20,7 @@ DYND_API nd::callable nd::fft::make()
 #endif
 
 #ifdef DYND_CUDA
-  children.push_back(nd::callable::make<
-      cufft_ck<cufftDoubleComplex, cufftDoubleComplex, CUFFT_FORWARD>>(0));
+  children.push_back(nd::callable::make<cufft_ck<cufftDoubleComplex, cufftDoubleComplex, CUFFT_FORWARD>>(0));
 #endif
 
   if (children.empty()) {
@@ -29,13 +28,13 @@ DYND_API nd::callable nd::fft::make()
   }
 
   return children[0];
-/*
-  return functional::multidispatch(
-      ndt::type("(M[Fixed**N * complex[float64]], shape: ?N * int64, axes: "
-                "?Fixed * int64, "
-                "flags: ?int32) -> M[Fixed**N * complex[float64]]"),
-      children, {"N"});
-*/
+  /*
+    return functional::multidispatch(
+        ndt::type("(M[Fixed**N * complex[float64]], shape: ?N * int64, axes: "
+                  "?Fixed * int64, "
+                  "flags: ?int32) -> M[Fixed**N * complex[float64]]"),
+        children, {"N"});
+  */
 }
 
 DYND_API nd::callable nd::ifft::make()
@@ -43,13 +42,11 @@ DYND_API nd::callable nd::ifft::make()
   std::vector<nd::callable> children;
 
 #ifdef DYND_FFTW
-  children.push_back(
-      nd::callable::make<fftw_ck<fftw_complex, fftw_complex, FFTW_BACKWARD>>());
+  children.push_back(nd::callable::make<fftw_ck<fftw_complex, fftw_complex, FFTW_BACKWARD>>());
 #endif
 
 #ifdef DYND_CUDA
-  children.push_back(nd::callable::make<
-      cufft_ck<cufftDoubleComplex, cufftDoubleComplex, CUFFT_INVERSE>>());
+  children.push_back(nd::callable::make<cufft_ck<cufftDoubleComplex, cufftDoubleComplex, CUFFT_INVERSE>>());
 #endif
 
   if (children.empty()) {
@@ -57,13 +54,13 @@ DYND_API nd::callable nd::ifft::make()
   }
 
   return children[0];
-/*
-  return functional::multidispatch(
-      ndt::type("(M[Fixed**N * complex[float64]], shape: ?N * int64, "
-                "axes: ?Fixed * int64, "
-                "flags: ?int32) -> M[Fixed**N * complex[float64]]"),
-      children, {"N"});
-*/
+  /*
+    return functional::multidispatch(
+        ndt::type("(M[Fixed**N * complex[float64]], shape: ?N * int64, "
+                  "axes: ?Fixed * int64, "
+                  "flags: ?int32) -> M[Fixed**N * complex[float64]]"),
+        children, {"N"});
+  */
 }
 
 DYND_API nd::callable nd::rfft::make()
@@ -84,9 +81,13 @@ DYND_API nd::callable nd::irfft::make()
 #endif
 }
 
+DYND_DEFAULT_DECLFUNC_GET(nd::fft)
+DYND_DEFAULT_DECLFUNC_GET(nd::rfft)
+DYND_DEFAULT_DECLFUNC_GET(nd::ifft)
+DYND_DEFAULT_DECLFUNC_GET(nd::irfft)
+
 DYND_API struct nd::fft nd::fft;
 DYND_API struct nd::rfft nd::rfft;
-
 DYND_API struct nd::ifft nd::ifft;
 DYND_API struct nd::irfft nd::irfft;
 
@@ -117,7 +118,5 @@ nd::array nd::ifftshift(const nd::array &x)
 nd::array nd::fftspace(intptr_t count, double step)
 {
   // Todo: When casting is fixed, change the ranges below to integer versions
-  return nd::concatenate(nd::range((count - 1) / 2 + 1.0),
-                         nd::range(-count / 2 + 0.0, 0.0)) /
-         (count * step);
+  return nd::concatenate(nd::range((count - 1) / 2 + 1.0), nd::range(-count / 2 + 0.0, 0.0)) / (count * step);
 }

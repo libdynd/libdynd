@@ -4,9 +4,9 @@
 //
 
 #include <dynd/functional.hpp>
-#include <dynd/option.hpp>
 #include <dynd/kernels/assign_na_kernel.hpp>
 #include <dynd/kernels/is_na_kernel.hpp>
+#include <dynd/option.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -14,7 +14,8 @@ using namespace dynd;
 DYND_API nd::callable nd::assign_na::make()
 {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, float32_id, float64_id,
-                           complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id> type_ids;
+                           complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id>
+      type_ids;
 
   std::map<type_id_t, callable> children = callable::make_all<assign_na_kernel, type_ids>();
   children[uint32_id] = callable::make<assign_na_kernel<uint32_id>>();
@@ -44,12 +45,15 @@ DYND_API nd::callable nd::assign_na::make()
   });
 }
 
+DYND_DEFAULT_DECLFUNC_GET(nd::assign_na)
+
 DYND_API struct nd::assign_na nd::assign_na;
 
 DYND_API nd::callable nd::is_na::make()
 {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint32_id, float32_id, float64_id,
-                           complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id> type_ids;
+                           complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id>
+      type_ids;
 
   std::map<type_id_t, callable> children = callable::make_all<is_na_kernel, type_ids>();
   std::array<callable, 2> dim_children;
@@ -76,5 +80,7 @@ DYND_API nd::callable nd::is_na::make()
                                 return *child;
                               });
 }
+
+DYND_DEFAULT_DECLFUNC_GET(nd::is_na)
 
 DYND_API struct nd::is_na nd::is_na;

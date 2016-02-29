@@ -28,20 +28,6 @@ namespace nd {
       return callable::make<call_kernel<FuncType>>(tp);
     }
 
-    /**
-     * Creates a multiple dispatch callable out of a set of callables. The
-     * input callables must have concrete signatures.
-     *
-     * \param naf  The number of callables provided.
-     * \param af  The array of input callables, sized ``naf``.
-     */
-    DYND_API callable old_multidispatch(intptr_t naf, const callable *af);
-
-    inline callable old_multidispatch(const std::initializer_list<callable> &children)
-    {
-      return old_multidispatch(children.size(), children.begin());
-    }
-
     template <typename DispatcherType>
     callable dispatch(const ndt::type &tp, const DispatcherType &dispatcher)
     {

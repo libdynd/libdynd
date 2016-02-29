@@ -15,4 +15,6 @@ DYND_API nd::callable nd::serialize::make()
   return functional::reduction(callable::make<serialize_kernel<scalar_kind_id>>());
 }
 
+DYND_DEFAULT_DECLFUNC_GET(nd::serialize)
+
 DYND_API struct nd::serialize nd::serialize;

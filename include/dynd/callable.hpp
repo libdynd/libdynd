@@ -320,33 +320,6 @@ namespace nd {
     template <typename DstType, typename... ArgTypes>
     array operator()(ArgTypes &&... args)
     {
-      return get().operator()<DstType>(std::forward<ArgTypes>(args)...);
-    }
-
-    template <typename... ArgTypes>
-    array operator()(ArgTypes &&... args)
-    {
-      return get()(std::forward<ArgTypes>(args)...);
-    }
-
-    array operator()(const std::initializer_list<array> &args,
-                     const std::initializer_list<std::pair<const char *, array>> &kwds)
-    {
-      return get()(args, kwds);
-    }
-
-    static callable &get()
-    {
-      static callable self = FuncType::make();
-      return self;
-    }
-  };
-
-  template <typename FuncType>
-  struct declfunc2 {
-    template <typename DstType, typename... ArgTypes>
-    array operator()(ArgTypes &&... args)
-    {
       return FuncType::get().template operator()<DstType>(std::forward<ArgTypes>(args)...);
     }
 
@@ -362,6 +335,14 @@ namespace nd {
       return FuncType::get()(args, kwds);
     }
   };
+
+// A macro for defining the get method.
+#define DYND_DEFAULT_DECLFUNC_GET(NAME)                                                                                \
+  DYND_API dynd::nd::callable &NAME::get()                                                                             \
+  {                                                                                                                    \
+    static dynd::nd::callable self = NAME::make();                                                                     \
+    return self;                                                                                                       \
+  }
 
   template <typename FuncType>
   std::ostream &operator<<(std::ostream &o, const declfunc<FuncType> &DYND_UNUSED(rhs))
@@ -473,8 +454,7 @@ namespace nd {
   } // namespace dynd::nd::functional
 
   template <typename CallableType, typename... T, typename>
-  callable::callable(CallableType f, T &&... names)
-      : callable(nd::functional::apply(f, std::forward<T>(names)...))
+  callable::callable(CallableType f, T &&... names) : callable(nd::functional::apply(f, std::forward<T>(names)...))
   {
   }
 

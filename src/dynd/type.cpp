@@ -18,7 +18,6 @@
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/char_type.hpp>
-#include <dynd/types/date_type.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -80,6 +79,178 @@ ndt::type::type(type_id_t id) : type(type_registry[id].kind_tp) {}
 ndt::type::type(const std::string &rep) { type_from_datashape(rep).swap(*this); }
 
 ndt::type::type(const char *rep_begin, const char *rep_end) { type_from_datashape(rep_begin, rep_end).swap(*this); }
+
+type_kind_t ndt::type::get_kind() const
+{
+  switch (reinterpret_cast<uintptr_t>(m_ptr)) {
+  case uninitialized_id:
+    return void_kind;
+  case bool_id:
+    return bool_kind;
+  case int8_id:
+  case int16_id:
+  case int32_id:
+  case int64_id:
+  case int128_id:
+    return sint_kind;
+  case uint8_id:
+  case uint16_id:
+  case uint32_id:
+  case uint64_id:
+  case uint128_id:
+    return uint_kind;
+  case float16_id:
+  case float32_id:
+  case float64_id:
+  case float128_id:
+    return real_kind;
+  case complex_float32_id:
+  case complex_float64_id:
+    return complex_kind;
+  case void_id:
+    return void_kind;
+  default:
+    return m_ptr->get_kind();
+  }
+}
+
+size_t ndt::type::get_data_alignment() const
+{
+  switch (reinterpret_cast<uintptr_t>(m_ptr)) {
+  case uninitialized_id:
+    return 1;
+  case bool_id:
+    return alignof(bool1);
+  case int8_id:
+    return alignof(int8_t);
+  case int16_id:
+    return alignof(int16_t);
+  case int32_id:
+    return alignof(int32_t);
+  case int64_id:
+    return alignof(int64_t);
+  case int128_id:
+    return alignof(int128);
+  case uint8_id:
+    return alignof(uint8_t);
+  case uint16_id:
+    return alignof(uint16_t);
+  case uint32_id:
+    return alignof(uint32_t);
+  case uint64_id:
+    return alignof(uint64_t);
+  case uint128_id:
+    return alignof(uint128);
+  case float16_id:
+    return alignof(float16);
+  case float32_id:
+    return alignof(float);
+  case float64_id:
+    return alignof(double);
+  case float128_id:
+    return alignof(float128);
+  case complex_float32_id:
+    return alignof(complex<float>);
+  case complex_float64_id:
+    return alignof(complex<double>);
+  case void_id:
+    return 1;
+  default:
+    return m_ptr->get_data_alignment();
+  }
+}
+
+size_t ndt::type::get_data_size() const
+{
+  switch (reinterpret_cast<uintptr_t>(m_ptr)) {
+  case uninitialized_id:
+    return 0;
+  case bool_id:
+    return sizeof(bool1);
+  case int8_id:
+    return sizeof(int8_t);
+  case int16_id:
+    return sizeof(int16_t);
+  case int32_id:
+    return sizeof(int32_t);
+  case int64_id:
+    return sizeof(int64_t);
+  case int128_id:
+    return sizeof(int128);
+  case uint8_id:
+    return sizeof(uint8_t);
+  case uint16_id:
+    return sizeof(uint16_t);
+  case uint32_id:
+    return sizeof(uint32_t);
+  case uint64_id:
+    return sizeof(uint64_t);
+  case uint128_id:
+    return sizeof(uint128);
+  case float16_id:
+    return sizeof(float16);
+  case float32_id:
+    return sizeof(float);
+  case float64_id:
+    return sizeof(double);
+  case float128_id:
+    return sizeof(float128);
+  case complex_float32_id:
+    return sizeof(complex<float>);
+  case complex_float64_id:
+    return sizeof(complex<double>);
+  case void_id:
+    return 0;
+  default:
+    return m_ptr->get_data_size();
+  }
+}
+
+size_t ndt::type::get_default_data_size() const
+{
+  switch (reinterpret_cast<uintptr_t>(m_ptr)) {
+  case uninitialized_id:
+    return 0;
+  case bool_id:
+    return sizeof(bool1);
+  case int8_id:
+    return sizeof(int8_t);
+  case int16_id:
+    return sizeof(int16_t);
+  case int32_id:
+    return sizeof(int32_t);
+  case int64_id:
+    return sizeof(int64_t);
+  case int128_id:
+    return sizeof(int128);
+  case uint8_id:
+    return sizeof(uint8_t);
+  case uint16_id:
+    return sizeof(uint16_t);
+  case uint32_id:
+    return sizeof(uint32_t);
+  case uint64_id:
+    return sizeof(uint64_t);
+  case uint128_id:
+    return sizeof(uint128);
+  case float16_id:
+    return sizeof(float16);
+  case float32_id:
+    return sizeof(float);
+  case float64_id:
+    return sizeof(double);
+  case float128_id:
+    return sizeof(float128);
+  case complex_float32_id:
+    return sizeof(complex<float>);
+  case complex_float64_id:
+    return sizeof(complex<double>);
+  case void_id:
+    return 0;
+  default:
+    return m_ptr->get_default_data_size();
+  }
+}
 
 ndt::type ndt::type::at_array(int nindices, const irange *indices) const
 {
@@ -399,96 +570,6 @@ bool ndt::type::data_layout_compatible_with(const ndt::type &rhs) const
     break;
   }
   return false;
-}
-
-std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
-{
-  switch (tid) {
-  case uninitialized_id:
-    return (o << "uninitialized");
-  case bool_id:
-    return (o << "bool");
-  case int8_id:
-    return (o << "int8");
-  case int16_id:
-    return (o << "int16");
-  case int32_id:
-    return (o << "int32");
-  case int64_id:
-    return (o << "int64");
-  case int128_id:
-    return (o << "int128");
-  case uint8_id:
-    return (o << "uint8");
-  case uint16_id:
-    return (o << "uint16");
-  case uint32_id:
-    return (o << "uint32");
-  case uint64_id:
-    return (o << "uint64");
-  case uint128_id:
-    return (o << "uint128");
-  case float16_id:
-    return (o << "float16");
-  case float32_id:
-    return (o << "float32");
-  case float64_id:
-    return (o << "float64");
-  case float128_id:
-    return (o << "float128");
-  case complex_float32_id:
-    return (o << "complex_float32");
-  case complex_float64_id:
-    return (o << "complex_float64");
-  case void_id:
-    return (o << "void");
-  case pointer_id:
-    return (o << "pointer");
-  case bytes_id:
-    return (o << "bytes");
-  case fixed_bytes_id:
-    return (o << "fixed_bytes");
-  case string_id:
-    return (o << "string");
-  case fixed_string_id:
-    return (o << "fixed_string");
-  case categorical_id:
-    return (o << "categorical");
-  case fixed_dim_id:
-    return (o << "fixed_dim");
-  case var_dim_id:
-    return (o << "var_dim");
-  case struct_id:
-    return (o << "struct");
-  case tuple_id:
-    return (o << "tuple");
-  case c_contiguous_id:
-    return (o << "C");
-  case option_id:
-    return (o << "option");
-  case adapt_id:
-    return o << "adapt";
-  case kind_sym_id:
-    return (o << "kind_sym");
-  case int_sym_id:
-    return (o << "int_sym");
-  case expr_id:
-    return (o << "expr");
-  case type_id:
-    return (o << "type");
-  case callable_id:
-    return (o << "callable");
-  case typevar_id:
-    return (o << "typevar");
-  case typevar_constructed_id:
-    return (o << "typevar_constructed");
-  case typevar_dim_id:
-    return (o << "typevar_dim");
-  case ellipsis_dim_id:
-    return (o << "ellipsis_dim");
-  default:
-    return o << ndt::registry::data[tid].name;
-  }
 }
 
 std::ostream &dynd::ndt::operator<<(std::ostream &o, const ndt::type &rhs)
@@ -922,7 +1003,7 @@ void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *dat
   }
 }
 
-type_id_t ndt::type::get_base_id() const { return type_registry[get_id()].bases[0]; }
+type_id_t ndt::type::get_base_id() const { return type_registry[get_id()]._bases[0]; }
 
 std::map<std::array<type_id_t, 2>, ndt::common_type::child_type> ndt::common_type::children;
 

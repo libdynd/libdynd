@@ -112,22 +112,27 @@ namespace nd {
 
   extern DYND_API struct DYND_API string_concatenation : declfunc<string_concatenation> {
     static callable make();
+    static callable &get();
   } string_concatenation;
 
   extern DYND_API struct DYND_API string_count : declfunc<string_count> {
     static callable make();
+    static callable &get();
   } string_count;
 
   extern DYND_API struct DYND_API string_find : declfunc<string_find> {
     static callable make();
+    static callable &get();
   } string_find;
 
   extern DYND_API struct DYND_API string_replace : declfunc<string_replace> {
     static callable make();
+    static callable &get();
   } string_replace;
 
   extern DYND_API struct DYND_API string_split : declfunc<string_split> {
     static callable make();
+    static callable &get();
   } string_split;
 
 } // namespace dynd::nd

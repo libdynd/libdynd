@@ -12,6 +12,7 @@ namespace nd {
 
     extern DYND_API struct DYND_API uniform : declfunc<uniform> {
       static callable make();
+      static callable &get();
     } uniform;
 
   } // namespace dynd::nd::random

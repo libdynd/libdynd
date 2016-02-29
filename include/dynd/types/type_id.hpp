@@ -167,14 +167,9 @@ enum type_id_t {
   // A special type which holds a fragment of canonical dimensions
   // for the purpose of broadcasting together named ellipsis type vars.
   dim_fragment_id,
-
-  // The number of built-in, atomic types (including uninitialized and void)
-  builtin_id_count = 19,
-
-  // The number of types
-  static_id_max = dim_fragment_id
 };
 
+<<<<<<< HEAD
 enum type_property_kind_t {
   Int64_kind,
   Uint64_kind,
@@ -203,6 +198,9 @@ typedef struct {
     const std::vector<ndt::type> *type_vector;
   };
 } type_property_t;
+
+template <type_id_t Value>
+using id_constant = std::integral_constant<type_id_t, Value>;
 
 template <type_id_t... I>
 using type_id_sequence = integer_sequence<type_id_t, I...>;
@@ -269,17 +267,38 @@ enum {
 DYND_API std::ostream &operator<<(std::ostream &o, type_kind_t kind);
 DYND_API std::ostream &operator<<(std::ostream &o, type_id_t tid);
 
-enum {
-  /** A mask within which all the built-in type ids are guaranteed to fit */
-  builtin_id_mask = 0x3f
-};
-
 // Forward declaration so we can make the is_builtin_type function here
 namespace ndt {
   class base_type;
 } // namespace dynd::nd
 
-inline bool is_builtin_type(const ndt::base_type *dt) { return reinterpret_cast<uintptr_t>(dt) < builtin_id_count; }
+inline bool is_builtin_type(const ndt::base_type *dt)
+{
+  switch (reinterpret_cast<uintptr_t>(dt)) {
+  case uninitialized_id:
+  case bool_id:
+  case int8_id:
+  case int16_id:
+  case int32_id:
+  case int64_id:
+  case int128_id:
+  case uint8_id:
+  case uint16_id:
+  case uint32_id:
+  case uint64_id:
+  case uint128_id:
+  case float16_id:
+  case float32_id:
+  case float64_id:
+  case float128_id:
+  case complex_float32_id:
+  case complex_float64_id:
+  case void_id:
+    return true;
+  default:
+    return false;
+  }
+}
 
 namespace detail {
   // Simple metaprogram taking log base 2 of 1, 2, 4, and 8
@@ -517,167 +536,167 @@ struct type_of<type_id> {
   typedef ndt::type type;
 };
 
-template <type_id_t TypeID>
+template <type_id_t ID>
 struct base_id_of;
 
 template <>
-struct base_id_of<bool_id> {
-  static const type_id_t value = bool_kind_id;
+struct base_id_of<bool_kind_id> : id_constant<scalar_kind_id> {
 };
 
 template <>
-struct base_id_of<int8_id> {
-  static const type_id_t value = int_kind_id;
+struct base_id_of<bool_id> : id_constant<bool_kind_id> {
 };
 
 template <>
-struct base_id_of<int16_id> {
-  static const type_id_t value = int_kind_id;
+struct base_id_of<int_kind_id> : id_constant<scalar_kind_id> {
 };
 
 template <>
-struct base_id_of<int32_id> {
-  static const type_id_t value = int_kind_id;
+struct base_id_of<int8_id> : id_constant<int_kind_id> {
 };
 
 template <>
-struct base_id_of<int64_id> {
-  static const type_id_t value = int_kind_id;
+struct base_id_of<int16_id> : id_constant<int_kind_id> {
 };
 
 template <>
-struct base_id_of<int128_id> {
-  static const type_id_t value = int_kind_id;
+struct base_id_of<int32_id> : id_constant<int_kind_id> {
 };
 
 template <>
-struct base_id_of<uint8_id> {
-  static const type_id_t value = uint_kind_id;
+struct base_id_of<int64_id> : id_constant<int_kind_id> {
 };
 
 template <>
-struct base_id_of<uint16_id> {
-  static const type_id_t value = uint_kind_id;
+struct base_id_of<int128_id> : id_constant<int_kind_id> {
 };
 
 template <>
-struct base_id_of<uint32_id> {
-  static const type_id_t value = uint_kind_id;
+struct base_id_of<uint_kind_id> : id_constant<scalar_kind_id> {
 };
 
 template <>
-struct base_id_of<uint64_id> {
-  static const type_id_t value = uint_kind_id;
+struct base_id_of<uint8_id> : id_constant<uint_kind_id> {
 };
 
 template <>
-struct base_id_of<uint128_id> {
-  static const type_id_t value = uint_kind_id;
+struct base_id_of<uint16_id> : id_constant<uint_kind_id> {
 };
 
 template <>
-struct base_id_of<float16_id> {
-  static const type_id_t value = float_kind_id;
+struct base_id_of<uint32_id> : id_constant<uint_kind_id> {
 };
 
 template <>
-struct base_id_of<float32_id> {
-  static const type_id_t value = float_kind_id;
+struct base_id_of<uint64_id> : id_constant<uint_kind_id> {
 };
 
 template <>
-struct base_id_of<float64_id> {
-  static const type_id_t value = float_kind_id;
+struct base_id_of<uint128_id> : id_constant<uint_kind_id> {
 };
 
 template <>
-struct base_id_of<float128_id> {
-  static const type_id_t value = float_kind_id;
+struct base_id_of<float_kind_id> : id_constant<scalar_kind_id> {
 };
 
 template <>
-struct base_id_of<complex_float32_id> {
-  static const type_id_t value = complex_kind_id;
+struct base_id_of<float16_id> : id_constant<float_kind_id> {
 };
 
 template <>
-struct base_id_of<complex_float64_id> {
-  static const type_id_t value = complex_kind_id;
+struct base_id_of<float32_id> : id_constant<float_kind_id> {
 };
 
 template <>
-struct base_id_of<void_id> {
-  static const type_id_t value = any_kind_id;
+struct base_id_of<float64_id> : id_constant<float_kind_id> {
 };
 
 template <>
-struct base_id_of<fixed_dim_id> {
-  static const type_id_t value = dim_kind_id;
+struct base_id_of<float128_id> : id_constant<float_kind_id> {
 };
 
 template <>
-struct base_id_of<var_dim_id> {
-  static const type_id_t value = dim_kind_id;
+struct base_id_of<complex_float32_id> : id_constant<complex_kind_id> {
 };
 
 template <>
-struct base_id_of<pointer_id> {
-  static const type_id_t value = any_kind_id;
+struct base_id_of<complex_float64_id> : id_constant<complex_kind_id> {
 };
 
 template <>
-struct base_id_of<fixed_bytes_id> {
-  static const type_id_t value = bytes_kind_id;
+struct base_id_of<void_id> : id_constant<any_kind_id> {
 };
 
 template <>
-struct base_id_of<bytes_id> {
-  static const type_id_t value = bytes_kind_id;
+struct base_id_of<bytes_kind_id> : id_constant<scalar_kind_id> {
 };
 
 template <>
-struct base_id_of<char_id> {
-  static const type_id_t value = string_kind_id;
+struct base_id_of<fixed_bytes_id> : id_constant<bytes_kind_id> {
 };
 
 template <>
-struct base_id_of<fixed_string_id> {
-  static const type_id_t value = string_kind_id;
+struct base_id_of<bytes_id> : id_constant<bytes_kind_id> {
 };
 
 template <>
-struct base_id_of<string_id> {
-  static const type_id_t value = string_kind_id;
+struct base_id_of<string_kind_id> : id_constant<scalar_kind_id> {
 };
 
 template <>
-struct base_id_of<tuple_id> {
-  static const type_id_t value = scalar_kind_id;
+struct base_id_of<char_id> : id_constant<string_kind_id> {
 };
 
 template <>
-struct base_id_of<struct_id> {
-  static const type_id_t value = tuple_id;
+struct base_id_of<fixed_string_id> : id_constant<string_kind_id> {
 };
 
 template <>
-struct base_id_of<option_id> {
-  static const type_id_t value = any_kind_id;
+struct base_id_of<string_id> : id_constant<string_kind_id> {
 };
 
 template <>
-struct base_id_of<categorical_id> {
-  static const type_id_t value = any_kind_id;
+struct base_id_of<fixed_dim_id> : id_constant<dim_kind_id> {
 };
 
 template <>
-struct base_id_of<expr_id> {
-  static const type_id_t value = any_kind_id;
+struct base_id_of<var_dim_id> : id_constant<dim_kind_id> {
 };
 
 template <>
-struct base_id_of<type_id> {
-  static const type_id_t value = any_kind_id;
+struct base_id_of<pointer_id> : id_constant<any_kind_id> {
+};
+
+template <>
+struct base_id_of<tuple_id> : id_constant<scalar_kind_id> {
+};
+
+template <>
+struct base_id_of<struct_id> : id_constant<tuple_id> {
+};
+
+template <>
+struct base_id_of<option_id> : id_constant<any_kind_id> {
+};
+
+template <>
+struct base_id_of<categorical_id> : id_constant<any_kind_id> {
+};
+
+template <>
+struct base_id_of<expr_id> : id_constant<any_kind_id> {
+};
+
+template <>
+struct base_id_of<type_id> : id_constant<scalar_kind_id> {
+};
+
+template <>
+struct base_id_of<callable_id> : id_constant<scalar_kind_id> {
+};
+
+template <>
+struct base_id_of<array_id> : id_constant<scalar_kind_id> {
 };
 
 namespace detail {

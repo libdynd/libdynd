@@ -15,7 +15,6 @@
 #include <dynd/func/comparison.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/date_type.hpp>
 
 using namespace std;
 using namespace dynd;

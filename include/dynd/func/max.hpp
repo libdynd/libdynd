@@ -12,6 +12,7 @@ namespace nd {
 
   extern DYND_API struct DYND_API max : declfunc<max> {
     static callable make();
+    static callable &get();
   } max;
 
 } // namespace dynd::nd

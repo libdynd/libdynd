@@ -253,19 +253,3 @@ bool ndt::base_type::reverse_adapt_type(const type &DYND_UNUSED(value_tp), const
 {
   return false;
 }
-
-// Some information about the builtin types
-
-DYND_API uint8_t ndt::detail::builtin_data_sizes[builtin_id_count] = {
-    0, sizeof(bool1), sizeof(int8), sizeof(int16), sizeof(int32), sizeof(int64), sizeof(int128), sizeof(uint8),
-    sizeof(uint16), sizeof(uint32), sizeof(uint64), sizeof(uint128), sizeof(float16), sizeof(float32), sizeof(float64),
-    sizeof(float128), sizeof(dynd::complex<float>), sizeof(dynd::complex<double>), 0};
-
-DYND_API uint8_t ndt::detail::builtin_kinds[builtin_id_count] = {
-    void_kind, bool_kind, sint_kind, sint_kind, sint_kind, sint_kind, sint_kind,    uint_kind,    uint_kind, uint_kind,
-    uint_kind, uint_kind, real_kind, real_kind, real_kind, real_kind, complex_kind, complex_kind, void_kind};
-
-DYND_API uint8_t ndt::detail::builtin_data_alignments[builtin_id_count] = {
-    1, 1, alignof(int8), alignof(int16), alignof(int32), alignof(int64), alignof(int128), alignof(uint8),
-    alignof(uint16), alignof(uint32), alignof(uint64), alignof(uint128), alignof(float16), alignof(float32),
-    alignof(float64), alignof(float128), alignof(dynd::complex<float>), alignof(dynd::complex<double>), 1};

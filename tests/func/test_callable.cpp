@@ -12,7 +12,6 @@
 #include "../dynd_assertions.hpp"
 
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/types/date_type.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/elwise.hpp>

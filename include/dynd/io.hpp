@@ -12,6 +12,7 @@ namespace nd {
 
   extern DYND_API struct DYND_API serialize : declfunc<serialize> {
     static callable make();
+    static callable &get();
   } serialize;
 
 } // namespace dynd::nd
