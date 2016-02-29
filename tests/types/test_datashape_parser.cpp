@@ -154,7 +154,7 @@ TEST(DataShapeParser, StridedFixedDim)
 {
   EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_fixed_dim(3, ndt::make_type<float>())),
             ndt::type("Fixed * 3 * float32"));
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim_kind(ndt::make_type<float>())),
+  EXPECT_EQ(ndt::make_fixed_dim(3,  ndt::make_fixed_dim_kind(ndt::make_type<float>())),
             ndt::type("3 * Fixed * float32"));
 }
 
