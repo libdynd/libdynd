@@ -23,36 +23,40 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 #
 # -DDYND_SHARED_LIB=ON/OFF, whether to build a shared or a static library.
     option(DYND_SHARED_LIB
-        "Build a libdynd shared library instead of a static library"
-        ON)
+           "Build a libdynd shared library instead of a static library"
+           ON)
 # -DDYND_CUDA=ON/OFF, whether to build libdynd with or without the CUDA Toolkit
     option(DYND_CUDA
-        "Build a libdynd library with CUDA"
-        OFF) # While CUDA support is in development, we default to OFF.
+           "Build a libdynd library with CUDA"
+           OFF) # While CUDA support is in development, we default to OFF.
 # -DDYND_FFTW=ON/OFF, whether to build libdynd with or without FFTW
     option(DYND_FFTW
-        "Build a libdynd library with FFTW"
-        OFF)
+           "Build a libdynd library with FFTW"
+           OFF)
 # -DDYND_LLVM=ON/OFF, whether to build libdynd with or without LLVM support
     option(DYND_LLVM
-        "Build a libdynd library with LLVM"
-        OFF)
+           "Build a libdynd library with LLVM"
+           OFF)
 #
 # -DDYND_INSTALL_LIB=ON/OFF, whether to install libdynd into the
 #   CMAKE_INSTALL_PREFIX. Its main purpose is to allow dynd-python and
 #   libdynd to be built inside the source tree of another project, like
 #   in the libraries/libdynd subdirectory of dynd-python.
     option(DYND_INSTALL_LIB
-        "Do installation of the built libdynd library to the CMAKE_INSTALL_PREFIX"
-        ON)
+           "Do installation of the built libdynd library to the CMAKE_INSTALL_PREFIX"
+           ON)
 # -DDYND_BUILD_TESTS=ON/OFF, whether to build the googletest unit tests.
     option(DYND_BUILD_TESTS
-        "Build the googletest unit tests for libdynd."
-        ON)
+           "Build the googletest unit tests for libdynd."
+           ON)
 # -DDYND_BUILD_BENCHMARKS=ON/OFF, whether to build the Google benchmarks
     option(DYND_BUILD_BENCHMARKS
-        "Build the Google benchmarks for libdynd."
-        ON)
+           "Build the Google benchmarks for libdynd."
+           ON)
+# -DDYND_BUILD_DOCS=ON/OFF, whether or not to build the documentation.
+    option(DYND_BUILD_DOCS
+           "Use Doxygen to generate the documentation."
+           OFF)
 #
 ################################################
 endif()
@@ -621,6 +625,23 @@ else()
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/libdynd-config.in"
         "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config" @ONLY)
+endif()
+
+if(DYND_BUILD_DOCS)
+    find_package(Doxygen)
+    if(NOT DOXYGEN_FOUND)
+        message(FATAL_ERROR "Building DyND documentation requires that Doxygen be installed.")
+    endif()
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in"
+                   "${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile" @ONLY)
+    add_custom_target(dynd_documentation ALL
+                      COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile
+                      DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile
+                      COMMENT "Building documentation for libdynd."
+                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                      VERBATIM
+                      )
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs DESTINATION docs)
 endif()
 
 # If requested, install the .lib/.so/.dll file and headers to the install prefix
