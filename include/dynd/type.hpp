@@ -123,11 +123,6 @@ DYND_API char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, 
 DYND_API char *iterdata_broadcasting_terminator_adv(iterdata_common *iterdata, intptr_t level, intptr_t i);
 DYND_API char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, intptr_t level);
 
-// Forward declaration of nd::array and nd::strided_vals
-namespace nd {
-  class DYND_API array;
-} // namespace dynd::nd
-
 namespace ndt {
   typedef type (*type_make_t)(type_id_t tp_id, const nd::array &args);
 
