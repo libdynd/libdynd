@@ -143,6 +143,7 @@ set(libdynd_SRC
     src/dynd/types/array_type.cpp
     src/dynd/types/base_bytes_type.cpp
     src/dynd/types/base_type.cpp
+    src/dynd/types/base_fixed_dim_type.cpp
     src/dynd/types/base_expr_type.cpp
     src/dynd/types/base_memory_type.cpp
     src/dynd/types/base_string_type.cpp
@@ -159,7 +160,6 @@ set(libdynd_SRC
     src/dynd/types/dim_fragment_type.cpp
     src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/fixed_dim_type.cpp
-    src/dynd/types/fixed_dim_kind_type.cpp
     src/dynd/types/fixed_bytes_kind_type.cpp
     src/dynd/types/fixed_bytes_type.cpp
     src/dynd/types/fixed_string_kind_type.cpp
@@ -187,6 +187,7 @@ set(libdynd_SRC
     include/dynd/types/callable_type.hpp
     include/dynd/types/base_bytes_type.hpp
     include/dynd/types/base_type.hpp
+    include/dynd/types/base_fixed_dim_type.hpp
     include/dynd/types/base_memory_type.hpp
     include/dynd/types/base_expr_type.hpp
     include/dynd/types/base_string_type.hpp
@@ -203,7 +204,6 @@ set(libdynd_SRC
     include/dynd/types/dim_fragment_type.hpp
     include/dynd/types/ellipsis_dim_type.hpp
     include/dynd/types/fixed_dim_type.hpp
-    include/dynd/types/fixed_dim_kind_type.hpp
     include/dynd/types/fixed_bytes_kind_type.hpp
     include/dynd/types/fixed_bytes_type.hpp
     include/dynd/types/fixed_string_kind_type.hpp

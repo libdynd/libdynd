@@ -233,7 +233,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp, 
   type concrete_subtype = candidate_tp;
   switch (base_tp.get_id()) {
   case fixed_dim_id: {
-    if (base_tp.get_kind() == kind_kind) {
+    if (!base_tp.extended<base_fixed_dim_type>()->is_sized()) {
       for (intptr_t i = 0; i < exponent; ++i) {
         switch (concrete_subtype.get_id()) {
         case fixed_dim_id:

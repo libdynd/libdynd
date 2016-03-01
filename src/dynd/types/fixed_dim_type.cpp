@@ -16,8 +16,8 @@ using namespace std;
 using namespace dynd;
 
 ndt::fixed_dim_type::fixed_dim_type(intptr_t dim_size, const type &element_tp)
-    : base_dim_type(fixed_dim_id, element_tp, 0, element_tp.get_data_alignment(), sizeof(fixed_dim_type_arrmeta),
-                    type_flag_none, true),
+    : base_fixed_dim_type(fixed_dim_id, element_tp, 0, element_tp.get_data_alignment(), sizeof(fixed_dim_type_arrmeta),
+                          type_flag_none, true),
       m_dim_size(dim_size)
 {
   // Propagate the inherited flags from the element
@@ -271,20 +271,9 @@ bool ndt::fixed_dim_type::is_lossless_assignment(const type &dst_tp, const type 
 
 bool ndt::fixed_dim_type::operator==(const base_type &rhs) const
 {
-  if (this == &rhs) {
-    return true;
-  }
-
-  if (rhs.get_id() != fixed_dim_id) {
-    return false;
-  }
-
-  if (rhs.get_kind() == kind_kind) {
-    return false;
-  }
-
-  const fixed_dim_type *dt = static_cast<const fixed_dim_type *>(&rhs);
-  return m_element_tp == dt->m_element_tp && m_dim_size == dt->m_dim_size;
+  return this == &rhs || (rhs.get_id() == fixed_dim_id && static_cast<const base_fixed_dim_type *>(&rhs)->is_sized() &&
+                          m_element_tp == static_cast<const fixed_dim_type *>(&rhs)->m_element_tp &&
+                          m_dim_size == static_cast<const fixed_dim_type *>(&rhs)->m_dim_size);
 }
 
 void ndt::fixed_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
@@ -598,7 +587,7 @@ bool ndt::fixed_dim_type::match(const char *arrmeta, const type &candidate_tp, c
 {
   switch (candidate_tp.get_id()) {
   case fixed_dim_id:
-    if (candidate_tp.get_kind() == kind_kind) {
+    if (!candidate_tp.extended<base_fixed_dim_type>()->is_sized()) {
       return false;
     }
     // TODO XXX If the arrmeta is not NULL, the strides should be checked too
