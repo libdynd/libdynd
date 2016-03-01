@@ -118,7 +118,7 @@ bool ndt::base_fixed_dim_type::operator==(const base_type &rhs) const
     return false;
   }
 
-  if (rhs.get_kind() != kind_kind) {
+  if (static_cast<const base_fixed_dim_type *>(&rhs)->is_sized()) {
     return false;
   }
 
