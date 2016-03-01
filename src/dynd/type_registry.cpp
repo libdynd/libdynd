@@ -10,7 +10,6 @@
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
@@ -79,7 +78,7 @@ ndt::type_registry::type_registry()
   insert(base_id_of<tuple_id>::value, tuple_type::make(true));
   insert(base_id_of<struct_id>::value, struct_type::make(true));
 
-  insert(base_id_of<fixed_dim_id>::value, fixed_dim_kind_type::make(any_kind_type::make()));
+  insert(base_id_of<fixed_dim_id>::value, base_fixed_dim_type::make(any_kind_type::make()));
   insert(base_id_of<var_dim_id>::value, var_dim_type::make(any_kind_type::make()));
 
   insert(scalar_kind_id, categorical_kind_type::make());          // categorical_id

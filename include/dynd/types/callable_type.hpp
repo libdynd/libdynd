@@ -7,7 +7,6 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/struct_type.hpp>
 

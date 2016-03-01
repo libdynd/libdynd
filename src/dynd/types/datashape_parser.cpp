@@ -14,7 +14,6 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/c_contiguous_type.hpp>
-#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
