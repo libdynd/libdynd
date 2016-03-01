@@ -38,8 +38,6 @@ ndt::struct_type::struct_type(const std::vector<std::string> &field_names, const
        << m_field_count;
     throw invalid_argument(ss.str());
   }
-
-  this->kind = variadic ? kind_kind : struct_kind;
 }
 
 ndt::struct_type::~struct_type() {}
