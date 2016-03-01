@@ -18,15 +18,6 @@ namespace ndt {
   class type;
 }
 
-enum type_kind_t {
-  bool_kind,
-  uint_kind,
-  sint_kind,
-  real_kind,
-  complex_kind,
-  void_kind,
-};
-
 enum type_id_t {
   // The value zero is reserved for an uninitialized type.
   uninitialized_id,
@@ -195,7 +186,6 @@ enum {
   type_flags_value_inherited = type_flag_symbolic | type_flag_variadic
 };
 
-DYND_API std::ostream &operator<<(std::ostream &o, type_kind_t kind);
 DYND_API std::ostream &operator<<(std::ostream &o, type_id_t tid);
 
 // Forward declaration so we can make the is_builtin_type function here
