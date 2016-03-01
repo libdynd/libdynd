@@ -21,8 +21,6 @@ ndt::string_type::string_type()
 {
 }
 
-ndt::string_type::~string_type() {}
-
 void ndt::string_type::get_string_range(const char **out_begin, const char **out_end, const char *DYND_UNUSED(arrmeta),
                                         const char *data) const
 {

@@ -10,7 +10,7 @@
 using namespace std;
 using namespace dynd;
 
-ndt::int_kind_sym_type::int_kind_sym_type() : base_type(int_sym_id, kind_kind, 0, 1, type_flag_symbolic, 0, 0, 0) {}
+ndt::int_kind_sym_type::int_kind_sym_type() : base_type(int_sym_id, 0, 1, type_flag_symbolic, 0, 0, 0) {}
 
 ndt::int_kind_sym_type::~int_kind_sym_type() {}
 

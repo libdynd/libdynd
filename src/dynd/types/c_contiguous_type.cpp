@@ -9,9 +9,8 @@ using namespace std;
 using namespace dynd;
 
 ndt::c_contiguous_type::c_contiguous_type(const type &child_tp)
-    : base_type(c_contiguous_id, kind_kind, 0, 1,
-                type_flag_symbolic |
-                    (child_tp.get_flags() & (type_flags_value_inherited | type_flags_operand_inherited)),
+    : base_type(c_contiguous_id, 0, 1, type_flag_symbolic | (child_tp.get_flags() & (type_flags_value_inherited |
+                                                                                     type_flags_operand_inherited)),
                 0, child_tp.get_ndim(), 0),
       m_child_tp(child_tp)
 {
