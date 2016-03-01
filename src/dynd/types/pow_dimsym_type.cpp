@@ -13,7 +13,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::pow_dimsym_type::pow_dimsym_type(const type &base_tp, const std::string &exponent, const type &element_type)
-    : base_dim_type(pow_dimsym_id, pattern_kind, element_type, 0, 1, 0, type_flag_symbolic, false), m_base_tp(base_tp),
+    : base_dim_type(pow_dimsym_id, element_type, 0, 1, 0, type_flag_symbolic, false), m_base_tp(base_tp),
       m_exponent(exponent)
 {
   if (base_tp.is_scalar() || base_tp.extended<base_dim_type>()->get_element_type().get_id() != void_id) {

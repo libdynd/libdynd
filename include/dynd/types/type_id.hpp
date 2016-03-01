@@ -18,54 +18,6 @@ namespace ndt {
   class type;
 }
 
-enum type_kind_t {
-  bool_kind,
-  uint_kind,
-  sint_kind,
-  real_kind,
-  complex_kind,
-  void_kind,
-  char_kind,
-
-  // string_kind means subclass of base_string_type
-  string_kind,
-  bytes_kind,
-  datetime_kind,
-
-  // For type_id and other types that themselves represent types
-  type_kind,
-
-  // For any dimension types which have elements of all the same type
-  dim_kind,
-
-  // For structs
-  struct_kind,
-  // For tuples
-  tuple_kind,
-
-  // For types whose value_type != the type, signals
-  // that calculations should look at the value_type for
-  // type promotion, etc.
-  expr_kind,
-
-  // For the option type, whose value may or may not be present
-  option_kind,
-
-  // For types that specify a memory space
-  memory_kind,
-
-  // For callables
-  function_kind,
-
-  // For symbolic types that represent a kind of type, like 'Any' or 'Fixed'
-  kind_kind,
-  // For symbolic types that represent a pattern, like 'T' or 'Dims... * R'
-  pattern_kind,
-
-  // For use when it becomes possible to register custom types
-  custom_kind
-};
-
 enum type_id_t {
   // The value zero is reserved for an uninitialized type.
   uninitialized_id,
@@ -234,7 +186,6 @@ enum {
   type_flags_value_inherited = type_flag_symbolic | type_flag_variadic
 };
 
-DYND_API std::ostream &operator<<(std::ostream &o, type_kind_t kind);
 DYND_API std::ostream &operator<<(std::ostream &o, type_id_t tid);
 
 // Forward declaration so we can make the is_builtin_type function here

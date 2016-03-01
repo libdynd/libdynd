@@ -10,7 +10,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::typevar_type::typevar_type(const std::string &name)
-    : base_type(typevar_id, pattern_kind, 0, 1, type_flag_symbolic, 0, 0, 0), m_name(name)
+    : base_type(typevar_id, 0, 1, type_flag_symbolic, 0, 0, 0), m_name(name)
 {
   if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");

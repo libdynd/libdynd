@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::pointer_type::pointer_type(const type &target_tp)
-    : base_expr_type(pointer_id, expr_kind, sizeof(void *), alignof(void *),
+    : base_expr_type(pointer_id, sizeof(void *), alignof(void *),
                      inherited_flags(target_tp.get_flags(), type_flag_zeroinit | type_flag_blockref),
                      sizeof(pointer_type_arrmeta) + target_tp.get_arrmeta_size(), target_tp.get_ndim()),
       m_target_tp(target_tp)

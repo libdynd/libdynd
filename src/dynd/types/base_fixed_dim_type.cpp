@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::base_fixed_dim_type::base_fixed_dim_type(const type &element_tp)
-    : base_dim_type(fixed_dim_id, kind_kind, element_tp, 0, element_tp.get_data_alignment(), sizeof(size_stride_t),
+    : base_dim_type(fixed_dim_id, element_tp, 0, element_tp.get_data_alignment(), sizeof(size_stride_t),
                     type_flag_symbolic, true)
 {
   // Propagate the inherited flags from the element

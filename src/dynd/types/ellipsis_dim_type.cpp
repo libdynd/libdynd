@@ -12,8 +12,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::ellipsis_dim_type::ellipsis_dim_type(const std::string &name, const type &element_type)
-    : base_dim_type(ellipsis_dim_id, pattern_kind, element_type, 0, 1, 0, type_flag_symbolic | type_flag_variadic,
-                    false),
+    : base_dim_type(ellipsis_dim_id, element_type, 0, 1, 0, type_flag_symbolic | type_flag_variadic, false),
       m_name(name)
 {
   if (!m_name.empty()) {

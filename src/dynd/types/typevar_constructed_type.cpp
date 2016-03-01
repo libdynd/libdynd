@@ -12,8 +12,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::typevar_constructed_type::typevar_constructed_type(const std::string &name, const type &arg)
-    : base_type(typevar_constructed_id, pattern_kind, 0, 1, type_flag_symbolic, 0, arg.get_ndim(),
-                arg.get_strided_ndim()),
+    : base_type(typevar_constructed_id, 0, 1, type_flag_symbolic, 0, arg.get_ndim(), arg.get_strided_ndim()),
       m_name(name), m_arg(arg)
 {
   //  static ndt::type args_pattern("((...), {...})");

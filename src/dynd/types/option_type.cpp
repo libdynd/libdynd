@@ -18,7 +18,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::option_type::option_type(const type &value_tp)
-    : base_type(option_id, option_kind, value_tp.get_data_size(), value_tp.get_data_alignment(),
+    : base_type(option_id, value_tp.get_data_size(), value_tp.get_data_alignment(),
                 value_tp.get_flags() & (type_flags_value_inherited | type_flags_operand_inherited),
                 value_tp.get_arrmeta_size(), value_tp.get_ndim(), 0),
       m_value_tp(value_tp)

@@ -80,40 +80,6 @@ ndt::type::type(const std::string &rep) { type_from_datashape(rep).swap(*this); 
 
 ndt::type::type(const char *rep_begin, const char *rep_end) { type_from_datashape(rep_begin, rep_end).swap(*this); }
 
-type_kind_t ndt::type::get_kind() const
-{
-  switch (reinterpret_cast<uintptr_t>(m_ptr)) {
-  case uninitialized_id:
-    return void_kind;
-  case bool_id:
-    return bool_kind;
-  case int8_id:
-  case int16_id:
-  case int32_id:
-  case int64_id:
-  case int128_id:
-    return sint_kind;
-  case uint8_id:
-  case uint16_id:
-  case uint32_id:
-  case uint64_id:
-  case uint128_id:
-    return uint_kind;
-  case float16_id:
-  case float32_id:
-  case float64_id:
-  case float128_id:
-    return real_kind;
-  case complex_float32_id:
-  case complex_float64_id:
-    return complex_kind;
-  case void_id:
-    return void_kind;
-  default:
-    return m_ptr->get_kind();
-  }
-}
-
 size_t ndt::type::get_data_alignment() const
 {
   switch (reinterpret_cast<uintptr_t>(m_ptr)) {

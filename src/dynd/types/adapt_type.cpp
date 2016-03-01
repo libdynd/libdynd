@@ -10,7 +10,7 @@ using namespace dynd;
 
 ndt::adapt_type::adapt_type(const ndt::type &value_tp, const ndt::type &storage_tp, const nd::callable &forward,
                             const nd::callable &inverse)
-    : base_type(adapt_id, expr_kind, storage_tp.get_data_size(), storage_tp.get_data_alignment(), type_flag_none,
+    : base_type(adapt_id, storage_tp.get_data_size(), storage_tp.get_data_alignment(), type_flag_none,
                 storage_tp.get_arrmeta_size(), storage_tp.get_ndim(), storage_tp.get_strided_ndim()),
       m_value_tp(value_tp), m_storage_tp(storage_tp), m_forward(forward), m_inverse(inverse)
 {
@@ -57,4 +57,3 @@ bool ndt::adapt_type::operator==(const base_type &rhs) const
 
   return false;
 }
-

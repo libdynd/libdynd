@@ -63,8 +63,6 @@ namespace ndt {
 
     string_type();
 
-    virtual ~string_type();
-
     string_encoding_t get_encoding() const { return string_encoding_utf_8; }
 
     /** Alignment of the string data being pointed to. */
