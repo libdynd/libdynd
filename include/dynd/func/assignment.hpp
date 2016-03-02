@@ -12,10 +12,20 @@
 
 namespace dynd {
 
+struct inexact_check_t {
+};
+
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_complex<RetType>::value && is_signed<ArgType>::value && is_integral<ArgType>::value, RetType>
+nocheck_cast(ArgType arg)
+{
+  return static_cast<RetType>(arg.real());
+}
+
 // Signed int -> complex floating point with inexact checking
 template <typename RetType, typename ArgType>
 std::enable_if_t<is_complex<RetType>::value && is_signed<ArgType>::value && is_integral<ArgType>::value, RetType>
-check_cast(ArgType arg)
+check_cast(ArgType arg, inexact_check_t)
 {
   typename RetType::value_type d = static_cast<typename RetType::value_type>(arg);
 
@@ -32,7 +42,7 @@ check_cast(ArgType arg)
 template <typename RetType, typename ArgType>
 std::enable_if_t<is_floating_point<RetType>::value && is_unsigned<ArgType>::value && is_integral<ArgType>::value,
                  RetType>
-check_cast(ArgType arg)
+check_cast(ArgType arg, inexact_check_t)
 {
   RetType res = static_cast<RetType>(arg);
 
@@ -48,7 +58,7 @@ check_cast(ArgType arg)
 // Unsigned int -> complex floating point with inexact checking
 template <typename RetType, typename ArgType>
 std::enable_if_t<is_complex<RetType>::value && is_unsigned<ArgType>::value && is_integral<ArgType>::value, RetType>
-check_cast(ArgType arg)
+check_cast(ArgType arg, inexact_check_t)
 {
   typename RetType::value_type res = static_cast<typename RetType::value_type>(arg);
 
@@ -64,7 +74,7 @@ check_cast(ArgType arg)
 // real -> real with inexact checking
 template <typename RetType, typename ArgType>
 std::enable_if_t<is_floating_point<RetType>::value && is_floating_point<ArgType>::value, RetType>
-check_cast(ArgType arg)
+check_cast(ArgType arg, inexact_check_t)
 {
   RetType res;
 #if defined(DYND_USE_FPSTATUS)
@@ -105,7 +115,7 @@ check_cast(ArgType arg)
 // complex<double> -> float with inexact checking
 template <typename RetType, typename ArgType>
 std::enable_if_t<std::is_same<RetType, float>::value && std::is_same<ArgType, complex<double>>::value, RetType>
-check_cast(ArgType arg)
+check_cast(ArgType arg, inexact_check_t)
 {
   float res;
 
@@ -146,7 +156,8 @@ check_cast(ArgType arg)
 
 // real -> complex with inexact checking
 template <typename RetType, typename ArgType>
-std::enable_if_t<is_complex<RetType>::value && is_floating_point<ArgType>::value, RetType> check_cast(ArgType s)
+std::enable_if_t<is_complex<RetType>::value && is_floating_point<ArgType>::value, RetType>
+check_cast(ArgType s, inexact_check_t DYND_UNUSED(check))
 {
   typename RetType::value_type d;
 
@@ -182,7 +193,7 @@ std::enable_if_t<is_complex<RetType>::value && is_floating_point<ArgType>::value
 // complex<double> -> complex<float> with inexact checking
 template <typename RetType, typename ArgType>
 std::enable_if_t<std::is_same<RetType, complex<float>>::value && std::is_same<ArgType, complex<double>>::value, RetType>
-check_cast(ArgType s)
+check_cast(ArgType s, inexact_check_t DYND_UNUSED(check))
 {
   complex<float> d;
 
@@ -225,7 +236,7 @@ check_cast(ArgType s)
 // Signed int -> floating point with inexact checking
 template <typename RetType, typename ArgType>
 std::enable_if_t<is_floating_point<RetType>::value && is_signed<ArgType>::value && is_integral<ArgType>::value, RetType>
-check_cast(ArgType s)
+check_cast(ArgType s, inexact_check_t)
 {
   RetType d = static_cast<RetType>(s);
 
@@ -608,6 +619,14 @@ fractional_cast(ArgType s)
     throw std::runtime_error(ss.str());
   }
   return static_cast<RetType>(s.real());
+}
+
+// Floating point -> signed int with other checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_signed<RetType>::value && is_integral<RetType>::value && is_floating_point<ArgType>::value, RetType>
+check_cast(ArgType s, inexact_check_t)
+{
+  return fractional_cast<RetType>(s);
 }
 
 namespace nd {

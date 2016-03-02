@@ -34,6 +34,8 @@
 
 namespace dynd {
 
+const inexact_check_t inexact_check = inexact_check_t();
+
 // Trim taken from boost string algorithms library
 // Trim taken from boost string algorithms library
 template <typename ForwardIteratorT>
@@ -82,54 +84,6 @@ inline void to_lower(std::string &s)
 }
 
 namespace nd {
-
-  template <typename UIntType>
-  struct category_to_categorical_kernel_extra : base_strided_kernel<category_to_categorical_kernel_extra<UIntType>, 1> {
-    typedef category_to_categorical_kernel_extra self_type;
-
-    ndt::type dst_cat_tp;
-    const char *src_arrmeta;
-
-    // Assign from an input matching the category type to a categorical type
-    void single(char *dst, char *const *src)
-    {
-      uint32_t src_val = dst_cat_tp.extended<ndt::categorical_type>()->get_value_from_category(src_arrmeta, src[0]);
-      *reinterpret_cast<UIntType *>(dst) = src_val;
-    }
-
-    static void destruct(kernel_prefix *self)
-    {
-      self_type *e = reinterpret_cast<self_type *>(self);
-      e->dst_cat_tp.~type();
-    }
-  };
-
-  // Assign from a categorical type to some other type
-  template <typename UIntType>
-  struct categorical_to_other_kernel : base_strided_kernel<categorical_to_other_kernel<UIntType>, 1> {
-    typedef categorical_to_other_kernel extra_type;
-
-    ndt::type src_cat_tp;
-
-    void single(char *dst, char *const *src)
-    {
-      kernel_prefix *echild = this->get_child();
-      kernel_single_t opchild = echild->get_function<kernel_single_t>();
-
-      uint32_t value = *reinterpret_cast<const UIntType *>(src[0]);
-      char *src_val = const_cast<char *>(
-          reinterpret_cast<const ndt::categorical_type *>(src_cat_tp.extended())->get_category_data_from_value(value));
-      opchild(echild, dst, &src_val);
-    }
-
-    static void destruct(kernel_prefix *self)
-    {
-      extra_type *e = reinterpret_cast<extra_type *>(self);
-      e->src_cat_tp.~type();
-      self->get_child(sizeof(extra_type))->destroy();
-    }
-  };
-
   namespace detail {
 
     template <type_id_t DstID, type_id_t DstBaseID, type_id_t Src0ID, type_id_t Src0BaseID,
@@ -265,7 +219,8 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        *reinterpret_cast<dst_type *>(dst) = check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
+        *reinterpret_cast<dst_type *>(dst) =
+            check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]), inexact_check);
       }
     };
 
@@ -307,7 +262,8 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        *reinterpret_cast<dst_type *>(dst) = check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
+        *reinterpret_cast<dst_type *>(dst) =
+            check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]), inexact_check);
       }
     };
 
@@ -350,7 +306,8 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        *reinterpret_cast<dst_type *>(dst) = check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
+        *reinterpret_cast<dst_type *>(dst) =
+            check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]), inexact_check);
       }
     };
 
@@ -645,7 +602,8 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        *reinterpret_cast<dst_type *>(dst) = check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
+        *reinterpret_cast<dst_type *>(dst) =
+            check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]), inexact_check);
       }
     };
 
@@ -815,7 +773,8 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        *reinterpret_cast<dst_type *>(dst) = check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
+        *reinterpret_cast<dst_type *>(dst) =
+            check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]), inexact_check);
       }
     };
 
@@ -880,7 +839,8 @@ namespace nd {
               1> {
       void single(char *dst, char *const *src)
       {
-        *reinterpret_cast<float *>(dst) = check_cast<float>(*reinterpret_cast<complex<double> *>(src[0]));
+        *reinterpret_cast<float *>(dst) =
+            check_cast<float>(*reinterpret_cast<complex<double> *>(src[0]), inexact_check);
       }
     };
 
@@ -914,7 +874,8 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        *reinterpret_cast<dst_type *>(dst) = check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
+        *reinterpret_cast<dst_type *>(dst) =
+            check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]), inexact_check);
       }
     };
 
@@ -954,7 +915,8 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        *reinterpret_cast<dst_type *>(dst) = check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
+        *reinterpret_cast<dst_type *>(dst) =
+            check_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]), inexact_check);
       }
     };
 
