@@ -7,6 +7,7 @@
 
 #include <dynd/callable.hpp>
 #include <dynd/math.hpp>
+#include <dynd/parse.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 
 namespace dynd {
@@ -236,6 +237,278 @@ check_cast(ArgType s)
   }
 
   return d;
+}
+
+// Floating point -> signed int with overflow checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_signed<RetType>::value && is_integral<RetType>::value && is_floating_point<ArgType>::value, RetType>
+overflow_cast(ArgType s)
+{
+  if (s < std::numeric_limits<RetType>::min() || std::numeric_limits<RetType>::max() < s) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+
+  return static_cast<RetType>(s);
+}
+
+// Complex floating point -> signed int with overflow checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_signed<RetType>::value && is_integral<RetType>::value && is_complex<ArgType>::value, RetType>
+overflow_cast(ArgType s)
+{
+  if (s.imag() != 0) {
+    std::stringstream ss;
+    ss << "loss of imaginary component while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::runtime_error(ss.str());
+  }
+
+  if (s.real() < std::numeric_limits<RetType>::min() || std::numeric_limits<RetType>::max() < s.real()) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+
+  return static_cast<RetType>(s.real());
+}
+
+// Floating point -> unsigned int with overflow checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_unsigned<RetType>::value && is_integral<RetType>::value && is_floating_point<ArgType>::value,
+                 RetType>
+overflow_cast(ArgType s)
+{
+  if (s < 0 || std::numeric_limits<RetType>::max() < s) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+  return static_cast<RetType>(s);
+}
+
+// Complex floating point -> unsigned int with overflow checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_unsigned<RetType>::value && is_integral<RetType>::value && is_complex<ArgType>::value, RetType>
+overflow_cast(ArgType s)
+{
+  if (s.imag() != 0) {
+    std::stringstream ss;
+    ss << "loss of imaginary component while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::runtime_error(ss.str());
+  }
+
+  if (s.real() < 0 || std::numeric_limits<RetType>::max() < s.real()) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+  return static_cast<RetType>(s.real());
+}
+
+// real -> real with overflow checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_floating_point<RetType>::value && is_floating_point<ArgType>::value, RetType>
+overflow_cast(ArgType s)
+{
+#if defined(DYND_USE_FPSTATUS)
+  clear_fp_status();
+  if (is_overflow_fp_status()) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+  return static_cast<RetType>(s);
+#else
+  ArgType sd = s;
+  if (isfinite(sd) && (sd < -std::numeric_limits<RetType>::max() || sd > std::numeric_limits<RetType>::max())) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+  return static_cast<RetType>(sd);
+#endif // DYND_USE_FPSTATUS
+}
+
+// Anything -> boolean with overflow checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<std::is_same<RetType, bool1>::value, RetType> overflow_cast(ArgType s)
+{
+  if (s == ArgType(0)) {
+    return bool1(false);
+  }
+  else if (s == ArgType(1)) {
+    return bool1(true);
+  }
+  else {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<bool1>();
+    throw std::overflow_error(ss.str());
+  }
+}
+
+// Signed int -> signed int with overflow checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_signed<RetType>::value && is_integral<RetType>::value && is_signed<ArgType>::value &&
+                     is_integral<ArgType>::value,
+                 RetType>
+overflow_cast(ArgType s)
+{
+  if (is_overflow<RetType>(s)) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<ArgType>();
+    throw std::overflow_error(ss.str());
+  }
+  return static_cast<RetType>(s);
+}
+
+// Unsigned int -> signed int with overflow checking just when sizeof(dst) <= sizeof(src)
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_signed<RetType>::value && is_integral<RetType>::value && is_unsigned<ArgType>::value &&
+                     is_integral<ArgType>::value,
+                 RetType>
+overflow_cast(ArgType s)
+{
+  if (is_overflow<RetType>(s)) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+  return static_cast<RetType>(s);
+}
+
+// Signed int -> unsigned int with positive overflow checking just when sizeof(dst) < sizeof(src)
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_unsigned<RetType>::value && is_integral<RetType>::value && is_signed<ArgType>::value &&
+                     is_integral<ArgType>::value,
+                 RetType>
+overflow_cast(ArgType s)
+{
+  if (is_overflow<RetType>(s)) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+  return static_cast<RetType>(s);
+}
+
+// Unsigned int -> unsigned int with overflow checking just when sizeof(dst) < sizeof(src)
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_unsigned<RetType>::value && is_integral<RetType>::value && is_unsigned<ArgType>::value &&
+                     is_integral<ArgType>::value,
+                 RetType>
+overflow_cast(ArgType s)
+{
+  if (is_overflow<RetType>(s)) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+  return static_cast<RetType>(s);
+}
+
+// complex -> real with overflow checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_floating_point<RetType>::value && is_complex<ArgType>::value, RetType> overflow_cast(ArgType s)
+{
+  RetType d;
+
+  if (s.imag() != 0) {
+    std::stringstream ss;
+    ss << "loss of imaginary component while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::runtime_error(ss.str());
+  }
+
+#if defined(DYND_USE_FPSTATUS)
+  clear_fp_status();
+  d = static_cast<RetType>(s.real());
+  if (is_overflow_fp_status()) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<RetType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+#else
+  if (s.real() < -std::numeric_limits<RetType>::max() || s.real() > std::numeric_limits<RetType>::max()) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+  d = static_cast<RetType>(s.real());
+#endif // DYND_USE_FPSTATUS
+
+  return d;
+}
+
+// real -> complex with overflow checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_complex<RetType>::value && is_floating_point<ArgType>::value, RetType> overflow_cast(ArgType s)
+{
+  typename RetType::value_type d;
+
+#if defined(DYND_USE_FPSTATUS)
+  clear_fp_status();
+  d = static_cast<typename RetType::value_type>(s);
+  if (is_overflow_fp_status()) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+#else
+  if (isfinite(s) && (s < -std::numeric_limits<typename RetType::value_type>::max() ||
+                      s > std::numeric_limits<typename RetType::value_type>::max())) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+  d = static_cast<typename RetType::value_type>(s);
+#endif // DYND_USE_FPSTATUS
+
+  return d;
+}
+
+// complex<double> -> complex<float> with overflow checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<std::is_same<RetType, complex<float>>::value && std::is_same<ArgType, complex<double>>::value, RetType>
+overflow_cast(ArgType s)
+{
+#if defined(DYND_USE_FPSTATUS)
+  clear_fp_status();
+  complex<float> d = static_cast<complex<float>>(s);
+  if (is_overflow_fp_status()) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<complex<double>>() << " value ";
+    ss << s << " to " << ndt::make_type<complex<float>>();
+    throw std::overflow_error(ss.str());
+  }
+  return d;
+#else
+  if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max() ||
+      s.imag() < -std::numeric_limits<float>::max() || s.imag() > std::numeric_limits<float>::max()) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<complex<double>>() << " value ";
+    ss << s << " to " << ndt::make_type<complex<float>>();
+    throw std::overflow_error(ss.str());
+  }
+  return static_cast<complex<float>>(s);
+#endif // DYND_USE_FPSTATUS
 }
 
 namespace nd {
