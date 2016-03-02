@@ -45,7 +45,7 @@ struct func_wrapper;
   struct func_wrapper<KERNREQ, R (*)(A...)> {                                                                          \
     R (*func)(A...);                                                                                                   \
                                                                                                                        \
-    DYND_CUDA_HOST_DEVICE func_wrapper(R (*func)(A...)) : func(func) {}                                                \
+    func_wrapper(R (*func)(A...)) : func(func) {}                                                                      \
                                                                                                                        \
     __VA_ARGS__ R operator()(A... a) const { return (*func)(a...); }                                                   \
   };
@@ -57,7 +57,7 @@ struct func_wrapper;
   struct func_wrapper<KERNREQ, R (*)()> {                                                                              \
     R (*func)();                                                                                                       \
                                                                                                                        \
-    DYND_CUDA_HOST_DEVICE func_wrapper(R (*func)()) : func(func) {}                                                    \
+    func_wrapper(R (*func)()) : func(func) {}                                                                          \
                                                                                                                        \
     __VA_ARGS__ R operator()() const { return (*func)(); }                                                             \
   };                                                                                                                   \
@@ -66,7 +66,7 @@ struct func_wrapper;
   struct func_wrapper<KERNREQ, R (*)(A0)> {                                                                            \
     R (*func)(A0);                                                                                                     \
                                                                                                                        \
-    DYND_CUDA_HOST_DEVICE func_wrapper(R (*func)(A0)) : func(func) {}                                                  \
+    func_wrapper(R (*func)(A0)) : func(func) {}                                                                        \
                                                                                                                        \
     __VA_ARGS__ R operator()(A0 a0) const { return (*func)(a0); }                                                      \
   };                                                                                                                   \
@@ -75,7 +75,7 @@ struct func_wrapper;
   struct func_wrapper<KERNREQ, R (*)(A0, A1)> {                                                                        \
     R (*func)(A0, A1);                                                                                                 \
                                                                                                                        \
-    DYND_CUDA_HOST_DEVICE func_wrapper(R (*func)(A0, A1)) : func(func) {}                                              \
+    func_wrapper(R (*func)(A0, A1)) : func(func) {}                                                                    \
                                                                                                                        \
     __VA_ARGS__ R operator()(A0 a0, A1 a1) const { return (*func)(a0, a1); }                                           \
   };                                                                                                                   \
@@ -84,7 +84,7 @@ struct func_wrapper;
   struct func_wrapper<KERNREQ, R (*)(A0, A1, A2)> {                                                                    \
     R (*func)(A0, A1, A2);                                                                                             \
                                                                                                                        \
-    DYND_CUDA_HOST_DEVICE func_wrapper(R (*func)(A0, A1, A2)) : func(func) {}                                          \
+    func_wrapper(R (*func)(A0, A1, A2)) : func(func) {}                                                                \
                                                                                                                        \
     __VA_ARGS__ R operator()(A0 a0, A1 a1, A2 a2) const { return (*func)(a0, a1, a2); }                                \
   }
@@ -141,8 +141,7 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
   }                                                                                                                    \
                                                                                                                        \
   template <kernel_request_t kernreq>                                                                                  \
-  DYND_CUDA_HOST_DEVICE typename std::enable_if<kernreq == kernel_request_cuda_device,                                 \
-                                                CUDA_DECLTYPE_WORKAROUND(&NAME)>::type get_##NAME()                    \
+  typename std::enable_if<kernreq == kernel_request_cuda_device, CUDA_DECLTYPE_WORKAROUND(&NAME)>::type get_##NAME()   \
   {                                                                                                                    \
     GET_CUDA_DEVICE_FUNC_BODY(NAME)                                                                                    \
   }
@@ -154,7 +153,7 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
   template <>                                                                                                          \
   struct NAME##_as_callable<kernel_request_cuda_device>                                                                \
       : func_wrapper<kernel_request_cuda_device, CUDA_DECLTYPE_WORKAROUND(&NAME)> {                                    \
-    DYND_CUDA_HOST_DEVICE NAME##_as_callable()                                                                         \
+    NAME##_as_callable()                                                                                               \
         : func_wrapper<kernel_request_cuda_device, CUDA_DECLTYPE_WORKAROUND(&NAME)>(                                   \
               get_##NAME<kernel_request_cuda_device>())                                                                \
     {                                                                                                                  \
@@ -189,35 +188,32 @@ CUDA_DEVICE_FUNC_AS_CALLABLE(func1);
 
 #endif
 
-DYND_CUDA_HOST_DEVICE float func2(const float(&x)[3]) { return x[0] + x[1] + x[2]; }
+float func2(const float(&x)[3]) { return x[0] + x[1] + x[2]; }
 
 GET_CUDA_HOST_DEVICE_FUNC(func2)
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func2);
 
-DYND_CUDA_HOST_DEVICE unsigned int func3() { return 12U; }
+unsigned int func3() { return 12U; }
 
 GET_CUDA_HOST_DEVICE_FUNC(func3)
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func3);
 
-DYND_CUDA_HOST_DEVICE double func4(const double(&x)[3], const double(&y)[3])
-{
-  return x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
-}
+double func4(const double(&x)[3], const double(&y)[3]) { return x[0] * y[0] + x[1] * y[1] + x[2] * y[2]; }
 
 GET_CUDA_HOST_DEVICE_FUNC(func4);
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func4);
 
-DYND_CUDA_HOST_DEVICE long func5(const long(&x)[2][3]) { return x[0][0] + x[0][1] + x[1][2]; }
+long func5(const long(&x)[2][3]) { return x[0][0] + x[0][1] + x[1][2]; }
 
 GET_CUDA_HOST_DEVICE_FUNC(func5);
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func5);
 
-DYND_CUDA_HOST_DEVICE int func6(int x, int y, int z) { return x * y - z; }
+int func6(int x, int y, int z) { return x * y - z; }
 
 GET_CUDA_HOST_DEVICE_FUNC(func6);
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func6);
 
-DYND_CUDA_HOST_DEVICE double func7(int x, int y, double z) { return (x % y) * z; }
+double func7(int x, int y, double z) { return (x % y) * z; }
 
 GET_CUDA_HOST_DEVICE_FUNC(func7);
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func7);
@@ -225,7 +221,7 @@ CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func7);
 template <kernel_request_t kernreq>
 class callable0 {
 public:
-  DYND_CUDA_HOST_DEVICE double operator()(double x) const { return 10 * x; }
+  double operator()(double x) const { return 10 * x; }
 };
 
 template <kernel_request_t kernreq>
@@ -233,8 +229,8 @@ class callable1 {
   int m_x, m_y;
 
 public:
-  DYND_CUDA_HOST_DEVICE callable1(int x, int y) : m_x(x + 2), m_y(y + 3) {}
-  DYND_CUDA_HOST_DEVICE int operator()(int z) const { return m_x * m_y - z; }
+  callable1(int x, int y) : m_x(x + 2), m_y(y + 3) {}
+  int operator()(int z) const { return m_x * m_y - z; }
 };
 
 template <kernel_request_t kernreq>
@@ -242,8 +238,8 @@ class callable2 {
   int m_z;
 
 public:
-  DYND_CUDA_HOST_DEVICE callable2(int z = 7) : m_z(z) {}
-  DYND_CUDA_HOST_DEVICE int operator()(int x, int y) const { return 2 * (x - y) + m_z; }
+  callable2(int z = 7) : m_z(z) {}
+  int operator()(int x, int y) const { return 2 * (x - y) + m_z; }
 };
 
 #undef GET_HOST_FUNC

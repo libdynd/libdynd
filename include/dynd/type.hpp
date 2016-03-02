@@ -123,11 +123,6 @@ DYND_API char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, 
 DYND_API char *iterdata_broadcasting_terminator_adv(iterdata_common *iterdata, intptr_t level, intptr_t i);
 DYND_API char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, intptr_t level);
 
-// Forward declaration of nd::array and nd::strided_vals
-namespace nd {
-  class DYND_API array;
-} // namespace dynd::nd
-
 namespace ndt {
   typedef type (*type_make_t)(type_id_t tp_id, const nd::array &args);
 
@@ -290,13 +285,99 @@ namespace ndt {
 
     bool match(const ndt::type &candidate_tp) const;
 
+    template<typename T>
+    bool has_scalar_type() const
+    {
+      switch (get_id()) {
+      case bool_id: return std::is_same<T, type_of<bool_id>::type>::value;
+      case int8_id: return std::is_same<T, type_of<int8_id>::type>::value;
+      case int16_id: return std::is_same<T, type_of<int16_id>::type>::value;
+      case int32_id: return std::is_same<T, type_of<int32_id>::type>::value;
+      case int64_id: return std::is_same<T, type_of<int64_id>::type>::value;
+      case int128_id: return std::is_same<T, type_of<int128_id>::type>::value;
+      case uint8_id: return std::is_same<T, type_of<uint8_id>::type>::value;
+      case uint16_id: return std::is_same<T, type_of<uint16_id>::type>::value;
+      case uint32_id: return std::is_same<T, type_of<uint32_id>::type>::value;
+      case uint64_id: return std::is_same<T, type_of<uint64_id>::type>::value;
+      case uint128_id: return std::is_same<T, type_of<uint128_id>::type>::value;
+      case float16_id: return std::is_same<T, type_of<float16_id>::type>::value;
+      case float32_id: return std::is_same<T, type_of<float32_id>::type>::value;
+      case float64_id: return std::is_same<T, type_of<float64_id>::type>::value;
+      case float128_id: return std::is_same<T, type_of<float128_id>::type>::value;
+      case complex_float32_id: return std::is_same<T, type_of<complex_float32_id>::type>::value;
+      case complex_float64_id: return std::is_same<T, type_of<complex_float64_id>::type>::value;
+      default: return false;
+      }
+    }
+
+    template<typename T>
+    bool has_admissible_value_type() const
+    {
+      switch (get_id()) {
+      case string_id: return std::is_same<T, std::string>::value;
+      case type_id: return std::is_same<T, ndt::type>::value;
+      default: return false;
+      }
+    }
+
+    template<typename T>
+    bool has_admissible_property_type() const
+    {
+       return has_scalar_type<T>() || has_admissible_value_type<T>();
+    }
+
     /**
      * Accesses a dynamic property of the type.
      *
      * \param name  The property to access.
      */
-    type_property_t p(const char *name) const;
-    type_property_t p(const std::string &name) const;
+    template <class T>
+    struct is_vector {
+      enum { value = false };
+    };
+
+    template <class T>
+    struct is_vector<std::vector<T>> {
+      enum { value = true };
+    };
+
+    std::map<std::string, std::pair<ndt::type, void *>> get_properties() const;
+
+    template<typename T, typename C = typename T::value_type>
+    std::enable_if_t<is_vector<T>::value, T> &
+    property(const char *name) const
+    {
+      const std::pair<ndt::type, void *> pair = get_properties()[name];
+      const ndt::type &dt = pair.first.get_dtype();
+
+      if (pair.first.get_id() != fixed_dim_id) {
+        throw std::runtime_error("unsupported type for property access");
+      }
+
+      if (dt.has_admissible_property_type<C>()) {
+        return *reinterpret_cast<T *>(pair.second);
+      }
+
+      throw std::runtime_error("type mismatch or unsupported type in property access");
+    }
+
+    template<typename T>
+    std::enable_if_t<!is_vector<T>::value, T> &
+    property(const char *name) const
+    {
+      const std::pair<ndt::type, void *> pair = get_properties()[name];
+ 
+      if (pair.first.has_admissible_property_type<T>()) {
+        return *reinterpret_cast<T *>(pair.second);
+      }
+
+      throw std::runtime_error("type mismatch in property access");
+    }
+
+    template<typename T>
+    T &p(const char *name) const { return property<T>(name); }
+    template<typename T>
+    T &p(const std::string &name) const { return property<T>(name.c_str()); }
 
     /**
      * Indexes into the type, intended for recursive calls from the
@@ -341,9 +422,6 @@ namespace ndt {
      * WARNING: Normally just use get_id().
      */
     type_id_t unchecked_get_builtin_id() const { return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr)); }
-
-    /** The 'kind' of the type (int, uint, float, etc) */
-    type_kind_t get_kind() const;
 
     type_id_t get_base_id() const;
 
@@ -588,8 +666,6 @@ namespace ndt {
 
       return vars;
     }
-
-    std::map<std::string, type_property_t> get_properties() const;
 
     /**
      * Returns a const pointer to the base_type object which

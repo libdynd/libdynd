@@ -15,8 +15,7 @@ using namespace dynd;
 
 ndt::tuple_type::tuple_type(type_id_t type_id, const std::vector<type> &field_types, flags_type flags,
                             bool layout_in_arrmeta, bool variadic)
-    : base_type(type_id, variadic ? kind_kind : tuple_kind, 0, 1,
-                flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
+    : base_type(type_id, 0, 1, flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
       m_field_count(field_types.size()), m_field_types(field_types), m_arrmeta_offsets(field_types.size()),
       m_variadic(variadic)
 {
@@ -491,11 +490,11 @@ bool ndt::tuple_type::match(const char *arrmeta, const type &candidate_tp, const
   }
 }
 
-std::map<std::string, type_property_t> ndt::tuple_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::tuple_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, type_property_t> properties;
-  properties["field_types"] = {.kind = TypeVector_kind, {.type_vector = &m_field_types}};
-  properties["metadata_offsets"] = {.kind = UintptrVector_kind, {.uintptr_vector = &m_arrmeta_offsets}};
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  properties["field_types"] = {ndt::type_for(m_field_types), (void *)(&m_field_types)};
+  properties["metadata_offsets"] = {ndt::type_for(m_arrmeta_offsets), (void *)(&m_arrmeta_offsets)};
 
   return properties;
 }

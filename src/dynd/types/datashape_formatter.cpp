@@ -5,7 +5,6 @@
 
 #include <dynd/types/datashape_formatter.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/string_type.hpp>

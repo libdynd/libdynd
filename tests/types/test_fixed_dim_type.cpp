@@ -30,7 +30,7 @@ TEST(FixedDimType, Create)
   EXPECT_EQ(1, d.get_ndim());
   EXPECT_EQ(1, d.get_strided_ndim());
   EXPECT_FALSE(d.is_expression());
-  EXPECT_EQ(ndt::make_type<int32_t>(), *d.p("element_type").type);
+  EXPECT_EQ(ndt::make_type<int32_t>(), d.p<ndt::type>("element_type"));
   EXPECT_EQ(ndt::make_type<int32_t>(), d.at(-3));
   EXPECT_EQ(ndt::make_type<int32_t>(), d.at(-2));
   EXPECT_EQ(ndt::make_type<int32_t>(), d.at(-1));

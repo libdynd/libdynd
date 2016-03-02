@@ -13,7 +13,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::pow_dimsym_type::pow_dimsym_type(const type &base_tp, const std::string &exponent, const type &element_type)
-    : base_dim_type(pow_dimsym_id, pattern_kind, element_type, 0, 1, 0, type_flag_symbolic, false), m_base_tp(base_tp),
+    : base_dim_type(pow_dimsym_id, element_type, 0, 1, 0, type_flag_symbolic, false), m_base_tp(base_tp),
       m_exponent(exponent)
 {
   if (base_tp.is_scalar() || base_tp.extended<base_dim_type>()->get_element_type().get_id() != void_id) {
@@ -233,7 +233,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp, 
   type concrete_subtype = candidate_tp;
   switch (base_tp.get_id()) {
   case fixed_dim_id: {
-    if (base_tp.get_kind() == kind_kind) {
+    if (!base_tp.extended<base_fixed_dim_type>()->is_sized()) {
       for (intptr_t i = 0; i < exponent; ++i) {
         switch (concrete_subtype.get_id()) {
         case fixed_dim_id:
@@ -272,11 +272,11 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp, 
   return m_element_tp.match(arrmeta, concrete_subtype, NULL, tp_vars);
 }
 
-std::map<std::string, type_property_t> ndt::pow_dimsym_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::pow_dimsym_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, type_property_t> properties;
-  properties["name"] = {.kind = String_kind, {.string = &m_exponent}};
-  properties["element_type"] = {.kind = Type_kind, {.type = &m_element_tp}};
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  properties["name"] = {ndt::type("string"), (void *)(&m_exponent)};
+  properties["element_type"] = {ndt::type("type"), (void *)(&m_element_tp)};
 
   return properties;
 }

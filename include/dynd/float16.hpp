@@ -19,13 +19,13 @@
 namespace dynd {
 
 // Bit-level conversions
-DYND_CUDA_HOST_DEVICE DYND_API uint16_t float_to_halfbits(float value);
+DYND_API uint16_t float_to_halfbits(float value);
 
-DYND_CUDA_HOST_DEVICE DYND_API uint16_t double_to_halfbits(double value);
+DYND_API uint16_t double_to_halfbits(double value);
 
-DYND_CUDA_HOST_DEVICE DYND_API float halfbits_to_float(uint16_t value);
+DYND_API float halfbits_to_float(uint16_t value);
 
-DYND_CUDA_HOST_DEVICE DYND_API double halfbits_to_double(uint16_t value);
+DYND_API double halfbits_to_double(uint16_t value);
 
 class DYND_API float16 {
   uint16_t m_bits;
@@ -33,172 +33,90 @@ class DYND_API float16 {
 public:
   class raw_bits_tag {
   };
-  DYND_CUDA_HOST_DEVICE explicit float16(uint16_t bits, raw_bits_tag)
-      : m_bits(bits)
-  {
-  }
+  explicit float16(uint16_t bits, raw_bits_tag) : m_bits(bits) {}
 
-  DYND_CUDA_HOST_DEVICE float16()
-  {
-  }
+  float16() {}
 
-  DYND_CUDA_HOST_DEVICE explicit float16(bool1 rhs)
-      : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO)
-  {
-  }
+  explicit float16(bool1 rhs) : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO) {}
 
-  DYND_CUDA_HOST_DEVICE explicit float16(bool rhs)
-      : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO)
-  {
-  }
+  explicit float16(bool rhs) : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO) {}
 
-  DYND_CUDA_HOST_DEVICE explicit float16(int8 value)
-      : float16(static_cast<float32>(value))
-  {
-  }
+  explicit float16(int8 value) : float16(static_cast<float32>(value)) {}
 
-  DYND_CUDA_HOST_DEVICE explicit float16(int16 value)
-      : float16(static_cast<float32>(value))
-  {
-  }
+  explicit float16(int16 value) : float16(static_cast<float32>(value)) {}
 
-  DYND_CUDA_HOST_DEVICE explicit float16(int32 value)
-      : float16(static_cast<float32>(value))
-  {
-  }
+  explicit float16(int32 value) : float16(static_cast<float32>(value)) {}
 
-  DYND_CUDA_HOST_DEVICE explicit float16(int64 value)
-      : float16(static_cast<float32>(value))
-  {
-  }
+  explicit float16(int64 value) : float16(static_cast<float32>(value)) {}
 
-  DYND_CUDA_HOST_DEVICE explicit float16(int128 value);
+  explicit float16(int128 value);
 
-  DYND_CUDA_HOST_DEVICE explicit float16(uint16 value)
-      : float16(static_cast<float32>(value))
-  {
-  }
+  explicit float16(uint16 value) : float16(static_cast<float32>(value)) {}
 
-  DYND_CUDA_HOST_DEVICE explicit float16(uint32 value)
-      : float16(static_cast<float32>(value))
-  {
-  }
+  explicit float16(uint32 value) : float16(static_cast<float32>(value)) {}
 
-  DYND_CUDA_HOST_DEVICE explicit float16(uint64 value)
-      : float16(static_cast<float32>(value))
-  {
-  }
+  explicit float16(uint64 value) : float16(static_cast<float32>(value)) {}
 
-  DYND_CUDA_HOST_DEVICE explicit float16(uint128 value);
+  explicit float16(uint128 value);
 
-  DYND_CUDA_HOST_DEVICE
-  explicit float16(float f) : m_bits(float_to_halfbits(f))
-  {
-  }
+  explicit float16(float f) : m_bits(float_to_halfbits(f)) {}
 
-  DYND_CUDA_HOST_DEVICE
-  explicit float16(double d) : m_bits(double_to_halfbits(d))
-  {
-  }
+  explicit float16(double d) : m_bits(double_to_halfbits(d)) {}
 
-  DYND_CUDA_HOST_DEVICE explicit float16(const float128 &value);
+  explicit float16(const float128 &value);
 
-  DYND_CUDA_HOST_DEVICE float16(const float16 &rhs) : m_bits(rhs.m_bits)
-  {
-  }
+  float16(const float16 &rhs) : m_bits(rhs.m_bits) {}
 
-  DYND_CUDA_HOST_DEVICE explicit operator int8() const
-  {
-    return static_cast<int8>(halfbits_to_float(m_bits));
-  }
+  explicit operator int8() const { return static_cast<int8>(halfbits_to_float(m_bits)); }
 
-  DYND_CUDA_HOST_DEVICE explicit operator int16() const
+  explicit operator int16() const
   {
     DYND_IGNORE_MAYBE_UNINITIALIZED
     return static_cast<int16>(halfbits_to_float(m_bits));
     DYND_END_IGNORE_MAYBE_UNINITIALIZED
   }
 
-  DYND_CUDA_HOST_DEVICE explicit operator int32() const
-  {
-    return static_cast<int32>(halfbits_to_float(m_bits));
-  }
+  explicit operator int32() const { return static_cast<int32>(halfbits_to_float(m_bits)); }
 
-  DYND_CUDA_HOST_DEVICE explicit operator int64() const
-  {
-    return static_cast<int64>(halfbits_to_float(m_bits));
-  }
+  explicit operator int64() const { return static_cast<int64>(halfbits_to_float(m_bits)); }
 
-  DYND_CUDA_HOST_DEVICE explicit operator int128() const;
+  explicit operator int128() const;
 
-  DYND_CUDA_HOST_DEVICE explicit operator uint8() const
-  {
-    return static_cast<uint8>(halfbits_to_float(m_bits));
-  }
+  explicit operator uint8() const { return static_cast<uint8>(halfbits_to_float(m_bits)); }
 
-  DYND_CUDA_HOST_DEVICE explicit operator uint16() const
-  {
-    return static_cast<uint16>(halfbits_to_float(m_bits));
-  }
+  explicit operator uint16() const { return static_cast<uint16>(halfbits_to_float(m_bits)); }
 
-  DYND_CUDA_HOST_DEVICE explicit operator uint32() const
-  {
-    return static_cast<uint32>(halfbits_to_float(m_bits));
-  }
+  explicit operator uint32() const { return static_cast<uint32>(halfbits_to_float(m_bits)); }
 
-  DYND_CUDA_HOST_DEVICE explicit operator uint64() const
-  {
-    return static_cast<uint64>(halfbits_to_float(m_bits));
-  }
+  explicit operator uint64() const { return static_cast<uint64>(halfbits_to_float(m_bits)); }
 
-  DYND_CUDA_HOST_DEVICE explicit operator uint128() const;
+  explicit operator uint128() const;
 
-  DYND_CUDA_HOST_DEVICE operator float32() const
+  operator float32() const
   {
     DYND_IGNORE_MAYBE_UNINITIALIZED
     return halfbits_to_float(m_bits);
     DYND_END_IGNORE_MAYBE_UNINITIALIZED
   }
 
-  DYND_CUDA_HOST_DEVICE explicit operator float64() const
-  {
-    return halfbits_to_double(m_bits);
-  }
+  explicit operator float64() const { return halfbits_to_double(m_bits); }
 
-  DYND_CUDA_HOST_DEVICE explicit operator float128() const;
+  explicit operator float128() const;
 
-  DYND_CUDA_HOST_DEVICE uint16_t bits() const
-  {
-    return m_bits;
-  }
+  uint16_t bits() const { return m_bits; }
 
-  DYND_CUDA_HOST_DEVICE bool iszero() const
-  {
-    return (m_bits & 0x7fff) == 0;
-  }
+  bool iszero() const { return (m_bits & 0x7fff) == 0; }
 
-  DYND_CUDA_HOST_DEVICE bool signbit_() const
-  {
-    return (m_bits & 0x8000u) != 0;
-  }
+  bool signbit_() const { return (m_bits & 0x8000u) != 0; }
 
-  DYND_CUDA_HOST_DEVICE bool isnan_() const
-  {
-    return ((m_bits & 0x7c00u) == 0x7c00u) && ((m_bits & 0x03ffu) != 0x0000u);
-  }
+  bool isnan_() const { return ((m_bits & 0x7c00u) == 0x7c00u) && ((m_bits & 0x03ffu) != 0x0000u); }
 
-  DYND_CUDA_HOST_DEVICE bool isinf_() const
-  {
-    return ((m_bits & 0x7fffu) == 0x7c00u);
-  }
+  bool isinf_() const { return ((m_bits & 0x7fffu) == 0x7c00u); }
 
-  DYND_CUDA_HOST_DEVICE bool isfinite_() const
-  {
-    return ((m_bits & 0x7c00u) != 0x7c00u);
-  }
+  bool isfinite_() const { return ((m_bits & 0x7c00u) != 0x7c00u); }
 
   /*
-    DYND_CUDA_HOST_DEVICE bool operator==(const float16 &rhs) const
+       bool operator==(const float16 &rhs) const
     {
       // The equality cases are as follows:
       //   - If either value is NaN, never equal.
@@ -208,94 +126,88 @@ public:
              (m_bits == rhs.m_bits || ((m_bits | rhs.m_bits) & 0x7fff) == 0);
     }
 
-    DYND_CUDA_HOST_DEVICE bool operator!=(const float16 &rhs) const
+       bool operator!=(const float16 &rhs) const
     {
       return !operator==(rhs);
     }
   */
 
-  DYND_CUDA_HOST_DEVICE bool less_nonan(const float16 &rhs) const
+  bool less_nonan(const float16 &rhs) const
   {
     if (signbit_()) {
       if (rhs.signbit_()) {
         return m_bits > rhs.m_bits;
-      } else {
+      }
+      else {
         // Signed zeros are equal, have to check for it
         return (m_bits != 0x8000u) || (rhs.m_bits != 0x0000u);
       }
-    } else {
+    }
+    else {
       if (rhs.signbit_()) {
         return false;
-      } else {
+      }
+      else {
         return m_bits < rhs.m_bits;
       }
     }
   }
 
-  DYND_CUDA_HOST_DEVICE bool less_equal_nonan(const float16 &rhs) const
+  bool less_equal_nonan(const float16 &rhs) const
   {
     if (signbit_()) {
       if (rhs.signbit_()) {
         return m_bits >= rhs.m_bits;
-      } else {
+      }
+      else {
         return true;
       }
-    } else {
+    }
+    else {
       if (rhs.signbit_()) {
         // Signed zeros are equal, have to check for it
         return (m_bits == 0x0000u) && (rhs.m_bits == 0x8000u);
-      } else {
+      }
+      else {
         return m_bits <= rhs.m_bits;
       }
     }
   }
 
   /*
-    DYND_CUDA_HOST_DEVICE bool operator<(const float16 &rhs) const
+       bool operator<(const float16 &rhs) const
     {
       return !isnan_() && !rhs.isnan_() && less_nonan(rhs);
     }
 
-    DYND_CUDA_HOST_DEVICE bool operator>(const float16 &rhs) const
+       bool operator>(const float16 &rhs) const
     {
       return rhs.operator<(*this);
     }
 
-    DYND_CUDA_HOST_DEVICE bool operator<=(const float16 &rhs) const
+       bool operator<=(const float16 &rhs) const
     {
       return !isnan_() && !rhs.isnan_() && less_equal_nonan(rhs);
     }
 
-    DYND_CUDA_HOST_DEVICE bool operator>=(const float16 &rhs) const
+       bool operator>=(const float16 &rhs) const
     {
       return rhs.operator<=(*this);
     }
   */
 
-  DYND_CUDA_HOST_DEVICE friend float16 float16_from_bits(uint16_t bits);
+  friend float16 float16_from_bits(uint16_t bits);
 
-  float16 operator+() const {
-    return *this;
-  }
+  float16 operator+() const { return *this; }
 
-  float16 operator-() const
-  {
-    return float16(-static_cast<float>(*this));
-  }
+  float16 operator-() const { return float16(-static_cast<float>(*this)); }
 
-  bool operator!() const
-  {
-    return (0x7fffu | m_bits) == 0;
-  }
+  bool operator!() const { return (0x7fffu | m_bits) == 0; }
 
-  DYND_CUDA_HOST_DEVICE explicit operator bool() const {
-    return (0x7ffu | m_bits) != 0;
-  }
-
+  explicit operator bool() const { return (0x7ffu | m_bits) != 0; }
 };
 
-inline float16 operator+(const float16 &DYND_UNUSED(lhs),
-                         const float16 &DYND_UNUSED(rhs))
+inline float16 operator+(const float16 &DYND_UNUSED(lhs), const float16 &DYND_UNUSED(rhs))
 {
   throw std::runtime_error("+ is not implemented for float16");
 }
@@ -306,16 +218,14 @@ inline bool operator<(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<
-    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator<(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) < static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<
-    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator<(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) < static_cast<double>(rhs);
@@ -327,15 +237,13 @@ inline bool operator<=(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic<T>::value, bool>::type
-operator<=(const float16 &lhs, const T &rhs)
+typename std::enable_if<is_arithmetic<T>::value, bool>::type operator<=(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) <= static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic<T>::value, bool>::type
-operator<=(const T &lhs, const float16 &rhs)
+typename std::enable_if<is_arithmetic<T>::value, bool>::type operator<=(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) <= static_cast<double>(rhs);
 }
@@ -346,16 +254,14 @@ inline bool operator==(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<
-    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator==(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) == static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<
-    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator==(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) == static_cast<double>(rhs);
@@ -367,16 +273,14 @@ inline bool operator!=(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<
-    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator!=(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) != static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<
-    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator!=(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) != static_cast<double>(rhs);
@@ -388,15 +292,13 @@ inline bool operator>=(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic<T>::value, bool>::type
-operator>=(const float16 &lhs, const T &rhs)
+typename std::enable_if<is_arithmetic<T>::value, bool>::type operator>=(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) >= static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic<T>::value, bool>::type
-operator>=(const T &lhs, const float16 &rhs)
+typename std::enable_if<is_arithmetic<T>::value, bool>::type operator>=(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) >= static_cast<double>(rhs);
 }
@@ -407,16 +309,14 @@ inline bool operator>(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<
-    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator>(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) > static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<
-    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator>(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) > static_cast<double>(rhs);
@@ -426,18 +326,11 @@ operator>(const T &lhs, const float16 &rhs)
  * Constructs a float16 from a uint16_t
  * containing its bits.
  */
-DYND_CUDA_HOST_DEVICE inline float16 float16_from_bits(uint16_t bits)
-{
-  return float16(bits, float16::raw_bits_tag());
-}
+inline float16 float16_from_bits(uint16_t bits) { return float16(bits, float16::raw_bits_tag()); }
 
-inline float16 floor(float16 value)
-{
-  return float16(std::floor(static_cast<float>(value)));
-}
+inline float16 floor(float16 value) { return float16(std::floor(static_cast<float>(value))); }
 
-inline std::ostream &operator<<(std::ostream &o,
-                                const float16 &DYND_UNUSED(rhs))
+inline std::ostream &operator<<(std::ostream &o, const float16 &DYND_UNUSED(rhs))
 {
   return (o << "<float16 printing unimplemented>");
 }

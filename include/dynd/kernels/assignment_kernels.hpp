@@ -84,7 +84,7 @@ inline void to_lower(std::string &s)
 namespace nd {
 
   template <typename UIntType>
-  struct category_to_categorical_kernel_extra : base_kernel<category_to_categorical_kernel_extra<UIntType>, 1> {
+  struct category_to_categorical_kernel_extra : base_strided_kernel<category_to_categorical_kernel_extra<UIntType>, 1> {
     typedef category_to_categorical_kernel_extra self_type;
 
     ndt::type dst_cat_tp;
@@ -106,7 +106,7 @@ namespace nd {
 
   // Assign from a categorical type to some other type
   template <typename UIntType>
-  struct categorical_to_other_kernel : base_kernel<categorical_to_other_kernel<UIntType>, 1> {
+  struct categorical_to_other_kernel : base_strided_kernel<categorical_to_other_kernel<UIntType>, 1> {
     typedef categorical_to_other_kernel extra_type;
 
     ndt::type src_cat_tp;
@@ -172,7 +172,7 @@ namespace nd {
     template <type_id_t DstTypeID, type_id_t DstBaseID, type_id_t Src0TypeID, type_id_t Src0BaseID,
               assign_error_mode ErrorMode>
     struct assignment_kernel<DstTypeID, DstBaseID, Src0TypeID, Src0BaseID, ErrorMode>
-        : base_kernel<assignment_kernel<DstTypeID, DstBaseID, Src0TypeID, Src0BaseID, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<DstTypeID, DstBaseID, Src0TypeID, Src0BaseID, ErrorMode>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src_type;
 
@@ -188,7 +188,8 @@ namespace nd {
     // Complex floating point -> non-complex with no error checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, complex_kind_id, assign_error_nocheck>
-        : base_kernel<assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, complex_kind_id, assign_error_nocheck>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, complex_kind_id, assign_error_nocheck>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -204,8 +205,8 @@ namespace nd {
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, complex_kind_id, assign_error_nocheck>
-        : base_kernel<assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, complex_kind_id, assign_error_nocheck>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, complex_kind_id, assign_error_nocheck>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -221,8 +222,8 @@ namespace nd {
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, complex_kind_id, assign_error_nocheck>
-        : base_kernel<assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, complex_kind_id, assign_error_nocheck>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, complex_kind_id, assign_error_nocheck>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -239,7 +240,8 @@ namespace nd {
     // Signed int -> complex floating point with no checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, int_kind_id, assign_error_nocheck>
-        : base_kernel<assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, int_kind_id, assign_error_nocheck>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, int_kind_id, assign_error_nocheck>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -256,7 +258,8 @@ namespace nd {
     // Signed int -> complex floating point with inexact checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, int_kind_id, assign_error_inexact>
-        : base_kernel<assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, int_kind_id, assign_error_inexact>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, int_kind_id, assign_error_inexact>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -291,7 +294,8 @@ namespace nd {
     // Anything -> boolean with no checking
     template <type_id_t Src0TypeID, type_id_t Src0BaseTypeID>
     struct assignment_kernel<bool_id, bool_kind_id, Src0TypeID, Src0BaseTypeID, assign_error_nocheck>
-        : base_kernel<assignment_kernel<bool_id, bool_kind_id, Src0TypeID, Src0BaseTypeID, assign_error_nocheck>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<bool_id, bool_kind_id, Src0TypeID, Src0BaseTypeID, assign_error_nocheck>, 1> {
       typedef typename type_of<Src0TypeID>::type src0_type;
 
       void single(char *dst, char *const *src)
@@ -307,7 +311,8 @@ namespace nd {
     // Unsigned int -> floating point with inexact checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, uint_kind_id, assign_error_inexact>
-        : base_kernel<assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, uint_kind_id, assign_error_inexact>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, uint_kind_id, assign_error_inexact>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -342,12 +347,12 @@ namespace nd {
     // Unsigned int -> complex floating point with no checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, uint_kind_id, assign_error_nocheck>
-        : base_kernel<assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, uint_kind_id, assign_error_nocheck>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, uint_kind_id, assign_error_nocheck>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
-      DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
+      void single(char *dst, char *const *src)
       {
         src0_type s = *reinterpret_cast<src0_type *>(src[0]);
 
@@ -360,8 +365,8 @@ namespace nd {
     // Unsigned int -> complex floating point with inexact checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, uint_kind_id, assign_error_inexact>
-        : base_kernel<assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, uint_kind_id, assign_error_inexact>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, uint_kind_id, assign_error_inexact>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -396,7 +401,8 @@ namespace nd {
     // Floating point -> signed int with overflow checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, float_kind_id, assign_error_overflow>
-        : base_kernel<assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, float_kind_id, assign_error_overflow>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, float_kind_id, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -419,8 +425,8 @@ namespace nd {
     // Floating point -> signed int with fractional checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, float_kind_id, assign_error_fractional>
-        : base_kernel<assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, float_kind_id, assign_error_fractional>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, float_kind_id, assign_error_fractional>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -456,8 +462,8 @@ namespace nd {
     // Complex floating point -> signed int with overflow checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, complex_kind_id, assign_error_overflow>
-        : base_kernel<assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, complex_kind_id, assign_error_overflow>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, complex_kind_id, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -487,8 +493,8 @@ namespace nd {
     // Complex floating point -> signed int with fractional checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, complex_kind_id, assign_error_fractional>
-        : base_kernel<assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, complex_kind_id, assign_error_fractional>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, complex_kind_id, assign_error_fractional>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -531,7 +537,8 @@ namespace nd {
     // Floating point -> unsigned int with overflow checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, float_kind_id, assign_error_overflow>
-        : base_kernel<assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, float_kind_id, assign_error_overflow>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, float_kind_id, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -554,8 +561,8 @@ namespace nd {
     // Floating point -> unsigned int with fractional checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, float_kind_id, assign_error_fractional>
-        : base_kernel<assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, float_kind_id, assign_error_fractional>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, float_kind_id, assign_error_fractional>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -591,8 +598,8 @@ namespace nd {
     // Complex floating point -> unsigned int with overflow checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, complex_kind_id, assign_error_overflow>
-        : base_kernel<assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, complex_kind_id, assign_error_overflow>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, complex_kind_id, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -622,8 +629,8 @@ namespace nd {
     // Complex floating point -> unsigned int with fractional checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, complex_kind_id, assign_error_fractional>
-        : base_kernel<assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, complex_kind_id, assign_error_fractional>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, complex_kind_id, assign_error_fractional>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -780,8 +787,8 @@ namespace nd {
     // real -> real with overflow checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, float_kind_id, assign_error_overflow>
-        : base_kernel<assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, float_kind_id, assign_error_overflow>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, float_kind_id, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -822,7 +829,8 @@ namespace nd {
     // real -> real with inexact checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, float_kind_id, assign_error_inexact>
-        : base_kernel<assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, float_kind_id, assign_error_inexact>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, float_kind_id, assign_error_inexact>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -872,7 +880,8 @@ namespace nd {
     // Anything -> boolean with overflow checking
     template <type_id_t Src0TypeID, type_id_t Src0BaseTypeID>
     struct assignment_kernel<bool_id, bool_kind_id, Src0TypeID, Src0BaseTypeID, assign_error_overflow>
-        : base_kernel<assignment_kernel<bool_id, bool_kind_id, Src0TypeID, Src0BaseTypeID, assign_error_overflow>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<bool_id, bool_kind_id, Src0TypeID, Src0BaseTypeID, assign_error_overflow>, 1> {
       typedef typename type_of<Src0TypeID>::type src0_type;
 
       void single(char *dst, char *const *src)
@@ -942,7 +951,8 @@ namespace nd {
     // Signed int -> signed int with overflow checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, int_kind_id, assign_error_overflow>
-        : base_kernel<assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, int_kind_id, assign_error_overflow>, 1> {
+        : base_strided_kernel<assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, int_kind_id, assign_error_overflow>,
+                              1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -976,7 +986,8 @@ namespace nd {
     // sizeof(src)
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, uint_kind_id, assign_error_overflow>
-        : base_kernel<assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, uint_kind_id, assign_error_overflow>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, int_kind_id, Src0TypeID, uint_kind_id, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1011,7 +1022,8 @@ namespace nd {
     // sizeof(dst) < sizeof(src)
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, int_kind_id, assign_error_overflow>
-        : base_kernel<assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, int_kind_id, assign_error_overflow>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, int_kind_id, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1047,7 +1059,8 @@ namespace nd {
     // sizeof(src)
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, uint_kind_id, assign_error_overflow>
-        : base_kernel<assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, uint_kind_id, assign_error_overflow>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, uint_kind_id, Src0TypeID, uint_kind_id, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1081,7 +1094,8 @@ namespace nd {
     // Signed int -> floating point with inexact checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, int_kind_id, assign_error_inexact>
-        : base_kernel<assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, int_kind_id, assign_error_inexact>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, int_kind_id, assign_error_inexact>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1115,7 +1129,7 @@ namespace nd {
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID, assign_error_mode ErrorMode>
     struct assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, float_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, float_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, float_kind_id, ErrorMode>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1132,8 +1146,8 @@ namespace nd {
     // complex -> real with overflow checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, complex_kind_id, assign_error_overflow>
-        : base_kernel<assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, complex_kind_id, assign_error_overflow>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, float_kind_id, Src0TypeID, complex_kind_id, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1189,7 +1203,7 @@ namespace nd {
     // complex<double> -> float with inexact checking
     template <>
     struct assignment_kernel<float32_id, float_kind_id, complex_float64_id, complex_kind_id, assign_error_inexact>
-        : base_kernel<
+        : base_strided_kernel<
               assignment_kernel<float32_id, float_kind_id, complex_float64_id, complex_kind_id, assign_error_inexact>,
               1> {
       void single(char *dst, char *const *src)
@@ -1239,8 +1253,8 @@ namespace nd {
     // real -> complex with overflow checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, float_kind_id, assign_error_overflow>
-        : base_kernel<assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, float_kind_id, assign_error_overflow>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, float_kind_id, assign_error_overflow>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1284,8 +1298,8 @@ namespace nd {
     // real -> complex with inexact checking
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, float_kind_id, assign_error_inexact>
-        : base_kernel<assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, float_kind_id, assign_error_inexact>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<DstTypeID, complex_kind_id, Src0TypeID, float_kind_id, assign_error_inexact>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1331,9 +1345,9 @@ namespace nd {
     template <>
     struct assignment_kernel<complex_float32_id, complex_kind_id, complex_float64_id, complex_kind_id,
                              assign_error_overflow>
-        : base_kernel<assignment_kernel<complex_float32_id, complex_kind_id, complex_float64_id, complex_kind_id,
-                                        assign_error_overflow>,
-                      1> {
+        : base_strided_kernel<assignment_kernel<complex_float32_id, complex_kind_id, complex_float64_id,
+                                                complex_kind_id, assign_error_overflow>,
+                              1> {
       typedef complex<float> dst_type;
       typedef complex<double> src0_type;
 
@@ -1377,9 +1391,9 @@ namespace nd {
     template <>
     struct assignment_kernel<complex_float32_id, complex_kind_id, complex_float64_id, complex_kind_id,
                              assign_error_inexact>
-        : base_kernel<assignment_kernel<complex_float32_id, complex_kind_id, complex_float64_id, complex_kind_id,
-                                        assign_error_inexact>,
-                      1> {
+        : base_strided_kernel<assignment_kernel<complex_float32_id, complex_kind_id, complex_float64_id,
+                                                complex_kind_id, assign_error_inexact>,
+                              1> {
       typedef complex<float> dst_type;
       typedef complex<double> src0_type;
 
@@ -1433,7 +1447,7 @@ namespace nd {
      */
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<option_id, any_kind_id, option_id, any_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<option_id, any_kind_id, option_id, any_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<option_id, any_kind_id, option_id, any_kind_id, ErrorMode>, 1> {
       // The default child is the src is_avail ckernel
       // This child is the dst assign_na ckernel
       size_t m_dst_assign_na_offset;
@@ -1565,7 +1579,7 @@ namespace nd {
       }
     };
 
-    struct DYND_API string_to_option_bool_ck : nd::base_kernel<string_to_option_bool_ck, 1> {
+    struct DYND_API string_to_option_bool_ck : nd::base_strided_kernel<string_to_option_bool_ck, 1> {
       void single(char *dst, char *const *src)
       {
         const string *std = reinterpret_cast<string *>(src[0]);
@@ -1573,7 +1587,7 @@ namespace nd {
       }
     };
 
-    struct DYND_API string_to_option_number_ck : nd::base_kernel<string_to_option_number_ck, 1> {
+    struct DYND_API string_to_option_number_ck : nd::base_strided_kernel<string_to_option_number_ck, 1> {
       type_id_t m_tid;
       assign_error_mode m_errmode;
 
@@ -1597,7 +1611,7 @@ namespace nd {
       }
     };
 
-    struct DYND_API string_to_option_tp_ck : nd::base_kernel<string_to_option_tp_ck, 1> {
+    struct DYND_API string_to_option_tp_ck : nd::base_strided_kernel<string_to_option_tp_ck, 1> {
       intptr_t m_dst_assign_na_offset;
 
       ~string_to_option_tp_ck()
@@ -1713,7 +1727,7 @@ namespace nd {
   /**
    * A ckernel which assigns option[S] to T.
    */
-  struct DYND_API option_to_value_ck : nd::base_kernel<option_to_value_ck, 1> {
+  struct DYND_API option_to_value_ck : nd::base_strided_kernel<option_to_value_ck, 1> {
     // The default child is the src_is_na ckernel
     size_t m_value_assign_offset;
 
@@ -1799,12 +1813,12 @@ namespace nd {
   struct trivial_copy_kernel;
 
   template <>
-  struct trivial_copy_kernel<1> : base_kernel<trivial_copy_kernel<1>, 1> {
+  struct trivial_copy_kernel<1> : base_strided_kernel<trivial_copy_kernel<1>, 1> {
     void single(char *dst, char *const *src) { *dst = *src[0]; }
   };
 
   template <>
-  struct trivial_copy_kernel<2> : base_kernel<trivial_copy_kernel<2>, 1> {
+  struct trivial_copy_kernel<2> : base_strided_kernel<trivial_copy_kernel<2>, 1> {
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<int16_t *>(dst) = *reinterpret_cast<int16_t *>(src[0]);
@@ -1812,7 +1826,7 @@ namespace nd {
   };
 
   template <>
-  struct trivial_copy_kernel<4> : base_kernel<trivial_copy_kernel<4>, 1> {
+  struct trivial_copy_kernel<4> : base_strided_kernel<trivial_copy_kernel<4>, 1> {
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<int32_t *>(dst) = *reinterpret_cast<int32_t *>(src[0]);
@@ -1820,14 +1834,14 @@ namespace nd {
   };
 
   template <>
-  struct trivial_copy_kernel<8> : base_kernel<trivial_copy_kernel<8>, 1> {
+  struct trivial_copy_kernel<8> : base_strided_kernel<trivial_copy_kernel<8>, 1> {
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<int64_t *>(dst) = *reinterpret_cast<int64_t *>(src[0]);
     }
   };
 
-  struct unaligned_copy_ck : base_kernel<unaligned_copy_ck, 1> {
+  struct unaligned_copy_ck : base_strided_kernel<unaligned_copy_ck, 1> {
     size_t data_size;
 
     unaligned_copy_ck(size_t data_size) : data_size(data_size) {}
@@ -1840,27 +1854,20 @@ namespace nd {
     template <>
     struct assignment_virtual_kernel<fixed_bytes_id, bytes_kind_id, fixed_bytes_id, bytes_kind_id>
         : base_kernel<assignment_virtual_kernel<fixed_bytes_id, bytes_kind_id, fixed_bytes_id, bytes_kind_id>> {
-      size_t data_size;
-
-      assignment_virtual_kernel(size_t data_size) : data_size(data_size) {}
-
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
+                              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        if (dst_tp.get_data_size() != src_tp[0]->get_data_size()) {
-          throw std::runtime_error("cannot assign to a fixed_bytes type of a different size");
-        }
-
-        ckb->emplace_back<assignment_virtual_kernel>(kernreq, dst_tp.get_data_size());
+        throw std::runtime_error("cannot assign to a fixed_bytes type of a different size");
       }
     };
 
     template <type_id_t Src0TypeID, assign_error_mode ErrorMode>
     struct assignment_kernel<string_id, string_kind_id, Src0TypeID, int_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<string_id, string_kind_id, Src0TypeID, int_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<string_id, string_kind_id, Src0TypeID, int_kind_id, ErrorMode>, 1> {
       ndt::type dst_string_tp;
       type_id_t src_id;
       const char *dst_arrmeta;
@@ -1953,7 +1960,8 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<string_id, string_kind_id, fixed_string_id, string_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<string_id, string_kind_id, fixed_string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<string_id, string_kind_id, fixed_string_id, string_kind_id, ErrorMode>,
+                              1> {
       string_encoding_t m_dst_encoding, m_src_encoding;
       intptr_t m_src_element_size;
       next_unicode_codepoint_t m_next_fn;
@@ -2034,7 +2042,8 @@ namespace nd {
 
     template <>
     struct assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_nocheck>
-        : base_kernel<assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_nocheck>, 1> {
+        : base_strided_kernel<assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_nocheck>,
+                              1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2064,7 +2073,8 @@ namespace nd {
 
     template <>
     struct assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_inexact>
-        : base_kernel<assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_inexact>, 1> {
+        : base_strided_kernel<assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_inexact>,
+                              1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2094,7 +2104,8 @@ namespace nd {
 
     template <>
     struct assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_default>
-        : base_kernel<assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_default>, 1> {
+        : base_strided_kernel<assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_default>,
+                              1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2124,7 +2135,8 @@ namespace nd {
 
     template <>
     struct assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_overflow>
-        : base_kernel<assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_overflow>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_overflow>, 1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2154,7 +2166,8 @@ namespace nd {
 
     template <>
     struct assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_fractional>
-        : base_kernel<assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_fractional>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_fractional>, 1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2184,7 +2197,7 @@ namespace nd {
 
     template <type_id_t Src0TypeID, assign_error_mode ErrorMode>
     struct assignment_kernel<Src0TypeID, int_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<Src0TypeID, int_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<Src0TypeID, int_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
       typedef typename type_of<Src0TypeID>::type T;
 
       ndt::type src_string_tp;
@@ -2233,7 +2246,7 @@ namespace nd {
 
     template <type_id_t DstTypeID>
     struct assignment_virtual_kernel<DstTypeID, uint_kind_id, string_id, string_kind_id>
-        : base_kernel<assignment_virtual_kernel<DstTypeID, uint_kind_id, string_id, string_kind_id>, 1> {
+        : base_strided_kernel<assignment_virtual_kernel<DstTypeID, uint_kind_id, string_id, string_kind_id>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
 
       void single(char *dst, char *const *src)
@@ -2244,7 +2257,7 @@ namespace nd {
 
     template <type_id_t DstTypeID>
     struct assignment_virtual_kernel<DstTypeID, uint_kind_id, string_id, string_kind_id, assign_error_nocheck>
-        : base_kernel<
+        : base_strided_kernel<
               assignment_virtual_kernel<DstTypeID, uint_kind_id, string_id, string_kind_id, assign_error_nocheck>, 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
 
@@ -2256,7 +2269,7 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<float16_id, float_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<float16_id, float_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<float16_id, float_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("TODO: implement string_to_float16_single");
@@ -2265,7 +2278,7 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<float32_id, float_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<float32_id, float_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<float32_id, float_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2299,7 +2312,7 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<float64_id, float_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<float64_id, float_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<float64_id, float_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2330,7 +2343,7 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<float128_id, float_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<float128_id, float_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<float128_id, float_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("TODO: implement string_to_float128_single");
@@ -2339,7 +2352,8 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<complex_float32_id, complex_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<complex_float32_id, complex_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<complex_float32_id, complex_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("TODO: implement string_to_complex_float32_single");
@@ -2348,7 +2362,8 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<complex_float64_id, complex_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<complex_float64_id, complex_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<
+              assignment_kernel<complex_float64_id, complex_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("TODO: implement string_to_complex_float64_single");
@@ -2362,8 +2377,8 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id, ErrorMode>,
-                      1> {
+        : base_strided_kernel<
+              assignment_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id, ErrorMode>, 1> {
       next_unicode_codepoint_t m_next_fn;
       append_unicode_codepoint_t m_append_fn;
       intptr_t m_dst_data_size, m_src_data_size;
@@ -2445,7 +2460,7 @@ namespace nd {
       }
     };
 
-    struct adapt_assign_from_kernel : base_kernel<adapt_assign_from_kernel, 1> {
+    struct adapt_assign_from_kernel : base_strided_kernel<adapt_assign_from_kernel, 1> {
       intptr_t forward_offset;
       array buffer;
 
@@ -2503,7 +2518,8 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<fixed_string_id, string_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<fixed_string_id, string_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<fixed_string_id, string_kind_id, string_id, string_kind_id, ErrorMode>,
+                              1> {
       next_unicode_codepoint_t m_next_fn;
       append_unicode_codepoint_t m_append_fn;
       intptr_t m_dst_data_size;
@@ -2611,7 +2627,7 @@ namespace nd {
 
     template <>
     struct assignment_virtual_kernel<pointer_id, any_kind_id, pointer_id, any_kind_id>
-        : base_kernel<assignment_virtual_kernel<pointer_id, any_kind_id, pointer_id, any_kind_id>, 1> {
+        : base_strided_kernel<assignment_virtual_kernel<pointer_id, any_kind_id, pointer_id, any_kind_id>, 1> {
       ~assignment_virtual_kernel() { get_child()->destroy(); }
 
       void single(char *dst, char *const *src)
@@ -2641,7 +2657,7 @@ namespace nd {
 
     template <>
     struct assignment_virtual_kernel<type_id, scalar_kind_id, type_id, scalar_kind_id>
-        : base_kernel<assignment_virtual_kernel<type_id, scalar_kind_id, type_id, scalar_kind_id>, 1> {
+        : base_strided_kernel<assignment_virtual_kernel<type_id, scalar_kind_id, type_id, scalar_kind_id>, 1> {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<ndt::type *>(dst) = *reinterpret_cast<ndt::type *>(src[0]);
@@ -2650,7 +2666,7 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<type_id, scalar_kind_id, string_id, string_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<type_id, scalar_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<type_id, scalar_kind_id, string_id, string_kind_id, ErrorMode>, 1> {
       ndt::type src_string_dt;
       const char *src_arrmeta;
 
@@ -2678,7 +2694,7 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<string_id, string_kind_id, type_id, scalar_kind_id, ErrorMode>
-        : base_kernel<assignment_kernel<string_id, string_kind_id, type_id, scalar_kind_id, ErrorMode>, 1> {
+        : base_strided_kernel<assignment_kernel<string_id, string_kind_id, type_id, scalar_kind_id, ErrorMode>, 1> {
       ndt::type dst_string_dt;
       const char *dst_arrmeta;
 

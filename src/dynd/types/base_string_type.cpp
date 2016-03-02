@@ -22,10 +22,10 @@ std::string ndt::base_string_type::get_utf8_string(const char *arrmeta, const ch
 
 size_t ndt::base_string_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const { return 0; }
 
-std::map<std::string, type_property_t> ndt::base_string_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::base_string_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, type_property_t> properties;
-  properties["encoding"] = {.kind = Uint64_kind, {.u64 = get_encoding()}};
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  //properties["encoding"] = {ndt::type("uint64"), get_encoding()};
 
   return properties;
 }

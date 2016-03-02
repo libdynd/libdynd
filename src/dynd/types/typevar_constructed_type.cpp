@@ -12,8 +12,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::typevar_constructed_type::typevar_constructed_type(const std::string &name, const type &arg)
-    : base_type(typevar_constructed_id, pattern_kind, 0, 1, type_flag_symbolic, 0, arg.get_ndim(),
-                arg.get_strided_ndim()),
+    : base_type(typevar_constructed_id, 0, 1, type_flag_symbolic, 0, arg.get_ndim(), arg.get_strided_ndim()),
       m_name(name), m_arg(arg)
 {
   //  static ndt::type args_pattern("((...), {...})");
@@ -152,10 +151,10 @@ bool ndt::typevar_constructed_type::match(const char *arrmeta, const type &candi
                      tp_vars);
 }
 
-std::map<std::string, type_property_t> ndt::typevar_constructed_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::typevar_constructed_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, type_property_t> properties;
-  properties["name"] = {.kind = String_kind, {.string = &m_name}};
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  properties["name"] = {ndt::type("string"), (void *)(&m_name)};
 
   return properties;
 }

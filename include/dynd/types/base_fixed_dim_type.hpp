@@ -5,20 +5,16 @@
 
 #pragma once
 
-#include <dynd/type.hpp>
 #include <dynd/types/base_dim_type.hpp>
-#include <dynd/types/string_type.hpp>
-#include <dynd/types/type_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
 
 namespace dynd {
 namespace ndt {
 
-  class DYND_API fixed_dim_kind_type : public base_dim_type {
+  class DYND_API base_fixed_dim_type : public base_dim_type {
   public:
-    fixed_dim_kind_type(const type &element_tp);
+    using base_dim_type::base_dim_type;
 
-    virtual ~fixed_dim_kind_type();
+    base_fixed_dim_type(const type &element_tp);
 
     size_t get_default_data_size() const;
 
@@ -41,6 +37,8 @@ namespace ndt {
 
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
+    virtual bool is_sized() const { return false; }
+
     bool operator==(const base_type &rhs) const;
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
@@ -59,11 +57,11 @@ namespace ndt {
     bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;
 
-    std::map<std::string, type_property_t> get_dynamic_type_properties() const;
+    std::map<std::string, std::pair<ndt::type, void *>> get_dynamic_type_properties() const;
 
     virtual type with_element_type(const type &element_tp) const;
 
-    static type make(const type &element_tp) { return type(new fixed_dim_kind_type(element_tp), false); }
+    static type make(const type &element_tp) { return type(new base_fixed_dim_type(element_tp), false); }
 
     static type make(const type &element_tp, intptr_t ndim)
     {
@@ -84,25 +82,18 @@ namespace ndt {
 
   inline type make_fixed_dim_kind(const type &uniform_tp, intptr_t ndim)
   {
-    return fixed_dim_kind_type::make(uniform_tp, ndim);
+    return base_fixed_dim_type::make(uniform_tp, ndim);
   }
 
   template <typename T>
   struct traits<T[]> {
-    static type equivalent() { return fixed_dim_kind_type::make(make_type<T>()); }
+    static type equivalent() { return base_fixed_dim_type::make(make_type<T>()); }
   };
 
   // Need to handle const properly
   template <typename T>
   struct traits<const T[]> {
     static type equivalent() { return make_type<T[]>(); }
-  };
-
-  template <typename ElementType>
-  struct traits<fixed_dim<ElementType>> {
-    static const bool is_same_layout = false;
-
-    static type equivalent() { return fixed_dim_kind_type::make(make_type<ElementType>()); }
   };
 
 } // namespace dynd::ndt

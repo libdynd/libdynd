@@ -6,14 +6,13 @@
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
 ndt::dim_fragment_type::dim_fragment_type(intptr_t ndim, const intptr_t *tagged_dims)
-    : base_dim_type(dim_fragment_id, pattern_kind, make_type<void>(), 0, 1, 0, type_flag_symbolic, false),
+    : base_dim_type(dim_fragment_id, make_type<void>(), 0, 1, 0, type_flag_symbolic, false),
       m_tagged_dims(ndim, tagged_dims)
 {
   this->ndim = static_cast<uint8_t>(ndim);

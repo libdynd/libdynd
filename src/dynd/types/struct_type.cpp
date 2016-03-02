@@ -37,8 +37,6 @@ ndt::struct_type::struct_type(const std::vector<std::string> &field_names, const
        << m_field_count;
     throw invalid_argument(ss.str());
   }
-
-  this->kind = variadic ? kind_kind : struct_kind;
 }
 
 ndt::struct_type::~struct_type() {}
@@ -300,12 +298,12 @@ intptr_t ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *i
   }
 }
 
-std::map<std::string, type_property_t> ndt::struct_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::struct_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, type_property_t> properties;
-  properties["field_types"] = {.kind = TypeVector_kind, {.type_vector = &m_field_types}};
-  properties["metadata_offsets"] = {.kind = UintptrVector_kind, {.uintptr_vector = &m_arrmeta_offsets}};
-  properties["field_names"] = {.kind = StringVector_kind, {.string_vector = &m_field_names}};
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  properties["field_types"] = {ndt::type_for(m_field_types), (void *)(&m_field_types)};
+  properties["metadata_offsets"] = {ndt::type_for(m_arrmeta_offsets), (void *)(&m_arrmeta_offsets)};
+  properties["field_names"] = {ndt::type_for(m_field_names), (void *)(&m_field_names)};
 
   return properties;
 }

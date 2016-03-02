@@ -15,8 +15,8 @@ namespace ndt {
    */
   class DYND_API base_expr_type : public base_type {
   public:
-    base_expr_type(type_id_t type_id, type_kind_t kind, size_t data_size, size_t alignment, flags_type flags,
-                   size_t arrmeta_size, size_t ndim = 0);
+    base_expr_type(type_id_t type_id, size_t data_size, size_t alignment, flags_type flags, size_t arrmeta_size,
+                   size_t ndim = 0);
 
     /**
      * Should return a reference to the type representing the value which

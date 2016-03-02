@@ -229,21 +229,20 @@ namespace nd {
     };
 
     template <int N>
-    struct elwise_ck<fixed_dim_id, fixed_dim_id, N> : base_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, N>, N> {
+    struct elwise_ck<fixed_dim_id, fixed_dim_id, N> : base_strided_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, N>, N> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
       intptr_t m_dst_stride, m_src_stride[N];
 
-      DYND_CUDA_HOST_DEVICE elwise_ck(intptr_t size, intptr_t dst_stride, const intptr_t *src_stride)
-          : m_size(size), m_dst_stride(dst_stride)
+      elwise_ck(intptr_t size, intptr_t dst_stride, const intptr_t *src_stride) : m_size(size), m_dst_stride(dst_stride)
       {
         memcpy(m_src_stride, src_stride, sizeof(m_src_stride));
       }
 
-      DYND_CUDA_HOST_DEVICE ~elwise_ck() { this->get_child()->destroy(); }
+      ~elwise_ck() { this->get_child()->destroy(); }
 
-      DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
+      void single(char *dst, char *const *src)
       {
         kernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
@@ -251,8 +250,7 @@ namespace nd {
         opchild(child, dst, m_dst_stride, src, m_src_stride, m_size);
       }
 
-      DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride,
-                                         size_t count)
+      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
         kernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
@@ -345,25 +343,25 @@ namespace nd {
     // int N, int K
 
     template <>
-    struct elwise_ck<fixed_dim_id, fixed_dim_id, 0> : base_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, 0>, 0> {
+    struct elwise_ck<fixed_dim_id, fixed_dim_id, 0> : base_strided_kernel<elwise_ck<fixed_dim_id, fixed_dim_id, 0>, 0> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
       intptr_t m_dst_stride;
 
-      DYND_CUDA_HOST_DEVICE elwise_ck(intptr_t size, intptr_t dst_stride) : m_size(size), m_dst_stride(dst_stride) {}
+      elwise_ck(intptr_t size, intptr_t dst_stride) : m_size(size), m_dst_stride(dst_stride) {}
 
-      DYND_CUDA_HOST_DEVICE ~elwise_ck() { this->get_child()->destroy(); }
+      ~elwise_ck() { this->get_child()->destroy(); }
 
-      DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
+      void single(char *dst, char *const *src)
       {
         kernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
         opchild(child, dst, m_dst_stride, src, NULL, m_size);
       }
 
-      DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
-                                         const intptr_t *DYND_UNUSED(src_stride), size_t count)
+      void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
+                   const intptr_t *DYND_UNUSED(src_stride), size_t count)
       {
         kernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
@@ -426,7 +424,7 @@ namespace nd {
      * kernel_request_strided type of kernel.
      */
     template <int N>
-    struct elwise_ck<fixed_dim_id, var_dim_id, N> : base_kernel<elwise_ck<fixed_dim_id, var_dim_id, N>, N> {
+    struct elwise_ck<fixed_dim_id, var_dim_id, N> : base_strided_kernel<elwise_ck<fixed_dim_id, var_dim_id, N>, N> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -570,7 +568,7 @@ namespace nd {
     };
 
     template <>
-    struct elwise_ck<fixed_dim_id, var_dim_id, 0> : base_kernel<elwise_ck<fixed_dim_id, var_dim_id, 0>, 0> {
+    struct elwise_ck<fixed_dim_id, var_dim_id, 0> : base_strided_kernel<elwise_ck<fixed_dim_id, var_dim_id, 0>, 0> {
       typedef elwise_ck self_type;
 
       intptr_t m_size;
@@ -646,7 +644,7 @@ namespace nd {
      * kernel_request_strided type of kernel.
      */
     template <int N>
-    struct elwise_ck<var_dim_id, fixed_dim_id, N> : base_kernel<elwise_ck<var_dim_id, fixed_dim_id, N>, N> {
+    struct elwise_ck<var_dim_id, fixed_dim_id, N> : base_strided_kernel<elwise_ck<var_dim_id, fixed_dim_id, N>, N> {
       typedef elwise_ck self_type;
 
       memory_block_data *m_dst_memblock;
@@ -860,7 +858,7 @@ namespace nd {
     };
 
     template <>
-    struct elwise_ck<var_dim_id, fixed_dim_id, 0> : base_kernel<elwise_ck<var_dim_id, fixed_dim_id, 0>, 0> {
+    struct elwise_ck<var_dim_id, fixed_dim_id, 0> : base_strided_kernel<elwise_ck<var_dim_id, fixed_dim_id, 0>, 0> {
       typedef elwise_ck self_type;
 
       memory_block_data *m_dst_memblock;

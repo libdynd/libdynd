@@ -16,14 +16,14 @@ namespace kernels {
   struct permute_ck;
 
   template <int N>
-  struct permute_ck<N, true> : nd::base_kernel<permute_ck<N, true>, N> {
+  struct permute_ck<N, true> : nd::base_strided_kernel<permute_ck<N, true>, N> {
     typedef permute_ck self_type;
 
     intptr_t perm[N];
 
-    DYND_CUDA_HOST_DEVICE permute_ck(const intptr_t *perm) { memcpy(this->perm, perm, sizeof(this->perm)); }
+    permute_ck(const intptr_t *perm) { memcpy(this->perm, perm, sizeof(this->perm)); }
 
-    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
+    void single(char *dst, char *const *src)
     {
       char *src_inv_perm[N];
       inv(src_inv_perm, dst, src);
@@ -33,8 +33,7 @@ namespace kernels {
       single(child, NULL, src_inv_perm);
     }
 
-    DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride,
-                                       size_t count)
+    void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
     {
       char *src_inv_perm[N];
       inv(src_inv_perm, dst, src);
@@ -85,7 +84,7 @@ namespace kernels {
     }
 
     template <typename T>
-    DYND_CUDA_HOST_DEVICE static void inv(T *src_inv, const T &dst, const T *src, const intptr_t *perm)
+    static void inv(T *src_inv, const T &dst, const T *src, const intptr_t *perm)
     {
       for (intptr_t i = 0; i < N; ++i) {
         intptr_t j = perm[i];
@@ -98,20 +97,17 @@ namespace kernels {
       }
     }
 
-    DYND_CUDA_HOST_DEVICE void inv(ndt::type *src_inv, const ndt::type &dst, const ndt::type *src)
-    {
-      return inv(src_inv, dst, src, perm);
-    }
+    void inv(ndt::type *src_inv, const ndt::type &dst, const ndt::type *src) { return inv(src_inv, dst, src, perm); }
 
     template <typename T>
-    DYND_CUDA_HOST_DEVICE void inv(T *src_inv, const T &dst, const T *src)
+    void inv(T *src_inv, const T &dst, const T *src)
     {
       return inv(src_inv, dst, src, perm);
     }
   };
 
   template <int N>
-  struct permute_ck<N, false> : nd::base_kernel<permute_ck<N, false>, N> {
+  struct permute_ck<N, false> : nd::base_strided_kernel<permute_ck<N, false>, N> {
     typedef permute_ck self_type;
 
     intptr_t perm[N];

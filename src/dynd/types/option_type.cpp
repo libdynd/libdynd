@@ -18,7 +18,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::option_type::option_type(const type &value_tp)
-    : base_type(option_id, option_kind, value_tp.get_data_size(), value_tp.get_data_alignment(),
+    : base_type(option_id, value_tp.get_data_size(), value_tp.get_data_alignment(),
                 value_tp.get_flags() & (type_flags_value_inherited | type_flags_operand_inherited),
                 value_tp.get_arrmeta_size(), value_tp.get_ndim(), 0),
       m_value_tp(value_tp)
@@ -296,10 +296,10 @@ bool ndt::option_type::match(const char *arrmeta, const type &candidate_tp, cons
   return m_value_tp.match(arrmeta, candidate_tp.extended<option_type>()->m_value_tp, candidate_arrmeta, tp_vars);
 }
 
-std::map<std::string, type_property_t> ndt::option_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::option_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, type_property_t> properties;
-  properties["value_type"] = {.kind = Type_kind, {.type = &m_value_tp}};
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  properties["value_type"] = {ndt::type("type"), (void *)(&m_value_tp)};
 
   return properties;
 }

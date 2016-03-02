@@ -10,12 +10,9 @@
 using namespace std;
 using namespace dynd;
 
-ndt::fixed_string_kind_type::fixed_string_kind_type()
-    : base_string_type(fixed_string_id, kind_kind, 0, 0, type_flag_symbolic, 0)
+ndt::fixed_string_kind_type::fixed_string_kind_type() : base_string_type(fixed_string_id, 0, 0, type_flag_symbolic, 0)
 {
 }
-
-ndt::fixed_string_kind_type::~fixed_string_kind_type() {}
 
 size_t ndt::fixed_string_kind_type::get_default_data_size() const
 {

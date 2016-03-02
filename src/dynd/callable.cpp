@@ -18,7 +18,7 @@ namespace {
 ////////////////////////////////////////////////////////////////
 // Functions for the unary assignment as an callable
 
-struct unary_assignment_ck : nd::base_kernel<unary_assignment_ck, 1> {
+struct unary_assignment_ck : nd::base_strided_kernel<unary_assignment_ck, 1> {
   static void instantiate(char *static_data, char *DYND_UNUSED(data), nd::kernel_builder *ckb, const ndt::type &dst_tp,
                           const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                           const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),

@@ -15,8 +15,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::bytes_type::bytes_type(size_t alignment)
-    : base_bytes_type(bytes_id, bytes_kind, sizeof(bytes), alignof(bytes), type_flag_zeroinit | type_flag_destructor,
-                      0),
+    : base_bytes_type(bytes_id, sizeof(bytes), alignof(bytes), type_flag_zeroinit | type_flag_destructor, 0),
       m_alignment(alignment)
 {
   if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
@@ -130,10 +129,10 @@ void ndt::bytes_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), ch
   }
 }
 
-std::map<std::string, type_property_t> ndt::bytes_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::bytes_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, type_property_t> properties;
-  properties["target_alignment"] = {.kind = Size_kind, {.size = m_alignment}};
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  properties["target_alignment"] = {ndt::type("uintptr"), (void *)(&m_alignment)};
 
   return properties;
 }

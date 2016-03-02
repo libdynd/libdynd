@@ -28,14 +28,22 @@ matrix:
         - gcc-5
         - g++-5
         - cmake
+        - doxygen
         - valgrind
         - libfftw3-dev
     before_install:
     - export CC="gcc-5"
     - export CXX="g++-5"
     script:
+    - cmake -DDYND_BUILD_DOCS=ON -DDYND_FFTW=${DYND_FFTW} ..
     - make -j3 || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
+    after_success:
+    - pwd
+    - cd docs
+    - git add .
+    - git commit -m "Automated documentation build"
+    - git push origin gh-pages
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:

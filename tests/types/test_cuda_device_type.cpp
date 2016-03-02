@@ -14,7 +14,6 @@
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/array.hpp>
 

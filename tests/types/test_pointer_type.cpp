@@ -25,7 +25,7 @@ TEST(PointerType, PointerToBuiltIn)
   EXPECT_EQ(sizeof(void *), d.get_data_size());
   EXPECT_EQ(sizeof(void *), d.get_data_alignment());
   EXPECT_NE(0u, d.get_flags() & type_flag_blockref);
-  EXPECT_EQ(ndt::make_type<char>(), *d.p("target_type").type);
+  EXPECT_EQ(ndt::make_type<char>(), d.p<ndt::type>("target_type"));
   // As a special case, the pointer_type says it isn't an expression type,
   // even though it is derived from base_expr_type
   EXPECT_FALSE(d.is_expression());

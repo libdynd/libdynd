@@ -20,7 +20,7 @@ namespace nd {
       {
       }
 
-      DYND_CUDA_HOST_DEVICE D &get(char *data) { return *reinterpret_cast<D *>(data); }
+      D &get(char *data) { return *reinterpret_cast<D *>(data); }
     };
 
     template <typename ElementType, size_t I>
@@ -60,7 +60,7 @@ namespace nd {
 
       apply_kwd(nd::array val) : m_val(val.as<T>()) {}
 
-      DYND_CUDA_HOST_DEVICE T get() { return m_val; }
+      T get() { return m_val; }
     };
 
     template <typename K, typename J = make_index_sequence<K::size>>

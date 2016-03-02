@@ -133,7 +133,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques, c
 }
 
 ndt::categorical_type::categorical_type(const nd::array &categories, bool presorted)
-    : base_type(categorical_id, custom_kind, 4, 4, type_flag_none, 0, 0, 0)
+    : base_type(categorical_id, 4, 4, type_flag_none, 0, 0, 0)
 {
   intptr_t category_count;
   if (presorted) {
@@ -436,11 +436,11 @@ ndt::type ndt::factor_categorical(const nd::array &values)
   return type(new categorical_type(categories, true), false);
 }
 
-std::map<std::string, type_property_t> ndt::categorical_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::categorical_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, type_property_t> properties;
-  properties["storage_type"] = {.kind = Type_kind, {.type = &m_storage_type}};
-  properties["category_type"] = {.kind = Type_kind, {.type = &m_category_tp}};
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  properties["storage_type"] = {ndt::type("type"), (void *)(&m_storage_type)};
+  properties["category_type"] = {ndt::type("type"), (void *)(&m_category_tp)};
 
   return properties;
 }

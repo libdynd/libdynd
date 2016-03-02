@@ -86,7 +86,7 @@ namespace nd {
      *      kdp->get_function<kernel_single_t>()
      */
     template <typename T>
-    DYND_CUDA_HOST_DEVICE T get_function() const
+    T get_function() const
     {
       return reinterpret_cast<T>(function);
     }
@@ -95,20 +95,16 @@ namespace nd {
      * Calls the destructor of the ckernel if it is
      * non-NULL.
      */
-    DYND_CUDA_HOST_DEVICE void destroy()
+    void destroy()
     {
       if (destructor != NULL) {
         destructor(this);
       }
     }
 
-    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
-    {
-      (*reinterpret_cast<kernel_single_t>(function))(this, dst, src);
-    }
+    void single(char *dst, char *const *src) { (*reinterpret_cast<kernel_single_t>(function))(this, dst, src); }
 
-    DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride,
-                                       size_t count)
+    void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
     {
       (*reinterpret_cast<kernel_strided_t>(function))(this, dst, dst_stride, src, src_stride, count);
     }
@@ -117,7 +113,7 @@ namespace nd {
      * Returns the pointer to a child ckernel at the provided
      * offset.
      */
-    DYND_CUDA_HOST_DEVICE kernel_prefix *get_child(intptr_t offset)
+    kernel_prefix *get_child(intptr_t offset)
     {
       return reinterpret_cast<kernel_prefix *>(reinterpret_cast<char *>(this) + kernel_builder::aligned_size(offset));
     }

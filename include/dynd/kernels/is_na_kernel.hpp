@@ -18,7 +18,7 @@ namespace nd {
     struct is_na_kernel;
 
     template <>
-    struct is_na_kernel<bool_id, bool_kind_id> : base_kernel<is_na_kernel<bool_id, bool_kind_id>, 1> {
+    struct is_na_kernel<bool_id, bool_kind_id> : base_strided_kernel<is_na_kernel<bool_id, bool_kind_id>, 1> {
       void single(char *dst, char *const *src) { *dst = **reinterpret_cast<unsigned char *const *>(src) > 1; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
@@ -37,7 +37,7 @@ namespace nd {
     // option[T] for signed integer T
     // NA is the smallest negative value
     template <type_id_t Src0TypeID>
-    struct is_na_kernel<Src0TypeID, int_kind_id> : base_kernel<is_na_kernel<Src0TypeID, int_kind_id>, 1> {
+    struct is_na_kernel<Src0TypeID, int_kind_id> : base_strided_kernel<is_na_kernel<Src0TypeID, int_kind_id>, 1> {
       typedef typename type_of<Src0TypeID>::type A0;
 
       void single(char *dst, char *const *src)
@@ -58,7 +58,7 @@ namespace nd {
     };
 
     template <type_id_t Src0TypeID>
-    struct is_na_kernel<Src0TypeID, uint_kind_id> : base_kernel<is_na_kernel<Src0TypeID, uint_kind_id>, 1> {
+    struct is_na_kernel<Src0TypeID, uint_kind_id> : base_strided_kernel<is_na_kernel<Src0TypeID, uint_kind_id>, 1> {
       typedef typename type_of<Src0TypeID>::type src0_type;
 
       void single(char *dst, char *const *src)
@@ -82,7 +82,7 @@ namespace nd {
     // NA is 0x7f8007a2
     // Special rule adopted from R: Any NaN is NA
     template <>
-    struct is_na_kernel<float32_id, float_kind_id> : base_kernel<is_na_kernel<float32_id, float_kind_id>, 1> {
+    struct is_na_kernel<float32_id, float_kind_id> : base_strided_kernel<is_na_kernel<float32_id, float_kind_id>, 1> {
       void single(char *dst, char *const *src) { *dst = dynd::isnan(**reinterpret_cast<float *const *>(src)) != 0; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
@@ -101,7 +101,7 @@ namespace nd {
     // NA is 0x7ff00000000007a2ULL
     // Special rule adopted from R: Any NaN is NA
     template <>
-    struct is_na_kernel<float64_id, float_kind_id> : base_kernel<is_na_kernel<float64_id, float_kind_id>, 1> {
+    struct is_na_kernel<float64_id, float_kind_id> : base_strided_kernel<is_na_kernel<float64_id, float_kind_id>, 1> {
       void single(char *dst, char *const *src) { *dst = dynd::isnan(**reinterpret_cast<double *const *>(src)) != 0; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
@@ -120,7 +120,7 @@ namespace nd {
     // NA is two float NAs
     template <>
     struct is_na_kernel<complex_float32_id, complex_kind_id>
-        : base_kernel<is_na_kernel<complex_float32_id, complex_kind_id>, 1> {
+        : base_strided_kernel<is_na_kernel<complex_float32_id, complex_kind_id>, 1> {
       void single(char *dst, char *const *src)
       {
         *dst = (*reinterpret_cast<uint32_t *const *>(src))[0] == DYND_FLOAT32_NA_AS_UINT &&
@@ -144,7 +144,7 @@ namespace nd {
     // NA is two double NAs
     template <>
     struct is_na_kernel<complex_float64_id, complex_kind_id>
-        : base_kernel<is_na_kernel<complex_float64_id, complex_kind_id>, 1> {
+        : base_strided_kernel<is_na_kernel<complex_float64_id, complex_kind_id>, 1> {
       void single(char *dst, char *const *src)
       {
         *dst = (*reinterpret_cast<uint64_t *const *>(src))[0] == DYND_FLOAT64_NA_AS_UINT &&
@@ -166,7 +166,7 @@ namespace nd {
     };
 
     template <>
-    struct is_na_kernel<void_id, any_kind_id> : base_kernel<is_na_kernel<void_id, any_kind_id>, 1> {
+    struct is_na_kernel<void_id, any_kind_id> : base_strided_kernel<is_na_kernel<void_id, any_kind_id>, 1> {
       void single(char *dst, char *const *DYND_UNUSED(src)) { *dst = 1; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
@@ -180,12 +180,12 @@ namespace nd {
     };
 
     template <>
-    struct is_na_kernel<bytes_id, bytes_kind_id> : base_kernel<is_na_kernel<bytes_id, bytes_kind_id>, 1> {
+    struct is_na_kernel<bytes_id, bytes_kind_id> : base_strided_kernel<is_na_kernel<bytes_id, bytes_kind_id>, 1> {
       void single(char *dst, char *const *src) { *dst = reinterpret_cast<bytes *>(src[0])->begin() == NULL; }
     };
 
     template <>
-    struct is_na_kernel<string_id, string_kind_id> : base_kernel<is_na_kernel<string_id, string_kind_id>, 1> {
+    struct is_na_kernel<string_id, string_kind_id> : base_strided_kernel<is_na_kernel<string_id, string_kind_id>, 1> {
       void single(char *dst, char *const *src) { *dst = reinterpret_cast<string *>(src[0])->begin() == NULL; }
     };
 
@@ -236,7 +236,7 @@ namespace nd {
     };
 
     template <>
-    struct is_na_kernel<pointer_id, any_kind_id> : base_kernel<is_na_kernel<pointer_id, any_kind_id>, 1> {
+    struct is_na_kernel<pointer_id, any_kind_id> : base_strided_kernel<is_na_kernel<pointer_id, any_kind_id>, 1> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("is_missing for pointers is not yet implemented");

@@ -80,40 +80,6 @@ ndt::type::type(const std::string &rep) { type_from_datashape(rep).swap(*this); 
 
 ndt::type::type(const char *rep_begin, const char *rep_end) { type_from_datashape(rep_begin, rep_end).swap(*this); }
 
-type_kind_t ndt::type::get_kind() const
-{
-  switch (reinterpret_cast<uintptr_t>(m_ptr)) {
-  case uninitialized_id:
-    return void_kind;
-  case bool_id:
-    return bool_kind;
-  case int8_id:
-  case int16_id:
-  case int32_id:
-  case int64_id:
-  case int128_id:
-    return sint_kind;
-  case uint8_id:
-  case uint16_id:
-  case uint32_id:
-  case uint64_id:
-  case uint128_id:
-    return uint_kind;
-  case float16_id:
-  case float32_id:
-  case float64_id:
-  case float128_id:
-    return real_kind;
-  case complex_float32_id:
-  case complex_float64_id:
-    return complex_kind;
-  case void_id:
-    return void_kind;
-  default:
-    return m_ptr->get_kind();
-  }
-}
-
 size_t ndt::type::get_data_alignment() const
 {
   switch (reinterpret_cast<uintptr_t>(m_ptr)) {
@@ -301,14 +267,6 @@ bool ndt::type::match(const ndt::type &candidate_tp) const
   return match(candidate_tp, tp_vars);
 }
 
-type_property_t ndt::type::p(const char *name) const
-{
-  map<std::string, type_property_t> properties(get_properties());
-  return properties[name];
-}
-
-type_property_t ndt::type::p(const std::string &name) const { return p(name.c_str()); }
-
 ndt::type ndt::type::apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i,
                                         const ndt::type &root_tp, bool leading_dimension) const
 {
@@ -493,9 +451,9 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size, intp
   }
 }
 
-std::map<std::string, type_property_t> ndt::type::get_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::type::get_properties() const
 {
-  std::map<std::string, type_property_t> properties;
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
   if (!is_builtin()) {
     return m_ptr->get_dynamic_type_properties();
   }

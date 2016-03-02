@@ -11,7 +11,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::typevar_dim_type::typevar_dim_type(const std::string &name, const type &element_type)
-    : base_dim_type(typevar_dim_id, pattern_kind, element_type, 0, 1, 0, type_flag_symbolic, false), m_name(name)
+    : base_dim_type(typevar_dim_id, element_type, 0, 1, 0, type_flag_symbolic, false), m_name(name)
 {
   if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");
@@ -146,11 +146,11 @@ bool ndt::typevar_dim_type::match(const char *arrmeta, const type &candidate_tp,
   }
 }
 
-std::map<std::string, type_property_t> ndt::typevar_dim_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::typevar_dim_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, type_property_t> properties;
-  properties["name"] = {.kind = String_kind, {.string = &m_name}};
-  properties["element_type"] = {.kind = Type_kind, {.type = &m_element_tp}};
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  properties["name"] = {ndt::type("string"), (void *)(&m_name)};
+  properties["element_type"] = {ndt::type("type"), (void *)(&m_element_tp)};
 
   return properties;
 }

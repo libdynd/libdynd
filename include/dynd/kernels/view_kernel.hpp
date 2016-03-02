@@ -10,7 +10,7 @@
 namespace dynd {
 namespace nd {
 
-  struct view_kernel : base_kernel<view_kernel, 1> {
+  struct view_kernel : base_kernel<view_kernel> {
     void call(array *dst, const array *src)
     {
       const ndt::type &dst_tp = dst->get_type();

@@ -8,7 +8,7 @@
 using namespace std;
 using namespace dynd;
 
-ndt::scalar_kind_type::scalar_kind_type() : base_type(scalar_kind_id, kind_kind, 0, 0, type_flag_symbolic, 0, 0, 0) {}
+ndt::scalar_kind_type::scalar_kind_type() : base_type(scalar_kind_id, 0, 0, type_flag_symbolic, 0, 0, 0) {}
 
 ndt::scalar_kind_type::~scalar_kind_type() {}
 

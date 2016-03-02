@@ -10,7 +10,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::typevar_type::typevar_type(const std::string &name)
-    : base_type(typevar_id, pattern_kind, 0, 1, type_flag_symbolic, 0, 0, 0), m_name(name)
+    : base_type(typevar_id, 0, 1, type_flag_symbolic, 0, 0, 0), m_name(name)
 {
   if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");
@@ -125,10 +125,10 @@ bool ndt::typevar_type::match(const char *DYND_UNUSED(arrmeta), const type &cand
   }
 }
 
-std::map<std::string, type_property_t> ndt::typevar_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::typevar_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, type_property_t> properties;
-  properties["name"] = {.kind = String_kind, {.string = &m_name}};
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  properties["name"] = {ndt::type("string"), (void *)(&m_name)};
 
   return properties;
 }

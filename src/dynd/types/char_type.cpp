@@ -14,8 +14,8 @@ using namespace std;
 using namespace dynd;
 
 ndt::char_type::char_type(string_encoding_t encoding)
-    : base_type(char_id, char_kind, string_encoding_char_size_table[encoding],
-                string_encoding_char_size_table[encoding], type_flag_none, 0, 0, 0),
+    : base_type(char_id, string_encoding_char_size_table[encoding], string_encoding_char_size_table[encoding],
+                type_flag_none, 0, 0, 0),
       m_encoding(encoding)
 {
   switch (encoding) {

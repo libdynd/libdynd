@@ -82,7 +82,7 @@ namespace ndt {
     virtual bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                        std::map<std::string, type> &tp_vars) const;
 
-    virtual std::map<std::string, type_property_t> get_dynamic_type_properties() const;
+    virtual std::map<std::string, std::pair<ndt::type, void *>> get_dynamic_type_properties() const;
   };
 
 } // namespace dynd::ndt

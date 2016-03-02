@@ -10,10 +10,7 @@
 using namespace std;
 using namespace dynd;
 
-ndt::any_kind_type::any_kind_type()
-    : base_type(any_kind_id, kind_kind, 0, 1, type_flag_symbolic | type_flag_variadic, 0, 0, 0)
-{
-}
+ndt::any_kind_type::any_kind_type() : base_type(any_kind_id, 0, 1, type_flag_symbolic | type_flag_variadic, 0, 0, 0) {}
 
 ndt::any_kind_type::~any_kind_type() {}
 

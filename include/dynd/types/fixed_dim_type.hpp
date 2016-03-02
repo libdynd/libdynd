@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/array.hpp>
-#include <dynd/types/base_dim_type.hpp>
+#include <dynd/types/base_fixed_dim_type.hpp>
 
 namespace dynd {
 
@@ -117,7 +117,7 @@ public:
 
 namespace ndt {
 
-  class DYND_API fixed_dim_type : public base_dim_type {
+  class DYND_API fixed_dim_type : public base_fixed_dim_type {
     intptr_t m_dim_size;
 
   public:
@@ -159,6 +159,8 @@ namespace ndt {
     intptr_t get_dim_size(const char *arrmeta, const char *data) const;
     void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
     void get_strides(size_t i, intptr_t *out_strides, const char *arrmeta) const;
+
+    bool is_sized() const { return true; }
 
     axis_order_classification_t classify_axis_order(const char *arrmeta) const;
 
@@ -205,7 +207,7 @@ namespace ndt {
     bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;
 
-    std::map<std::string, type_property_t> get_dynamic_type_properties() const;
+    std::map<std::string, std::pair<ndt::type, void *>> get_dynamic_type_properties() const;
 
     virtual type with_element_type(const type &element_tp) const;
   };
@@ -247,6 +249,13 @@ namespace ndt {
 
     return result;
   }
+
+  template <typename ElementType>
+  struct traits<fixed_dim<ElementType>> {
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return base_fixed_dim_type::make(make_type<ElementType>()); }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

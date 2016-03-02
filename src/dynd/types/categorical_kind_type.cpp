@@ -10,10 +10,7 @@
 using namespace std;
 using namespace dynd;
 
-ndt::categorical_kind_type::categorical_kind_type()
-    : base_type(categorical_id, kind_kind, 0, 0, type_flag_symbolic, 0, 0, 0)
-{
-}
+ndt::categorical_kind_type::categorical_kind_type() : base_type(categorical_id, 0, 0, type_flag_symbolic, 0, 0, 0) {}
 
 ndt::categorical_kind_type::~categorical_kind_type() {}
 

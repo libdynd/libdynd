@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_strided_kernel.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/array_range.hpp>
 #include <dynd/types/tuple_type.hpp>
@@ -111,7 +111,7 @@ namespace nd {
   };
 
   template <typename fftw_dst_type, typename fftw_src_type, int sign = 0>
-  struct fftw_ck : base_kernel<fftw_ck<fftw_dst_type, fftw_src_type, sign>, 1> {
+  struct fftw_ck : base_strided_kernel<fftw_ck<fftw_dst_type, fftw_src_type, sign>, 1> {
     typedef typename std::conditional<std::is_same<fftw_dst_type, fftw_complex>::value, complex<double>,
                                       typename std::conditional<std::is_same<fftw_dst_type, fftwf_complex>::value,
                                                                 complex<float>, fftw_dst_type>::type>::type dst_type;

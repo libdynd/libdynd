@@ -12,7 +12,7 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct constant_kernel : base_kernel<constant_kernel, 0> {
+    struct constant_kernel : base_strided_kernel<constant_kernel, 0> {
       char *data;
 
       constant_kernel(char *data) : data(data) {}

@@ -14,20 +14,21 @@ using namespace std;
 using namespace dynd;
 
 ndt::callable_type::callable_type(const type &ret_type, const type &pos_types, const type &kwd_types)
-    : base_type(callable_id, function_kind, sizeof(data_type), alignof(data_type),
-                type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
+    : base_type(callable_id, sizeof(data_type), alignof(data_type), type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
       m_return_type(ret_type), m_pos_tuple(pos_types), m_kwd_struct(kwd_types)
 {
   if (m_pos_tuple.get_id() != tuple_id) {
     stringstream ss;
     ss << "dynd callable positional arg types require a tuple type, got a "
-          "type \"" << m_pos_tuple << "\"";
+          "type \""
+       << m_pos_tuple << "\"";
     throw invalid_argument(ss.str());
   }
   if (m_kwd_struct.get_id() != struct_id) {
     stringstream ss;
     ss << "dynd callable keyword arg types require a struct type, got a "
-          "type \"" << m_kwd_struct << "\"";
+          "type \""
+       << m_kwd_struct << "\"";
     throw invalid_argument(ss.str());
   }
 
@@ -241,17 +242,17 @@ bool ndt::callable_type::match(const char *arrmeta, const type &candidate_tp, co
   return true;
 }
 
-std::map<std::string, type_property_t> ndt::callable_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::callable_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, type_property_t> properties;
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  const std::vector<ndt::type> &pos_types = m_pos_tuple.extended<ndt::tuple_type>()->get_field_types();
+  const std::vector<ndt::type> &kwd_types = m_kwd_struct.extended<ndt::struct_type>()->get_field_types();
+  const std::vector<std::string> &kwd_names = m_kwd_struct.extended<ndt::struct_type>()->get_field_names();
 
-  properties["pos_types"] = {.kind = TypeVector_kind,
-                             {.type_vector = &m_pos_tuple.extended<tuple_type>()->get_field_types()}};
-  properties["kwd_types"] = {.kind = TypeVector_kind,
-                             {.type_vector = &m_kwd_struct.extended<struct_type>()->get_field_types()}};
-  properties["kwd_names"] = {.kind = StringVector_kind,
-                             {.string_vector = &m_kwd_struct.extended<struct_type>()->get_field_names()}};
-  properties["return_type"] = {.kind = Type_kind, {.type = &m_return_type}};
+  properties["pos_types"] = {ndt::type_for(pos_types), (void *)(&pos_types)};
+  properties["kwd_types"] = {ndt::type_for(kwd_types), (void *)(&kwd_types)};
+  properties["kwd_names"] = {ndt::type_for(kwd_names), (void *)(&kwd_names)};
+  properties["return_type"] = {ndt::type("type"), (void *)(&m_return_type)};
 
   return properties;
 }

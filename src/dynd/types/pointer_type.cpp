@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::pointer_type::pointer_type(const type &target_tp)
-    : base_expr_type(pointer_id, expr_kind, sizeof(void *), alignof(void *),
+    : base_expr_type(pointer_id, sizeof(void *), alignof(void *),
                      inherited_flags(target_tp.get_flags(), type_flag_zeroinit | type_flag_blockref),
                      sizeof(pointer_type_arrmeta) + target_tp.get_arrmeta_size(), target_tp.get_ndim()),
       m_target_tp(target_tp)
@@ -289,10 +289,10 @@ bool ndt::pointer_type::match(const char *arrmeta, const type &candidate_tp, con
                            DYND_INC_IF_NOT_NULL(candidate_arrmeta, sizeof(pointer_type_arrmeta)), tp_vars);
 }
 
-std::map<std::string, type_property_t> ndt::pointer_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, void *>> ndt::pointer_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, type_property_t> properties;
-  properties["target_type"] = {.kind = Type_kind, {.type = &m_target_tp}};
+  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  properties["target_type"] = {ndt::type("type"), (void *)(&m_target_tp)};
 
   return properties;
 }

@@ -12,7 +12,7 @@
 namespace dynd {
 namespace nd {
 
-  struct sort_kernel : base_kernel<sort_kernel, 1> {
+  struct sort_kernel : base_strided_kernel<sort_kernel, 1> {
     const intptr_t src0_size;
     const intptr_t src0_stride;
     const intptr_t src0_element_data_size;

@@ -11,7 +11,6 @@
 
 #include <dynd/callable.hpp>
 #include <dynd/types/datashape_parser.hpp>
-#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -200,10 +199,10 @@ TEST(DataShapeParser, Callable)
   EXPECT_EQ(ndt::make_type<int(int, int)>("x", "y"), ndt::type("(x: int, y: int) -> int"));
 
   tp = ndt::type("(N * S, func: (M * S) -> T) -> N * T");
-  EXPECT_JSON_EQ_ARR("[\"N * S\"]", *tp.p("pos_types").type_vector);
-  EXPECT_JSON_EQ_ARR("[\"(M * S) -> T\"]", *tp.p("kwd_types").type_vector);
-  EXPECT_JSON_EQ_ARR("[\"func\"]", *tp.p("kwd_names").string_vector);
-  EXPECT_JSON_EQ_ARR("\"N * T\"", *tp.p("return_type").type);
+  EXPECT_JSON_EQ_ARR("[\"N * S\"]", tp.p<std::vector<ndt::type>>("pos_types"));
+  EXPECT_JSON_EQ_ARR("[\"(M * S) -> T\"]", tp.p<std::vector<ndt::type>>("kwd_types"));
+  EXPECT_JSON_EQ_ARR("[\"func\"]", tp.p<std::vector<std::string>>("kwd_names"));
+  EXPECT_JSON_EQ_ARR("\"N * T\"", tp.p<ndt::type>("return_type"));
 }
 
 TEST(DataShapeParser, ErrorBasic)
