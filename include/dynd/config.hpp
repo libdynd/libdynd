@@ -486,8 +486,6 @@ struct arg_at {
 #define DYND_END_IGNORE_MAYBE_UNINITIALIZED
 #endif
 
-#define DYND_INC_IF_NOT_NULL(POINTER, OFFSET) ((POINTER == NULL) ? NULL : (POINTER + OFFSET))
-
 namespace dynd {
 // These are defined in git_version.cpp, generated from
 // git_version.cpp.in by the CMake build configuration.

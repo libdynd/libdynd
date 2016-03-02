@@ -94,8 +94,6 @@ ndt::type_registry::type_registry()
   insert(expr_kind_id, type()); // adapt_id
   insert(expr_kind_id, type()); // expr_id
 
-  insert(any_kind_id, type()); // c_contiguous_id
-
   insert(any_kind_id, type()); // cuda_host_id
   insert(any_kind_id, type()); // cuda_device_id
 

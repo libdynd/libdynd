@@ -85,8 +85,7 @@ namespace ndt {
 
     std::map<std::string, nd::callable> get_dynamic_type_properties() const;
 
-    virtual bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                       std::map<std::string, type> &tp_vars) const;
+    virtual bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
     /** Makes a struct type with the specified fields */
     static type make(const std::vector<std::string> &field_names, const std::vector<type> &field_types,

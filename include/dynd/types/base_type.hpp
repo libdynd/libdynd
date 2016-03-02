@@ -456,8 +456,7 @@ namespace ndt {
     /** Destructs any references or other state contained in the iterdata */
     virtual size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
-    virtual bool match(const char *arrmeta, const ndt::type &candidate_tp, const char *candidate_arrmeta,
-                       std::map<std::string, ndt::type> &tp_vars) const;
+    virtual bool match(const ndt::type &candidate_tp, std::map<std::string, ndt::type> &tp_vars) const;
 
     /**
      * Call the callback on each element of the array with given data/arrmeta

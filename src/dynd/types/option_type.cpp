@@ -286,14 +286,13 @@ void ndt::option_type::data_destruct_strided(const char *arrmeta, char *data, in
   m_value_tp.extended()->data_destruct_strided(arrmeta, data, stride, count);
 }
 
-bool ndt::option_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                             std::map<std::string, type> &tp_vars) const
+bool ndt::option_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_id() != option_id) {
     return false;
   }
 
-  return m_value_tp.match(arrmeta, candidate_tp.extended<option_type>()->m_value_tp, candidate_arrmeta, tp_vars);
+  return m_value_tp.match(candidate_tp.extended<option_type>()->m_value_tp, tp_vars);
 }
 
 static ndt::type property_get_value_type(ndt::type tp)

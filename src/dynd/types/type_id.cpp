@@ -70,8 +70,6 @@ ostream &dynd::operator<<(ostream &o, type_id_t id)
     return o << "struct";
   case tuple_id:
     return o << "tuple";
-  case c_contiguous_id:
-    return o << "C";
   case option_id:
     return o << "option";
   case adapt_id:

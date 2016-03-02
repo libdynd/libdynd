@@ -96,9 +96,6 @@ enum type_id_t {
   adapt_id, // Adapter type
   expr_id,  // Advanced expression types
 
-  // A type that enforces C contiguity
-  c_contiguous_id,
-
   // A CUDA host memory type
   cuda_host_id,
   // A CUDA device (global) memory type
