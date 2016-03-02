@@ -151,7 +151,6 @@ set(libdynd_SRC
     src/dynd/types/bytes_type.cpp
     src/dynd/types/categorical_type.cpp
     src/dynd/types/categorical_kind_type.cpp
-    src/dynd/types/c_contiguous_type.cpp
     src/dynd/types/char_type.cpp
     src/dynd/types/cuda_host_type.cpp
     src/dynd/types/cuda_device_type.cpp
@@ -193,7 +192,6 @@ set(libdynd_SRC
     include/dynd/types/base_string_type.hpp
     include/dynd/types/base_dim_type.hpp
     include/dynd/types/bytes_type.hpp
-    include/dynd/types/c_contiguous_type.hpp
     include/dynd/types/categorical_type.hpp
     include/dynd/types/categorical_kind_type.hpp
     include/dynd/types/char_type.hpp

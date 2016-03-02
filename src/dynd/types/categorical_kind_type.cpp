@@ -97,8 +97,7 @@ void ndt::categorical_kind_type::data_destruct_strided(const char *DYND_UNUSED(a
   throw runtime_error(ss.str());
 }
 
-bool ndt::categorical_kind_type::match(const char *DYND_UNUSED(arrmeta), const type &candidate_tp,
-                                       const char *DYND_UNUSED(candidate_arrmeta),
+bool ndt::categorical_kind_type::match(const type &candidate_tp,
                                        std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
 {
   return candidate_tp.get_id() == categorical_id;

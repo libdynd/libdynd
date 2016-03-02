@@ -139,15 +139,13 @@ void ndt::base_memory_type::arrmeta_destruct(char *arrmeta) const
   }
 }
 
-bool ndt::base_memory_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                                  std::map<std::string, type> &tp_vars) const
+bool ndt::base_memory_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_base_id() != memory_id) {
     return false;
   }
 
-  return m_element_tp.match(arrmeta, candidate_tp.extended<base_memory_type>()->m_element_tp, candidate_arrmeta,
-                            tp_vars);
+  return m_element_tp.match(candidate_tp.extended<base_memory_type>()->m_element_tp, tp_vars);
 }
 
 static ndt::type property_get_storage_type(ndt::type tp)

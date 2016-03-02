@@ -13,7 +13,6 @@
 #include <dynd/types/array_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/callable_type.hpp>
-#include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
@@ -487,28 +486,6 @@ static ndt::type parse_fixed_bytes_parameters(const char *&rbegin, const char *e
     return ndt::make_fixed_bytes(atoi(size_val.c_str()), atoi(align_val.c_str()));
   }
   throw datashape_parse_error(begin, "expected opening '['");
-}
-
-// c_contiguous_type : C[child_type]
-// This is called after 'C' is already matched
-static ndt::type parse_c_contiguous_parameters(const char *&rbegin, const char *end,
-                                               map<std::string, ndt::type> &symtable)
-{
-  const char *begin = rbegin;
-  if (parse_token_ds(begin, end, '[')) {
-    ndt::type tp = parse_datashape(begin, end, symtable);
-    if (tp.is_null()) {
-      throw datashape_parse_error(begin, "expected a type parameter");
-    }
-    if (!parse_token_ds(begin, end, ']')) {
-      throw datashape_parse_error(begin, "expected closing ']'");
-    }
-    rbegin = begin;
-    return ndt::c_contiguous_type::make(tp);
-  }
-  else {
-    throw datashape_parse_error(begin, "expected opening '['");
-  }
 }
 
 // cuda_host_type : cuda_host[storage_type]
@@ -1254,9 +1231,6 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
     }
     else if (compare_range_to_literal(nbegin, nend, "fixed_bytes")) {
       result = parse_fixed_bytes_parameters(begin, end);
-    }
-    else if (compare_range_to_literal(nbegin, nend, "C")) {
-      result = parse_c_contiguous_parameters(begin, end, symtable);
     }
     else if (compare_range_to_literal(nbegin, nend, "cuda_host")) {
       result = parse_cuda_host_parameters(begin, end, symtable);

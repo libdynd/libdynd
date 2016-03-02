@@ -4,7 +4,6 @@
 //
 
 #include <dynd/callable.hpp>
-#include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
@@ -582,8 +581,7 @@ void ndt::fixed_dim_type::reorder_default_constructed_strides(char *dst_arrmeta,
   }
 }
 
-bool ndt::fixed_dim_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                                std::map<std::string, type> &tp_vars) const
+bool ndt::fixed_dim_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
   switch (candidate_tp.get_id()) {
   case fixed_dim_id:
@@ -592,14 +590,9 @@ bool ndt::fixed_dim_type::match(const char *arrmeta, const type &candidate_tp, c
     }
     // TODO XXX If the arrmeta is not NULL, the strides should be checked too
     return get_fixed_dim_size() == candidate_tp.extended<fixed_dim_type>()->get_fixed_dim_size() &&
-           m_element_tp.match((arrmeta == NULL) ? arrmeta : (arrmeta + sizeof(fixed_dim_type_arrmeta)),
-                              candidate_tp.extended<fixed_dim_type>()->m_element_tp,
-                              (candidate_arrmeta == NULL) ? candidate_arrmeta
-                                                          : (candidate_arrmeta + sizeof(fixed_dim_type_arrmeta)),
+           m_element_tp.match(candidate_tp.extended<fixed_dim_type>()->m_element_tp,
+
                               tp_vars);
-  case c_contiguous_id:
-    return is_c_contiguous(arrmeta) &&
-           match(arrmeta, candidate_tp.extended<c_contiguous_type>()->get_child_type(), candidate_arrmeta, tp_vars);
   default:
     return false;
   }

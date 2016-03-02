@@ -112,8 +112,7 @@ namespace ndt {
 
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
-    virtual bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                       std::map<std::string, type> &tp_vars) const;
+    virtual bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
     std::map<std::string, nd::callable> get_dynamic_type_properties() const;
 

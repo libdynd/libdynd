@@ -99,8 +99,7 @@ namespace ndt {
     virtual size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
                                                  const intrusive_ptr<memory_block_data> &embedded_reference) const = 0;
 
-    virtual bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                       std::map<std::string, type> &tp_vars) const;
+    virtual bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
     virtual type with_element_type(const type &element_tp) const = 0;
   };

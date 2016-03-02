@@ -114,9 +114,7 @@ void ndt::int_kind_sym_type::data_destruct_strided(const char *DYND_UNUSED(arrme
   throw runtime_error(ss.str());
 }
 
-bool ndt::int_kind_sym_type::match(const char *DYND_UNUSED(arrmeta), const type &candidate_tp,
-                                   const char *DYND_UNUSED(candidate_arrmeta),
-                                   std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
+bool ndt::int_kind_sym_type::match(const type &candidate_tp, std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
 {
   // Matches against the 'kind' of the candidate type
   type_id_t base_id = candidate_tp.get_base_id();

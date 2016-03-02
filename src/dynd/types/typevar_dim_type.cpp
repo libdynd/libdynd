@@ -112,9 +112,7 @@ void ndt::typevar_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
   throw type_error("Cannot store data of typevar type");
 }
 
-bool ndt::typevar_dim_type::match(const char *arrmeta, const type &candidate_tp,
-                                  const char *DYND_UNUSED(candidate_arrmeta),
-                                  std::map<std::string, type> &tp_vars) const
+bool ndt::typevar_dim_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.is_scalar()) {
     return false;
@@ -124,7 +122,7 @@ bool ndt::typevar_dim_type::match(const char *arrmeta, const type &candidate_tp,
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet
     tv_type = candidate_tp;
-    return m_element_tp.match(arrmeta, candidate_tp.get_type_at_dimension(NULL, 1), NULL, tp_vars);
+    return m_element_tp.match(candidate_tp.get_type_at_dimension(NULL, 1), tp_vars);
   }
   else {
     // Make sure the type matches previous
@@ -142,7 +140,7 @@ bool ndt::typevar_dim_type::match(const char *arrmeta, const type &candidate_tp,
     default:
       break;
     }
-    return m_element_tp.match(arrmeta, candidate_tp.get_type_at_dimension(NULL, 1), NULL, tp_vars);
+    return m_element_tp.match(candidate_tp.get_type_at_dimension(NULL, 1), tp_vars);
   }
 }
 

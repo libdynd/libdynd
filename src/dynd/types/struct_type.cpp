@@ -318,8 +318,7 @@ std::map<std::string, nd::callable> ndt::struct_type::get_dynamic_type_propertie
   return properties;
 }
 
-bool ndt::struct_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                             std::map<std::string, type> &tp_vars) const
+bool ndt::struct_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
   intptr_t candidate_field_count = candidate_tp.extended<struct_type>()->get_field_count();
   bool candidate_variadic = candidate_tp.extended<tuple_type>()->is_variadic();
@@ -335,7 +334,7 @@ bool ndt::struct_type::match(const char *arrmeta, const type &candidate_tp, cons
     // Compare the field types
     const std::vector<type> &candidate_fields = candidate_tp.extended<struct_type>()->get_field_types();
     for (intptr_t i = 0; i < m_field_count; ++i) {
-      if (!m_field_types[i].match(arrmeta, candidate_fields[i], candidate_arrmeta, tp_vars)) {
+      if (!m_field_types[i].match(candidate_fields[i], tp_vars)) {
         return false;
       }
     }

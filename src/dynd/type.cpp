@@ -233,38 +233,9 @@ ndt::type ndt::type::at_array(int nindices, const irange *indices) const
   }
 }
 
-bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp, const char *candidate_arrmeta,
-                      std::map<std::string, ndt::type> &tp_vars) const
+bool ndt::type::match(const type &other, std::map<std::string, type> &tp_vars) const
 {
-  // A type being matched against itself works for both type id and more
-  // complicated types
-  if (extended() == candidate_tp.extended()) {
-    return true;
-  }
-
-  // Builtin types only match against themselves
-  if (is_builtin()) {
-    return false;
-  }
-
-  return extended()->match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars);
-}
-
-bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp, const char *candidate_arrmeta) const
-{
-  std::map<std::string, ndt::type> tp_vars;
-  return match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars);
-}
-
-bool ndt::type::match(const ndt::type &candidate_tp, std::map<std::string, ndt::type> &tp_vars) const
-{
-  return match(NULL, candidate_tp, NULL, tp_vars);
-}
-
-bool ndt::type::match(const ndt::type &candidate_tp) const
-{
-  std::map<std::string, ndt::type> tp_vars;
-  return match(candidate_tp, tp_vars);
+  return m_ptr == other.m_ptr || (!is_builtin() && m_ptr->match(other, tp_vars));
 }
 
 nd::array ndt::type::p(const char *name) const
