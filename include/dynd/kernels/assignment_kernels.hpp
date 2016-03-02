@@ -389,24 +389,7 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        src0_type s = *reinterpret_cast<src0_type *>(src[0]);
-
-        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src0_type);
-
-        if (s < std::numeric_limits<dst_type>::min() || std::numeric_limits<dst_type>::max() < s) {
-          std::stringstream ss;
-          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
-          ss << s << " to " << ndt::make_type<dst_type>();
-          throw std::overflow_error(ss.str());
-        }
-
-        if (floor(s) != s) {
-          std::stringstream ss;
-          ss << "fractional part lost while assigning " << ndt::make_type<src0_type>() << " value ";
-          ss << s << " to " << ndt::make_type<dst_type>();
-          throw std::runtime_error(ss.str());
-        }
-        *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
+        *reinterpret_cast<dst_type *>(dst) = fractional_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
       }
     };
 
@@ -440,31 +423,7 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        src0_type s = *reinterpret_cast<src0_type *>(src[0]);
-
-        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, src0_type);
-
-        if (s.imag() != 0) {
-          std::stringstream ss;
-          ss << "loss of imaginary component while assigning " << ndt::make_type<src0_type>() << " value ";
-          ss << s << " to " << ndt::make_type<dst_type>();
-          throw std::runtime_error(ss.str());
-        }
-
-        if (s.real() < std::numeric_limits<dst_type>::min() || std::numeric_limits<dst_type>::max() < s.real()) {
-          std::stringstream ss;
-          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
-          ss << s << " to " << ndt::make_type<dst_type>();
-          throw std::overflow_error(ss.str());
-        }
-
-        if (std::floor(s.real()) != s.real()) {
-          std::stringstream ss;
-          ss << "fractional part lost while assigning " << ndt::make_type<src0_type>() << " value ";
-          ss << s << " to " << ndt::make_type<dst_type>();
-          throw std::runtime_error(ss.str());
-        }
-        *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s.real());
+        *reinterpret_cast<dst_type *>(dst) = fractional_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
       }
     };
 
@@ -498,24 +457,7 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        src0_type s = *reinterpret_cast<src0_type *>(src[0]);
-
-        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src0_type);
-
-        if (s < 0 || std::numeric_limits<dst_type>::max() < s) {
-          std::stringstream ss;
-          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
-          ss << s << " to " << ndt::make_type<dst_type>();
-          throw std::overflow_error(ss.str());
-        }
-
-        if (floor(s) != s) {
-          std::stringstream ss;
-          ss << "fractional part lost while assigning " << ndt::make_type<src0_type>() << " value ";
-          ss << s << " to " << ndt::make_type<dst_type>();
-          throw std::runtime_error(ss.str());
-        }
-        *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
+        *reinterpret_cast<dst_type *>(dst) = fractional_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
       }
     };
 
@@ -549,31 +491,7 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        src0_type s = *reinterpret_cast<src0_type *>(src[0]);
-
-        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, src0_type);
-
-        if (s.imag() != 0) {
-          std::stringstream ss;
-          ss << "loss of imaginary component while assigning " << ndt::make_type<src0_type>() << " value ";
-          ss << s << " to " << ndt::make_type<dst_type>();
-          throw std::runtime_error(ss.str());
-        }
-
-        if (s.real() < 0 || std::numeric_limits<dst_type>::max() < s.real()) {
-          std::stringstream ss;
-          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
-          ss << s << " to " << ndt::make_type<dst_type>();
-          throw std::overflow_error(ss.str());
-        }
-
-        if (std::floor(s.real()) != s.real()) {
-          std::stringstream ss;
-          ss << "fractional part lost while assigning " << ndt::make_type<src0_type>() << " value ";
-          ss << s << " to " << ndt::make_type<dst_type>();
-          throw std::runtime_error(ss.str());
-        }
-        *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s.real());
+        *reinterpret_cast<dst_type *>(dst) = fractional_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
       }
     };
 

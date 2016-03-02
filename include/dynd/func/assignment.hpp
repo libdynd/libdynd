@@ -511,6 +511,105 @@ overflow_cast(ArgType s)
 #endif // DYND_USE_FPSTATUS
 }
 
+// Floating point -> signed int with fractional checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_signed<RetType>::value && is_integral<RetType>::value && is_floating_point<ArgType>::value, RetType>
+fractional_cast(ArgType s)
+{
+  if (s < std::numeric_limits<RetType>::min() || std::numeric_limits<RetType>::max() < s) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+
+  if (floor(s) != s) {
+    std::stringstream ss;
+    ss << "fractional part lost while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::runtime_error(ss.str());
+  }
+  return static_cast<RetType>(s);
+}
+
+// Complex floating point -> signed int with fractional checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_signed<RetType>::value && is_integral<RetType>::value && is_complex<ArgType>::value, RetType>
+fractional_cast(ArgType s)
+{
+  if (s.imag() != 0) {
+    std::stringstream ss;
+    ss << "loss of imaginary component while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::runtime_error(ss.str());
+  }
+
+  if (s.real() < std::numeric_limits<RetType>::min() || std::numeric_limits<RetType>::max() < s.real()) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+
+  if (std::floor(s.real()) != s.real()) {
+    std::stringstream ss;
+    ss << "fractional part lost while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::runtime_error(ss.str());
+  }
+  return static_cast<RetType>(s.real());
+}
+
+// Floating point -> unsigned int with fractional checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_unsigned<RetType>::value && is_integral<RetType>::value && is_floating_point<ArgType>::value,
+                 RetType>
+fractional_cast(ArgType s)
+{
+  if (s < 0 || std::numeric_limits<RetType>::max() < s) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+
+  if (floor(s) != s) {
+    std::stringstream ss;
+    ss << "fractional part lost while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::runtime_error(ss.str());
+  }
+  return static_cast<RetType>(s);
+}
+
+// Complex floating point -> unsigned int with fractional checking
+template <typename RetType, typename ArgType>
+std::enable_if_t<is_unsigned<RetType>::value && is_integral<RetType>::value && is_complex<ArgType>::value, RetType>
+fractional_cast(ArgType s)
+{
+  if (s.imag() != 0) {
+    std::stringstream ss;
+    ss << "loss of imaginary component while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::runtime_error(ss.str());
+  }
+
+  if (s.real() < 0 || std::numeric_limits<RetType>::max() < s.real()) {
+    std::stringstream ss;
+    ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::overflow_error(ss.str());
+  }
+
+  if (std::floor(s.real()) != s.real()) {
+    std::stringstream ss;
+    ss << "fractional part lost while assigning " << ndt::make_type<ArgType>() << " value ";
+    ss << s << " to " << ndt::make_type<RetType>();
+    throw std::runtime_error(ss.str());
+  }
+  return static_cast<RetType>(s.real());
+}
+
 namespace nd {
 
   extern DYND_API struct DYND_API assign : declfunc<assign> {
