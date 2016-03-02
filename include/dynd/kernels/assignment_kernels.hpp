@@ -707,7 +707,7 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        *reinterpret_cast<dst_type *>(dst) = overflow_cast<src0_type>(*reinterpret_cast<src0_type *>(src[0]));
+        *reinterpret_cast<dst_type *>(dst) = overflow_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
       }
     };
 
