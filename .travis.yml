@@ -42,6 +42,7 @@ matrix:
     - pwd
     - cd docs
     - git add .
+    - git commit -m "Automated documentation build"
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
