@@ -15,68 +15,49 @@ class DYND_API bool1 {
   char m_value;
 
 public:
-  DYND_CUDA_HOST_DEVICE bool1() = default;
+  bool1() = default;
 
-  DYND_CUDA_HOST_DEVICE explicit bool1(bool value) : m_value(value)
-  {
-  }
+  explicit bool1(bool value) : m_value(value) {}
 
-  operator bool() const
-  {
-    return m_value != 0;
-  }
+  operator bool() const { return m_value != 0; }
 
-  DYND_CUDA_HOST_DEVICE bool1 &operator=(bool rhs)
+  bool1 &operator=(bool rhs)
   {
     m_value = rhs;
     return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE bool1 operator+() const
-  {
-    return *this;
-  }
+  bool1 operator+() const { return *this; }
 
-  DYND_CUDA_HOST_DEVICE bool1 operator-() const
-  {
-    return *this;
-  }
+  bool1 operator-() const { return *this; }
 
-  DYND_CUDA_HOST_DEVICE bool1 operator!() const {
-    return bool1(m_value == 0);
-  }
+  bool1 operator!() const { return bool1(m_value == 0); }
 
-  DYND_CUDA_HOST_DEVICE bool1 operator~() const {
-    return bool1(m_value == 0);
-  }
+  bool1 operator~() const { return bool1(m_value == 0); }
 
-  DYND_CUDA_HOST_DEVICE bool1 operator&&(bool1 &rhs) {
-    return bool1(m_value && rhs.m_value);
-  }
+  bool1 operator&&(bool1 &rhs) { return bool1(m_value && rhs.m_value); }
 
-  DYND_CUDA_HOST_DEVICE bool1 operator||(bool1 &rhs) {
-    return bool1(m_value || rhs.m_value);
-  }
+  bool1 operator||(bool1 &rhs) { return bool1(m_value || rhs.m_value); }
 
-  DYND_CUDA_HOST_DEVICE bool1 &operator+=(bool1 rhs)
+  bool1 &operator+=(bool1 rhs)
   {
     m_value += rhs.m_value;
     return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE bool1 &operator-=(bool1 rhs)
+  bool1 &operator-=(bool1 rhs)
   {
     m_value -= rhs.m_value;
     return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE bool1 &operator*=(bool1 rhs)
+  bool1 &operator*=(bool1 rhs)
   {
     m_value *= rhs.m_value;
     return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE bool1 &operator/=(bool1 rhs)
+  bool1 &operator/=(bool1 rhs)
   {
     m_value /= rhs.m_value;
     return *this;
@@ -92,25 +73,13 @@ template <>
 struct is_integral<bool1> : std::true_type {
 };
 
-DYND_CUDA_HOST_DEVICE inline int operator+(bool1 lhs, bool1 rhs)
-{
-  return lhs.m_value + rhs.m_value;
-}
+inline int operator+(bool1 lhs, bool1 rhs) { return lhs.m_value + rhs.m_value; }
 
-DYND_CUDA_HOST_DEVICE inline int operator-(bool1 lhs, bool1 rhs)
-{
-  return lhs.m_value - rhs.m_value;
-}
+inline int operator-(bool1 lhs, bool1 rhs) { return lhs.m_value - rhs.m_value; }
 
-DYND_CUDA_HOST_DEVICE inline int operator*(bool1 lhs, bool1 rhs)
-{
-  return lhs.m_value * rhs.m_value;
-}
+inline int operator*(bool1 lhs, bool1 rhs) { return lhs.m_value * rhs.m_value; }
 
-DYND_CUDA_HOST_DEVICE inline int operator/(bool1 lhs, bool1 rhs)
-{
-  return lhs.m_value / rhs.m_value;
-}
+inline int operator/(bool1 lhs, bool1 rhs) { return lhs.m_value / rhs.m_value; }
 
 } // namespace dynd
 
@@ -185,111 +154,90 @@ struct common_type<T, dynd::bool1> : common_type<dynd::bool1, T> {
 
 namespace dynd {
 
-DYND_CUDA_HOST_DEVICE inline bool operator<(bool1 lhs, bool1 rhs)
-{
-  return static_cast<bool>(lhs) < static_cast<bool>(rhs);
-}
+inline bool operator<(bool1 lhs, bool1 rhs) { return static_cast<bool>(lhs) < static_cast<bool>(rhs); }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator<(bool1 lhs, T rhs)
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator<(bool1 lhs, T rhs)
 {
   return static_cast<T>(lhs) < rhs;
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator<(T lhs, bool1 rhs)
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator<(T lhs, bool1 rhs)
 {
   return lhs < static_cast<T>(rhs);
 }
 
-DYND_CUDA_HOST_DEVICE inline bool operator<=(bool1 lhs, bool1 rhs)
-{
-  return static_cast<bool>(lhs) <= static_cast<bool>(rhs);
-}
+inline bool operator<=(bool1 lhs, bool1 rhs) { return static_cast<bool>(lhs) <= static_cast<bool>(rhs); }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator<=(bool1 lhs, T rhs)
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator<=(bool1 lhs, T rhs)
 {
   return static_cast<T>(lhs) <= rhs;
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator<=(T lhs, bool1 rhs)
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator<=(T lhs, bool1 rhs)
 {
   return lhs <= static_cast<T>(rhs);
 }
 
-DYND_CUDA_HOST_DEVICE inline bool operator==(bool1 lhs, bool1 rhs)
-{
-  return static_cast<bool>(lhs) == static_cast<bool>(rhs);
-}
+inline bool operator==(bool1 lhs, bool1 rhs) { return static_cast<bool>(lhs) == static_cast<bool>(rhs); }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator==(bool1 lhs, T rhs)
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator==(bool1 lhs, T rhs)
 {
   return static_cast<T>(lhs) == rhs;
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator==(T lhs, bool1 rhs)
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator==(T lhs, bool1 rhs)
 {
   return lhs == static_cast<T>(rhs);
 }
 
-DYND_CUDA_HOST_DEVICE inline bool operator!=(bool1 lhs, bool1 rhs)
-{
-  return static_cast<bool>(lhs) != static_cast<bool>(rhs);
-}
+inline bool operator!=(bool1 lhs, bool1 rhs) { return static_cast<bool>(lhs) != static_cast<bool>(rhs); }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator!=(bool1 lhs, T rhs)
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator!=(bool1 lhs, T rhs)
 {
   return static_cast<T>(lhs) != rhs;
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator!=(T lhs, bool1 rhs)
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator!=(T lhs, bool1 rhs)
 {
   return lhs != static_cast<T>(rhs);
 }
 
-DYND_CUDA_HOST_DEVICE inline bool operator>=(bool1 lhs, bool1 rhs)
-{
-  return static_cast<bool>(lhs) >= static_cast<bool>(rhs);
-}
+inline bool operator>=(bool1 lhs, bool1 rhs) { return static_cast<bool>(lhs) >= static_cast<bool>(rhs); }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator>=(bool1 lhs, T rhs)
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator>=(bool1 lhs, T rhs)
 {
   return static_cast<T>(lhs) >= rhs;
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator>=(T lhs, bool1 rhs)
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator>=(T lhs, bool1 rhs)
 {
   return lhs >= static_cast<T>(rhs);
 }
 
-DYND_CUDA_HOST_DEVICE inline bool operator>(bool1 lhs, bool1 rhs)
-{
-  return static_cast<bool>(lhs) > static_cast<bool>(rhs);
-}
+inline bool operator>(bool1 lhs, bool1 rhs) { return static_cast<bool>(lhs) > static_cast<bool>(rhs); }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator>(bool1 lhs, T rhs)
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator>(bool1 lhs, T rhs)
 {
   return static_cast<T>(lhs) > rhs;
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator>(T lhs, bool1 rhs)
+typename std::enable_if<std::is_arithmetic<T>::value, bool>::type operator>(T lhs, bool1 rhs)
 {
   return lhs > static_cast<T>(rhs);
 }
 
-inline std::ostream &operator<<(std::ostream &o, const bool1 &rhs)
-{
-  return o << static_cast<bool>(rhs);
-}
+inline std::ostream &operator<<(std::ostream &o, const bool1 &rhs) { return o << static_cast<bool>(rhs); }
 
 } // namespace dynd

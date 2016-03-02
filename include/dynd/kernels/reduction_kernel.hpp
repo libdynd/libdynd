@@ -135,9 +135,9 @@ namespace nd {
       /**
        * Returns the child kernel immediately following this one.
        */
-      DYND_CUDA_HOST_DEVICE kernel_prefix *get_child() { return kernel_prefix::get_child(sizeof(SelfType)); }
+      kernel_prefix *get_child() { return kernel_prefix::get_child(sizeof(SelfType)); }
 
-      DYND_CUDA_HOST_DEVICE kernel_prefix *get_child(intptr_t offset)
+      kernel_prefix *get_child(intptr_t offset)
       {
         return kernel_prefix::get_child(kernel_builder::aligned_size(offset));
       }

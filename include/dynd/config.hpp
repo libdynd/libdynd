@@ -20,16 +20,6 @@
 
 #include <dynd/visibility.hpp>
 
-#ifdef __NVCC__
-#ifndef DYND_CUDA
-#define DYND_CUDA
-#endif
-#endif
-
-#ifdef DYND_CUDA
-#include <cuda_runtime.h>
-#endif
-
 /** The number of elements to process at once when doing chunking/buffering */
 #define DYND_BUFFER_CHUNK_SIZE 128
 
@@ -121,12 +111,6 @@ public:
 };
 
 #endif // end of compiler vendor checks
-
-#ifdef __CUDACC__
-#define DYND_CUDA_HOST_DEVICE __host__ __device__
-#else
-#define DYND_CUDA_HOST_DEVICE
-#endif
 
 // If being run from the CLING C++ interpreter
 #ifdef DYND_CLING
@@ -819,93 +803,68 @@ struct operator_if_lrcast_arithmetic
 };
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename operator_if_only_rcast_arithmetic<T, U>::type operator+(T lhs, U rhs)
+typename operator_if_only_rcast_arithmetic<T, U>::type operator+(T lhs, U rhs)
 {
   return lhs + static_cast<T>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename operator_if_only_lcast_arithmetic<T, U>::type operator+(T lhs, U rhs)
+typename operator_if_only_lcast_arithmetic<T, U>::type operator+(T lhs, U rhs)
 {
   return static_cast<U>(lhs) + rhs;
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename operator_if_lrcast_arithmetic<T, U>::type operator+(T lhs, U rhs)
+typename operator_if_lrcast_arithmetic<T, U>::type operator+(T lhs, U rhs)
 {
   return static_cast<typename std::common_type<T, U>::type>(lhs) +
          static_cast<typename std::common_type<T, U>::type>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename operator_if_only_rcast_arithmetic<T, U>::type operator/(T lhs, U rhs)
+typename operator_if_only_rcast_arithmetic<T, U>::type operator/(T lhs, U rhs)
 {
   return lhs / static_cast<T>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename operator_if_only_lcast_arithmetic<T, U>::type operator/(T lhs, U rhs)
+typename operator_if_only_lcast_arithmetic<T, U>::type operator/(T lhs, U rhs)
 {
   return static_cast<U>(lhs) / rhs;
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename operator_if_lrcast_arithmetic<T, U>::type operator/(T lhs, U rhs)
+typename operator_if_lrcast_arithmetic<T, U>::type operator/(T lhs, U rhs)
 {
   return static_cast<typename std::common_type<T, U>::type>(lhs) /
          static_cast<typename std::common_type<T, U>::type>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE
-    typename std::enable_if<is_mixed_arithmetic<T, U>::value, complex<typename std::common_type<T, U>::type>>::type
-    operator/(complex<T> lhs, U rhs)
+
+typename std::enable_if<is_mixed_arithmetic<T, U>::value, complex<typename std::common_type<T, U>::type>>::type
+operator/(complex<T> lhs, U rhs)
 {
   return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) /
          static_cast<typename std::common_type<T, U>::type>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE
-    typename std::enable_if<is_mixed_arithmetic<T, U>::value, complex<typename std::common_type<T, U>::type>>::type
-    operator/(T lhs, complex<U> rhs)
+
+typename std::enable_if<is_mixed_arithmetic<T, U>::value, complex<typename std::common_type<T, U>::type>>::type
+operator/(T lhs, complex<U> rhs)
 {
   return static_cast<typename std::common_type<T, U>::type>(lhs) /
          static_cast<complex<typename std::common_type<T, U>::type>>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value && is_integral<U>::value, T &>::type
-operator/=(T &lhs, U rhs)
+typename std::enable_if<std::is_floating_point<T>::value && is_integral<U>::value, T &>::type operator/=(T &lhs, U rhs)
 {
   return lhs /= static_cast<T>(rhs);
 }
 
 } // namespace dynd
-
-#ifdef DYND_CUDA
-
-#define DYND_GET_CUDA_DEVICE_FUNC(NAME, FUNC)                                                                          \
-  template <typename func_type>                                                                                        \
-  __global__ void NAME(void *res)                                                                                      \
-  {                                                                                                                    \
-    *reinterpret_cast<func_type *>(res) = static_cast<func_type>(&FUNC);                                               \
-  }                                                                                                                    \
-                                                                                                                       \
-  template <typename func_type>                                                                                        \
-  func_type NAME()                                                                                                     \
-  {                                                                                                                    \
-    func_type func;                                                                                                    \
-    func_type *cuda_device_func;                                                                                       \
-    cuda_throw_if_not_success(cudaMalloc(&cuda_device_func, sizeof(func_type)));                                       \
-    NAME<func_type><<<1, 1>>>(reinterpret_cast<void *>(cuda_device_func));                                             \
-    cuda_throw_if_not_success(cudaMemcpy(&func, cuda_device_func, sizeof(func_type), cudaMemcpyDeviceToHost));         \
-    cuda_throw_if_not_success(cudaFree(cuda_device_func));                                                             \
-                                                                                                                       \
-    return func;                                                                                                       \
-  }
-
-#endif
 
 namespace dynd {
 namespace detail {
@@ -915,29 +874,29 @@ namespace detail {
     T m_data[N];
 
   public:
-    DYND_CUDA_HOST_DEVICE array_wrapper() = default;
+    array_wrapper() = default;
 
-    DYND_CUDA_HOST_DEVICE array_wrapper(const T *data) { memcpy(m_data, data, sizeof(m_data)); }
+    array_wrapper(const T *data) { memcpy(m_data, data, sizeof(m_data)); }
 
-    DYND_CUDA_HOST_DEVICE operator T *() { return m_data; }
+    operator T *() { return m_data; }
 
-    DYND_CUDA_HOST_DEVICE operator const T *() const { return m_data; }
+    operator const T *() const { return m_data; }
 
-    DYND_CUDA_HOST_DEVICE T &operator[](intptr_t i) { return m_data[i]; }
+    T &operator[](intptr_t i) { return m_data[i]; }
 
-    DYND_CUDA_HOST_DEVICE const T &operator[](intptr_t i) const { return m_data[i]; }
+    const T &operator[](intptr_t i) const { return m_data[i]; }
   };
 
   template <typename T>
   class array_wrapper<T, 0> {
   public:
-    DYND_CUDA_HOST_DEVICE array_wrapper() = default;
+    array_wrapper() = default;
 
-    DYND_CUDA_HOST_DEVICE array_wrapper(const T *DYND_UNUSED(data)) {}
+    array_wrapper(const T *DYND_UNUSED(data)) {}
 
-    DYND_CUDA_HOST_DEVICE operator T *() { return NULL; }
+    operator T *() { return NULL; }
 
-    DYND_CUDA_HOST_DEVICE operator const T *() const { return NULL; }
+    operator const T *() const { return NULL; }
   };
 
   template <int N, typename T>
@@ -953,7 +912,7 @@ namespace detail {
   public:
     value_wrapper(const T &value) : m_value(value) {}
 
-    DYND_CUDA_HOST_DEVICE operator T() const { return m_value; }
+    operator T() const { return m_value; }
   };
 
   template <typename T>
@@ -962,70 +921,5 @@ namespace detail {
     return value_wrapper<T>(value);
   }
 
-#ifdef __CUDACC__
-
-  template <intptr_t I>
-  __device__ inline typename std::enable_if<I == 0, intptr_t>::type cuda_device_thread_id()
-  {
-    return blockIdx.x * blockDim.x + threadIdx.x;
-  }
-
-  template <intptr_t I>
-  __device__ inline typename std::enable_if<I == 1, intptr_t>::type cuda_device_thread_id()
-  {
-    return blockIdx.y * blockDim.y + threadIdx.y;
-  }
-
-  template <intptr_t I>
-  __device__ inline typename std::enable_if<I == 2, intptr_t>::type cuda_device_thread_id()
-  {
-    return blockIdx.z * blockDim.z + threadIdx.z;
-  }
-
-  template <intptr_t I>
-  __device__ inline typename std::enable_if<I == -1, intptr_t>::type cuda_device_thread_id()
-  {
-    return 0;
-  }
-
-  template <intptr_t I>
-  __device__ inline typename std::enable_if<I == 0, intptr_t>::type cuda_device_thread_count()
-  {
-    return gridDim.x * blockDim.x;
-  }
-
-  template <intptr_t I>
-  __device__ inline typename std::enable_if<I == 1, intptr_t>::type cuda_device_thread_count()
-  {
-    return gridDim.y * blockDim.y;
-  }
-
-  template <intptr_t I>
-  __device__ inline typename std::enable_if<I == 2, intptr_t>::type cuda_device_thread_count()
-  {
-    return gridDim.z * blockDim.z;
-  }
-
-  template <intptr_t I>
-  __device__ inline typename std::enable_if<I == -1, intptr_t>::type cuda_device_thread_count()
-  {
-    return 1;
-  }
-
-  __device__ inline intptr_t cuda_device_thread_count()
-  {
-    return cuda_device_thread_count<0>() * cuda_device_thread_count<1>() * cuda_device_thread_count<2>();
-  }
-
-#endif
-
 } // namespace dynd::detail
 } // namespace dynd
-
-#ifdef __CUDA_ARCH__
-#define DYND_THREAD_ID(I) dynd::detail::cuda_device_thread_id<I>()
-#define DYND_THREAD_COUNT(I) dynd::detail::cuda_device_thread_count<I>()
-#else
-#define DYND_THREAD_ID(I) 0
-#define DYND_THREAD_COUNT(I) 1
-#endif

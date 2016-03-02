@@ -352,7 +352,7 @@ namespace nd {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
-      DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
+      void single(char *dst, char *const *src)
       {
         src0_type s = *reinterpret_cast<src0_type *>(src[0]);
 

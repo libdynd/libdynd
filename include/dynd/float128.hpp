@@ -19,32 +19,32 @@ public:
 #else
   uint64_t m_lo, m_hi;
 #endif
-  DYND_CUDA_HOST_DEVICE float128() {}
-  DYND_CUDA_HOST_DEVICE float128(uint64_t hi, uint64_t lo) : m_lo(lo), m_hi(hi) {}
+  float128() {}
+  float128(uint64_t hi, uint64_t lo) : m_lo(lo), m_hi(hi) {}
 
   float128(bool1) {}
 
-  DYND_CUDA_HOST_DEVICE float128(signed char value);
-  DYND_CUDA_HOST_DEVICE float128(unsigned char value);
-  DYND_CUDA_HOST_DEVICE float128(short value);
-  DYND_CUDA_HOST_DEVICE float128(unsigned short value);
-  DYND_CUDA_HOST_DEVICE float128(int value);
-  DYND_CUDA_HOST_DEVICE float128(unsigned int value);
-  DYND_CUDA_HOST_DEVICE float128(long value) { *this = float128((long long)value); }
-  DYND_CUDA_HOST_DEVICE float128(unsigned long value) { *this = float128((unsigned long long)value); }
-  DYND_CUDA_HOST_DEVICE float128(long long value);
-  DYND_CUDA_HOST_DEVICE float128(unsigned long long value);
-  DYND_CUDA_HOST_DEVICE float128(double value);
-  DYND_CUDA_HOST_DEVICE float128(const int128 &value);
-  DYND_CUDA_HOST_DEVICE float128(const uint128 &value);
-  DYND_CUDA_HOST_DEVICE float128(const float16 &value);
+  float128(signed char value);
+  float128(unsigned char value);
+  float128(short value);
+  float128(unsigned short value);
+  float128(int value);
+  float128(unsigned int value);
+  float128(long value) { *this = float128((long long)value); }
+  float128(unsigned long value) { *this = float128((unsigned long long)value); }
+  float128(long long value);
+  float128(unsigned long long value);
+  float128(double value);
+  float128(const int128 &value);
+  float128(const uint128 &value);
+  float128(const float16 &value);
 
-  DYND_CUDA_HOST_DEVICE float128 &operator/=(float128 DYND_UNUSED(rhs))
+  float128 &operator/=(float128 DYND_UNUSED(rhs))
   {
     throw std::runtime_error("operator/= is not implemented for float128");
   }
 
-  DYND_CUDA_HOST_DEVICE operator signed char() const
+  operator signed char() const
   {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
@@ -52,7 +52,7 @@ public:
     throw std::runtime_error("float128 conversions are not completed");
 #endif
   }
-  DYND_CUDA_HOST_DEVICE operator unsigned char() const
+  operator unsigned char() const
   {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
@@ -60,7 +60,7 @@ public:
     throw std::runtime_error("float128 conversions are not completed");
 #endif
   }
-  DYND_CUDA_HOST_DEVICE operator short() const
+  operator short() const
   {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
@@ -68,7 +68,7 @@ public:
     throw std::runtime_error("float128 conversions are not completed");
 #endif
   }
-  DYND_CUDA_HOST_DEVICE operator unsigned short() const
+  operator unsigned short() const
   {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
@@ -76,7 +76,7 @@ public:
     throw std::runtime_error("float128 conversions are not completed");
 #endif
   }
-  DYND_CUDA_HOST_DEVICE operator int() const
+  operator int() const
   {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
@@ -84,7 +84,7 @@ public:
     throw std::runtime_error("float128 conversions are not completed");
 #endif
   }
-  DYND_CUDA_HOST_DEVICE operator unsigned int() const
+  operator unsigned int() const
   {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
@@ -92,7 +92,7 @@ public:
     throw std::runtime_error("float128 conversions are not completed");
 #endif
   }
-  DYND_CUDA_HOST_DEVICE operator long() const
+  operator long() const
   {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
@@ -100,7 +100,7 @@ public:
     throw std::runtime_error("float128 conversions are not completed");
 #endif
   }
-  DYND_CUDA_HOST_DEVICE operator unsigned long() const
+  operator unsigned long() const
   {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
@@ -108,7 +108,7 @@ public:
     throw std::runtime_error("float128 conversions are not completed");
 #endif
   }
-  DYND_CUDA_HOST_DEVICE operator long long() const
+  operator long long() const
   {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
@@ -116,16 +116,7 @@ public:
     throw std::runtime_error("float128 conversions are not completed");
 #endif
   }
-  DYND_CUDA_HOST_DEVICE operator unsigned long long() const
-  {
-#ifdef __CUDA_ARCH__
-    DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
-#else
-    throw std::runtime_error("float128 conversions are not completed");
-#endif
-  }
-
-  DYND_CUDA_HOST_DEVICE operator float() const
+  operator unsigned long long() const
   {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
@@ -134,7 +125,7 @@ public:
 #endif
   }
 
-  DYND_CUDA_HOST_DEVICE operator double() const
+  operator float() const
   {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
@@ -143,28 +134,34 @@ public:
 #endif
   }
 
-  DYND_CUDA_HOST_DEVICE explicit float128(const bool &rhs) : m_lo(0ULL), m_hi(rhs ? 0x3fff000000000000ULL : 0ULL) {}
+  operator double() const
+  {
+#ifdef __CUDA_ARCH__
+    DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
+#else
+    throw std::runtime_error("float128 conversions are not completed");
+#endif
+  }
 
-  DYND_CUDA_HOST_DEVICE bool iszero() const { return (m_hi & 0x7fffffffffffffffULL) == 0 && m_lo == 0; }
+  explicit float128(const bool &rhs) : m_lo(0ULL), m_hi(rhs ? 0x3fff000000000000ULL : 0ULL) {}
 
-  DYND_CUDA_HOST_DEVICE bool signbit_() const { return (m_hi & 0x8000000000000000ULL) != 0; }
+  bool iszero() const { return (m_hi & 0x7fffffffffffffffULL) == 0 && m_lo == 0; }
 
-  DYND_CUDA_HOST_DEVICE bool isnan_() const
+  bool signbit_() const { return (m_hi & 0x8000000000000000ULL) != 0; }
+
+  bool isnan_() const
   {
     return (m_hi & 0x7fff000000000000ULL) == 0x7fff000000000000ULL &&
            ((m_hi & 0x0000ffffffffffffULL) != 0ULL || m_lo != 0ULL);
   }
 
-  DYND_CUDA_HOST_DEVICE bool isinf_() const
-  {
-    return (m_hi & 0x7fffffffffffffffULL) == 0x7fff000000000000ULL && (m_lo == 0ULL);
-  }
+  bool isinf_() const { return (m_hi & 0x7fffffffffffffffULL) == 0x7fff000000000000ULL && (m_lo == 0ULL); }
 
-  DYND_CUDA_HOST_DEVICE bool isfinite_() const { return (m_hi & 0x7fff000000000000ULL) != 0x7fff000000000000ULL; }
+  bool isfinite_() const { return (m_hi & 0x7fff000000000000ULL) != 0x7fff000000000000ULL; }
 
   /*
 
-    DYND_CUDA_HOST_DEVICE bool operator==(const float128 &rhs) const
+       bool operator==(const float128 &rhs) const
     {
       // The equality cases are as follows:
       //   - If either value is NaN, never equal.
@@ -176,14 +173,14 @@ public:
                (m_lo | rhs.m_lo) == 0ULL));
     }
 
-    DYND_CUDA_HOST_DEVICE bool operator!=(const float128 &rhs) const
+       bool operator!=(const float128 &rhs) const
     {
       return !operator==(rhs);
     }
 
   */
 
-  DYND_CUDA_HOST_DEVICE bool less_nonan(const float128 &rhs) const
+  bool less_nonan(const float128 &rhs) const
   {
     if (signbit_()) {
       if (rhs.signbit_()) {
@@ -204,7 +201,7 @@ public:
     }
   }
 
-  DYND_CUDA_HOST_DEVICE bool less_equal_nonan(const float128 &rhs) const
+  bool less_equal_nonan(const float128 &rhs) const
   {
     if (signbit_()) {
       if (rhs.signbit_()) {
@@ -227,22 +224,22 @@ public:
 
   /*
 
-    DYND_CUDA_HOST_DEVICE bool operator<(const float128 &rhs) const
+       bool operator<(const float128 &rhs) const
     {
       return !isnan_() && !rhs.isnan_() && less_nonan(rhs);
     }
 
-    DYND_CUDA_HOST_DEVICE bool operator>(const float128 &rhs) const
+       bool operator>(const float128 &rhs) const
     {
       return rhs.operator<(*this);
     }
 
-    DYND_CUDA_HOST_DEVICE bool operator<=(const float128 &rhs) const
+       bool operator<=(const float128 &rhs) const
     {
       return !isnan_() && !rhs.isnan_() && less_equal_nonan(rhs);
     }
 
-    DYND_CUDA_HOST_DEVICE bool operator>=(const float128 &rhs) const
+       bool operator>=(const float128 &rhs) const
     {
       return rhs.operator<=(*this);
     }
@@ -255,7 +252,7 @@ public:
 
   bool operator!() const { return ((0x7fffffffffffffffULL | m_hi) == 0) && (m_lo == 0); }
 
-  DYND_CUDA_HOST_DEVICE explicit operator bool() const { return (m_lo != 0) || ((0x7fffffffffffffffULL | m_hi) != 0); }
+  explicit operator bool() const { return (m_lo != 0) || ((0x7fffffffffffffffULL | m_hi) != 0); }
 };
 
 template <>

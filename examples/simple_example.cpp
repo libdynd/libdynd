@@ -14,12 +14,11 @@
 #include <dynd/callable.hpp>
 #include <dynd/func/reduction.hpp>
 
-
 using namespace std;
 using namespace dynd;
 
 struct callable0 {
-  DYND_CUDA_HOST_DEVICE int operator()(int x, int y) { return x + y; }
+  int operator()(int x, int y) { return x + y; }
 };
 
 int main()
