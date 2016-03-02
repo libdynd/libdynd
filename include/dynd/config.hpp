@@ -744,6 +744,9 @@ enum assign_error_mode {
   assign_error_default
 };
 
+struct overflow_check_t {
+};
+
 DYND_API std::ostream &operator<<(std::ostream &o, assign_error_mode errmode);
 
 namespace detail {
