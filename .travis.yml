@@ -41,6 +41,7 @@ matrix:
     after_success:
     - pwd
     - cd docs
+    - git add .
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
