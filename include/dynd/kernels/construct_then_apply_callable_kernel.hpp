@@ -30,33 +30,14 @@ namespace nd {
                                                                                                                        \
     func_type func;                                                                                                    \
                                                                                                                        \
-    __VA_ARGS__ construct_then_apply_callable_kernel(args_type args, kwds_type DYND_IGNORE_UNUSED(kwds))               \
+    construct_then_apply_callable_kernel(args_type args, kwds_type DYND_IGNORE_UNUSED(kwds))                           \
         : args_type(args), func(kwds.apply_kwd<K, J>::get()...)                                                        \
     {                                                                                                                  \
     }                                                                                                                  \
                                                                                                                        \
-    __VA_ARGS__ void single(char *dst, char *const *DYND_IGNORE_UNUSED(src))                                           \
+    void single(char *dst, char *const *DYND_IGNORE_UNUSED(src))                                                       \
     {                                                                                                                  \
       *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])...);                                             \
-    }                                                                                                                  \
-                                                                                                                       \
-    __VA_ARGS__ void strided(char *dst, intptr_t dst_stride, char *const *DYND_IGNORE_UNUSED(src_copy),                \
-                             const intptr_t *DYND_IGNORE_UNUSED(src_stride), size_t count)                             \
-    {                                                                                                                  \
-      dynd::detail::array_wrapper<char *, sizeof...(A)> src;                                                           \
-                                                                                                                       \
-      dst += DYND_THREAD_ID(0) * dst_stride;                                                                           \
-      for (size_t j = 0; j != sizeof...(A); ++j) {                                                                     \
-        src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];                                                      \
-      }                                                                                                                \
-                                                                                                                       \
-      for (std::ptrdiff_t i = DYND_THREAD_ID(0); i < (std::ptrdiff_t)count; i += DYND_THREAD_COUNT(0)) {               \
-        *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])...);                                           \
-        dst += DYND_THREAD_COUNT(0) * dst_stride;                                                                      \
-        for (size_t j = 0; j != sizeof...(A); ++j) {                                                                   \
-          src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                                                              \
-        }                                                                                                              \
-      }                                                                                                                \
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,              \
@@ -83,32 +64,14 @@ namespace nd {
                                                                                                                        \
     func_type func;                                                                                                    \
                                                                                                                        \
-    __VA_ARGS__ construct_then_apply_callable_kernel(args_type args, kwds_type DYND_IGNORE_UNUSED(kwds))               \
+    construct_then_apply_callable_kernel(args_type args, kwds_type DYND_IGNORE_UNUSED(kwds))                           \
         : args_type(args), func(kwds.apply_kwd<K, J>::get()...)                                                        \
     {                                                                                                                  \
     }                                                                                                                  \
                                                                                                                        \
-    __VA_ARGS__ void single(char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))                              \
+    void single(char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))                                          \
     {                                                                                                                  \
       func(apply_arg<A, I>::get(src[I])...);                                                                           \
-    }                                                                                                                  \
-                                                                                                                       \
-    __VA_ARGS__ void strided(char *DYND_UNUSED(dst), intptr_t DYND_UNUSED(dst_stride),                                 \
-                             char *const *DYND_IGNORE_UNUSED(src_copy),                                                \
-                             const intptr_t *DYND_IGNORE_UNUSED(src_stride), size_t count)                             \
-    {                                                                                                                  \
-      dynd::detail::array_wrapper<char *, sizeof...(A)> src;                                                           \
-                                                                                                                       \
-      for (size_t j = 0; j != sizeof...(A); ++j) {                                                                     \
-        src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];                                                      \
-      }                                                                                                                \
-                                                                                                                       \
-      for (std::ptrdiff_t i = DYND_THREAD_ID(0); i < (std::ptrdiff_t)count; i += DYND_THREAD_COUNT(0)) {               \
-        func(apply_arg<A, I>::get(src[I])...);                                                                         \
-        for (size_t j = 0; j != sizeof...(A); ++j) {                                                                   \
-          src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                                                              \
-        }                                                                                                              \
-      }                                                                                                                \
     }                                                                                                                  \
                                                                                                                        \
     static void instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),    \
