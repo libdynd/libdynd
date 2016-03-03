@@ -42,6 +42,8 @@ matrix:
     - pwd
     - cd docs
     - git add .
+    - git config user.name "izaid"
+    - git config user.name "izaid@continuum.io"
     - git commit -m "Automated documentation build"
     - git push origin gh-pages
   - compiler: clang
