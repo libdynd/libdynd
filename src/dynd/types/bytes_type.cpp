@@ -132,7 +132,7 @@ void ndt::bytes_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), ch
 std::map<std::string, std::pair<ndt::type, void *>> ndt::bytes_type::get_dynamic_type_properties() const
 {
   std::map<std::string, std::pair<ndt::type, void *>> properties;
-  properties["target_alignment"] = {ndt::type("uintptr"), (void *)(&m_alignment)};
+  properties["target_alignment"] = {ndt::type("size"), (void *)(&m_alignment)};
 
   return properties;
 }

@@ -80,6 +80,7 @@ static const map<std::string, ndt::type> &builtin_types()
     bit["uint64"] = ndt::make_type<uint64>();
     bit["uint128"] = ndt::make_type<uint128>();
     bit["uintptr"] = ndt::make_type<uintptr_t>();
+    bit["size"] = ndt::make_type<size_t>();
     bit["float16"] = ndt::make_type<float16>();
     bit["float32"] = ndt::make_type<float32>();
     bit["float64"] = ndt::make_type<float64>();
