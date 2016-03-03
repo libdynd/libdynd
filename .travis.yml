@@ -113,7 +113,7 @@ matrix:
     - python -c "import dynd; dynd.test(verbosity=2, exit=True)"
     after_script:
     - cd .
-
+ 
 language: cpp
 before_install:
 before_script:
