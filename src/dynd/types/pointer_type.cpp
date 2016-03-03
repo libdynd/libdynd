@@ -275,18 +275,13 @@ void ndt::pointer_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o
   }
 }
 
-bool ndt::pointer_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                              std::map<std::string, type> &tp_vars) const
+bool ndt::pointer_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_id() != pointer_id) {
     return false;
   }
 
-  // TODO XXX If the arrmeta is non-null, need to compare the offset and the
-  //          data reference
-  return m_target_tp.match(DYND_INC_IF_NOT_NULL(arrmeta, sizeof(pointer_type_arrmeta)),
-                           candidate_tp.extended<pointer_type>()->m_target_tp,
-                           DYND_INC_IF_NOT_NULL(candidate_arrmeta, sizeof(pointer_type_arrmeta)), tp_vars);
+  return m_target_tp.match(candidate_tp.extended<pointer_type>()->m_target_tp, tp_vars);
 }
 
 std::map<std::string, std::pair<ndt::type, void *>> ndt::pointer_type::get_dynamic_type_properties() const

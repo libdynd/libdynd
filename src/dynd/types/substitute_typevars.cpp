@@ -9,7 +9,6 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/pow_dimsym_type.hpp>
@@ -51,9 +50,6 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
     return ndt::make_cuda_device(
         ndt::substitute(pattern.extended<base_memory_type>()->get_element_type(), typevars, concrete));
 #endif
-  case c_contiguous_id:
-    return ndt::c_contiguous_type::make(
-        ndt::substitute(pattern.extended<c_contiguous_type>()->get_child_type(), typevars, concrete));
   case pointer_id:
     return ndt::pointer_type::make(
         ndt::substitute(pattern.extended<pointer_type>()->get_target_type(), typevars, concrete));

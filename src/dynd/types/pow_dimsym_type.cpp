@@ -129,18 +129,16 @@ void ndt::pow_dimsym_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
   throw type_error("Cannot store data of typevar type");
 }
 
-bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                                 std::map<std::string, type> &tp_vars) const
+bool ndt::pow_dimsym_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_id() == typevar_constructed_id) {
-    return candidate_tp.extended<typevar_constructed_type>()->match(candidate_arrmeta, type(this, true), arrmeta,
-                                                                    tp_vars);
+    return candidate_tp.extended<typevar_constructed_type>()->match(type(this, true), tp_vars);
   }
 
   if (candidate_tp.get_id() == pow_dimsym_id) {
-    if (m_base_tp.match(arrmeta, candidate_tp.extended<pow_dimsym_type>()->get_base_type(), NULL, tp_vars)) {
+    if (m_base_tp.match(candidate_tp.extended<pow_dimsym_type>()->get_base_type(), tp_vars)) {
 
-      get_element_type().match(arrmeta, candidate_tp.extended<pow_dimsym_type>()->get_element_type(), NULL, tp_vars);
+      get_element_type().match(candidate_tp.extended<pow_dimsym_type>()->get_element_type(), tp_vars);
       type &tv_type = tp_vars[candidate_tp.extended<pow_dimsym_type>()->get_exponent()];
       if (tv_type.is_null()) {
         // This typevar hasn't been seen yet
@@ -175,7 +173,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp, 
         // The exponent is always the dim_size inside a fixed_dim_type
         return false;
       }
-      return m_element_tp.match(arrmeta, candidate_tp, NULL, tp_vars);
+      return m_element_tp.match(candidate_tp, tp_vars);
     }
     else {
       return false;
@@ -204,7 +202,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp, 
   }
   // If the exponent is zero, the base doesn't matter, just match the rest
   if (exponent == 0) {
-    return m_element_tp.match(arrmeta, candidate_tp, NULL, tp_vars);
+    return m_element_tp.match(candidate_tp, tp_vars);
   }
   else if (exponent < 0) {
     return false;
@@ -269,7 +267,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp, 
   default:
     return false;
   }
-  return m_element_tp.match(arrmeta, concrete_subtype, NULL, tp_vars);
+  return m_element_tp.match(concrete_subtype, tp_vars);
 }
 
 std::map<std::string, std::pair<ndt::type, void *>> ndt::pow_dimsym_type::get_dynamic_type_properties() const

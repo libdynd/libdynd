@@ -123,15 +123,14 @@ void ndt::typevar_constructed_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta))
   throw type_error("Cannot store data of typevar_constructed type");
 }
 
-bool ndt::typevar_constructed_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                                          std::map<std::string, type> &tp_vars) const
+bool ndt::typevar_constructed_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_id() == typevar_constructed_id) {
-    return m_arg.match(arrmeta, candidate_tp.extended<typevar_constructed_type>()->m_arg, candidate_arrmeta, tp_vars);
+    return m_arg.match(candidate_tp.extended<typevar_constructed_type>()->m_arg, tp_vars);
   }
 
   if (candidate_tp.get_base_id() != memory_id) {
-    if (m_arg.match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars)) {
+    if (m_arg.match(candidate_tp, tp_vars)) {
       type &tv_type = tp_vars[m_name];
       if (tv_type.is_null()) {
         tv_type = make_type<void>();
@@ -147,8 +146,7 @@ bool ndt::typevar_constructed_type::match(const char *arrmeta, const type &candi
     tv_type = candidate_tp.extended<base_memory_type>()->with_replaced_storage_type(make_type<void>());
   }
 
-  return m_arg.match(arrmeta, candidate_tp.extended<base_memory_type>()->get_element_type(), candidate_arrmeta,
-                     tp_vars);
+  return m_arg.match(candidate_tp.extended<base_memory_type>()->get_element_type(), tp_vars);
 }
 
 std::map<std::string, std::pair<ndt::type, void *>> ndt::typevar_constructed_type::get_dynamic_type_properties() const

@@ -45,8 +45,7 @@ namespace ndt {
                                 const intrusive_ptr<memory_block_data> &embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
 
-    bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-               std::map<std::string, type> &tp_vars) const;
+    bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
     std::map<std::string, std::pair<ndt::type, void *>> get_dynamic_type_properties() const;
 

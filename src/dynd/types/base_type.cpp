@@ -214,9 +214,7 @@ size_t ndt::base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata),
   throw std::runtime_error(ss.str());
 }
 
-bool ndt::base_type::match(const char *DYND_UNUSED(arrmeta), const type &candidate_tp,
-                           const char *DYND_UNUSED(candidate_arrmeta),
-                           std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
+bool ndt::base_type::match(const type &candidate_tp, std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
 {
   // The default match implementation is equality, pattern types
   // must override this virtual function.

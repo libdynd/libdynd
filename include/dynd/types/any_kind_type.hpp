@@ -52,8 +52,7 @@ namespace ndt {
     void data_destruct(const char *arrmeta, char *data) const;
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
 
-    bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-               std::map<std::string, type> &tp_vars) const;
+    bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
     static type make() { return type(new any_kind_type(), false); }
   };

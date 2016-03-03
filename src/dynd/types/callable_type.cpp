@@ -215,27 +215,24 @@ void ndt::callable_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
   }
 }
 
-bool ndt::callable_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                               std::map<std::string, type> &tp_vars) const
+bool ndt::callable_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_id() != callable_id) {
     return false;
   }
 
   // First match the return type
-  if (!m_return_type.match(arrmeta, candidate_tp.extended<callable_type>()->m_return_type, candidate_arrmeta,
-                           tp_vars)) {
+  if (!m_return_type.match(candidate_tp.extended<callable_type>()->m_return_type, tp_vars)) {
     return false;
   }
 
   // Next match all the positional parameters
-  if (!m_pos_tuple.match(arrmeta, candidate_tp.extended<callable_type>()->m_pos_tuple, candidate_arrmeta, tp_vars)) {
+  if (!m_pos_tuple.match(candidate_tp.extended<callable_type>()->m_pos_tuple, tp_vars)) {
     return false;
   }
 
   // Finally match all the keyword parameters
-  if (!m_kwd_struct.match(arrmeta, candidate_tp.extended<callable_type>()->get_kwd_struct(), candidate_arrmeta,
-                          tp_vars)) {
+  if (!m_kwd_struct.match(candidate_tp.extended<callable_type>()->get_kwd_struct(), tp_vars)) {
     return false;
   }
 

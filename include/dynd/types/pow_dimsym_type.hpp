@@ -53,8 +53,7 @@ namespace ndt {
 
     std::map<std::string, std::pair<ndt::type, void *>> get_dynamic_type_properties() const;
 
-    bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-               std::map<std::string, type> &tp_vars) const;
+    bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
     virtual type with_element_type(const type &element_tp) const;
   }; // class pow_dimsym_type

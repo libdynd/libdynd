@@ -50,7 +50,7 @@ void nd::detail::check_narg(const ndt::callable_type *af_tp, intptr_t narg)
 }
 
 void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i, const ndt::type &actual_tp,
-                           const char *actual_arrmeta, std::map<std::string, ndt::type> &tp_vars)
+                           const char *DYND_UNUSED(actual_arrmeta), std::map<std::string, ndt::type> &tp_vars)
 {
   if (af_tp->is_pos_variadic()) {
     return;
@@ -62,7 +62,7 @@ void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i, const nd
     candidate_tp = candidate_tp.value_type();
   }
 
-  if (!expected_tp.match(NULL, candidate_tp, actual_arrmeta, tp_vars)) {
+  if (!expected_tp.match(candidate_tp, tp_vars)) {
     std::stringstream ss;
     ss << "positional argument " << i << " to callable does not match, ";
     ss << "expected " << expected_tp << ", received " << actual_tp;
@@ -146,7 +146,7 @@ nd::array nd::callable::call(size_t args_size, const array *args_values, size_t 
 
   // Validate the destination type, if it was provided
   if (!dst.is_null()) {
-    if (!self_tp->get_return_type().match(NULL, dst.get_type(), dst.get()->metadata(), tp_vars)) {
+    if (!self_tp->get_return_type().match(dst.get_type(), tp_vars)) {
       std::stringstream ss;
       ss << "provided \"dst\" type " << dst.get_type() << " does not match callable return type "
          << self_tp->get_return_type();

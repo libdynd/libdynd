@@ -101,8 +101,7 @@ void ndt::typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
   throw type_error("Cannot store data of typevar type");
 }
 
-bool ndt::typevar_type::match(const char *DYND_UNUSED(arrmeta), const type &candidate_tp,
-                              const char *DYND_UNUSED(candidate_arrmeta), std::map<std::string, type> &tp_vars) const
+bool ndt::typevar_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_id() == typevar_id) {
     return *this == *candidate_tp.extended();

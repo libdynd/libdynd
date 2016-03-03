@@ -125,8 +125,7 @@ void ndt::ellipsis_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
   throw type_error("Cannot store data of ellipsis type");
 }
 
-bool ndt::ellipsis_dim_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                                   std::map<std::string, type> &tp_vars) const
+bool ndt::ellipsis_dim_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
   // TODO XXX This is wrong, "Any" could represent a type that doesn't match
   // against this one...
@@ -156,11 +155,10 @@ bool ndt::ellipsis_dim_type::match(const char *arrmeta, const type &candidate_tp
         }
       }
     }
-    return m_element_tp.match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars);
+    return m_element_tp.match(candidate_tp, tp_vars);
   }
   else if (candidate_tp.get_id() == ellipsis_dim_id) {
-    return m_element_tp.match(arrmeta, candidate_tp.extended<ellipsis_dim_type>()->m_element_tp, candidate_arrmeta,
-                              tp_vars);
+    return m_element_tp.match(candidate_tp.extended<ellipsis_dim_type>()->m_element_tp, tp_vars);
   }
   else if (candidate_tp.get_ndim() >= get_ndim() - 1) {
     intptr_t matched_ndim = candidate_tp.get_ndim() - get_ndim() + 1;
@@ -191,7 +189,7 @@ bool ndt::ellipsis_dim_type::match(const char *arrmeta, const type &candidate_tp
         }
       }
     }
-    return m_element_tp.match(arrmeta, candidate_tp.get_type_at_dimension(NULL, matched_ndim), NULL, tp_vars);
+    return m_element_tp.match(candidate_tp.get_type_at_dimension(NULL, matched_ndim), tp_vars);
   }
 
   return false;

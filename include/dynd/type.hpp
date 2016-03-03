@@ -270,20 +270,16 @@ namespace ndt {
      * typevars dictionary which is used to enforce consistent usage of
      * type vars.
      *
-     * \param arrmeta     The arrmeta for this type, maybe NULL.
      * \param candidate_tp    A type to match against this one.
-     * \param candidate_arrmeta   The arrmeta for the candidate type,
-     *                            may be NULL.
      * \param tp_vars     A map of names to matched type vars.
      */
-    bool match(const char *arrmeta, const ndt::type &candidate_tp, const char *candidate_arrmeta,
-               std::map<std::string, ndt::type> &tp_vars) const;
-
-    bool match(const char *arrmeta, const ndt::type &candidate_tp, const char *candidate_arrmeta) const;
-
     bool match(const ndt::type &candidate_tp, std::map<std::string, ndt::type> &tp_vars) const;
 
-    bool match(const ndt::type &candidate_tp) const;
+    bool match(const type &other) const
+    {
+      std::map<std::string, type> tp_vars;
+      return match(other, tp_vars);
+    }
 
     template<typename T>
     bool has_scalar_type() const

@@ -181,18 +181,15 @@ void ndt::base_fixed_dim_type::data_destruct_strided(const char *DYND_UNUSED(arr
   throw runtime_error(ss.str());
 }
 
-bool ndt::base_fixed_dim_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
-                                     std::map<std::string, type> &tp_vars) const
+bool ndt::base_fixed_dim_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
   switch (candidate_tp.get_id()) {
   case fixed_dim_id:
     if (candidate_tp.is_symbolic()) {
-      return m_element_tp.match(arrmeta, candidate_tp.extended<base_fixed_dim_type>()->get_element_type(),
-                                candidate_arrmeta, tp_vars);
+      return m_element_tp.match(candidate_tp.extended<base_fixed_dim_type>()->get_element_type(), tp_vars);
     }
     else {
-      return m_element_tp.match(arrmeta, candidate_tp.extended<fixed_dim_type>()->get_element_type(),
-                                DYND_INC_IF_NOT_NULL(candidate_arrmeta, sizeof(fixed_dim_type_arrmeta)), tp_vars);
+      return m_element_tp.match(candidate_tp.extended<fixed_dim_type>()->get_element_type(), tp_vars);
     }
   default:
     return false;
