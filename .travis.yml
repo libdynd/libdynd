@@ -40,12 +40,12 @@ matrix:
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
     after_success:
     - cd ~
-    - git config user.name "izaid"
     - git clone https://github.com/libdynd/libdynd.github.io
-    - ls
-#    - git add .
-#    - git commit -m "Automated documentation build"
-#    - git push origin gh-pages
+    - cd libdynd.github.io
+    - git config user.name "izaid"
+    - git add .
+    - git commit -m "Automated documentation build"
+    - git push origin master
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
