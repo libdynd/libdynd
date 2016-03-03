@@ -282,7 +282,7 @@ namespace ndt {
     }
 
     template<typename T>
-    bool has_scalar_type() const
+    bool _has_scalar_type() const
     {
       switch (get_id()) {
       case bool_id: return std::is_same<T, type_of<bool_id>::type>::value;
@@ -303,6 +303,42 @@ namespace ndt {
       case complex_float32_id: return std::is_same<T, type_of<complex_float32_id>::type>::value;
       case complex_float64_id: return std::is_same<T, type_of<complex_float64_id>::type>::value;
       default: return false;
+      }
+    }
+
+    // Temporary hack (mainly for OS X)
+    template<typename T>
+    bool has_scalar_type() const
+    {
+      if (std::is_same<T, size_t>::value) {
+      #if SIZE_MAX == UINT32_MAX
+        return _has_scalar_type<uint32_t>();
+      #elif SIZE_MAX == UINT64_MAX
+        return _has_scalar_type<uint64_t>();
+      #else
+        #error "unsupported platform"
+      #endif
+      }
+      else if (std::is_same<T, intptr_t>::value) {
+      #if INTPTR_MAX == INT32_MAX
+        return _has_scalar_type<int32_t>();
+      #elif INTPTR_MAX == INT64_MAX
+        return _has_scalar_type<int64_t>();
+      #else
+        #error "unsupported platform"
+      #endif
+      }
+      else if (std::is_same<T, uintptr_t>::value) {
+      #if UINTPTR_MAX == UINT32_MAX
+        return _has_scalar_type<uint32_t>();
+      #elif UINTPTR_MAX == UINT64_MAX
+        return _has_scalar_type<uint64_t>();
+      #else
+        #error "unsupported platform"
+      #endif
+      }
+      else {
+        return _has_scalar_type<T>();
       }
     }
 
