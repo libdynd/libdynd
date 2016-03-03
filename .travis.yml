@@ -39,11 +39,13 @@ matrix:
     - make -j3 || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
     after_success:
-    - pwd
-    - cd docs
+    - cd ~
+    - git clone https://github.com/libdynd/libdynd.github.io
+    - cd libdynd.github.io
+    - git config user.name "izaid"
     - git add .
     - git commit -m "Automated documentation build"
-    - git push origin gh-pages
+    - git push origin master
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
@@ -113,7 +115,7 @@ matrix:
     - python -c "import dynd; dynd.test(verbosity=2, exit=True)"
     after_script:
     - cd .
-
+ 
 language: cpp
 before_install:
 before_script:
