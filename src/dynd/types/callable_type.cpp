@@ -20,15 +20,13 @@ ndt::callable_type::callable_type(const type &ret_type, const type &pos_types, c
   if (m_pos_tuple.get_id() != tuple_id) {
     stringstream ss;
     ss << "dynd callable positional arg types require a tuple type, got a "
-          "type \""
-       << m_pos_tuple << "\"";
+          "type \"" << m_pos_tuple << "\"";
     throw invalid_argument(ss.str());
   }
   if (m_kwd_struct.get_id() != struct_id) {
     stringstream ss;
     ss << "dynd callable keyword arg types require a struct type, got a "
-          "type \""
-       << m_kwd_struct << "\"";
+          "type \"" << m_kwd_struct << "\"";
     throw invalid_argument(ss.str());
   }
 

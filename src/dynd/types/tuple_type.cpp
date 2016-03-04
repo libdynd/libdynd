@@ -492,7 +492,8 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::tuple_type::get_d
 {
   std::map<std::string, std::pair<ndt::type, const char *>> properties;
   properties["field_types"] = {ndt::type_for(m_field_types), reinterpret_cast<const char *>(&m_field_types)};
-  properties["metadata_offsets"] = {ndt::type_for(m_arrmeta_offsets), reinterpret_cast<const char *>(&m_arrmeta_offsets)};
+  properties["metadata_offsets"] = {ndt::type_for(m_arrmeta_offsets),
+                                    reinterpret_cast<const char *>(&m_arrmeta_offsets)};
 
   return properties;
 }
