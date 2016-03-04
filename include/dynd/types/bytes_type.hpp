@@ -46,7 +46,7 @@ namespace ndt {
     void data_destruct(const char *arrmeta, char *data) const;
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
 
-    std::map<std::string, std::pair<ndt::type, void *>> get_dynamic_type_properties() const;
+    std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
     static const type &make()
     {

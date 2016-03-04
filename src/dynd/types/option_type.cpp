@@ -295,10 +295,10 @@ bool ndt::option_type::match(const type &candidate_tp, std::map<std::string, typ
   return m_value_tp.match(candidate_tp.extended<option_type>()->m_value_tp, tp_vars);
 }
 
-std::map<std::string, std::pair<ndt::type, void *>> ndt::option_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::option_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, std::pair<ndt::type, void *>> properties;
-  properties["value_type"] = {ndt::type("type"), (void *)(&m_value_tp)};
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["value_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_value_tp)};
 
   return properties;
 }

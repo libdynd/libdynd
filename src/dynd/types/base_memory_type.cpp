@@ -148,10 +148,10 @@ bool ndt::base_memory_type::match(const type &candidate_tp, std::map<std::string
   return m_element_tp.match(candidate_tp.extended<base_memory_type>()->m_element_tp, tp_vars);
 }
 
-std::map<std::string, std::pair<ndt::type, void *>> ndt::base_memory_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::base_memory_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, std::pair<ndt::type, void *>> properties;
-  properties["storage_type"] = {ndt::type("type"), (void *)(&m_element_tp)};
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["storage_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_element_tp)};
 
   return properties;
 }

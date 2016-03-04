@@ -298,12 +298,12 @@ intptr_t ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *i
   }
 }
 
-std::map<std::string, std::pair<ndt::type, void *>> ndt::struct_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::struct_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, std::pair<ndt::type, void *>> properties;
-  properties["field_types"] = {ndt::type_for(m_field_types), (void *)(&m_field_types)};
-  properties["metadata_offsets"] = {ndt::type_for(m_arrmeta_offsets), (void *)(&m_arrmeta_offsets)};
-  properties["field_names"] = {ndt::type_for(m_field_names), (void *)(&m_field_names)};
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["field_types"] = {ndt::type_for(m_field_types), reinterpret_cast<const char *>(&m_field_types)};
+  properties["metadata_offsets"] = {ndt::type_for(m_arrmeta_offsets), reinterpret_cast<const char *>(&m_arrmeta_offsets)};
+  properties["field_names"] = {ndt::type_for(m_field_names), reinterpret_cast<const char *>(&m_field_names)};
 
   return properties;
 }

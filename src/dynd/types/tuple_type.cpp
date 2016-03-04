@@ -488,11 +488,11 @@ bool ndt::tuple_type::match(const type &candidate_tp, std::map<std::string, type
   }
 }
 
-std::map<std::string, std::pair<ndt::type, void *>> ndt::tuple_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::tuple_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, std::pair<ndt::type, void *>> properties;
-  properties["field_types"] = {ndt::type_for(m_field_types), (void *)(&m_field_types)};
-  properties["metadata_offsets"] = {ndt::type_for(m_arrmeta_offsets), (void *)(&m_arrmeta_offsets)};
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["field_types"] = {ndt::type_for(m_field_types), reinterpret_cast<const char *>(&m_field_types)};
+  properties["metadata_offsets"] = {ndt::type_for(m_arrmeta_offsets), reinterpret_cast<const char *>(&m_arrmeta_offsets)};
 
   return properties;
 }

@@ -124,10 +124,10 @@ bool ndt::typevar_type::match(const type &candidate_tp, std::map<std::string, ty
   }
 }
 
-std::map<std::string, std::pair<ndt::type, void *>> ndt::typevar_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::typevar_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, std::pair<ndt::type, void *>> properties;
-  properties["name"] = {ndt::type("string"), (void *)(&m_name)};
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["name"] = {ndt::type("string"), reinterpret_cast<const char *>(&m_name)};
 
   return properties;
 }

@@ -83,7 +83,7 @@ namespace ndt {
                                 size_t current_i, const type &root_tp, bool leading_dimension, char **inout_data,
                                 intrusive_ptr<memory_block_data> &inout_dataref) const;
 
-    std::map<std::string, std::pair<ndt::type, void *>> get_dynamic_type_properties() const;
+    std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
     virtual bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 

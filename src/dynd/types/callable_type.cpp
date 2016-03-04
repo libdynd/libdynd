@@ -239,17 +239,17 @@ bool ndt::callable_type::match(const type &candidate_tp, std::map<std::string, t
   return true;
 }
 
-std::map<std::string, std::pair<ndt::type, void *>> ndt::callable_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::callable_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
   const std::vector<ndt::type> &pos_types = m_pos_tuple.extended<ndt::tuple_type>()->get_field_types();
   const std::vector<ndt::type> &kwd_types = m_kwd_struct.extended<ndt::struct_type>()->get_field_types();
   const std::vector<std::string> &kwd_names = m_kwd_struct.extended<ndt::struct_type>()->get_field_names();
 
-  properties["pos_types"] = {ndt::type_for(pos_types), (void *)(&pos_types)};
-  properties["kwd_types"] = {ndt::type_for(kwd_types), (void *)(&kwd_types)};
-  properties["kwd_names"] = {ndt::type_for(kwd_names), (void *)(&kwd_names)};
-  properties["return_type"] = {ndt::type("type"), (void *)(&m_return_type)};
+  properties["pos_types"] = {ndt::type_for(pos_types), reinterpret_cast<const char *>(&pos_types)};
+  properties["kwd_types"] = {ndt::type_for(kwd_types), reinterpret_cast<const char *>(&kwd_types)};
+  properties["kwd_names"] = {ndt::type_for(kwd_names), reinterpret_cast<const char *>(&kwd_names)};
+  properties["return_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_return_type)};
 
   return properties;
 }

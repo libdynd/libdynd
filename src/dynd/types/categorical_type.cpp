@@ -436,11 +436,11 @@ ndt::type ndt::factor_categorical(const nd::array &values)
   return type(new categorical_type(categories, true), false);
 }
 
-std::map<std::string, std::pair<ndt::type, void *>> ndt::categorical_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::categorical_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, std::pair<ndt::type, void *>> properties;
-  properties["storage_type"] = {ndt::type("type"), (void *)(&m_storage_type)};
-  properties["category_type"] = {ndt::type("type"), (void *)(&m_category_tp)};
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["storage_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_storage_type)};
+  properties["category_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_category_tp)};
 
   return properties;
 }

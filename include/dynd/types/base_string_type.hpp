@@ -37,7 +37,7 @@ namespace ndt {
     // TODO: Maybe it should be more flexible?
     size_t get_iterdata_size(intptr_t ndim) const;
 
-    std::map<std::string, std::pair<ndt::type, void *>> get_dynamic_type_properties() const;
+    std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
   };
 
 } // namespace dynd::ndt

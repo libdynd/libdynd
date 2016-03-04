@@ -598,11 +598,11 @@ bool ndt::fixed_dim_type::match(const type &candidate_tp, std::map<std::string, 
   }
 }
 
-std::map<std::string, std::pair<ndt::type, void *>> ndt::fixed_dim_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::fixed_dim_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, std::pair<ndt::type, void *>> properties;
-  properties["fixed_dim_size"] = {ndt::type("intptr"), (void *)(&m_dim_size)};
-  properties["element_type"] = {ndt::type("type"), (void *)(&m_element_tp)};
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["fixed_dim_size"] = {ndt::type("intptr"), reinterpret_cast<const char *>(&m_dim_size)};
+  properties["element_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_element_tp)};
 
   return properties;
 }

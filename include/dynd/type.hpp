@@ -153,6 +153,125 @@ namespace ndt {
    *
    */
   class DYND_API type : public intrusive_ptr<const base_type> {
+  private:
+    template<typename T>
+    bool _has_scalar_type() const
+    {
+      switch (get_id()) {
+      case bool_id: return std::is_same<T, type_of<bool_id>::type>::value;
+      case int8_id: return std::is_same<T, type_of<int8_id>::type>::value;
+      case int16_id: return std::is_same<T, type_of<int16_id>::type>::value;
+      case int32_id: return std::is_same<T, type_of<int32_id>::type>::value;
+      case int64_id: return std::is_same<T, type_of<int64_id>::type>::value;
+      case int128_id: return std::is_same<T, type_of<int128_id>::type>::value;
+      case uint8_id: return std::is_same<T, type_of<uint8_id>::type>::value;
+      case uint16_id: return std::is_same<T, type_of<uint16_id>::type>::value;
+      case uint32_id: return std::is_same<T, type_of<uint32_id>::type>::value;
+      case uint64_id: return std::is_same<T, type_of<uint64_id>::type>::value;
+      case uint128_id: return std::is_same<T, type_of<uint128_id>::type>::value;
+      case float16_id: return std::is_same<T, type_of<float16_id>::type>::value;
+      case float32_id: return std::is_same<T, type_of<float32_id>::type>::value;
+      case float64_id: return std::is_same<T, type_of<float64_id>::type>::value;
+      case float128_id: return std::is_same<T, type_of<float128_id>::type>::value;
+      case complex_float32_id: return std::is_same<T, type_of<complex_float32_id>::type>::value;
+      case complex_float64_id: return std::is_same<T, type_of<complex_float64_id>::type>::value;
+      default: return false;
+      }
+    }
+
+    // Temporary hack (mainly for OS X)
+    template<typename T>
+    bool has_scalar_type() const
+    {
+      if (std::is_same<T, size_t>::value) {
+      #if SIZE_MAX == UINT32_MAX
+        return _has_scalar_type<uint32_t>();
+      #elif SIZE_MAX == UINT64_MAX
+        return _has_scalar_type<uint64_t>();
+      #else
+        #error "unsupported platform"
+      #endif
+      }
+      else if (std::is_same<T, intptr_t>::value) {
+      #if INTPTR_MAX == INT32_MAX
+        return _has_scalar_type<int32_t>();
+      #elif INTPTR_MAX == INT64_MAX
+        return _has_scalar_type<int64_t>();
+      #else
+        #error "unsupported platform"
+      #endif
+      }
+      else if (std::is_same<T, uintptr_t>::value) {
+      #if UINTPTR_MAX == UINT32_MAX
+        return _has_scalar_type<uint32_t>();
+      #elif UINTPTR_MAX == UINT64_MAX
+        return _has_scalar_type<uint64_t>();
+      #else
+        #error "unsupported platform"
+      #endif
+      }
+      else {
+        return _has_scalar_type<T>();
+      }
+    }
+
+    template<typename T>
+    bool has_admissible_value_type() const
+    {
+      switch (get_id()) {
+      case string_id: return std::is_same<T, std::string>::value;
+      case type_id: return std::is_same<T, ndt::type>::value;
+      default: return false;
+      }
+    }
+
+    template<typename T>
+    bool has_admissible_property_type() const
+    {
+       return has_scalar_type<T>() || has_admissible_value_type<T>();
+    }
+
+    template <class T>
+    struct is_vector {
+      enum { value = false };
+    };
+
+    template <class T>
+    struct is_vector<std::vector<T>> {
+      enum { value = true };
+    };
+
+    template<typename T, typename C = typename T::value_type>
+    std::enable_if_t<is_vector<T>::value, const T> &
+    property(const char *name) const
+    {
+      const std::pair<ndt::type, const char *> pair = get_properties()[name];
+      const ndt::type &dt = pair.first.get_dtype();
+
+      if (pair.first.get_id() != fixed_dim_id) {
+        throw std::runtime_error("unsupported type for property access");
+      }
+
+      if (dt.has_admissible_property_type<C>()) {
+        return *reinterpret_cast<const T *>(pair.second);
+      }
+
+      throw std::runtime_error("type mismatch or unsupported type in property access");
+    }
+
+    template<typename T>
+    std::enable_if_t<!is_vector<T>::value, const T> &
+    property(const char *name) const
+    {
+      const std::pair<ndt::type, const char *> pair = get_properties()[name];
+ 
+      if (pair.first.has_admissible_property_type<T>()) {
+        return *reinterpret_cast<const T *>(pair.second);
+      }
+
+      throw std::runtime_error("type mismatch in property access");
+    }
+
   public:
     using intrusive_ptr<const base_type>::intrusive_ptr;
 
@@ -281,135 +400,15 @@ namespace ndt {
       return match(other, tp_vars);
     }
 
-    template<typename T>
-    bool _has_scalar_type() const
-    {
-      switch (get_id()) {
-      case bool_id: return std::is_same<T, type_of<bool_id>::type>::value;
-      case int8_id: return std::is_same<T, type_of<int8_id>::type>::value;
-      case int16_id: return std::is_same<T, type_of<int16_id>::type>::value;
-      case int32_id: return std::is_same<T, type_of<int32_id>::type>::value;
-      case int64_id: return std::is_same<T, type_of<int64_id>::type>::value;
-      case int128_id: return std::is_same<T, type_of<int128_id>::type>::value;
-      case uint8_id: return std::is_same<T, type_of<uint8_id>::type>::value;
-      case uint16_id: return std::is_same<T, type_of<uint16_id>::type>::value;
-      case uint32_id: return std::is_same<T, type_of<uint32_id>::type>::value;
-      case uint64_id: return std::is_same<T, type_of<uint64_id>::type>::value;
-      case uint128_id: return std::is_same<T, type_of<uint128_id>::type>::value;
-      case float16_id: return std::is_same<T, type_of<float16_id>::type>::value;
-      case float32_id: return std::is_same<T, type_of<float32_id>::type>::value;
-      case float64_id: return std::is_same<T, type_of<float64_id>::type>::value;
-      case float128_id: return std::is_same<T, type_of<float128_id>::type>::value;
-      case complex_float32_id: return std::is_same<T, type_of<complex_float32_id>::type>::value;
-      case complex_float64_id: return std::is_same<T, type_of<complex_float64_id>::type>::value;
-      default: return false;
-      }
-    }
-
-    // Temporary hack (mainly for OS X)
-    template<typename T>
-    bool has_scalar_type() const
-    {
-      if (std::is_same<T, size_t>::value) {
-      #if SIZE_MAX == UINT32_MAX
-        return _has_scalar_type<uint32_t>();
-      #elif SIZE_MAX == UINT64_MAX
-        return _has_scalar_type<uint64_t>();
-      #else
-        #error "unsupported platform"
-      #endif
-      }
-      else if (std::is_same<T, intptr_t>::value) {
-      #if INTPTR_MAX == INT32_MAX
-        return _has_scalar_type<int32_t>();
-      #elif INTPTR_MAX == INT64_MAX
-        return _has_scalar_type<int64_t>();
-      #else
-        #error "unsupported platform"
-      #endif
-      }
-      else if (std::is_same<T, uintptr_t>::value) {
-      #if UINTPTR_MAX == UINT32_MAX
-        return _has_scalar_type<uint32_t>();
-      #elif UINTPTR_MAX == UINT64_MAX
-        return _has_scalar_type<uint64_t>();
-      #else
-        #error "unsupported platform"
-      #endif
-      }
-      else {
-        return _has_scalar_type<T>();
-      }
-    }
-
-    template<typename T>
-    bool has_admissible_value_type() const
-    {
-      switch (get_id()) {
-      case string_id: return std::is_same<T, std::string>::value;
-      case type_id: return std::is_same<T, ndt::type>::value;
-      default: return false;
-      }
-    }
-
-    template<typename T>
-    bool has_admissible_property_type() const
-    {
-       return has_scalar_type<T>() || has_admissible_value_type<T>();
-    }
-
     /**
      * Accesses a dynamic property of the type.
      *
      * \param name  The property to access.
      */
-    template <class T>
-    struct is_vector {
-      enum { value = false };
-    };
-
-    template <class T>
-    struct is_vector<std::vector<T>> {
-      enum { value = true };
-    };
-
-    std::map<std::string, std::pair<ndt::type, void *>> get_properties() const;
-
-    template<typename T, typename C = typename T::value_type>
-    std::enable_if_t<is_vector<T>::value, T> &
-    property(const char *name) const
-    {
-      const std::pair<ndt::type, void *> pair = get_properties()[name];
-      const ndt::type &dt = pair.first.get_dtype();
-
-      if (pair.first.get_id() != fixed_dim_id) {
-        throw std::runtime_error("unsupported type for property access");
-      }
-
-      if (dt.has_admissible_property_type<C>()) {
-        return *reinterpret_cast<T *>(pair.second);
-      }
-
-      throw std::runtime_error("type mismatch or unsupported type in property access");
-    }
-
     template<typename T>
-    std::enable_if_t<!is_vector<T>::value, T> &
-    property(const char *name) const
-    {
-      const std::pair<ndt::type, void *> pair = get_properties()[name];
- 
-      if (pair.first.has_admissible_property_type<T>()) {
-        return *reinterpret_cast<T *>(pair.second);
-      }
-
-      throw std::runtime_error("type mismatch in property access");
-    }
-
+    const T &p(const char *name) const { return property<T>(name); }
     template<typename T>
-    T &p(const char *name) const { return property<T>(name); }
-    template<typename T>
-    T &p(const std::string &name) const { return property<T>(name.c_str()); }
+    const T &p(const std::string &name) const { return property<T>(name.c_str()); }
 
     /**
      * Indexes into the type, intended for recursive calls from the
@@ -698,6 +697,8 @@ namespace ndt {
 
       return vars;
     }
+
+    std::map<std::string, std::pair<ndt::type, const char *>> get_properties() const;
 
     /**
      * Returns a const pointer to the base_type object which

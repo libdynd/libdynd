@@ -422,9 +422,9 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size, intp
   }
 }
 
-std::map<std::string, std::pair<ndt::type, void *>> ndt::type::get_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::type::get_properties() const
 {
-  std::map<std::string, std::pair<ndt::type, void *>> properties;
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
   if (!is_builtin()) {
     return m_ptr->get_dynamic_type_properties();
   }

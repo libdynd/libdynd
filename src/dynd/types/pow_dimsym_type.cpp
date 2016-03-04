@@ -270,11 +270,11 @@ bool ndt::pow_dimsym_type::match(const type &candidate_tp, std::map<std::string,
   return m_element_tp.match(concrete_subtype, tp_vars);
 }
 
-std::map<std::string, std::pair<ndt::type, void *>> ndt::pow_dimsym_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::pow_dimsym_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, std::pair<ndt::type, void *>> properties;
-  properties["name"] = {ndt::type("string"), (void *)(&m_exponent)};
-  properties["element_type"] = {ndt::type("type"), (void *)(&m_element_tp)};
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["name"] = {ndt::type("string"), reinterpret_cast<const char *>(&m_exponent)};
+  properties["element_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_element_tp)};
 
   return properties;
 }
