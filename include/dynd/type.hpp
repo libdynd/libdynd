@@ -190,6 +190,7 @@ namespace ndt {
 
   public:
     using intrusive_ptr<const base_type>::intrusive_ptr;
+
     /**
       * Default constructor.
       */
