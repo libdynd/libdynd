@@ -376,6 +376,11 @@ namespace nd {
     array p(const std::string &name) const;
 
     /**
+     * Converts a dynamic type property to an array.
+     */
+    static nd::array from_type_property(const std::pair<ndt::type, const char *> &pair);
+
+    /**
      * Calls the dynamic function - #include <dynd/callable_registry.hpp> to use it.
      */
     template <typename... ArgTypes>
