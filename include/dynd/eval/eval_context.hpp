@@ -18,5 +18,6 @@ namespace eval {
   };
 
   extern DYND_API eval_context default_eval_context;
-}
+
 } // namespace dynd::eval
+} // namespace dynd

@@ -27,6 +27,8 @@ namespace ndt {
 } // namespace ndt;
 
 namespace nd {
+  class callable;
+
   DYND_API callable &find_dynamic_function(const char *name);
 
   class DYND_API array;
