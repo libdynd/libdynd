@@ -6,28 +6,21 @@
 #pragma once
 
 #include <atomic>
+#include <map>
 #include <unordered_set>
 #include <vector>
 
-#include <dynd/config.hpp>
-#include <dynd/types/type_id.hpp>
 #include <dynd/irange.hpp>
+#include <dynd/eval/eval_context.hpp>
 #include <dynd/memblock/memory_block.hpp>
-#include <dynd/kernels/kernel_prefix.hpp>
+#include <dynd/types/type_id.hpp>
 
 namespace dynd {
-
-// Forward definition from dynd/type.hpp
 namespace ndt {
-  class base_type;
-  class type;
-} // namespace dynd::ndt
 
-// Forward definition from dynd/array.hpp
-namespace nd {
-  class array;
-  class callable;
-} // namsepace dynd::nd
+  class type;
+
+} // namespace dynd::ndt
 
 struct iterdata_common;
 

@@ -8,6 +8,7 @@
 #include <atomic>
 #include <map>
 
+#include <dynd/kernels/kernel_prefix.hpp>
 #include <dynd/array.hpp>
 
 namespace dynd {

@@ -20,13 +20,6 @@ namespace nd {
 
 } // namespace dynd::nd
 
-namespace eval {
-
-  struct DYND_API eval_context;
-  extern DYND_API eval_context default_eval_context;
-
-} // namespace dynd::eval
-
 namespace ndt {
 
   class type;
