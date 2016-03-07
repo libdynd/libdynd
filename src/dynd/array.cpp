@@ -230,6 +230,72 @@ nd::array nd::array::p(const char *name) const { return nd::make_field_access_ke
 
 nd::array nd::array::p(const std::string &name) const { return p(name.c_str()); }
 
+// Unpack a type property.
+template <typename T>
+static inline nd::array unpack(bool is_vector, const char *data)
+{
+  if (is_vector) {
+    return *reinterpret_cast<const std::vector<T> *>(data);
+  }
+  else {
+    return *reinterpret_cast<const T *>(data);
+  }
+}
+
+nd::array nd::array::from_type_property(const std::pair<ndt::type, const char *> &pair)
+{
+  type_id_t id = pair.first.get_id();
+  bool is_vector = false;
+
+  if (id == fixed_dim_id) {
+    id = pair.first.get_dtype().get_id();
+    is_vector = true;
+  }
+
+  switch (id) {
+  case bool_id:
+    return unpack<bool1>(is_vector, pair.second);
+  case int8_id:
+    return unpack<int8>(is_vector, pair.second);
+  case int16_id:
+    return unpack<int16>(is_vector, pair.second);
+  case int32_id:
+    return unpack<int32>(is_vector, pair.second);
+  case int64_id:
+    return unpack<int64>(is_vector, pair.second);
+  case int128_id:
+    return unpack<int128>(is_vector, pair.second);
+  case uint8_id:
+    return unpack<uint8>(is_vector, pair.second);
+  case uint16_id:
+    return unpack<uint16>(is_vector, pair.second);
+  case uint32_id:
+    return unpack<uint32>(is_vector, pair.second);
+  case uint64_id:
+    return unpack<uint64>(is_vector, pair.second);
+  case uint128_id:
+    return unpack<uint128>(is_vector, pair.second);
+  case float16_id:
+    return unpack<float16>(is_vector, pair.second);
+  case float32_id:
+    return unpack<float32>(is_vector, pair.second);
+  case float64_id:
+    return unpack<float64>(is_vector, pair.second);
+  case float128_id:
+    return unpack<float128>(is_vector, pair.second);
+  case complex_float32_id:
+    return unpack<complex64>(is_vector, pair.second);
+  case complex_float64_id:
+    return unpack<complex128>(is_vector, pair.second);
+  case type_id:
+    return unpack<ndt::type>(is_vector, pair.second);
+  case string_id:
+    return unpack<std::string>(is_vector, pair.second);
+  default:
+    throw runtime_error("invalid type property");
+  }
+}
+
 nd::array nd::array::eval() const
 {
   const ndt::type &current_tp = get_type();
@@ -1064,8 +1130,7 @@ nd::array nd::reshape(const nd::array &a, const nd::array &shape)
   if (old_size != size) {
     stringstream ss;
     ss << "dynd reshape: cannot reshape to a different total number of "
-          "elements, from "
-       << old_size << " to " << size;
+          "elements, from " << old_size << " to " << size;
     throw invalid_argument(ss.str());
   }
 
@@ -1139,8 +1204,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
 
   array result(
       reinterpret_cast<array_preamble *>(make_array_memory_block(fsd->get_arrmeta_size(), fsd->get_default_data_size(),
-                                                                 fsd->get_data_alignment(), &data_ptr)
-                                             .get()),
+                                                                 fsd->get_data_alignment(), &data_ptr).get()),
       true);
   // Set the array properties
   result.get()->tp = result_type;

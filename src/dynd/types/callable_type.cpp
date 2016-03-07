@@ -9,7 +9,6 @@
 #include <dynd/types/str_util.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
 #include <dynd/types/typevar_type.hpp>
-#include <dynd/kernels/get_then_copy_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -21,15 +20,13 @@ ndt::callable_type::callable_type(const type &ret_type, const type &pos_types, c
   if (m_pos_tuple.get_id() != tuple_id) {
     stringstream ss;
     ss << "dynd callable positional arg types require a tuple type, got a "
-          "type \""
-       << m_pos_tuple << "\"";
+          "type \"" << m_pos_tuple << "\"";
     throw invalid_argument(ss.str());
   }
   if (m_kwd_struct.get_id() != struct_id) {
     stringstream ss;
     ss << "dynd callable keyword arg types require a struct type, got a "
-          "type \""
-       << m_kwd_struct << "\"";
+          "type \"" << m_kwd_struct << "\"";
     throw invalid_argument(ss.str());
   }
 
@@ -240,23 +237,17 @@ bool ndt::callable_type::match(const type &candidate_tp, std::map<std::string, t
   return true;
 }
 
-std::map<std::string, nd::callable> ndt::callable_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::callable_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, nd::callable> properties;
-  properties["pos_types"] = nd::callable::make<
-      nd::get_then_copy_kernel<const std::vector<type> &, callable_type, &callable_type::get_pos_types>>(
-      ndt::callable_type::make(m_pos_tuple.extended<ndt::tuple_type>()->get_type(), ndt::tuple_type::make(),
-                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["kwd_types"] = nd::callable::make<
-      nd::get_then_copy_kernel<const std::vector<type> &, callable_type, &callable_type::get_kwd_types>>(
-      ndt::callable_type::make(m_kwd_struct.extended<ndt::struct_type>()->get_type(), ndt::tuple_type::make(),
-                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["kwd_names"] = nd::callable::make<
-      nd::get_then_copy_kernel<const std::vector<std::string> &, callable_type, &callable_type::get_kwd_names>>(
-      ndt::callable_type::make(ndt::type_for(m_kwd_struct.extended<ndt::struct_type>()->get_field_names()),
-                               ndt::tuple_type::make(),
-                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["return_type"] = nd::callable([](type self) { return self.extended<callable_type>()->get_return_type(); });
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  const std::vector<ndt::type> &pos_types = m_pos_tuple.extended<ndt::tuple_type>()->get_field_types();
+  const std::vector<ndt::type> &kwd_types = m_kwd_struct.extended<ndt::struct_type>()->get_field_types();
+  const std::vector<std::string> &kwd_names = m_kwd_struct.extended<ndt::struct_type>()->get_field_names();
+
+  properties["pos_types"] = {ndt::type_for(pos_types), reinterpret_cast<const char *>(&pos_types)};
+  properties["kwd_types"] = {ndt::type_for(kwd_types), reinterpret_cast<const char *>(&kwd_types)};
+  properties["kwd_names"] = {ndt::type_for(kwd_names), reinterpret_cast<const char *>(&kwd_names)};
+  properties["return_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_return_type)};
 
   return properties;
 }

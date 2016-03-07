@@ -149,24 +149,11 @@ bool ndt::typevar_constructed_type::match(const type &candidate_tp, std::map<std
   return m_arg.match(candidate_tp.extended<base_memory_type>()->get_element_type(), tp_vars);
 }
 
-/*
-static nd::array property_get_name(const ndt::type &tp)
+std::map<std::string, std::pair<ndt::type, const char *>>
+ndt::typevar_constructed_type::get_dynamic_type_properties() const
 {
-  return tp.extended<ndt::typevar_constructed_type>()->get_name();
-}
-*/
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["name"] = {ndt::type("string"), reinterpret_cast<const char *>(&m_name)};
 
-/*
-void ndt::typevar_constructed_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
-    size_t *out_count) const
-{
-  static pair<string, nd::arrfunc> type_properties[] = {
-      pair<string, gfunc::callable>(
-          "name", gfunc::make_callable(&property_get_name, "self")),
-  };
-
-  *out_properties = type_properties;
-  *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+  return properties;
 }
-*/

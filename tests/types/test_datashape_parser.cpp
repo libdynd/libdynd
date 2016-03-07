@@ -38,6 +38,7 @@ TEST(DataShapeParser, Basic)
   EXPECT_EQ(ndt::make_type<uint64>(), ndt::type("uint64"));
   EXPECT_EQ(ndt::make_type<uint128>(), ndt::type("uint128"));
   EXPECT_EQ(ndt::make_type<uintptr_t>(), ndt::type("uintptr"));
+  EXPECT_EQ(ndt::make_type<size_t>(), ndt::type("size"));
   EXPECT_EQ(ndt::make_type<float16>(), ndt::type("float16"));
   EXPECT_EQ(ndt::make_type<float32>(), ndt::type("float32"));
   EXPECT_EQ(ndt::make_type<float64>(), ndt::type("float64"));
@@ -191,10 +192,10 @@ TEST(DataShapeParser, Callable)
   EXPECT_EQ(ndt::make_type<int(int, int)>("x", "y"), ndt::type("(x: int, y: int) -> int"));
 
   tp = ndt::type("(N * S, func: (M * S) -> T) -> N * T");
-  EXPECT_JSON_EQ_ARR("[\"N * S\"]", tp.p("pos_types"));
-  EXPECT_JSON_EQ_ARR("[\"(M * S) -> T\"]", tp.p("kwd_types"));
-  EXPECT_JSON_EQ_ARR("[\"func\"]", tp.p("kwd_names"));
-  EXPECT_JSON_EQ_ARR("\"N * T\"", tp.p("return_type"));
+  EXPECT_JSON_EQ_ARR("[\"N * S\"]", tp.p<std::vector<ndt::type>>("pos_types"));
+  EXPECT_JSON_EQ_ARR("[\"(M * S) -> T\"]", tp.p<std::vector<ndt::type>>("kwd_types"));
+  EXPECT_JSON_EQ_ARR("[\"func\"]", tp.p<std::vector<std::string>>("kwd_names"));
+  EXPECT_JSON_EQ_ARR("\"N * T\"", tp.p<ndt::type>("return_type"));
 }
 
 TEST(DataShapeParser, ErrorBasic)

@@ -355,6 +355,11 @@ struct type_id_of<void> {
   static const type_id_t value = void_id;
 };
 
+template <>
+struct type_id_of<ndt::type> {
+  static const type_id_t value = type_id;
+};
+
 // Also allow type_id_of<std::complex<>> as synonyms for
 // type_id_of<dynd_complex<>>
 template <>
@@ -766,6 +771,19 @@ template <>
 struct is_dynd_scalar<std::complex<double>> {
   enum { value = true };
 };
+
+// Get the type id for types that are valid for describing the return value of
+// a type property.
+template <typename T>
+struct property_type_id_of {
+  static const type_id_t value = type_id_of<T>::value;
+};
+
+template <>
+struct property_type_id_of<std::string> {
+  static const type_id_t value = string_id;
+};
+
 
 DYND_API bool is_base_id_of(type_id_t base_id, type_id_t id);
 

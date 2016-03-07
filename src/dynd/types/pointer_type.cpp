@@ -284,16 +284,10 @@ bool ndt::pointer_type::match(const type &candidate_tp, std::map<std::string, ty
   return m_target_tp.match(candidate_tp.extended<pointer_type>()->m_target_tp, tp_vars);
 }
 
-static ndt::type property_get_target_type(ndt::type tp)
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::pointer_type::get_dynamic_type_properties() const
 {
-  const ndt::pointer_type *pd = tp.extended<ndt::pointer_type>();
-  return pd->get_target_type();
-}
-
-std::map<std::string, nd::callable> ndt::pointer_type::get_dynamic_type_properties() const
-{
-  std::map<std::string, nd::callable> properties;
-  properties["target_type"] = nd::functional::apply(&property_get_target_type, "self");
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["target_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_target_tp)};
 
   return properties;
 }
