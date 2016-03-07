@@ -11,6 +11,7 @@
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/base_expr_type.hpp>
 #include <dynd/types/base_string_type.hpp>
+#include <dynd/types/type_id.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -153,6 +154,40 @@ namespace ndt {
    *
    */
   class DYND_API type : public intrusive_ptr<const base_type> {
+  private:
+    /**
+     * Valid type properties can have type scalar, std::string, ndt::type
+     * or a vector of any of these.
+     */
+    template <typename T, typename C = typename T::value_type>
+    std::enable_if_t<is_vector<T>::value, const T> &property(const char *name) const
+    {
+      const std::pair<ndt::type, const char *> pair = get_properties()[name];
+      const ndt::type &dt = pair.first.get_dtype();
+
+      if (pair.first.get_id() != fixed_dim_id) {
+        throw std::runtime_error("unsupported type for property access");
+      }
+
+      if (dt.get_id() == property_type_id_of<C>::value) {
+        return *reinterpret_cast<const T *>(pair.second);
+      }
+
+      throw std::runtime_error("type mismatch or unsupported type in property access");
+    }
+
+    template <typename T>
+    std::enable_if_t<!is_vector<T>::value, const T> &property(const char *name) const
+    {
+      const std::pair<ndt::type, const char *> pair = get_properties()[name];
+
+      if (pair.first.get_id() == property_type_id_of<T>::value) {
+        return *reinterpret_cast<const T *>(pair.second);
+      }
+
+      throw std::runtime_error("type mismatch in property access");
+    }
+
   public:
     using intrusive_ptr<const base_type>::intrusive_ptr;
 
@@ -286,8 +321,16 @@ namespace ndt {
      *
      * \param name  The property to access.
      */
-    nd::array p(const char *name) const;
-    nd::array p(const std::string &name) const;
+    template <typename T>
+    const T &p(const char *name) const
+    {
+      return property<T>(name);
+    }
+    template <typename T>
+    const T &p(const std::string &name) const
+    {
+      return property<T>(name.c_str());
+    }
 
     /**
      * Indexes into the type, intended for recursive calls from the
@@ -577,7 +620,7 @@ namespace ndt {
       return vars;
     }
 
-    std::map<std::string, nd::callable> get_properties() const;
+    std::map<std::string, std::pair<ndt::type, const char *>> get_properties() const;
 
     /**
      * Returns a const pointer to the base_type object which

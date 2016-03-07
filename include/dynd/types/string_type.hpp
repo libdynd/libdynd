@@ -58,12 +58,14 @@ public:
 namespace ndt {
 
   class DYND_API string_type : public base_string_type {
+  private:
+    const string_encoding_t m_encoding = string_encoding_utf_8;
   public:
     typedef string data_type;
 
     string_type();
 
-    string_encoding_t get_encoding() const { return string_encoding_utf_8; }
+    string_encoding_t get_encoding() const { return m_encoding; }
 
     /** Alignment of the string data being pointed to. */
     size_t get_target_alignment() const { return string_encoding_char_size_table[string_encoding_utf_8]; }
@@ -80,6 +82,8 @@ namespace ndt {
     type get_canonical_type() const;
 
     void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
+
+    std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 

@@ -234,9 +234,9 @@ void ndt::base_type::foreach_leading(const char *DYND_UNUSED(arrmeta), char *DYN
   throw std::runtime_error(ss.str());
 }
 
-std::map<std::string, nd::callable> ndt::base_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::base_type::get_dynamic_type_properties() const
 {
-  return std::map<std::string, nd::callable>();
+  return std::map<std::string, std::pair<ndt::type, const char *>>();
 }
 
 bool ndt::base_type::adapt_type(const type &DYND_UNUSED(operand_tp), const std::string &DYND_UNUSED(op),

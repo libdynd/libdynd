@@ -48,8 +48,8 @@ TEST(SymbolicTypes, CreateFuncProto)
   EXPECT_EQ("(float32, int32, float64) -> int64", tp.str());
 
   // Dynamic type properties
-  EXPECT_EQ(ndt::make_type<int64_t>(), tp.p("return_type").as<ndt::type>());
-  nd::array ptp = tp.p("pos_types");
+  EXPECT_EQ(ndt::make_type<int64_t>(), tp.p<ndt::type>("return_type"));
+  nd::array ptp = tp.p<std::vector<ndt::type>>("pos_types");
   EXPECT_EQ(ndt::type("3 * type"), ptp.get_type());
   ASSERT_EQ(3, ptp.get_dim_size());
   EXPECT_EQ(ndt::make_type<float>(), ptp(0).as<ndt::type>());
@@ -96,7 +96,7 @@ TEST(SymbolicTypes, CreateTypeVar)
   EXPECT_EQ("Blah", tp.str());
 
   // Dynamic type properties
-  EXPECT_EQ("Blah", tp.p("name").as<std::string>());
+  EXPECT_EQ("Blah", tp.p<std::string>("name"));
 
   // The typevar name must start with a capital
   // and look like an identifier
@@ -128,7 +128,7 @@ TEST(SymbolicTypes, CreateTypeVarDim)
   EXPECT_EQ("Blah * int32", tp.str());
 
   // Dynamic type properties
-  EXPECT_EQ("Blah", tp.p("name").as<std::string>());
+  EXPECT_EQ("Blah", tp.p<std::string>("name"));
 
   // The typevar name must start with a capital
   // and look like an identifier
@@ -267,7 +267,7 @@ TEST(SymbolicTypes, VariadicTuple)
 
   tp = ndt::type("(type, int32, T, ...)");
   EXPECT_EQ(tuple_id, tp.get_id());
-  EXPECT_JSON_EQ_ARR("[\"type\", \"int32\", \"T\"]", tp.p("field_types"));
+  EXPECT_JSON_EQ_ARR("[\"type\", \"int32\", \"T\"]", tp.p<std::vector<ndt::type>>("field_types"));
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.extended<ndt::tuple_type>()->is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
@@ -284,8 +284,8 @@ TEST(SymbolicTypes, VariadicStruct)
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   tp = ndt::type("{x: type, y: int32, z: T, ...}");
-  EXPECT_JSON_EQ_ARR("[\"type\", \"int32\", \"T\"]", tp.p("field_types"));
-  EXPECT_JSON_EQ_ARR("[\"x\", \"y\", \"z\"]", tp.p("field_names"));
+  EXPECT_JSON_EQ_ARR("[\"type\", \"int32\", \"T\"]", tp.p<std::vector<ndt::type>>("field_types"));
+  EXPECT_JSON_EQ_ARR("[\"x\", \"y\", \"z\"]", tp.p<std::vector<std::string>>("field_names"));
   EXPECT_EQ(struct_id, tp.get_id());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.extended<ndt::struct_type>()->is_variadic());
@@ -297,14 +297,14 @@ TEST(SymbolicTypes, VariadicCallable)
   ndt::type tp;
 
   tp = ndt::type("(int32, ...) -> float32");
-  EXPECT_JSON_EQ_ARR("[\"int32\"]", tp.p("pos_types"));
+  EXPECT_JSON_EQ_ARR("[\"int32\"]", tp.p<std::vector<ndt::type>>("pos_types"));
   EXPECT_TRUE(tp.extended<ndt::callable_type>()->is_pos_variadic());
   EXPECT_EQ(ndt::type("(int32, ...)"), tp.extended<ndt::callable_type>()->get_pos_tuple());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   tp = ndt::type("(int32, ..., shape: 3 * intptr) -> float32");
-  EXPECT_JSON_EQ_ARR("[\"int32\"]", tp.p("pos_types"));
-  EXPECT_JSON_EQ_ARR("[\"3 * intptr\"]", tp.p("kwd_types"));
+  EXPECT_JSON_EQ_ARR("[\"int32\"]", tp.p<std::vector<ndt::type>>("pos_types"));
+  EXPECT_JSON_EQ_ARR("[\"3 * intptr\"]", tp.p<std::vector<ndt::type>>("kwd_types"));
   EXPECT_EQ(ndt::type("(int32, ...)"), tp.extended<ndt::callable_type>()->get_pos_tuple());
   EXPECT_EQ(ndt::type("{shape: 3 * intptr}"), tp.extended<ndt::callable_type>()->get_kwd_struct());
   EXPECT_EQ(tp, ndt::type(tp.str()));

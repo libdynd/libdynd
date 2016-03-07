@@ -219,6 +219,13 @@ TEST(StringType, Storage)
   EXPECT_EQ(ndt::bytes_type::make(1), a.storage().get_type());
 }
 
+TEST(StringType, Properties)
+{
+  ndt::type d = ndt::make_type<ndt::string_type>();
+
+  EXPECT_EQ(string_encoding_utf_8, d.p<uint32_t>("encoding"));
+}
+
 TEST(StringType, EncodingSizes)
 {
   EXPECT_EQ(1, string_encoding_char_size_table[string_encoding_ascii]);

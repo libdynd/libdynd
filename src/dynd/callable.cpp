@@ -130,7 +130,7 @@ nd::array nd::callable::call(size_t args_size, const array *args_values, size_t 
 
       ndt::type expected_tp = self_tp->get_kwd_type(j);
       if (expected_tp.get_id() == option_id) {
-        expected_tp = expected_tp.p("value_type").as<ndt::type>();
+        expected_tp = expected_tp.extended<ndt::option_type>()->get_value_type();
       }
 
       const ndt::type &actual_tp = value.get_type();
@@ -171,8 +171,7 @@ nd::array nd::callable::call(size_t args_size, const array *args_values, size_t 
     // TODO: Provide the missing keyword parameter names in this error
     //       message
     ss << "callable requires keyword parameters that were not provided. "
-          "callable signature "
-       << get()->tp;
+          "callable signature " << get()->tp;
     throw std::invalid_argument(ss.str());
   }
 

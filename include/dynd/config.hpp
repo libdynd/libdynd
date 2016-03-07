@@ -17,6 +17,7 @@
 #include <tuple>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include <dynd/visibility.hpp>
 
@@ -156,6 +157,14 @@ template <typename T>
 struct is_function_pointer {
   static const bool value =
       std::is_pointer<T>::value ? std::is_function<typename std::remove_pointer<T>::type>::value : false;
+};
+
+template <typename T>
+struct is_vector : std::false_type {
+};
+
+template <typename T>
+struct is_vector<std::vector<T>> : std::true_type {
 };
 
 template <typename T>

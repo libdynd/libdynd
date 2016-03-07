@@ -436,23 +436,11 @@ ndt::type ndt::factor_categorical(const nd::array &values)
   return type(new categorical_type(categories, true), false);
 }
 
-static ndt::type property_type_get_storage_type(ndt::type d)
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::categorical_type::get_dynamic_type_properties() const
 {
-  const ndt::categorical_type *cd = d.extended<ndt::categorical_type>();
-  return cd->get_storage_type();
-}
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["storage_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_storage_type)};
+  properties["category_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_category_tp)};
 
-static ndt::type property_type_get_category_type(ndt::type d)
-{
-  const ndt::categorical_type *cd = d.extended<ndt::categorical_type>();
-  return cd->get_category_type();
-}
-
-std::map<std::string, nd::callable> ndt::categorical_type::get_dynamic_type_properties() const
-{
-  static const std::map<std::string, nd::callable> categorical_type_properties{
-      {"storage_type", nd::functional::apply(&property_type_get_storage_type, "self")},
-      {"category_type", nd::functional::apply(&property_type_get_category_type, "self")}};
-
-  return categorical_type_properties;
+  return properties;
 }

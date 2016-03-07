@@ -9,7 +9,6 @@
 #include <dynd/func/assignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/kernels/get_then_copy_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -489,17 +488,12 @@ bool ndt::tuple_type::match(const type &candidate_tp, std::map<std::string, type
   }
 }
 
-std::map<std::string, nd::callable> ndt::tuple_type::get_dynamic_type_properties() const
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::tuple_type::get_dynamic_type_properties() const
 {
-  std::map<std::string, nd::callable> properties;
-  properties["field_types"] =
-      nd::callable::make<nd::get_then_copy_kernel<const std::vector<type> &, tuple_type, &tuple_type::get_field_types>>(
-          ndt::callable_type::make(get_type(), ndt::tuple_type::make(),
-                                   ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
-  properties["metadata_offsets"] = nd::callable::make<
-      nd::get_then_copy_kernel<const std::vector<uintptr_t> &, tuple_type, &tuple_type::get_arrmeta_offsets>>(
-      ndt::callable_type::make(ndt::type_for(m_arrmeta_offsets), ndt::tuple_type::make(),
-                               ndt::struct_type::make({"self"}, {ndt::make_type<ndt::type_type>()})));
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["field_types"] = {ndt::type_for(m_field_types), reinterpret_cast<const char *>(&m_field_types)};
+  properties["metadata_offsets"] = {ndt::type_for(m_arrmeta_offsets),
+                                    reinterpret_cast<const char *>(&m_arrmeta_offsets)};
 
   return properties;
 }

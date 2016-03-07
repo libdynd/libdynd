@@ -17,7 +17,7 @@ namespace ndt {
 
 } // namespace dynd::ndt
 
-enum string_encoding_t {
+enum string_encoding_t : uint32_t {
   string_encoding_ascii,
   string_encoding_ucs_2,
   string_encoding_utf_8,

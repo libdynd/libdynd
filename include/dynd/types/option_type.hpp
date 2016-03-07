@@ -84,7 +84,7 @@ namespace ndt {
 
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
-    std::map<std::string, nd::callable> get_dynamic_type_properties() const;
+    std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
   };
 
   template <typename ValueType>
