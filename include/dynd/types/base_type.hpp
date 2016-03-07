@@ -20,7 +20,6 @@ namespace dynd {
 // Forward definition from dynd/type.hpp
 namespace ndt {
   class base_type;
-  class callable_type;
   class type;
 } // namespace dynd::ndt
 
@@ -475,29 +474,9 @@ namespace ndt {
     virtual void get_vars(std::unordered_set<std::string> &DYND_UNUSED(vars)) const {}
 
     /**
-     * Additional dynamic properties exposed by the type as gfunc::callable.
+     * Additional dynamic properties exposed by the type.
      */
     virtual std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
-
-    /**
-     * Produces forward and reverse callables for adapting the operand
-     * type to the current type, according to the information stored in
-     * ``op``.
-     *
-     * \returns  True if the adapt is ok, false otherwise.
-     */
-    virtual bool adapt_type(const ndt::type &operand_tp, const std::string &op, nd::callable &out_forward,
-                            nd::callable &out_reverse) const;
-
-    /**
-     * Produces forward and reverse callables for adapting the current type
-     * to the value type, according to the information stored in
-     * ``op``.
-     *
-     * \returns  True if the adapt is ok, false otherwise.
-     */
-    virtual bool reverse_adapt_type(const ndt::type &value_tp, const std::string &op, nd::callable &out_forward,
-                                    nd::callable &out_reverse) const;
 
     friend void intrusive_ptr_retain(const base_type *ptr);
     friend void intrusive_ptr_release(const base_type *ptr);

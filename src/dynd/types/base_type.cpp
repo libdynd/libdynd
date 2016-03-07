@@ -238,16 +238,3 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::base_type::get_dy
 {
   return std::map<std::string, std::pair<ndt::type, const char *>>();
 }
-
-bool ndt::base_type::adapt_type(const type &DYND_UNUSED(operand_tp), const std::string &DYND_UNUSED(op),
-                                nd::callable &DYND_UNUSED(out_forward), nd::callable &DYND_UNUSED(out_reverse)) const
-{
-  return false;
-}
-
-bool ndt::base_type::reverse_adapt_type(const type &DYND_UNUSED(value_tp), const std::string &DYND_UNUSED(op),
-                                        nd::callable &DYND_UNUSED(out_forward),
-                                        nd::callable &DYND_UNUSED(out_reverse)) const
-{
-  return false;
-}
