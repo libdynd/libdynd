@@ -35,10 +35,10 @@ public:
   {
   }
 
-  virtual const char *message() const throw() { return m_message.c_str(); }
-  virtual const char *what() const throw() { return m_what.c_str(); }
+  virtual const char *message() const throw();
+  virtual const char *what() const throw();
 
-  virtual ~dynd_exception() throw() {}
+  virtual ~dynd_exception() throw();
 };
 
 /**
@@ -75,7 +75,7 @@ public:
    */
   broadcast_error(intptr_t dst_size, intptr_t src_size, const char *dst_name, const char *src_name);
 
-  virtual ~broadcast_error() throw() {}
+  virtual ~broadcast_error() throw();
 };
 
 /**
@@ -89,7 +89,7 @@ public:
    */
   too_many_indices(const ndt::type &dt, intptr_t nindices, intptr_t ndim);
 
-  virtual ~too_many_indices() throw() {}
+  virtual ~too_many_indices() throw();
 };
 
 class DYND_API index_out_of_bounds : public dynd_exception {
@@ -102,7 +102,7 @@ public:
   index_out_of_bounds(intptr_t i, size_t axis, const std::vector<intptr_t> &shape);
   index_out_of_bounds(intptr_t i, intptr_t dimension_size);
 
-  virtual ~index_out_of_bounds() throw() {}
+  virtual ~index_out_of_bounds() throw();
 };
 
 class DYND_API axis_out_of_bounds : public dynd_exception {
@@ -113,7 +113,7 @@ public:
    */
   axis_out_of_bounds(size_t i, intptr_t ndim);
 
-  virtual ~axis_out_of_bounds() throw() {}
+  virtual ~axis_out_of_bounds() throw();
 };
 
 /**
@@ -129,7 +129,7 @@ public:
   irange_out_of_bounds(const irange &i, size_t axis, const std::vector<intptr_t> &shape);
   irange_out_of_bounds(const irange &i, intptr_t dimension_size);
 
-  virtual ~irange_out_of_bounds() throw() {}
+  virtual ~irange_out_of_bounds() throw();
 };
 
 /**
@@ -138,7 +138,7 @@ public:
 class DYND_API zero_division_error : public dynd_exception {
 public:
   zero_division_error(const std::string &msg) : dynd_exception("zero division error", msg) {}
-  virtual ~zero_division_error() throw() {}
+  virtual ~zero_division_error() throw();
 };
 
 /**
@@ -149,7 +149,7 @@ public:
   type_error(const char *exception_name, const std::string &msg) : dynd_exception(exception_name, msg) {}
   type_error(const std::string &msg) : dynd_exception("type error", msg) {}
 
-  virtual ~type_error() throw() {}
+  virtual ~type_error() throw();
 };
 
 /**
@@ -159,7 +159,7 @@ class DYND_API invalid_id : public type_error {
 public:
   invalid_id(int type_id);
 
-  virtual ~invalid_id() throw() {}
+  virtual ~invalid_id() throw();
 };
 
 /**
@@ -172,11 +172,11 @@ class DYND_API string_decode_error : public dynd_exception {
 public:
   string_decode_error(const char *begin, const char *end, string_encoding_t encoding);
 
-  virtual ~string_decode_error() throw() {}
+  virtual ~string_decode_error() throw();
 
-  const std::string &bytes() const { return m_bytes; }
+  const std::string &bytes() const;
 
-  string_encoding_t encoding() const { return m_encoding; }
+  string_encoding_t encoding() const;
 };
 
 /**
@@ -190,11 +190,11 @@ class DYND_API string_encode_error : public dynd_exception {
 public:
   string_encode_error(uint32_t cp, string_encoding_t encoding);
 
-  virtual ~string_encode_error() throw() {}
+  virtual ~string_encode_error() throw();
 
-  uint32_t cp() const { return m_cp; }
+  uint32_t cp() const;
 
-  string_encoding_t encoding() const { return m_encoding; }
+  string_encoding_t encoding() const;
 };
 
 enum comparison_type_t {
@@ -220,7 +220,7 @@ class DYND_API not_comparable_error : public dynd_exception {
 public:
   not_comparable_error(const ndt::type &lhs, const ndt::type &rhs, comparison_type_t comptype);
 
-  virtual ~not_comparable_error() throw() {}
+  virtual ~not_comparable_error() throw();
 };
 
 #ifdef DYND_CUDA
