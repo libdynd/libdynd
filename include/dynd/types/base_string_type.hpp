@@ -19,8 +19,9 @@ namespace ndt {
   class DYND_API base_string_type : public base_type {
   private:
     const string_encoding_t m_encoding = string_encoding_ascii;
+
   public:
-    base_string_type(type_id_t type_id, size_t data_size, size_t alignment, flags_type flags, size_t arrmeta_size)
+    base_string_type(type_id_t type_id, size_t data_size, size_t alignment, uint32_t flags, size_t arrmeta_size)
         : base_type(type_id, data_size, alignment, flags, arrmeta_size, 0, 0)
     {
     }

@@ -33,17 +33,20 @@ typedef void (*foreach_fn_t)(const ndt::type &dt, const char *arrmeta, char *dat
  * iterator at the specified level, resetting all the more inner levels to 0.
  */
 typedef char *(*iterdata_increment_fn_t)(iterdata_common *iterdata, intptr_t level);
+
 /**
  * This is the iteration advance function used by iterdata. It advances the
  * iterator at the specified level by the specified amount, resetting all the
  * more inner levels to 0.
  */
+
 typedef char *(*iterdata_advance_fn_t)(iterdata_common *iterdata, intptr_t level, intptr_t i);
 /**
  * This is the reset function which is called when an outer dimension
  * increment resets all the lower dimensions to index 0. It returns
  * the data pointer for the next inner level of iteration.
  */
+
 typedef char *(*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, intptr_t ndim);
 
 /**
@@ -85,24 +88,20 @@ namespace ndt {
     mutable std::atomic_long m_use_count;
 
   protected:
-    type_id_t type_id;      // The type id
-    size_t data_size;       // The size of one instance of the type, or 0 if there is not one fixed size.
-    uint8_t data_alignment; // The data alignment
-    uint32_t flags;         // The flags.
-    size_t arrmeta_size;    // The size of a arrmeta instance for the type.
-    int8_t ndim;            // The number of array dimensions this type has
-    int8_t strided_ndim; // The number of strided dimensions (strided/fixed/cfixed) in a row with no pointers, var dims,
-                         // etc in between.
+    type_id_t m_id;          // The type id
+    size_t m_metadata_size;  // The size of a arrmeta instance for the type.
+    size_t m_data_size;      // The size of one instance of the type, or 0 if there is not one fixed size.
+    size_t m_data_alignment; // The data alignment
+    uint32_t flags;          // The flags.
+    intptr_t m_ndim;         // The number of array dimensions this type has
+    intptr_t m_fixed_ndim;   // The number of fixed dimensions in a row with no var dims, pointers, etc in between
 
   public:
-    typedef uint32_t flags_type;
-
     /** Starts off the extended type instance with a use count of 1. */
-    base_type(type_id_t type_id, size_t data_size, size_t alignment, flags_type flags, size_t arrmeta_size, size_t ndim,
+    base_type(type_id_t id, size_t data_size, size_t data_alignment, uint32_t flags, size_t arrmeta_size, size_t ndim,
               size_t strided_ndim)
-        : m_use_count(1), type_id(type_id), data_size(data_size), data_alignment(static_cast<uint8_t>(alignment)),
-          flags(flags), arrmeta_size(arrmeta_size), ndim(static_cast<uint8_t>(ndim)),
-          strided_ndim(static_cast<uint8_t>(strided_ndim))
+        : m_use_count(1), m_id(id), m_metadata_size(arrmeta_size), m_data_size(data_size),
+          m_data_alignment(data_alignment), flags(flags), m_ndim(ndim), m_fixed_ndim(strided_ndim)
     {
     }
 
@@ -111,24 +110,29 @@ namespace ndt {
     /** For debugging purposes, the type's use count */
     int32_t get_use_count() const { return m_use_count; }
 
-    /** The type's type id */
-    type_id_t get_id() const { return static_cast<type_id_t>(type_id); }
+    /**
+      * The type's id.
+      */
+    type_id_t get_id() const { return m_id; }
+
+    /** The size of the nd::array arrmeta for this type */
+    size_t get_arrmeta_size() const { return m_metadata_size; }
 
     /** The size of one instance of the type, or 0 if there is not one fixed
      * size. */
-    size_t get_data_size() const { return data_size; }
+    size_t get_data_size() const { return m_data_size; }
 
     /** The type's data alignment. Every data pointer for this type _must_ be
      * aligned. */
-    size_t get_data_alignment() const { return data_alignment; }
+    size_t get_data_alignment() const { return m_data_alignment; }
 
     /** The number of array dimensions this type has */
-    intptr_t get_ndim() const { return ndim; }
+    intptr_t get_ndim() const { return m_ndim; }
 
     /** The number of outer strided dimensions this type has in a row */
-    intptr_t get_strided_ndim() const { return strided_ndim; }
+    intptr_t get_strided_ndim() const { return m_fixed_ndim; }
 
-    flags_type get_flags() const { return flags; }
+    uint32_t get_flags() const { return flags; }
 
     virtual size_t get_default_data_size() const;
 
@@ -157,7 +161,7 @@ namespace ndt {
      *behavior,
      * but the simplicity seems to probably be worth it.
      */
-    bool is_scalar() const { return ndim == 0 && (flags & type_flag_variadic) == 0; }
+    bool is_scalar() const { return m_ndim == 0 && (flags & type_flag_variadic) == 0; }
 
     /**
      * Returns true if the given type is a subarray of this type.
@@ -369,8 +373,6 @@ namespace ndt {
 
     virtual bool operator==(const base_type &rhs) const = 0;
 
-    /** The size of the nd::array arrmeta for this type */
-    inline size_t get_arrmeta_size() const { return arrmeta_size; }
     /**
      * Constructs the nd::array arrmeta for this type using default settings.
      * The element size of the result must match that from

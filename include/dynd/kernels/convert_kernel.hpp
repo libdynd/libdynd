@@ -23,7 +23,7 @@ namespace nd {
     inline void reset_strided_buffer_array(const nd::array &buf)
     {
       const ndt::type &buf_tp = buf.get_type();
-      ndt::base_type::flags_type flags = buf_tp.extended()->get_flags();
+      uint32_t flags = buf_tp.extended()->get_flags();
       if (flags & (type_flag_blockref | type_flag_zeroinit | type_flag_destructor)) {
         char *buf_arrmeta = buf.get()->metadata();
         char *buf_data = buf.data();

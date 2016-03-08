@@ -375,7 +375,7 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
   md->offset = 0;
   // Allocate a memory block
   if (blockref_alloc) {
-    base_type::flags_type flags = m_element_tp.get_flags();
+    uint32_t flags = m_element_tp.get_flags();
     if (flags & type_flag_destructor) {
       md->blockref = make_objectarray_memory_block(m_element_tp, arrmeta, element_size, 64, sizeof(metadata_type));
     }

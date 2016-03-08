@@ -18,17 +18,17 @@ ndt::fixed_string_type::fixed_string_type(intptr_t stringsize, string_encoding_t
   switch (encoding) {
   case string_encoding_ascii:
   case string_encoding_utf_8:
-    this->data_size = m_stringsize;
-    this->data_alignment = 1;
+    this->m_data_size = m_stringsize;
+    this->m_data_alignment = 1;
     break;
   case string_encoding_ucs_2:
   case string_encoding_utf_16:
-    this->data_size = m_stringsize * 2;
-    this->data_alignment = 2;
+    this->m_data_size = m_stringsize * 2;
+    this->m_data_alignment = 2;
     break;
   case string_encoding_utf_32:
-    this->data_size = m_stringsize * 4;
-    this->data_alignment = 4;
+    this->m_data_size = m_stringsize * 4;
+    this->m_data_alignment = 4;
     break;
   default:
     throw runtime_error("Unrecognized string encoding in dynd fixed_string type constructor");

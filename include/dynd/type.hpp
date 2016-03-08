@@ -520,7 +520,7 @@ namespace ndt {
       }
     }
 
-    base_type::flags_type get_flags() const
+    uint32_t get_flags() const
     {
       if (is_builtin()) {
         return type_flag_none;

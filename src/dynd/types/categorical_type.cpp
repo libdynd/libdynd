@@ -218,8 +218,8 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
   else {
     m_storage_type = make_type<uint32_t>();
   }
-  this->data_size = m_storage_type.get_data_size();
-  this->data_alignment = (uint8_t)m_storage_type.get_data_alignment();
+  this->m_data_size = m_storage_type.get_data_size();
+  this->m_data_alignment = (uint8_t)m_storage_type.get_data_alignment();
 }
 
 void ndt::categorical_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
