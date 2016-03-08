@@ -141,6 +141,7 @@ namespace nd {
 
   extern DYND_API struct DYND_API string_rfind : declfunc<string_rfind> {
     static callable make();
+    static callable &get();
   } string_rfind;
 
   extern DYND_API struct DYND_API string_replace : declfunc<string_replace> {

@@ -44,6 +44,8 @@ namespace nd {
 
   DYND_API callable string_rfind::make() { return functional::elwise(callable::make<string_rfind_kernel>()); }
 
+  DYND_DEFAULT_DECLFUNC_GET(string_rfind)
+
   DYND_API struct string_rfind string_rfind;
 
   DYND_API callable string_replace::make() { return functional::elwise(callable::make<string_replace_kernel>()); }
