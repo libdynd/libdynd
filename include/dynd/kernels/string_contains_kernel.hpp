@@ -18,7 +18,7 @@ namespace nd {
       bool1 *d = reinterpret_cast<bool1 *>(dst);
       const string *const *s = reinterpret_cast<const string *const *>(src);
 
-      *d = dynd::string_contains(*(s[0]), *(s[1]));
+      *d = (bool1)dynd::string_contains(*(s[0]), *(s[1]));
     }
   };
 

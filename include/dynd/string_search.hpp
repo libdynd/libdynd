@@ -282,7 +282,7 @@ namespace detail {
       return true;
     }
 
-    intptr_t finish() { return m_found; }
+    bool finish() { return m_found; }
   };
 
   template <class StringType>
