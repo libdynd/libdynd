@@ -13,7 +13,7 @@
 using namespace std;
 using namespace dynd;
 
-ndt::tuple_type::tuple_type(type_id_t type_id, const std::vector<type> &field_types, flags_type flags,
+ndt::tuple_type::tuple_type(type_id_t type_id, const std::vector<type> &field_types, uint32_t flags,
                             bool layout_in_arrmeta, bool variadic)
     : base_type(type_id, 0, 1, flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
       m_field_count(field_types.size()), m_field_types(field_types), m_arrmeta_offsets(field_types.size()),
@@ -35,13 +35,13 @@ ndt::tuple_type::tuple_type(type_id_t type_id, const std::vector<type> &field_ty
   if (layout_in_arrmeta) {
     arrmeta_offset = get_field_count() * sizeof(size_t);
   }
-  this->data_alignment = 1;
+  this->m_data_alignment = 1;
   for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
     const type &ft = get_field_type(i);
     size_t field_alignment = ft.get_data_alignment();
     // Accumulate the biggest field alignment as the type alignment
-    if (field_alignment > this->data_alignment) {
-      this->data_alignment = (uint8_t)field_alignment;
+    if (field_alignment > this->m_data_alignment) {
+      this->m_data_alignment = (uint8_t)field_alignment;
     }
     // Inherit any operand flags from the fields
     this->flags |= (ft.get_flags() & type_flags_operand_inherited);
@@ -49,7 +49,7 @@ ndt::tuple_type::tuple_type(type_id_t type_id, const std::vector<type> &field_ty
     m_arrmeta_offsets[i] = arrmeta_offset;
     arrmeta_offset += ft.get_arrmeta_size();
   }
-  this->arrmeta_size = arrmeta_offset;
+  this->m_metadata_size = arrmeta_offset;
 }
 
 ndt::tuple_type::tuple_type(const std::vector<type> &field_types, bool variadic)
@@ -107,7 +107,7 @@ size_t ndt::tuple_type::get_default_data_size() const
       s += ft.get_data_size();
     }
   }
-  s = inc_to_alignment(s, this->data_alignment);
+  s = inc_to_alignment(s, this->m_data_alignment);
   return s;
 }
 

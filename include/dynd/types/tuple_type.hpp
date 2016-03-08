@@ -37,7 +37,7 @@ namespace ndt {
      */
     bool m_variadic;
 
-    tuple_type(type_id_t type_id, const std::vector<type> &field_types, flags_type flags, bool layout_in_arrmeta,
+    tuple_type(type_id_t type_id, const std::vector<type> &field_types, uint32_t flags, bool layout_in_arrmeta,
                bool variadic);
 
     uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const { return reinterpret_cast<uintptr_t *>(arrmeta); }
