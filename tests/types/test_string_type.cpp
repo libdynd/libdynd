@@ -434,7 +434,7 @@ TEST(StringType, Find1)
   b = "abc";
   intptr_t c[] = {0, 2, -1, -1};
 
-  EXPECT_ARRAY_EQ(nd::array(c), nd::string_find(a, b));
+  EXPECT_ARRAY_EQ(c, nd::string_find(a, b));
 }
 
 TEST(StringType, Find2)
@@ -445,7 +445,7 @@ TEST(StringType, Find2)
   b = {"a", "b", "c", "bc", "d", "cd"};
   intptr_t c[] = {0, 1, 2, 1, -1, -1};
 
-  EXPECT_ARRAY_EQ(nd::array(c), nd::string_find(a, b));
+  EXPECT_ARRAY_EQ(c, nd::string_find(a, b));
 }
 
 TEST(StringType, Find3)
@@ -458,7 +458,7 @@ TEST(StringType, Find3)
   b = "a";
   intptr_t c[] = {0, -1, 4, -1, 10};
 
-  EXPECT_ARRAY_EQ(nd::array(c), nd::string_find(a, b));
+  EXPECT_ARRAY_EQ(c, nd::string_find(a, b));
 }
 
 TEST(StringType, RFind1) {
@@ -468,8 +468,7 @@ TEST(StringType, RFind1) {
   b = "abc";
   intptr_t c[] = {0, 2, 4, -1};
 
-  EXPECT_ARRAY_EQ(nd::array(c),
-                  nd::string_rfind(a, b));
+  EXPECT_ARRAY_EQ(c, nd::string_rfind(a, b));
 }
 
 TEST(StringType, Count1) {
@@ -479,7 +478,7 @@ TEST(StringType, Count1) {
   b = "abc";
   intptr_t c[] = {1, 2, 0, 0};
 
-  EXPECT_ARRAY_EQ(nd::array(c), nd::string_count(a, b));
+  EXPECT_ARRAY_EQ(c, nd::string_count(a, b));
 }
 
 TEST(StringType, Count2)
@@ -490,7 +489,7 @@ TEST(StringType, Count2)
   b = {"a", "b", "c", "bc", "d", "cd"};
   intptr_t c[] = {1, 1, 1, 1, 0, 0};
 
-  EXPECT_ARRAY_EQ(nd::array(c), nd::string_count(a, b));
+  EXPECT_ARRAY_EQ(c, nd::string_count(a, b));
 }
 
 TEST(StringType, Count3)
@@ -503,7 +502,7 @@ TEST(StringType, Count3)
   b = "a";
   intptr_t c[] = {1, 2, 0, 3};
 
-  EXPECT_ARRAY_EQ(nd::array(c), nd::string_count(a, b));
+  EXPECT_ARRAY_EQ(c, nd::string_count(a, b));
 }
 
 TEST(StringType, Replace)
