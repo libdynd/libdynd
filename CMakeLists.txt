@@ -446,27 +446,25 @@ endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
-add_library(dynd_OBJ OBJECT ${libdynd_SRC})
-
-if(DYND_LLVM)
-  if(LLVM_FOUND)
-    add_subdirectory(plugin)
-
-    add_dependencies(dynd_OBJ dynd_plugin)
-    set_target_properties(dynd_OBJ PROPERTIES COMPILE_FLAGS "-Xclang -load -Xclang plugin/libdynd_plugin.so")
-  endif()
-endif()
+#if(DYND_LLVM)
+#  if(LLVM_FOUND)
+#    add_subdirectory(plugin)
+#
+#    add_dependencies(dynd_OBJ dynd_plugin)
+#    set_target_properties(dynd_OBJ PROPERTIES COMPILE_FLAGS "-Xclang -load -Xclang plugin/libdynd_plugin.so")
+#  endif()
+#endif()
 
 if (DYND_SHARED_LIB)
     # xcode doesn't like when all cpp files are contained in an OBJECT library
-    add_library(libdynd SHARED ${config_cpp} $<TARGET_OBJECTS:dynd_OBJ>)
+    add_library(libdynd SHARED ${config_cpp} ${libdynd_SRC})
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"
         PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
         )
 else()
-    add_library(libdynd STATIC ${config_cpp} $<TARGET_OBJECTS:dynd_OBJ>)
+    add_library(libdynd STATIC ${config_cpp} ${libdynd_SRC})
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"
@@ -475,7 +473,7 @@ else()
 endif()
 
 set_property(
-    TARGET libdynd dynd_OBJ
+    TARGET libdynd
     PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
 )
 
