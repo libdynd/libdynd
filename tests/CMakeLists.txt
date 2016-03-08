@@ -122,26 +122,8 @@ source_group("Array Tests" REGULAR_EXPRESSION "\\/array\\/test_[^\\/]*\\.cpp$")
 source_group("Types Tests" REGULAR_EXPRESSION "\\/types\\/test_[^\\/]*\\.cpp$")
 source_group("Func Tests" REGULAR_EXPRESSION "\\/func\\/test_[^\\/]*\\.cpp$")
 
-if (DYND_CUDA)
-    # Specify that some source files are CUDA files
-    foreach(filename_CPP
-            func/test_apply.cpp
-            func/test_elwise.cpp
-            func/test_random.cpp
-            func/test_multidispatch.cpp
-            types/test_complex_type.cpp
-        )
-        set_property(SOURCE ${filename_CPP} PROPERTY CUDA_SOURCE_FILE TRUE)
-    endforeach(filename_CPP)
-endif()
-
-if (DYND_CUDA)
-    cuda_add_executable(test_libdynd ${tests_SRC} OPTIONS -ldynddev -L${CMAKE_BINARY_DIR})
-    set(LINK_LIBS ${LINK_LIBS} libdynddev)
-else()
-    add_executable(test_libdynd ${tests_SRC})
-    set(LINK_LIBS ${LINK_LIBS} libdynd)
-endif()
+add_executable(test_libdynd ${tests_SRC})
+set(LINK_LIBS ${LINK_LIBS} libdynd)
 
 if(WIN32)
     target_link_libraries(test_libdynd

@@ -25,10 +25,6 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(DYND_SHARED_LIB
            "Build a libdynd shared library instead of a static library"
            ON)
-# -DDYND_CUDA=ON/OFF, whether to build libdynd with or without the CUDA Toolkit
-    option(DYND_CUDA
-           "Build a libdynd library with CUDA"
-           OFF) # While CUDA support is in development, we default to OFF.
 # -DDYND_FFTW=ON/OFF, whether to build libdynd with or without FFTW
     option(DYND_FFTW
            "Build a libdynd library with FFTW"
@@ -63,12 +59,6 @@ endif()
 
 if(DYND_LLVM)
   find_package(LLVM CONFIG)
-endif()
-
-if(DYND_CUDA)
-    # CUDA 6.5, which has experimental C++11 support, is the minimum required
-    find_package(CUDA_DyND 6.5 REQUIRED)
-    add_definitions(-DDYND_CUDA)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH
@@ -448,44 +438,6 @@ source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 #set_source_files_properties(include/dynd/kernels/compare_kernels.hpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
 #set_source_files_properties(src/dynd/func/comparison.cpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
 
-if (DYND_CUDA)
-    # Replace some source files with their CUDA versions
-    foreach(filename_CPP
-            src/dynd/float16.cpp
-            src/dynd/float128.cpp
-            src/dynd/int128.cpp
-            src/dynd/uint128.cpp
-            # Func
-            src/dynd/func/arithmetic.cpp
-            src/dynd/func/elwise.cpp
-            src/dynd/math.cpp
-            src/dynd/func/permute.cpp
-            src/dynd/func/random.cpp
-            # Kernels
-            src/dynd/kernels/assignment_kernels.cpp
-            src/dynd/kernels/kernel_builder.cpp
-        )
-        list(REMOVE_ITEM libdynd_SRC ${filename_CPP})
-        list(APPEND libdynddev_SRC ${filename_CPP})
-        set_property(SOURCE ${filename_CPP} PROPERTY CUDA_SOURCE_FILE TRUE)
-    endforeach(filename_CPP)
-
-    set(CUDA_SEPARABLE_COMPILATION ON)
-
-    if(NOT WIN32)
-        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++14;-Xcompiler;-fPIC;-Xcompiler;-O3)
-    endif()
-
-    # Make some warnings into errors and inhibit other warnings
-    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Werror=cross-execution-space-call;
-        -Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant;
-        -Xcudafe;--diag_suppress=cc_clobber_ignored;)
-    if(NOT WIN32)
-        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};
-            -Xcompiler;-Wno-unused;-Xcompiler;-Wno-unused-parameter)
-    endif()
-endif()
-
 if (DYND_FFTW)
     find_path(FFTW_PATH fftw3.h)
     include_directories(${FFTW_PATH})
@@ -506,39 +458,18 @@ if(DYND_LLVM)
 endif()
 
 if (DYND_SHARED_LIB)
-    if (DYND_CUDA)
-        cuda_add_library(libdynd SHARED ${config_cpp} ${libdynddev_SRC} $<TARGET_OBJECTS:dynd_OBJ>)
-    else()
-        # xcode doesn't like when all cpp files are contained in an OBJECT library
-        add_library(libdynd SHARED ${config_cpp} $<TARGET_OBJECTS:dynd_OBJ>)
-    endif()
+    # xcode doesn't like when all cpp files are contained in an OBJECT library
+    add_library(libdynd SHARED ${config_cpp} $<TARGET_OBJECTS:dynd_OBJ>)
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"
         PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
         )
 else()
-    if (DYND_CUDA)
-        cuda_add_library(libdynd STATIC ${config_cpp} ${libdynddev_SRC} $<TARGET_OBJECTS:dynd_OBJ>)
-    else()
-        add_library(libdynd STATIC ${config_cpp} $<TARGET_OBJECTS:dynd_OBJ>)
-    endif()
+    add_library(libdynd STATIC ${config_cpp} $<TARGET_OBJECTS:dynd_OBJ>)
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"
-        PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}"
-        )
-endif()
-
-if (DYND_CUDA)
-    cuda_add_cufft_to_target(libdynd)
-
-    add_library(libdynddev STATIC ${config_cpp} $<TARGET_OBJECTS:dynd_OBJ> ${libdynd_SEPARABLE_COMPILATION_OBJECTS})
-    cuda_add_cufft_to_target(libdynddev)
-    set_target_properties(libdynddev PROPERTIES LINKER_LANGUAGE CXX)
-    set_target_properties(libdynddev
-        PROPERTIES
-        OUTPUT_NAME "dynddev"
         PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}"
         )
 endif()
@@ -577,9 +508,6 @@ if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
     # If we're not making an installable static library,
     # link the sublibraries normally
     target_link_libraries(libdynd ${DYND_LINK_LIBS})
-    if (DYND_CUDA)
-        target_link_libraries(libdynddev ${DYND_LINK_LIBS})
-    endif ()
 endif()
 
 if(DYND_BUILD_TESTS)
@@ -649,13 +577,6 @@ if (DYND_INSTALL_LIB)
         RUNTIME DESTINATION lib${LIB_SUFFIX}
         LIBRARY DESTINATION lib${LIB_SUFFIX}
         ARCHIVE DESTINATION lib${LIB_SUFFIX}${DYND_STATIC_LIB_DIR})
-    # Install the libdynddev binary
-    if(DYND_CUDA)
-        install(TARGETS libdynddev
-            RUNTIME DESTINATION lib${LIB_SUFFIX}
-            LIBRARY DESTINATION lib${LIB_SUFFIX}
-            ARCHIVE DESTINATION lib${LIB_SUFFIX})
-    endif()
     # Install the libdynd headers
     install(DIRECTORY "include/dynd"
             DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
