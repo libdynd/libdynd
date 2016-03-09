@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/math.hpp>
 #include <dynd/types/option_type.hpp>
 
 using namespace std;
