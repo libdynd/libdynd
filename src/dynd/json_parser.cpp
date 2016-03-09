@@ -289,8 +289,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrme
     if (!populated_fields[i]) {
       const ndt::type &field_tp = fsd->get_field_type(i);
       if (field_tp.get_id() == option_id) {
-        field_tp.extended<ndt::option_type>()->assign_na(arrmeta + arrmeta_offsets[i], out_data + data_offsets[i],
-                                                         &eval::default_eval_context);
+        nd::old_assign_na(field_tp, arrmeta + arrmeta_offsets[i], out_data + data_offsets[i]);
       }
       else {
         stringstream ss;
@@ -534,7 +533,7 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
   const char *saved_begin = begin;
   if (tp.is_scalar()) {
     if (parse_token(begin, end, "null")) {
-      tp.extended<ndt::option_type>()->assign_na(arrmeta, out_data, ectx);
+      nd::old_assign_na(tp, arrmeta, out_data);
       return;
     }
     else {
@@ -544,12 +543,12 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
       if (parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
         try {
           if (!escaped) {
-            tp.extended()->set_from_utf8_string(arrmeta, out_data, strbegin, strend, ectx);
+            nd::set_option_from_utf8_string(tp, arrmeta, out_data, strbegin, strend, ectx);
           }
           else {
             std::string val;
             unescape_string(strbegin, strend, val);
-            tp.extended()->set_from_utf8_string(arrmeta, out_data, val, ectx);
+            nd::set_option_from_utf8_string(tp, arrmeta, out_data, val, ectx);
           }
           return;
         }
