@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/callable.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
 
@@ -47,12 +47,6 @@ namespace ndt {
 
     const type &get_value_type() const { return m_value_tp.value_type(); }
 
-    /** Assigns NA to one value */
-    void assign_na(const char *arrmeta, char *data, const eval::eval_context *ectx) const;
-
-    /** Returns true if the value is available */
-    bool is_avail(const char *arrmeta, const char *data, const eval::eval_context *ectx) const;
-
     void print_type(std::ostream &o) const;
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
@@ -61,9 +55,6 @@ namespace ndt {
     void transform_child_types(type_transform_fn_t transform_fn, intptr_t arrmeta_offset, void *extra,
                                type &out_transformed_tp, bool &out_was_transformed) const;
     type get_canonical_type() const;
-
-    void set_from_utf8_string(const char *arrmeta, char *data, const char *utf8_begin, const char *utf8_end,
-                              const eval::eval_context *ectx) const;
 
     type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
 

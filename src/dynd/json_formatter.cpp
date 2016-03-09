@@ -5,6 +5,7 @@
 
 #include <dynd/json_formatter.hpp>
 #include <dynd/callable.hpp>
+#include <dynd/option.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -182,7 +183,7 @@ static void format_json_string(output_data &out, const ndt::type &dt, const char
 static void format_json_option(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
 {
   const ndt::option_type *ot = dt.extended<ndt::option_type>();
-  if (ot->is_avail(arrmeta, data, &eval::default_eval_context)) {
+  if (nd::old_is_avail(dt, arrmeta, data)) {
     format_json(out, ot->get_value_type(), arrmeta, data);
   }
   else {

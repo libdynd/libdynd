@@ -390,7 +390,7 @@ bool nd::array::is_na() const
 {
   ndt::type tp = get_type();
   if (tp.get_id() == option_id) {
-    return !tp.extended<ndt::option_type>()->is_avail(get()->metadata(), cdata(), &eval::default_eval_context);
+    return !nd::old_is_avail(tp, get()->metadata(), cdata());
   }
 
   return false;
@@ -1130,7 +1130,8 @@ nd::array nd::reshape(const nd::array &a, const nd::array &shape)
   if (old_size != size) {
     stringstream ss;
     ss << "dynd reshape: cannot reshape to a different total number of "
-          "elements, from " << old_size << " to " << size;
+          "elements, from "
+       << old_size << " to " << size;
     throw invalid_argument(ss.str());
   }
 
@@ -1204,7 +1205,8 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
 
   array result(
       reinterpret_cast<array_preamble *>(make_array_memory_block(fsd->get_arrmeta_size(), fsd->get_default_data_size(),
-                                                                 fsd->get_data_alignment(), &data_ptr).get()),
+                                                                 fsd->get_data_alignment(), &data_ptr)
+                                             .get()),
       true);
   // Set the array properties
   result.get()->tp = result_type;
