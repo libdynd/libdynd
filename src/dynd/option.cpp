@@ -139,35 +139,7 @@ bool nd::old_is_avail(const ndt::type &option_tp, const char *arrmeta, const cha
 {
   const ndt::type value_tp = option_tp.extended<ndt::option_type>()->get_value_type();
   if (value_tp.is_builtin()) {
-    switch (value_tp.get_id()) {
-    // Just use the known value assignments for these builtins
-    case bool_id:
-      return *reinterpret_cast<const unsigned char *>(data) <= 1;
-    case int8_id:
-      return *reinterpret_cast<const int8_t *>(data) != DYND_INT8_NA;
-    case int16_id:
-      return *reinterpret_cast<const int16_t *>(data) != DYND_INT16_NA;
-    case int32_id:
-      return *reinterpret_cast<const int32_t *>(data) != DYND_INT32_NA;
-    case uint32_id:
-      return *reinterpret_cast<const uint32_t *>(data) != DYND_UINT32_NA;
-    case int64_id:
-      return *reinterpret_cast<const int64_t *>(data) != DYND_INT64_NA;
-    case int128_id:
-      return *reinterpret_cast<const int128 *>(data) != DYND_INT128_NA;
-    case float32_id:
-      return !isnan(*reinterpret_cast<const float *>(data));
-    case float64_id:
-      return !isnan(*reinterpret_cast<const double *>(data));
-    case complex_float32_id:
-      return reinterpret_cast<const uint32_t *>(data)[0] != DYND_FLOAT32_NA_AS_UINT ||
-             reinterpret_cast<const uint32_t *>(data)[1] != DYND_FLOAT32_NA_AS_UINT;
-    case complex_float64_id:
-      return reinterpret_cast<const uint64_t *>(data)[0] != DYND_FLOAT64_NA_AS_UINT ||
-             reinterpret_cast<const uint64_t *>(data)[1] != DYND_FLOAT64_NA_AS_UINT;
-    default:
-      return false;
-    }
+    return is_avail_builtin(value_tp.get_id(), data);
   }
   else {
     nd::kernel_builder ckb;
