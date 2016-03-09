@@ -932,4 +932,22 @@ namespace detail {
   }
 
 } // namespace dynd::detail
+
+using std::cos;
+using std::sin;
+using std::tan;
+using std::atan2;
+using std::cosh;
+using std::sinh;
+using std::exp;
+using std::log;
+using std::pow;
+using std::sqrt;
+using std::cbrt;
+using std::hypot;
+using std::abs;
+using std::isfinite;
+using std::isinf;
+using std::isnan;
+
 } // namespace dynd

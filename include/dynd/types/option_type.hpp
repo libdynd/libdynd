@@ -7,6 +7,17 @@
 
 #include <dynd/type.hpp>
 
+#define DYND_BOOL_NA (2)
+#define DYND_INT8_NA (std::numeric_limits<int8_t>::min())
+#define DYND_INT16_NA (std::numeric_limits<int16_t>::min())
+#define DYND_INT32_NA (std::numeric_limits<int32_t>::min())
+#define DYND_UINT32_NA (std::numeric_limits<uint32_t>::max())
+#define DYND_INT64_NA (std::numeric_limits<int64_t>::min())
+#define DYND_INT128_NA (std::numeric_limits<int128>::min())
+#define DYND_FLOAT16_NA_AS_UINT (0x7e0au)
+#define DYND_FLOAT32_NA_AS_UINT (0x7f8007a2U)
+#define DYND_FLOAT64_NA_AS_UINT (0x7ff00000000007a2ULL)
+
 namespace dynd {
 
 template <typename ValueType>
@@ -29,6 +40,8 @@ option<ValueType> opt(ValueType value)
 {
   return option<ValueType>(value);
 }
+
+bool is_avail_builtin(type_id_t value_id, const char *data);
 
 namespace ndt {
 

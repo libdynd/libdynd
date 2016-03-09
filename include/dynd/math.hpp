@@ -227,31 +227,6 @@ inline double _nan(const char *arg)
 #endif
 }
 
-#ifdef __CUDACC__
-#define NAMESPACE
-#else
-#define NAMESPACE std
-#endif
-
-using NAMESPACE::cos;
-using NAMESPACE::sin;
-using NAMESPACE::tan;
-using NAMESPACE::atan2;
-using NAMESPACE::cosh;
-using NAMESPACE::sinh;
-using NAMESPACE::exp;
-using NAMESPACE::log;
-using NAMESPACE::pow;
-using NAMESPACE::sqrt;
-using NAMESPACE::cbrt;
-using NAMESPACE::hypot;
-using NAMESPACE::abs;
-using NAMESPACE::isfinite;
-using NAMESPACE::isinf;
-using NAMESPACE::isnan;
-
-#undef NAMESPACE
-
 template <typename T>
 T abs(complex<T> z)
 {
