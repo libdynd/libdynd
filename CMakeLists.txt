@@ -359,6 +359,7 @@ set(libdynd_SRC
     src/dynd/json_parser.cpp
     src/dynd/logic.cpp
     src/dynd/parse.cpp
+    src/dynd/parse_util.cpp
     src/dynd/shape_tools.cpp
     src/dynd/string.cpp
     src/dynd/string_encodings.cpp
