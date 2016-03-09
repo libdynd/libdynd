@@ -8,6 +8,47 @@
 using namespace std;
 using namespace dynd;
 
+void dynd::assign_na_builtin(type_id_t value_id, char *data)
+{
+  switch (value_id) {
+  // Just use the known value assignments for these builtins
+  case bool_id:
+    *data = 2;
+    return;
+  case int8_id:
+    *reinterpret_cast<int8_t *>(data) = DYND_INT8_NA;
+    return;
+  case int16_id:
+    *reinterpret_cast<int16_t *>(data) = DYND_INT16_NA;
+    return;
+  case int32_id:
+    *reinterpret_cast<int32_t *>(data) = DYND_INT32_NA;
+    return;
+  case int64_id:
+    *reinterpret_cast<int64_t *>(data) = DYND_INT64_NA;
+    return;
+  case int128_id:
+    *reinterpret_cast<int128 *>(data) = DYND_INT128_NA;
+    return;
+  case float32_id:
+    *reinterpret_cast<uint32_t *>(data) = DYND_FLOAT32_NA_AS_UINT;
+    return;
+  case float64_id:
+    *reinterpret_cast<uint64_t *>(data) = DYND_FLOAT64_NA_AS_UINT;
+    return;
+  case complex_float32_id:
+    reinterpret_cast<uint32_t *>(data)[0] = DYND_FLOAT32_NA_AS_UINT;
+    reinterpret_cast<uint32_t *>(data)[1] = DYND_FLOAT32_NA_AS_UINT;
+    return;
+  case complex_float64_id:
+    reinterpret_cast<uint64_t *>(data)[0] = DYND_FLOAT64_NA_AS_UINT;
+    reinterpret_cast<uint64_t *>(data)[1] = DYND_FLOAT64_NA_AS_UINT;
+    return;
+  default:
+    break;
+  }
+}
+
 bool dynd::is_avail_builtin(type_id_t value_id, const char *data)
 {
   switch (value_id) {
