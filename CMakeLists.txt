@@ -135,11 +135,14 @@ set(libndt_SRC
     src/dynd/types/base_dim_type.cpp
     src/dynd/types/base_expr_type.cpp
     src/dynd/types/base_fixed_dim_type.cpp
+    src/dynd/types/base_memory_type.cpp
     src/dynd/types/base_string_type.cpp
     src/dynd/types/bytes_type.cpp
     src/dynd/types/categorical_kind_type.cpp
     src/dynd/types/callable_type.cpp
     src/dynd/types/char_type.cpp
+    src/dynd/types/cuda_host_type.cpp
+    src/dynd/types/cuda_device_type.cpp
     src/dynd/types/datashape_formatter.cpp
     src/dynd/types/datashape_parser.cpp
     src/dynd/types/dim_fragment_type.cpp
@@ -149,6 +152,7 @@ set(libndt_SRC
     src/dynd/types/fixed_dim_type.cpp
     src/dynd/types/fixed_string_kind_type.cpp
     src/dynd/types/fixed_string_type.cpp
+    src/dynd/types/int_kind_sym_type.cpp
     src/dynd/types/option_type.cpp
     src/dynd/types/pointer_type.cpp
     src/dynd/types/pow_dimsym_type.cpp
@@ -219,65 +223,15 @@ set(libndt_SRC
 set(libdynd_SRC
     # Types
     src/dynd/types/adapt_type.cpp
-    src/dynd/types/base_bytes_type.cpp
-    src/dynd/types/base_type.cpp
-    src/dynd/types/base_expr_type.cpp
-    src/dynd/types/base_memory_type.cpp
-    src/dynd/types/base_string_type.cpp
-    src/dynd/types/base_dim_type.cpp
     src/dynd/types/categorical_type.cpp
     src/dynd/types/categorical_kind_type.cpp
-    src/dynd/types/cuda_host_type.cpp
-    src/dynd/types/cuda_device_type.cpp
-    src/dynd/types/dim_fragment_type.cpp
-    src/dynd/types/ellipsis_dim_type.cpp
-    src/dynd/types/callable_type.cpp
-    src/dynd/types/int_kind_sym_type.cpp
-    src/dynd/types/option_type.cpp
-    src/dynd/types/pointer_type.cpp
-    src/dynd/types/string_type.cpp
-    src/dynd/types/struct_type.cpp
     src/dynd/types/substitute_shape.cpp
     src/dynd/types/substitute_typevars.cpp
-    src/dynd/types/tuple_type.cpp
-    src/dynd/types/typevar_constructed_type.cpp
-    src/dynd/types/typevar_dim_type.cpp
-    src/dynd/types/pow_dimsym_type.cpp
-    src/dynd/types/scalar_kind_type.cpp
-    src/dynd/types/typevar_type.cpp
-    src/dynd/types/var_dim_type.cpp
     include/dynd/types/adapt_type.hpp
-    include/dynd/types/any_kind_type.hpp
-    include/dynd/types/callable_type.hpp
-    include/dynd/types/base_bytes_type.hpp
-    include/dynd/types/base_type.hpp
-    include/dynd/types/base_memory_type.hpp
-    include/dynd/types/base_expr_type.hpp
     include/dynd/types/categorical_type.hpp
     include/dynd/types/categorical_kind_type.hpp
-    include/dynd/types/char_type.hpp
-    include/dynd/types/cuda_host_type.hpp
-    include/dynd/types/cuda_device_type.hpp
-    include/dynd/types/dim_fragment_type.hpp
-    include/dynd/types/ellipsis_dim_type.hpp
-    include/dynd/types/fixed_bytes_kind_type.hpp
-    include/dynd/types/fixed_bytes_type.hpp
-    include/dynd/types/fixed_string_kind_type.hpp
-    include/dynd/types/fixed_string_type.hpp
-    include/dynd/types/int_kind_sym_type.hpp
-    include/dynd/types/option_type.hpp
-    include/dynd/types/pointer_type.hpp
-    include/dynd/types/pow_dimsym_type.hpp
-    include/dynd/types/scalar_kind_type.hpp
-    include/dynd/types/string_type.hpp
-    include/dynd/types/struct_type.hpp
     include/dynd/types/substitute_shape.hpp
     include/dynd/types/substitute_typevars.hpp
-    include/dynd/types/tuple_type.hpp
-    include/dynd/types/typevar_constructed_type.hpp
-    include/dynd/types/typevar_dim_type.hpp
-    include/dynd/types/typevar_type.hpp
-    include/dynd/types/var_dim_type.hpp
     # Callables
     src/dynd/callables/base_callable.cpp
     include/dynd/callables/base_callable.hpp
@@ -404,7 +358,6 @@ set(libdynd_SRC
     src/dynd/logic.cpp
     src/dynd/string.cpp
     src/dynd/string_encodings.cpp
-    src/dynd/uint128.cpp
     src/dynd/view.cpp
     include/dynd/array.hpp
     include/dynd/array_range.hpp
@@ -443,7 +396,6 @@ set(libdynd_SRC
     include/dynd/platform_definitions.hpp
     include/dynd/shortvector.hpp
     include/dynd/string_encodings.hpp
-    include/dynd/uint128.hpp
     include/dynd/view.hpp
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/visibility.hpp
     include/dynd/with.hpp
