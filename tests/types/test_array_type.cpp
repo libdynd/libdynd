@@ -22,5 +22,5 @@ TEST(ArrayType, Constructor)
   EXPECT_EQ(sizeof(nd::array), array_tp.get_data_size());
   EXPECT_EQ(sizeof(nd::array), array_tp.get_data_alignment());
   EXPECT_FALSE(array_tp.is_expression());
-//  EXPECT_EQ(array_tp, ndt::type(array_tp.str())); // Round trip through a string
+  EXPECT_EQ(array_tp, ndt::type(array_tp.str())); // Round trip through a string
 }

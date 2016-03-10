@@ -9,6 +9,7 @@
 
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/parse_util.hpp>
+#include <dynd/types/array_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -1230,7 +1231,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       result = parse_pointer_parameters(begin, end, symtable);
     }
     else if (compare_range_to_literal(nbegin, nend, "array")) {
-      throw std::runtime_error("array_type cannot currently be parsed");
+      result = ndt::array_type::make();
     }
     else if (compare_range_to_literal(nbegin, nend, "char")) {
       result = parse_char_parameters(begin, end);
