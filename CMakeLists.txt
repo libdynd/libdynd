@@ -395,8 +395,6 @@ set(libdynd_SRC
     src/dynd/search.cpp
     src/dynd/sort.cpp
     src/dynd/struct.cpp
-    src/dynd/type.cpp
-    src/dynd/type_registry.cpp
     src/dynd/type_promotion.cpp
     src/dynd/git_version.cpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp
@@ -432,8 +430,6 @@ set(libdynd_SRC
     include/dynd/string.hpp
     include/dynd/string_search.hpp
     include/dynd/struct.hpp
-    include/dynd/type.hpp
-    include/dynd/type_registry.hpp
     include/dynd/type_sequence.hpp
     include/dynd/type_promotion.hpp
     include/dynd/exceptions.hpp
