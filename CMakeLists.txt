@@ -126,7 +126,7 @@ list(GET DYND_VERSION 0 "${DYND_VERSION}")
 
 set(config_cpp src/dynd/config.cpp)
 
-set(libdynd_ndt_SRC
+set(libndt_SRC
     # Types
     src/dynd/types/any_kind_type.cpp
     src/dynd/types/array_type.cpp
@@ -496,9 +496,9 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 if (DYND_SHARED_LIB)
     # xcode doesn't like when all cpp files are contained in an OBJECT library
-    add_library(libdynd_ndt SHARED ${config_cpp} ${libdynd_ndt_SRC})
+    add_library(libndt SHARED ${config_cpp} ${libndt_SRC})
     add_library(libdynd SHARED ${config_cpp} ${libdynd_SRC})
-    add_dependencies(libdynd libdynd_ndt)
+    add_dependencies(libdynd libndt)
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"
@@ -514,7 +514,7 @@ else()
 endif()
 
 set_property(
-    TARGET libdynd_ndt libdynd
+    TARGET libndt libdynd
     PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
 )
 
@@ -536,7 +536,7 @@ elseif(APPLE)
     #
     # See http://stackoverflow.com/questions/22885207/opencv-and-pcl-builds-on-osx-result-in-malformed-object-load-command-cmdsize
     #
-    set_target_properties(libdynd_ndt
+    set_target_properties(libndt
         PROPERTIES
         BUILD_WITH_INSTALL_RPATH ON
         INSTALL_NAME_DIR "@rpath"
@@ -551,7 +551,7 @@ endif()
 if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
     # If we're not making an installable static library,
     # link the sublibraries normally
-    target_link_libraries(libdynd ${DYND_LINK_LIBS} libdynd_ndt)
+    target_link_libraries(libdynd ${DYND_LINK_LIBS} libndt)
 endif()
 
 if(DYND_BUILD_TESTS)
@@ -616,6 +616,11 @@ endif()
 
 # If requested, install the .lib/.so/.dll file and headers to the install prefix
 if (DYND_INSTALL_LIB)
+    # Install the libndt binary
+    install(TARGETS libndt
+        RUNTIME DESTINATION lib${LIB_SUFFIX}
+        LIBRARY DESTINATION lib${LIB_SUFFIX}
+        ARCHIVE DESTINATION lib${LIB_SUFFIX}${DYND_STATIC_LIB_DIR})
     # Install the libdynd binary
     install(TARGETS libdynd
         RUNTIME DESTINATION lib${LIB_SUFFIX}
