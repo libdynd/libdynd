@@ -31,6 +31,15 @@ namespace ndt {
     virtual const type &get_operand_type() const = 0;
 
     /**
+     * Should return a reference to a type representing the data this type
+     * uses to produce the value.
+     */
+    virtual const type &get_storage_type() const
+    {
+      throw std::runtime_error("get_storage_type is not implemented for this type");
+    }
+
+    /**
      * Returns a flags value which inherits the appropriate flags from
      * the value and operand types.
      */
