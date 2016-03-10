@@ -21,7 +21,6 @@
 #include <unistd.h>
 #endif
 
-#include <dynd/array.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
 
 using namespace std;
@@ -49,7 +48,8 @@ static void clip_begin_end(intptr_t size, intptr_t &begin, intptr_t &end)
     if (begin < 0) {
       begin = 0;
     }
-  } else if (begin >= size) {
+  }
+  else if (begin >= size) {
     begin = size;
   }
   // Handle the end offset
@@ -58,9 +58,11 @@ static void clip_begin_end(intptr_t size, intptr_t &begin, intptr_t &end)
     if (end <= begin) {
       end = begin;
     }
-  } else if (end <= begin) {
+  }
+  else if (end <= begin) {
     end = begin;
-  } else if (end >= size) {
+  }
+  else if (end >= size) {
     end = size;
   }
 }
@@ -89,7 +91,7 @@ struct memmap_memory_block {
                       intptr_t begin, intptr_t end)
       : m_mbd(1, memmap_memory_block_type), m_filename(filename), m_access(access), m_begin(begin), m_end(end)
   {
-    bool readwrite = ((access & nd::write_access_flag) == nd::write_access_flag);
+    bool readwrite = false; // ((access & nd::write_access_flag) == nd::write_access_flag);
 #ifdef WIN32
     // TODO: This function isn't quite exception-safe, use a smart pointer for the handles to fix.
 
@@ -213,8 +215,9 @@ struct memmap_memory_block {
 };
 } // anonymous namespace
 
-intrusive_ptr<memory_block_data> dynd::make_memmap_memory_block(const std::string &filename, uint32_t access, char **out_pointer,
-                                             intptr_t *out_size, intptr_t begin, intptr_t end)
+intrusive_ptr<memory_block_data> dynd::make_memmap_memory_block(const std::string &filename, uint32_t access,
+                                                                char **out_pointer, intptr_t *out_size, intptr_t begin,
+                                                                intptr_t end)
 {
   memmap_memory_block *pmb = new memmap_memory_block(filename, access, out_pointer, out_size, begin, end);
   return intrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(pmb), false);
