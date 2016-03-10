@@ -565,6 +565,7 @@ static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end, 
 
 // datashape_list : datashape COMMA datashape_list RBRACKET
 //                | datashape RBRACKET
+/*
 static nd::array parse_datashape_list(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
@@ -594,9 +595,11 @@ static nd::array parse_datashape_list(const char *&rbegin, const char *end, map<
   rbegin = begin;
   return dlist;
 }
+*/
 
 // integer_list : INTEGER COMMA integer_list RBRACKET
 //              | INTEGER RBRACKET
+/*
 static nd::array parse_integer_list(const char *&rbegin, const char *end)
 {
   const char *begin = rbegin;
@@ -624,9 +627,11 @@ static nd::array parse_integer_list(const char *&rbegin, const char *end)
     dlist.push_back(parse<int64_t>(strbegin, strend));
   }
 }
+*/
 
 // string_list : STRING COMMA string_list RBRACKET
 //             | STRING RBRACKET
+/*
 static nd::array parse_string_list(const char *&rbegin, const char *end)
 {
   const char *begin = rbegin;
@@ -655,6 +660,7 @@ static nd::array parse_string_list(const char *&rbegin, const char *end)
   rbegin = begin;
   return dlist;
 }
+*/
 
 // list_type_arg : LBRACKET RBRACKET
 //               | LBRACKET datashape_list
@@ -664,6 +670,7 @@ static nd::array parse_string_list(const char *&rbegin, const char *end)
 //          | INTEGER
 //          | STRING
 //          | list_type_arg
+/*
 static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
@@ -706,6 +713,7 @@ static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::s
 
   return nd::array();
 }
+*/
 
 // type_arg_list : type_arg COMMA type_arg_list
 //               | type_kwarg_list
@@ -714,6 +722,7 @@ static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::s
 //                 | type_kwarg
 // type_kwarg : NAME_LOWER EQUAL type_arg
 // type_constr_args : LBRACKET type_arg_list RBRACKET
+/*
 nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   nd::array result;
@@ -812,6 +821,7 @@ nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map
   rbegin = begin;
   return result;
 }
+*/
 
 // record_item_bare : BARENAME COLON rhs_expression
 static bool parse_struct_item_bare(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable,
@@ -1517,6 +1527,7 @@ ndt::type dynd::type_from_datashape(const char *datashape_begin, const char *dat
   }
 }
 
+/*
 nd::array dynd::parse_type_constr_args(const std::string &str)
 {
   nd::array result;
@@ -1552,3 +1563,4 @@ nd::array dynd::parse_type_constr_args(const std::string &str)
 
   return result;
 }
+*/
