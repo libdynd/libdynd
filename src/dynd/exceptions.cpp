@@ -7,7 +7,6 @@
 #include <iostream> // for DEBUG
 
 #include <dynd/exceptions.hpp>
-#include <dynd/array.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/datashape_formatter.hpp>
 

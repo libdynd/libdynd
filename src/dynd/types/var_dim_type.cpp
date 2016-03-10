@@ -3,7 +3,6 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/callable.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>

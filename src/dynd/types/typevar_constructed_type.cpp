@@ -6,7 +6,6 @@
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 #include <dynd/types/typevar_type.hpp>
-#include <dynd/callable.hpp>
 
 using namespace std;
 using namespace dynd;

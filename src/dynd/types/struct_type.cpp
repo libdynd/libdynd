@@ -9,9 +9,6 @@
 #include <dynd/types/str_util.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/kernels/tuple_assignment_kernels.hpp>
-#include <dynd/kernels/struct_assignment_kernels.hpp>
-#include <dynd/func/assignment.hpp>
 
 using namespace std;
 using namespace dynd;

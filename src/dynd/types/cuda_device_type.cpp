@@ -3,8 +3,6 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/callable.hpp>
-#include <dynd/func/elwise.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 
 using namespace std;

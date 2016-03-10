@@ -3,7 +3,6 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/callable.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>

@@ -3,9 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/array.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/memblock/pod_memory_block.hpp>
 
 #include <algorithm>
 
