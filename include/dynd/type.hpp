@@ -112,21 +112,21 @@ inline void *inc_to_alignment(void *ptr, size_t alignment)
 inline bool offset_is_aligned(size_t offset, size_t alignment) { return (offset & (alignment - 1)) == 0; }
 
 /** Prints a single scalar of a builtin type to the stream */
-void DYND_API print_builtin_scalar(type_id_t type_id, std::ostream &o, const char *data);
+void DYNDT_API print_builtin_scalar(type_id_t type_id, std::ostream &o, const char *data);
 
 /** Special iterdata which broadcasts to any number of additional dimensions */
-struct DYND_API iterdata_broadcasting_terminator {
+struct DYNDT_API iterdata_broadcasting_terminator {
   iterdata_common common;
   char *data;
 };
-DYND_API char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, intptr_t level);
-DYND_API char *iterdata_broadcasting_terminator_adv(iterdata_common *iterdata, intptr_t level, intptr_t i);
-DYND_API char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, intptr_t level);
+DYNDT_API char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, intptr_t level);
+DYNDT_API char *iterdata_broadcasting_terminator_adv(iterdata_common *iterdata, intptr_t level, intptr_t i);
+DYNDT_API char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, intptr_t level);
 
 namespace ndt {
   typedef type (*type_make_t)(type_id_t tp_id, const nd::array &args);
 
-  DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
+  DYNDT_API type make_fixed_dim(size_t dim_size, const type &element_tp);
   inline type make_var_dim(const type &element_tp);
 
   template <typename T>
@@ -152,7 +152,7 @@ namespace ndt {
    * which case this is entirely a value type with no allocated memory.
    *
    */
-  class DYND_API type : public intrusive_ptr<const base_type> {
+  class DYNDT_API type : public intrusive_ptr<const base_type> {
   private:
     /**
      * Valid type properties can have type scalar, std::string, ndt::type
@@ -769,7 +769,7 @@ namespace ndt {
 
     static type make(type_id_t tp_id, const nd::array &args);
 
-    friend DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
+    friend DYNDT_API std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
 
   template <>
@@ -1228,7 +1228,7 @@ namespace ndt {
     * Returns the common type of two types. For built-in types, this is analogous to
     * std::common_type.
     */
-  DYND_API extern class common_type {
+  DYNDT_API extern class common_type {
     typedef type (*child_type)(const type &, const type &);
 
     struct init;
@@ -1238,7 +1238,7 @@ namespace ndt {
   public:
     common_type();
 
-    DYND_API ndt::type operator()(const ndt::type &tp0, const ndt::type &tp1) const;
+    DYNDT_API ndt::type operator()(const ndt::type &tp0, const ndt::type &tp1) const;
   } common_type;
 
   /**
@@ -1251,7 +1251,7 @@ namespace ndt {
    * \param shape  The shape of the array type to create.
    * \param dtype  The data type of each array element.
    */
-  DYND_API type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype);
+  DYNDT_API type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype);
 
   /**
    * Constructs an array type from a shape and
@@ -1283,9 +1283,9 @@ namespace ndt {
    *                     is encountered, it is untouched, so the caller
    *                     should initialize it to false.
    */
-  DYND_API type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype, bool &out_any_var);
+  DYNDT_API type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype, bool &out_any_var);
 
-  DYND_API type_id_t register_type(const std::string &name, type_make_t make);
+  DYNDT_API type_id_t register_type(const std::string &name, type_make_t make);
 
   template <typename TypeType>
   type_id_t register_type(const std::string &name)
@@ -1294,27 +1294,27 @@ namespace ndt {
                          [](type_id_t tp_id, const nd::array &args) { return type(new TypeType(tp_id, args), false); });
   }
 
-  DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
+  DYNDT_API std::ostream &operator<<(std::ostream &o, const type &rhs);
 
 } // namespace dynd::ndt
 
 /** Prints raw bytes as hexadecimal */
-DYND_API void hexadecimal_print(std::ostream &o, char value);
-DYND_API void hexadecimal_print(std::ostream &o, unsigned char value);
-DYND_API void hexadecimal_print(std::ostream &o, unsigned short value);
-DYND_API void hexadecimal_print(std::ostream &o, unsigned int value);
-DYND_API void hexadecimal_print(std::ostream &o, unsigned long value);
-DYND_API void hexadecimal_print(std::ostream &o, unsigned long long value);
-DYND_API void hexadecimal_print(std::ostream &o, const char *data, intptr_t element_size);
-DYND_API void hexadecimal_print_summarized(std::ostream &o, const char *data, intptr_t element_size,
+DYNDT_API void hexadecimal_print(std::ostream &o, char value);
+DYNDT_API void hexadecimal_print(std::ostream &o, unsigned char value);
+DYNDT_API void hexadecimal_print(std::ostream &o, unsigned short value);
+DYNDT_API void hexadecimal_print(std::ostream &o, unsigned int value);
+DYNDT_API void hexadecimal_print(std::ostream &o, unsigned long value);
+DYNDT_API void hexadecimal_print(std::ostream &o, unsigned long long value);
+DYNDT_API void hexadecimal_print(std::ostream &o, const char *data, intptr_t element_size);
+DYNDT_API void hexadecimal_print_summarized(std::ostream &o, const char *data, intptr_t element_size,
                                            intptr_t summary_size);
 
-DYND_API void strided_array_summarized(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
+DYNDT_API void strided_array_summarized(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
                                        intptr_t dim_size, intptr_t stride);
-DYND_API void print_indented(std::ostream &o, const std::string &indent, const std::string &s,
+DYNDT_API void print_indented(std::ostream &o, const std::string &indent, const std::string &s,
                              bool skipfirstline = false);
 
 /** If 'src' can always be cast to 'dst' with no loss of information */
-DYND_API bool is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_tp);
+DYNDT_API bool is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_tp);
 
 } // namespace dynd

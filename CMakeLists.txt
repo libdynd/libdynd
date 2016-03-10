@@ -124,8 +124,6 @@ string(REPLACE "v" "" DYND_VERSION "${DYND_VERSION_STRING}")
 string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION}")
 list(GET DYND_VERSION 0 "${DYND_VERSION}")
 
-set(config_cpp src/dynd/config.cpp)
-
 set(libndt_SRC
     # Eval
     src/dynd/eval/eval_context.cpp
@@ -184,21 +182,21 @@ set(libndt_SRC
     include/dynd/types/type_id.hpp
     include/dynd/types/type_type.hpp
     # MemBlock
-    src/dynd/memblock/memory_block.cpp
+    src/dynd/memblock/array_memory_block.cpp
     src/dynd/memblock/external_memory_block.cpp
     src/dynd/memblock/fixed_size_pod_memory_block.cpp
     src/dynd/memblock/memmap_memory_block.cpp
-    src/dynd/memblock/pod_memory_block.cpp
-    src/dynd/memblock/array_memory_block.cpp
+    src/dynd/memblock/memory_block.cpp
     src/dynd/memblock/objectarray_memory_block.cpp
+    src/dynd/memblock/pod_memory_block.cpp
     src/dynd/memblock/zeroinit_memory_block.cpp
-    include/dynd/memblock/memory_block.hpp
+    include/dynd/memblock/array_memory_block.hpp
     include/dynd/memblock/external_memory_block.hpp
     include/dynd/memblock/fixed_size_pod_memory_block.hpp
     include/dynd/memblock/memmap_memory_block.hpp
-    include/dynd/memblock/pod_memory_block.hpp
-    include/dynd/memblock/array_memory_block.hpp
+    include/dynd/memblock/memory_block.hpp
     include/dynd/memblock/objectarray_memory_block.hpp
+    include/dynd/memblock/pod_memory_block.hpp
     include/dynd/memblock/zeroinit_memory_block.hpp
     # Main
     src/dynd/exceptions.cpp
@@ -212,6 +210,7 @@ set(libndt_SRC
     src/dynd/type_promotion.cpp
     src/dynd/type_registry.cpp
     src/dynd/uint128.cpp
+    include/dynd/bytes.hpp
     include/dynd/float16.hpp
     include/dynd/float128.hpp
     include/dynd/int128.hpp
@@ -339,7 +338,6 @@ set(libdynd_SRC
     src/dynd/asarray.cpp
     src/dynd/callable.cpp
     src/dynd/callable_registry.cpp
-    # src/dynd/config.cpp
     src/dynd/convert.cpp
     src/dynd/io.cpp
     src/dynd/math.cpp
@@ -361,7 +359,6 @@ set(libdynd_SRC
     include/dynd/array_iter.hpp
     include/dynd/arrmeta_holder.hpp
     include/dynd/asarray.hpp
-    include/dynd/bytes.hpp
     include/dynd/callable.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
@@ -440,8 +437,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 if (DYND_SHARED_LIB)
     # xcode doesn't like when all cpp files are contained in an OBJECT library
-    add_library(libndt SHARED ${config_cpp} ${libndt_SRC})
-    add_library(libdynd SHARED ${config_cpp} ${libdynd_SRC})
+    add_library(libndt SHARED ${libndt_SRC})
+    add_library(libdynd SHARED ${libdynd_SRC})
     add_dependencies(libdynd libndt)
     set_target_properties(libdynd
         PROPERTIES
@@ -449,7 +446,7 @@ if (DYND_SHARED_LIB)
         PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
         )
 else()
-    add_library(libdynd STATIC ${config_cpp} ${libdynd_SRC})
+    add_library(libdynd STATIC ${libdynd_SRC})
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"
@@ -458,7 +455,12 @@ else()
 endif()
 
 set_property(
-    TARGET libndt libdynd
+    TARGET libndt
+    PROPERTY COMPILE_DEFINITIONS DYNDT_EXPORT
+)
+
+set_property(
+    TARGET libdynd
     PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
 )
 

@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include <dynd/type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
 namespace ndt {
 
-  class DYND_API fixed_string_type : public base_string_type {
+  class DYNDT_API fixed_string_type : public base_string_type {
     intptr_t m_stringsize;
     string_encoding_t m_encoding;
 

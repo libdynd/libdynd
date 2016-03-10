@@ -1,26 +1,57 @@
 #pragma once
-// Symbol visibility macros
+
+// There should eventually be distinct headers for libdynd and libdyndt.
+
+// Symbol visibility macros for libdyndt.
 #if defined(_WIN32) || defined(__CYGWIN__)
 #if defined(_MSC_VER)
 #pragma warning( disable : 4251 )
-#else
+#else // defined(_MSC_VER)
 #pragma GCC diagnostic ignored "-Wattributes"
-#endif
+#endif //defined(_MSC_VER)
+#if defined(DYNDT_EXPORT)
+// Building the library
+#define DYNDT_API __declspec(dllexport)
+#else // defined(DYNDT_EXPORT)
+// Importing the library
+// libdynd and libdyndt must either both be built as shared or static libs.
+// Use a single configuration parameter to represent that.
+#if @DYND_SHARED_LIB_VAL@
+#define DYNDT_API __declspec(dllimport)
+#define DYNDT_USING_DLL
+#else // @DYND_SHARED_LIB_VAL@
+#define DYNDT_API
+#define DYNDT_USING_STATIC_LIB
+#endif // @DYND_SHARED_LIB_VAL@
+#endif // defined(DYNDT_EXPORT)
+#define DYNDT_INTERNAL
+#else // defined(_WIN32) || defined(__CYGWIN__)
+#define DYNDT_API
+#define DYNDT_INTERNAL __attribute__ ((visibility ("hidden")))
+#endif // defined(_WIN32) || defined(__CYGWIN__)
+
+// Symbol visibility macros for libdynd.
+#if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_MSC_VER)
+#pragma warning( disable : 4251 )
+#else // defined(_MSC_VER)
+#pragma GCC diagnostic ignored "-Wattributes"
+#endif //defined(_MSC_VER)
 #if defined(DYND_EXPORT)
 // Building the library
 #define DYND_API __declspec(dllexport)
-#else
+#else // defined(DYND_EXPORT)
 // Importing the library
 #if @DYND_SHARED_LIB_VAL@
 #define DYND_API __declspec(dllimport)
 #define DYND_USING_DLL
-#else
+#else // @DYND_SHARED_LIB_VAL@
 #define DYND_API
 #define DYND_USING_STATIC_LIB
-#endif
+#endif // @DYND_SHARED_LIB_VAL@
 #endif // defined(DYND_EXPORT)
 #define DYND_INTERNAL
-#else
+#else // defined(_WIN32) || defined(__CYGWIN__)
 #define DYND_API
 #define DYND_INTERNAL __attribute__ ((visibility ("hidden")))
-#endif // End symbol visibility macros.
+#endif // defined(_WIN32) || defined(__CYGWIN__)

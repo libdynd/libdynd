@@ -10,7 +10,7 @@
 namespace dynd {
 namespace ndt {
 
-  class DYND_API any_kind_type : public base_type {
+  class DYNDT_API any_kind_type : public base_type {
   public:
     any_kind_type();
 

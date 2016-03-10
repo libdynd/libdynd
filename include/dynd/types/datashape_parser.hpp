@@ -19,7 +19,7 @@ namespace dynd {
  * \param datashape_begin  The start of the buffer containing the datashape.
  * \param datashape_end    The end of the buffer containing the datashape.
  */
-DYND_API ndt::type type_from_datashape(const char *datashape_begin, const char *datashape_end);
+DYNDT_API ndt::type type_from_datashape(const char *datashape_begin, const char *datashape_end);
 
 inline ndt::type type_from_datashape(const std::string &datashape)
 {
@@ -44,10 +44,10 @@ inline ndt::type type_from_datashape(const char(&datashape)[N])
  *   "{pos: N * arg, kw: {name: arg, ...}}" otherwise.
  */
 /*
-DYND_API nd::array parse_type_constr_args(const char *&rbegin, const char *end,
+DYNDT_API nd::array parse_type_constr_args(const char *&rbegin, const char *end,
                                           std::map<std::string, ndt::type> &symtable);
 
-DYND_API nd::array parse_type_constr_args(const std::string &str);
+DYNDT_API nd::array parse_type_constr_args(const std::string &str);
 */
 
 } // namespace dynd

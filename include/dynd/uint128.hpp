@@ -16,7 +16,7 @@ namespace dynd {
 class int128;
 #endif
 
-class DYND_API uint128 {
+class DYNDT_API uint128 {
 public:
 #if defined(DYND_BIG_ENDIAN)
   uint64_t m_hi, m_lo;
@@ -279,7 +279,7 @@ inline void operator+=(uint128 DYND_UNUSED(lhs), T DYND_UNUSED(rhs))
   throw std::runtime_error("operator += is not implemented for uint128");
 }
 
-DYND_API std::ostream &operator<<(std::ostream &out, const uint128 &val);
+DYNDT_API std::ostream &operator<<(std::ostream &out, const uint128 &val);
 
 } // namespace dynd
 

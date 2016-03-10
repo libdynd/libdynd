@@ -14,7 +14,7 @@
 
 namespace dynd {
 
-class DYND_API string : public bytes {
+class DYNDT_API string : public bytes {
 public:
   string() {}
 
@@ -57,7 +57,7 @@ public:
 
 namespace ndt {
 
-  class DYND_API string_type : public base_string_type {
+  class DYNDT_API string_type : public base_string_type {
   private:
     const string_encoding_t m_encoding = string_encoding_utf_8;
   public:

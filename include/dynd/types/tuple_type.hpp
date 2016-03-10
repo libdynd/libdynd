@@ -14,7 +14,7 @@
 namespace dynd {
 namespace ndt {
 
-  class DYND_API tuple_type : public base_type {
+  class DYNDT_API tuple_type : public base_type {
   protected:
     /**
      * The number of values in m_field_types and m_arrmeta_offsets.

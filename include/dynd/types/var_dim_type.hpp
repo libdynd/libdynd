@@ -10,7 +10,7 @@
 namespace dynd {
 namespace ndt {
 
-  class DYND_API var_dim_type : public base_dim_type {
+  class DYNDT_API var_dim_type : public base_dim_type {
 
   public:
     struct metadata_type {

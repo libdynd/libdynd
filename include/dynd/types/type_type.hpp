@@ -13,7 +13,7 @@ namespace ndt {
   /**
    * A type whose instance represents a type itself.
    */
-  class DYND_API type_type : public base_type {
+  class DYNDT_API type_type : public base_type {
     type m_pattern_tp;
 
   public:

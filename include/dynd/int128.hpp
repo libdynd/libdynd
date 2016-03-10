@@ -11,7 +11,7 @@
 
 namespace dynd {
 
-class DYND_API int128 {
+class DYNDT_API int128 {
 public:
 #if defined(DYND_BIG_ENDIAN)
   uint64_t m_hi, m_lo;
@@ -299,7 +299,7 @@ inline bool operator>(unsigned int lhs, const int128 &rhs) { return int128(lhs) 
 inline bool operator>(long long lhs, const int128 &rhs) { return int128(lhs) > rhs; }
 inline bool operator>(unsigned long long lhs, const int128 &rhs) { return int128(lhs) > rhs; }
 
-DYND_API std::ostream &operator<<(std::ostream &out, const int128 &val);
+DYNDT_API std::ostream &operator<<(std::ostream &out, const int128 &val);
 
 } // namespace dynd
 

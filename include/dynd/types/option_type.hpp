@@ -49,7 +49,7 @@ namespace ndt {
   /**
    * The option type represents data which may or may not be there.
    */
-  class DYND_API option_type : public base_type {
+  class DYNDT_API option_type : public base_type {
     type m_value_tp;
 
   public:

@@ -16,7 +16,7 @@ namespace ndt {
    * The bytes type uses memory_block references to store
    * arbitrarily sized runs of bytes.
    */
-  class DYND_API bytes_type : public base_bytes_type {
+  class DYNDT_API bytes_type : public base_bytes_type {
     size_t m_alignment;
 
   public:

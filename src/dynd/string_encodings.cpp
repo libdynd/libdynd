@@ -5,8 +5,8 @@
 
 #include <sstream>
 
-#include <dynd/type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/type.hpp>
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 
@@ -15,7 +15,7 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API int dynd::string_encoding_char_size_table[6] = {
+DYNDT_API int dynd::string_encoding_char_size_table[6] = {
     // string_encoding_ascii
     1,
     // string_encoding_ucs_2

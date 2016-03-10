@@ -5,15 +5,15 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <dynd/types/base_type.hpp>
 
 namespace dynd {
 namespace ndt {
 
-  class DYND_API typevar_type : public base_type {
+  class DYNDT_API typevar_type : public base_type {
     std::string m_name;
 
   public:

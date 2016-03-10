@@ -99,9 +99,9 @@ ndt::type_registry::type_registry()
   insert(any_kind_id, type()); // dim_fragment_id
 }
 
-DYND_API size_t ndt::type_registry::size() const { return m_infos.size(); }
+DYNDT_API size_t ndt::type_registry::size() const { return m_infos.size(); }
 
-DYND_API type_id_t ndt::type_registry::insert(type_id_t base_id, const type &tp)
+DYNDT_API type_id_t ndt::type_registry::insert(type_id_t base_id, const type &tp)
 {
   type_id_t id = static_cast<type_id_t>(size());
 
@@ -116,7 +116,7 @@ DYND_API type_id_t ndt::type_registry::insert(type_id_t base_id, const type &tp)
   return id;
 }
 
-DYND_API const id_info &ndt::type_registry::operator[](type_id_t id) const
+DYNDT_API const id_info &ndt::type_registry::operator[](type_id_t id) const
 {
   if (id >= static_cast<type_id_t>(size())) {
     throw runtime_error("invalid type id");
@@ -125,4 +125,4 @@ DYND_API const id_info &ndt::type_registry::operator[](type_id_t id) const
   return m_infos[id];
 }
 
-DYND_API class ndt::type_registry ndt::type_registry;
+DYNDT_API class ndt::type_registry ndt::type_registry;

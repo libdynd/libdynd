@@ -175,7 +175,7 @@ inline void raise_string_cast_overflow_error(const ndt::type &dst_tp, const char
  *        return sbs.succeed();
  *    }
  */
-class DYND_API saved_begin_state {
+class DYNDT_API saved_begin_state {
   const char *&m_begin;
   const char *m_saved_begin;
   bool m_succeeded;
@@ -472,7 +472,7 @@ bool parse_doublequote_string_no_ws(const char *&rbegin, const char *end, const 
  * output string as UTF-8. Typically used with the
  * ``parse_doublequote_string_no_ws`` function.
  */
-DYND_API void unescape_string(const char *strbegin, const char *strend, std::string &out);
+DYNDT_API void unescape_string(const char *strbegin, const char *strend, std::string &out);
 
 namespace json {
 
@@ -480,7 +480,7 @@ namespace json {
    * Without skipping whitespace, parses a range of bytes following
    * the JSON number grammar, returning its range of bytes.
    */
-  DYND_API bool parse_number(const char *&rbegin, const char *end, const char *&out_nbegin, const char *&out_nend);
+  DYNDT_API bool parse_number(const char *&rbegin, const char *end, const char *&out_nbegin, const char *&out_nend);
 
 } // namespace dynd::json
 
@@ -587,7 +587,7 @@ inline bool parse_int_no_ws(const char *&rbegin, const char *end, const char *&o
  *         // Couldn't match month as an integer
  *     }
  */
-DYND_API bool parse_2digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
+DYNDT_API bool parse_2digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
 
 /**
  * Without skipping whitespace, parses an integer with one or two digits.
@@ -603,7 +603,7 @@ DYND_API bool parse_2digit_int_no_ws(const char *&rbegin, const char *end, int &
  *         // Couldn't match day
  *     }
  */
-DYND_API bool parse_1or2digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
+DYNDT_API bool parse_1or2digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
 
 /**
  * Without skipping whitespace, parses an integer with exactly four digits.
@@ -618,7 +618,7 @@ DYND_API bool parse_1or2digit_int_no_ws(const char *&rbegin, const char *end, in
  *         // Couldn't match year
  *     }
  */
-DYND_API bool parse_4digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
+DYNDT_API bool parse_4digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
 
 /**
  * Without skipping whitespace, parses an integer with exactly six digits.
@@ -633,7 +633,7 @@ DYND_API bool parse_4digit_int_no_ws(const char *&rbegin, const char *end, int &
  *         // Couldn't match year
  *     }
  */
-DYND_API bool parse_6digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
+DYNDT_API bool parse_6digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
 
 /**
  * Parses a string containing an boolean (no leading or trailing space), returning
@@ -1084,7 +1084,7 @@ T parse(const string &s)
  * Returns true if the string provided matches an option[T] missing value token,
  * such as "", "NA", "NULL", "null", "None".
  */
-DYND_API bool parse_na(const char *begin, const char *end);
+DYNDT_API bool parse_na(const char *begin, const char *end);
 
 /**
  * A helper class for matching a bunch of names and getting an integer.
@@ -1105,7 +1105,7 @@ DYND_API bool parse_na(const char *begin, const char *end);
  *         named_value("wed", 2),
  *     }
  */
-struct DYND_API named_value {
+struct DYNDT_API named_value {
   const char *name;
   int value;
   DYND_CONSTEXPR named_value(const char *name_, int value_) : name(name_), value(value_) {}

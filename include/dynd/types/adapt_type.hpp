@@ -11,7 +11,7 @@
 namespace dynd {
 namespace ndt {
 
-  class DYND_API adapt_type : public base_expr_type {
+  class DYNDT_API adapt_type : public base_expr_type {
     ndt::type m_value_tp;
     ndt::type m_storage_tp;
     nd::callable m_forward;
