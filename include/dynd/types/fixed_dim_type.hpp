@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <dynd/array.hpp>
 #include <dynd/types/base_fixed_dim_type.hpp>
 
 namespace dynd {
@@ -210,30 +209,6 @@ namespace ndt {
 
     virtual type with_element_type(const type &element_tp) const;
   };
-
-  /**
-   * Does a value lookup into an array of type "N * T", without
-   * bounds checking the index ``i`` or validating that ``a`` has the
-   * required type. Use only when these checks have been done externally.
-   */
-  template <typename T>
-  inline const T &unchecked_fixed_dim_get(const nd::array &a, intptr_t i)
-  {
-    const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get()->metadata());
-    return *reinterpret_cast<const T *>(a.cdata() + i * md->stride);
-  }
-
-  /**
-   * Does a writable value lookup into an array of type "N * T", without
-   * bounds checking the index ``i`` or validating that ``a`` has the
-   * required type. Use only when these checks have been done externally.
-   */
-  template <typename T>
-  inline T &unchecked_fixed_dim_get_rw(const nd::array &a, intptr_t i)
-  {
-    const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get()->metadata());
-    return *reinterpret_cast<T *>(a.data() + i * md->stride);
-  }
 
   DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 

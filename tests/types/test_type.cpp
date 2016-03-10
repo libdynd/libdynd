@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
+#include <dynd/array.hpp>
 #include <dynd/type.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/bytes_type.hpp>

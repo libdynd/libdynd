@@ -12,7 +12,6 @@
 #include <dynd/types/base_expr_type.hpp>
 #include <dynd/types/base_string_type.hpp>
 #include <dynd/types/type_id.hpp>
-#include <dynd/eval/eval_context.hpp>
 #include <dynd/exceptions.hpp>
 
 namespace dynd {

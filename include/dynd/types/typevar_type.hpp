@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 
-#include <dynd/array.hpp>
+#include <dynd/types/base_type.hpp>
 
 namespace dynd {
 namespace ndt {

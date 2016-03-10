@@ -127,6 +127,9 @@ list(GET DYND_VERSION 0 "${DYND_VERSION}")
 set(config_cpp src/dynd/config.cpp)
 
 set(libndt_SRC
+    # Eval
+    src/dynd/eval/eval_context.cpp
+    include/dynd/eval/eval_context.hpp
     # Types
     src/dynd/types/any_kind_type.cpp
     src/dynd/types/array_type.cpp
@@ -206,6 +209,7 @@ set(libndt_SRC
     src/dynd/shape_tools.cpp
     src/dynd/string_encodings.cpp
     src/dynd/type.cpp
+    src/dynd/type_promotion.cpp
     src/dynd/type_registry.cpp
     src/dynd/uint128.cpp
     include/dynd/float16.hpp
@@ -224,23 +228,17 @@ set(libdynd_SRC
     # Types
     src/dynd/types/adapt_type.cpp
     src/dynd/types/categorical_type.cpp
-    src/dynd/types/categorical_kind_type.cpp
     src/dynd/types/substitute_shape.cpp
     src/dynd/types/substitute_typevars.cpp
     include/dynd/types/adapt_type.hpp
     include/dynd/types/categorical_type.hpp
-    include/dynd/types/categorical_kind_type.hpp
     include/dynd/types/substitute_shape.hpp
     include/dynd/types/substitute_typevars.hpp
     # Callables
     src/dynd/callables/base_callable.cpp
     include/dynd/callables/base_callable.hpp
-    # Eval
-    src/dynd/eval/eval_context.cpp
-    include/dynd/eval/eval_context.hpp
     # Func
     src/dynd/func/arithmetic.cpp
-    src/dynd/callable_registry.cpp
     src/dynd/func/assignment.cpp
     src/dynd/func/comparison.cpp
     src/dynd/func/complex.cpp
@@ -340,6 +338,7 @@ set(libdynd_SRC
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
     src/dynd/callable.cpp
+    src/dynd/callable_registry.cpp
     # src/dynd/config.cpp
     src/dynd/convert.cpp
     src/dynd/io.cpp
@@ -349,7 +348,6 @@ set(libdynd_SRC
     src/dynd/search.cpp
     src/dynd/sort.cpp
     src/dynd/struct.cpp
-    src/dynd/type_promotion.cpp
     src/dynd/git_version.cpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp
     src/dynd/index.cpp
@@ -357,14 +355,12 @@ set(libdynd_SRC
     src/dynd/json_parser.cpp
     src/dynd/logic.cpp
     src/dynd/string.cpp
-    src/dynd/string_encodings.cpp
     src/dynd/view.cpp
     include/dynd/array.hpp
     include/dynd/array_range.hpp
     include/dynd/array_iter.hpp
     include/dynd/arrmeta_holder.hpp
     include/dynd/asarray.hpp
-    include/dynd/bool1.hpp
     include/dynd/bytes.hpp
     include/dynd/callable.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
