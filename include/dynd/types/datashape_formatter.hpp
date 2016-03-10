@@ -5,19 +5,9 @@
 
 #pragma once
 
-#include <dynd/array.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
-
-/**
- * Formats the dynd array's type + arrmeta as a
- * Blaze datashape.
- *
- * \param n  The object whose datashape to produce
- * \param prefix  Prepends the datashape with this string
- * \param multiline  If true, split the datashape across multiple lines.
- */
-DYND_API std::string format_datashape(const nd::array &n, const std::string &prefix = "", bool multiline = true);
 
 /**
  * Formats the type as a blaze datashape.
