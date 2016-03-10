@@ -1155,4 +1155,71 @@ namespace ndt {
 DYND_API void broadcast_input_shapes(intptr_t ninputs, const nd::array *inputs, intptr_t &out_undim,
                                      dimvector &out_shape, shortvector<int> &out_axis_perm);
 
+/**
+ * An exception for various kinds of broadcast errors.
+ */
+class DYND_API broadcast_error : public dynd_exception {
+public:
+  broadcast_error(const std::string &m);
+
+  /**
+   * An exception for when 'src' doesn't broadcast to 'dst'
+   */
+  broadcast_error(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim, const intptr_t *src_shape);
+
+  /**
+   * An exception for when 'src' doesn't broadcast to 'dst'
+   */
+  broadcast_error(const nd::array &dst, const nd::array &src);
+
+  /**
+   * An exception for when a number of input operands can't be broadcast
+   * together.
+   */
+  broadcast_error(intptr_t ninputs, const nd::array *inputs);
+
+  broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta);
+
+  broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const char *src_name);
+
+  /**
+   * For when broadcasting is occurring in a context where
+   * much of the global information about the broadcasting isn't
+   * available, e.g. broadcasting a var dim inside a kernel.
+   */
+  broadcast_error(intptr_t dst_size, intptr_t src_size, const char *dst_name, const char *src_name);
+
+  virtual ~broadcast_error() throw();
+};
+
+/**
+ * This function broadcasts the dimensions and strides of 'src' to a given
+ * shape, raising an error if it cannot be broadcast.
+ *
+ * \param ndim        The number of dimensions being broadcast to.
+ * \param shape       The shape being broadcast to.
+ * \param src_ndim    The number of dimensions of the input which is to be broadcast.
+ * \param src_shape   The shape of the input which is to be broadcast.
+ * \param src_strides The strides of the input which is to be broadcast.
+ * \param out_strides The resulting strides after broadcasting (with length 'ndim').
+ */
+DYND_API void broadcast_to_shape(intptr_t ndim, const intptr_t *shape, intptr_t src_ndim, const intptr_t *src_shape,
+                                 const intptr_t *src_strides, intptr_t *out_strides);
+
+/**
+ * Adjusts out_shape to broadcast it with the input shape.
+ *
+ * \param out_undim  The number of dimensions in the output
+ *                   broadcast shape. This should be set to
+ *                   the maximum of all the input undim values
+ *                   that will be incrementally broadcasted.
+ * \param out_shape  The shape that gets updated to become the
+ *                   final broadcast shape. This should be
+ *                   initialized to all ones before incrementally
+ *                   broadcasting.
+ * \param undim  The number of dimensions in the input shape.
+ * \param shape  The input shape.
+ */
+DYND_API void incremental_broadcast(intptr_t out_undim, intptr_t *out_shape, intptr_t undim, const intptr_t *shape);
+
 } // namespace dynd

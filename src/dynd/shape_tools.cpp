@@ -30,68 +30,6 @@ bool dynd::shape_can_broadcast(intptr_t dst_ndim, const intptr_t *dst_shape, int
   }
 }
 
-void dynd::broadcast_to_shape(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim,
-                              const intptr_t *src_shape, const intptr_t *src_strides, intptr_t *out_strides)
-{
-  // cout << "broadcast_to_shape(" << dst_ndim << ", (";
-  // for (int i = 0; i < dst_ndim; ++i) cout << dst_shape[i] << " ";
-  // cout << "), " << src_ndim << ", (";
-  // for (int i = 0; i < src_ndim; ++i) cout << src_shape[i] << " ";
-  // cout << "), (";
-  // for (int i = 0; i < src_ndim; ++i) cout << src_strides[i] << " ";
-  // cout << ")\n";
-
-  if (src_ndim > dst_ndim) {
-    throw broadcast_error(dst_ndim, dst_shape, src_ndim, src_shape);
-  }
-
-  intptr_t dimdelta = dst_ndim - src_ndim;
-  for (intptr_t i = 0; i < dimdelta; ++i) {
-    out_strides[i] = 0;
-  }
-  for (intptr_t i = dimdelta; i < dst_ndim; ++i) {
-    intptr_t src_i = i - dimdelta;
-    if (src_shape[src_i] == 1) {
-      out_strides[i] = 0;
-    }
-    else if (src_shape[src_i] == dst_shape[i]) {
-      out_strides[i] = src_strides[src_i];
-    }
-    else {
-      throw broadcast_error(dst_ndim, dst_shape, src_ndim, src_shape);
-    }
-  }
-
-  // cout << "output strides: ";
-  // for (int i = 0; i < dst_ndim; ++i) cout << out_strides[i] << " ";
-  // cout << "\n";
-}
-
-void dynd::incremental_broadcast(intptr_t out_undim, intptr_t *out_shape, intptr_t undim, const intptr_t *shape)
-{
-  if (out_undim < undim) {
-    throw broadcast_error(out_undim, out_shape, undim, shape);
-  }
-
-  out_shape += (out_undim - undim);
-  for (intptr_t i = 0; i < undim; ++i) {
-    intptr_t shape_i = shape[i];
-    if (shape_i != 1) {
-      if (shape_i == -1) {
-        if (out_shape[i] == 1) {
-          out_shape[i] = -1;
-        }
-      }
-      else if (out_shape[i] == 1 || out_shape[i] == -1) {
-        out_shape[i] = shape_i;
-      }
-      else if (shape_i != out_shape[i]) {
-        throw broadcast_error(out_undim, out_shape - (out_undim - undim), undim, shape);
-      }
-    }
-  }
-}
-
 static inline intptr_t intptr_abs(intptr_t x) { return x >= 0 ? x : -x; }
 
 namespace {

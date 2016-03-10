@@ -7,9 +7,9 @@
 #include <algorithm>
 
 #include <dynd/type_promotion.hpp>
-#include <dynd/callable.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -29,36 +29,6 @@ inline bool shape_can_broadcast(const std::vector<intptr_t> &dst_shape, const st
 }
 
 /**
- * This function broadcasts the dimensions and strides of 'src' to a given
- * shape, raising an error if it cannot be broadcast.
- *
- * \param ndim        The number of dimensions being broadcast to.
- * \param shape       The shape being broadcast to.
- * \param src_ndim    The number of dimensions of the input which is to be broadcast.
- * \param src_shape   The shape of the input which is to be broadcast.
- * \param src_strides The strides of the input which is to be broadcast.
- * \param out_strides The resulting strides after broadcasting (with length 'ndim').
- */
-DYND_API void broadcast_to_shape(intptr_t ndim, const intptr_t *shape, intptr_t src_ndim, const intptr_t *src_shape,
-                                 const intptr_t *src_strides, intptr_t *out_strides);
-
-/**
- * Adjusts out_shape to broadcast it with the input shape.
- *
- * \param out_undim  The number of dimensions in the output
- *                   broadcast shape. This should be set to
- *                   the maximum of all the input undim values
- *                   that will be incrementally broadcasted.
- * \param out_shape  The shape that gets updated to become the
- *                   final broadcast shape. This should be
- *                   initialized to all ones before incrementally
- *                   broadcasting.
- * \param undim  The number of dimensions in the input shape.
- * \param shape  The input shape.
- */
-DYND_API void incremental_broadcast(intptr_t out_undim, intptr_t *out_shape, intptr_t undim, const intptr_t *shape);
-
-/**
  * This function creates a permutation based on one ndarray's strides.
  * The value strides(out_axis_perm[0]) is the smallest stride,
  * and strides(out_axis_perm[ndim-1]) is the largest stride.
