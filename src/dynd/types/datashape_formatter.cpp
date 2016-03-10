@@ -9,7 +9,6 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/callable.hpp>
 
 using namespace std;
 using namespace dynd;

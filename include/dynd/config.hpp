@@ -950,4 +950,16 @@ using std::isfinite;
 using std::isinf;
 using std::isnan;
 
+namespace ndt {
+
+  class type;
+
+} // namespace dynd::ndt
+
+namespace nd {
+
+  class array;
+  class callable;
+
+} // namespace dynd ::nd
 } // namespace dynd
