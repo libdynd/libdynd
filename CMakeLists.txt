@@ -132,7 +132,6 @@ set(libndt_SRC
     include/dynd/eval/eval_context.hpp
     # Types
     src/dynd/types/any_kind_type.cpp
-    src/dynd/types/array_type.cpp
     src/dynd/types/base_bytes_type.cpp
     src/dynd/types/base_type.cpp
     src/dynd/types/base_dim_type.cpp
@@ -170,7 +169,6 @@ set(libndt_SRC
     src/dynd/types/typevar_dim_type.cpp
     src/dynd/types/var_dim_type.cpp
     include/dynd/types/any_kind_type.hpp
-    include/dynd/types/array_type.hpp
     include/dynd/types/base_bytes_type.hpp
     include/dynd/types/base_type.hpp
     include/dynd/types/base_dim_type.hpp
@@ -227,10 +225,12 @@ set(libndt_SRC
 set(libdynd_SRC
     # Types
     src/dynd/types/adapt_type.cpp
+    src/dynd/types/array_type.cpp
     src/dynd/types/categorical_type.cpp
     src/dynd/types/substitute_shape.cpp
     src/dynd/types/substitute_typevars.cpp
     include/dynd/types/adapt_type.hpp
+    include/dynd/types/array_type.hpp
     include/dynd/types/categorical_type.hpp
     include/dynd/types/substitute_shape.hpp
     include/dynd/types/substitute_typevars.hpp
