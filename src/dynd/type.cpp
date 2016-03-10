@@ -10,7 +10,6 @@
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/callable.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
@@ -21,9 +20,6 @@
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/kernels/imag_kernel.hpp>
-#include <dynd/kernels/conj_kernel.hpp>
-#include <dynd/func/elwise.hpp>
 
 #include <sstream>
 #include <cstring>
