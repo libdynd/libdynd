@@ -11,7 +11,7 @@
 
 namespace dynd {
 
-class DYND_API bytes {
+class DYNDT_API bytes {
 protected:
   char *m_data;
   size_t m_size;
@@ -22,8 +22,7 @@ public:
   bytes(const char *data, size_t size) : m_data(new char[size]), m_size(size) { memcpy(m_data, data, size); }
 
   template <size_t N>
-  bytes(const char(&data)[N])
-      : bytes(data, N - 1)
+  bytes(const char (&data)[N]) : bytes(data, N - 1)
   {
   }
 

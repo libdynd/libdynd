@@ -3,12 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/callable.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/func/elwise.hpp>
-#include <dynd/kernels/elwise.hpp>
 #include <dynd/types/typevar_type.hpp>
 
 using namespace std;

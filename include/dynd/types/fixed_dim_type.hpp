@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <dynd/array.hpp>
 #include <dynd/types/base_fixed_dim_type.hpp>
 
 namespace dynd {
@@ -13,7 +12,7 @@ namespace dynd {
 // fixed_dim (redundantly) uses the same arrmeta as strided_dim
 typedef size_stride_t fixed_dim_type_arrmeta;
 
-struct DYND_API fixed_dim_type_iterdata {
+struct DYNDT_API fixed_dim_type_iterdata {
   iterdata_common common;
   char *data;
   intptr_t stride;
@@ -117,7 +116,7 @@ public:
 
 namespace ndt {
 
-  class DYND_API fixed_dim_type : public base_fixed_dim_type {
+  class DYNDT_API fixed_dim_type : public base_fixed_dim_type {
     intptr_t m_dim_size;
 
   public:
@@ -211,33 +210,9 @@ namespace ndt {
     virtual type with_element_type(const type &element_tp) const;
   };
 
-  /**
-   * Does a value lookup into an array of type "N * T", without
-   * bounds checking the index ``i`` or validating that ``a`` has the
-   * required type. Use only when these checks have been done externally.
-   */
-  template <typename T>
-  inline const T &unchecked_fixed_dim_get(const nd::array &a, intptr_t i)
-  {
-    const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get()->metadata());
-    return *reinterpret_cast<const T *>(a.cdata() + i * md->stride);
-  }
+  DYNDT_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 
-  /**
-   * Does a writable value lookup into an array of type "N * T", without
-   * bounds checking the index ``i`` or validating that ``a`` has the
-   * required type. Use only when these checks have been done externally.
-   */
-  template <typename T>
-  inline T &unchecked_fixed_dim_get_rw(const nd::array &a, intptr_t i)
-  {
-    const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get()->metadata());
-    return *reinterpret_cast<T *>(a.data() + i * md->stride);
-  }
-
-  DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
-
-  DYND_API type make_fixed_dim(intptr_t ndim, const intptr_t *shape, const type &dtp);
+  DYNDT_API type make_fixed_dim(intptr_t ndim, const intptr_t *shape, const type &dtp);
 
   inline type make_fixed_dim(size_t dim_size, const type &element_tp, intptr_t ndim)
   {

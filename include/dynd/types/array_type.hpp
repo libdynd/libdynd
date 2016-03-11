@@ -10,7 +10,7 @@
 namespace dynd {
 namespace ndt {
 
-  class DYND_API array_type : public base_type {
+  class DYNDT_API array_type : public base_type {
   public:
     array_type();
 

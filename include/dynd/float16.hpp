@@ -19,15 +19,15 @@
 namespace dynd {
 
 // Bit-level conversions
-DYND_API uint16_t float_to_halfbits(float value);
+DYNDT_API uint16_t float_to_halfbits(float value);
 
-DYND_API uint16_t double_to_halfbits(double value);
+DYNDT_API uint16_t double_to_halfbits(double value);
 
-DYND_API float halfbits_to_float(uint16_t value);
+DYNDT_API float halfbits_to_float(uint16_t value);
 
-DYND_API double halfbits_to_double(uint16_t value);
+DYNDT_API double halfbits_to_double(uint16_t value);
 
-class DYND_API float16 {
+class DYNDT_API float16 {
   uint16_t m_bits;
 
 public:

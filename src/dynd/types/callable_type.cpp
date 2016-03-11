@@ -3,30 +3,30 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/callable.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/str_util.hpp>
-#include <dynd/ensure_immutable_contig.hpp>
 #include <dynd/types/typevar_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
 ndt::callable_type::callable_type(const type &ret_type, const type &pos_types, const type &kwd_types)
-    : base_type(callable_id, sizeof(data_type), alignof(data_type), type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
+    : base_type(callable_id, sizeof(void *), alignof(void *), type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
       m_return_type(ret_type), m_pos_tuple(pos_types), m_kwd_struct(kwd_types)
 {
   if (m_pos_tuple.get_id() != tuple_id) {
     stringstream ss;
     ss << "dynd callable positional arg types require a tuple type, got a "
-          "type \"" << m_pos_tuple << "\"";
+          "type \""
+       << m_pos_tuple << "\"";
     throw invalid_argument(ss.str());
   }
   if (m_kwd_struct.get_id() != struct_id) {
     stringstream ss;
     ss << "dynd callable keyword arg types require a struct type, got a "
-          "type \"" << m_kwd_struct << "\"";
+          "type \""
+       << m_kwd_struct << "\"";
     throw invalid_argument(ss.str());
   }
 
@@ -198,19 +198,27 @@ void ndt::callable_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) co
 
 void ndt::callable_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
 
-void ndt::callable_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
+void ndt::callable_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data)) const
 {
-  const data_type *d = reinterpret_cast<data_type *>(data);
-  d->~data_type();
-}
+  throw std::runtime_error("data_destruct is not implemented for callable_type");
 
-void ndt::callable_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *data, intptr_t stride,
-                                               size_t count) const
-{
-  for (size_t i = 0; i != count; ++i, data += stride) {
+  /*
     const data_type *d = reinterpret_cast<data_type *>(data);
     d->~data_type();
-  }
+  */
+}
+
+void ndt::callable_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data),
+                                               intptr_t DYND_UNUSED(stride), size_t DYND_UNUSED(count)) const
+{
+  throw std::runtime_error("data_destruct_strided is not implemented for callable_type");
+
+  /*
+    for (size_t i = 0; i != count; ++i, data += stride) {
+      const data_type *d = reinterpret_cast<data_type *>(data);
+      d->~data_type();
+    }
+  */
 }
 
 bool ndt::callable_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const

@@ -13,7 +13,7 @@ namespace ndt {
   /**
    * Base class for all types of expr_kind.
    */
-  class DYND_API base_expr_type : public base_type {
+  class DYNDT_API base_expr_type : public base_type {
   public:
     base_expr_type(type_id_t type_id, size_t data_size, size_t alignment, uint32_t flags, size_t arrmeta_size,
                    size_t ndim = 0);
@@ -29,6 +29,15 @@ namespace ndt {
      * uses to produce the value.
      */
     virtual const type &get_operand_type() const = 0;
+
+    /**
+     * Should return a reference to a type representing the data this type
+     * uses to produce the value.
+     */
+    virtual const type &get_storage_type() const
+    {
+      throw std::runtime_error("get_storage_type is not implemented for this type");
+    }
 
     /**
      * Returns a flags value which inherits the appropriate flags from

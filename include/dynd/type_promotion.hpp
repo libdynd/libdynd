@@ -20,6 +20,6 @@ namespace dynd {
  * be in NBO. If the inputs are not, the output may or may not
  * be in NBO, the function makes no effort to follow a convention.
  */
-DYND_API ndt::type promote_types_arithmetic(const ndt::type& tp0, const ndt::type& tp1);
+DYNDT_API ndt::type promote_types_arithmetic(const ndt::type &tp0, const ndt::type &tp1);
 
 } // namespace dynd

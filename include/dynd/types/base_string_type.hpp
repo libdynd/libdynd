@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <dynd/types/base_type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/types/base_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -16,7 +16,7 @@ namespace ndt {
    * has kind string_kind, it must be a subclass of
    * base_string_type.
    */
-  class DYND_API base_string_type : public base_type {
+  class DYNDT_API base_string_type : public base_type {
   private:
     const string_encoding_t m_encoding = string_encoding_ascii;
 

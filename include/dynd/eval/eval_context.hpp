@@ -10,14 +10,14 @@
 namespace dynd {
 namespace eval {
 
-  struct DYND_API eval_context {
+  struct DYNDT_API eval_context {
     // Default error mode for computations
     assign_error_mode errmode;
 
     eval_context() : errmode(assign_error_fractional) {}
   };
 
-  extern DYND_API eval_context default_eval_context;
+  extern DYNDT_API eval_context default_eval_context;
 
 } // namespace dynd::eval
 } // namespace dynd

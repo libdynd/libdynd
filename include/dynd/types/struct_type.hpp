@@ -5,19 +5,19 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <dynd/type.hpp>
-#include <dynd/types/tuple_type.hpp>
 #include <dynd/types/pointer_type.hpp>
-#include <dynd/types/type_type.hpp>
 #include <dynd/types/string_type.hpp>
+#include <dynd/types/tuple_type.hpp>
+#include <dynd/types/type_type.hpp>
 
 namespace dynd {
 namespace ndt {
 
-  class DYND_API struct_type : public tuple_type {
+  class DYNDT_API struct_type : public tuple_type {
     const std::vector<std::string> m_field_names;
 
   protected:

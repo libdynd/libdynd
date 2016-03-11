@@ -183,7 +183,7 @@ enum {
   type_flags_value_inherited = type_flag_symbolic | type_flag_variadic
 };
 
-DYND_API std::ostream &operator<<(std::ostream &o, type_id_t tid);
+DYNDT_API std::ostream &operator<<(std::ostream &o, type_id_t tid);
 
 // Forward declaration so we can make the is_builtin_type function here
 namespace ndt {
@@ -796,6 +796,6 @@ struct property_type_id_of<std::string> {
   static const type_id_t value = string_id;
 };
 
-DYND_API bool is_base_id_of(type_id_t base_id, type_id_t id);
+DYNDT_API bool is_base_id_of(type_id_t base_id, type_id_t id);
 
 } // namespace dynd

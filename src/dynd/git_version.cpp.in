@@ -5,7 +5,7 @@
 
 // NOTE: Only modify git_version.cpp.in, not the generated git_version.cpp.
 
-#include <dynd/config.hpp>
+#include <dynd/git_version.hpp>
 
 #define DYND_GIT_SHA1 "@DYND_GIT_SHA1@"
 #define DYND_VERSION_STRING "@DYND_VERSION_STRING@"

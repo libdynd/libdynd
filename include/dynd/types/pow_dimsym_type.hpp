@@ -5,16 +5,15 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
-#include <dynd/array.hpp>
 #include <dynd/types/base_dim_type.hpp>
 
 namespace dynd {
 namespace ndt {
 
-  class DYND_API pow_dimsym_type : public base_dim_type {
+  class DYNDT_API pow_dimsym_type : public base_dim_type {
     type m_base_tp;
     std::string m_exponent;
 

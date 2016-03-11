@@ -26,10 +26,10 @@ struct external_memory_block : memory_block_data {
 /**
  * Creates a memory block which is a reference to an external object.
  */
-DYND_API intrusive_ptr<memory_block_data> make_external_memory_block(void *object,
+DYNDT_API intrusive_ptr<memory_block_data> make_external_memory_block(void *object,
                                                                      external_memory_block_free_t free_fn);
 
-DYND_API void external_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                                const std::string &indent);
+DYNDT_API void external_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
+                                                 const std::string &indent);
 
 } // namespace dynd

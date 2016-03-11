@@ -774,6 +774,7 @@ TEST(DataShapeParser, SpecialCharacterFields)
   }
 }
 
+/*
 static std::string to_str(const nd::array &a)
 {
   stringstream ss;
@@ -801,3 +802,4 @@ TEST(DataShapeParser, TypeConstructorArgs)
   a = parse_json(b.get_type(), "[[[1, 2, 3]], [[\"2 * int32\", \"float32\", \"3 * int8\"], [\"x\", \"yz\"]]]");
   EXPECT_EQ(to_str(a), to_str(b));
 }
+*/

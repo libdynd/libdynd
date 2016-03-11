@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 
-#include <dynd/array.hpp>
+#include <dynd/shortvector.hpp>
 #include <dynd/types/base_dim_type.hpp>
 
 namespace dynd {
@@ -25,7 +25,7 @@ enum {
 
 namespace ndt {
 
-  class DYND_API dim_fragment_type : public base_dim_type {
+  class DYNDT_API dim_fragment_type : public base_dim_type {
     dimvector m_tagged_dims;
 
   public:
@@ -81,7 +81,7 @@ namespace ndt {
   }; // class dim_fragment_type
 
   /** Makes an empty dim fragment */
-  DYND_API const type &make_dim_fragment();
+  DYNDT_API const type &make_dim_fragment();
 
   /** Makes a dim fragment out of the tagged dims provided */
   inline type make_dim_fragment(intptr_t ndim, const intptr_t *tagged_dims)

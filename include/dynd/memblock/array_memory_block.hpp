@@ -19,7 +19,7 @@ namespace dynd {
  * arrmeta after this structure is determined by the type
  * object.
  */
-struct DYND_API array_preamble : memory_block_data {
+struct DYNDT_API array_preamble : memory_block_data {
   /**
    * type is overloaded - for builtin scalar types, it
    * simply contains the type id. If (type&~builtin_id_mask)
@@ -68,7 +68,7 @@ struct DYND_API array_preamble : memory_block_data {
  *
  * The created object is uninitialized.
  */
-DYND_API intrusive_ptr<memory_block_data> make_array_memory_block(size_t arrmeta_size);
+DYNDT_API intrusive_ptr<memory_block_data> make_array_memory_block(size_t arrmeta_size);
 
 /**
  * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta),
@@ -76,7 +76,7 @@ DYND_API intrusive_ptr<memory_block_data> make_array_memory_block(size_t arrmeta
  *
  * The created object is uninitialized.
  */
-DYND_API intrusive_ptr<memory_block_data> make_array_memory_block(size_t arrmeta_size, size_t extra_size,
+DYNDT_API intrusive_ptr<memory_block_data> make_array_memory_block(size_t arrmeta_size, size_t extra_size,
                                                                   size_t extra_alignment, char **out_extra_ptr);
 
 /**
@@ -85,10 +85,10 @@ DYND_API intrusive_ptr<memory_block_data> make_array_memory_block(size_t arrmeta
  * references are swapped to point at the original nd::array memory block, as they
  * are a signal that the data was embedded in the same memory allocation.
  */
-DYND_API intrusive_ptr<memory_block_data> shallow_copy_array_memory_block(const intrusive_ptr<memory_block_data> &ndo);
+DYNDT_API intrusive_ptr<memory_block_data> shallow_copy_array_memory_block(const intrusive_ptr<memory_block_data> &ndo);
 
-DYND_API void array_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                             const std::string &indent);
+DYNDT_API void array_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
+                                              const std::string &indent);
 
 inline long intrusive_ptr_use_count(array_preamble *ptr) { return ptr->m_use_count; }
 

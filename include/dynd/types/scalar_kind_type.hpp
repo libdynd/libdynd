@@ -10,7 +10,7 @@
 namespace dynd {
 namespace ndt {
 
-  class DYND_API scalar_kind_type : public base_type {
+  class DYNDT_API scalar_kind_type : public base_type {
   public:
     scalar_kind_type();
 
