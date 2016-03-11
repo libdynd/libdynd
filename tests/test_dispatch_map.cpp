@@ -20,14 +20,11 @@ using namespace dynd;
 
 TEST(TypeRegistry, Bases)
 {
-  static const vector<type_id_t> any_kind_base_ids;
-  EXPECT_EQ(any_kind_base_ids, ndt::type_registry[any_kind_id].bases());
+  EXPECT_INITIALIZER_LIST_EQ(({}), ndt::type_registry[any_kind_id].bases());
+  EXPECT_INITIALIZER_LIST_EQ(({any_kind_id}), ndt::type_registry[scalar_kind_id].bases());
 
-  static const vector<type_id_t> scalar_kind_base_ids{any_kind_id};
-  EXPECT_EQ(scalar_kind_base_ids, ndt::type_registry[scalar_kind_id].bases());
-
-  static const vector<type_id_t> bool_base_ids{bool_kind_id, scalar_kind_id, any_kind_id};
-  EXPECT_EQ(bool_base_ids, ndt::type_registry[bool_id].bases());
+  EXPECT_INITIALIZER_LIST_EQ(({scalar_kind_id, any_kind_id}), ndt::type_registry[bool_kind_id].bases());
+  EXPECT_INITIALIZER_LIST_EQ(({bool_kind_id, scalar_kind_id, any_kind_id}), ndt::type_registry[bool_id].bases());
 
   static const vector<type_id_t> int_kind_base_ids{scalar_kind_id, any_kind_id};
   EXPECT_EQ(int_kind_base_ids, ndt::type_registry[int_kind_id].bases());

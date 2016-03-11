@@ -183,6 +183,8 @@ inline ::testing::AssertionResult ExpectAllFalse(const char *DYND_UNUSED(expr1),
   return ::testing::AssertionFailure();
 }
 
+#define EXPECT_INITIALIZER_LIST_EQ(EXPECTED, ACTUAL) EXPECT_EQ(decltype(ACTUAL) EXPECTED, ACTUAL)
+
 /**
  * Macro to compare two arrays which should
  * be exactly equal
