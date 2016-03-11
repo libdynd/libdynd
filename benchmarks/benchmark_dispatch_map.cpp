@@ -86,11 +86,9 @@ BENCHMARK_DEFINE_F(BinaryDispatchFixture, BM_Supercedes)(benchmark::State &state
 
 BENCHMARK_REGISTER_F(BinaryDispatchFixture, BM_Supercedes)->Arg(10)->Arg(100)->Arg(1000);
 
-/*
-  dispatch_map<int, 1> map{{any_kind_id, 0}, {scalar_kind_id, 1}, {bool_id, 2},     {int8_id, 3},     {int16_id, 4},
-                           {int32_id, 5},    {int64_id, 6},       {int128_id, 7},   {uint8_id, 8},    {uint16_id, 9},
-                           {uint32_id, 10},  {uint64_id, 11},     {uint128_id, 12}, {float32_id, 13}, {float64_id, 14}};
-
+dispatch_map<int, 1> map{{any_kind_id, 0}, {scalar_kind_id, 1}, {bool_id, 2},     {int8_id, 3},     {int16_id, 4},
+                         {int32_id, 5},    {int64_id, 6},       {int128_id, 7},   {uint8_id, 8},    {uint16_id, 9},
+                         {uint32_id, 10},  {uint64_id, 11},     {uint128_id, 12}, {float32_id, 13}, {float64_id, 14}};
 
 static void BM_Binary_Dispatch(benchmark::State &state)
 {
@@ -106,4 +104,3 @@ static void BM_Binary_Dispatch(benchmark::State &state)
 }
 
 BENCHMARK(BM_Binary_Dispatch);
-*/

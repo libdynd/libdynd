@@ -23,7 +23,7 @@ ndt::type_registry::type_registry()
 {
   m_infos.emplace_back();
 
-  m_infos.emplace_back(make_type<any_kind_type>());
+  m_infos.emplace_back(any_kind_id, make_type<any_kind_type>());
   insert(base_id_of<scalar_kind_id>::value, make_type<scalar_kind_type>());
 
   insert(base_id_of<bool_kind_id>::value, type());
@@ -110,8 +110,7 @@ DYND_API type_id_t ndt::type_registry::insert(type_id_t base_id, const type &tp)
     base_ids.push_back(id);
   }
 
-  m_infos.emplace_back(tp, base_ids);
-  m_infos[id].bits |= 1L << id;
+  m_infos.emplace_back(id, tp, base_ids);
 
   return id;
 }
