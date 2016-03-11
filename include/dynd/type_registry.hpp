@@ -40,21 +40,22 @@ public:
 
 namespace ndt {
 
-  extern DYND_API class type_registry {
+  extern DYNDT_API class type_registry {
     std::vector<id_info> m_infos;
 
   public:
     type_registry();
 
-    DYND_API size_t size() const;
+    DYNDT_API size_t size() const;
 
     type_id_t min() const { return static_cast<type_id_t>(1); }
 
     type_id_t max() const { return static_cast<type_id_t>(size() - 1); }
 
-    DYND_API type_id_t insert(type_id_t base_id, const type &kind_tp);
+    DYNDT_API type_id_t insert(type_id_t base_id, const type &kind_tp);
 
-    DYND_API const id_info &operator[](type_id_t tp_id) const;
+    DYNDT_API const id_info &operator[](type_id_t tp_id) const;
+
   } type_registry;
 
 } // namespace dynd::ndt

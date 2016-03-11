@@ -5,15 +5,14 @@
 
 #pragma once
 
-#include <dynd/array.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/tuple_type.hpp>
 #include <dynd/types/struct_type.hpp>
+#include <dynd/types/tuple_type.hpp>
 
 namespace dynd {
 namespace ndt {
 
-  class DYND_API callable_type : public base_type {
+  class DYNDT_API callable_type : public base_type {
     type m_return_type;
     // Always a tuple type containing the types for positional args
     type m_pos_tuple;
@@ -172,7 +171,7 @@ namespace ndt {
     }
   };
 
-  DYND_API type make_generic_funcproto(intptr_t nargs);
+  DYNDT_API type make_generic_funcproto(intptr_t nargs);
 
 } // namespace dynd::ndt
 } // namespace dynd

@@ -34,7 +34,7 @@ enum memory_block_type_t {
   memmap_memory_block_type
 };
 
-DYND_API std::ostream &operator<<(std::ostream &o, memory_block_type_t mbt);
+DYNDT_API std::ostream &operator<<(std::ostream &o, memory_block_type_t mbt);
 
 /**
  * This is the data that goes at the start of every memory block, including
@@ -42,12 +42,12 @@ DYND_API std::ostream &operator<<(std::ostream &o, memory_block_type_t mbt);
  * of memory block types, of which 'external' is presently the only
  * extensible ones.
  */
-struct DYND_API memory_block_data {
+struct DYNDT_API memory_block_data {
   /**
    * This is a struct of function pointers for allocating
    * data within a memory_block.
    */
-  struct DYND_API api {
+  struct DYNDT_API api {
     char *(*allocate)(memory_block_data *self, size_t count);
     char *(*resize)(memory_block_data *self, char *previous_allocated, size_t count);
     void (*finalize)(memory_block_data *self);
@@ -105,7 +105,7 @@ namespace detail {
    * by memory_block_decref when the reference count
    * reaches zero.
    */
-  DYND_API void memory_block_free(memory_block_data *memblock);
+  DYNDT_API void memory_block_free(memory_block_data *memblock);
 } // namespace detail
 
 inline long intrusive_ptr_use_count(memory_block_data *ptr) { return ptr->m_use_count; }
@@ -122,7 +122,7 @@ inline void intrusive_ptr_release(memory_block_data *ptr)
 /**
  * Does a debug dump of the memory block.
  */
-DYND_API void memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                       const std::string &indent = "");
+DYNDT_API void memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
+                                        const std::string &indent = "");
 
 } // namespace dynd

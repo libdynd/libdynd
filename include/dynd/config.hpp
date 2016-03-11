@@ -8,17 +8,19 @@
 #include <dynd/cmake_config.hpp>
 
 #include <cassert>
+#include <cctype>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
-#include <cctype>
 #include <initializer_list>
 #include <limits>
 #include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <iostream>
 
+#include <dynd/git_version.hpp>
 #include <dynd/visibility.hpp>
 
 /** The number of elements to process at once when doing chunking/buffering */
@@ -98,7 +100,7 @@
 
 // Some C library calls will abort if given bad format strings, etc
 // This RAII class temporarily disables that
-class DYND_API disable_invalid_parameter_handler {
+class disable_invalid_parameter_handler {
   _invalid_parameter_handler m_saved;
 
   disable_invalid_parameter_handler(const disable_invalid_parameter_handler &);
@@ -180,7 +182,7 @@ void intrusive_ptr_release(T *ptr);
  * A smart pointer, very similar to boost::intrusive_ptr.
  */
 template <typename T>
-class DYND_API intrusive_ptr {
+class intrusive_ptr {
 protected:
   T *m_ptr;
 
@@ -335,7 +337,7 @@ struct is_char_string_param<char *> {
   static const bool value = true;
 };
 template <int N>
-struct is_char_string_param<const char(&)[N]> {
+struct is_char_string_param<const char (&)[N]> {
   static const bool value = true;
 };
 template <int N>
@@ -494,13 +496,6 @@ struct arg_at {
 #define DYND_IGNORE_MAYBE_UNINITIALIZED
 #define DYND_END_IGNORE_MAYBE_UNINITIALIZED
 #endif
-
-namespace dynd {
-// These are defined in git_version.cpp, generated from
-// git_version.cpp.in by the CMake build configuration.
-extern DYND_API const char dynd_git_sha1[];
-extern DYND_API const char dynd_version_string[];
-} // namespace dynd
 
 // Check endian: define DYND_BIG_ENDIAN if big endian, otherwise assume little
 #if defined(__GLIBC__)
@@ -754,7 +749,31 @@ enum assign_error_mode {
 struct overflow_check_t {
 };
 
-DYND_API std::ostream &operator<<(std::ostream &o, assign_error_mode errmode);
+inline std::ostream &operator<<(std::ostream &o, assign_error_mode errmode)
+{
+  switch (errmode) {
+  case assign_error_nocheck:
+    o << "nocheck";
+    break;
+  case assign_error_overflow:
+    o << "overflow";
+    break;
+  case assign_error_fractional:
+    o << "fractional";
+    break;
+  case assign_error_inexact:
+    o << "inexact";
+    break;
+  case assign_error_default:
+    o << "default";
+    break;
+  default:
+    o << "invalid error mode(" << (int)errmode << ")";
+    break;
+  }
+
+  return o;
+}
 
 namespace detail {
   // Use these declarations before includeing bool1, int128, uint128, etc. so they are usable there.
@@ -776,11 +795,18 @@ namespace detail {
 
 } // namespace dynd
 
+// Unfortunately, include order matters here (for now), so separate by
+// extra lines to avoid having clang-format reorder everything.
 #include <dynd/bool1.hpp>
+
 #include <dynd/int128.hpp>
+
 #include <dynd/uint128.hpp>
+
 #include <dynd/float16.hpp>
+
 #include <dynd/float128.hpp>
+
 #include <dynd/complex.hpp>
 
 namespace dynd {
@@ -950,4 +976,16 @@ using std::isfinite;
 using std::isinf;
 using std::isnan;
 
+namespace ndt {
+
+  class type;
+
+} // namespace dynd::ndt
+
+namespace nd {
+
+  class array;
+  class callable;
+
+} // namespace dynd ::nd
 } // namespace dynd

@@ -61,10 +61,10 @@ struct zeroinit_memory_block : memory_block_data {
  *
  * The initial capacity can be set if a good estimate is known.
  */
-DYND_API intrusive_ptr<memory_block_data> make_zeroinit_memory_block(const ndt::type &element_tp,
+DYNDT_API intrusive_ptr<memory_block_data> make_zeroinit_memory_block(const ndt::type &element_tp,
                                                                      intptr_t initial_capacity_bytes = 2048);
 
-DYND_API void zeroinit_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                                const std::string &indent);
+DYNDT_API void zeroinit_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
+                                                 const std::string &indent);
 
 } // namespace dynd

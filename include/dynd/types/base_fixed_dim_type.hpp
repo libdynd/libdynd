@@ -10,7 +10,7 @@
 namespace dynd {
 namespace ndt {
 
-  class DYND_API base_fixed_dim_type : public base_dim_type {
+  class DYNDT_API base_fixed_dim_type : public base_dim_type {
   public:
     using base_dim_type::base_dim_type;
 
@@ -77,7 +77,7 @@ namespace ndt {
     }
   };
 
-  DYND_API type make_fixed_dim_kind(const type &element_tp);
+  DYNDT_API type make_fixed_dim_kind(const type &element_tp);
 
   inline type make_fixed_dim_kind(const type &uniform_tp, intptr_t ndim)
   {

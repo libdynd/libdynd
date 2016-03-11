@@ -11,11 +11,11 @@
 
 #include <dynd/config.hpp>
 #include <dynd/init.hpp>
-#include <dynd/shortvector.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
-#include <dynd/types/pointer_type.hpp>
+#include <dynd/shortvector.hpp>
 #include <dynd/types/bytes_type.hpp>
+#include <dynd/types/pointer_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -23,7 +23,7 @@
 namespace dynd {
 
 namespace ndt {
-  DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
+  DYNDT_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 } // namespace ndt;
 
 namespace nd {
@@ -86,7 +86,7 @@ namespace nd {
       {
       }
 
-      void single(char *data, const ValueType(&values)[Size]) const
+      void single(char *data, const ValueType (&values)[Size]) const
       {
         for (const ValueType &value : values) {
           child.single(data, value);
@@ -106,7 +106,7 @@ namespace nd {
       {
       }
 
-      void single(char *data, const ValueType(&values)[Size]) const
+      void single(char *data, const ValueType (&values)[Size]) const
       {
         for (const ValueType &value : values) {
           child.single(data, value);
@@ -175,16 +175,14 @@ namespace nd {
       */
     template <typename T,
               typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
-    array(T &&value)
-        : intrusive_ptr<array_preamble>(empty(ndt::type_for(value)))
+    array(T &&value) : intrusive_ptr<array_preamble>(empty(ndt::type_for(value)))
     {
       init(std::forward<T>(value));
     }
 
     /** Constructs an array from a 1D initializer list */
     template <typename ValueType>
-    array(const std::initializer_list<ValueType> &values)
-        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values)))
+    array(const std::initializer_list<ValueType> &values) : intrusive_ptr<array_preamble>(empty(ndt::type_for(values)))
     {
       init(values);
     }
@@ -555,7 +553,7 @@ namespace nd {
     array view(const ndt::type &tp) const;
 
     template <int N>
-    inline array view(const char(&rhs)[N])
+    inline array view(const char (&rhs)[N])
     {
       return view(ndt::type(rhs));
     }
@@ -900,7 +898,7 @@ namespace nd {
    * nd::array a = nd::empty("10 * int32");
    */
   template <int N>
-  inline array empty(const char(&dshape)[N])
+  inline array empty(const char (&dshape)[N])
   {
     return nd::empty(ndt::type(dshape, dshape + N - 1));
   }
@@ -922,7 +920,7 @@ namespace nd {
    *      array a = nd::empty(10, "int32");
    */
   template <int N>
-  inline array empty(intptr_t dim0, const char(&dshape)[N])
+  inline array empty(intptr_t dim0, const char (&dshape)[N])
   {
     return empty(dim0, ndt::type(dshape, dshape + N - 1));
   }
@@ -946,7 +944,7 @@ namespace nd {
    *      array a = nd::empty(10, 10, "int32");
    */
   template <int N>
-  inline array empty(intptr_t dim0, intptr_t dim1, const char(&dshape)[N])
+  inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N])
   {
     return empty(dim0, dim1, ndt::type(dshape, dshape + N - 1));
   }
@@ -972,7 +970,7 @@ namespace nd {
    *      array a = nd::empty(10, 10, 10, "int32");
    */
   template <int N>
-  inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char(&dshape)[N])
+  inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N])
   {
     return empty(dim0, dim1, dim2, ndt::type(dshape, dshape + N - 1));
   }
@@ -1110,4 +1108,116 @@ namespace nd {
   DYND_API array combine_into_tuple(size_t field_count, const array *field_values);
 
 } // namespace dynd::nd
+
+namespace ndt {
+
+  /**
+   * Does a value lookup into an array of type "N * T", without
+   * bounds checking the index ``i`` or validating that ``a`` has the
+   * required type. Use only when these checks have been done externally.
+   */
+  template <typename T>
+  inline const T &unchecked_fixed_dim_get(const nd::array &a, intptr_t i)
+  {
+    const size_stride_t *md = reinterpret_cast<const size_stride_t *>(a.get()->metadata());
+    return *reinterpret_cast<const T *>(a.cdata() + i * md->stride);
+  }
+
+  /**
+   * Does a writable value lookup into an array of type "N * T", without
+   * bounds checking the index ``i`` or validating that ``a`` has the
+   * required type. Use only when these checks have been done externally.
+   */
+  template <typename T>
+  inline T &unchecked_fixed_dim_get_rw(const nd::array &a, intptr_t i)
+  {
+    const size_stride_t *md = reinterpret_cast<const size_stride_t *>(a.get()->metadata());
+    return *reinterpret_cast<T *>(a.data() + i * md->stride);
+  }
+
+} // namespace dynd::ndt
+
+/**
+ * This function broadcasts the input array's shapes together,
+ * producing a broadcast shape as the result. For any dimension in
+ * an input with a variable-sized shape, the output shape is set
+ * to a negative value.
+ *
+ * \param ninputs  The number of inputs whose shapes are to be broadcasted.
+ * \param inputs  The inputs whose shapes are to be broadcasted.
+ * \param out_undim  The number of dimensions in the output shape.
+ * \param out_shape  This is filled with the broadcast shape.
+ * \param out_axis_perm  A permutation of the axis for the output to use to
+ *                       match the input's memory ordering.
+ */
+DYND_API void broadcast_input_shapes(intptr_t ninputs, const nd::array *inputs, intptr_t &out_undim,
+                                     dimvector &out_shape, shortvector<int> &out_axis_perm);
+
+/**
+ * An exception for various kinds of broadcast errors.
+ */
+class DYND_API broadcast_error : public dynd_exception {
+public:
+  broadcast_error(const std::string &m);
+
+  /**
+   * An exception for when 'src' doesn't broadcast to 'dst'
+   */
+  broadcast_error(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim, const intptr_t *src_shape);
+
+  /**
+   * An exception for when 'src' doesn't broadcast to 'dst'
+   */
+  broadcast_error(const nd::array &dst, const nd::array &src);
+
+  /**
+   * An exception for when a number of input operands can't be broadcast
+   * together.
+   */
+  broadcast_error(intptr_t ninputs, const nd::array *inputs);
+
+  broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta);
+
+  broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const char *src_name);
+
+  /**
+   * For when broadcasting is occurring in a context where
+   * much of the global information about the broadcasting isn't
+   * available, e.g. broadcasting a var dim inside a kernel.
+   */
+  broadcast_error(intptr_t dst_size, intptr_t src_size, const char *dst_name, const char *src_name);
+
+  virtual ~broadcast_error() throw();
+};
+
+/**
+ * This function broadcasts the dimensions and strides of 'src' to a given
+ * shape, raising an error if it cannot be broadcast.
+ *
+ * \param ndim        The number of dimensions being broadcast to.
+ * \param shape       The shape being broadcast to.
+ * \param src_ndim    The number of dimensions of the input which is to be broadcast.
+ * \param src_shape   The shape of the input which is to be broadcast.
+ * \param src_strides The strides of the input which is to be broadcast.
+ * \param out_strides The resulting strides after broadcasting (with length 'ndim').
+ */
+DYND_API void broadcast_to_shape(intptr_t ndim, const intptr_t *shape, intptr_t src_ndim, const intptr_t *src_shape,
+                                 const intptr_t *src_strides, intptr_t *out_strides);
+
+/**
+ * Adjusts out_shape to broadcast it with the input shape.
+ *
+ * \param out_undim  The number of dimensions in the output
+ *                   broadcast shape. This should be set to
+ *                   the maximum of all the input undim values
+ *                   that will be incrementally broadcasted.
+ * \param out_shape  The shape that gets updated to become the
+ *                   final broadcast shape. This should be
+ *                   initialized to all ones before incrementally
+ *                   broadcasting.
+ * \param undim  The number of dimensions in the input shape.
+ * \param shape  The input shape.
+ */
+DYND_API void incremental_broadcast(intptr_t out_undim, intptr_t *out_shape, intptr_t undim, const intptr_t *shape);
+
 } // namespace dynd

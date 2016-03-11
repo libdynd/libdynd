@@ -63,7 +63,7 @@ typedef void (*type_transform_fn_t)(const ndt::type &dt, intptr_t arrmeta_offset
                                     ndt::type &out_transformed_type, bool &out_was_transformed);
 
 // Common preamble of all iterdata instances
-struct DYND_API iterdata_common {
+struct DYNDT_API iterdata_common {
   // This increments the iterator at the requested level
   iterdata_increment_fn_t incr;
   // This advances the iterator at the requested level by the requested amount
@@ -83,7 +83,7 @@ namespace ndt {
    * Typically, the base_type is used by manipulating a type instance, which acts
    * as a smart pointer to base_type, which special handling for the builtin types.
    */
-  class DYND_API base_type {
+  class DYNDT_API base_type {
     /** Embedded reference counting */
     mutable std::atomic_long m_use_count;
 
@@ -515,7 +515,7 @@ namespace ndt {
  * strided array, its arrmeta always begins with an array
  * of ``size_stride_t`` with length ``tp.get_strided_ndim()``.
  */
-struct DYND_API size_stride_t {
+struct DYNDT_API size_stride_t {
   intptr_t dim_size;
   intptr_t stride;
 };

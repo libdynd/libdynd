@@ -3,12 +3,11 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/tuple_type.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/kernels/tuple_assignment_kernels.hpp>
-#include <dynd/func/assignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/types/tuple_type.hpp>
+#include <dynd/types/type_type.hpp>
 
 using namespace std;
 using namespace dynd;

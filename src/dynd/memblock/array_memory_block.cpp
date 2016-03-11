@@ -5,7 +5,6 @@
 
 #include <dynd/memblock/array_memory_block.hpp>
 #include <dynd/types/base_memory_type.hpp>
-#include <dynd/array.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/shape_tools.hpp>
 

@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include <dynd/type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
 namespace ndt {
 
-  class DYND_API char_type : public base_type {
+  class DYNDT_API char_type : public base_type {
     // This encoding can be ascii, latin1, ucs2, or utf32.
     // Not a variable-sized encoding.
     string_encoding_t m_encoding;

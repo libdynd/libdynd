@@ -84,11 +84,11 @@ struct objectarray_memory_block : memory_block_data {
  *                get_default_data_size() corresponding to default-constructed arrmeta.
  * \param initial_count  The number of elements to allocate at the start.
  */
-DYND_API intrusive_ptr<memory_block_data> make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta,
+DYNDT_API intrusive_ptr<memory_block_data> make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta,
                                                                         intptr_t stride, intptr_t initial_count = 64,
                                                                         size_t arrmeta_size = 0);
 
-DYND_API void objectarray_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                                   const std::string &indent);
+DYNDT_API void objectarray_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
+                                                    const std::string &indent);
 
 } // namespace dynd

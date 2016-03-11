@@ -4,8 +4,6 @@
 //
 
 #include <dynd/types/char_type.hpp>
-#include <dynd/memblock/pod_memory_block.hpp>
-#include <dynd/func/assignment.hpp>
 #include <dynd/exceptions.hpp>
 
 #include <algorithm>

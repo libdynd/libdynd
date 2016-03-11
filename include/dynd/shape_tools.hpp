@@ -9,7 +9,6 @@
 
 #include <dynd/type.hpp>
 #include <dynd/shortvector.hpp>
-#include <dynd/array.hpp>
 
 namespace dynd {
 
@@ -20,7 +19,7 @@ namespace dynd {
  * dimension size must be broadcastable with everything
  * shoved to the right.
  */
-DYND_API bool shape_can_broadcast(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim,
+DYNDT_API bool shape_can_broadcast(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim,
                                   const intptr_t *src_shape);
 
 inline bool shape_can_broadcast(const std::vector<intptr_t> &dst_shape, const std::vector<intptr_t> &src_shape)
@@ -28,52 +27,6 @@ inline bool shape_can_broadcast(const std::vector<intptr_t> &dst_shape, const st
   return shape_can_broadcast(dst_shape.size(), dst_shape.empty() ? NULL : &dst_shape[0], src_shape.size(),
                              src_shape.empty() ? NULL : &src_shape[0]);
 }
-
-/**
- * This function broadcasts the dimensions and strides of 'src' to a given
- * shape, raising an error if it cannot be broadcast.
- *
- * \param ndim        The number of dimensions being broadcast to.
- * \param shape       The shape being broadcast to.
- * \param src_ndim    The number of dimensions of the input which is to be broadcast.
- * \param src_shape   The shape of the input which is to be broadcast.
- * \param src_strides The strides of the input which is to be broadcast.
- * \param out_strides The resulting strides after broadcasting (with length 'ndim').
- */
-DYND_API void broadcast_to_shape(intptr_t ndim, const intptr_t *shape, intptr_t src_ndim, const intptr_t *src_shape,
-                                 const intptr_t *src_strides, intptr_t *out_strides);
-
-/**
- * This function broadcasts the input array's shapes together,
- * producing a broadcast shape as the result. For any dimension in
- * an input with a variable-sized shape, the output shape is set
- * to a negative value.
- *
- * \param ninputs  The number of inputs whose shapes are to be broadcasted.
- * \param inputs  The inputs whose shapes are to be broadcasted.
- * \param out_undim  The number of dimensions in the output shape.
- * \param out_shape  This is filled with the broadcast shape.
- * \param out_axis_perm  A permutation of the axis for the output to use to
- *                       match the input's memory ordering.
- */
-DYND_API void broadcast_input_shapes(intptr_t ninputs, const nd::array *inputs, intptr_t &out_undim,
-                                     dimvector &out_shape, shortvector<int> &out_axis_perm);
-
-/**
- * Adjusts out_shape to broadcast it with the input shape.
- *
- * \param out_undim  The number of dimensions in the output
- *                   broadcast shape. This should be set to
- *                   the maximum of all the input undim values
- *                   that will be incrementally broadcasted.
- * \param out_shape  The shape that gets updated to become the
- *                   final broadcast shape. This should be
- *                   initialized to all ones before incrementally
- *                   broadcasting.
- * \param undim  The number of dimensions in the input shape.
- * \param shape  The input shape.
- */
-DYND_API void incremental_broadcast(intptr_t out_undim, intptr_t *out_shape, intptr_t undim, const intptr_t *shape);
 
 /**
  * This function creates a permutation based on one ndarray's strides.
@@ -84,7 +37,7 @@ DYND_API void incremental_broadcast(intptr_t out_undim, intptr_t *out_shape, int
  * \param strides  The strides values used for sorting.
  * \param out_axis_perm  A permutation which corresponds to the input strides.
  */
-DYND_API void strides_to_axis_perm(intptr_t ndim, const intptr_t *strides, int *out_axis_perm);
+DYNDT_API void strides_to_axis_perm(intptr_t ndim, const intptr_t *strides, int *out_axis_perm);
 
 /**
  * This function creates fresh strides based on the provided axis
@@ -100,7 +53,7 @@ DYND_API void strides_to_axis_perm(intptr_t ndim, const intptr_t *strides, int *
  *                      stride in the created strides array.
  * \param out_strides  The calculated strides are placed here.
  */
-DYND_API void axis_perm_to_strides(intptr_t ndim, const int *axis_perm, const intptr_t *shape, intptr_t element_size,
+DYNDT_API void axis_perm_to_strides(intptr_t ndim, const int *axis_perm, const intptr_t *shape, intptr_t element_size,
                                    intptr_t *out_strides);
 
 /**
@@ -108,7 +61,7 @@ DYND_API void axis_perm_to_strides(intptr_t ndim, const int *axis_perm, const in
  * trying to match the memory ordering of both where possible and defaulting to
  * C-order where not possible.
  */
-DYND_API void multistrides_to_axis_perm(intptr_t ndim, int noperands, const intptr_t **operstrides, int *out_axis_perm);
+DYNDT_API void multistrides_to_axis_perm(intptr_t ndim, int noperands, const intptr_t **operstrides, int *out_axis_perm);
 
 // For some reason casting 'intptr_t **' to 'const intptr_t **' causes
 // a warning in g++ 4.6.1, this overload works around that.
@@ -117,7 +70,7 @@ inline void multistrides_to_axis_perm(intptr_t ndim, int noperands, intptr_t **o
   multistrides_to_axis_perm(ndim, noperands, const_cast<const intptr_t **>(operstrides), out_axis_perm);
 }
 
-DYND_API void print_shape(std::ostream &o, intptr_t ndim, const intptr_t *shape);
+DYNDT_API void print_shape(std::ostream &o, intptr_t ndim, const intptr_t *shape);
 
 inline void print_shape(std::ostream &o, const std::vector<intptr_t> &shape)
 {
@@ -137,7 +90,7 @@ inline void print_shape(std::ostream &o, const std::vector<intptr_t> &shape)
  * \param out_index_stride  The index stride of the resolved indexing.
  * \param out_dimension_size  The size of the resulting dimension from the resolved indexing.
  */
-DYND_API void apply_single_linear_index(const irange &idx, intptr_t dimension_size, intptr_t error_i,
+DYNDT_API void apply_single_linear_index(const irange &idx, intptr_t dimension_size, intptr_t error_i,
                                         const ndt::type *error_tp, bool &out_remove_dimension,
                                         intptr_t &out_start_index, intptr_t &out_index_stride,
                                         intptr_t &out_dimension_size);
@@ -245,8 +198,8 @@ inline bool strides_are_f_contiguous(intptr_t ndim, intptr_t element_size, const
  * \param element_tp  The type of the elements. It must have undim > 0.
  * \param element_arrmeta  The arrmeta of the elements.
  */
-DYND_API axis_order_classification_t classify_strided_axis_order(intptr_t current_stride, const ndt::type &element_tp,
-                                                                 const char *element_arrmeta);
+DYNDT_API axis_order_classification_t classify_strided_axis_order(intptr_t current_stride, const ndt::type &element_tp,
+                                                                  const char *element_arrmeta);
 
 enum shape_signal_t {
   /** Shape value that has never been initialized */

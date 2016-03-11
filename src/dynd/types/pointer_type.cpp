@@ -3,11 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/array.hpp>
-#include <dynd/callable.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 
 #include <algorithm>
 

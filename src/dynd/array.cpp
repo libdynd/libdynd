@@ -7,6 +7,7 @@
 #include <dynd/array_iter.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/callable_registry.hpp>
+#include <dynd/types/datashape_formatter.hpp>
 #include <dynd/func/complex.hpp>
 #include <dynd/func/pointer.hpp>
 #include <dynd/func/assignment.hpp>
@@ -21,6 +22,7 @@
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
+#include <dynd/types/datashape_formatter.hpp>
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
@@ -1247,3 +1249,246 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
 }
 
 nd::callable &nd::find_dynamic_function(const char *name) { return callable_registry[name]; }
+
+void dynd::broadcast_input_shapes(intptr_t ninputs, const nd::array *inputs, intptr_t &out_undim, dimvector &out_shape,
+                                  shortvector<int> &out_axis_perm)
+{
+  // Get the number of broadcast dimensions
+  intptr_t undim = inputs[0].get_ndim();
+  for (intptr_t i = 0; i < ninputs; ++i) {
+    intptr_t candidate_undim = inputs[i].get_ndim();
+    if (candidate_undim > undim) {
+      undim = candidate_undim;
+    }
+  }
+
+  out_undim = undim;
+  out_shape.init(undim);
+  out_axis_perm.init(undim);
+  intptr_t *shape = out_shape.get();
+
+  // Fill in the broadcast shape
+  for (intptr_t k = 0; k < undim; ++k) {
+    shape[k] = 1;
+  }
+  dimvector tmpshape(undim);
+  for (intptr_t i = 0; i < ninputs; ++i) {
+    intptr_t input_undim = inputs[i].get_ndim();
+    inputs[i].get_shape(tmpshape.get());
+    intptr_t dimdelta = undim - input_undim;
+    for (intptr_t k = dimdelta; k < undim; ++k) {
+      intptr_t size = tmpshape[k - dimdelta];
+      intptr_t itershape_size = shape[k];
+      if (itershape_size == 1) {
+        shape[k] = size;
+      }
+      else if (size < 0) {
+        // A negative shape value means variable-sized
+        if (itershape_size > 0) {
+          shape[k] = -itershape_size;
+        }
+        else {
+          shape[k] = -1;
+        }
+      }
+      else if (itershape_size >= 0) {
+        if (size != 1 && itershape_size != size) {
+          // cout << "operand " << i << ", comparing size " << itershape_size << " vs " << size << "\n";
+          throw broadcast_error(ninputs, inputs);
+        }
+      }
+      else { // itershape_size < 0
+        if (itershape_size == -1 && size > 0) {
+          shape[k] = -size;
+        }
+        else if (size > 1 && itershape_size != -size) {
+          throw broadcast_error(ninputs, inputs);
+        }
+      }
+    }
+  }
+  // Fill in the axis permutation
+  if (undim > 1) {
+    int *axis_perm = out_axis_perm.get();
+    // TODO: keeporder behavior, currently always C order
+    for (intptr_t i = 0; i < undim; ++i) {
+      axis_perm[i] = int(undim - i - 1);
+    }
+  }
+  else if (undim == 1) {
+    out_axis_perm[0] = 0;
+  }
+}
+
+broadcast_error::broadcast_error(const std::string &m) : dynd_exception("broadcast error", m) {}
+
+broadcast_error::~broadcast_error() throw() {}
+
+inline std::string broadcast_error_message(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim,
+                                           const intptr_t *src_shape)
+{
+  stringstream ss;
+
+  ss << "cannot broadcast shape ";
+  print_shape(ss, src_ndim, src_shape);
+  ss << " to shape ";
+  print_shape(ss, dst_ndim, dst_shape);
+
+  return ss.str();
+}
+
+broadcast_error::broadcast_error(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim,
+                                 const intptr_t *src_shape)
+    : dynd_exception("broadcast error", broadcast_error_message(dst_ndim, dst_shape, src_ndim, src_shape))
+{
+}
+
+inline std::string broadcast_error_message(const nd::array &dst, const nd::array &src)
+{
+  vector<intptr_t> dst_shape = dst.get_shape(), src_shape = src.get_shape();
+  stringstream ss;
+
+  ss << "cannot broadcast dynd array with type ";
+  ss << src.get_type() << " and shape ";
+  print_shape(ss, src_shape);
+  ss << " to type " << dst.get_type() << " and shape ";
+  print_shape(ss, dst_shape);
+
+  return ss.str();
+}
+
+broadcast_error::broadcast_error(const nd::array &dst, const nd::array &src)
+    : dynd_exception("broadcast error", broadcast_error_message(dst, src))
+{
+}
+
+inline std::string broadcast_error_message(intptr_t ninputs, const nd::array *inputs)
+{
+  stringstream ss;
+
+  ss << "cannot broadcast input dynd operands with shapes ";
+  for (intptr_t i = 0; i < ninputs; ++i) {
+    intptr_t undim = inputs[i].get_ndim();
+    dimvector shape(undim);
+    inputs[i].get_shape(shape.get());
+    print_shape(ss, undim, shape.get());
+    if (i + 1 != ninputs) {
+      ss << " ";
+    }
+  }
+
+  return ss.str();
+}
+
+broadcast_error::broadcast_error(intptr_t ninputs, const nd::array *inputs)
+    : dynd_exception("broadcast error", broadcast_error_message(ninputs, inputs))
+{
+}
+
+inline std::string broadcast_error_message(const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
+                                           const char *src_arrmeta)
+{
+  stringstream ss;
+  ss << "cannot broadcast input datashape '";
+  format_datashape(ss, src_tp, src_arrmeta, NULL, false);
+  ss << "' into datashape '";
+  format_datashape(ss, dst_tp, dst_arrmeta, NULL, false);
+  ss << "'";
+  return ss.str();
+}
+
+broadcast_error::broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
+                                 const char *src_arrmeta)
+    : dynd_exception("broadcast error", broadcast_error_message(dst_tp, dst_arrmeta, src_tp, src_arrmeta))
+{
+}
+
+inline std::string broadcast_error_message(const ndt::type &dst_tp, const char *dst_arrmeta, const char *src_name)
+{
+  stringstream ss;
+  ss << "cannot broadcast input " << src_name << " into datashape '";
+  format_datashape(ss, dst_tp, dst_arrmeta, NULL, false);
+  ss << "'";
+  return ss.str();
+}
+
+broadcast_error::broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const char *src_name)
+    : dynd_exception("broadcast error", broadcast_error_message(dst_tp, dst_arrmeta, src_name))
+{
+}
+
+inline std::string broadcast_error_message(intptr_t dst_size, intptr_t src_size, const char *dst_name,
+                                           const char *src_name)
+{
+  stringstream ss;
+  ss << "cannot broadcast input " << src_name << " with size " << src_size;
+  ss << " into output " << dst_name << " with size " << dst_size;
+  return ss.str();
+}
+
+broadcast_error::broadcast_error(intptr_t dst_size, intptr_t src_size, const char *dst_name, const char *src_name)
+    : dynd_exception("broadcast error", broadcast_error_message(dst_size, src_size, dst_name, src_name))
+{
+}
+
+void dynd::broadcast_to_shape(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim,
+                              const intptr_t *src_shape, const intptr_t *src_strides, intptr_t *out_strides)
+{
+  // cout << "broadcast_to_shape(" << dst_ndim << ", (";
+  // for (int i = 0; i < dst_ndim; ++i) cout << dst_shape[i] << " ";
+  // cout << "), " << src_ndim << ", (";
+  // for (int i = 0; i < src_ndim; ++i) cout << src_shape[i] << " ";
+  // cout << "), (";
+  // for (int i = 0; i < src_ndim; ++i) cout << src_strides[i] << " ";
+  // cout << ")\n";
+
+  if (src_ndim > dst_ndim) {
+    throw broadcast_error(dst_ndim, dst_shape, src_ndim, src_shape);
+  }
+
+  intptr_t dimdelta = dst_ndim - src_ndim;
+  for (intptr_t i = 0; i < dimdelta; ++i) {
+    out_strides[i] = 0;
+  }
+  for (intptr_t i = dimdelta; i < dst_ndim; ++i) {
+    intptr_t src_i = i - dimdelta;
+    if (src_shape[src_i] == 1) {
+      out_strides[i] = 0;
+    }
+    else if (src_shape[src_i] == dst_shape[i]) {
+      out_strides[i] = src_strides[src_i];
+    }
+    else {
+      throw broadcast_error(dst_ndim, dst_shape, src_ndim, src_shape);
+    }
+  }
+
+  // cout << "output strides: ";
+  // for (int i = 0; i < dst_ndim; ++i) cout << out_strides[i] << " ";
+  // cout << "\n";
+}
+
+void dynd::incremental_broadcast(intptr_t out_undim, intptr_t *out_shape, intptr_t undim, const intptr_t *shape)
+{
+  if (out_undim < undim) {
+    throw broadcast_error(out_undim, out_shape, undim, shape);
+  }
+
+  out_shape += (out_undim - undim);
+  for (intptr_t i = 0; i < undim; ++i) {
+    intptr_t shape_i = shape[i];
+    if (shape_i != 1) {
+      if (shape_i == -1) {
+        if (out_shape[i] == 1) {
+          out_shape[i] = -1;
+        }
+      }
+      else if (out_shape[i] == 1 || out_shape[i] == -1) {
+        out_shape[i] = shape_i;
+      }
+      else if (shape_i != out_shape[i]) {
+        throw broadcast_error(out_undim, out_shape - (out_undim - undim), undim, shape);
+      }
+    }
+  }
+}

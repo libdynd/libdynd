@@ -5,10 +5,9 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
-#include <dynd/array.hpp>
 #include <dynd/types/base_dim_type.hpp>
 
 namespace dynd {
@@ -16,7 +15,7 @@ namespace ndt {
 
   type make_ellipsis_dim(const std::string &name, const type &element_type);
 
-  class DYND_API ellipsis_dim_type : public base_dim_type {
+  class DYNDT_API ellipsis_dim_type : public base_dim_type {
     std::string m_name;
 
   public:

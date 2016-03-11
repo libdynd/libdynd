@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <dynd/types/base_type.hpp>
 #include <dynd/type.hpp>
+#include <dynd/types/base_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -21,7 +21,7 @@ namespace ndt {
    * dynd. This memory can be tracked via the object in
    * memblock/external_memory_block.hpp.
    */
-  class DYND_API base_memory_type : public base_type {
+  class DYNDT_API base_memory_type : public base_type {
   protected:
     type m_element_tp;
     size_t m_storage_arrmeta_offset;
