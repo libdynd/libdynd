@@ -21,10 +21,9 @@ using namespace dynd;
 
 ndt::type_registry::type_registry()
 {
-  m_infos.emplace_back(0, nullptr,
-                       type(reinterpret_cast<const base_type *>(uninitialized_id), false)); // uninitialized_id
+  m_infos.emplace_back();
 
-  m_infos.emplace_back(0, nullptr, make_type<any_kind_type>()); // any_kind_id
+  m_infos.emplace_back(make_type<any_kind_type>());
   insert(base_id_of<scalar_kind_id>::value, make_type<scalar_kind_type>());
 
   insert(base_id_of<bool_kind_id>::value, type());
@@ -98,41 +97,26 @@ ndt::type_registry::type_registry()
   insert(any_kind_id, type()); // pow_dimsym_id
   insert(any_kind_id, type()); // ellipsis_dim_id
   insert(any_kind_id, type()); // dim_fragment_id
-
-  for (size_t i = 0; i < size(); ++i) {
-    m_infos[i].bits |= 1L << i;
-  }
-}
-
-ndt::type_registry::~type_registry()
-{
-  for (auto iter = m_infos.begin(); iter != m_infos.end(); ++iter) {
-    delete[] iter->_bases;
-    iter->_bases = nullptr;
-  }
 }
 
 DYND_API size_t ndt::type_registry::size() const { return m_infos.size(); }
 
-DYND_API type_id_t ndt::type_registry::insert(type_id_t base_id, const type &kind_tp)
+DYND_API type_id_t ndt::type_registry::insert(type_id_t base_id, const type &tp)
 {
   type_id_t id = static_cast<type_id_t>(size());
-  const type_info &base_tp_info = m_infos[base_id];
 
-  size_t nbases = base_tp_info.nbases + 1;
-  type_id_t *bases = new type_id_t[nbases];
-
-  bases[0] = base_id;
-  for (size_t i = 1; i < nbases; ++i) {
-    bases[i] = base_tp_info._bases[i - 1];
+  vector<type_id_t> base_ids{base_id};
+  for (type_id_t id : m_infos[base_id].get_base_ids()) {
+    base_ids.push_back(id);
   }
 
-  m_infos.emplace_back(nbases, bases, kind_tp);
+  m_infos.emplace_back(tp, base_ids);
+  m_infos[id].bits |= 1L << id;
 
   return id;
 }
 
-DYND_API const ndt::type_info &ndt::type_registry::operator[](type_id_t id) const
+DYND_API const id_info &ndt::type_registry::operator[](type_id_t id) const
 {
   if (id >= static_cast<type_id_t>(size())) {
     throw runtime_error("invalid type id");

@@ -74,7 +74,7 @@ char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, ch
   return data;
 }
 
-ndt::type::type(type_id_t id) : type(type_registry[id].kind_tp) {}
+ndt::type::type(type_id_t id) : type(type_registry[id].get_type()) {}
 
 ndt::type::type(const std::string &rep) { type_from_datashape(rep).swap(*this); }
 
@@ -932,7 +932,7 @@ void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *dat
   }
 }
 
-type_id_t ndt::type::get_base_id() const { return type_registry[get_id()]._bases[0]; }
+type_id_t ndt::type::get_base_id() const { return type_registry[get_id()].get_base_id(); }
 
 std::map<std::array<type_id_t, 2>, ndt::common_type::child_type> ndt::common_type::children;
 
@@ -940,12 +940,12 @@ struct ndt::common_type::init {
   template <typename TypeIDSequence>
   void on_each()
   {
-    children[{{front<TypeIDSequence>::value, back<TypeIDSequence>::value}}] =
-        [](const ndt::type &DYND_UNUSED(tp0), const ndt::type &DYND_UNUSED(tp1)) {
-          return ndt::make_type<
-              typename std::common_type<typename dynd::type_of<front<TypeIDSequence>::value>::type,
-                                        typename dynd::type_of<back<TypeIDSequence>::value>::type>::type>();
-        };
+    children[{{front<TypeIDSequence>::value, back<TypeIDSequence>::value}}] = [](const ndt::type &DYND_UNUSED(tp0),
+                                                                                 const ndt::type &DYND_UNUSED(tp1)) {
+      return ndt::make_type<
+          typename std::common_type<typename dynd::type_of<front<TypeIDSequence>::value>::type,
+                                    typename dynd::type_of<back<TypeIDSequence>::value>::type>::type>();
+    };
   }
 };
 
