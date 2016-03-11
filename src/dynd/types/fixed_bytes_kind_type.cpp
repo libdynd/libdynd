@@ -12,8 +12,6 @@ using namespace dynd;
 
 ndt::fixed_bytes_kind_type::fixed_bytes_kind_type() : base_bytes_type(fixed_bytes_id, 0, 0, type_flag_symbolic, 0) {}
 
-ndt::fixed_bytes_kind_type::~fixed_bytes_kind_type() {}
-
 size_t ndt::fixed_bytes_kind_type::get_default_data_size() const
 {
   stringstream ss;

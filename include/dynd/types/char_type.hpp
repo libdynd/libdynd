@@ -23,8 +23,6 @@ namespace ndt {
   public:
     char_type(string_encoding_t encoding = string_encoding_utf_32);
 
-    virtual ~char_type();
-
     string_encoding_t get_encoding() const { return m_encoding; }
 
     /** Alignment of the string data being pointed to. */

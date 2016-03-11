@@ -35,8 +35,6 @@ ndt::fixed_string_type::fixed_string_type(intptr_t stringsize, string_encoding_t
   }
 }
 
-ndt::fixed_string_type::~fixed_string_type() {}
-
 void ndt::fixed_string_type::get_string_range(const char **out_begin, const char **out_end,
                                               const char *DYND_UNUSED(arrmeta), const char *data) const
 {

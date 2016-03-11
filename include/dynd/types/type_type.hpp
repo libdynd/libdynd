@@ -23,8 +23,6 @@ namespace ndt {
 
     type_type(const type &pattern_tp);
 
-    virtual ~type_type();
-
     const type &get_pattern_type() const { return m_pattern_tp; }
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;

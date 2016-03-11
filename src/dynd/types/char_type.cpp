@@ -32,8 +32,6 @@ ndt::char_type::char_type(string_encoding_t encoding)
   }
 }
 
-ndt::char_type::~char_type() {}
-
 uint32_t ndt::char_type::get_code_point(const char *data) const
 {
   next_unicode_codepoint_t next_fn;

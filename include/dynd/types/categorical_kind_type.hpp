@@ -14,8 +14,6 @@ namespace ndt {
   public:
     categorical_kind_type();
 
-    virtual ~categorical_kind_type();
-
     size_t get_default_data_size() const;
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;

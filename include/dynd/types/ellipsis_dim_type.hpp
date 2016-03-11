@@ -22,8 +22,6 @@ namespace ndt {
   public:
     ellipsis_dim_type(const std::string &name, const type &element_type);
 
-    virtual ~ellipsis_dim_type() {}
-
     const std::string &get_name() const { return m_name; }
 
     void get_vars(std::unordered_set<std::string> &vars) const;

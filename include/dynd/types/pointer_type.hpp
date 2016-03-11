@@ -36,8 +36,6 @@ namespace ndt {
   public:
     pointer_type(const type &target_tp);
 
-    virtual ~pointer_type();
-
     const type &get_value_type() const { return m_target_tp.value_type(); }
     const type &get_operand_type() const;
 

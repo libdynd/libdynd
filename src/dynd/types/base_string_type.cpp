@@ -10,8 +10,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::base_string_type::~base_string_type() {}
-
 std::string ndt::base_string_type::get_utf8_string(const char *arrmeta, const char *data,
                                                    assign_error_mode errmode) const
 {

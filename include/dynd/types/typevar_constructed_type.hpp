@@ -20,8 +20,6 @@ namespace ndt {
   public:
     typevar_constructed_type(const std::string &name, const type &arg);
 
-    virtual ~typevar_constructed_type() {}
-
     std::string get_name() const { return m_name; }
 
     type get_arg() const { return m_arg; }

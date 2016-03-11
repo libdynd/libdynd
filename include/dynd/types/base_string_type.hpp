@@ -26,7 +26,6 @@ namespace ndt {
     {
     }
 
-    virtual ~base_string_type();
     /** The encoding used by the string */
     virtual string_encoding_t get_encoding() const { return m_encoding; }
 

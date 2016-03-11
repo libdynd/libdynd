@@ -12,8 +12,6 @@ using namespace dynd;
 
 ndt::categorical_kind_type::categorical_kind_type() : base_type(categorical_id, 0, 0, type_flag_symbolic, 0, 0, 0) {}
 
-ndt::categorical_kind_type::~categorical_kind_type() {}
-
 size_t ndt::categorical_kind_type::get_default_data_size() const
 {
   stringstream ss;

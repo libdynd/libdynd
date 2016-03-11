@@ -22,8 +22,6 @@ namespace ndt {
 
     adapt_type(const nd::callable &forward, const nd::callable &inverse);
 
-    virtual ~adapt_type() {}
-
     const ndt::type &get_value_type() const { return m_value_tp; }
     const ndt::type &get_storage_type() const { return m_storage_tp; }
     const nd::callable &get_forward() const { return m_forward; }

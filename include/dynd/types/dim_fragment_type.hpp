@@ -32,8 +32,6 @@ namespace ndt {
     dim_fragment_type(intptr_t ndim, const intptr_t *tagged_dims);
     dim_fragment_type(intptr_t ndim, const type &tp);
 
-    virtual ~dim_fragment_type() {}
-
     /**
      * The tagged_dims should be interpreted as an array of
      * size get_ndim() containing:
