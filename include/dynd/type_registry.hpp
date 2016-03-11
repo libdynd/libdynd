@@ -25,9 +25,12 @@ namespace ndt {
         : nbases(nbases), _bases(bases), kind_tp(kind_tp), bits(0)
     {
       for (size_t i = 0; i < nbases; ++i) {
+        this->m_bases.push_back(_bases[i]);
+      }
+
+      for (size_t i = 0; i < nbases; ++i) {
         type_id_t base_id = _bases[i];
         bits |= (1L << base_id);
-        this->m_bases.push_back(_bases[i]);
       }
     }
 
