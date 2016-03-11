@@ -124,7 +124,7 @@ string(REPLACE "v" "" DYND_VERSION "${DYND_VERSION_STRING}")
 string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION}")
 list(GET DYND_VERSION 0 "${DYND_VERSION}")
 
-set(libndt_SRC
+set(libdyndt_SRC
     # Eval
     src/dynd/eval/eval_context.cpp
     include/dynd/eval/eval_context.hpp
@@ -437,15 +437,16 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 if (DYND_SHARED_LIB)
     # xcode doesn't like when all cpp files are contained in an OBJECT library
-    add_library(libndt SHARED ${libndt_SRC})
+    add_library(libdyndt SHARED ${libdyndt_SRC})
     add_library(libdynd SHARED ${libdynd_SRC})
-    add_dependencies(libdynd libndt)
+    add_dependencies(libdynd libdyndt)
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"
         PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
         )
 else()
+    add_library(libdyndt STATIC ${libdyndt_SRC})
     add_library(libdynd STATIC ${libdynd_SRC})
     set_target_properties(libdynd
         PROPERTIES
@@ -455,7 +456,7 @@ else()
 endif()
 
 set_property(
-    TARGET libndt
+    TARGET libdyndt
     PROPERTY COMPILE_DEFINITIONS DYNDT_EXPORT
 )
 
@@ -482,7 +483,7 @@ elseif(APPLE)
     #
     # See http://stackoverflow.com/questions/22885207/opencv-and-pcl-builds-on-osx-result-in-malformed-object-load-command-cmdsize
     #
-    set_target_properties(libndt
+    set_target_properties(libdyndt
         PROPERTIES
         BUILD_WITH_INSTALL_RPATH ON
         INSTALL_NAME_DIR "@rpath"
@@ -497,7 +498,7 @@ endif()
 if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
     # If we're not making an installable static library,
     # link the sublibraries normally
-    target_link_libraries(libdynd ${DYND_LINK_LIBS} libndt)
+    target_link_libraries(libdynd ${DYND_LINK_LIBS} libdyndt)
 endif()
 
 if(DYND_BUILD_TESTS)
@@ -562,8 +563,8 @@ endif()
 
 # If requested, install the .lib/.so/.dll file and headers to the install prefix
 if (DYND_INSTALL_LIB)
-    # Install the libndt binary
-    install(TARGETS libndt
+    # Install the libdyndt binary
+    install(TARGETS libdyndt
         RUNTIME DESTINATION lib${LIB_SUFFIX}
         LIBRARY DESTINATION lib${LIB_SUFFIX}
         ARCHIVE DESTINATION lib${LIB_SUFFIX}${DYND_STATIC_LIB_DIR})
