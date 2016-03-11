@@ -41,8 +41,8 @@ option<ValueType> opt(ValueType value)
   return option<ValueType>(value);
 }
 
-void assign_na_builtin(type_id_t value_id, char *data);
-bool is_avail_builtin(type_id_t value_id, const char *data);
+DYNDT_API void assign_na_builtin(type_id_t value_id, char *data);
+DYNDT_API bool is_avail_builtin(type_id_t value_id, const char *data);
 
 namespace ndt {
 
