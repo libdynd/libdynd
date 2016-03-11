@@ -20,6 +20,18 @@ using namespace dynd;
 
 TEST(TypeRegistry, Bases)
 {
+  static const vector<type_id_t> any_kind_base_ids;
+  EXPECT_EQ(any_kind_base_ids, ndt::type_registry[any_kind_id].bases());
+
+  static const vector<type_id_t> scalar_kind_base_ids{any_kind_id};
+  EXPECT_EQ(scalar_kind_base_ids, ndt::type_registry[scalar_kind_id].bases());
+
+  static const vector<type_id_t> bool_base_ids{bool_kind_id, scalar_kind_id, any_kind_id};
+  EXPECT_EQ(bool_base_ids, ndt::type_registry[bool_id].bases());
+
+  static const vector<type_id_t> int_kind_base_ids{scalar_kind_id, any_kind_id};
+  EXPECT_EQ(int_kind_base_ids, ndt::type_registry[int_kind_id].bases());
+
   static const vector<type_id_t> int_base_ids{int_kind_id, scalar_kind_id, any_kind_id};
   EXPECT_EQ(int_base_ids, ndt::type_registry[int8_id].bases());
   EXPECT_EQ(int_base_ids, ndt::type_registry[int16_id].bases());
@@ -39,20 +51,6 @@ TEST(TypeRegistry, Bases)
   EXPECT_EQ(float_base_ids, ndt::type_registry[float32_id].bases());
   EXPECT_EQ(float_base_ids, ndt::type_registry[float64_id].bases());
   EXPECT_EQ(float_base_ids, ndt::type_registry[float128_id].bases());
-
-  /*
-    static const vector<type_id_t> bytes_base_ids{bytes_kind_id, scalar_kind_id, any_kind_id};
-    //  EXPECT_EQ(bytes_base_ids, ndt::type_registry[fixed_bytes_id].bases());
-    //  EXPECT_EQ(bytes_base_ids, ndt::type_registry[bytes_id].bases());
-
-    static const vector<type_id_t> string_base_ids{string_kind_id, scalar_kind_id, any_kind_id};
-    for (type_id_t id : ndt::type_registry[string_id].bases()) {
-      std::cout << id << std::endl;
-    }
-
-    std::exit(-1);
-    EXPECT_EQ(string_base_ids, ndt::type_registry[string_id].bases());
-  */
 }
 
 /*

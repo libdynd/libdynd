@@ -14,8 +14,16 @@ ostream &dynd::operator<<(ostream &o, type_id_t id)
   switch (id) {
   case uninitialized_id:
     return o << "uninitialized";
+  case any_kind_id:
+    return o << "any_kind";
+  case scalar_kind_id:
+    return o << "scalar_kind";
+  case bool_kind_id:
+    return o << "bool_kind";
   case bool_id:
     return o << "bool";
+  case int_kind_id:
+    return o << "int_kind";
   case int8_id:
     return o << "int8";
   case int16_id:
@@ -26,6 +34,8 @@ ostream &dynd::operator<<(ostream &o, type_id_t id)
     return o << "int64";
   case int128_id:
     return o << "int128";
+  case uint_kind_id:
+    return o << "uint_kind";
   case uint8_id:
     return o << "uint8";
   case uint16_id:
