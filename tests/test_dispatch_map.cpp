@@ -64,6 +64,7 @@ TEST(TypeRegistry, Bases)
   EXPECT_EQ(vector<type_id_t>({any_kind_id}), ndt::type_registry[void_id].get_base_ids());
 }
 
+/*
 TEST(TypeRegistry, IsBaseIDOf)
 {
   for (type_id_t id = ndt::type_registry.min(); id < callable_id; id = static_cast<type_id_t>(id + 1)) {
@@ -72,6 +73,7 @@ TEST(TypeRegistry, IsBaseIDOf)
     }
   }
 }
+*/
 
 TEST(Sort, TopologicalSort)
 {
