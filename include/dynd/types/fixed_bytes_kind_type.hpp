@@ -15,8 +15,6 @@ namespace ndt {
   public:
     fixed_bytes_kind_type();
 
-    virtual ~fixed_bytes_kind_type();
-
     size_t get_default_data_size() const;
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;

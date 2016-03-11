@@ -14,8 +14,6 @@ namespace ndt {
   public:
     scalar_kind_type();
 
-    virtual ~scalar_kind_type();
-
     bool operator==(const base_type &rhs) const;
 
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;

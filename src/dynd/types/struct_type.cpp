@@ -39,8 +39,6 @@ ndt::struct_type::struct_type(const std::vector<std::string> &field_names, const
   }
 }
 
-ndt::struct_type::~struct_type() {}
-
 intptr_t ndt::struct_type::get_field_index(const std::string &name) const
 {
   auto it = std::find(m_field_names.begin(), m_field_names.end(), name);

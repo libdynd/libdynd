@@ -10,8 +10,6 @@ using namespace dynd;
 
 ndt::scalar_kind_type::scalar_kind_type() : base_type(scalar_kind_id, 0, 0, type_flag_symbolic, 0, 0, 0) {}
 
-ndt::scalar_kind_type::~scalar_kind_type() {}
-
 bool ndt::scalar_kind_type::operator==(const base_type &other) const
 {
   return this == &other || other.get_id() == scalar_kind_id;

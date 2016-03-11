@@ -15,8 +15,6 @@ namespace ndt {
   public:
     fixed_bytes_type(intptr_t element_size, intptr_t alignment);
 
-    virtual ~fixed_bytes_type();
-
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;

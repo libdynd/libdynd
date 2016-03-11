@@ -22,8 +22,6 @@ namespace ndt {
   public:
     fixed_string_type(intptr_t stringsize, string_encoding_t encoding);
 
-    virtual ~fixed_string_type();
-
     intptr_t get_size() const { return m_stringsize; }
     string_encoding_t get_encoding() const { return m_encoding; }
 

@@ -19,8 +19,6 @@ namespace ndt {
   public:
     typevar_type(const std::string &name);
 
-    virtual ~typevar_type() {}
-
     const std::string &get_name() const { return m_name; }
 
     void get_vars(std::unordered_set<std::string> &vars) const;

@@ -22,10 +22,15 @@ enum type_id_t {
   // The value zero is reserved for an uninitialized type.
   uninitialized_id,
 
+  any_kind_id,    // "Any", matching any type (dimensions and dtype)
+  scalar_kind_id, // "Scalar" matchines any scalar type
+
+  bool_kind_id,
   // A 1-byte boolean type
   bool_id,
 
   // Signed integer types
+  int_kind_id,
   int8_id,
   int16_id,
   int32_id,
@@ -33,6 +38,7 @@ enum type_id_t {
   int128_id,
 
   // Unsigned integer types
+  uint_kind_id,
   uint8_id,
   uint16_id,
   uint32_id,
@@ -40,27 +46,21 @@ enum type_id_t {
   uint128_id,
 
   // Floating point types
+  float_kind_id,
   float16_id,
   float32_id,
   float64_id,
   float128_id,
 
   // Complex floating-point types
+  complex_kind_id,
   complex_float32_id,
   complex_float64_id,
 
   // Means no type, just like in C. (Different from NumPy)
   void_id,
 
-  any_kind_id,    // "Any", matching any type (dimensions and dtype)
-  scalar_kind_id, // "Scalar" matchines any scalar type
   dim_kind_id,
-
-  bool_kind_id,
-  int_kind_id,
-  uint_kind_id,
-  float_kind_id,
-  complex_kind_id,
 
   bytes_kind_id,
   fixed_bytes_id, // A bytes buffer of a fixed size
@@ -463,6 +463,10 @@ template <type_id_t ID>
 struct base_id_of;
 
 template <>
+struct base_id_of<scalar_kind_id> : id_constant<any_kind_id> {
+};
+
+template <>
 struct base_id_of<bool_kind_id> : id_constant<scalar_kind_id> {
 };
 
@@ -536,6 +540,10 @@ struct base_id_of<float64_id> : id_constant<float_kind_id> {
 
 template <>
 struct base_id_of<float128_id> : id_constant<float_kind_id> {
+};
+
+template <>
+struct base_id_of<complex_kind_id> : id_constant<scalar_kind_id> {
 };
 
 template <>
@@ -620,6 +628,10 @@ struct base_id_of<callable_id> : id_constant<scalar_kind_id> {
 
 template <>
 struct base_id_of<array_id> : id_constant<scalar_kind_id> {
+};
+
+template <>
+struct base_id_of<dim_kind_id> : id_constant<any_kind_id> {
 };
 
 namespace detail {
@@ -783,7 +795,6 @@ template <>
 struct property_type_id_of<std::string> {
   static const type_id_t value = string_id;
 };
-
 
 DYND_API bool is_base_id_of(type_id_t base_id, type_id_t id);
 

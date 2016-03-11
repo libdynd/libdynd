@@ -26,8 +26,6 @@ namespace ndt {
 
     var_dim_type(const type &element_tp);
 
-    virtual ~var_dim_type();
-
     size_t get_default_data_size() const { return sizeof(data_type); }
 
     /** Alignment of the data being pointed to. */

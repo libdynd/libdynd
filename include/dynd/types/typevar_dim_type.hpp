@@ -20,8 +20,6 @@ namespace ndt {
   public:
     typevar_dim_type(const std::string &name, const type &element_type);
 
-    virtual ~typevar_dim_type() {}
-
     const std::string &get_name() const { return m_name; }
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;

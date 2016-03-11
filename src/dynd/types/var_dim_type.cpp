@@ -28,8 +28,6 @@ ndt::var_dim_type::var_dim_type(const type &element_tp)
   this->flags |= (element_tp.get_flags() & type_flags_value_inherited);
 }
 
-ndt::var_dim_type::~var_dim_type() {}
-
 void ndt::var_dim_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const
 {
   const metadata_type *md = reinterpret_cast<const metadata_type *>(arrmeta);

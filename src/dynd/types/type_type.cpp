@@ -27,8 +27,6 @@ ndt::type_type::type_type(const type &pattern_tp)
   }
 }
 
-ndt::type_type::~type_type() {}
-
 void ndt::type_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
   o << *reinterpret_cast<const ndt::type *>(data);

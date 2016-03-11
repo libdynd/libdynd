@@ -15,8 +15,6 @@ class DYND_API cuda_device_type : public base_memory_type {
 public:
   cuda_device_type(const ndt::type &element_tp);
 
-  virtual ~cuda_device_type();
-
   void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
   void print_type(std::ostream &o) const;

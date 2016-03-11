@@ -36,8 +36,6 @@ ndt::fixed_bytes_type::fixed_bytes_type(intptr_t data_size, intptr_t data_alignm
   }
 }
 
-ndt::fixed_bytes_type::~fixed_bytes_type() {}
-
 void ndt::fixed_bytes_type::get_bytes_range(const char **out_begin, const char **out_end,
                                             const char *DYND_UNUSED(arrmeta), const char *data) const
 {

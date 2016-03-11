@@ -27,8 +27,6 @@ namespace ndt {
     struct_type(const std::vector<std::string> &field_names, const std::vector<type> &field_types,
                 bool variadic = false);
 
-    virtual ~struct_type();
-
     /** The array of the field names */
     const std::vector<std::string> &get_field_names() const { return m_field_names; }
     const std::string &get_field_name(intptr_t i) const { return m_field_names[i]; }

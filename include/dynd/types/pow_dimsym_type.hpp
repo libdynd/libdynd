@@ -21,8 +21,6 @@ namespace ndt {
   public:
     pow_dimsym_type(const type &base_tp, const std::string &exponent, const type &element_type);
 
-    virtual ~pow_dimsym_type() {}
-
     const type &get_base_type() const { return m_base_tp; }
 
     const std::string &get_exponent() const { return m_exponent; }

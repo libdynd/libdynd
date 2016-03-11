@@ -22,8 +22,6 @@ ndt::pointer_type::pointer_type(const type &target_tp)
 {
 }
 
-ndt::pointer_type::~pointer_type() {}
-
 void ndt::pointer_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const
 {
   const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);

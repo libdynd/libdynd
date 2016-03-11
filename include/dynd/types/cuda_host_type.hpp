@@ -18,8 +18,6 @@ class DYND_API cuda_host_type : public base_memory_type {
 public:
   cuda_host_type(const ndt::type &element_tp, unsigned int cuda_host_flags = cudaHostAllocDefault);
 
-  virtual ~cuda_host_type();
-
   unsigned int get_cuda_host_flags() const { return m_cuda_host_flags; }
 
   void print_type(std::ostream &o) const;
