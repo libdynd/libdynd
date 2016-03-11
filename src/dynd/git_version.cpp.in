@@ -5,14 +5,14 @@
 
 // NOTE: Only modify git_version.cpp.in, not the generated git_version.cpp.
 
-#include <dynd/config.hpp>
+#include <dynd/git_version.hpp>
 
 #define DYND_GIT_SHA1 "@DYND_GIT_SHA1@"
 #define DYND_VERSION_STRING "@DYND_VERSION_STRING@"
 
 namespace dynd {
 
-DYNDT_API const char dynd_git_sha1[] = DYND_GIT_SHA1;
-DYNDT_API const char dynd_version_string[] = DYND_VERSION_STRING;
+const char dynd_git_sha1[] = DYND_GIT_SHA1;
+const char dynd_version_string[] = DYND_VERSION_STRING;
 
 } // namespace dynd

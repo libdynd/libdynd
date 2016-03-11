@@ -18,6 +18,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 #include <dynd/git_version.hpp>
 #include <dynd/visibility.hpp>
