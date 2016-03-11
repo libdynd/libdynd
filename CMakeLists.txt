@@ -441,13 +441,15 @@ if (DYND_SHARED_LIB)
     set_target_properties(libdyndt
         PROPERTIES
         OUTPUT_NAME "dyndt"
-        PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
+        PREFIX "lib"
+        IMPORT_PREFIX "lib"
         )
     add_library(libdynd SHARED ${libdynd_SRC})
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"
-        PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
+        PREFIX "lib"
+        IMPORT_PREFIX "lib"
         )
     add_dependencies(libdynd libdyndt)
 else()
@@ -455,14 +457,14 @@ else()
     set_target_properties(libdyndt
         PROPERTIES
         OUTPUT_NAME "dyndt"
-        PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}"
+        PREFIX "lib"
         )
 
     add_library(libdynd STATIC ${libdynd_SRC})
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"
-        PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}"
+        PREFIX "lib"
         )
 endif()
 
@@ -480,13 +482,7 @@ set_property(
 configure_file("include/dynd/cmake_config.hpp.in"
                "${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp")
 
-if(WIN32)
-    set_target_properties(libdynd
-        PROPERTIES
-        PREFIX "lib"
-        IMPORT_PREFIX "lib"
-        )
-elseif(APPLE)
+if(APPLE)
     # The rpath stuff is confusing, and this is our attempt to get it right.
     # It's been complicated by a bug in certain versions of CMake that plays
     # particularly badly with CUDA. If anyone knows the "right" way to do this,
