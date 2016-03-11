@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <dynd/type.hpp>
 #include <dynd/array.hpp>
+#include <dynd/type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 
 namespace {
@@ -20,7 +20,7 @@ struct assign_to_same_category_type;
 namespace dynd {
 namespace ndt {
 
-  class DYNDT_API categorical_type : public base_type {
+  class DYND_API categorical_type : public base_type {
     // The data type of the category
     type m_category_tp;
     // The integer type used for storage
@@ -95,7 +95,7 @@ namespace ndt {
     static type make(const nd::array &values) { return type(new categorical_type(values), false); }
   };
 
-  DYNDT_API type factor_categorical(const nd::array &values);
+  DYND_API type factor_categorical(const nd::array &values);
 
 } // namespace dynd::ndt
 } // namespace dynd

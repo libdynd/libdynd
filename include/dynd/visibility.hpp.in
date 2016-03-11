@@ -42,6 +42,8 @@
 #define DYND_API __declspec(dllexport)
 #else // defined(DYND_EXPORT)
 // Importing the library
+// libdynd and libdyndt must either both be built as shared or static libs.
+// Use a single configuration parameter to represent that.
 #if @DYND_SHARED_LIB_VAL@
 #define DYND_API __declspec(dllimport)
 #define DYND_USING_DLL

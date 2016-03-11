@@ -22,6 +22,6 @@ namespace ndt {
    * \param ndim  Number of dimensions in the shape.
    * \param shape  The dimensions to substitute.
    */
-  DYNDT_API ndt::type substitute_shape(const ndt::type &pattern, intptr_t ndim, const intptr_t *shape);
+  DYND_API ndt::type substitute_shape(const ndt::type &pattern, intptr_t ndim, const intptr_t *shape);
 }
 } // namespace dynd::ndt

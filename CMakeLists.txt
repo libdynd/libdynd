@@ -202,6 +202,8 @@ set(libdyndt_SRC
     src/dynd/exceptions.cpp
     src/dynd/float16.cpp
     src/dynd/float128.cpp
+    src/dynd/git_version.cpp.in # Included here for ease of editing in IDEs
+    ${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp
     src/dynd/int128.cpp
     src/dynd/parse_util.cpp
     src/dynd/shape_tools.cpp
@@ -346,8 +348,6 @@ set(libdynd_SRC
     src/dynd/search.cpp
     src/dynd/sort.cpp
     src/dynd/struct.cpp
-    src/dynd/git_version.cpp.in # Included here for ease of editing in IDEs
-    ${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp
     src/dynd/index.cpp
     src/dynd/json_formatter.cpp
     src/dynd/json_parser.cpp

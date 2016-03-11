@@ -11,11 +11,11 @@
 
 #include <dynd/config.hpp>
 #include <dynd/init.hpp>
-#include <dynd/shortvector.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
-#include <dynd/types/pointer_type.hpp>
+#include <dynd/shortvector.hpp>
 #include <dynd/types/bytes_type.hpp>
+#include <dynd/types/pointer_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -23,7 +23,7 @@
 namespace dynd {
 
 namespace ndt {
-  DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
+  DYNDT_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 } // namespace ndt;
 
 namespace nd {
@@ -86,7 +86,7 @@ namespace nd {
       {
       }
 
-      void single(char *data, const ValueType(&values)[Size]) const
+      void single(char *data, const ValueType (&values)[Size]) const
       {
         for (const ValueType &value : values) {
           child.single(data, value);
@@ -106,7 +106,7 @@ namespace nd {
       {
       }
 
-      void single(char *data, const ValueType(&values)[Size]) const
+      void single(char *data, const ValueType (&values)[Size]) const
       {
         for (const ValueType &value : values) {
           child.single(data, value);
@@ -175,16 +175,14 @@ namespace nd {
       */
     template <typename T,
               typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
-    array(T &&value)
-        : intrusive_ptr<array_preamble>(empty(ndt::type_for(value)))
+    array(T &&value) : intrusive_ptr<array_preamble>(empty(ndt::type_for(value)))
     {
       init(std::forward<T>(value));
     }
 
     /** Constructs an array from a 1D initializer list */
     template <typename ValueType>
-    array(const std::initializer_list<ValueType> &values)
-        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values)))
+    array(const std::initializer_list<ValueType> &values) : intrusive_ptr<array_preamble>(empty(ndt::type_for(values)))
     {
       init(values);
     }
@@ -555,7 +553,7 @@ namespace nd {
     array view(const ndt::type &tp) const;
 
     template <int N>
-    inline array view(const char(&rhs)[N])
+    inline array view(const char (&rhs)[N])
     {
       return view(ndt::type(rhs));
     }
@@ -900,7 +898,7 @@ namespace nd {
    * nd::array a = nd::empty("10 * int32");
    */
   template <int N>
-  inline array empty(const char(&dshape)[N])
+  inline array empty(const char (&dshape)[N])
   {
     return nd::empty(ndt::type(dshape, dshape + N - 1));
   }
@@ -922,7 +920,7 @@ namespace nd {
    *      array a = nd::empty(10, "int32");
    */
   template <int N>
-  inline array empty(intptr_t dim0, const char(&dshape)[N])
+  inline array empty(intptr_t dim0, const char (&dshape)[N])
   {
     return empty(dim0, ndt::type(dshape, dshape + N - 1));
   }
@@ -946,7 +944,7 @@ namespace nd {
    *      array a = nd::empty(10, 10, "int32");
    */
   template <int N>
-  inline array empty(intptr_t dim0, intptr_t dim1, const char(&dshape)[N])
+  inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N])
   {
     return empty(dim0, dim1, ndt::type(dshape, dshape + N - 1));
   }
@@ -972,7 +970,7 @@ namespace nd {
    *      array a = nd::empty(10, 10, 10, "int32");
    */
   template <int N>
-  inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char(&dshape)[N])
+  inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N])
   {
     return empty(dim0, dim1, dim2, ndt::type(dshape, dshape + N - 1));
   }
