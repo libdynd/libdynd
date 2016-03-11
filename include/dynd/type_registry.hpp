@@ -14,18 +14,22 @@ namespace dynd {
 class id_info {
   ndt::type m_tp;
   std::vector<type_id_t> m_base_ids;
+  std::vector<bool> m_is_base_id;
 
 public:
-  std::bitset<64> bits;
-
   id_info() = default;
 
-  id_info(const ndt::type &tp) : m_tp(tp), bits(0) {}
-
-  id_info(const ndt::type &tp, const std::vector<type_id_t> &base_ids) : m_tp(tp), m_base_ids(base_ids), bits(0)
+  id_info(type_id_t id, const ndt::type &tp, size_t size = 128) : m_tp(tp), m_is_base_id(size)
   {
+    m_is_base_id[id] = true;
+  }
+
+  id_info(type_id_t id, const ndt::type &tp, const std::vector<type_id_t> &base_ids, size_t size = 128)
+      : m_tp(tp), m_base_ids(base_ids), m_is_base_id(size)
+  {
+    m_is_base_id[id] = true;
     for (type_id_t base_id : m_base_ids) {
-      bits |= (1L << base_id);
+      m_is_base_id[base_id] = true;
     }
   }
 
@@ -35,7 +39,7 @@ public:
 
   const ndt::type &get_type() const { return m_tp; }
 
-  bool is_base_id(type_id_t id) const { return bits[id]; }
+  bool is_base_id(type_id_t id) const { return m_is_base_id[id]; }
 };
 
 namespace ndt {

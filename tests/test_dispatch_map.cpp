@@ -64,16 +64,14 @@ TEST(TypeRegistry, Bases)
   EXPECT_EQ(vector<type_id_t>({any_kind_id}), ndt::type_registry[void_id].get_base_ids());
 }
 
-/*
 TEST(TypeRegistry, IsBaseIDOf)
 {
-  for (type_id_t id = ndt::type_registry.min(); id < callable_id; id = static_cast<type_id_t>(id + 1)) {
+  for (type_id_t id = ndt::type_registry.min(); id < void_id; id = static_cast<type_id_t>(id + 1)) {
     for (type_id_t base_id : ndt::type_registry[id].get_base_ids()) {
       EXPECT_TRUE(is_base_id_of(base_id, id));
     }
   }
 }
-*/
 
 TEST(Sort, TopologicalSort)
 {
