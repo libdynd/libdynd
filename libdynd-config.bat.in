@@ -1,17 +1,17 @@
 @echo off
 
-if NOT "%1"=="-libname" goto notlibname
-    echo @DYND_LIB_FILE@
+if NOT "%1"=="-libnames" goto notlibnames
+    echo @DYND_LIB_FILE@;@DYNDT_LIB_FILE@
     exit /B 0
-:notlibname
+:notlibnames
 
-if NOT "%1"=="-libpath" goto notlibname
+if NOT "%1"=="-libdir" goto notlibdir
     REM This batch file should be in a ...\bin relative to ...\lib
-    pushd %~f0\..\..\lib@LIB_SUFFIX@@DYND_STATIC_LIB_DIR@
-    echo %CD%\@DYND_LIB_FILE@
+    pushd %~f0\..\..\lib
+    echo %CD%
     popd
     exit /B 0
-:notlibname
+:notlibdir
 
 if NOT "%1"=="-includedir" goto notincludedir
     REM This batch file should be in a ...\bin relative to ...\include
@@ -21,24 +21,25 @@ if NOT "%1"=="-includedir" goto notincludedir
     exit /B 0
 :notincludedir
 
+if NOT "%1"=="-rootdir" goto notrootdir
+    REM This batch file should be in a ...\bin relative to ...\include
+    pushd %~f0\..\..
+    echo %CD%
+    popd
+    exit /B 0
+:notrootdir
+
 if NOT "%1"=="-version" goto notversion
     echo @DYND_VERSION_STRING@
     exit /B 0
 :notversion
 
-if NOT "%1"=="-cuda" goto notcuda
-    REM Use the echo: syntax because echo OFF and echo ON have other meanings.
-    echo:@DYND_CUDA@
-    exit /B 0
-:notcuda
-
 echo Usage: %0 OPTION
 echo Print information for linking libdynd.
 echo
 echo Options:
-echo   -libname     Prints the name of the libdynd library.
-echo   -libpath     Prints the full path of the libdynd library.
+echo   -libnames    Prints a semicolon separated list of the library names.
+echo   -libdir      Prints the full path of the directory containing the libraries.
 echo   -includedir  Prints the directory with the libdynd include files.
 echo   -version     Prints the version of libdynd.
-echo   -cuda        Prints whether libdynd was built with cuda support ON or OFF.
 exit /B 1
