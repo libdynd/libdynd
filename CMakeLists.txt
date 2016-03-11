@@ -584,7 +584,9 @@ if (DYND_INSTALL_LIB)
             DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
         if(DYND_SHARED_LIB)
             install(FILES "$<TARGET_FILE_DIR:libdynd>/libdynd.dll"
-                DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+                    DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+            install(FILES "$<TARGET_FILE_DIR:libdyndt>/libdyndt.dll"
+                    DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
         endif()
     else()
         install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config"
