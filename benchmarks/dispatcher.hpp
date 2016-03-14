@@ -3,8 +3,6 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <vector>
-
 struct parent {
   virtual ~parent();
 
@@ -15,4 +13,4 @@ struct child : parent {
   int operator()() const;
 };
 
-extern std::vector<parent *> items;
+extern parent *item;

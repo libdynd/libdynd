@@ -107,7 +107,7 @@ BENCHMARK_REGISTER_F(UnaryDispatchFixture, BM_UnaryDispatch)->Arg(100)->Arg(1000
 static void BM_VirtualDispatch(benchmark::State &state)
 {
   while (state.KeepRunning()) {
-    benchmark::DoNotOptimize((*items[0])());
+    benchmark::DoNotOptimize((*item)());
   }
 }
 
