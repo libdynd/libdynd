@@ -110,14 +110,14 @@ namespace detail {
 
     iterator find(const key_type &key)
     {
+
       auto it = m_cache.find(key);
       if (it != m_cache.end()) {
         return it->second;
       }
 
-      return m_cache[key] = std::find_if(m_values.begin(), m_values.end(), [key](const value_type &value) {
-               return value.first == key || supercedes(key, value.first);
-             });
+      return m_cache[key] = std::find_if(m_values.begin(), m_values.end(),
+                                         [key](const value_type &value) { return supercedes(key, value.first); });
     }
 
     iterator begin() { return m_values.begin(); }
