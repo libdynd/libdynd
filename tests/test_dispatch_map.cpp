@@ -71,6 +71,10 @@ TEST(TypeRegistry, IsBaseIDOf)
       EXPECT_TRUE(is_base_id_of(base_id, id));
     }
   }
+
+  EXPECT_FALSE(is_base_id_of(scalar_kind_id, fixed_dim_id));
+  EXPECT_FALSE(is_base_id_of(int8_id, int32_id));
+  EXPECT_FALSE(is_base_id_of(uint_kind_id, float64_id));
 }
 
 TEST(Sort, TopologicalSort)
@@ -91,29 +95,27 @@ TEST(Sort, TopologicalSort)
 TEST(DispatchMap, Unary)
 {
   typedef dispatch_map<int, 1> map_type;
-  typedef typename map_type::value_type value_type;
 
   map_type map{{any_kind_id, 0}, {scalar_kind_id, 1}, {int32_id, 2}, {float32_id, 3}};
-  EXPECT_EQ(value_type(int32_id, 2), *map.find(int32_id));
-  EXPECT_EQ(value_type(float32_id, 3), *map.find(float32_id));
-  EXPECT_EQ(value_type(scalar_kind_id, 1), *map.find(float64_id));
-  EXPECT_EQ(value_type(scalar_kind_id, 1), *map.find(int64_id));
-  EXPECT_EQ(value_type(any_kind_id, 0), *map.find(option_id));
+  EXPECT_EQ(map_type::value_type(int32_id, 2), *map.find(int32_id));
+  EXPECT_EQ(map_type::value_type(float32_id, 3), *map.find(float32_id));
+  EXPECT_EQ(map_type::value_type(scalar_kind_id, 1), *map.find(float64_id));
+  EXPECT_EQ(map_type::value_type(scalar_kind_id, 1), *map.find(int64_id));
+  EXPECT_EQ(map_type::value_type(any_kind_id, 0), *map.find(option_id));
 }
 
 TEST(DispatchMap, Binary)
 {
   typedef dispatch_map<int, 2> map_type;
-  typedef typename map_type::value_type value_type;
 
   map_type map{{{any_kind_id, int64_id}, 0},
                {{scalar_kind_id, int64_id}, 1},
                {{int32_id, int64_id}, 2},
                {{float32_id, int64_id}, 3}};
-  EXPECT_EQ(value_type({int32_id, int64_id}, 2), *map.find({int32_id, int64_id}));
-  EXPECT_EQ(value_type({float32_id, int64_id}, 3), *map.find({float32_id, int64_id}));
-  EXPECT_EQ(value_type({scalar_kind_id, int64_id}, 1), *map.find({float64_id, int64_id}));
-  EXPECT_EQ(value_type({scalar_kind_id, int64_id}, 1), *map.find({int64_id, int64_id}));
-  EXPECT_EQ(value_type({any_kind_id, int64_id}, 0), *map.find({option_id, int64_id}));
+  EXPECT_EQ(map_type::value_type({int32_id, int64_id}, 2), *map.find({int32_id, int64_id}));
+  EXPECT_EQ(map_type::value_type({float32_id, int64_id}, 3), *map.find({float32_id, int64_id}));
+  EXPECT_EQ(map_type::value_type({scalar_kind_id, int64_id}, 1), *map.find({float64_id, int64_id}));
+  EXPECT_EQ(map_type::value_type({scalar_kind_id, int64_id}, 1), *map.find({int64_id, int64_id}));
+  EXPECT_EQ(map_type::value_type({any_kind_id, int64_id}, 0), *map.find({option_id, int64_id}));
   EXPECT_EQ(map.end(), map.find({int64_id, int32_id}));
 }
