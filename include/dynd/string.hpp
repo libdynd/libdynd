@@ -40,9 +40,9 @@ void string_concat(size_t nop, StringType &d, const StringType *const *s)
 template <class StringType>
 intptr_t string_count(const StringType &haystack, const StringType &needle)
 {
-  detail::string_counter<StringType> f;
+  detail::string_counter f;
 
-  f(haystack, needle);
+  detail::string_search(haystack, needle, f);
 
   return f.finish();
 }
@@ -54,9 +54,23 @@ intptr_t string_count(const StringType &haystack, const StringType &needle)
 template <class StringType>
 intptr_t string_find(const StringType &haystack, const StringType &needle)
 {
-  detail::string_finder<StringType> f;
+  detail::string_finder f;
 
-  f(haystack, needle);
+  detail::string_search(haystack, needle, f);
+
+  return f.finish();
+}
+
+/*
+  Returns byte index of the last occurrence of needle in haystack.
+  Returns -1 if not found.
+*/
+template <class StringType>
+intptr_t string_rfind(const StringType &haystack, const StringType &needle)
+{
+  detail::string_finder f;
+
+  detail::string_search_reverse(haystack, needle, f);
 
   return f.finish();
 }
@@ -90,7 +104,7 @@ void string_replace(StringType &dst, const StringType &src, const StringType &ol
     }
     else {
       detail::string_inplace_replacer<StringType> replacer(dst, new_str);
-      replacer(src, old_str);
+      detail::string_search(src, old_str, replacer);
     }
   }
   else {
@@ -103,7 +117,7 @@ void string_replace(StringType &dst, const StringType &src, const StringType &ol
     dst.resize((intptr_t)src.size() + delta);
 
     detail::string_copy_replacer<StringType> replacer(dst, src, old_str, new_str);
-    replacer(src, old_str);
+    detail::string_search(src, old_str, replacer);
     replacer.finish();
   }
 }
@@ -124,6 +138,11 @@ namespace nd {
     static callable make();
     static callable &get();
   } string_find;
+
+  extern DYND_API struct DYND_API string_rfind : declfunc<string_rfind> {
+    static callable make();
+    static callable &get();
+  } string_rfind;
 
   extern DYND_API struct DYND_API string_replace : declfunc<string_replace> {
     static callable make();

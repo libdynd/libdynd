@@ -7,6 +7,7 @@
 #include <dynd/kernels/string_concat_kernel.hpp>
 #include <dynd/kernels/string_count_kernel.hpp>
 #include <dynd/kernels/string_find_kernel.hpp>
+#include <dynd/kernels/string_rfind_kernel.hpp>
 #include <dynd/kernels/string_replace_kernel.hpp>
 #include <dynd/kernels/string_split_kernel.hpp>
 #include <dynd/string.hpp>
@@ -40,6 +41,12 @@ namespace nd {
   DYND_DEFAULT_DECLFUNC_GET(string_find)
 
   DYND_API struct string_find string_find;
+
+  DYND_API callable string_rfind::make() { return functional::elwise(callable::make<string_rfind_kernel>()); }
+
+  DYND_DEFAULT_DECLFUNC_GET(string_rfind)
+
+  DYND_API struct string_rfind string_rfind;
 
   DYND_API callable string_replace::make() { return functional::elwise(callable::make<string_replace_kernel>()); }
 
