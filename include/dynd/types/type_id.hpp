@@ -14,10 +14,6 @@ namespace dynd {
 class bytes;
 class string;
 
-namespace ndt {
-  class type;
-}
-
 enum type_id_t {
   // The value zero is reserved for an uninitialized type.
   uninitialized_id,
@@ -76,12 +72,10 @@ enum type_id_t {
   // A struct type with variable layout
   struct_id,
 
-  // A fixed-sized strided array dimension type
-  fixed_dim_id,
-  // A variable-sized array dimension type
-  var_dim_id,
-  // A dimension made up of offsets
-  // offset_dim_id,
+  fixed_dim_kind_id,
+  fixed_dim_id, // A fixed-sized strided array dimension type
+  var_dim_id,   // A variable-sized array dimension type
+  // offset_dim_id, // A dimension made up of offsets
 
   categorical_id, // A categorical (enum-like) type
   option_id,
@@ -587,7 +581,11 @@ struct base_id_of<string_id> : id_constant<string_kind_id> {
 };
 
 template <>
-struct base_id_of<fixed_dim_id> : id_constant<dim_kind_id> {
+struct base_id_of<fixed_dim_kind_id> : id_constant<dim_kind_id> {
+};
+
+template <>
+struct base_id_of<fixed_dim_id> : id_constant<fixed_dim_kind_id> {
 };
 
 template <>

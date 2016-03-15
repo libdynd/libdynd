@@ -30,7 +30,7 @@ struct DYNDT_API pointer_type_arrmeta {
 
 namespace ndt {
 
-  class DYNDT_API pointer_type : public base_expr_type {
+  class DYNDT_API pointer_type : public base_type {
     type m_target_tp;
 
   public:
@@ -52,7 +52,6 @@ namespace ndt {
              m_target_tp.is_type_subarray(subarray_tp);
     }
 
-    bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;
     void transform_child_types(type_transform_fn_t transform_fn, intptr_t arrmeta_offset, void *extra,
                                type &out_transformed_tp, bool &out_was_transformed) const;

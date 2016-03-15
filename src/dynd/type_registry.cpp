@@ -69,6 +69,7 @@ ndt::type_registry::type_registry()
   insert(base_id_of<tuple_id>::value, tuple_type::make(true));
   insert(base_id_of<struct_id>::value, struct_type::make(true));
 
+  insert(base_id_of<fixed_dim_kind_id>::value, type());
   insert(base_id_of<fixed_dim_id>::value, base_fixed_dim_type::make(any_kind_type::make()));
   insert(base_id_of<var_dim_id>::value, var_dim_type::make(any_kind_type::make()));
 

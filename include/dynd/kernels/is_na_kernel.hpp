@@ -190,7 +190,7 @@ namespace nd {
     };
 
     template <>
-    struct is_na_kernel<fixed_dim_id, dim_kind_id> : base_kernel<is_na_kernel<fixed_dim_id, dim_kind_id>> {
+    struct is_na_kernel<fixed_dim_id, fixed_dim_kind_id> : base_kernel<is_na_kernel<fixed_dim_id, fixed_dim_kind_id>> {
       static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                               const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                               intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
