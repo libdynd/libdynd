@@ -24,7 +24,7 @@ TEST(FixedDimType, Create)
   // Strings with various encodings and sizes
   d = ndt::make_fixed_dim(3, ndt::make_type<int32_t>());
   EXPECT_EQ(fixed_dim_id, d.get_id());
-  EXPECT_EQ(dim_kind_id, d.get_base_id());
+  EXPECT_EQ(fixed_dim_kind_id, d.get_base_id());
   EXPECT_EQ(4u, d.get_data_alignment());
   EXPECT_EQ(0u, d.get_data_size());
   EXPECT_EQ(1, d.get_ndim());
@@ -44,7 +44,7 @@ TEST(FixedDimType, Create)
 
   d = ndt::make_fixed_dim(1, ndt::make_type<int32_t>());
   EXPECT_EQ(fixed_dim_id, d.get_id());
-  EXPECT_EQ(dim_kind_id, d.get_base_id());
+  EXPECT_EQ(fixed_dim_kind_id, d.get_base_id());
   EXPECT_EQ(4u, d.get_data_alignment());
   EXPECT_EQ(0u, d.get_data_size());
   EXPECT_FALSE(d.is_expression());
