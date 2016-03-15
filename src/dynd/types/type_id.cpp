@@ -72,6 +72,10 @@ ostream &dynd::operator<<(ostream &o, type_id_t id)
     return o << "fixed_string";
   case categorical_id:
     return o << "categorical";
+  case dim_kind_id:
+    return o << "dim_kind";
+  case fixed_dim_kind_id:
+    return o << "fixed_dim_kind";
   case fixed_dim_id:
     return o << "fixed_dim";
   case var_dim_id:
