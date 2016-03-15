@@ -316,9 +316,8 @@ ndt::type ndt::type::without_memory_type() const
   if (get_base_id() == memory_id) {
     return extended<base_memory_type>()->get_element_type();
   }
-  else {
-    return *this;
-  }
+
+  return *this;
 }
 
 const ndt::type &ndt::type::storage_type() const
@@ -327,17 +326,8 @@ const ndt::type &ndt::type::storage_type() const
   if (is_builtin() || get_base_id() != expr_kind_id) {
     return *this;
   }
-  else if (get_id() == adapt_id) {
-    return extended<ndt::base_expr_type>()->get_storage_type();
-  }
-  else {
-    // Follow the operand type chain to get the storage type
-    const type *dt = &static_cast<const base_expr_type *>(m_ptr)->get_operand_type();
-    while (dt->get_base_id() == expr_kind_id) {
-      dt = &static_cast<const base_expr_type *>(dt->m_ptr)->get_operand_type();
-    }
-    return *dt;
-  }
+
+  return extended<base_expr_type>()->get_storage_type();
 }
 
 const ndt::type &ndt::type::value_type() const
@@ -346,13 +336,8 @@ const ndt::type &ndt::type::value_type() const
   if (is_builtin() || get_base_id() != expr_kind_id) {
     return *this;
   }
-  else if (get_id() == adapt_id) {
-    return extended<ndt::base_expr_type>()->get_value_type();
-  }
-  else {
-    // All chaining happens in the operand_type
-    return static_cast<const base_expr_type *>(m_ptr)->get_value_type();
-  }
+
+  return extended<base_expr_type>()->get_value_type();
 }
 
 ndt::type ndt::type::with_new_axis(intptr_t i, intptr_t new_ndim) const
