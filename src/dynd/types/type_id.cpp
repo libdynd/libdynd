@@ -106,16 +106,3 @@ ostream &dynd::operator<<(ostream &o, type_id_t id)
     return o << static_cast<underlying_type_t<type_id_t>>(id);
   }
 }
-
-bool dynd::is_base_id_of(type_id_t base_id, type_id_t id) { return ndt::type_registry[id].is_base_id(base_id); }
-
-bool dynd::is_base_id_of_2(type_id_t base_id, type_id_t id)
-{
-  for (const type_id_t &other_id : ndt::type_registry[id].get_base_ids()) {
-    if (other_id == base_id) {
-      return true;
-    }
-  }
-
-  return false;
-}

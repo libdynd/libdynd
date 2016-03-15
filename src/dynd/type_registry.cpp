@@ -115,13 +115,4 @@ DYNDT_API type_id_t ndt::type_registry::insert(type_id_t base_id, const type &tp
   return id;
 }
 
-DYNDT_API const id_info &ndt::type_registry::operator[](type_id_t id) const
-{
-  if (id >= static_cast<type_id_t>(size())) {
-    throw runtime_error("invalid type id");
-  }
-
-  return m_infos[id];
-}
-
 DYNDT_API class ndt::type_registry ndt::type_registry;
