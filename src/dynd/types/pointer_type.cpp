@@ -3,18 +3,16 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/pointer_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
-
-#include <algorithm>
+#include <dynd/types/pointer_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
 ndt::pointer_type::pointer_type(const type &target_tp)
-    : base_expr_type(pointer_id, sizeof(void *), alignof(void *),
-                     inherited_flags(target_tp.get_flags(), type_flag_zeroinit | type_flag_blockref),
-                     sizeof(pointer_type_arrmeta) + target_tp.get_arrmeta_size(), target_tp.get_ndim()),
+    : base_type(pointer_id, sizeof(char *), alignof(char *),
+                target_tp.get_flags() | type_flag_zeroinit | type_flag_blockref,
+                target_tp.get_arrmeta_size() + sizeof(pointer_type_arrmeta), 0, 0),
       m_target_tp(target_tp)
 {
 }
@@ -27,13 +25,6 @@ void ndt::pointer_type::print_data(std::ostream &o, const char *arrmeta, const c
 }
 
 void ndt::pointer_type::print_type(std::ostream &o) const { o << "pointer[" << m_target_tp << "]"; }
-
-bool ndt::pointer_type::is_expression() const
-{
-  // Even though the pointer is an instance of an base_expr_type,
-  // we'll only call it an expression if the target is.
-  return m_target_tp.is_expression();
-}
 
 bool ndt::pointer_type::is_unique_data_owner(const char *arrmeta) const
 {
@@ -272,11 +263,8 @@ void ndt::pointer_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o
 
 bool ndt::pointer_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
 {
-  if (candidate_tp.get_id() != pointer_id) {
-    return false;
-  }
-
-  return m_target_tp.match(candidate_tp.extended<pointer_type>()->m_target_tp, tp_vars);
+  return candidate_tp.get_id() == pointer_id &&
+         m_target_tp.match(candidate_tp.extended<pointer_type>()->m_target_tp, tp_vars);
 }
 
 std::map<std::string, std::pair<ndt::type, const char *>> ndt::pointer_type::get_dynamic_type_properties() const
