@@ -27,7 +27,7 @@ public:
   id_info(type_id_t id, const ndt::type &tp, const std::vector<type_id_t> &base_ids, size_t size = 128)
       : m_tp(tp), m_base_ids(base_ids), m_is_base_id(size)
   {
-    m_is_base_id[id] = true;
+    m_is_base_id[id] = true; 
     for (type_id_t base_id : m_base_ids) {
       m_is_base_id[base_id] = true;
     }
