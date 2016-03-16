@@ -5,7 +5,7 @@ The DyND Library
 
 [![Join the chat at https://gitter.im/libdynd/libdynd](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/libdynd/libdynd?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-TravisCI: [![Build Status](https://api.travis-ci.org/libdynd/libdynd.svg?branch=master)](https://travis-ci.org/libdynd/libdynd) AppVeyor: [![Build status](https://ci.appveyor.com/api/projects/status/92o89tiw6wwliuxy/branch/master?svg=true)](https://ci.appveyor.com/project/libdynd/libdynd/branch/master)
+TravisCI: [![Build Status](https://api.travis-ci.org/libdynd/libdynd.svg?branch=master)](https://travis-ci.org/libdynd/libdynd) AppVeyor: [![Build status](https://ci.appveyor.com/api/projects/status/92o89tiw6wwliuxy/branch/master?svg=true)](https://ci.appveyor.com/project/libdynd/libdynd/branch/master) Coveralls: [![Coverage Status](https://coveralls.io/repos/github/libdynd/libdynd/badge.svg?branch=master)](https://coveralls.io/github/libdynd/libdynd?branch=master)
 
 The core DyND developer team consists of
 [Mark Wiebe](https://github.com/mwiebe),
