@@ -53,8 +53,20 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(DYND_BUILD_DOCS
            "Use Doxygen to generate the documentation."
            OFF)
+# -DDYND_COVERAGE=ON/OFF, whether to generate test coverage information
+    option(DYND_COVERAGE
+           "Generate code coverage reports from the unit test suite."
+           OFF)
 #
 ################################################
+endif()
+
+if(DYND_COVERAGE)
+  INCLUDE(CodeCoverage)
+
+  SET(CMAKE_BUILD_TYPE "Debug")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_COVERAGE}")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_COVERAGE}")
 endif()
 
 if(DYND_LLVM)

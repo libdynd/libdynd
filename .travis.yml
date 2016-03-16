@@ -115,7 +115,44 @@ matrix:
     - python -c "import dynd; dynd.test(verbosity=2, exit=True)"
     after_script:
     - cd .
- 
+
+  - compiler: gcc
+    env: DYND_FFTW=ON DYND_COVERAGE=ON
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - kalakris-cmake
+        packages:
+        - gcc-5
+        - g++-5
+        - cmake
+        # Install lcov for its Perl dependencies, even though we'll
+        # be locally installing a newer version below
+        - lcov
+        - libfftw3-dev
+    before_install:
+    - export CC="gcc-5"
+    - export CXX="g++-5"
+    - gem install coveralls-lcov
+    - wget https://github.com/linux-test-project/lcov/archive/v1.12.zip
+    - unzip v1.12.zip
+    - export PATH=${PWD}/lcov-1.12/bin:$PATH
+    - cp /usr/bin/gcov-5 ${PWD}/lcov-1.12/bin/gcov
+    before_script:
+    - mkdir build
+    - pushd build
+    - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_COVERAGE=${DYND_COVERAGE} ..
+    script:
+    - make -j3 || exit 1
+    - make coverage
+    after_script:
+    # Must upload coverage results from the root of the project so
+    # paths are translated correctly.
+    - popd
+    - coveralls-lcov build/coverage.info.cleaned
+
+
 language: cpp
 before_install:
 before_script:
