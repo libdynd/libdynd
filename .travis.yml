@@ -147,7 +147,9 @@ matrix:
     - make -j3 || exit 1
     - make coverage
     after_script:
-    - sed 's/SF:\/home\/travis\/build\/libdynd\/libdynd\///' coverage.info.cleaned > coverage.coveralls.info
+    # Edit the absolute filesystem paths to be project-local so
+    # coveralls can find them
+    - sed 's/SF:\/home\/travis\/build\/libdynd\/libdynd\//SF:/' coverage.info.cleaned > coverage.coveralls.info
     - coveralls-lcov coverage.coveralls.info
 
 
