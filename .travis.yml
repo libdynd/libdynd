@@ -147,7 +147,8 @@ matrix:
     - make -j3 || exit 1
     - make coverage
     after_script:
-    - coveralls-lcov coverage.info.cleaned
+    - sed 's/SF:\/home\/travis\/build\/libdynd\/libdynd\///' coverage.info.cleaned > coverage.coveralls.info
+    - coveralls-lcov coverage.coveralls.info
 
 
 language: cpp
