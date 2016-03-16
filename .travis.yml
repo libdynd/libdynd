@@ -147,7 +147,7 @@ matrix:
     - make -j3 || exit 1
     - make coverage
     after_script:
-    - coveralls-lcov coverage.info
+    - coveralls-lcov coverage.info.cleaned
 
 
 language: cpp
