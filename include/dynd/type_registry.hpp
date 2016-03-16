@@ -39,7 +39,7 @@ public:
 
   const ndt::type &get_type() const { return m_tp; }
 
-  char is_base_id(type_id_t id) const { return m_is_base_id[id]; }
+  bool is_base_id(type_id_t id) const { return m_is_base_id[id] != 0; }
 };
 
 namespace ndt {
@@ -64,6 +64,6 @@ namespace ndt {
 
 } // namespace dynd::ndt
 
-inline char is_base_id_of(type_id_t base_id, type_id_t id) { return ndt::type_registry[id].is_base_id(base_id); }
+inline bool is_base_id_of(type_id_t base_id, type_id_t id) { return ndt::type_registry[id].is_base_id(base_id); }
 
 } // namespace dynd
