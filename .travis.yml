@@ -135,8 +135,8 @@ matrix:
     - export CC="gcc-5"
     - export CXX="g++-5"
     - gem install coveralls-lcov
-    - wget http://downloads.sourceforge.net/project/ltp/Coverage%20Analysis/LCOV-1.12/lcov-1.12.tar.gz
-    - tar zvxf lcov-1.12.tar.gz
+    - wget https://github.com/linux-test-project/lcov/archive/v1.12.zip
+    - unzip v1.12.zip
     - export PATH=${PWD}/lcov-1.12/bin:$PATH
     - cp /usr/bin/gcov-5 ${PWD}/lcov-1.12/bin/gcov
     before_script:
