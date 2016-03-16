@@ -149,8 +149,8 @@ matrix:
     after_script:
     # Edit the absolute filesystem paths to be project-local so
     # coveralls can find them
-    - sed 's/SF:\/home\/travis\/build\/libdynd\/libdynd\//SF:/' coverage.info.cleaned > coverage.coveralls.info
-    - coveralls-lcov coverage.coveralls.info
+    - popd
+    - coveralls-lcov build/coverage.info.cleaned
 
 
 language: cpp
