@@ -67,9 +67,9 @@
 #				)
 #
 # 4. Build a Debug build:
-#	 cmake -DCMAKE_BUILD_TYPE=Debug ..
-#	 make
-#	 make my_coverage_target
+#        cmake -DCMAKE_BUILD_TYPE=Debug ..
+#        make
+#        make my_coverage_target
 #
 #
 
@@ -80,16 +80,16 @@ FIND_PROGRAM( GENHTML_PATH genhtml )
 FIND_PROGRAM( GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/tests)
 
 IF(NOT GCOV_PATH)
-	MESSAGE(FATAL_ERROR "gcov not found! Aborting...")
+        MESSAGE(FATAL_ERROR "gcov not found! Aborting...")
 ENDIF() # NOT GCOV_PATH
 
 IF(NOT CMAKE_COMPILER_IS_GNUCXX)
-	# Clang version 3.0.0 and greater now supports gcov as well.
-	MESSAGE(WARNING "Compiler is not GNU gcc! Clang Version 3.0.0 and greater supports gcov as well, but older versions don't.")
+        # Clang version 3.0.0 and greater now supports gcov as well.
+        MESSAGE(WARNING "Compiler is not GNU gcc! Clang Version 3.0.0 and greater supports gcov as well, but older versions don't.")
 
-	IF(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-		MESSAGE(FATAL_ERROR "Compiler is not GNU gcc! Aborting...")
-	ENDIF()
+        IF(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+                MESSAGE(FATAL_ERROR "Compiler is not GNU gcc! Aborting...")
+        ENDIF()
 ENDIF() # NOT CMAKE_COMPILER_IS_GNUCXX
 
 SET(CMAKE_CXX_FLAGS_COVERAGE
@@ -121,24 +121,24 @@ ENDIF() # NOT CMAKE_BUILD_TYPE STREQUAL "Debug"
 
 # Param _targetname     The name of new the custom make target
 # Param _testrunner     The name of the target which runs the tests.
-#						MUST return ZERO always, even on errors.
-#						If not, no coverage report will be created!
+#                                               MUST return ZERO always, even on errors.
+#                                               If not, no coverage report will be created!
 # Param _outputname     lcov output is generated as _outputname.info
 #                       HTML report is generated in _outputname/index.html
 # Optional fourth parameter is passed as arguments to _testrunner
 #   Pass them in list form, e.g.: "-j;2" for -j 2
 FUNCTION(SETUP_TARGET_FOR_COVERAGE _targetname _testrunner _outputname)
 
-	IF(NOT LCOV_PATH)
-		MESSAGE(FATAL_ERROR "lcov not found! Aborting...")
-	ENDIF() # NOT LCOV_PATH
+        IF(NOT LCOV_PATH)
+                MESSAGE(FATAL_ERROR "lcov not found! Aborting...")
+        ENDIF() # NOT LCOV_PATH
 
-	IF(NOT GENHTML_PATH)
-		MESSAGE(FATAL_ERROR "genhtml not found! Aborting...")
-	ENDIF() # NOT GENHTML_PATH
+        IF(NOT GENHTML_PATH)
+                MESSAGE(FATAL_ERROR "genhtml not found! Aborting...")
+        ENDIF() # NOT GENHTML_PATH
 
-	# Setup target
-	ADD_CUSTOM_TARGET(${_targetname}
+        # Setup target
+        ADD_CUSTOM_TARGET(${_targetname}
 
 		# Cleanup lcov
 		${LCOV_PATH} --directory . --zerocounters
