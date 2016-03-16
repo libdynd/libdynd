@@ -796,6 +796,4 @@ struct property_type_id_of<std::string> {
 
 DYNDT_API bool is_base_id_of(type_id_t base_id, type_id_t id);
 
-DYNDT_API bool is_base_id_of_2(type_id_t base_id, type_id_t id);
-
 } // namespace dynd

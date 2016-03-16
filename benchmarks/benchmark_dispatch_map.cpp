@@ -66,10 +66,19 @@ BENCHMARK_DEFINE_F(X, BM_IsBaseIDOf)(benchmark::State &state)
 {
   while (state.KeepRunning()) {
     for (const auto &pair : pairs) {
-      benchmark::DoNotOptimize(is_base_id_of_2(pair.first, pair.second));
+      benchmark::DoNotOptimize(is_base_id_of(pair.first, pair.second));
+      benchmark::DoNotOptimize(is_base_id_of(pair.first, pair.second));
+      benchmark::DoNotOptimize(is_base_id_of(pair.first, pair.second));
+      benchmark::DoNotOptimize(is_base_id_of(pair.first, pair.second));
+      benchmark::DoNotOptimize(is_base_id_of(pair.first, pair.second));
+      benchmark::DoNotOptimize(is_base_id_of(pair.first, pair.second));
+      benchmark::DoNotOptimize(is_base_id_of(pair.first, pair.second));
+      benchmark::DoNotOptimize(is_base_id_of(pair.first, pair.second));
+      benchmark::DoNotOptimize(is_base_id_of(pair.first, pair.second));
+      benchmark::DoNotOptimize(is_base_id_of(pair.first, pair.second));
     }
   }
-  state.SetItemsProcessed(state.iterations() * state.range_x());
+  state.SetItemsProcessed(10 * state.iterations() * state.range_x());
 }
 
 BENCHMARK_REGISTER_F(X, BM_IsBaseIDOf)->Arg(100)->Arg(1000)->Arg(10000);
