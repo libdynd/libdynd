@@ -147,8 +147,8 @@ matrix:
     - make -j3 || exit 1
     - make coverage
     after_script:
-    # Edit the absolute filesystem paths to be project-local so
-    # coveralls can find them
+    # Must upload coverage results from the root of the project so
+    # paths are translated correctly.
     - popd
     - coveralls-lcov build/coverage.info.cleaned
 
