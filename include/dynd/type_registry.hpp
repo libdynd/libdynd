@@ -15,9 +15,7 @@ class id_info {
 public:
   ndt::type m_tp;
   std::vector<type_id_t> m_base_ids;
-  std::vector<bool> m_is_base_id;
-
-  type_id_t m_base_ids_2[5];
+  std::vector<char> m_is_base_id;
 
   id_info() = default;
 
@@ -32,12 +30,6 @@ public:
     m_is_base_id[id] = true;
     for (type_id_t base_id : m_base_ids) {
       m_is_base_id[base_id] = true;
-    }
-
-    int i = 0;
-    for (type_id_t base_id : m_base_ids) {
-      m_base_ids_2[i] = base_id;
-      ++i;
     }
   }
 
@@ -73,16 +65,5 @@ namespace ndt {
 } // namespace dynd::ndt
 
 inline bool is_base_id_of(type_id_t base_id, type_id_t id) { return ndt::type_registry[id].is_base_id(base_id); }
-
-inline bool is_base_id_of_2(type_id_t base_id, type_id_t id)
-{
-  for (type_id_t other_id : ndt::type_registry[id].m_base_ids_2) {
-    if (other_id == base_id) {
-      return true;
-    }
-  }
-
-  return false;
-}
 
 } // namespace dynd
