@@ -1,3 +1,9 @@
+//
+// Copyright (C) 2011-15 DyND Developers
+// BSD 2-Clause License, see LICENSE.txt
+//
+
+// #include <sparsehash/dense_hash_map>
 
 namespace dynd {
 
@@ -6,6 +12,37 @@ bool supercedes(type_id_t lhs, type_id_t rhs) { return is_base_id_of(rhs, lhs); 
 template <size_t N>
 bool supercedes(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs)
 {
+  for (size_t i = 0; i < N; ++i) {
+    if (!is_base_id_of(rhs[i], lhs[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool supercedes(const std::vector<type_id_t> &lhs, const std::vector<type_id_t> &rhs)
+{
+  if (lhs.size() != rhs.size()) {
+    return false;
+  }
+
+  for (size_t i = 0; i < lhs.size(); ++i) {
+    if (!is_base_id_of(rhs[i], lhs[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+template <size_t N>
+bool supercedes(const type_id_t(&lhs)[N], const std::vector<type_id_t> &rhs)
+{
+  if (rhs.size() != N) {
+    return false;
+  }
+
   for (size_t i = 0; i < N; ++i) {
     if (!is_base_id_of(rhs[i], lhs[i])) {
       return false;
@@ -61,103 +98,100 @@ void topological_sort(const std::vector<ValueType> &values, const std::vector<st
   std::reverse(res - values.size(), res);
 }
 
-namespace detail {
+template <typename T>
+class dispatcher {
+public:
+  typedef T mapped_type;
+  typedef std::pair<std::vector<type_id_t>, mapped_type> value_type;
 
-  template <typename KeyType, typename MappedType>
-  class dispatch_map {
-  public:
-    typedef KeyType key_type;
-    typedef MappedType mapped_type;
-    typedef std::pair<key_type, mapped_type> value_type;
+  typedef typename std::vector<value_type>::iterator iterator;
+  typedef typename std::vector<value_type>::const_iterator const_iterator;
 
-    typedef typename std::vector<value_type>::iterator iterator;
-    typedef typename std::vector<value_type>::const_iterator const_iterator;
+private:
+  std::vector<value_type> m_pairs;
+  //  google::dense_hash_map<size_t, T> m_map;
+  std::map<size_t, T> m_map;
 
-  private:
-    std::vector<value_type> m_values;
-    std::map<key_type, iterator> m_cache;
+  static size_t combine(size_t seed) { return seed; }
 
-  public:
-    dispatch_map() = default;
+  static size_t combine(size_t seed, type_id_t id0) { return seed ^ (id0 + (seed << 6) + (seed >> 2)); }
 
-    dispatch_map(const std::initializer_list<value_type> &values) { init(values.begin(), values.end()); }
+public:
+  dispatcher() = default;
 
-    template <typename Iter>
-    void init(Iter begin, Iter end)
-    {
-      std::vector<key_type> signatures;
-      std::vector<value_type> m;
-      while (begin != end) {
-        signatures.push_back(begin->first);
-        m.push_back(*begin);
-        ++begin;
-      }
+  dispatcher(const std::initializer_list<value_type> &values)
+  {
+    //    m_map.set_empty_key(uninitialized_id);
+    insert(values.begin(), values.end());
+  }
 
-      std::vector<std::vector<intptr_t>> edges(signatures.size());
-      for (size_t i = 0; i < signatures.size(); ++i) {
-        for (size_t j = 0; j < signatures.size(); ++j) {
-          if (edge(signatures[i], signatures[j])) {
-            edges[i].push_back(j);
-          }
-        }
-      }
+  iterator begin() { return m_pairs.begin(); }
+  const_iterator begin() const { return m_pairs.begin(); }
+  const_iterator cbegin() const { return m_pairs.cbegin(); }
 
-      decltype(m) res(m.size());
-      topological_sort(m, edges, res.begin());
+  iterator end() { return m_pairs.end(); }
+  const_iterator end() const { return m_pairs.end(); }
+  const_iterator cend() const { return m_pairs.cend(); }
 
-      m_values = res;
+  template <typename... U>
+  mapped_type operator()(type_id_t id0, U... ids)
+  {
+    size_t key = combine(static_cast<size_t>(id0), ids...);
+
+    const auto &it = m_map.find(key);
+    if (it != m_map.end()) {
+      return it->second;
     }
 
-    iterator find(const key_type &key)
-    {
-
-      auto it = m_cache.find(key);
-      if (it != m_cache.end()) {
-        return it->second;
+    type_id_t signature[sizeof...(U) + 1] = {id0, ids...};
+    for (const auto &pair : m_pairs) {
+      if (supercedes(signature, pair.first)) {
+        return m_map[key] = pair.second;
       }
-
-      return m_cache[key] = std::find_if(m_values.begin(), m_values.end(),
-                                         [key](const value_type &value) { return supercedes(key, value.first); });
     }
 
-    iterator begin() { return m_values.begin(); }
-    const_iterator begin() const { return m_values.begin(); }
-    const_iterator cbegin() const { return m_values.cbegin(); }
+    throw std::out_of_range("signature not found");
+  }
 
-    iterator end() { return m_values.end(); }
-    const_iterator end() const { return m_values.end(); }
-    const_iterator cend() const { return m_values.cend(); }
+  template <typename IteratorType>
+  void insert(IteratorType begin, IteratorType end)
+  {
+    std::vector<std::vector<type_id_t>> signatures;
+    std::vector<value_type> m;
+    while (begin != end) {
+      signatures.push_back(begin->first);
+      m.push_back(*begin);
+      ++begin;
+    }
 
-    mapped_type &operator[](const key_type &key) { return find(key)->second; }
-
-    static bool edge(const key_type &u, const key_type &v)
-    {
-      if (supercedes(u, v)) {
-        if (supercedes(v, u)) {
-          return false;
-        }
-        else {
-          return true;
+    std::vector<std::vector<intptr_t>> edges(signatures.size());
+    for (size_t i = 0; i < signatures.size(); ++i) {
+      for (size_t j = 0; j < signatures.size(); ++j) {
+        if (edge(signatures[i], signatures[j])) {
+          edges[i].push_back(j);
         }
       }
-
-      return false;
     }
-  };
 
-} // namespace dynd::detail
+    decltype(m) res(m.size());
+    topological_sort(m, edges, res.begin());
 
-template <typename MappedType, size_t...>
-class dispatch_map;
+    m_pairs = res;
+  }
 
-template <typename MappedType>
-class dispatch_map<MappedType, 1> : public detail::dispatch_map<type_id_t, MappedType> {
-  using detail::dispatch_map<type_id_t, MappedType>::dispatch_map;
-};
+  static bool edge(const std::vector<type_id_t> &u, const std::vector<type_id_t> &v)
+  {
+    if (supercedes(u, v)) {
+      if (supercedes(v, u)) {
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
 
-template <typename MappedType, size_t N>
-class dispatch_map<MappedType, N> : public detail::dispatch_map<std::array<type_id_t, N>, MappedType> {
-  using detail::dispatch_map<std::array<type_id_t, N>, MappedType>::dispatch_map;
+    return false;
+  }
 };
 
 } // namespace dynd

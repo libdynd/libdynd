@@ -92,30 +92,47 @@ TEST(Sort, TopologicalSort)
   EXPECT_EQ(0, res[5]);
 }
 
-TEST(DispatchMap, Unary)
+TEST(Dispatcher, Unary)
 {
-  typedef dispatch_map<int, 1> map_type;
+  dispatcher<int> dispatcher{{{any_kind_id}, 0}, {{scalar_kind_id}, 1}, {{int_kind_id}, 2},
+                             {{int32_id}, 3},    {{float32_id}, 4},     {{float64_id}, 5}};
 
-  map_type map{{any_kind_id, 0}, {scalar_kind_id, 1}, {int32_id, 2}, {float32_id, 3}};
-  EXPECT_EQ(map_type::value_type(int32_id, 2), *map.find(int32_id));
-  EXPECT_EQ(map_type::value_type(float32_id, 3), *map.find(float32_id));
-  EXPECT_EQ(map_type::value_type(scalar_kind_id, 1), *map.find(float64_id));
-  EXPECT_EQ(map_type::value_type(scalar_kind_id, 1), *map.find(int64_id));
-  EXPECT_EQ(map_type::value_type(any_kind_id, 0), *map.find(option_id));
+  EXPECT_EQ(1, dispatcher(bool_id));
+  EXPECT_EQ(2, dispatcher(int16_id));
+  EXPECT_EQ(3, dispatcher(int32_id));
+  EXPECT_EQ(2, dispatcher(int64_id));
+  EXPECT_EQ(4, dispatcher(float32_id));
+  EXPECT_EQ(5, dispatcher(float64_id));
+  EXPECT_EQ(1, dispatcher(float128_id));
+  EXPECT_EQ(0, dispatcher(option_id));
+  EXPECT_EQ(0, dispatcher(fixed_dim_id));
 }
 
-TEST(DispatchMap, Binary)
+TEST(Dispatcher, Binary)
 {
-  typedef dispatch_map<int, 2> map_type;
+  dispatcher<int> dispatcher{{{any_kind_id, int64_id}, 0},
+                             {{scalar_kind_id, int64_id}, 1},
+                             {{int32_id, int64_id}, 2},
+                             {{float32_id, int64_id}, 3}};
 
-  map_type map{{{any_kind_id, int64_id}, 0},
-               {{scalar_kind_id, int64_id}, 1},
-               {{int32_id, int64_id}, 2},
-               {{float32_id, int64_id}, 3}};
-  EXPECT_EQ(map_type::value_type({int32_id, int64_id}, 2), *map.find({int32_id, int64_id}));
-  EXPECT_EQ(map_type::value_type({float32_id, int64_id}, 3), *map.find({float32_id, int64_id}));
-  EXPECT_EQ(map_type::value_type({scalar_kind_id, int64_id}, 1), *map.find({float64_id, int64_id}));
-  EXPECT_EQ(map_type::value_type({scalar_kind_id, int64_id}, 1), *map.find({int64_id, int64_id}));
-  EXPECT_EQ(map_type::value_type({any_kind_id, int64_id}, 0), *map.find({option_id, int64_id}));
-  EXPECT_EQ(map.end(), map.find({int64_id, int32_id}));
+  EXPECT_EQ(2, dispatcher(int32_id, int64_id));
+  EXPECT_EQ(3, dispatcher(float32_id, int64_id));
+  EXPECT_EQ(1, dispatcher(float64_id, int64_id));
+  EXPECT_EQ(1, dispatcher(int64_id, int64_id));
+  EXPECT_EQ(0, dispatcher(option_id, int64_id));
+  EXPECT_THROW(dispatcher(int64_id, float32_id), out_of_range);
+}
+
+TEST(Dispatcher, Ternary)
+{
+  dispatcher<int> dispatcher{{{any_kind_id, int64_id}, 0},
+                             {{scalar_kind_id, int64_id}, 1},
+                             {{int32_id, int64_id}, 2},
+                             {{float32_id, int64_id}, 3}};
+
+  EXPECT_EQ(2, dispatcher(int32_id, int64_id));
+  EXPECT_EQ(3, dispatcher(float32_id, int64_id));
+  EXPECT_EQ(1, dispatcher(float64_id, int64_id));
+  EXPECT_EQ(1, dispatcher(int64_id, int64_id));
+  EXPECT_EQ(0, dispatcher(option_id, int64_id));
 }
