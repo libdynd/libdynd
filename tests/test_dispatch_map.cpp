@@ -96,7 +96,6 @@ TEST(Dispatcher, Unary)
 {
   dispatcher<int> dispatcher{{{any_kind_id}, 0}, {{scalar_kind_id}, 1}, {{int_kind_id}, 2},
                              {{int32_id}, 3},    {{float32_id}, 4},     {{float64_id}, 5}};
-
   EXPECT_EQ(1, dispatcher(bool_id));
   EXPECT_EQ(2, dispatcher(int16_id));
   EXPECT_EQ(3, dispatcher(int32_id));

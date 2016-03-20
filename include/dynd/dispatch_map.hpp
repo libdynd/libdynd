@@ -119,11 +119,34 @@ private:
 public:
   dispatcher() = default;
 
-  dispatcher(const std::initializer_list<value_type> &values)
+  template <typename IteratorType>
+  dispatcher(IteratorType begin, IteratorType end)
+      : m_pairs(end - begin)
   {
     //    m_map.set_empty_key(uninitialized_id);
-    insert(values.begin(), values.end());
+
+    std::vector<std::vector<type_id_t>> signatures;
+
+    std::vector<value_type> vertices;
+    while (begin != end) {
+      signatures.push_back(begin->first);
+      vertices.push_back(*begin);
+      ++begin;
+    }
+
+    std::vector<std::vector<intptr_t>> edges(signatures.size());
+    for (size_t i = 0; i < signatures.size(); ++i) {
+      for (size_t j = 0; j < signatures.size(); ++j) {
+        if (edge(signatures[i], signatures[j])) {
+          edges[i].push_back(j);
+        }
+      }
+    }
+
+    topological_sort(vertices, edges, m_pairs.begin());
   }
+
+  dispatcher(const std::initializer_list<value_type> &pairs) : dispatcher(pairs.begin(), pairs.end()) {}
 
   iterator begin() { return m_pairs.begin(); }
   const_iterator begin() const { return m_pairs.begin(); }
@@ -151,32 +174,6 @@ public:
     }
 
     throw std::out_of_range("signature not found");
-  }
-
-  template <typename IteratorType>
-  void insert(IteratorType begin, IteratorType end)
-  {
-    std::vector<std::vector<type_id_t>> signatures;
-    std::vector<value_type> m;
-    while (begin != end) {
-      signatures.push_back(begin->first);
-      m.push_back(*begin);
-      ++begin;
-    }
-
-    std::vector<std::vector<intptr_t>> edges(signatures.size());
-    for (size_t i = 0; i < signatures.size(); ++i) {
-      for (size_t j = 0; j < signatures.size(); ++j) {
-        if (edge(signatures[i], signatures[j])) {
-          edges[i].push_back(j);
-        }
-      }
-    }
-
-    decltype(m) res(m.size());
-    topological_sort(m, edges, res.begin());
-
-    m_pairs = res;
   }
 
   static bool edge(const std::vector<type_id_t> &u, const std::vector<type_id_t> &v)
