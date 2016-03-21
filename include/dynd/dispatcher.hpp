@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <memory>
+
 // #include <sparsehash/dense_hash_map>
 
 #include <dynd/types/type_id.hpp>
