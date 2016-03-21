@@ -69,16 +69,11 @@ namespace nd {
                          {{scalar_kind_id, dim_kind_id}, functional::elwise(self)},
                          {{dim_kind_id, dim_kind_id}, functional::elwise(self)}});
 
-      return functional::dispatch(
-          ndt::type("(Any, Any) -> Any"), [dispatcher](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                                                       const ndt::type *src_tp) mutable -> callable & {
-            callable &child = const_cast<callable &>(dispatcher(src_tp[0].get_id(), src_tp[1].get_id()));
-            if (child.is_null()) {
-              throw std::runtime_error(FuncType::what(src_tp[0], src_tp[1]));
-            }
-
-            return child;
-          });
+      return functional::dispatch(ndt::type("(Any, Any) -> Any"),
+                                  [dispatcher](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                               const ndt::type *src_tp) mutable -> callable & {
+                                    return const_cast<callable &>(dispatcher(src_tp[0].get_id(), src_tp[1].get_id()));
+                                  });
     }
   };
 

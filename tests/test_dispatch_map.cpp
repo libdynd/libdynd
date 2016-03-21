@@ -87,26 +87,26 @@ TEST(Dispatcher, Unary)
 {
   dispatcher<int> dispatcher{
       {{scalar_kind_id}, 1}, {{int_kind_id}, 2}, {{int32_id}, 3}, {{float32_id}, 4}, {{float64_id}, 5}};
-  EXPECT_EQ(1, dispatcher({bool_id}));
-  EXPECT_EQ(2, dispatcher({int16_id}));
-  EXPECT_EQ(3, dispatcher({int32_id}));
-  EXPECT_EQ(2, dispatcher({int64_id}));
-  EXPECT_EQ(4, dispatcher({float32_id}));
-  EXPECT_EQ(5, dispatcher({float64_id}));
-  EXPECT_EQ(1, dispatcher({float128_id}));
-  EXPECT_THROW(dispatcher({option_id}), out_of_range);
-  EXPECT_THROW(dispatcher({fixed_dim_id}), out_of_range);
+  EXPECT_EQ(1, dispatcher(bool_id));
+  EXPECT_EQ(2, dispatcher(int16_id));
+  EXPECT_EQ(3, dispatcher(int32_id));
+  EXPECT_EQ(2, dispatcher(int64_id));
+  EXPECT_EQ(4, dispatcher(float32_id));
+  EXPECT_EQ(5, dispatcher(float64_id));
+  EXPECT_EQ(1, dispatcher(float128_id));
+  EXPECT_THROW(dispatcher(option_id), out_of_range);
+  EXPECT_THROW(dispatcher(fixed_dim_id), out_of_range);
 
   dispatcher.insert({{any_kind_id}, 0});
-  EXPECT_EQ(1, dispatcher({bool_id}));
-  EXPECT_EQ(2, dispatcher({int16_id}));
-  EXPECT_EQ(3, dispatcher({int32_id}));
-  EXPECT_EQ(2, dispatcher({int64_id}));
-  EXPECT_EQ(4, dispatcher({float32_id}));
-  EXPECT_EQ(5, dispatcher({float64_id}));
-  EXPECT_EQ(1, dispatcher({float128_id}));
-  EXPECT_EQ(0, dispatcher({option_id}));
-  EXPECT_EQ(0, dispatcher({fixed_dim_id}));
+  EXPECT_EQ(1, dispatcher(bool_id));
+  EXPECT_EQ(2, dispatcher(int16_id));
+  EXPECT_EQ(3, dispatcher(int32_id));
+  EXPECT_EQ(2, dispatcher(int64_id));
+  EXPECT_EQ(4, dispatcher(float32_id));
+  EXPECT_EQ(5, dispatcher(float64_id));
+  EXPECT_EQ(1, dispatcher(float128_id));
+  EXPECT_EQ(0, dispatcher(option_id));
+  EXPECT_EQ(0, dispatcher(fixed_dim_id));
 }
 
 TEST(Dispatcher, Binary)
@@ -116,12 +116,12 @@ TEST(Dispatcher, Binary)
                              {{int32_id, int64_id}, 2},
                              {{float32_id, int64_id}, 3}};
 
-  EXPECT_EQ(2, dispatcher({int32_id, int64_id}));
-  EXPECT_EQ(3, dispatcher({float32_id, int64_id}));
-  EXPECT_EQ(1, dispatcher({float64_id, int64_id}));
-  EXPECT_EQ(1, dispatcher({int64_id, int64_id}));
-  EXPECT_EQ(0, dispatcher({option_id, int64_id}));
-  EXPECT_THROW(dispatcher({int64_id, float32_id}), out_of_range);
+  EXPECT_EQ(2, dispatcher(int32_id, int64_id));
+  EXPECT_EQ(3, dispatcher(float32_id, int64_id));
+  EXPECT_EQ(1, dispatcher(float64_id, int64_id));
+  EXPECT_EQ(1, dispatcher(int64_id, int64_id));
+  EXPECT_EQ(0, dispatcher(option_id, int64_id));
+  EXPECT_THROW(dispatcher(int64_id, float32_id), out_of_range);
 }
 
 TEST(Dispatcher, Ternary)
@@ -131,9 +131,9 @@ TEST(Dispatcher, Ternary)
                              {{int32_id, int64_id}, 2},
                              {{float32_id, int64_id}, 3}};
 
-  EXPECT_EQ(2, dispatcher({int32_id, int64_id}));
-  EXPECT_EQ(3, dispatcher({float32_id, int64_id}));
-  EXPECT_EQ(1, dispatcher({float64_id, int64_id}));
-  EXPECT_EQ(1, dispatcher({int64_id, int64_id}));
-  EXPECT_EQ(0, dispatcher({option_id, int64_id}));
+  EXPECT_EQ(2, dispatcher(int32_id, int64_id));
+  EXPECT_EQ(3, dispatcher(float32_id, int64_id));
+  EXPECT_EQ(1, dispatcher(float64_id, int64_id));
+  EXPECT_EQ(1, dispatcher(int64_id, int64_id));
+  EXPECT_EQ(0, dispatcher(option_id, int64_id));
 }

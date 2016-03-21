@@ -220,28 +220,6 @@ public:
     throw std::out_of_range("signature not found");
   }
 
-  template <size_t N>
-  const value_type &operator()(const type_id_t(&ids)[N])
-  {
-    size_t key = static_cast<size_t>(ids[0]);
-    for (size_t i = 1; i < N; ++i) {
-      key = hash_combine(key, ids[i]);
-    }
-
-    const auto &it = m_map.find(key);
-    if (it != m_map.end()) {
-      return it->second;
-    }
-
-    for (const pair_type &pair : m_pairs) {
-      if (supercedes(ids, pair.first)) {
-        return m_map[key] = pair.second;
-      }
-    }
-
-    throw std::out_of_range("signature not found");
-  }
-
   const value_type &operator()(size_t nids, const type_id_t *ids)
   {
     size_t key = static_cast<size_t>(ids[0]);

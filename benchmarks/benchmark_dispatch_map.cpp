@@ -109,8 +109,7 @@ BENCHMARK_DEFINE_F(UnaryDispatchFixture, BM_UnaryDispatch)(benchmark::State &sta
                              {{uint128_id}, 12}, {{float32_id}, 13},    {{float64_id}, 14}};
   while (state.KeepRunning()) {
     for (const auto &pair : pairs) {
-      type_id_t ids[1] = {pair.first};
-      benchmark::DoNotOptimize(dispatcher(ids));
+      benchmark::DoNotOptimize(dispatcher(pair.first));
     }
   }
   state.SetItemsProcessed(state.iterations() * state.range_x());
@@ -138,8 +137,7 @@ BENCHMARK_DEFINE_F(UnaryDispatchFixture, BM_BinaryDispatch)(benchmark::State &st
                              {{any_kind_id, any_kind_id}, 4}};
   while (state.KeepRunning()) {
     for (const auto &pair : pairs) {
-      type_id_t ids[2] = {pair.first, pair.second};
-      benchmark::DoNotOptimize(dispatcher(ids));
+      benchmark::DoNotOptimize(dispatcher(pair.first, pair.second));
     }
   }
   state.SetItemsProcessed(state.iterations() * state.range_x());
