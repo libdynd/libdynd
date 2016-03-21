@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#pragma once
+
 #include <memory>
 
 // #include <sparsehash/dense_hash_map>
@@ -11,7 +13,7 @@
 
 namespace dynd {
 
-bool supercedes(const std::vector<type_id_t> &lhs, const std::vector<type_id_t> &rhs)
+inline bool supercedes(const std::vector<type_id_t> &lhs, const std::vector<type_id_t> &rhs)
 {
   if (lhs.size() != rhs.size()) {
     return false;
@@ -42,7 +44,7 @@ bool supercedes(const type_id_t(&lhs)[N], const std::vector<type_id_t> &rhs)
   return true;
 }
 
-bool supercedes(size_t N, const type_id_t *lhs, const std::vector<type_id_t> &rhs)
+inline bool supercedes(size_t N, const type_id_t *lhs, const std::vector<type_id_t> &rhs)
 {
   if (rhs.size() != N) {
     return false;
@@ -113,13 +115,13 @@ void topological_sort(std::initializer_list<VertexType> vertices,
   topological_sort(vertices.begin(), vertices.end(), edges.begin(), res);
 }
 
-template <typename T>
+template <typename T, typename Map = std::map<size_t, T>>
 class dispatcher {
 public:
   typedef T value_type;
 
   typedef std::pair<std::vector<type_id_t>, value_type> pair_type;
-  typedef std::map<size_t, value_type> map_type;
+  typedef Map map_type;
   //  typedef google::dense_hash_map<size_t, value_type> map_type;
 
   typedef typename std::vector<pair_type>::iterator iterator;
@@ -129,20 +131,30 @@ private:
   std::vector<pair_type> m_pairs;
   map_type m_map;
 
-  static size_t combine(size_t key, type_id_t id) { return key ^ (id + (key << 6) + (key >> 2)); }
+  static size_t hash_combine(size_t seed, type_id_t id) { return seed ^ (id + (seed << 6) + (seed >> 2)); }
+
+  template <typename... IDTypes>
+  static size_t hash_combine(size_t seed, type_id_t id0, IDTypes... ids)
+  {
+    return hash_combine(hash_combine(seed, id0), ids...);
+  }
 
 public:
   dispatcher() = default;
 
   template <typename Iterator>
-  dispatcher(Iterator begin, Iterator end)
+  dispatcher(Iterator begin, Iterator end, const map_type &map = map_type())
+      : m_map(map)
   {
-//    m_map.set_empty_key(uninitialized_id);
+    //    m_map.set_empty_key(uninitialized_id);
 
     assign(begin, end);
   }
 
-  dispatcher(std::initializer_list<pair_type> pairs) : dispatcher(pairs.begin(), pairs.end()) {}
+  dispatcher(std::initializer_list<pair_type> pairs, const map_type &map = map_type())
+      : dispatcher(pairs.begin(), pairs.end(), map)
+  {
+  }
 
   template <typename Iterator>
   void assign(Iterator begin, Iterator end)
@@ -189,12 +201,31 @@ public:
   const_iterator end() const { return m_pairs.end(); }
   const_iterator cend() const { return m_pairs.cend(); }
 
+  template <typename... IDTypes>
+  const value_type &operator()(IDTypes... ids)
+  {
+    size_t key = hash(ids...);
+
+    const auto &it = m_map.find(key);
+    if (it != m_map.end()) {
+      return it->second;
+    }
+
+    for (const pair_type &pair : m_pairs) {
+      if (supercedes({ids...}, pair.first)) {
+        return m_map[key] = pair.second;
+      }
+    }
+
+    throw std::out_of_range("signature not found");
+  }
+
   template <size_t N>
   const value_type &operator()(const type_id_t(&ids)[N])
   {
     size_t key = static_cast<size_t>(ids[0]);
     for (size_t i = 1; i < N; ++i) {
-      key = combine(key, ids[i]);
+      key = hash_combine(key, ids[i]);
     }
 
     const auto &it = m_map.find(key);
@@ -215,7 +246,7 @@ public:
   {
     size_t key = static_cast<size_t>(ids[0]);
     for (size_t i = 1; i < nids; ++i) {
-      key = combine(key, ids[i]);
+      key = hash_combine(key, ids[i]);
     }
 
     const auto &it = m_map.find(key);
@@ -246,6 +277,14 @@ public:
     }
 
     return false;
+  }
+
+  static size_t hash(type_id_t id) { return static_cast<size_t>(id); }
+
+  template <typename... IDTypes>
+  static size_t hash(type_id_t id0, IDTypes... ids)
+  {
+    return hash_combine(hash(id0), ids...);
   }
 };
 

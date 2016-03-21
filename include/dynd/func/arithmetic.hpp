@@ -59,38 +59,26 @@ namespace nd {
   struct binary_arithmetic_operator : declfunc<FuncType> {
     static callable make()
     {
-      auto children = callable::make_all<KernelType, TypeIDSequence, TypeIDSequence>();
-
-      for (type_id_t i : i2a<TypeIDSequence>()) {
-        children[{{option_id, i}}] = callable::make<option_arithmetic_kernel<FuncType, true, false>>();
-        children[{{i, option_id}}] = callable::make<option_arithmetic_kernel<FuncType, false, true>>();
-      }
-      children[{{option_id, option_id}}] = callable::make<option_arithmetic_kernel<FuncType, true, true>>();
-
       callable self = functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
-      for (type_id_t i0 : i2a<TypeIDSequence>()) {
-        for (type_id_t i1 : i2a<dim_ids>()) {
-          children[{{i0, i1}}] = functional::elwise(self);
-        }
-      }
 
-      for (type_id_t i0 : i2a<dim_ids>()) {
-        typedef typename join<TypeIDSequence, dim_ids>::type broadcast_ids;
-        for (type_id_t i1 : i2a<broadcast_ids>()) {
-          children[{{i0, i1}}] = functional::elwise(self);
-        }
-      }
+      auto dispatcher = callable::new_make_all<KernelType, TypeIDSequence, TypeIDSequence>();
+      dispatcher.insert({{{option_id, any_kind_id}, callable::make<option_arithmetic_kernel<FuncType, true, false>>()},
+                         {{any_kind_id, option_id}, callable::make<option_arithmetic_kernel<FuncType, false, true>>()},
+                         {{option_id, option_id}, callable::make<option_arithmetic_kernel<FuncType, true, true>>()},
+                         {{dim_kind_id, scalar_kind_id}, functional::elwise(self)},
+                         {{scalar_kind_id, dim_kind_id}, functional::elwise(self)},
+                         {{dim_kind_id, dim_kind_id}, functional::elwise(self)}});
 
-      return functional::dispatch(ndt::type("(Any, Any) -> Any"),
-                                  [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                                             const ndt::type *src_tp) mutable -> callable & {
-                                    callable &child = children[{{src_tp[0].get_id(), src_tp[1].get_id()}}];
-                                    if (child.is_null()) {
-                                      throw std::runtime_error(FuncType::what(src_tp[0], src_tp[1]));
-                                    }
+      return functional::dispatch(
+          ndt::type("(Any, Any) -> Any"), [dispatcher](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                                       const ndt::type *src_tp) mutable -> callable & {
+            callable &child = const_cast<callable &>(dispatcher(src_tp[0].get_id(), src_tp[1].get_id()));
+            if (child.is_null()) {
+              throw std::runtime_error(FuncType::what(src_tp[0], src_tp[1]));
+            }
 
-                                    return child;
-                                  });
+            return child;
+          });
     }
   };
 
@@ -109,12 +97,10 @@ namespace nd {
   namespace detail {
 
     typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int16_id, int32_id, int64_id,
-                             float32_id, float64_id, complex_float32_id, complex_float64_id>
-        binop_ids;
+                             float32_id, float64_id, complex_float32_id, complex_float64_id> binop_ids;
 
     typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int16_id, int32_id, int64_id,
-                             float32_id, float64_id>
-        binop_real_ids;
+                             float32_id, float64_id> binop_real_ids;
   }
 
   DYND_DEF_BINARY_OP_CALLABLE(add, detail::binop_ids)
