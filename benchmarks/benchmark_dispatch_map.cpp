@@ -15,7 +15,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/type_registry.hpp>
-#include <dynd/dispatch_map.hpp>
+#include <dynd/dispatcher.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -23,19 +23,18 @@ using namespace dynd;
 template <size_t N>
 class DispatchFixture : public ::benchmark::Fixture {
 public:
-  vector<pair<array<type_id_t, N>, array<type_id_t, N>>> pairs;
+  vector<type_id_t[N]> ids;
 
   void SetUp(const benchmark::State &state)
   {
-    pairs.resize(state.range_x());
+    ids.resize(state.range_x());
 
     default_random_engine generator;
     uniform_int_distribution<underlying_type_t<type_id_t>> d(bool_id, callable_id);
 
-    for (auto &pair : pairs) {
+    for (auto &id : ids) {
       for (size_t i = 0; i < N; ++i) {
-        pair.first[i] = static_cast<type_id_t>(d(generator));
-        pair.second[i] = static_cast<type_id_t>(d(generator));
+        id[i] = static_cast<type_id_t>(d(generator));
       }
     }
   }
@@ -110,19 +109,11 @@ BENCHMARK_DEFINE_F(UnaryDispatchFixture, BM_UnaryDispatch)(benchmark::State &sta
                              {{uint128_id}, 12}, {{float32_id}, 13},    {{float64_id}, 14}};
   while (state.KeepRunning()) {
     for (const auto &pair : pairs) {
-      benchmark::DoNotOptimize(dispatcher(pair.first));
-      benchmark::DoNotOptimize(dispatcher(pair.first));
-      benchmark::DoNotOptimize(dispatcher(pair.first));
-      benchmark::DoNotOptimize(dispatcher(pair.first));
-      benchmark::DoNotOptimize(dispatcher(pair.first));
-      benchmark::DoNotOptimize(dispatcher(pair.first));
-      benchmark::DoNotOptimize(dispatcher(pair.first));
-      benchmark::DoNotOptimize(dispatcher(pair.first));
-      benchmark::DoNotOptimize(dispatcher(pair.first));
-      benchmark::DoNotOptimize(dispatcher(pair.first));
+      type_id_t ids[1] = {pair.first};
+      benchmark::DoNotOptimize(dispatcher(ids));
     }
   }
-  state.SetItemsProcessed(10 * state.iterations() * state.range_x());
+  state.SetItemsProcessed(state.iterations() * state.range_x());
 }
 
 BENCHMARK_REGISTER_F(UnaryDispatchFixture, BM_UnaryDispatch)->Arg(100)->Arg(1000)->Arg(10000);
@@ -147,19 +138,11 @@ BENCHMARK_DEFINE_F(UnaryDispatchFixture, BM_BinaryDispatch)(benchmark::State &st
                              {{any_kind_id, any_kind_id}, 4}};
   while (state.KeepRunning()) {
     for (const auto &pair : pairs) {
-      benchmark::DoNotOptimize(dispatcher(pair.first, pair.second));
-      benchmark::DoNotOptimize(dispatcher(pair.first, pair.second));
-      benchmark::DoNotOptimize(dispatcher(pair.first, pair.second));
-      benchmark::DoNotOptimize(dispatcher(pair.first, pair.second));
-      benchmark::DoNotOptimize(dispatcher(pair.first, pair.second));
-      benchmark::DoNotOptimize(dispatcher(pair.first, pair.second));
-      benchmark::DoNotOptimize(dispatcher(pair.first, pair.second));
-      benchmark::DoNotOptimize(dispatcher(pair.first, pair.second));
-      benchmark::DoNotOptimize(dispatcher(pair.first, pair.second));
-      benchmark::DoNotOptimize(dispatcher(pair.first, pair.second));
+      type_id_t ids[2] = {pair.first, pair.second};
+      benchmark::DoNotOptimize(dispatcher(ids));
     }
   }
-  state.SetItemsProcessed(10 * state.iterations() * state.range_x());
+  state.SetItemsProcessed(state.iterations() * state.range_x());
 }
 
 BENCHMARK_REGISTER_F(UnaryDispatchFixture, BM_BinaryDispatch)->Arg(100)->Arg(1000)->Arg(10000);
