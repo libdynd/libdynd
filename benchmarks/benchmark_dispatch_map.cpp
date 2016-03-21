@@ -15,7 +15,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/type_registry.hpp>
-#include <dynd/dispatch_map.hpp>
+#include <dynd/dispatcher.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -23,19 +23,18 @@ using namespace dynd;
 template <size_t N>
 class DispatchFixture : public ::benchmark::Fixture {
 public:
-  vector<pair<array<type_id_t, N>, array<type_id_t, N>>> pairs;
+  vector<type_id_t[N]> ids;
 
   void SetUp(const benchmark::State &state)
   {
-    pairs.resize(state.range_x());
+    ids.resize(state.range_x());
 
     default_random_engine generator;
     uniform_int_distribution<underlying_type_t<type_id_t>> d(bool_id, callable_id);
 
-    for (auto &pair : pairs) {
+    for (auto &id : ids) {
       for (size_t i = 0; i < N; ++i) {
-        pair.first[i] = static_cast<type_id_t>(d(generator));
-        pair.second[i] = static_cast<type_id_t>(d(generator));
+        id[i] = static_cast<type_id_t>(d(generator));
       }
     }
   }
@@ -62,6 +61,7 @@ public:
 
 typedef DispatchFixture<1> X;
 
+/*
 BENCHMARK_DEFINE_F(X, BM_IsBaseIDOf)(benchmark::State &state)
 {
   while (state.KeepRunning()) {
@@ -82,11 +82,12 @@ BENCHMARK_DEFINE_F(X, BM_IsBaseIDOf)(benchmark::State &state)
 }
 
 BENCHMARK_REGISTER_F(X, BM_IsBaseIDOf)->Arg(100)->Arg(1000)->Arg(10000);
+*/
 
-/*
 typedef DispatchFixture<1> UnaryDispatchFixture;
 typedef DispatchFixture<2> BinaryDispatchFixture;
 
+/*
 BENCHMARK_DEFINE_F(BinaryDispatchFixture, BM_Supercedes)(benchmark::State &state)
 {
   while (state.KeepRunning()) {
@@ -100,15 +101,16 @@ BENCHMARK_DEFINE_F(BinaryDispatchFixture, BM_Supercedes)(benchmark::State &state
 
 // BENCHMARK_REGISTER_F(BinaryDispatchFixture, BM_Supercedes)->Arg(10)->Arg(100)->Arg(1000);
 
-/*
 BENCHMARK_DEFINE_F(UnaryDispatchFixture, BM_UnaryDispatch)(benchmark::State &state)
 {
-  dispatch_map<int, 1> map{{any_kind_id, 0}, {scalar_kind_id, 1}, {bool_id, 2},     {int8_id, 3},     {int16_id, 4},
-                           {int32_id, 5},    {int64_id, 6},       {int128_id, 7},   {uint8_id, 8},    {uint16_id, 9},
-                           {uint32_id, 10},  {uint64_id, 11},     {uint128_id, 12}, {float32_id, 13}, {float64_id, 14}};
+  dispatcher<int> dispatcher{{{any_kind_id}, 0}, {{scalar_kind_id}, 1}, {{bool_id}, 2},    {{int8_id}, 3},
+                             {{int16_id}, 4},    {{int32_id}, 5},       {{int64_id}, 6},   {{int128_id}, 7},
+                             {{uint8_id}, 8},    {{uint16_id}, 9},      {{uint32_id}, 10}, {{uint64_id}, 11},
+                             {{uint128_id}, 12}, {{float32_id}, 13},    {{float64_id}, 14}};
   while (state.KeepRunning()) {
     for (const auto &pair : pairs) {
-      benchmark::DoNotOptimize(map[pair.first]);
+      type_id_t ids[1] = {pair.first};
+      benchmark::DoNotOptimize(dispatcher(ids));
     }
   }
   state.SetItemsProcessed(state.iterations() * state.range_x());
@@ -116,6 +118,7 @@ BENCHMARK_DEFINE_F(UnaryDispatchFixture, BM_UnaryDispatch)(benchmark::State &sta
 
 BENCHMARK_REGISTER_F(UnaryDispatchFixture, BM_UnaryDispatch)->Arg(100)->Arg(1000)->Arg(10000);
 
+/*
 static void BM_VirtualDispatch(benchmark::State &state)
 {
   while (state.KeepRunning()) {
@@ -124,22 +127,22 @@ static void BM_VirtualDispatch(benchmark::State &state)
 }
 
 BENCHMARK(BM_VirtualDispatch);
+*/
 
-BENCHMARK_DEFINE_F(BinaryDispatchFixture, BM_BinaryDispatch)(benchmark::State &state)
+BENCHMARK_DEFINE_F(UnaryDispatchFixture, BM_BinaryDispatch)(benchmark::State &state)
 {
-  typedef dispatch_map<int, 2> map_type;
-
-  map_type map{{{any_kind_id, int64_id}, 0},
-               {{scalar_kind_id, int64_id}, 1},
-               {{int32_id, int64_id}, 2},
-               {{float32_id, int64_id}, 3}};
+  dispatcher<int> dispatcher{{{any_kind_id, int64_id}, 0},
+                             {{scalar_kind_id, int64_id}, 1},
+                             {{int32_id, int64_id}, 2},
+                             {{float32_id, int64_id}, 3},
+                             {{any_kind_id, any_kind_id}, 4}};
   while (state.KeepRunning()) {
     for (const auto &pair : pairs) {
-      benchmark::DoNotOptimize(map.find(pair.first));
+      type_id_t ids[2] = {pair.first, pair.second};
+      benchmark::DoNotOptimize(dispatcher(ids));
     }
   }
   state.SetItemsProcessed(state.iterations() * state.range_x());
 }
-*/
 
-// BENCHMARK_REGISTER_F(BinaryDispatchFixture, BM_BinaryDispatch)->Arg(1000);
+BENCHMARK_REGISTER_F(UnaryDispatchFixture, BM_BinaryDispatch)->Arg(100)->Arg(1000)->Arg(10000);
