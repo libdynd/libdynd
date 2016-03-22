@@ -15,7 +15,7 @@
 #include <dynd/func/permute.hpp>
 #include <dynd/iterator.hpp>
 #include <dynd/callable.hpp>
-#include <dynd/callables/dispatcher_callable.hpp>
+#include <dynd/callables/base_dispatch_callable.hpp>
 
 namespace dynd {
 namespace nd {

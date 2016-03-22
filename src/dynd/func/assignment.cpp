@@ -41,19 +41,7 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert({{char_id, fixed_string_id}, callable::make<assignment_kernel<char_id, fixed_string_id>>()});
   dispatcher.insert({{char_id, string_id}, callable::make<assignment_kernel<char_id, string_id>>()});
   dispatcher.insert(
-      {{adapt_id, int16_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
-  dispatcher.insert(
-      {{adapt_id, int32_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
-  dispatcher.insert(
-      {{adapt_id, int64_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
-  dispatcher.insert(
-      {{adapt_id, float32_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
-  dispatcher.insert(
-      {{adapt_id, float64_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
-  dispatcher.insert(
-      {{adapt_id, complex_float32_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
-  dispatcher.insert(
-      {{adapt_id, complex_float64_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
+      {{adapt_id, any_kind_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
   dispatcher.insert(
       {{int32_id, adapt_id}, nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"))});
   dispatcher.insert(
@@ -107,24 +95,12 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert({{tuple_id, tuple_id}, callable::make<assignment_kernel<tuple_id, tuple_id>>()});
   dispatcher.insert({{struct_id, int32_id}, callable::make<assignment_kernel<struct_id, struct_id>>()});
   dispatcher.insert({{struct_id, struct_id}, callable::make<assignment_kernel<struct_id, struct_id>>()});
-  for (type_id_t tp_id : {bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint8_id, uint16_id, uint32_id,
-                          uint64_id, uint128_id, float32_id, float64_id, fixed_dim_id, type_id}) {
-    dispatcher.insert(
-        {{tp_id, var_dim_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
-    dispatcher.insert(
-        {{var_dim_id, tp_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
-  }
   dispatcher.insert(
-      {{var_dim_id, var_dim_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
-  for (type_id_t tp_id : {bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint8_id, uint16_id, uint32_id,
-                          uint64_id, uint128_id, float32_id, float64_id, type_id}) {
-    dispatcher.insert(
-        {{tp_id, fixed_dim_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) ->Any")))});
-    dispatcher.insert(
-        {{fixed_dim_id, tp_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) ->Any")))});
-  }
+      {{scalar_kind_id, dim_kind_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
   dispatcher.insert(
-      {{fixed_dim_id, fixed_dim_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
+      {{dim_kind_id, scalar_kind_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
+  dispatcher.insert(
+      {{dim_kind_id, dim_kind_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
 
   return make_callable<assign_callable>(self_tp, std::make_shared<dynd::dispatcher<callable>>(dispatcher));
 }

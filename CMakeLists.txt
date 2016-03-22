@@ -250,6 +250,7 @@ set(libdynd_SRC
     # Callables
     src/dynd/callables/base_callable.cpp
     include/dynd/callables/base_callable.hpp
+    include/dynd/callables/base_dispatch_callable.hpp
     # Func
     src/dynd/func/arithmetic.cpp
     src/dynd/func/assignment.cpp

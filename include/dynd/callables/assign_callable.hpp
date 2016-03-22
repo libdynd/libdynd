@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/callables/dispatcher_callable.hpp>
+#include <dynd/callables/base_dispatch_callable.hpp>
 
 namespace dynd {
 namespace nd {
