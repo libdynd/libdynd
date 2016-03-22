@@ -24,7 +24,7 @@ namespace nd {
                              intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         DispatcherType &dispatcher = *reinterpret_cast<static_data_type *>(static_data);
-        callable &child = dispatcher(dst_tp, nsrc, src_tp);
+        const callable &child = dispatcher(dst_tp, nsrc, src_tp);
 
         const ndt::type &child_dst_tp = child.get_type()->get_return_type();
 
@@ -37,7 +37,7 @@ namespace nd {
       {
         DispatcherType &dispatcher = *reinterpret_cast<static_data_type *>(static_data);
 
-        callable &child = dispatcher(dst_tp, nsrc, src_tp);
+        const callable &child = dispatcher(dst_tp, nsrc, src_tp);
         if (child.is_null()) {
           throw std::runtime_error("no suitable child for multidispatch");
         }
@@ -58,7 +58,7 @@ namespace nd {
       {
         DispatcherType &dispatcher = *reinterpret_cast<static_data_type *>(static_data);
 
-        callable &child = dispatcher(dst_tp, nsrc, src_tp);
+        const callable &child = dispatcher(dst_tp, nsrc, src_tp);
         if (child.is_null()) {
           std::stringstream ss;
           ss << "no suitable child for multidispatch for types " << src_tp[0] << ", and " << dst_tp << "\n";

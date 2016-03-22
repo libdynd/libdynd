@@ -24,16 +24,10 @@ namespace nd {
         children[i0] = functional::elwise(child_tp, self);
       }
 
-      return functional::dispatch(self.get_array_type(),
-                                  [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                                             const ndt::type *src_tp) mutable -> callable & {
-                                    callable &child = children[src_tp[0].get_id()];
-                                    if (child.is_null()) {
-                                      throw std::runtime_error(FuncType::what(src_tp[0]));
-                                    }
-
-                                    return child;
-                                  });
+      return functional::dispatch(
+          self.get_array_type(),
+          [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                     const ndt::type *src_tp) mutable -> const callable & { return children[src_tp[0].get_id()]; });
     }
   };
 
@@ -75,8 +69,8 @@ namespace nd {
                                     dispatcher.insert({{src_tp[0].get_id(), src_tp[1].get_id()}, value});
                                   },
                                   [dispatcher](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                                               const ndt::type *src_tp) mutable -> callable & {
-                                    return const_cast<callable &>(dispatcher(src_tp[0].get_id(), src_tp[1].get_id()));
+                                               const ndt::type *src_tp) mutable -> const callable & {
+                                    return dispatcher(src_tp[0].get_id(), src_tp[1].get_id());
                                   });
     }
   };
@@ -133,13 +127,8 @@ namespace nd {
 
       return functional::dispatch(ndt::type("(Any) -> Any"),
                                   [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                                             const ndt::type *src_tp) mutable -> callable & {
-                                    callable &child = children[{{dst_tp.get_id(), src_tp[0].get_id()}}];
-                                    if (child.is_null()) {
-                                      throw std::runtime_error("no child found");
-                                    }
-
-                                    return child;
+                                             const ndt::type *src_tp) mutable -> const callable & {
+                                    return children[{{dst_tp.get_id(), src_tp[0].get_id()}}];
                                   });
     }
   };
