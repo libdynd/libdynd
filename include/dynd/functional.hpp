@@ -31,16 +31,14 @@ namespace nd {
     template <typename SpecializerType>
     callable dispatch(const ndt::type &tp, const SpecializerType &specializer)
     {
-      return make_callable<dispatcher_callable<SpecializerType>, multidispatch_kernel<SpecializerType>>(tp,
-                                                                                                        specializer);
+      return make_callable<dispatch_callable<SpecializerType>, multidispatch_kernel<SpecializerType>>(tp, specializer);
     }
 
-    template <typename SpecializerType, typename OverloaderType>
-    callable dispatch(const ndt::type &tp, const SpecializerType &specializer,
-                      const OverloaderType &DYND_UNUSED(overloader))
+    template <typename OverloaderType, typename SpecializerType>
+    callable dispatch(const ndt::type &tp, const OverloaderType &overloader, const SpecializerType &specializer)
     {
-      return make_callable<dispatcher_callable<SpecializerType>, multidispatch_kernel<SpecializerType>>(tp,
-                                                                                                        specializer);
+      return make_callable<dispatch_callable<OverloaderType, SpecializerType>, multidispatch_kernel<SpecializerType>>(
+          tp, overloader, specializer);
     }
 
     namespace detail {

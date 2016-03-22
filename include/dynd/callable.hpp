@@ -137,7 +137,7 @@ namespace nd {
 
     void overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp, const callable &value)
     {
-      get()->overload(ret_tp, narg, arg_tp) = value;
+      get()->overload(ret_tp, narg, arg_tp, value);
     }
 
     void overload(const ndt::type &ret_tp, const std::initializer_list<ndt::type> &arg_tp, const callable &value)
