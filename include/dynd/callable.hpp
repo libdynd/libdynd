@@ -135,50 +135,42 @@ namespace nd {
 
     const std::vector<ndt::type> &get_arg_types() const { return get_type()->get_pos_types(); }
 
-    const callable &get_overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp) const
-    {
-      return get()->overload(ret_tp, narg, arg_tp);
-    }
-
-    const callable &get_overload(const ndt::type &ret_tp, const std::initializer_list<ndt::type> &arg_tp) const
-    {
-      return get_overload(ret_tp, arg_tp.size(), arg_tp.begin());
-    }
-
-    void set_overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp, const callable &value)
+    void overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp, const callable &value)
     {
       get()->overload(ret_tp, narg, arg_tp) = value;
     }
 
-    void set_overload(const ndt::type &ret_tp, const std::initializer_list<ndt::type> &arg_tp, const callable &value)
+    void overload(const ndt::type &ret_tp, const std::initializer_list<ndt::type> &arg_tp, const callable &value)
     {
-      set_overload(ret_tp, arg_tp.size(), arg_tp.begin(), value);
+      overload(ret_tp, arg_tp.size(), arg_tp.begin(), value);
+    }
+
+    const callable &specialize(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp) const
+    {
+      return get()->specialize(ret_tp, narg, arg_tp);
+    }
+
+    const callable &specialize(const ndt::type &ret_tp, const std::initializer_list<ndt::type> &arg_tp) const
+    {
+      return specialize(ret_tp, arg_tp.size(), arg_tp.begin());
     }
 
     array call(size_t args_size, const array *args_values, size_t kwds_size,
-               const std::pair<const char *, array> *kwds_values);
+               const std::pair<const char *, array> *kwds_values) const;
 
     template <typename... ArgTypes>
-    array operator()(ArgTypes &&... args)
+    array operator()(ArgTypes &&... args) const
     {
       array tmp[sizeof...(ArgTypes)] = {std::forward<ArgTypes>(args)...};
       return call(sizeof...(ArgTypes), tmp, 0, nullptr);
     }
 
-    array operator()() { return call(0, nullptr, 0, nullptr); }
+    array operator()() const { return call(0, nullptr, 0, nullptr); }
 
     array operator()(const std::initializer_list<array> &args,
-                     const std::initializer_list<std::pair<const char *, array>> &kwds)
+                     const std::initializer_list<std::pair<const char *, array>> &kwds) const
     {
       return call(args.size(), args.begin(), kwds.size(), kwds.begin());
-    }
-
-    template <typename DstType, typename... ArgTypes>
-    array operator()(ArgTypes &&... args)
-    {
-      array tmp[sizeof...(ArgTypes)] = {std::forward<ArgTypes>(args)...};
-      std::pair<const char *, array> kwds = {"dst_tp", ndt::make_type<DstType>()};
-      return call(sizeof...(ArgTypes), tmp, 1, &kwds);
     }
 
     template <typename KernelType>

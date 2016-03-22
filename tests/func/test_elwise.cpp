@@ -53,7 +53,7 @@ TEST(Elwise, UnaryExpr_VarDim)
 
 TEST(Elwise, UnaryExpr_StridedToVarDim)
 {
-  nd::callable f = nd::functional::elwise(nd::assign::get().get_overload(ndt::make_type<int>(), {ndt::type("string")}));
+  nd::callable f = nd::functional::elwise(nd::assign::get().specialize(ndt::make_type<int>(), {ndt::type("string")}));
   EXPECT_ARRAY_EQ(nd::array({172, -139, 12345, -1111, 284}).cast(ndt::type("var * int32")),
                   f({{"172", "-139", "12345", "-1111", "284"}}, {{"dst_tp", ndt::type("var * int32")}}));
 }

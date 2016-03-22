@@ -129,9 +129,9 @@ TEST(Multidispatch, Unary)
   nd::callable f2([](double) { return 2; });
 
   nd::callable f = nd::functional::multidispatch({f0, f1, f2});
-  EXPECT_EQ(f0, f.get_overload(ndt::make_type<int>(), {ndt::make_type<int>()}));
-  EXPECT_EQ(f1, f.get_overload(ndt::make_type<int>(), {ndt::make_type<float>()}));
-  EXPECT_EQ(f2, f.get_overload(ndt::make_type<int>(), {ndt::make_type<double>()}));
+  EXPECT_EQ(f0, f.specialize(ndt::make_type<int>(), {ndt::make_type<int>()}));
+  EXPECT_EQ(f1, f.specialize(ndt::make_type<int>(), {ndt::make_type<float>()}));
+  EXPECT_EQ(f2, f.specialize(ndt::make_type<int>(), {ndt::make_type<double>()}));
 
   /*
     EXPECT_ARRAY_EQ(0, func(int32()));
@@ -142,9 +142,9 @@ TEST(Multidispatch, Unary)
   */
 
   f = nd::functional::multidispatch(ndt::type("(Any) -> Any"), {f0, f1, f2});
-  EXPECT_EQ(f0, f.get_overload(ndt::make_type<int>(), {ndt::make_type<int>()}));
-  EXPECT_EQ(f1, f.get_overload(ndt::make_type<int>(), {ndt::make_type<float>()}));
-  EXPECT_EQ(f2, f.get_overload(ndt::make_type<int>(), {ndt::make_type<double>()}));
+  EXPECT_EQ(f0, f.specialize(ndt::make_type<int>(), {ndt::make_type<int>()}));
+  EXPECT_EQ(f1, f.specialize(ndt::make_type<int>(), {ndt::make_type<float>()}));
+  EXPECT_EQ(f2, f.specialize(ndt::make_type<int>(), {ndt::make_type<double>()}));
 
   EXPECT_ARRAY_EQ(0, f(int()));
   EXPECT_ARRAY_EQ(1, f(float()));
