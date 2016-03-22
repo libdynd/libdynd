@@ -125,15 +125,15 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert(
       {{fixed_dim_id, fixed_dim_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
 
-  return functional::dispatch(self_tp,
-                              [dispatcher](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                                           const callable &value) mutable {
-                                dispatcher.insert({{dst_tp.get_id(), src_tp[0].get_id()}, value});
-                              },
-                              [dispatcher](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                                           const ndt::type *src_tp) mutable -> const callable & {
-                                return dispatcher(dst_tp.get_id(), src_tp[0].get_id());
-                              });
+  auto x = std::make_shared<dynd::dispatcher<callable>>(dispatcher);
+  return functional::dispatch(
+      self_tp,
+      [x](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const callable &value) mutable {
+        x->insert({{dst_tp.get_id(), src_tp[0].get_id()}, value});
+      },
+      [x](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable -> const callable & {
+        return (*x)(dst_tp.get_id(), src_tp[0].get_id());
+      });
 }
 
 DYND_DEFAULT_DECLFUNC_GET(nd::assign)
