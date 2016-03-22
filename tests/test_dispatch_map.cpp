@@ -63,6 +63,12 @@ TEST(TypeRegistry, Bases)
   EXPECT_EQ(vector<type_id_t>({any_kind_id}), ndt::type_registry[void_id].get_base_ids());
 }
 
+TEST(TypeRegistry, Ambiguous)
+{
+  EXPECT_TRUE(ambiguous({int_kind_id, int32_id}, {int32_id, int_kind_id}));
+  EXPECT_FALSE(ambiguous({int32_id, int32_id}, {int32_id, int_kind_id}));
+}
+
 TEST(TypeRegistry, IsBaseIDOf)
 {
   for (type_id_t id = ndt::type_registry.min(); id < void_id; id = static_cast<type_id_t>(id + 1)) {
