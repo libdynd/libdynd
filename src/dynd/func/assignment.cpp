@@ -30,96 +30,110 @@ DYND_API nd::callable nd::assign::make()
   ndt::type self_tp = ndt::callable_type::make(ndt::any_kind_type::make(), {ndt::any_kind_type::make()}, {"error_mode"},
                                                {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())});
 
-  map<std::array<type_id_t, 2>, callable> children =
-      callable::make_all<_bind<assign_error_mode, assignment_kernel>::type, numeric_ids, numeric_ids>();
-  children[{{string_id, string_id}}] = callable::make<assignment_kernel<string_id, string_id>>();
-  children[{{bytes_id, bytes_id}}] = callable::make<assignment_kernel<bytes_id, bytes_id>>();
-  children[{{fixed_bytes_id, fixed_bytes_id}}] = callable::make<assignment_kernel<fixed_bytes_id, fixed_bytes_id>>();
-  children[{{char_id, char_id}}] = callable::make<assignment_kernel<char_id, char_id>>();
-  children[{{char_id, fixed_string_id}}] = callable::make<assignment_kernel<char_id, fixed_string_id>>();
-  children[{{char_id, string_id}}] = callable::make<assignment_kernel<char_id, string_id>>();
-  children[{{fixed_string_id, char_id}}] = callable::make<assignment_kernel<fixed_string_id, char_id>>();
-  children[{{string_id, char_id}}] = callable::make<assignment_kernel<string_id, char_id>>();
-  children[{{type_id, type_id}}] = callable::make<assignment_kernel<type_id, type_id>>();
-  children[{{string_id, int32_id}}] = callable::make<assignment_kernel<string_id, int32_id>>();
-  children[{{fixed_string_id, fixed_string_id}}] =
-      callable::make<assignment_kernel<fixed_string_id, fixed_string_id>>();
-  children[{{fixed_string_id, string_id}}] = callable::make<assignment_kernel<fixed_string_id, string_id>>();
-  children[{{fixed_string_id, uint8_id}}] = callable::make<assignment_kernel<fixed_string_id, uint8_id>>();
-  children[{{fixed_string_id, uint16_id}}] = callable::make<assignment_kernel<fixed_string_id, uint16_id>>();
-  children[{{fixed_string_id, uint32_id}}] = callable::make<assignment_kernel<fixed_string_id, uint32_id>>();
-  children[{{fixed_string_id, uint64_id}}] = callable::make<assignment_kernel<fixed_string_id, uint64_id>>();
-  children[{{fixed_string_id, uint128_id}}] = callable::make<assignment_kernel<fixed_string_id, uint128_id>>();
-  children[{{int32_id, fixed_string_id}}] = callable::make<assignment_kernel<int32_id, fixed_string_id>>();
-  children[{{string_id, string_id}}] = callable::make<assignment_kernel<string_id, string_id>>();
-  children[{{string_id, fixed_string_id}}] = callable::make<assignment_kernel<string_id, fixed_string_id>>();
-  children[{{bool_id, string_id}}] = callable::make<assignment_kernel<bool_id, string_id>>();
-  children[{{option_id, option_id}}] = callable::make<assignment_kernel<option_id, option_id>>();
-  children[{{int32_id, option_id}}] = callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"));
-  children[{{string_id, option_id}}] = callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"));
-  children[{{float64_id, option_id}}] = callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"));
-  children[{{bool_id, option_id}}] = callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"));
-  children[{{int8_id, option_id}}] = callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"));
-  children[{{uint32_id, option_id}}] = callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"));
-  children[{{option_id, int32_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"));
-  children[{{option_id, string_id}}] = callable::make<assignment_kernel<option_id, string_id>>();
-  children[{{option_id, float64_id}}] = callable::make<assignment_kernel<option_id, float64_id>>();
-  children[{{option_id, bool_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"));
-  children[{{option_id, int8_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"));
-  children[{{option_id, uint32_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"));
-  children[{{string_id, type_id}}] = callable::make<assignment_kernel<string_id, type_id>>();
-  children[{{type_id, string_id}}] = callable::make<assignment_kernel<type_id, string_id>>();
-  children[{{pointer_id, pointer_id}}] = callable::make<assignment_kernel<pointer_id, pointer_id>>();
-  children[{{int8_id, string_id}}] = callable::make<assignment_kernel<int8_id, string_id>>();
-  children[{{int16_id, string_id}}] = callable::make<assignment_kernel<int16_id, string_id>>();
-  children[{{int32_id, string_id}}] = callable::make<assignment_kernel<int32_id, string_id>>();
-  children[{{int64_id, string_id}}] = callable::make<assignment_kernel<int64_id, string_id>>();
-  children[{{uint8_id, string_id}}] = callable::make<assignment_kernel<uint8_id, string_id>>();
-  children[{{uint16_id, string_id}}] = callable::make<assignment_kernel<uint16_id, string_id>>();
-  children[{{uint32_id, string_id}}] = callable::make<assignment_kernel<uint32_id, string_id>>();
-  children[{{uint64_id, string_id}}] = callable::make<assignment_kernel<uint64_id, string_id>>();
-  children[{{float32_id, string_id}}] = callable::make<assignment_kernel<float32_id, string_id>>();
-  children[{{float64_id, string_id}}] = callable::make<assignment_kernel<float64_id, string_id>>();
-  children[{{tuple_id, tuple_id}}] = callable::make<assignment_kernel<tuple_id, tuple_id>>();
-  children[{{struct_id, int32_id}}] = callable::make<assignment_kernel<struct_id, struct_id>>();
-  children[{{struct_id, struct_id}}] = callable::make<assignment_kernel<struct_id, struct_id>>();
+  auto dispatcher =
+      callable::new_make_all<_bind<assign_error_mode, assignment_kernel>::type, numeric_ids, numeric_ids>();
+  dispatcher.insert({{string_id, string_id}, callable::make<assignment_kernel<string_id, string_id>>()});
+  dispatcher.insert({{bytes_id, bytes_id}, callable::make<assignment_kernel<bytes_id, bytes_id>>()});
+  dispatcher.insert(
+      {{fixed_bytes_id, fixed_bytes_id}, callable::make<assignment_kernel<fixed_bytes_id, fixed_bytes_id>>()});
+  dispatcher.insert({{char_id, char_id}, callable::make<assignment_kernel<char_id, char_id>>()});
+  dispatcher.insert({{char_id, fixed_string_id}, callable::make<assignment_kernel<char_id, fixed_string_id>>()});
+  dispatcher.insert({{char_id, string_id}, callable::make<assignment_kernel<char_id, string_id>>()});
+  dispatcher.insert(
+      {{adapt_id, int16_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
+  dispatcher.insert(
+      {{adapt_id, int32_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
+  dispatcher.insert(
+      {{adapt_id, int64_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
+  dispatcher.insert(
+      {{adapt_id, float32_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
+  dispatcher.insert(
+      {{adapt_id, float64_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
+  dispatcher.insert(
+      {{adapt_id, complex_float32_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
+  dispatcher.insert(
+      {{adapt_id, complex_float64_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
+  dispatcher.insert(
+      {{int32_id, adapt_id}, nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"))});
+  dispatcher.insert(
+      {{struct_id, adapt_id}, nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"))});
+  dispatcher.insert({{fixed_string_id, char_id}, callable::make<assignment_kernel<fixed_string_id, char_id>>()});
+  dispatcher.insert({{string_id, char_id}, callable::make<assignment_kernel<string_id, char_id>>()});
+  dispatcher.insert({{type_id, type_id}, callable::make<assignment_kernel<type_id, type_id>>()});
+  dispatcher.insert({{string_id, int32_id}, callable::make<assignment_kernel<string_id, int32_id>>()});
+  dispatcher.insert(
+      {{fixed_string_id, fixed_string_id}, callable::make<assignment_kernel<fixed_string_id, fixed_string_id>>()});
+  dispatcher.insert({{fixed_string_id, string_id}, callable::make<assignment_kernel<fixed_string_id, string_id>>()});
+  dispatcher.insert({{fixed_string_id, uint8_id}, callable::make<assignment_kernel<fixed_string_id, uint8_id>>()});
+  dispatcher.insert({{fixed_string_id, uint16_id}, callable::make<assignment_kernel<fixed_string_id, uint16_id>>()});
+  dispatcher.insert({{fixed_string_id, uint32_id}, callable::make<assignment_kernel<fixed_string_id, uint32_id>>()});
+  dispatcher.insert({{fixed_string_id, uint64_id}, callable::make<assignment_kernel<fixed_string_id, uint64_id>>()});
+  dispatcher.insert({{fixed_string_id, uint128_id}, callable::make<assignment_kernel<fixed_string_id, uint128_id>>()});
+  dispatcher.insert({{int32_id, fixed_string_id}, callable::make<assignment_kernel<int32_id, fixed_string_id>>()});
+  dispatcher.insert({{string_id, string_id}, callable::make<assignment_kernel<string_id, string_id>>()});
+  dispatcher.insert({{string_id, fixed_string_id}, callable::make<assignment_kernel<string_id, fixed_string_id>>()});
+  dispatcher.insert({{bool_id, string_id}, callable::make<assignment_kernel<bool_id, string_id>>()});
+  dispatcher.insert({{option_id, option_id}, callable::make<assignment_kernel<option_id, option_id>>()});
+  dispatcher.insert({{int32_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))});
+  dispatcher.insert({{string_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))});
+  dispatcher.insert({{float64_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))});
+  dispatcher.insert({{bool_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))});
+  dispatcher.insert({{int8_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))});
+  dispatcher.insert({{uint32_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))});
+  dispatcher.insert(
+      {{option_id, int32_id}, callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"))});
+  dispatcher.insert({{option_id, string_id}, callable::make<assignment_kernel<option_id, string_id>>()});
+  dispatcher.insert({{option_id, float64_id}, callable::make<assignment_kernel<option_id, float64_id>>()});
+  dispatcher.insert(
+      {{option_id, bool_id}, callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"))});
+  dispatcher.insert(
+      {{option_id, int8_id}, callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"))});
+  dispatcher.insert(
+      {{option_id, uint32_id}, callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"))});
+  dispatcher.insert({{string_id, type_id}, callable::make<assignment_kernel<string_id, type_id>>()});
+  dispatcher.insert({{type_id, string_id}, callable::make<assignment_kernel<type_id, string_id>>()});
+  dispatcher.insert({{pointer_id, pointer_id}, callable::make<assignment_kernel<pointer_id, pointer_id>>()});
+  dispatcher.insert({{int8_id, string_id}, callable::make<assignment_kernel<int8_id, string_id>>()});
+  dispatcher.insert({{int16_id, string_id}, callable::make<assignment_kernel<int16_id, string_id>>()});
+  dispatcher.insert({{int32_id, string_id}, callable::make<assignment_kernel<int32_id, string_id>>()});
+  dispatcher.insert({{int64_id, string_id}, callable::make<assignment_kernel<int64_id, string_id>>()});
+  dispatcher.insert({{uint8_id, string_id}, callable::make<assignment_kernel<uint8_id, string_id>>()});
+  dispatcher.insert({{uint16_id, string_id}, callable::make<assignment_kernel<uint16_id, string_id>>()});
+  dispatcher.insert({{uint32_id, string_id}, callable::make<assignment_kernel<uint32_id, string_id>>()});
+  dispatcher.insert({{uint64_id, string_id}, callable::make<assignment_kernel<uint64_id, string_id>>()});
+  dispatcher.insert({{float32_id, string_id}, callable::make<assignment_kernel<float32_id, string_id>>()});
+  dispatcher.insert({{float64_id, string_id}, callable::make<assignment_kernel<float64_id, string_id>>()});
+  dispatcher.insert({{tuple_id, tuple_id}, callable::make<assignment_kernel<tuple_id, tuple_id>>()});
+  dispatcher.insert({{struct_id, int32_id}, callable::make<assignment_kernel<struct_id, struct_id>>()});
+  dispatcher.insert({{struct_id, struct_id}, callable::make<assignment_kernel<struct_id, struct_id>>()});
   for (type_id_t tp_id : {bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint8_id, uint16_id, uint32_id,
                           uint64_id, uint128_id, float32_id, float64_id, fixed_dim_id, type_id}) {
-    children[{{tp_id, var_dim_id}}] = nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
-    children[{{var_dim_id, tp_id}}] = nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
+    dispatcher.insert(
+        {{tp_id, var_dim_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
+    dispatcher.insert(
+        {{var_dim_id, tp_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
   }
-  children[{{var_dim_id, var_dim_id}}] =
-      nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
+  dispatcher.insert(
+      {{var_dim_id, var_dim_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
   for (type_id_t tp_id : {bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint8_id, uint16_id, uint32_id,
                           uint64_id, uint128_id, float32_id, float64_id, type_id}) {
-    children[{{tp_id, fixed_dim_id}}] = nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
-    children[{{fixed_dim_id, tp_id}}] = nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
+    dispatcher.insert(
+        {{tp_id, fixed_dim_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) ->Any")))});
+    dispatcher.insert(
+        {{fixed_dim_id, tp_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) ->Any")))});
   }
-  children[{{fixed_dim_id, fixed_dim_id}}] =
-      nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
+  dispatcher.insert(
+      {{fixed_dim_id, fixed_dim_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
 
-  children[{{adapt_id, int16_id}}] = nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
-  children[{{adapt_id, int32_id}}] = nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
-  children[{{adapt_id, int64_id}}] = nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
-  children[{{adapt_id, float32_id}}] = nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
-  children[{{adapt_id, float64_id}}] = nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
-  children[{{adapt_id, complex_float32_id}}] =
-      nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
-  children[{{adapt_id, complex_float64_id}}] =
-      nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
-
-  children[{{int32_id, adapt_id}}] = nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"));
-  children[{{struct_id, adapt_id}}] = nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"));
-
-  return functional::dispatch(
-      self_tp,
-      [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                 const callable &value) mutable {
-        children[{{dst_tp.get_id(), src_tp[0].get_id()}}] = value;
-      },
-      [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable -> callable & {
-        return children[{{dst_tp.get_id(), src_tp[0].get_id()}}];
-      });
+  return functional::dispatch(self_tp,
+                              [dispatcher](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                                           const callable &value) mutable {
+                                dispatcher.insert({{dst_tp.get_id(), src_tp[0].get_id()}, value});
+                              },
+                              [dispatcher](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                                           const ndt::type *src_tp) mutable -> const callable & {
+                                return dispatcher(dst_tp.get_id(), src_tp[0].get_id());
+                              });
 }
 
 DYND_DEFAULT_DECLFUNC_GET(nd::assign)
