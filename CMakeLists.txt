@@ -331,7 +331,6 @@ set(libdynd_SRC
     include/dynd/kernels/kernel_prefix.hpp
     include/dynd/kernels/max_kernel.hpp
     include/dynd/kernels/min_kernel.hpp
-    include/dynd/kernels/multidispatch_kernel.hpp
     include/dynd/kernels/outer.hpp
     include/dynd/kernels/reduction_kernel.hpp
     include/dynd/kernels/rolling_kernel.hpp

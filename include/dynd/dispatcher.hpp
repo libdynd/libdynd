@@ -142,6 +142,8 @@ private:
 public:
   dispatcher() = default;
 
+  dispatcher(const dispatcher &other) : m_pairs(other.m_pairs), m_map(other.m_map) {}
+
   template <typename Iterator>
   dispatcher(Iterator begin, Iterator end, const map_type &map = map_type())
       : m_map(map)

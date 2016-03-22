@@ -4,6 +4,7 @@
 //
 
 #include <dynd/func/assignment.hpp>
+#include <dynd/callables/assign_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/any_kind_type.hpp>
@@ -125,15 +126,7 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert(
       {{fixed_dim_id, fixed_dim_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
 
-  auto x = std::make_shared<dynd::dispatcher<callable>>(dispatcher);
-  return functional::dispatch(
-      self_tp,
-      [x](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const callable &value) mutable {
-        x->insert({{dst_tp.get_id(), src_tp[0].get_id()}, value});
-      },
-      [x](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable -> const callable & {
-        return (*x)(dst_tp.get_id(), src_tp[0].get_id());
-      });
+  return make_callable<assign_callable>(self_tp, std::make_shared<dynd::dispatcher<callable>>(dispatcher));
 }
 
 DYND_DEFAULT_DECLFUNC_GET(nd::assign)

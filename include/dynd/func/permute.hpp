@@ -54,7 +54,7 @@ namespace kernels {
       const std::pair<nd::callable, std::vector<intptr_t>> *data =
           reinterpret_cast<std::pair<nd::callable, std::vector<intptr_t>> *>(static_data);
 
-      const nd::base_callable *child = data->first.get();
+      const nd::callable &child = data->first;
 
       const intptr_t *perm = data->second.data();
 
@@ -132,7 +132,7 @@ namespace kernels {
       const std::pair<nd::callable, std::vector<intptr_t>> *data =
           reinterpret_cast<std::pair<nd::callable, std::vector<intptr_t>> *>(static_data);
 
-      const nd::base_callable *child = data->first.get();
+      const nd::callable &child = data->first;
 
       const intptr_t *perm = data->second.data();
 

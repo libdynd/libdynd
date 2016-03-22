@@ -70,7 +70,7 @@ void nd::functional::rolling_ck::instantiate(char *_static_data, char *data, ker
   intptr_t root_ckb_offset = ckb->size();
   ckb->emplace_back<self_type>(kernreq);
   self_type *self = ckb->get_at<self_type>(root_ckb_offset);
-  const base_callable *window_af = static_data->window_op.get();
+  const callable &window_af = static_data->window_op;
   ndt::type dst_el_tp, src_el_tp;
   const char *dst_el_arrmeta, *src_el_arrmeta;
   if (!dst_tp.get_as_strided(dst_arrmeta, &self->m_dim_size, &self->m_dst_stride, &dst_el_tp, &dst_el_arrmeta)) {
@@ -134,10 +134,10 @@ void nd::functional::rolling_ck::resolve_dst_type(char *_static_data, char *data
   */
 
   static_data_type *static_data = *reinterpret_cast<static_data_type **>(_static_data);
-  const base_callable *child_af = static_data->window_op.get();
+  const callable &child_af = static_data->window_op;
   // First get the type for the child callable
   ndt::type child_dst_tp;
-  if (child_af->resolve_dst_type) {
+  if (child_af->m_resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(static_data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
     child_af->resolve_dst_type(const_cast<char *>(child_af->static_data()), data, child_dst_tp, 1, &child_src_tp, nkwd,
                                kwds, tp_vars);

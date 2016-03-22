@@ -121,22 +121,28 @@ namespace nd {
     ndt::type tp;
     kernel_targets_t targets;
     const char *ir;
-    callable_alloc_t alloc;
-    callable_data_init_t data_init;
-    callable_resolve_dst_type_t resolve_dst_type;
-    callable_instantiate_t instantiate;
+    callable_alloc_t m_alloc;
+    callable_data_init_t m_data_init;
+    callable_resolve_dst_type_t m_resolve_dst_type;
+    callable_instantiate_t m_instantiate;
 
-    base_callable() : use_count(0), alloc(NULL), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL) {}
+    base_callable() : use_count(0), m_alloc(NULL), m_data_init(NULL), m_resolve_dst_type(NULL), m_instantiate(NULL) {}
 
     base_callable(const ndt::type &tp, const base_callable &other)
-        : use_count(0), tp(tp), targets(other.targets), ir(other.ir), alloc(other.alloc), data_init(other.data_init),
-          resolve_dst_type(other.resolve_dst_type), instantiate(other.instantiate)
+        : use_count(0), tp(tp), targets(other.targets), ir(other.ir), m_alloc(other.m_alloc),
+          m_data_init(other.m_data_init), m_resolve_dst_type(other.m_resolve_dst_type),
+          m_instantiate(other.m_instantiate)
+    {
+    }
+
+    base_callable(const ndt::type &tp)
+        : base_callable(tp, kernel_targets_t(), nullptr, nullptr, nullptr, nullptr, nullptr)
     {
     }
 
     base_callable(const ndt::type &tp, kernel_targets_t targets)
-        : use_count(0), tp(tp), targets(targets), alloc(&kernel_prefix::alloc), data_init(&kernel_prefix::data_init),
-          resolve_dst_type(NULL), instantiate(&kernel_prefix::instantiate)
+        : use_count(0), tp(tp), targets(targets), m_alloc(&kernel_prefix::alloc),
+          m_data_init(&kernel_prefix::data_init), m_resolve_dst_type(NULL), m_instantiate(&kernel_prefix::instantiate)
     {
       new (static_data()) kernel_targets_t(targets);
     }
@@ -144,19 +150,43 @@ namespace nd {
     base_callable(const ndt::type &tp, kernel_targets_t targets, const volatile char *ir, callable_alloc_t alloc,
                   callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
                   callable_instantiate_t instantiate)
-        : use_count(0), tp(tp), targets(targets), ir(const_cast<const char *>(ir)), alloc(alloc), data_init(data_init),
-          resolve_dst_type(resolve_dst_type), instantiate(instantiate)
+        : use_count(0), tp(tp), targets(targets), ir(const_cast<const char *>(ir)), m_alloc(alloc),
+          m_data_init(data_init), m_resolve_dst_type(resolve_dst_type), m_instantiate(instantiate)
     {
     }
 
     // non-copyable
     base_callable(const base_callable &) = delete;
 
-    virtual ~base_callable() {}
+    virtual ~base_callable();
 
     char *static_data() { return reinterpret_cast<char *>(this + 1); }
 
     const char *static_data() const { return reinterpret_cast<const char *>(this + 1); }
+
+    virtual array alloc(const ndt::type *dst_tp) const { return m_alloc(dst_tp); }
+
+    virtual char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                            intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    {
+      return m_data_init(static_data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+    }
+
+    virtual void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
+                                  const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
+                                  const std::map<std::string, ndt::type> &tp_vars)
+    {
+      m_resolve_dst_type(static_data, data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+    }
+
+    virtual void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                             const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
+                             const std::map<std::string, ndt::type> &tp_vars)
+    {
+      m_instantiate(static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
+                    tp_vars);
+    }
 
     virtual void overload(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
                           const ndt::type *DYND_UNUSED(arg_tp), const callable &DYND_UNUSED(value))

@@ -15,7 +15,6 @@
 #include <dynd/func/permute.hpp>
 #include <dynd/iterator.hpp>
 #include <dynd/callable.hpp>
-#include <dynd/kernels/multidispatch_kernel.hpp>
 #include <dynd/callables/dispatcher_callable.hpp>
 
 namespace dynd {
@@ -31,14 +30,13 @@ namespace nd {
     template <typename SpecializerType>
     callable dispatch(const ndt::type &tp, const SpecializerType &specializer)
     {
-      return make_callable<dispatch_callable<SpecializerType>, multidispatch_kernel<SpecializerType>>(tp, specializer);
+      return make_callable<dispatch_callable<SpecializerType>>(tp, specializer);
     }
 
     template <typename OverloaderType, typename SpecializerType>
     callable dispatch(const ndt::type &tp, const OverloaderType &overloader, const SpecializerType &specializer)
     {
-      return make_callable<dispatch_callable<OverloaderType, SpecializerType>, multidispatch_kernel<SpecializerType>>(
-          tp, overloader, specializer);
+      return make_callable<dispatch_callable<OverloaderType, SpecializerType>>(tp, overloader, specializer);
     }
 
     namespace detail {
