@@ -16,20 +16,15 @@ struct uniform_kernel_alias {
 DYND_API nd::callable nd::random::uniform::make()
 {
   typedef type_id_sequence<int32_id, int64_id, uint32_id, uint64_id, float32_id, float64_id, complex_float32_id,
-                           complex_float64_id>
-      numeric_ids;
+                           complex_float64_id> numeric_ids;
 
   std::random_device random_device;
 
-  auto children = callable::make_all<uniform_kernel_alias<std::default_random_engine>::type, numeric_ids>(0);
+  auto dispatcher = callable::new_make_all<uniform_kernel_alias<std::default_random_engine>::type, numeric_ids>();
   return functional::elwise(functional::dispatch(
-      ndt::type("(a: ?R, b: ?R) -> R"), [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                                                   const ndt::type *DYND_UNUSED(src_tp)) mutable -> callable & {
-        callable &child = children[dst_tp.get_id()];
-        if (child.is_null()) {
-          throw std::runtime_error("assignment error");
-        }
-        return child;
+      ndt::type("(a: ?R, b: ?R) -> R"), [dispatcher](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                                                     const ndt::type *DYND_UNUSED(src_tp)) mutable -> callable & {
+        return const_cast<callable &>(dispatcher(dst_tp.get_id()));
       }));
 }
 
