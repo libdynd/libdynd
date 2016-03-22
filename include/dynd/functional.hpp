@@ -28,10 +28,19 @@ namespace nd {
       return callable::make<call_kernel<FuncType>>(tp);
     }
 
-    template <typename DispatcherType>
-    callable dispatch(const ndt::type &tp, const DispatcherType &dispatcher)
+    template <typename SpecializerType>
+    callable dispatch(const ndt::type &tp, const SpecializerType &specializer)
     {
-      return make_callable<dispatcher_callable<DispatcherType>, multidispatch_kernel<DispatcherType>>(tp, dispatcher);
+      return make_callable<dispatcher_callable<SpecializerType>, multidispatch_kernel<SpecializerType>>(tp,
+                                                                                                        specializer);
+    }
+
+    template <typename SpecializerType, typename OverloaderType>
+    callable dispatch(const ndt::type &tp, const SpecializerType &specializer,
+                      const OverloaderType &DYND_UNUSED(overloader))
+    {
+      return make_callable<dispatcher_callable<SpecializerType>, multidispatch_kernel<SpecializerType>>(tp,
+                                                                                                        specializer);
     }
 
     namespace detail {

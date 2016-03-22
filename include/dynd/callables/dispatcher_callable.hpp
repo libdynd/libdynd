@@ -18,6 +18,11 @@ namespace nd {
     {
       return this->static_data(ret_tp, narg, arg_tp);
     }
+
+    callable &specialize(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp)
+    {
+      return this->static_data(ret_tp, narg, arg_tp);
+    }
   };
 
 } // namespace dynd::nd

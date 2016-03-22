@@ -71,7 +71,7 @@ void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i, const nd
 }
 
 nd::array nd::callable::call(size_t args_size, const array *args_values, size_t kwds_size,
-                             const std::pair<const char *, array> *kwds_values)
+                             const std::pair<const char *, array> *kwds_values) const
 {
   std::map<std::string, ndt::type> tp_vars;
   const ndt::callable_type *self_tp = get_type();
@@ -171,7 +171,8 @@ nd::array nd::callable::call(size_t args_size, const array *args_values, size_t 
     // TODO: Provide the missing keyword parameter names in this error
     //       message
     ss << "callable requires keyword parameters that were not provided. "
-          "callable signature " << get()->tp;
+          "callable signature "
+       << get()->tp;
     throw std::invalid_argument(ss.str());
   }
 

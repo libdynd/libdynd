@@ -164,6 +164,12 @@ namespace nd {
       throw std::runtime_error("callable is not overloadable");
     }
 
+    virtual callable &specialize(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
+                                 const ndt::type *DYND_UNUSED(arg_tp))
+    {
+      throw std::runtime_error("callable is not specializable");
+    }
+
     array call(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                char *const *src_data, intptr_t nkwd, const array *kwds,
                const std::map<std::string, ndt::type> &tp_vars);
