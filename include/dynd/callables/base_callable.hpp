@@ -158,14 +158,14 @@ namespace nd {
 
     const char *static_data() const { return reinterpret_cast<const char *>(this + 1); }
 
-    virtual callable &overload(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
-                               const ndt::type *DYND_UNUSED(arg_tp))
+    virtual void overload(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
+                          const ndt::type *DYND_UNUSED(arg_tp), const callable &DYND_UNUSED(value))
     {
       throw std::runtime_error("callable is not overloadable");
     }
 
-    virtual callable &specialize(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
-                                 const ndt::type *DYND_UNUSED(arg_tp))
+    virtual const callable &specialize(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
+                                       const ndt::type *DYND_UNUSED(arg_tp))
     {
       throw std::runtime_error("callable is not specializable");
     }

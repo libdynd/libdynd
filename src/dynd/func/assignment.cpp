@@ -24,8 +24,8 @@ struct DYND_API _bind {
 DYND_API nd::callable nd::assign::make()
 {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint8_id, uint16_id, uint32_id,
-                           uint64_id, uint128_id, float32_id, float64_id, complex_float32_id, complex_float64_id>
-      numeric_ids;
+                           uint64_id, uint128_id, float32_id, float64_id, complex_float32_id,
+                           complex_float64_id> numeric_ids;
 
   ndt::type self_tp = ndt::callable_type::make(ndt::any_kind_type::make(), {ndt::any_kind_type::make()}, {"error_mode"},
                                                {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())});
@@ -111,14 +111,15 @@ DYND_API nd::callable nd::assign::make()
   children[{{int32_id, adapt_id}}] = nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"));
   children[{{struct_id, adapt_id}}] = nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"));
 
-  return functional::dispatch(self_tp, [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                                                  const ndt::type *src_tp) mutable -> callable & {
-    callable &child = children[{{dst_tp.get_id(), src_tp[0].get_id()}}];
-    if (child.is_null()) {
-      //      throw std::runtime_error("assignment error");
-    }
-    return child;
-  });
+  return functional::dispatch(
+      self_tp,
+      [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                 const callable &value) mutable {
+        children[{{dst_tp.get_id(), src_tp[0].get_id()}}] = value;
+      },
+      [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable -> callable & {
+        return children[{{dst_tp.get_id(), src_tp[0].get_id()}}];
+      });
 }
 
 DYND_DEFAULT_DECLFUNC_GET(nd::assign)

@@ -71,6 +71,10 @@ namespace nd {
 
       return functional::dispatch(ndt::type("(Any, Any) -> Any"),
                                   [dispatcher](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                               const ndt::type *src_tp, const callable &value) mutable {
+                                    dispatcher.insert({{src_tp[0].get_id(), src_tp[1].get_id()}, value});
+                                  },
+                                  [dispatcher](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
                                                const ndt::type *src_tp) mutable -> callable & {
                                     return const_cast<callable &>(dispatcher(src_tp[0].get_id(), src_tp[1].get_id()));
                                   });
