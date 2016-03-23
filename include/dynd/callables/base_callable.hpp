@@ -10,6 +10,7 @@
 
 #include <dynd/kernels/kernel_prefix.hpp>
 #include <dynd/array.hpp>
+#include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
 namespace nd {
@@ -164,19 +165,34 @@ namespace nd {
 
     const char *static_data() const { return reinterpret_cast<const char *>(this + 1); }
 
-    virtual array alloc(const ndt::type *dst_tp) const { return m_alloc(dst_tp); }
+    virtual array alloc(const ndt::type *dst_tp) const
+    {
+      if (m_alloc != NULL) {
+        return m_alloc(dst_tp);
+      }
+
+      return empty(*dst_tp);
+    }
 
     virtual char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                             intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
-      return m_data_init(static_data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+      if (m_data_init != NULL) {
+        return m_data_init(static_data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+      }
+
+      return NULL;
     }
 
     virtual void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
                                   const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                                   const std::map<std::string, ndt::type> &tp_vars)
     {
-      m_resolve_dst_type(static_data, data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+      if (m_resolve_dst_type != NULL) {
+        return m_resolve_dst_type(static_data, data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+      }
+
+      dst_tp = ndt::substitute(dst_tp, tp_vars, true);
     }
 
     virtual void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
