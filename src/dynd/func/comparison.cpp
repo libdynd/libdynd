@@ -46,23 +46,14 @@ nd::array nd::operator>(const array &a0, const array &a1) { return greater(a0, a
 
 nd::callable nd::total_order::make()
 {
-  std::map<std::array<type_id_t, 2>, callable> children;
-  children[{{fixed_string_id, fixed_string_id}}] =
-      callable::make<total_order_kernel<fixed_string_id, fixed_string_id>>();
-  children[{{string_id, string_id}}] = callable::make<total_order_kernel<string_id, string_id>>();
-  children[{{int32_id, int32_id}}] = callable::make<total_order_kernel<int32_id, int32_id>>();
-  children[{{bool_id, bool_id}}] = callable::make<total_order_kernel<bool_id, bool_id>>();
+  dispatcher<callable> dispatcher;
+  dispatcher.insert(
+      {{fixed_string_id, fixed_string_id}, callable::make<total_order_kernel<fixed_string_id, fixed_string_id>>()});
+  dispatcher.insert({{string_id, string_id}, callable::make<total_order_kernel<string_id, string_id>>()});
+  dispatcher.insert({{int32_id, int32_id}, callable::make<total_order_kernel<int32_id, int32_id>>()});
+  dispatcher.insert({{bool_id, bool_id}, callable::make<total_order_kernel<bool_id, bool_id>>()});
 
-  return functional::dispatch(ndt::type("(Any, Any) -> Any"),
-                              [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                                         const ndt::type *src_tp) mutable -> callable & {
-                                callable &child = children[{{src_tp[0].get_id(), src_tp[1].get_id()}}];
-                                if (child.is_null()) {
-                                  throw std::runtime_error("no child found");
-                                }
-
-                                return child;
-                              });
+  return make_callable<comparison_dispatch_callable>(ndt::type("(Any, Any) -> Any"), dispatcher);
 }
 
 DYND_DEFAULT_DECLFUNC_GET(nd::total_order)
