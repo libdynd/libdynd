@@ -7,7 +7,7 @@
 
 #include <numeric>
 
-#include <dynd/kernels/adapt_kernel.hpp>
+#include <dynd/callables/adapt_callable.hpp>
 #include <dynd/callables/call_callable.hpp>
 #include <dynd/kernels/forward_na_kernel.hpp>
 #include <dynd/func/elwise.hpp>
@@ -30,8 +30,7 @@ namespace nd {
 
     inline callable adapt(const ndt::type &value_tp, const callable &forward)
     {
-      return callable::make<adapt_kernel>(ndt::callable_type::make(value_tp, {ndt::type("Any")}),
-                                          adapt_kernel::static_data_type{value_tp, forward});
+      return make_callable<adapt_callable>(value_tp, forward);
     }
 
     template <int... I>

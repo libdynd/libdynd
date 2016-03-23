@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_strided_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -29,13 +29,4 @@ namespace nd {
   };
 
 } // namespace dynd::nd
-
-namespace ndt {
-
-  template <>
-  struct traits<nd::all_kernel> {
-    static type equivalent() { return type("(bool) -> bool"); }
-  };
-
-} // namespace dynd::ndt
 } // namespace dynd
