@@ -15,9 +15,9 @@ ostream &dynd::operator<<(ostream &o, type_id_t id)
   case uninitialized_id:
     return o << "uninitialized";
   case any_kind_id:
-    return o << "any_kind";
+    return o << "Any";
   case scalar_kind_id:
-    return o << "scalar_kind";
+    return o << "Scalar";
   case bool_kind_id:
     return o << "bool_kind";
   case bool_id:

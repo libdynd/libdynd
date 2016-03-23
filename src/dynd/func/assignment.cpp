@@ -41,11 +41,9 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert({{char_id, fixed_string_id}, callable::make<assignment_kernel<char_id, fixed_string_id>>()});
   dispatcher.insert({{char_id, string_id}, callable::make<assignment_kernel<char_id, string_id>>()});
   dispatcher.insert(
-      {{adapt_id, any_kind_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))});
-  dispatcher.insert(
-      {{int32_id, adapt_id}, nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"))});
-  dispatcher.insert(
-      {{struct_id, adapt_id}, nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"))});
+      {{{adapt_id, any_kind_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))},
+       {{any_kind_id, adapt_id}, nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"))},
+       {{adapt_id, adapt_id}, nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"))}});
   dispatcher.insert({{fixed_string_id, char_id}, callable::make<assignment_kernel<fixed_string_id, char_id>>()});
   dispatcher.insert({{string_id, char_id}, callable::make<assignment_kernel<string_id, char_id>>()});
   dispatcher.insert({{type_id, type_id}, callable::make<assignment_kernel<type_id, type_id>>()});
@@ -62,23 +60,12 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert({{string_id, string_id}, callable::make<assignment_kernel<string_id, string_id>>()});
   dispatcher.insert({{string_id, fixed_string_id}, callable::make<assignment_kernel<string_id, fixed_string_id>>()});
   dispatcher.insert({{bool_id, string_id}, callable::make<assignment_kernel<bool_id, string_id>>()});
-  dispatcher.insert({{option_id, option_id}, callable::make<assignment_kernel<option_id, option_id>>()});
-  dispatcher.insert({{int32_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))});
-  dispatcher.insert({{string_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))});
-  dispatcher.insert({{float64_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))});
-  dispatcher.insert({{bool_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))});
-  dispatcher.insert({{int8_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))});
-  dispatcher.insert({{uint32_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))});
   dispatcher.insert(
-      {{option_id, int32_id}, callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"))});
+      {{{scalar_kind_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))},
+       {{option_id, option_id}, callable::make<assignment_kernel<option_id, option_id>>()},
+       {{option_id, scalar_kind_id}, callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"))}});
   dispatcher.insert({{option_id, string_id}, callable::make<assignment_kernel<option_id, string_id>>()});
   dispatcher.insert({{option_id, float64_id}, callable::make<assignment_kernel<option_id, float64_id>>()});
-  dispatcher.insert(
-      {{option_id, bool_id}, callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"))});
-  dispatcher.insert(
-      {{option_id, int8_id}, callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"))});
-  dispatcher.insert(
-      {{option_id, uint32_id}, callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"))});
   dispatcher.insert({{string_id, type_id}, callable::make<assignment_kernel<string_id, type_id>>()});
   dispatcher.insert({{type_id, string_id}, callable::make<assignment_kernel<type_id, string_id>>()});
   dispatcher.insert({{pointer_id, pointer_id}, callable::make<assignment_kernel<pointer_id, pointer_id>>()});

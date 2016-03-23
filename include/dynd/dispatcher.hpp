@@ -13,6 +13,21 @@
 
 namespace dynd {
 
+inline bool consistent(const std::vector<type_id_t> &lhs, const std::vector<type_id_t> &rhs)
+{
+  if (lhs.size() != rhs.size()) {
+    return false;
+  }
+
+  for (size_t i = 0; i < lhs.size(); ++i) {
+    if (!is_base_id_of(lhs[i], rhs[i]) && !is_base_id_of(rhs[i], lhs[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 inline bool supercedes(const std::vector<type_id_t> &lhs, const std::vector<type_id_t> &rhs)
 {
   if (lhs.size() != rhs.size()) {
@@ -26,6 +41,11 @@ inline bool supercedes(const std::vector<type_id_t> &lhs, const std::vector<type
   }
 
   return true;
+}
+
+inline bool ambiguous(const std::vector<type_id_t> &lhs, const std::vector<type_id_t> &rhs)
+{
+  return consistent(lhs, rhs) && !(supercedes(lhs, rhs) || supercedes(rhs, lhs));
 }
 
 template <size_t N>
@@ -115,6 +135,16 @@ void topological_sort(std::initializer_list<VertexType> vertices,
   topological_sort(vertices.begin(), vertices.end(), edges.begin(), res);
 }
 
+inline std::ostream &print_ids(std::ostream &o, size_t nids, const type_id_t *ids)
+{
+  o << "(" << ids[0];
+  for (size_t i = 1; i < nids; ++i) {
+    o << ", " << ids[i];
+  }
+  o << ")";
+  return o;
+}
+
 template <typename T, typename Map = std::map<size_t, T>>
 class dispatcher {
 public:
@@ -166,6 +196,24 @@ public:
     std::vector<std::vector<size_t>> edges(m_pairs.size());
     for (size_t i = 0; i < edges.size(); ++i) {
       for (size_t j = i + 1; j < edges.size(); ++j) {
+        if (ambiguous(begin[i].first, begin[j].first)) {
+          bool ok = false;
+          for (size_t k = 0; k < edges.size(); ++k) {
+            if (supercedes(begin[k].first, begin[i].first) && supercedes(begin[k].first, begin[j].first)) {
+              ok = true;
+            }
+          }
+
+          if (!ok) {
+            std::stringstream ss;
+            print_ids(ss, begin[i].first.size(), begin[i].first.data());
+            ss << " and ";
+            print_ids(ss, begin[j].first.size(), begin[j].first.data());
+            ss << " are ambiguous";
+            throw std::runtime_error(ss.str());
+          }
+        }
+
         if (edge(begin[i].first, begin[j].first)) {
           edges[i].push_back(j);
         }
