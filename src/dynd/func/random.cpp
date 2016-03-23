@@ -3,6 +3,7 @@
 #include <dynd/func/random.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/kernels/uniform_kernel.hpp>
+#include <dynd/callables/uniform_dispatch_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -21,11 +22,7 @@ DYND_API nd::callable nd::random::uniform::make()
   std::random_device random_device;
 
   auto dispatcher = callable::new_make_all<uniform_kernel_alias<std::default_random_engine>::type, numeric_ids>();
-  return functional::elwise(functional::dispatch(
-      ndt::type("(a: ?R, b: ?R) -> R"), [dispatcher](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                                                     const ndt::type *DYND_UNUSED(src_tp)) mutable -> callable & {
-        return const_cast<callable &>(dispatcher(dst_tp.get_id()));
-      }));
+  return functional::elwise(make_callable<uniform_dispatch_callable>(ndt::type("(a: ?R, b: ?R) -> R"), dispatcher));
 }
 
 DYND_DEFAULT_DECLFUNC_GET(nd::random::uniform)

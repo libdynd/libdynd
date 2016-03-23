@@ -12,6 +12,7 @@
 #include <dynd/string_encodings.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/callables/parse_dispatch_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -22,24 +23,22 @@ DYND_API struct nd::json::parse nd::json::parse;
 
 DYND_API nd::callable nd::json::parse::make()
 {
-  std::map<type_id_t, callable> children;
-  children[bool_id] = callable::make<parse_kernel<bool_id>>();
-  children[int8_id] = callable::make<parse_kernel<int8_id>>();
-  children[int16_id] = callable::make<parse_kernel<int16_id>>();
-  children[int32_id] = callable::make<parse_kernel<int32_id>>();
-  children[int64_id] = callable::make<parse_kernel<int64_id>>();
-  children[uint8_id] = callable::make<parse_kernel<uint8_id>>();
-  children[uint16_id] = callable::make<parse_kernel<uint16_id>>();
-  children[uint32_id] = callable::make<parse_kernel<uint32_id>>();
-  children[uint64_id] = callable::make<parse_kernel<uint64_id>>();
-  children[string_id] = callable::make<parse_kernel<string_id>>();
-  children[struct_id] = callable::make<parse_kernel<struct_id>>();
-  children[option_id] = callable::make<parse_kernel<option_id>>();
-  children[fixed_dim_id] = callable::make<parse_kernel<fixed_dim_id>>();
-  children[var_dim_id] = callable::make<parse_kernel<var_dim_id>>();
+  dispatcher<callable> dispatcher;
+  dispatcher.insert({{bool_id}, callable::make<parse_kernel<bool_id>>()});
+  dispatcher.insert({{int8_id}, callable::make<parse_kernel<int8_id>>()});
+  dispatcher.insert({{int16_id}, callable::make<parse_kernel<int16_id>>()});
+  dispatcher.insert({{int32_id}, callable::make<parse_kernel<int32_id>>()});
+  dispatcher.insert({{int64_id}, callable::make<parse_kernel<int64_id>>()});
+  dispatcher.insert({{uint8_id}, callable::make<parse_kernel<uint8_id>>()});
+  dispatcher.insert({{uint16_id}, callable::make<parse_kernel<uint16_id>>()});
+  dispatcher.insert({{uint32_id}, callable::make<parse_kernel<uint32_id>>()});
+  dispatcher.insert({{uint64_id}, callable::make<parse_kernel<uint64_id>>()});
+  dispatcher.insert({{string_id}, callable::make<parse_kernel<string_id>>()});
+  dispatcher.insert({{struct_id}, callable::make<parse_kernel<struct_id>>()});
+  dispatcher.insert({{option_id}, callable::make<parse_kernel<option_id>>()});
+  dispatcher.insert({{fixed_dim_id}, callable::make<parse_kernel<fixed_dim_id>>()});
+  dispatcher.insert({{var_dim_id}, callable::make<parse_kernel<var_dim_id>>()});
 
-  return functional::dispatch(
-      ndt::callable_type::make(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<string>()}),
-      [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                 const ndt::type *DYND_UNUSED(src_tp)) mutable -> callable & { return children[dst_tp.get_id()]; });
+  return make_callable<parse_dispatch_callable>(
+      ndt::callable_type::make(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<string>()}), dispatcher);
 }
