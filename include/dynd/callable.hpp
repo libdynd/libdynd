@@ -20,6 +20,9 @@
 
 namespace dynd {
 namespace nd {
+  template <typename CallableType, typename... ArgTypes>
+  callable make_callable(ArgTypes &&... args);
+
   namespace detail {
 
     /**
@@ -179,6 +182,12 @@ namespace nd {
       return callable(ndt::traits<KernelType>::equivalent(), detail::get_targets<KernelType>(),
                       detail::get_ir<KernelType>(), &KernelType::alloc, &KernelType::data_init,
                       &KernelType::resolve_dst_type, &KernelType::instantiate);
+    }
+
+    template <typename CallableType>
+    static std::enable_if_t<std::is_base_of<base_callable, CallableType>::value, callable> make()
+    {
+      return make_callable<CallableType>();
     }
 
     template <typename KernelType>
