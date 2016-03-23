@@ -89,7 +89,7 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert(
       {{dim_kind_id, dim_kind_id}, nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")))});
 
-  return make_callable<assign_callable>(self_tp, std::make_shared<dynd::dispatcher<callable>>(dispatcher));
+  return make_callable<assign_dispatch_callable>(self_tp, std::make_shared<dynd::dispatcher<callable>>(dispatcher));
 }
 
 DYND_DEFAULT_DECLFUNC_GET(nd::assign)

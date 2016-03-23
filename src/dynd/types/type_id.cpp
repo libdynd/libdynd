@@ -19,11 +19,11 @@ ostream &dynd::operator<<(ostream &o, type_id_t id)
   case scalar_kind_id:
     return o << "Scalar";
   case bool_kind_id:
-    return o << "bool_kind";
+    return o << "Bool";
   case bool_id:
     return o << "bool";
   case int_kind_id:
-    return o << "int_kind";
+    return o << "Int";
   case int8_id:
     return o << "int8";
   case int16_id:
@@ -35,7 +35,7 @@ ostream &dynd::operator<<(ostream &o, type_id_t id)
   case int128_id:
     return o << "int128";
   case uint_kind_id:
-    return o << "uint_kind";
+    return o << "UInt";
   case uint8_id:
     return o << "uint8";
   case uint16_id:

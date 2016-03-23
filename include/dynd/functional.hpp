@@ -16,6 +16,7 @@
 #include <dynd/iterator.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/callables/base_dispatch_callable.hpp>
+#include <dynd/callables/arithmetic_dispatch_callable.hpp>
 
 namespace dynd {
 namespace nd {
@@ -31,12 +32,6 @@ namespace nd {
     callable dispatch(const ndt::type &tp, const SpecializerType &specializer)
     {
       return make_callable<dispatch_callable<SpecializerType>>(tp, specializer);
-    }
-
-    template <typename OverloaderType, typename SpecializerType>
-    callable dispatch(const ndt::type &tp, const OverloaderType &overloader, const SpecializerType &specializer)
-    {
-      return make_callable<dispatch_callable<OverloaderType, SpecializerType>>(tp, overloader, specializer);
     }
 
     namespace detail {
