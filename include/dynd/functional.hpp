@@ -7,8 +7,8 @@
 
 #include <numeric>
 
-#include <dynd/kernels/adapt_kernel.hpp>
-#include <dynd/kernels/call_kernel.hpp>
+#include <dynd/callables/adapt_callable.hpp>
+#include <dynd/callables/call_callable.hpp>
 #include <dynd/kernels/forward_na_kernel.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/outer.hpp>
@@ -25,19 +25,12 @@ namespace nd {
     template <typename FuncType>
     callable call(const ndt::type &tp)
     {
-      return callable::make<call_kernel<FuncType>>(tp);
-    }
-
-    template <typename SpecializerType>
-    callable dispatch(const ndt::type &tp, const SpecializerType &specializer)
-    {
-      return make_callable<dispatch_callable<SpecializerType>>(tp, specializer);
+      return make_callable<call_callable<FuncType>>(tp);
     }
 
     inline callable adapt(const ndt::type &value_tp, const callable &forward)
     {
-      return callable::make<adapt_kernel>(ndt::callable_type::make(value_tp, {ndt::type("Any")}),
-                                          adapt_kernel::static_data_type{value_tp, forward});
+      return make_callable<adapt_callable>(value_tp, forward);
     }
 
     template <int... I>

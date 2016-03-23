@@ -304,7 +304,6 @@ set(libdynd_SRC
     # Kernels
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/compare_kernels.cpp
-    src/dynd/kernels/copy_kernel.cpp
     src/dynd/kernels/fft_kernel.cpp
     src/dynd/kernels/kernel_builder.cpp
     src/dynd/kernels/kernel_prefix.cpp
@@ -320,7 +319,6 @@ set(libdynd_SRC
     include/dynd/kernels/compare_kernels.hpp
     include/dynd/kernels/compose_kernel.hpp
     include/dynd/kernels/compound_kernel.hpp
-    include/dynd/kernels/copy_kernel.hpp
     include/dynd/kernels/constant_kernel.hpp
     include/dynd/kernels/cuda_launch.hpp
     include/dynd/kernels/dereference_kernel.hpp

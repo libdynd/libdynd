@@ -4,12 +4,12 @@
 //
 
 #include <dynd/func/copy.hpp>
-#include <dynd/kernels/copy_kernel.hpp>
+#include <dynd/callables/copy_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::copy::make() { return callable::make<copy_ck>(ndt::type("(A... * S) -> B... * T"), 0); }
+DYND_API nd::callable nd::copy::make() { return make_callable<copy_callable>(); }
 
 DYND_DEFAULT_DECLFUNC_GET(nd::copy)
 
