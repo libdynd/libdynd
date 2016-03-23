@@ -1,10 +1,66 @@
 #pragma once
 
+#include <dynd/kernels/apply.hpp>
 #include <dynd/option.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/kernels/apply.hpp>
 
 namespace dynd {
+
+namespace detail {
+  template <typename>
+  struct sfinae_true : std::true_type {
+  };
+
+#define DYND_CHECK_UNARY_OP(OP, NAME)                                                                                  \
+  template <typename T>                                                                                                \
+  static auto NAME##_isdef_test(int DYND_UNUSED(a))->sfinae_true<decltype(OP std::declval<T>())>;                      \
+                                                                                                                       \
+  template <typename>                                                                                                  \
+  static auto NAME##_isdef_test(long)->std::false_type;                                                                \
+                                                                                                                       \
+  template <type_id_t Src0TypeID>                                                                                      \
+  struct isdef_##NAME : decltype(NAME##_isdef_test<typename type_of<Src0TypeID>::type>(0)) {                           \
+  };
+
+  DYND_CHECK_UNARY_OP(+, plus)
+  DYND_ALLOW_UNSIGNED_UNARY_MINUS
+  DYND_CHECK_UNARY_OP(-, minus)
+  DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
+  DYND_CHECK_UNARY_OP(!, logical_not)
+  DYND_CHECK_UNARY_OP(~, bitwise_not)
+
+#undef DYND_CHECK_UNARY_OP
+
+#define DYND_CHECK_BINARY_OP(OP, NAME)                                                                                 \
+  \
+template<typename T, typename U> static auto NAME##_isdef_test(int DYND_UNUSED(a))                                     \
+      ->sfinae_true<decltype(std::declval<T>() OP std::declval<U>())>;                                                 \
+                                                                                                                       \
+  template <typename, typename>                                                                                        \
+  static auto NAME##_isdef_test(long)->std::false_type;                                                                \
+                                                                                                                       \
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
+  struct isdef_##NAME                                                                                                  \
+      : decltype(NAME##_isdef_test<typename type_of<Src0TypeID>::type, typename type_of<Src1TypeID>::type>(0)) {       \
+  };
+
+  DYND_CHECK_BINARY_OP(+, add)
+  DYND_CHECK_BINARY_OP(-, subtract)
+  DYND_CHECK_BINARY_OP(*, multiply)
+  DYND_CHECK_BINARY_OP(/, divide)
+  DYND_CHECK_BINARY_OP(%, mod)
+  DYND_CHECK_BINARY_OP(&, bitwise_and)
+  DYND_CHECK_BINARY_OP(&&, logical_and)
+  DYND_CHECK_BINARY_OP(|, bitwise_or)
+  DYND_CHECK_BINARY_OP(||, logical_or)
+  DYND_CHECK_BINARY_OP (^, bitwise_xor)
+  DYND_CHECK_BINARY_OP(<<, left_shift)
+  DYND_CHECK_BINARY_OP(>>, right_shift)
+
+#undef DYND_CHECK_BINARY_OP
+
+} // namespace dynd::detail
+
 namespace nd {
 
 #define DYND_DEF_UNARY_OP_KERNEL(OP, NAME)                                                                             \
@@ -13,12 +69,14 @@ namespace nd {
     struct inline_##NAME {                                                                                             \
       static auto f(typename type_of<Src0TypeID>::type a) { return OP a; }                                             \
     };                                                                                                                 \
-  } /* namespace detail */                                                                                             \
                                                                                                                        \
+    template <type_id_t Src0TypeID, bool Defined = dynd::detail::isdef_##NAME<Src0TypeID>::value>                      \
+    struct NAME##_kernel : functional::apply_function_kernel<decltype(&detail::inline_##NAME<Src0TypeID>::f),          \
+                                                             &detail::inline_##NAME<Src0TypeID>::f> {                  \
+    };                                                                                                                 \
+  } /* namespace detail */                                                                                             \
   template <type_id_t Src0TypeID>                                                                                      \
-  struct NAME##_kernel : functional::apply_function_kernel<decltype(&detail::inline_##NAME<Src0TypeID>::f),            \
-                                                           &detail::inline_##NAME<Src0TypeID>::f> {                    \
-  };
+  using NAME##_kernel = detail::NAME##_kernel<Src0TypeID>;
 
   DYND_DEF_UNARY_OP_KERNEL(+, plus)
   DYND_ALLOW_UNSIGNED_UNARY_MINUS
@@ -35,13 +93,16 @@ namespace nd {
     struct inline_##NAME {                                                                                             \
       static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return a OP b; }     \
     };                                                                                                                 \
+    template <type_id_t Src0TypeID, type_id_t Src1TypeID,                                                              \
+              bool Defined = dynd::detail::isdef_##NAME<Src0TypeID, Src1TypeID>::value>                                \
+    struct NAME##_kernel                                                                                               \
+        : functional::apply_function_kernel<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),               \
+                                            &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f> {                       \
+    };                                                                                                                 \
   } /* namespace detail */                                                                                             \
                                                                                                                        \
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
-  struct NAME##_kernel                                                                                                 \
-      : functional::apply_function_kernel<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),                 \
-                                          &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f> {                         \
-  };
+  using NAME##_kernel = detail::NAME##_kernel<Src0TypeID, Src1TypeID>;
 
   DYND_DEF_BINARY_OP_KERNEL(+, add)
   DYND_DEF_BINARY_OP_KERNEL(-, subtract)
@@ -61,13 +122,21 @@ namespace nd {
     struct inline_logical_xor {
       static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return (!a) ^ (!b); }
     };
-  } // namespace detail
 
+    // For the time being, with all internal types, the result of the logical not operator should always be
+    // a boolean value, so we can just check if the logical not operator is defined.
+    // If that is no longer true at some point, we can give logical_xor its own
+    // expression SFINAE based test for existence.
+    template <type_id_t Src0TypeID, type_id_t Src1TypeID, bool Defined =
+                                                              dynd::detail::isdef_logical_not<Src0TypeID>::value
+                                                                  &&dynd::detail::isdef_logical_not<Src1TypeID>::value>
+    struct logical_xor_kernel
+        : functional::apply_function_kernel<decltype(&detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f),
+                                            &detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f> {
+    };
+  } /* namespace detail */
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct logical_xor_kernel
-      : functional::apply_function_kernel<decltype(&detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f),
-                                          &detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f> {
-  };
+  using logical_xor_kernel = detail::logical_xor_kernel<Src0TypeID, Src1TypeID>;
 
   namespace detail {
     template <type_id_t Src0TypeID, type_id_t Src1TypeID>
@@ -104,13 +173,15 @@ namespace nd {
     template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                              \
     using inline_##NAME = inline_##NAME##_base<Src0TypeID, Src1TypeID, needs_zero_check<Src0TypeID, Src1TypeID>()>;    \
                                                                                                                        \
+    template <type_id_t Src0TypeID, type_id_t Src1TypeID,                                                              \
+              bool Defined = dynd::detail::isdef_##NAME<Src0TypeID, Src1TypeID>::value>                                \
+    struct NAME##_kernel                                                                                               \
+        : functional::apply_function_kernel<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),               \
+                                            &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f> {                       \
+    };                                                                                                                 \
   } /* namespace detail */                                                                                             \
-                                                                                                                       \
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
-  struct NAME##_kernel                                                                                                 \
-      : functional::apply_function_kernel<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),                 \
-                                          &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f> {                         \
-  };
+  using NAME##_kernel = detail::NAME##_kernel<Src0TypeID, Src1TypeID>;
 
   DYND_DEF_BINARY_OP_KERNEL_ZEROCHECK_INT(/, divide)
   DYND_DEF_BINARY_OP_KERNEL_ZEROCHECK_INT(%, mod)
