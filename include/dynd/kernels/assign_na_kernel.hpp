@@ -146,69 +146,12 @@ namespace nd {
     template <>
     struct assign_na_kernel<void_id, any_kind_id> : base_strided_kernel<assign_na_kernel<void_id, any_kind_id>, 0> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {}
-
-      void strided(char *DYND_UNUSED(dst), intptr_t DYND_UNUSED(dst_stride), char *const *DYND_UNUSED(src),
-                   const intptr_t *DYND_UNUSED(src_stride), size_t DYND_UNUSED(count))
-      {
-      }
-    };
-
-    template <>
-    struct assign_na_kernel<fixed_dim_id, fixed_dim_kind_id>
-        : base_kernel<assign_na_kernel<fixed_dim_id, fixed_dim_kind_id>> {
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        switch (dst_tp.get_dtype().get_id()) {
-        case bool_id:
-          ckb->emplace_back<assign_na_kernel<bool_id, bool_kind_id>>(kernreq);
-          break;
-        case int8_id:
-          ckb->emplace_back<assign_na_kernel<int8_id, int_kind_id>>(kernreq);
-          break;
-        case int16_id:
-          ckb->emplace_back<assign_na_kernel<int16_id, int_kind_id>>(kernreq);
-          break;
-        case int32_id:
-          ckb->emplace_back<assign_na_kernel<int32_id, int_kind_id>>(kernreq);
-          break;
-        case int64_id:
-          ckb->emplace_back<assign_na_kernel<int64_id, int_kind_id>>(kernreq);
-          break;
-        case int128_id:
-          ckb->emplace_back<assign_na_kernel<int128_id, int_kind_id>>(kernreq);
-          break;
-        case float32_id:
-          ckb->emplace_back<assign_na_kernel<float32_id, float_kind_id>>(kernreq);
-          break;
-        case float64_id:
-          ckb->emplace_back<assign_na_kernel<float64_id, float_kind_id>>(kernreq);
-          break;
-        case complex_float32_id:
-          ckb->emplace_back<assign_na_kernel<complex_float32_id, complex_kind_id>>(kernreq);
-          break;
-        case complex_float64_id:
-          ckb->emplace_back<assign_na_kernel<complex_float64_id, complex_kind_id>>(kernreq);
-          break;
-        default:
-          throw type_error("fixed_dim_assign_na: expected built-in type");
-        }
-      }
     };
 
     template <>
     struct assign_na_kernel<pointer_id, any_kind_id>
         : base_strided_kernel<assign_na_kernel<pointer_id, any_kind_id>, 0> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-      {
-        throw std::runtime_error("assign_na for pointers is not yet implemented");
-      }
-
-      void strided(char *DYND_UNUSED(dst), intptr_t DYND_UNUSED(dst_stride), char *const *DYND_UNUSED(src),
-                   const intptr_t *DYND_UNUSED(src_stride), size_t DYND_UNUSED(count))
       {
         throw std::runtime_error("assign_na for pointers is not yet implemented");
       }
@@ -233,13 +176,4 @@ namespace nd {
   };
 
 } // namespace dynd::nd
-
-namespace ndt {
-
-  template <type_id_t Src0ValueTypeID>
-  struct traits<nd::assign_na_kernel<Src0ValueTypeID>> {
-    static type equivalent() { return callable_type::make(make_type<option_type>(Src0ValueTypeID)); }
-  };
-
-} // namespace dynd::ndt
 } // namespace dynd
