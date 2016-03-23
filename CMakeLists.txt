@@ -305,7 +305,6 @@ set(libdynd_SRC
     include/dynd/func/view.hpp
     # Kernels
     src/dynd/kernels/byteswap_kernels.cpp
-    src/dynd/kernels/compare_kernels.cpp
     src/dynd/kernels/fft_kernel.cpp
     src/dynd/kernels/kernel_builder.cpp
     src/dynd/kernels/kernel_prefix.cpp
