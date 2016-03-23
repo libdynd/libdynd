@@ -35,13 +35,4 @@ namespace nd {
   };
 
 } // namespace dynd::nd
-
-namespace ndt {
-
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct traits<nd::greater_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type equivalent() { return callable_type::make(make_type<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
-  };
-
-} // namespace dynd::ndt
 } // namespace dynd

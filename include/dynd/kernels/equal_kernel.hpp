@@ -76,23 +76,7 @@ namespace nd {
       }
       *reinterpret_cast<bool1 *>(dst) = true;
     }
-
-    static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                            intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                            kernel_request_t DYND_UNUSED(kernreq), intptr_t DYND_UNUSED(nkwd),
-                            const nd::array *DYND_UNUSED(kwds),
-                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars));
   };
 
 } // namespace dynd::nd
-
-namespace ndt {
-
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct traits<nd::equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type equivalent() { return callable_type::make(make_type<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
-  };
-
-} // namespace dynd::ndt
 } // namespace dynd

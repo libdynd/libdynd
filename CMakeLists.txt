@@ -249,6 +249,8 @@ set(libdynd_SRC
     include/dynd/types/substitute_typevars.hpp
     # Callables
     src/dynd/callables/base_callable.cpp
+    src/dynd/callables/equal_callable.cpp
+    src/dynd/callables/not_equal_callable.cpp
     include/dynd/callables/base_callable.hpp
     include/dynd/callables/base_dispatch_callable.hpp
     # Func
