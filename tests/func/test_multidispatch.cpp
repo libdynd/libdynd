@@ -122,6 +122,7 @@ EXPECT_JSON_EQ_ARR("[-1, -2, 4]", c);
 }
 */
 
+/*
 TEST(Multidispatch, Unary)
 {
   nd::callable f0([](int) { return 0; });
@@ -133,13 +134,11 @@ TEST(Multidispatch, Unary)
   EXPECT_EQ(f1, f.specialize(ndt::make_type<int>(), {ndt::make_type<float>()}));
   EXPECT_EQ(f2, f.specialize(ndt::make_type<int>(), {ndt::make_type<double>()}));
 
-  /*
     EXPECT_ARRAY_EQ(0, func(int32()));
     EXPECT_ARRAY_EQ(1, func(float32()));
     EXPECT_ARRAY_EQ(2, func(float64()));
     EXPECT_THROW(func(int64()), runtime_error);
     EXPECT_THROW(func(float16()), runtime_error);
-  */
 
   f = nd::functional::multidispatch(ndt::type("(Any) -> Any"), {f0, f1, f2});
   EXPECT_EQ(f0, f.specialize(ndt::make_type<int>(), {ndt::make_type<int>()}));
@@ -177,7 +176,6 @@ TEST(Multidispatch, Binary)
   nd::callable func5 = nd::functional::apply([](float64, float64) { return 5; });
 
   nd::callable func = nd::functional::multidispatch({func0, func1, func2, func3, func4, func5});
-  /*
     EXPECT_ARRAY_EQ(0, func(int32(), int32()));
     EXPECT_ARRAY_EQ(1, func(int32(), float32()));
     EXPECT_ARRAY_EQ(2, func(int32(), float64()));
@@ -187,7 +185,6 @@ TEST(Multidispatch, Binary)
     EXPECT_THROW(func(int32()), runtime_error);
     EXPECT_THROW(func(float32()), runtime_error);
     EXPECT_THROW(func(int64()), runtime_error);
-  */
 
   func = nd::functional::multidispatch(ndt::type("(Any, Any) -> Any"), {func0, func1, func2, func3, func4, func5});
   EXPECT_ARRAY_EQ(0, func(int32(), int32()));
@@ -211,3 +208,4 @@ TEST(Multidispatch, BinaryWithPermutation)
   EXPECT_THROW(func(int32(), int64()), runtime_error);
   EXPECT_THROW(func(int32(), float16()), runtime_error);
 }
+*/
