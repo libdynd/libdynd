@@ -10,12 +10,12 @@
 namespace dynd {
 namespace nd {
 
-  class assign_dispatch_callable : public base_dispatch_callable {
+  class compound_arithmetic_dispatch_callable : public base_dispatch_callable {
     dispatcher<callable> m_dispatcher;
 
   public:
-    assign_dispatch_callable(const ndt::type &tp, std::shared_ptr<dispatcher<callable>> dispatcher)
-        : base_dispatch_callable(tp), m_dispatcher(*dispatcher.get())
+    compound_arithmetic_dispatch_callable(const ndt::type &tp, const dispatcher<callable> &dispatcher)
+        : base_dispatch_callable(tp), m_dispatcher(dispatcher)
     {
     }
 
