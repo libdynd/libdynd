@@ -6,7 +6,6 @@
 #pragma once
 
 #include <dynd/callable.hpp>
-#include <dynd/kernels/outer.hpp>
 
 namespace dynd {
 namespace nd {

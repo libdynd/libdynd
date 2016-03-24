@@ -6,6 +6,7 @@
 #include <dynd/arrmeta_holder.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/outer.hpp>
+#include <dynd/callables/outer_callable.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 
 using namespace std;
@@ -13,7 +14,27 @@ using namespace dynd;
 
 nd::callable nd::functional::outer(const callable &child)
 {
-  return callable::make<outer_ck>(outer_make_type(child.get_type()), child);
+  const ndt::type &self_tp = outer_make_type(child.get_type());
+  switch (self_tp.extended<ndt::callable_type>()->get_npos()) {
+  case 0:
+    return make_callable<outer_callable<0>>(self_tp, child);
+  case 1:
+    return make_callable<outer_callable<1>>(self_tp, child);
+  case 2:
+    return make_callable<outer_callable<2>>(self_tp, child);
+  case 3:
+    return make_callable<outer_callable<3>>(self_tp, child);
+  case 4:
+    return make_callable<outer_callable<4>>(self_tp, child);
+  case 5:
+    return make_callable<outer_callable<5>>(self_tp, child);
+  case 6:
+    return make_callable<outer_callable<6>>(self_tp, child);
+  case 7:
+    return make_callable<outer_callable<7>>(self_tp, child);
+  default:
+    throw std::runtime_error("callable with nsrc > 7 not implemented yet");
+  }
 }
 
 ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp)
