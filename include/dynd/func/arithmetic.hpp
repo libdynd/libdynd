@@ -7,8 +7,9 @@
 #include <dynd/callables/arithmetic_dispatch_callable.hpp>
 #include <dynd/callables/compound_arithmetic_dispatch_callable.hpp>
 #include <dynd/kernels/arithmetic.hpp>
-#include <dynd/kernels/compound_add_kernel.hpp>
-#include <dynd/kernels/compound_div_kernel.hpp>
+#include <dynd/callables/compound_add_callable.hpp>
+#include <dynd/callables/compound_div_callable.hpp>
+#include <dynd/callables/option_arithmetic_callable.hpp>
 
 namespace dynd {
 namespace nd {
@@ -55,9 +56,9 @@ namespace nd {
       callable self = functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
 
       auto dispatcher = callable::new_make_all<KernelType, TypeIDSequence, TypeIDSequence>();
-      dispatcher.insert({{{option_id, any_kind_id}, callable::make<option_arithmetic_kernel<FuncType, true, false>>()},
-                         {{any_kind_id, option_id}, callable::make<option_arithmetic_kernel<FuncType, false, true>>()},
-                         {{option_id, option_id}, callable::make<option_arithmetic_kernel<FuncType, true, true>>()},
+      dispatcher.insert({{{option_id, any_kind_id}, make_callable<option_arithmetic_callable<FuncType, true, false>>()},
+                         {{any_kind_id, option_id}, make_callable<option_arithmetic_callable<FuncType, false, true>>()},
+                         {{option_id, option_id}, make_callable<option_arithmetic_callable<FuncType, true, true>>()},
                          {{dim_kind_id, scalar_kind_id}, functional::elwise(self)},
                          {{scalar_kind_id, dim_kind_id}, functional::elwise(self)},
                          {{dim_kind_id, dim_kind_id}, functional::elwise(self)}});
@@ -121,7 +122,7 @@ namespace nd {
   };
 
 #define DYND_DEF_COMPOUND_OP_CALLABLE(NAME, TYPES)                                                                     \
-  extern DYND_API struct DYND_API NAME : compound_arithmetic_operator<NAME, NAME##_kernel_t, TYPES> {                  \
+  extern DYND_API struct DYND_API NAME : compound_arithmetic_operator<NAME, NAME##_callable, TYPES> {                  \
     static nd::callable &get();                                                                                        \
   } NAME;
 
