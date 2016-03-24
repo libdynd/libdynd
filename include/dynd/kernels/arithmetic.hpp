@@ -63,7 +63,7 @@ namespace detail {
 
 namespace nd {
 
-#define DYND_DEF_UNARY_OP_KERNEL(OP, NAME)                                                                             \
+#define DYND_DEF_UNARY_OP_CALLABLE(OP, NAME)                                                                           \
   namespace detail {                                                                                                   \
     template <type_id_t Src0TypeID>                                                                                    \
     struct inline_##NAME {                                                                                             \
@@ -71,21 +71,29 @@ namespace nd {
     };                                                                                                                 \
                                                                                                                        \
     template <type_id_t Src0TypeID, bool Defined = dynd::detail::isdef_##NAME<Src0TypeID>::value>                      \
-    struct NAME##_kernel : functional::apply_function_kernel<decltype(&detail::inline_##NAME<Src0TypeID>::f),          \
-                                                             &detail::inline_##NAME<Src0TypeID>::f> {                  \
+    class NAME##_callable                                                                                              \
+        : public functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID>::f),                  \
+                                                     &detail::inline_##NAME<Src0TypeID>::f> {                          \
+    public:                                                                                                            \
+      NAME##_callable()                                                                                                \
+          : functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID>::f),                       \
+                                                &detail::inline_##NAME<Src0TypeID>::f>(                                \
+                ndt::make_type<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID>::f)>())                            \
+      {                                                                                                                \
+      }                                                                                                                \
     };                                                                                                                 \
   } /* namespace detail */                                                                                             \
   template <type_id_t Src0TypeID>                                                                                      \
-  using NAME##_kernel = detail::NAME##_kernel<Src0TypeID>;
+  using NAME##_callable = detail::NAME##_callable<Src0TypeID>;
 
-  DYND_DEF_UNARY_OP_KERNEL(+, plus)
+  DYND_DEF_UNARY_OP_CALLABLE(+, plus)
   DYND_ALLOW_UNSIGNED_UNARY_MINUS
-  DYND_DEF_UNARY_OP_KERNEL(-, minus)
+  DYND_DEF_UNARY_OP_CALLABLE(-, minus)
   DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
-  DYND_DEF_UNARY_OP_KERNEL(!, logical_not)
-  DYND_DEF_UNARY_OP_KERNEL(~, bitwise_not)
+  DYND_DEF_UNARY_OP_CALLABLE(!, logical_not)
+  DYND_DEF_UNARY_OP_CALLABLE(~, bitwise_not)
 
-#undef DYND_DEF_UNARY_OP_KERNEL
+#undef DYND_DEF_UNARY_OP_CALLABLE
 
 #define DYND_DEF_BINARY_OP_KERNEL(OP, NAME)                                                                            \
   namespace detail {                                                                                                   \
@@ -259,20 +267,8 @@ namespace nd {
 
 namespace ndt {
 
-#define DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(NAME)                                                                      \
-  template <type_id_t Src0TypeID>                                                                                      \
-  struct traits<nd::NAME##_kernel<Src0TypeID>> {                                                                       \
-    static type equivalent() { return ndt::make_type<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID>::f)>(); }    \
-  };
-
-  DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(plus)
   DYND_ALLOW_UNSIGNED_UNARY_MINUS
-  DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(minus)
   DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
-  DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(logical_not)
-  DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(bitwise_not)
-
-#undef DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT
 
 #define DYND_DEF_BINARY_OP_KERNEL_EQUIVALENT(NAME)                                                                     \
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \

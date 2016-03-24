@@ -17,6 +17,7 @@
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/substitute_typevars.hpp>
+#include <dynd/callables/apply_function_callable.hpp>
 
 namespace dynd {
 namespace nd {
@@ -381,11 +382,9 @@ namespace nd {
     template <kernel_request_t kernreq, typename func_type, func_type func, typename... T>
     callable apply(T &&... names)
     {
-      typedef apply_function_kernel<func_type, func, arity_of<func_type>::value - sizeof...(T)> CKT;
-
+      typedef apply_function_callable<func_type, func, arity_of<func_type>::value - sizeof...(T)> CKT;
       ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
-
-      return callable::make<CKT>(self_tp);
+      return make_callable<CKT>(self_tp);
     }
 
     template <typename func_type, func_type func, typename... T>
