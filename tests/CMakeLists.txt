@@ -71,17 +71,14 @@ set(tests_SRC
     func/test_neighborhood.cpp
     func/test_option.cpp
     func/test_outer.cpp
-    func/test_permute.cpp
     func/test_random.cpp
     func/test_reduction.cpp
     func/test_registry.cpp
-    func/test_rolling.cpp
     func/test_search.cpp
     func/test_sort.cpp
     func/test_struct.cpp
     func/test_sum.cpp
     func/test_take.cpp
-    func/test_take_by_pointer.cpp
     func/test_view.cpp
     array/test_array.cpp
     array/test_array_range.cpp

@@ -270,13 +270,10 @@ set(libdynd_SRC
     src/dynd/func/mean.cpp
     src/dynd/func/neighborhood.cpp
     src/dynd/func/outer.cpp
-    src/dynd/func/permute.cpp
     src/dynd/func/pointer.cpp
     src/dynd/func/random.cpp
-    src/dynd/func/rolling.cpp
     src/dynd/func/sum.cpp
     src/dynd/func/take.cpp
-    src/dynd/func/take_by_pointer.cpp
     src/dynd/func/view.cpp
     include/dynd/func/arithmetic.hpp
     include/dynd/callable_registry.hpp
@@ -295,20 +292,16 @@ set(libdynd_SRC
     include/dynd/func/min.hpp
     include/dynd/func/neighborhood.hpp
     include/dynd/func/outer.hpp
-    include/dynd/func/permute.hpp
     include/dynd/func/pointer.hpp
     include/dynd/func/random.hpp
-    include/dynd/func/rolling.hpp
     include/dynd/func/sum.hpp
     include/dynd/func/take.hpp
-    include/dynd/func/take_by_pointer.hpp
     include/dynd/func/view.hpp
     # Kernels
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/fft_kernel.cpp
     src/dynd/kernels/kernel_builder.cpp
     src/dynd/kernels/kernel_prefix.cpp
-    src/dynd/kernels/rolling_kernel.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
     include/dynd/kernels/apply.hpp
@@ -333,7 +326,6 @@ set(libdynd_SRC
     include/dynd/kernels/min_kernel.hpp
     include/dynd/kernels/outer.hpp
     include/dynd/kernels/reduction_kernel.hpp
-    include/dynd/kernels/rolling_kernel.hpp
     include/dynd/kernels/serialize_kernel.hpp
     include/dynd/kernels/sort_kernel.hpp
     include/dynd/kernels/string_concat_kernel.hpp
