@@ -102,8 +102,9 @@ namespace nd {
           new_src_arrmeta.push_back(new_src_arrmeta_holder[i].get());
         }
 
-        elwise_virtual_ck<N>::instantiate(static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, new_src_tp.data(),
-                                          new_src_arrmeta.data(), kernreq, nkwd, kwds, tp_vars);
+        callable f = elwise(m_child);
+        f->instantiate(static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, new_src_tp.data(), new_src_arrmeta.data(),
+                       kernreq, nkwd, kwds, tp_vars);
 
         delete[] new_src_arrmeta_holder;
       }

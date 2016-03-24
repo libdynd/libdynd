@@ -71,21 +71,21 @@ nd::callable nd::functional::elwise(const ndt::type &self_tp, const callable &ch
 {
   switch (self_tp.extended<ndt::callable_type>()->get_npos()) {
   case 0:
-    return callable::make<elwise_virtual_ck<0>>(self_tp, child);
+    return make_callable<elwise_callable<0>>(self_tp, child);
   case 1:
-    return callable::make<elwise_virtual_ck<1>>(self_tp, child);
+    return make_callable<elwise_callable<1>>(self_tp, child);
   case 2:
-    return callable::make<elwise_virtual_ck<2>>(self_tp, child);
+    return make_callable<elwise_callable<2>>(self_tp, child);
   case 3:
-    return callable::make<elwise_virtual_ck<3>>(self_tp, child);
+    return make_callable<elwise_callable<3>>(self_tp, child);
   case 4:
-    return callable::make<elwise_virtual_ck<4>>(self_tp, child);
+    return make_callable<elwise_callable<4>>(self_tp, child);
   case 5:
-    return callable::make<elwise_virtual_ck<5>>(self_tp, child);
+    return make_callable<elwise_callable<5>>(self_tp, child);
   case 6:
-    return callable::make<elwise_virtual_ck<6>>(self_tp, child);
+    return make_callable<elwise_callable<6>>(self_tp, child);
   case 7:
-    return callable::make<elwise_virtual_ck<7>>(self_tp, child);
+    return make_callable<elwise_callable<7>>(self_tp, child);
   default:
     throw std::runtime_error("callable with nsrc > 7 not implemented yet");
   }
