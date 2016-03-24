@@ -68,7 +68,7 @@ namespace nd {
   };
 
 #define DYND_DEF_BINARY_OP_CALLABLE(NAME, TYPES)                                                                       \
-  extern DYND_API struct DYND_API NAME : binary_arithmetic_operator<NAME, NAME##_kernel, TYPES> {                      \
+  extern DYND_API struct DYND_API NAME : binary_arithmetic_operator<NAME, NAME##_callable, TYPES> {                    \
     static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)                                        \
     {                                                                                                                  \
       std::stringstream ss;                                                                                            \
