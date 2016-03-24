@@ -2,16 +2,16 @@
 
 #include <dynd/func/random.hpp>
 #include <dynd/functional.hpp>
-#include <dynd/kernels/uniform_kernel.hpp>
+#include <dynd/callables/uniform_callable.hpp>
 #include <dynd/callables/uniform_dispatch_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
 template <typename GeneratorType>
-struct uniform_kernel_alias {
+struct uniform_callable_alias {
   template <type_id_t DstTypeID>
-  using type = nd::random::uniform_kernel<DstTypeID, GeneratorType>;
+  using type = nd::random::uniform_callable<DstTypeID, GeneratorType>;
 };
 
 DYND_API nd::callable nd::random::uniform::make()
@@ -21,7 +21,7 @@ DYND_API nd::callable nd::random::uniform::make()
 
   std::random_device random_device;
 
-  auto dispatcher = callable::new_make_all<uniform_kernel_alias<std::default_random_engine>::type, numeric_ids>();
+  auto dispatcher = callable::new_make_all<uniform_callable_alias<std::default_random_engine>::type, numeric_ids>();
   return functional::elwise(make_callable<uniform_dispatch_callable>(ndt::type("(a: ?R, b: ?R) -> R"), dispatcher));
 }
 
