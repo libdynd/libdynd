@@ -22,17 +22,4 @@ namespace nd {
   };
 
 } // namespace dynd::nd
-
-namespace ndt {
-
-  template <type_id_t Arg0ID>
-  struct traits<nd::real_kernel<Arg0ID>> {
-    static type equivalent()
-    {
-      return callable_type::make(make_type<typename nd::real_kernel<Arg0ID>::real_type>(),
-                                 {make_type<typename nd::real_kernel<Arg0ID>::complex_type>()});
-    }
-  };
-
-} // namespace dynd::ndt
 } // namespace dynd

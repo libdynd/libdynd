@@ -61,16 +61,4 @@ namespace nd {
   };
 
 } // namespace dynd::nd
-
-namespace ndt {
-
-  template <type_id_t Src0TypeID>
-  struct traits<nd::max_kernel<Src0TypeID>> {
-    static type equivalent()
-    {
-      return callable_type::make(ndt::make_type<typename nd::max_kernel<Src0TypeID>::dst_type>(), type(Src0TypeID));
-    }
-  };
-
-} // namespace dynd::ndt
 } // namespace dynd

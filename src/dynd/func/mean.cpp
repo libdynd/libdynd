@@ -9,11 +9,12 @@
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/mean_kernel.hpp>
 #include <dynd/kernels/sum_kernel.hpp>
+#include <dynd/callables/mean_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::mean::make() { return callable::make<mean_kernel>(ndt::type(int64_id)); }
+DYND_API nd::callable nd::mean::make() { return make_callable<mean_callable>(ndt::type(int64_id)); }
 
 DYND_DEFAULT_DECLFUNC_GET(nd::mean)
 

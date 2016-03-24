@@ -4,12 +4,12 @@
 //
 
 #include <dynd/func/view.hpp>
-#include <dynd/kernels/view_kernel.hpp>
+#include <dynd/callables/view_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::view::make() { return callable::make<view_kernel>(ndt::type("(Any) -> Any")); }
+DYND_API nd::callable nd::view::make() { return make_callable<view_callable>(); }
 
 DYND_DEFAULT_DECLFUNC_GET(nd::view)
 
