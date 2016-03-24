@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/arrmeta_holder.hpp>
-#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/callables/base_callable.hpp>
 #include <dynd/kernels/elwise.hpp>
 
 namespace dynd {
@@ -14,11 +14,43 @@ namespace nd {
   namespace functional {
 
     template <int N>
-    struct outer_ck : base_kernel<outer_ck<N>> {
-      static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
-                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                              const char *const *src_arrmeta, dynd::kernel_request_t kernreq, intptr_t nkwd,
-                              const dynd::nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    class outer_callable : public base_callable {
+      callable m_child;
+
+    public:
+      outer_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
+
+      void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
+                            const ndt::type *src_tp, intptr_t nkwd, const dynd::nd::array *kwds,
+                            const std::map<std::string, ndt::type> &tp_vars)
+      {
+        const ndt::callable_type *child_tp = m_child.get_type();
+
+        if (child_tp->get_return_type().is_symbolic()) {
+          m_child->resolve_dst_type(m_child->static_data(), NULL, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+        }
+        else {
+          dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);
+        }
+
+        ndt::type tp = dst_tp.without_memory_type();
+        for (intptr_t i = nsrc - 1; i >= 0; --i) {
+          if (!src_tp[i].without_memory_type().is_scalar()) {
+            tp = src_tp[i].without_memory_type().with_replaced_dtype(tp);
+          }
+        }
+        if (dst_tp.get_base_id() == memory_id) {
+          dst_tp = dst_tp.extended<ndt::base_memory_type>()->with_replaced_storage_type(tp);
+        }
+        else {
+          dst_tp = tp;
+        }
+      }
+
+      void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                       const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                       const char *const *src_arrmeta, dynd::kernel_request_t kernreq, intptr_t nkwd,
+                       const dynd::nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         intptr_t ndim = 0;
         for (intptr_t i = 0; i < nsrc; ++i) {
@@ -70,38 +102,10 @@ namespace nd {
           new_src_arrmeta.push_back(new_src_arrmeta_holder[i].get());
         }
 
-        elwise_virtual_ck<N>::instantiate(static_data, NULL, ckb, dst_tp, dst_arrmeta, nsrc, new_src_tp.data(),
+        elwise_virtual_ck<N>::instantiate(static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, new_src_tp.data(),
                                           new_src_arrmeta.data(), kernreq, nkwd, kwds, tp_vars);
 
         delete[] new_src_arrmeta_holder;
-      }
-
-      static void resolve_dst_type(char *static_data, char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
-                                   const ndt::type *src_tp, intptr_t nkwd, const dynd::nd::array *kwds,
-                                   const std::map<std::string, ndt::type> &tp_vars)
-      {
-        base_callable *child = reinterpret_cast<callable *>(static_data)->get();
-        const ndt::callable_type *child_tp = reinterpret_cast<callable *>(static_data)->get_type();
-
-        if (child_tp->get_return_type().is_symbolic()) {
-          child->resolve_dst_type(child->static_data(), NULL, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-        }
-        else {
-          dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);
-        }
-
-        ndt::type tp = dst_tp.without_memory_type();
-        for (intptr_t i = nsrc - 1; i >= 0; --i) {
-          if (!src_tp[i].without_memory_type().is_scalar()) {
-            tp = src_tp[i].without_memory_type().with_replaced_dtype(tp);
-          }
-        }
-        if (dst_tp.get_base_id() == memory_id) {
-          dst_tp = dst_tp.extended<ndt::base_memory_type>()->with_replaced_storage_type(tp);
-        }
-        else {
-          dst_tp = tp;
-        }
       }
     };
 
