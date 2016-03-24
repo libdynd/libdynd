@@ -879,7 +879,9 @@ namespace nd {
                                  &eval::default_eval_context);
           return;
         }
-        constant_kernel::instantiate(
+
+        nd::callable constant = functional::constant(reinterpret_cast<data_type *>(data)->identity);
+        constant->instantiate(
             reinterpret_cast<char *>(const_cast<nd::array *>(&reinterpret_cast<data_type *>(data)->identity)), NULL,
             ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
         return;

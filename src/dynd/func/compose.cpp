@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/compose.hpp>
-#include <dynd/kernels/compose_kernel.hpp>
+#include <dynd/callables/compose_callable.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 
 using namespace std;
@@ -35,7 +35,7 @@ nd::callable nd::functional::compose(const nd::callable &first, const nd::callab
       ndt::substitute(second.get_type()->get_return_type(), tp_vars, false);
   */
 
-  return callable::make<compose_kernel>(
-      ndt::callable_type::make(second.get_type()->get_return_type(), first.get_type()->get_pos_tuple()),
-      compose_kernel::static_data(first, second, buf_tp));
+  return make_callable<compose_callable>(
+      ndt::callable_type::make(second.get_type()->get_return_type(), first.get_type()->get_pos_tuple()), first, second,
+      buf_tp);
 }

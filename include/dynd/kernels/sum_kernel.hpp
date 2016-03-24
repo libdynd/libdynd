@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include <dynd/kernels/base_kernel.hpp>
-#include <dynd/types/callable_type.hpp>
+#include <dynd/kernels/base_strided_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -36,16 +35,4 @@ namespace nd {
   };
 
 } // namespace dynd::nd
-
-namespace ndt {
-
-  template <type_id_t Src0TypeID>
-  struct traits<nd::sum_kernel<Src0TypeID>> {
-    static type equivalent()
-    {
-      return callable_type::make(ndt::make_type<typename nd::sum_kernel<Src0TypeID>::dst_type>(), type(Src0TypeID));
-    }
-  };
-
-} // namespace dynd::ndt
 } // namespace dynd

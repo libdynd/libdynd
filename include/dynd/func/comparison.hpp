@@ -8,6 +8,12 @@
 #include <dynd/kernels/compare_kernels.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/callables/comparison_dispatch_callable.hpp>
+#include <dynd/callables/less_callable.hpp>
+#include <dynd/callables/less_equal_callable.hpp>
+#include <dynd/callables/equal_callable.hpp>
+#include <dynd/callables/not_equal_callable.hpp>
+#include <dynd/callables/greater_equal_callable.hpp>
+#include <dynd/callables/greater_callable.hpp>
 
 namespace dynd {
 namespace nd {
@@ -61,55 +67,55 @@ namespace nd {
     }
   };
 
-  extern DYND_API struct DYND_API less : comparison_operator<less, less_kernel> {
+  extern DYND_API struct DYND_API less : comparison_operator<less, less_callable> {
     static callable &get();
   } less;
 
-  extern DYND_API struct DYND_API less_equal : comparison_operator<less_equal, less_equal_kernel> {
+  extern DYND_API struct DYND_API less_equal : comparison_operator<less_equal, less_equal_callable> {
     static callable &get();
   } less_equal;
 
-  extern DYND_API struct DYND_API equal : comparison_operator<equal, equal_kernel> {
+  extern DYND_API struct DYND_API equal : comparison_operator<equal, equal_callable> {
     static dispatcher<callable> make_children()
     {
       auto dispatcher = comparison_operator::make_children();
       dispatcher.insert({{complex_float32_id, complex_float32_id},
-                         callable::make<equal_kernel<complex_float32_id, complex_float32_id>>()});
+                         make_callable<equal_callable<complex_float32_id, complex_float32_id>>()});
       dispatcher.insert({{complex_float64_id, complex_float64_id},
-                         callable::make<equal_kernel<complex_float64_id, complex_float64_id>>()});
-      dispatcher.insert({{tuple_id, tuple_id}, callable::make<equal_kernel<tuple_id, tuple_id>>()});
-      dispatcher.insert({{struct_id, struct_id}, callable::make<equal_kernel<tuple_id, tuple_id>>()});
-      dispatcher.insert({{type_id, type_id}, callable::make<equal_kernel<type_id, type_id>>()});
-      dispatcher.insert({{bytes_id, bytes_id}, callable::make<equal_kernel<bytes_id, bytes_id>>()});
+                         make_callable<equal_callable<complex_float64_id, complex_float64_id>>()});
+      dispatcher.insert({{tuple_id, tuple_id}, make_callable<equal_callable<tuple_id, tuple_id>>()});
+      dispatcher.insert({{struct_id, struct_id}, make_callable<equal_callable<tuple_id, tuple_id>>()});
+      dispatcher.insert({{type_id, type_id}, make_callable<equal_callable<type_id, type_id>>()});
+      dispatcher.insert({{bytes_id, bytes_id}, make_callable<equal_callable<bytes_id, bytes_id>>()});
 
       return dispatcher;
     }
     static callable &get();
   } equal;
 
-  extern DYND_API struct DYND_API not_equal : comparison_operator<not_equal, not_equal_kernel> {
+  extern DYND_API struct DYND_API not_equal : comparison_operator<not_equal, not_equal_callable> {
     static dispatcher<callable> make_children()
     {
       auto dispatcher = comparison_operator::make_children();
       dispatcher.insert({{complex_float32_id, complex_float32_id},
-                         callable::make<not_equal_kernel<complex_float32_id, complex_float32_id>>()});
+                         make_callable<not_equal_callable<complex_float32_id, complex_float32_id>>()});
       dispatcher.insert({{complex_float64_id, complex_float64_id},
-                         callable::make<not_equal_kernel<complex_float64_id, complex_float64_id>>()});
-      dispatcher.insert({{tuple_id, tuple_id}, callable::make<not_equal_kernel<tuple_id, tuple_id>>()});
-      dispatcher.insert({{struct_id, struct_id}, callable::make<not_equal_kernel<tuple_id, tuple_id>>()});
-      dispatcher.insert({{type_id, type_id}, callable::make<not_equal_kernel<type_id, type_id>>()});
-      dispatcher.insert({{bytes_id, bytes_id}, callable::make<not_equal_kernel<bytes_id, bytes_id>>()});
+                         make_callable<not_equal_callable<complex_float64_id, complex_float64_id>>()});
+      dispatcher.insert({{tuple_id, tuple_id}, make_callable<not_equal_callable<tuple_id, tuple_id>>()});
+      dispatcher.insert({{struct_id, struct_id}, make_callable<not_equal_callable<tuple_id, tuple_id>>()});
+      dispatcher.insert({{type_id, type_id}, make_callable<not_equal_callable<type_id, type_id>>()});
+      dispatcher.insert({{bytes_id, bytes_id}, make_callable<not_equal_callable<bytes_id, bytes_id>>()});
 
       return dispatcher;
     }
     static callable &get();
   } not_equal;
 
-  extern DYND_API struct DYND_API greater_equal : comparison_operator<greater_equal, greater_equal_kernel> {
+  extern DYND_API struct DYND_API greater_equal : comparison_operator<greater_equal, greater_equal_callable> {
     static callable &get();
   } greater_equal;
 
-  extern DYND_API struct DYND_API greater : comparison_operator<greater, greater_kernel> {
+  extern DYND_API struct DYND_API greater : comparison_operator<greater, greater_callable> {
     static callable &get();
   } greater;
 

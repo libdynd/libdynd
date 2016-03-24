@@ -4,12 +4,12 @@
 //
 
 #include <dynd/convert.hpp>
-#include <dynd/kernels/convert_kernel.hpp>
+#include <dynd/callables/convert_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
 nd::callable nd::functional::convert(const ndt::type &tp, const callable &child)
 {
-  return callable::make<convert_kernel>(tp, child);
+  return make_callable<convert_callable>(tp, child);
 }
