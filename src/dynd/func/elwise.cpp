@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/elwise.hpp>
-#include <dynd/kernels/elwise.hpp>
+#include <dynd/callables/elwise_callable.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 
@@ -69,7 +69,26 @@ ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp)
 
 nd::callable nd::functional::elwise(const ndt::type &self_tp, const callable &child)
 {
-  return callable::make<elwise_virtual_ck>(self_tp, child);
+  switch (self_tp.extended<ndt::callable_type>()->get_npos()) {
+  case 0:
+    return callable::make<elwise_virtual_ck<0>>(self_tp, child);
+  case 1:
+    return callable::make<elwise_virtual_ck<1>>(self_tp, child);
+  case 2:
+    return callable::make<elwise_virtual_ck<2>>(self_tp, child);
+  case 3:
+    return callable::make<elwise_virtual_ck<3>>(self_tp, child);
+  case 4:
+    return callable::make<elwise_virtual_ck<4>>(self_tp, child);
+  case 5:
+    return callable::make<elwise_virtual_ck<5>>(self_tp, child);
+  case 6:
+    return callable::make<elwise_virtual_ck<6>>(self_tp, child);
+  case 7:
+    return callable::make<elwise_virtual_ck<7>>(self_tp, child);
+  default:
+    throw std::runtime_error("callable with nsrc > 7 not implemented yet");
+  }
 }
 
 nd::callable nd::functional::elwise(const callable &child) { return elwise(elwise_make_type(child.get_type()), child); }

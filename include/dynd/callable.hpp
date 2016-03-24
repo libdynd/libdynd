@@ -215,31 +215,6 @@ namespace nd {
                       &KernelType::resolve_dst_type, &KernelType::instantiate);
     }
 
-    template <template <int> class CKT, typename T>
-    static callable make(const ndt::type &self_tp, T &&data)
-    {
-      switch (self_tp.extended<ndt::callable_type>()->get_npos()) {
-      case 0:
-        return make<CKT<0>>(self_tp, std::forward<T>(data));
-      case 1:
-        return make<CKT<1>>(self_tp, std::forward<T>(data));
-      case 2:
-        return make<CKT<2>>(self_tp, std::forward<T>(data));
-      case 3:
-        return make<CKT<3>>(self_tp, std::forward<T>(data));
-      case 4:
-        return make<CKT<4>>(self_tp, std::forward<T>(data));
-      case 5:
-        return make<CKT<5>>(self_tp, std::forward<T>(data));
-      case 6:
-        return make<CKT<6>>(self_tp, std::forward<T>(data));
-      case 7:
-        return make<CKT<7>>(self_tp, std::forward<T>(data));
-      default:
-        throw std::runtime_error("callable with nsrc > 7 not implemented yet");
-      }
-    }
-
     template <template <type_id_t> class KernelType, typename I0, typename... A>
     static dispatcher<callable> new_make_all(A &&... a)
     {
