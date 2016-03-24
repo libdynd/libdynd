@@ -12,7 +12,6 @@
 #include <dynd/callables/forward_na_callable.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/outer.hpp>
-#include <dynd/func/permute.hpp>
 #include <dynd/iterator.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/callables/base_dispatch_callable.hpp>
