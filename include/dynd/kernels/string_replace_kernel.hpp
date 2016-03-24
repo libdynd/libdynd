@@ -23,17 +23,4 @@ namespace nd {
   };
 
 } // namespace nd
-
-namespace ndt {
-
-  template <>
-  struct traits<dynd::nd::string_replace_kernel> {
-    static type equivalent()
-    {
-      return callable_type::make(type(string_id), {type(string_id), type(string_id), type(string_id)});
-    }
-  };
-
-} // namespace ndt
-
 } // namespace dynd

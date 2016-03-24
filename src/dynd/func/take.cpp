@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/take.hpp>
-#include <dynd/kernels/take_kernel.hpp>
+#include <dynd/callables/take_dispatch_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -14,7 +14,7 @@ DYND_API nd::callable nd::take::make()
   // Masked take: (M * T, M * bool) -> var * T
   // Indexed take: (M * T, N * intptr) -> N * T
   // Combined: (M * T, N * Ix) -> R * T
-  return callable::make<take_ck>(ndt::type("(Dims... * T, N * Ix) -> R * T"), 0);
+  return make_callable<take_dispatch_callable>();
 }
 
 DYND_DEFAULT_DECLFUNC_GET(nd::take)
