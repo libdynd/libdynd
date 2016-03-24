@@ -9,7 +9,7 @@
 
 #include <dynd/callables/adapt_callable.hpp>
 #include <dynd/callables/call_callable.hpp>
-#include <dynd/kernels/forward_na_kernel.hpp>
+#include <dynd/callables/forward_na_callable.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/outer.hpp>
 #include <dynd/func/permute.hpp>
@@ -38,7 +38,7 @@ namespace nd {
     {
       ndt::type tp = ndt::callable_type::make(ndt::make_type<ndt::option_type>(child.get_ret_type()),
                                               {ndt::type("Any"), ndt::type("Any")});
-      return callable::make<forward_na_kernel<I...>>(tp, child);
+      return make_callable<forward_na_callable<I...>>(tp, child);
     }
 
   } // namespace dynd::nd::functional

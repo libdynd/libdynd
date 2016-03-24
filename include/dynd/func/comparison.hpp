@@ -40,7 +40,7 @@ namespace nd {
         dispatcher.insert({{option_id, i}, functional::forward_na<0>(self)});
         dispatcher.insert({{i, option_id}, functional::forward_na<1>(self)});
       }
-      dispatcher.insert({{option_id, option_id}, callable::make<option_comparison_kernel<FuncType, true, true>>()});
+      dispatcher.insert({{option_id, option_id}, make_callable<option_comparison_callable<FuncType, true, true>>()});
 
       for (type_id_t dim_tp_id : i2a<dim_ids>()) {
         dispatcher.insert({{dim_tp_id, option_id}, functional::elwise(self)});
@@ -55,7 +55,7 @@ namespace nd {
         }
       }
 
-      dispatcher.insert({{string_id, string_id}, callable::make<KernelType<string_id, string_id>>()});
+      dispatcher.insert({{string_id, string_id}, make_callable<KernelType<string_id, string_id>>()});
 
       return dispatcher;
     }

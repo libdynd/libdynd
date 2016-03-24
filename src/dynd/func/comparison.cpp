@@ -4,6 +4,7 @@
 //
 
 #include <dynd/func/comparison.hpp>
+#include <dynd/callables/total_order_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -48,10 +49,10 @@ nd::callable nd::total_order::make()
 {
   dispatcher<callable> dispatcher;
   dispatcher.insert(
-      {{fixed_string_id, fixed_string_id}, callable::make<total_order_kernel<fixed_string_id, fixed_string_id>>()});
-  dispatcher.insert({{string_id, string_id}, callable::make<total_order_kernel<string_id, string_id>>()});
-  dispatcher.insert({{int32_id, int32_id}, callable::make<total_order_kernel<int32_id, int32_id>>()});
-  dispatcher.insert({{bool_id, bool_id}, callable::make<total_order_kernel<bool_id, bool_id>>()});
+      {{fixed_string_id, fixed_string_id}, make_callable<total_order_callable<fixed_string_id, fixed_string_id>>()});
+  dispatcher.insert({{string_id, string_id}, make_callable<total_order_callable<string_id, string_id>>()});
+  dispatcher.insert({{int32_id, int32_id}, make_callable<total_order_callable<int32_id, int32_id>>()});
+  dispatcher.insert({{bool_id, bool_id}, make_callable<total_order_callable<bool_id, bool_id>>()});
 
   return make_callable<comparison_dispatch_callable>(ndt::type("(Any, Any) -> Any"), dispatcher);
 }

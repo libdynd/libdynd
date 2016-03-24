@@ -5,14 +5,14 @@
 
 #include <dynd/func/reduction.hpp>
 #include <dynd/io.hpp>
-#include <dynd/kernels/serialize_kernel.hpp>
+#include <dynd/callables/serialize_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
 DYND_API nd::callable nd::serialize::make()
 {
-  return functional::reduction(callable::make<serialize_kernel<scalar_kind_id>>());
+  return functional::reduction(make_callable<serialize_callable<scalar_kind_id>>());
 }
 
 DYND_DEFAULT_DECLFUNC_GET(nd::serialize)

@@ -5,7 +5,7 @@
 
 #include <dynd/functional.hpp>
 #include <dynd/index.hpp>
-#include <dynd/kernels/index_kernel.hpp>
+#include <dynd/callables/index_callable.hpp>
 #include <dynd/callables/index_dispatch_callable.hpp>
 
 using namespace std;
@@ -15,7 +15,7 @@ DYND_API nd::callable nd::index::make()
 {
   typedef type_id_sequence<int32_id, fixed_dim_id> type_ids;
 
-  auto dispatcher = callable::new_make_all<index_kernel, type_ids>();
+  auto dispatcher = callable::new_make_all<index_callable, type_ids>();
   return make_callable<index_dispatch_callable>(ndt::type("(Any, i: Any) -> Any"), dispatcher);
 }
 
