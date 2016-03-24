@@ -10,6 +10,7 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
+#include <dynd/callables/reduction_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -32,12 +33,12 @@ nd::callable nd::functional::reduction(const callable &child)
   }
   }
 
-  return callable::make<reduction_virtual_kernel>(
+  return make_callable<reduction_callable>(
       ndt::callable_type::make(ndt::ellipsis_dim_type::make_if_not_variadic(child.get_ret_type()),
                                {ndt::ellipsis_dim_type::make_if_not_variadic(child.get_arg_type(0))},
                                {"axes", "identity", "keepdims"},
                                {ndt::make_type<ndt::option_type>(ndt::type("Fixed * int32")),
                                 ndt::make_type<ndt::option_type>(child.get_ret_type()),
                                 ndt::make_type<ndt::option_type>(ndt::make_type<bool1>())}),
-      reduction_virtual_kernel::static_data_type(child));
+      child);
 }
