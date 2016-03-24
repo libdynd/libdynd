@@ -7,8 +7,8 @@
 #include <dynd/callables/arithmetic_dispatch_callable.hpp>
 #include <dynd/callables/compound_arithmetic_dispatch_callable.hpp>
 #include <dynd/kernels/arithmetic.hpp>
-#include <dynd/kernels/compound_add_kernel.hpp>
-#include <dynd/kernels/compound_div_kernel.hpp>
+#include <dynd/callables/compound_add_callable.hpp>
+#include <dynd/callables/compound_div_callable.hpp>
 
 namespace dynd {
 namespace nd {
@@ -121,7 +121,7 @@ namespace nd {
   };
 
 #define DYND_DEF_COMPOUND_OP_CALLABLE(NAME, TYPES)                                                                     \
-  extern DYND_API struct DYND_API NAME : compound_arithmetic_operator<NAME, NAME##_kernel_t, TYPES> {                  \
+  extern DYND_API struct DYND_API NAME : compound_arithmetic_operator<NAME, NAME##_callable, TYPES> {                  \
     static nd::callable &get();                                                                                        \
   } NAME;
 
