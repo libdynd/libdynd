@@ -19,20 +19,6 @@ namespace nd {
 
   template <typename SelfType>
   struct base_index_kernel : base_kernel<index_kernel_prefix, SelfType> {
-    struct data_type {
-      intptr_t nindices;
-      int *indices;
-
-      data_type(intptr_t nindices, int *indices) : nindices(nindices), indices(indices) {}
-      data_type(const array &index) : data_type(index.get_dim_size(), reinterpret_cast<int *>(index.data())) {}
-
-      void next()
-      {
-        --nindices;
-        ++indices;
-      }
-    };
-
     index_kernel_prefix *get_child()
     {
       return reinterpret_cast<index_kernel_prefix *>(kernel_prefix::get_child(sizeof(SelfType)));
@@ -54,13 +40,6 @@ namespace nd {
     static void single_wrapper(kernel_prefix *self, char *res_metadata, char **res_data, const array *arg0)
     {
       reinterpret_cast<SelfType *>(self)->single(res_metadata, res_data, arg0);
-    }
-
-    static char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp),
-                           intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
-                           const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      return reinterpret_cast<char *>(new data_type(kwds[0]));
     }
   };
 
