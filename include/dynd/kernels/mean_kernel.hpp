@@ -7,7 +7,7 @@
 
 #include <dynd/func/arithmetic.hpp>
 #include <dynd/func/sum.hpp>
-#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_strided_kernel.hpp>
 #include <dynd/types/any_kind_type.hpp>
 
 namespace dynd {
@@ -17,11 +17,6 @@ namespace nd {
   struct mean_kernel : base_strided_kernel<mean_kernel, 1> {
     std::intptr_t compound_div_offset;
     int64 count;
-
-    struct data_type {
-      char *sum_data;
-      char *compound_div_data;
-    };
 
     mean_kernel(int64 count) : count(count) {}
 
