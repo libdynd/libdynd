@@ -16,121 +16,27 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct DYND_API reduction_virtual_kernel : base_kernel<reduction_virtual_kernel> {
-      struct static_data_type {
-        callable child;
+    struct reduction_data_type {
+      array identity;
+      std::intptr_t ndim; // total number of dimensions being processed
+      std::intptr_t naxis;
+      const int32 *axes;
+      bool keepdims;
+      std::intptr_t stored_ndim; // original number of dimensions
 
-        static_data_type(const callable &child) : child(child) {}
-      };
+      std::intptr_t init_offset;
+      char *child_data;
 
-      struct data_type {
-        array identity;
-        std::intptr_t ndim; // total number of dimensions being processed
-        std::intptr_t naxis;
-        const int32 *axes;
-        bool keepdims;
-        std::intptr_t stored_ndim; // original number of dimensions
+      reduction_data_type() : ndim(0), naxis(0), axes(NULL), keepdims(false), stored_ndim(0) {}
 
-        std::intptr_t init_offset;
-        char *child_data;
+      bool is_broadcast() const { return axes != NULL && (naxis == 0 || stored_ndim - axes[0] != ndim); }
 
-        data_type() : ndim(0), naxis(0), axes(NULL), keepdims(false), stored_ndim(0) {}
-
-        bool is_broadcast() const { return axes != NULL && (naxis == 0 || stored_ndim - axes[0] != ndim); }
-
-        bool is_inner() const { return ndim == 1; }
-      };
-
-      static char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                             intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-      {
-        char *data = reinterpret_cast<char *>(new data_type());
-
-        const array &identity = kwds[1];
-        if (!identity.is_na()) {
-          reinterpret_cast<data_type *>(data)->identity = identity;
-        }
-
-        if (kwds[0].is_na()) {
-          reinterpret_cast<data_type *>(data)->naxis =
-              src_tp[0].get_ndim() -
-              reinterpret_cast<static_data_type *>(static_data)->child.get_type()->get_return_type().get_ndim();
-          reinterpret_cast<data_type *>(data)->axes = NULL;
-        }
-        else {
-          reinterpret_cast<data_type *>(data)->naxis = kwds[0].get_dim_size();
-          reinterpret_cast<data_type *>(data)->axes = reinterpret_cast<const int *>(kwds[0].cdata());
-        }
-
-        if (kwds[2].is_na()) {
-          reinterpret_cast<data_type *>(data)->keepdims = false;
-        }
-        else {
-          reinterpret_cast<data_type *>(data)->keepdims = kwds[2].as<bool>();
-        }
-
-        const ndt::type &child_dst_tp =
-            reinterpret_cast<static_data_type *>(static_data)->child.get_type()->get_return_type();
-
-        if (!dst_tp.is_symbolic()) {
-          reinterpret_cast<data_type *>(data)->ndim = src_tp[0].get_ndim() - child_dst_tp.get_ndim();
-          reinterpret_cast<data_type *>(data)->stored_ndim = reinterpret_cast<data_type *>(data)->ndim;
-        }
-
-        ndt::type child_src_tp = src_tp[0].get_type_at_dimension(NULL, reinterpret_cast<data_type *>(data)->naxis);
-        reinterpret_cast<data_type *>(data)->child_data =
-            reinterpret_cast<static_data_type *>(static_data)
-                ->child->data_init(reinterpret_cast<static_data_type *>(static_data)->child->static_data(),
-                                   child_dst_tp, nsrc, &child_src_tp, nkwd - 3, kwds, tp_vars);
-
-        return data;
-      }
-
-      static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
-                                   const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                                   const std::map<std::string, ndt::type> &tp_vars)
-      {
-        ndt::type child_dst_tp = reinterpret_cast<static_data_type *>(static_data)->child.get_type()->get_return_type();
-        if (child_dst_tp.is_symbolic()) {
-          ndt::type child_src_tp = src_tp[0].get_type_at_dimension(NULL, reinterpret_cast<data_type *>(data)->naxis);
-          reinterpret_cast<static_data_type *>(static_data)
-              ->child.get()
-              ->resolve_dst_type(reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data(), NULL,
-                                 child_dst_tp, nsrc, &child_src_tp, nkwd, kwds, tp_vars);
-        }
-
-        // check that the child_dst_tp and the child_src_tp are the same here
-
-        dst_tp = child_dst_tp;
-        reinterpret_cast<data_type *>(data)->ndim = src_tp[0].get_ndim() - dst_tp.get_ndim();
-        reinterpret_cast<data_type *>(data)->stored_ndim = reinterpret_cast<data_type *>(data)->ndim;
-
-        for (intptr_t i = reinterpret_cast<data_type *>(data)->ndim - 1,
-                      j = reinterpret_cast<data_type *>(data)->naxis - 1;
-             i >= 0; --i) {
-          if (reinterpret_cast<data_type *>(data)->axes == NULL ||
-              (j >= 0 && i == reinterpret_cast<data_type *>(data)->axes[j])) {
-            if (reinterpret_cast<data_type *>(data)->keepdims) {
-              dst_tp = ndt::make_fixed_dim(1, dst_tp);
-            }
-            --j;
-          }
-          else {
-            ndt::type dim_tp = src_tp[0].get_type_at_dimension(NULL, i);
-            dst_tp = dim_tp.extended<ndt::base_dim_type>()->with_element_type(dst_tp);
-          }
-        }
-      }
-
-      static void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                              const array *kwds, const std::map<std::string, ndt::type> &tp_vars);
+      bool is_inner() const { return ndim == 1; }
     };
 
     template <typename SelfType>
     struct base_reduction_kernel : reduction_kernel_prefix {
-      typedef reduction_virtual_kernel::data_type data_type;
+      typedef reduction_data_type data_type;
 
       /**
        * Returns the child kernel immediately following this one.
@@ -306,8 +212,8 @@ namespace nd {
        * This is for a strided dimension which is being reduced, and is not
        * the final dimension before the accumulation operation.
        */
-      static void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+      static void instantiate(callable &self, char *static_data, char *data, kernel_builder *ckb,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
@@ -329,14 +235,12 @@ namespace nd {
           const ndt::type &dst_element_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
           const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
 
-          return reduction_virtual_kernel::instantiate(static_data, data, ckb, dst_element_tp, dst_element_arrmeta,
-                                                       nsrc, &src0_element_tp, &src0_element_arrmeta,
-                                                       kernel_request_single, nkwd, kwds, tp_vars);
+          return self->instantiate(static_data, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
+                                   &src0_element_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
         }
 
-        return reduction_virtual_kernel::instantiate(static_data, data, ckb, dst_tp, dst_arrmeta, nsrc,
-                                                     &src0_element_tp, &src0_element_arrmeta, kernel_request_single,
-                                                     nkwd, kwds, tp_vars);
+        return self->instantiate(static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, &src0_element_tp,
+                                 &src0_element_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
       }
     };
 
@@ -433,8 +337,8 @@ namespace nd {
        * This is for a strided dimension which is being reduced, and is
        * the final dimension before the accumulation operation.
        */
-      static void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+      static void instantiate(callable &self, char *static_data, char *data, kernel_builder *ckb,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
@@ -471,13 +375,12 @@ namespace nd {
           const ndt::type &dst_element_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
           const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
 
-          reduction_virtual_kernel::instantiate(static_data, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc,
-                                                &src0_element_tp, &src0_element_arrmeta, kernel_request_single, nkwd,
-                                                kwds, tp_vars);
+          self->instantiate(static_data, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
+                            &src0_element_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
         }
         else {
-          reduction_virtual_kernel::instantiate(static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, &src0_element_tp,
-                                                &src0_element_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+          self->instantiate(static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, &src0_element_tp, &src0_element_arrmeta,
+                            kernel_request_single, nkwd, kwds, tp_vars);
         }
 
         e = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
@@ -561,8 +464,8 @@ namespace nd {
         }
       }
 
-      static void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+      static void instantiate(callable &self, char *static_data, char *data, kernel_builder *ckb,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
@@ -576,11 +479,11 @@ namespace nd {
         --reinterpret_cast<data_type *>(data)->ndim;
         --reinterpret_cast<data_type *>(data)->naxis;
 
-        reduction_virtual_kernel::instantiate(static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, &src0_element_tp,
-                                              &src0_element_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+        self->instantiate(static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, &src0_element_tp, &src0_element_arrmeta,
+                          kernel_request_single, nkwd, kwds, tp_vars);
 
-        reduction_kernel *self = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
-        self->init_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
+        reduction_kernel *self_k = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
+        self_k->init_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
 
         delete reinterpret_cast<data_type *>(data);
       }
@@ -670,8 +573,8 @@ namespace nd {
        * This is for a strided dimension which is being broadcast, and is not
        * the final dimension before the accumulation operation.
        */
-      static void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+      static void instantiate(callable &self, char *static_data, char *data, kernel_builder *ckb,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
@@ -689,9 +592,8 @@ namespace nd {
         const ndt::type &dst_element_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
 
-        return reduction_virtual_kernel::instantiate(static_data, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc,
-                                                     &src0_element_tp, &src0_element_arrmeta, kernel_request_strided,
-                                                     nkwd, kwds, tp_vars);
+        return self->instantiate(static_data, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
+                                 &src0_element_arrmeta, kernel_request_strided, nkwd, kwds, tp_vars);
       }
     };
 
@@ -797,8 +699,8 @@ namespace nd {
        * This is for a strided dimension which is being broadcast, and is
        * the final dimension before the accumulation operation.
        */
-      static void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+      static void instantiate(callable &self, char *static_data, char *data, kernel_builder *ckb,
+                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
@@ -816,81 +718,33 @@ namespace nd {
 
         intptr_t root_ckb_offset = ckb->size();
         ckb->emplace_back<reduction_kernel>(kernreq, dst_stride, src_stride);
-        reduction_kernel *self = ckb->get_at<reduction_kernel>(root_ckb_offset);
+        reduction_kernel *self_k = ckb->get_at<reduction_kernel>(root_ckb_offset);
 
         // The striding parameters
-        self->_size = src_size;
+        self_k->_size = src_size;
 
         // Need to retrieve 'e' again because it may have moved
         if (identity.is_null()) {
-          self->size_first = self->_size - 1;
-          self->dst_stride_first = self->dst_stride;
-          self->src_stride_first = self->src_stride;
+          self_k->size_first = self_k->_size - 1;
+          self_k->dst_stride_first = self_k->dst_stride;
+          self_k->src_stride_first = self_k->src_stride;
         }
         else {
-          self->size_first = self->_size;
-          self->dst_stride_first = 0;
-          self->src_stride_first = 0;
+          self_k->size_first = self_k->_size;
+          self_k->dst_stride_first = 0;
+          self_k->src_stride_first = 0;
         }
 
         --reinterpret_cast<data_type *>(data)->ndim;
 
-        reduction_virtual_kernel::instantiate(static_data, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc,
-                                              &src0_element_tp, &src0_element_arrmeta, kernel_request_strided, nkwd,
-                                              kwds, tp_vars);
-        self = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
-        self->dst_init_kernel_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
+        self->instantiate(static_data, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
+                          &src0_element_arrmeta, kernel_request_strided, nkwd, kwds, tp_vars);
+        self_k = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
+        self_k->dst_init_kernel_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
 
         delete reinterpret_cast<data_type *>(data);
       }
     };
-
-    void reduction_virtual_kernel::instantiate(char *static_data, char *data, kernel_builder *ckb,
-                                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                                               const ndt::type *src_tp, const char *const *src_arrmeta,
-                                               kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
-                                               const std::map<std::string, ndt::type> &tp_vars)
-    {
-      static const callable_instantiate_t table[2][2][2] = {
-          {{reduction_kernel<fixed_dim_id, false, false>::instantiate,
-            reduction_kernel<fixed_dim_id, false, true>::instantiate},
-           {reduction_kernel<fixed_dim_id, true, false>::instantiate,
-            reduction_kernel<fixed_dim_id, true, true>::instantiate}},
-          {{NULL, reduction_kernel<var_dim_id, false, true>::instantiate}, {NULL, NULL}}};
-
-      if (reinterpret_cast<data_type *>(data)->ndim == 0) {
-        callable &child = reinterpret_cast<static_data_type *>(static_data)->child;
-        child.get()->instantiate(child.get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
-                                 (reinterpret_cast<data_type *>(data)->stored_ndim == 0) ? kernel_request_single
-                                                                                         : kernel_request_strided,
-                                 nkwd - 3, kwds + 3, tp_vars);
-
-        reinterpret_cast<data_type *>(data)->init_offset = ckb->size();
-
-        // if identity is NULL, assign the first element to the output
-        // otherwise, assign the identity to the output
-        // init()
-
-        // f(Ret, Identity)
-        // f(Ret, Arg0_0)
-        // f(Ret, Arg0_1)
-        if (reinterpret_cast<data_type *>(data)->identity.is_null()) {
-          make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                 &eval::default_eval_context);
-          return;
-        }
-
-        nd::callable constant = functional::constant(reinterpret_cast<data_type *>(data)->identity);
-        constant->instantiate(
-            reinterpret_cast<char *>(const_cast<nd::array *>(&reinterpret_cast<data_type *>(data)->identity)), NULL,
-            ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-        return;
-      }
-
-      table[src_tp[0].get_id() - fixed_dim_id][reinterpret_cast<data_type *>(data)
-                                                   ->is_broadcast()][reinterpret_cast<data_type *>(data)->is_inner()](
-          static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-    }
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
