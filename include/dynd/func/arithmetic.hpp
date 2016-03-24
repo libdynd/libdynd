@@ -14,11 +14,11 @@
 namespace dynd {
 namespace nd {
 
-  template <typename FuncType, template <type_id_t> class KernelType, typename TypeIDSequence>
+  template <typename FuncType, template <type_id_t> class CallableType, typename TypeIDSequence>
   struct unary_arithmetic_operator : declfunc<FuncType> {
     static callable make()
     {
-      auto dispatcher = callable::new_make_all<KernelType, TypeIDSequence>();
+      auto dispatcher = callable::new_make_all<CallableType, TypeIDSequence>();
 
       const callable self = functional::call<FuncType>(ndt::type("(Any) -> Any"));
 
@@ -32,7 +32,7 @@ namespace nd {
   };
 
 #define DYND_DEF_UNARY_OP_CALLABLE(NAME, TYPES)                                                                        \
-  extern DYND_API struct DYND_API NAME : unary_arithmetic_operator<NAME, NAME##_kernel, TYPES> {                       \
+  extern DYND_API struct DYND_API NAME : unary_arithmetic_operator<NAME, NAME##_callable, TYPES> {                     \
     static std::string what(const ndt::type &src0_type)                                                                \
     {                                                                                                                  \
       std::stringstream ss;                                                                                            \
@@ -68,7 +68,7 @@ namespace nd {
   };
 
 #define DYND_DEF_BINARY_OP_CALLABLE(NAME, TYPES)                                                                       \
-  extern DYND_API struct DYND_API NAME : binary_arithmetic_operator<NAME, NAME##_kernel, TYPES> {                      \
+  extern DYND_API struct DYND_API NAME : binary_arithmetic_operator<NAME, NAME##_callable, TYPES> {                    \
     static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)                                        \
     {                                                                                                                  \
       std::stringstream ss;                                                                                            \

@@ -33,16 +33,6 @@ namespace nd {
         {
           *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
         }
-
-        static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                                const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                                intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-        {
-          ckb->emplace_back<apply_function_kernel>(kernreq, args_type(src_tp, src_arrmeta, kwds),
-                                                   kwds_type(nkwd, kwds));
-        }
       };
 
       template <typename func_type, func_type func, typename... A, size_t... I, typename... K, size_t... J>
@@ -61,16 +51,6 @@ namespace nd {
         void single(char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))
         {
           func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
-        }
-
-        static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                                const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                                intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-        {
-          ckb->emplace_back<apply_function_kernel>(kernreq, args_type(src_tp, src_arrmeta, kwds),
-                                                   kwds_type(nkwd, kwds));
         }
       };
 
