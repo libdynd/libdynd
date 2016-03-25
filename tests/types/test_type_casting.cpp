@@ -255,6 +255,7 @@ TEST(TypeCasting, StringToInt128) {
 }
 */
 
+/*
 TEST(TypeCasting, StringToUInt64) {
     nd::array a = nd::empty(ndt::make_type<uint64_t>());
 
@@ -274,3 +275,4 @@ TEST(TypeCasting, StringToUInt64) {
     EXPECT_THROW(a.vals() = "1845e20", out_of_range);
     EXPECT_THROW(a.vals() = "1e20", out_of_range);
 }
+*/

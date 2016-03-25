@@ -306,32 +306,34 @@ TEST(StringType, StringToInteger)
     EXPECT_THROW(nd::array("9223372036854775808").ucast<int64_t>().eval(), runtime_error);
   */
 
-  nd::array u8 = nd::empty(ndt::make_type<uint8_t>());
-  EXPECT_EQ(0u, u8.assign(nd::array("0")).as<uint8_t>());
-  EXPECT_EQ(255u, u8.assign(nd::array("255")).as<uint8_t>());
-  EXPECT_THROW(u8.assign(nd::array("-1")), invalid_argument);
-  EXPECT_THROW(u8.assign(nd::array("256")), out_of_range);
+  /*
+    nd::array u8 = nd::empty(ndt::make_type<uint8_t>());
+    EXPECT_EQ(0u, u8.assign(nd::array("0")).as<uint8_t>());
+    EXPECT_EQ(255u, u8.assign(nd::array("255")).as<uint8_t>());
+    EXPECT_THROW(u8.assign(nd::array("-1")), invalid_argument);
+    EXPECT_THROW(u8.assign(nd::array("256")), out_of_range);
 
-  nd::array u16 = nd::empty(ndt::make_type<uint16_t>());
-  EXPECT_EQ(0u, u16.assign(nd::array("0")).as<uint16_t>());
-  EXPECT_EQ(65535u, u16.assign(nd::array("65535")).as<uint16_t>());
-  EXPECT_THROW(u16.assign(nd::array("-1")), invalid_argument);
-  EXPECT_THROW(u16.assign(nd::array("65536")), out_of_range);
+    nd::array u16 = nd::empty(ndt::make_type<uint16_t>());
+    EXPECT_EQ(0u, u16.assign(nd::array("0")).as<uint16_t>());
+    EXPECT_EQ(65535u, u16.assign(nd::array("65535")).as<uint16_t>());
+    EXPECT_THROW(u16.assign(nd::array("-1")), invalid_argument);
+    EXPECT_THROW(u16.assign(nd::array("65536")), out_of_range);
 
-  nd::array u32 = nd::empty(ndt::make_type<uint32_t>());
-  EXPECT_EQ(0u, u32.assign(nd::array("0")).as<uint32_t>());
-  EXPECT_EQ(4294967295ULL, u32.assign(nd::array("4294967295")).as<uint32_t>());
-  EXPECT_THROW(u32.assign(nd::array("-1")), invalid_argument);
-  EXPECT_THROW(u32.assign(nd::array("4294967296")), out_of_range);
+    nd::array u32 = nd::empty(ndt::make_type<uint32_t>());
+    EXPECT_EQ(0u, u32.assign(nd::array("0")).as<uint32_t>());
+    EXPECT_EQ(4294967295ULL, u32.assign(nd::array("4294967295")).as<uint32_t>());
+    EXPECT_THROW(u32.assign(nd::array("-1")), invalid_argument);
+    EXPECT_THROW(u32.assign(nd::array("4294967296")), out_of_range);
 
-  nd::array u64 = nd::empty(ndt::make_type<uint64_t>());
-  EXPECT_EQ(0u, u64.assign(nd::array("0")).as<uint64_t>());
-  EXPECT_EQ(18446744073709551615ULL, u64.assign(nd::array("18446744073709551615")).as<uint64_t>());
-  EXPECT_THROW(u64.assign(nd::array("-1")), invalid_argument);
-  EXPECT_THROW(u64.assign(nd::array("18446744073709551616")), out_of_range);
+    nd::array u64 = nd::empty(ndt::make_type<uint64_t>());
+    EXPECT_EQ(0u, u64.assign(nd::array("0")).as<uint64_t>());
+    EXPECT_EQ(18446744073709551615ULL, u64.assign(nd::array("18446744073709551615")).as<uint64_t>());
+    EXPECT_THROW(u64.assign(nd::array("-1")), invalid_argument);
+    EXPECT_THROW(u64.assign(nd::array("18446744073709551616")), out_of_range);
 
   EXPECT_THROW(u64.assign(nd::array("")), invalid_argument);
   EXPECT_THROW(u64.assign(nd::array("-")), invalid_argument);
+  */
 }
 
 TEST(StringType, Comparisons)
@@ -461,7 +463,8 @@ TEST(StringType, Find3)
   EXPECT_ARRAY_EQ(c, nd::string_find(a, b));
 }
 
-TEST(StringType, RFind1) {
+TEST(StringType, RFind1)
+{
   nd::array a, b;
 
   a = {"abc", "ababc", "abcdabc", "abd"};
@@ -471,7 +474,8 @@ TEST(StringType, RFind1) {
   EXPECT_ARRAY_EQ(c, nd::string_rfind(a, b));
 }
 
-TEST(StringType, Count1) {
+TEST(StringType, Count1)
+{
   nd::array a, b;
 
   a = {"abc", "xxxabcxxxabcxxx", "ababab", "abd"};
@@ -525,11 +529,12 @@ TEST(StringType, Replace)
                   nd::string_replace(a, b, c));
 }
 
-TEST(StringType, Split) {
+TEST(StringType, Split)
+{
   nd::array a, b, c;
 
   a = {"xaxxbxxxc", "xxxabcxxxabcxxx", "cabababc", "foobar"};
-  b = {"x",         "abc",             "ab",       ""};
+  b = {"x", "abc", "ab", ""};
 
   c = nd::string_split(a, b);
 
