@@ -22,10 +22,10 @@ namespace nd {
       dst_tp = get_field_type(src_tp, kwds);
     }
 
-    void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                     const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
-                     const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
+                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *kwds,
+                     const std::map<std::string, ndt::type> &tp_vars)
     {
       const uintptr_t data_offset = get_data_offset(src_tp, src_arrmeta, kwds);
       const ndt::type field_type[1] = {get_field_type(src_tp, kwds)};
@@ -35,8 +35,8 @@ namespace nd {
       ckb->emplace_back<field_access_kernel>(kernreq, data_offset);
 
       static const array error_mode(opt<assign_error_mode>());
-      assign::get()->instantiate(assign::get()->static_data(), data, ckb, dst_tp, dst_arrmeta, 1, field_type,
-                                 field_metadata, kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
+      assign::get()->instantiate(data, ckb, dst_tp, dst_arrmeta, 1, field_type, field_metadata,
+                                 kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
     };
 
     const ndt::type &get_field_type(const ndt::type *src_tp, const array *kwds)
@@ -72,11 +72,11 @@ namespace nd {
       dst_tp = get_array_field_kernel::helper(kwds[0], m_i).get_type();
     }
 
-    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
-                     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                     intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
-                     const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    void instantiate(char *DYND_UNUSED(data), nd::kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
+                     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                     const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *kwds,
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       ckb->emplace_back<get_array_field_kernel>(kernreq, kwds[0], m_i);
     }

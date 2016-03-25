@@ -45,8 +45,8 @@ void nd::old_assign_na(const ndt::type &option_tp, const char *arrmeta, char *da
   else {
     nd::kernel_builder ckb;
     nd::callable &af = nd::assign_na::get();
-    af.get()->instantiate(af->static_data(), NULL, &ckb, option_tp, arrmeta, 0, NULL, NULL, kernel_request_single, 0,
-                          NULL, std::map<std::string, ndt::type>());
+    af.get()->instantiate(NULL, &ckb, option_tp, arrmeta, 0, NULL, NULL, kernel_request_single, 0, NULL,
+                          std::map<std::string, ndt::type>());
     nd::kernel_prefix *ckp = ckb.get();
     ckp->get_function<kernel_single_t>()(ckp, data, NULL);
   }
@@ -83,8 +83,8 @@ bool nd::old_is_avail(const ndt::type &option_tp, const char *arrmeta, const cha
     nd::kernel_builder ckb;
     nd::callable &af = nd::is_na::get();
     ndt::type src_tp[1] = {option_tp};
-    af.get()->instantiate(af->static_data(), NULL, &ckb, ndt::make_type<bool1>(), NULL, 1, src_tp, &arrmeta,
-                          kernel_request_single, 0, NULL, std::map<std::string, ndt::type>());
+    af.get()->instantiate(NULL, &ckb, ndt::make_type<bool1>(), NULL, 1, src_tp, &arrmeta, kernel_request_single, 0,
+                          NULL, std::map<std::string, ndt::type>());
     nd::kernel_prefix *ckp = ckb.get();
     char result;
     ckp->get_function<kernel_single_t>()(ckp, &result, const_cast<char **>(&data));

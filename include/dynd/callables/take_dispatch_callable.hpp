@@ -15,10 +15,9 @@ namespace nd {
   public:
     masked_take_callable() : base_callable(ndt::type("(Any) -> Any")) {}
 
-    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                     intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+    void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
+                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                      const std::map<std::string, ndt::type> &tp_vars)
     {
       typedef nd::masked_take_ck self_type;
@@ -69,8 +68,8 @@ namespace nd {
 
       // Create the child element assignment ckernel
       nd::array error_mode = assign_error_default;
-      assign::get()->instantiate(assign::get()->static_data(), NULL, ckb, dst_el_tp, dst_el_meta, 1, &src0_el_tp,
-                                 &src0_el_meta, kernel_request_strided, 1, &error_mode, tp_vars);
+      assign::get()->instantiate(NULL, ckb, dst_el_tp, dst_el_meta, 1, &src0_el_tp, &src0_el_meta,
+                                 kernel_request_strided, 1, &error_mode, tp_vars);
     }
   };
 
@@ -78,10 +77,9 @@ namespace nd {
   public:
     indexed_take_callable() : base_callable(ndt::type("(Any) -> Any")) {}
 
-    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                     intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+    void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
+                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                      const std::map<std::string, ndt::type> &tp_vars)
     {
       intptr_t self_offset = ckb->size();
@@ -129,8 +127,8 @@ namespace nd {
 
       // Create the child element assignment ckernel
       nd::array error_mode = assign_error_default;
-      assign::get()->instantiate(assign::get()->static_data(), NULL, ckb, dst_el_tp, dst_el_meta, 1, &src0_el_tp,
-                                 &src0_el_meta, kernel_request_single, 1, &error_mode, tp_vars);
+      assign::get()->instantiate(NULL, ckb, dst_el_tp, dst_el_meta, 1, &src0_el_tp, &src0_el_meta,
+                                 kernel_request_single, 1, &error_mode, tp_vars);
     }
   };
 
@@ -162,20 +160,19 @@ namespace nd {
       }
     }
 
-    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars)
+    void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
+                     intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                     intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
       if (mask_el_tp.get_id() == bool_id) {
         callable f = make_callable<masked_take_callable>();
-        f->instantiate(NULL, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        f->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
         return;
       }
       else if (mask_el_tp.get_id() == (type_id_t)type_id_of<intptr_t>::value) {
         callable f = make_callable<indexed_take_callable>();
-        f->instantiate(NULL, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        f->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
         return;
       }
       else {

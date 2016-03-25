@@ -9,11 +9,11 @@
 using namespace std;
 using namespace dynd;
 
-void nd::equal_callable<tuple_id, tuple_id>::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data),
-                                                         kernel_builder *ckb, const ndt::type &dst_tp,
-                                                         const char *dst_arrmeta, intptr_t nsrc,
-                                                         const ndt::type *src_tp, const char *const *src_arrmeta,
-                                                         kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
+void nd::equal_callable<tuple_id, tuple_id>::instantiate(char *DYND_UNUSED(data), kernel_builder *ckb,
+                                                         const ndt::type &dst_tp, const char *dst_arrmeta,
+                                                         intptr_t nsrc, const ndt::type *src_tp,
+                                                         const char *const *src_arrmeta, kernel_request_t kernreq,
+                                                         intptr_t nkwd, const nd::array *kwds,
                                                          const std::map<std::string, ndt::type> &tp_vars)
 {
   intptr_t self_offset = ckb->size();
@@ -33,7 +33,7 @@ void nd::equal_callable<tuple_id, tuple_id>::instantiate(char *DYND_UNUSED(stati
     ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::tuple_type>()->get_field_type(i),
                                  src_tp[1].extended<ndt::tuple_type>()->get_field_type(i)};
     const char *child_src_arrmeta[2] = {src_arrmeta[0] + arrmeta_offsets[i], src_arrmeta[1] + arrmeta_offsets[i]};
-    equal::get()->instantiate(equal::get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp,
-                              child_src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
+    equal::get()->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
+                              kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
   }
 }

@@ -122,9 +122,9 @@ namespace nd {
      *                 values.
      * \param kwds  A struct array of named auxiliary arguments.
      */
-    virtual void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                             const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
+    virtual void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
+                             intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                             kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                              const std::map<std::string, ndt::type> &tp_vars) = 0;
 
     virtual void overload(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),

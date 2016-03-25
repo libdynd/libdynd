@@ -29,10 +29,9 @@ namespace nd {
     {
     }
 
-    void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                     kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars);
+    void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                     const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
   };
 
 } // namespace dynd::nd

@@ -63,10 +63,9 @@ namespace nd {
       resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
-    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                     intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+    void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
+                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       int flags;
