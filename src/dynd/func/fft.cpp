@@ -6,6 +6,7 @@
 #include <dynd/func/fft.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/functional.hpp>
+#include <dynd/callables/fft_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -15,12 +16,8 @@ DYND_API nd::callable nd::fft::make()
   std::vector<nd::callable> children;
 
 #ifdef DYND_FFTW
-  typedef fftw_ck<fftw_complex, fftw_complex, FFTW_FORWARD> CKT;
-  children.push_back(nd::callable::make<CKT>(0));
-#endif
-
-#ifdef DYND_CUDA
-  children.push_back(nd::callable::make<cufft_ck<cufftDoubleComplex, cufftDoubleComplex, CUFFT_FORWARD>>(0));
+  typedef fftw_callable<fftw_complex, fftw_complex, FFTW_FORWARD> CKT;
+  children.push_back(nd::make_callable<CKT>());
 #endif
 
   if (children.empty()) {
@@ -42,11 +39,7 @@ DYND_API nd::callable nd::ifft::make()
   std::vector<nd::callable> children;
 
 #ifdef DYND_FFTW
-  children.push_back(nd::callable::make<fftw_ck<fftw_complex, fftw_complex, FFTW_BACKWARD>>());
-#endif
-
-#ifdef DYND_CUDA
-  children.push_back(nd::callable::make<cufft_ck<cufftDoubleComplex, cufftDoubleComplex, CUFFT_INVERSE>>());
+  children.push_back(nd::make_callable<fftw_callable<fftw_complex, fftw_complex, FFTW_BACKWARD>>());
 #endif
 
   if (children.empty()) {
@@ -66,7 +59,7 @@ DYND_API nd::callable nd::ifft::make()
 DYND_API nd::callable nd::rfft::make()
 {
 #ifdef DYND_FFTW
-  return nd::callable::make<fftw_ck<fftw_complex, double>>(0);
+  return nd::make_callable<fftw_callable<fftw_complex, double>>(0);
 #else
   throw std::runtime_error("no fft enabled");
 #endif
@@ -75,7 +68,7 @@ DYND_API nd::callable nd::rfft::make()
 DYND_API nd::callable nd::irfft::make()
 {
 #ifdef DYND_FFTW
-  return nd::callable::make<fftw_ck<double, fftw_complex>>(0);
+  return nd::make_callable<fftw_callable<double, fftw_complex>>();
 #else
   throw std::runtime_error("no fft enabled");
 #endif
