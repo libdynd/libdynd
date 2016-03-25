@@ -18,14 +18,20 @@ namespace {
 ////////////////////////////////////////////////////////////////
 // Functions for the unary assignment as an callable
 
-struct unary_assignment_ck : nd::base_strided_kernel<unary_assignment_ck, 1> {
-  static void instantiate(char *static_data, char *DYND_UNUSED(data), nd::kernel_builder *ckb, const ndt::type &dst_tp,
-                          const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                          const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
-                          const nd::array *DYND_UNUSED(kwds),
-                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+class unary_assignment_callable : public nd::base_callable {
+  assign_error_mode errmode;
+
+public:
+  unary_assignment_callable(const ndt::type &tp, assign_error_mode error_mode) : base_callable(tp), errmode(error_mode)
   {
-    assign_error_mode errmode = *reinterpret_cast<assign_error_mode *>(static_data);
+  }
+
+  void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+                   const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                   const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                   intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
     eval::eval_context ectx_tmp;
     ectx_tmp.errmode = errmode;
     make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, &ectx_tmp);
@@ -37,7 +43,7 @@ struct unary_assignment_ck : nd::base_strided_kernel<unary_assignment_ck, 1> {
 nd::callable dynd::make_callable_from_assignment(const ndt::type &dst_tp, const ndt::type &src_tp,
                                                  assign_error_mode errmode)
 {
-  return nd::callable::make<unary_assignment_ck>(ndt::callable_type::make(dst_tp, src_tp), errmode);
+  return nd::make_callable<unary_assignment_callable>(ndt::callable_type::make(dst_tp, src_tp), errmode);
 }
 
 void nd::detail::check_narg(const ndt::callable_type *af_tp, intptr_t narg)
