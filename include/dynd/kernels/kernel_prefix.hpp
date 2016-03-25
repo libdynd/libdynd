@@ -14,28 +14,11 @@
 #include <dynd/kernels/kernel_builder.hpp>
 
 namespace dynd {
-namespace nd {
-
-  class array;
-
-} // namespace dynd::nd
-
-namespace ndt {
-
-  class type;
-
-} // namespace dynd::ndt
 
 typedef void (*kernel_call_t)(nd::kernel_prefix *self, const nd::array *dst, const nd::array *src);
 typedef void (*kernel_single_t)(nd::kernel_prefix *self, char *dst, char *const *src);
 typedef void (*kernel_strided_t)(nd::kernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
                                  const intptr_t *src_stride, size_t count);
-
-struct kernel_targets_t {
-  void *single;
-  void *contiguous;
-  void *strided;
-};
 
 /**
  * Definition for kernel request parameters.
@@ -121,33 +104,6 @@ namespace nd {
       self->function = func;
       self->destructor = NULL;
       return self;
-    }
-
-    static void instantiate(char *static_data, char *DYND_UNUSED(data), kernel_builder *ckb,
-                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                            const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                            intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      void *func;
-      switch (kernreq) {
-      case kernel_request_single:
-        func = reinterpret_cast<kernel_targets_t *>(static_data)->single;
-        break;
-      case kernel_request_strided:
-        func = reinterpret_cast<kernel_targets_t *>(static_data)->strided;
-        break;
-      default:
-        throw std::invalid_argument("unrecognized kernel request");
-        break;
-      }
-
-      if (func == NULL) {
-        throw std::invalid_argument("no kernel request");
-      }
-
-      ckb->emplace_back<kernel_prefix>(func);
     }
   };
 

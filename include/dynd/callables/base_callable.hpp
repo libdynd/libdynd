@@ -15,74 +15,6 @@
 namespace dynd {
 namespace nd {
 
-  /**
-   * Resolves any missing keyword arguments for this callable based on
-   * the types of the positional arguments and the available keywords arguments.
-   *
-   * \param self    The callable.
-   * \param self_tp The function prototype of the callable.
-   * \param nsrc    The number of positional arguments.
-   * \param src_tp  An array of the source types.
-   * \param kwds    An array of the.
-   */
-  typedef char *(*callable_data_init_t)(char *static_data, const ndt::type &dst_tp, intptr_t nsrc,
-                                        const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                                        const std::map<std::string, ndt::type> &tp_vars);
-
-  /**
-   * Resolves the destination type for this callable based on the types
-   * of the source parameters.
-   *
-   * \param self  The callable.
-   * \param af_tp  The function prototype of the callable.
-   * \param dst_tp  To be filled with the destination type.
-   * \param nsrc  The number of source parameters.
-   * \param src_tp  An array of the source types.
-   */
-  typedef void (*callable_resolve_dst_type_t)(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
-                                              const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                                              const std::map<std::string, ndt::type> &tp_vars);
-
-  /**
-   * Function prototype for instantiating a kernel from an
-   * callable. To use this function, the
-   * caller should first allocate a `ckernel_builder` instance,
-   * either from C++ normally or by reserving appropriately aligned/sized
-   * data and calling the C function constructor dynd provides. When the
-   * data types of the kernel require arrmeta, such as for 'strided'
-   * or 'var' dimension types, the arrmeta must be provided as well.
-   *
-   * \param self  The callable.
-   * \param self_tp  The function prototype of the callable.
-   * \param ckb  A ckernel_builder instance where the kernel is placed.
-   * \param ckb_offset  The offset into the output ckernel_builder `ckb`
-   *                    where the kernel should be placed.
-   * \param dst_tp  The destination type of the ckernel to generate. This may be
-   *                different from the one in the function prototype, but must
-   *                match its pattern.
-   * \param dst_arrmeta  The destination arrmeta.
-   * \param nsrc  The number of source arrays.
-   * \param src_tp  An array of the source types of the ckernel to generate. These
-   *                may be different from the ones in the function prototype, but
-   *                must match the patterns.
-   * \param src_arrmeta  An array of dynd arrmeta pointers,
-   *                     corresponding to the source types.
-   * \param kernreq  What kind of C function prototype the resulting ckernel
-   *                 should follow. Defined by the enum with kernel_request_*
-   *                 values.
-   * \param kwds  A struct array of named auxiliary arguments.
-   */
-  typedef void (*callable_instantiate_t)(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                                         const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                                         const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                                         const array *kwds, const std::map<std::string, ndt::type> &tp_vars);
-
-  /**
-   * A function which deallocates the memory behind data_ptr after
-   * freeing any additional resources it might contain.
-   */
-  typedef void (*callable_static_data_free_t)(char *static_data);
-
   enum callable_property {
     none = 0x00000000,
     left_associative = 0x00000001,
@@ -94,15 +26,6 @@ namespace nd {
   {
     return static_cast<callable_property>(static_cast<int>(a) | static_cast<int>(b));
   }
-
-  struct single_t {
-    volatile kernel_single_t func;
-    const char *ir;
-
-    single_t() = default;
-
-    single_t(volatile kernel_single_t func, const volatile char *ir) : func(func), ir(const_cast<const char *>(ir)) {}
-  };
 
   /**
    * This is a struct designed for interoperability at
@@ -118,24 +41,9 @@ namespace nd {
   struct DYND_API base_callable {
     std::atomic_long use_count;
     ndt::type tp;
-    kernel_targets_t targets;
-    const char *ir;
-    callable_data_init_t m_data_init;
-    callable_resolve_dst_type_t m_resolve_dst_type;
-    callable_instantiate_t m_instantiate;
 
+  public:
     base_callable(const ndt::type &tp) : use_count(0), tp(tp) {}
-
-    base_callable(const ndt::type &tp, kernel_targets_t targets)
-        : use_count(0), tp(tp), targets(targets), m_instantiate(&kernel_prefix::instantiate)
-    {
-      new (static_data()) kernel_targets_t(targets);
-    }
-
-    base_callable(const ndt::type &tp, kernel_targets_t targets, callable_instantiate_t instantiate)
-        : use_count(0), tp(tp), targets(targets), m_instantiate(instantiate)
-    {
-    }
 
     // non-copyable
     base_callable(const base_callable &) = delete;
@@ -148,6 +56,16 @@ namespace nd {
 
     virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
 
+    /**
+     * Resolves any missing keyword arguments for this callable based on
+     * the types of the positional arguments and the available keywords arguments.
+     *
+     * \param self    The callable.
+     * \param self_tp The function prototype of the callable.
+     * \param nsrc    The number of positional arguments.
+     * \param src_tp  An array of the source types.
+     * \param kwds    An array of the.
+     */
     virtual char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp),
                             intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                             intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
@@ -156,6 +74,16 @@ namespace nd {
       return NULL;
     }
 
+    /**
+     * Resolves the destination type for this callable based on the types
+     * of the source parameters.
+     *
+     * \param self  The callable.
+     * \param af_tp  The function prototype of the callable.
+     * \param dst_tp  To be filled with the destination type.
+     * \param nsrc  The number of source parameters.
+     * \param src_tp  An array of the source types.
+     */
     virtual void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                                   intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
@@ -164,14 +92,39 @@ namespace nd {
       dst_tp = ndt::substitute(dst_tp, tp_vars, true);
     }
 
+    /**
+     * Function prototype for instantiating a kernel from an
+     * callable. To use this function, the
+     * caller should first allocate a `ckernel_builder` instance,
+     * either from C++ normally or by reserving appropriately aligned/sized
+     * data and calling the C function constructor dynd provides. When the
+     * data types of the kernel require arrmeta, such as for 'strided'
+     * or 'var' dimension types, the arrmeta must be provided as well.
+     *
+     * \param self  The callable.
+     * \param self_tp  The function prototype of the callable.
+     * \param ckb  A ckernel_builder instance where the kernel is placed.
+     * \param ckb_offset  The offset into the output ckernel_builder `ckb`
+     *                    where the kernel should be placed.
+     * \param dst_tp  The destination type of the ckernel to generate. This may be
+     *                different from the one in the function prototype, but must
+     *                match its pattern.
+     * \param dst_arrmeta  The destination arrmeta.
+     * \param nsrc  The number of source arrays.
+     * \param src_tp  An array of the source types of the ckernel to generate. These
+     *                may be different from the ones in the function prototype, but
+     *                must match the patterns.
+     * \param src_arrmeta  An array of dynd arrmeta pointers,
+     *                     corresponding to the source types.
+     * \param kernreq  What kind of C function prototype the resulting ckernel
+     *                 should follow. Defined by the enum with kernel_request_*
+     *                 values.
+     * \param kwds  A struct array of named auxiliary arguments.
+     */
     virtual void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
-                             const std::map<std::string, ndt::type> &tp_vars)
-    {
-      m_instantiate(static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
-                    tp_vars);
-    }
+                             const std::map<std::string, ndt::type> &tp_vars) = 0;
 
     virtual void overload(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
                           const ndt::type *DYND_UNUSED(arg_tp), const callable &DYND_UNUSED(value))
