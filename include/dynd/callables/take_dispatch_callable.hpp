@@ -13,7 +13,7 @@ namespace nd {
 
   class masked_take_callable : public base_callable {
   public:
-    masked_take_callable() {}
+    masked_take_callable() : base_callable(ndt::type("(Any) -> Any")) {}
 
     void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
@@ -76,7 +76,7 @@ namespace nd {
 
   class indexed_take_callable : public base_callable {
   public:
-    indexed_take_callable() {}
+    indexed_take_callable() : base_callable(ndt::type("(Any) -> Any")) {}
 
     void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
