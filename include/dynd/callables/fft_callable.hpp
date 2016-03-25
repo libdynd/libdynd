@@ -121,10 +121,10 @@ namespace nd {
       nd::array src = nd::empty(src_tp[0]);
       nd::array dst = nd::empty(dst_tp);
 
-      ckb->emplace_back<fftw_ck>(kernreq, detail::fftw_plan_guru_dft(rank, dims.get(), howmany_rank, howmany_dims.get(),
-                                                                     reinterpret_cast<fftw_src_type *>(src.data()),
-                                                                     reinterpret_cast<fftw_dst_type *>(dst.data()),
-                                                                     sign, flags));
+      ckb->emplace_back<fftw_ck<fftw_dst_type, fftw_src_type, sign>>(
+          kernreq, detail::fftw_plan_guru_dft(rank, dims.get(), howmany_rank, howmany_dims.get(),
+                                              reinterpret_cast<fftw_src_type *>(src.data()),
+                                              reinterpret_cast<fftw_dst_type *>(dst.data()), sign, flags));
     }
   };
 
