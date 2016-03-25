@@ -20,9 +20,6 @@
 
 namespace dynd {
 namespace nd {
-  template <typename CallableType, typename... ArgTypes>
-  callable make_callable(ArgTypes &&... args);
-
   namespace detail {
 
     /**
@@ -165,27 +162,6 @@ namespace nd {
       return call(args.size(), args.begin(), kwds.size(), kwds.begin());
     }
 
-    template <typename KernelType>
-    static typename std::enable_if<ndt::has_traits<KernelType>::value, callable>::type make()
-    {
-      return callable(ndt::traits<KernelType>::equivalent(), detail::get_targets<KernelType>(),
-                      detail::get_ir<KernelType>(), &KernelType::data_init, &KernelType::resolve_dst_type,
-                      &KernelType::instantiate);
-    }
-
-    template <typename CallableType>
-    static std::enable_if_t<std::is_base_of<base_callable, CallableType>::value, callable> make()
-    {
-      return make_callable<CallableType>();
-    }
-
-    template <typename KernelType>
-    static typename std::enable_if<!ndt::has_traits<KernelType>::value, callable>::type make(const ndt::type &tp)
-    {
-      return callable(tp, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(), &KernelType::data_init,
-                      &KernelType::resolve_dst_type, &KernelType::instantiate);
-    }
-
     template <template <type_id_t> class KernelType, typename I0, typename... A>
     static dispatcher<callable> new_make_all(A &&... a)
     {
@@ -230,26 +206,6 @@ namespace nd {
   callable make_callable(ArgTypes &&... args)
   {
     return callable(new CallableType(std::forward<ArgTypes>(args)...), true);
-  }
-
-  template <typename CallableType, typename KernelType, typename... ArgTypes>
-  std::enable_if_t<ndt::has_traits<KernelType>::value, callable> make_callable(ArgTypes &&... args)
-  {
-    return callable(new CallableType(ndt::traits<KernelType>::equivalent(), detail::get_targets<KernelType>(),
-                                     detail::get_ir<KernelType>(), &KernelType::alloc, &KernelType::data_init,
-                                     &KernelType::resolve_dst_type, &KernelType::instantiate,
-                                     std::forward<ArgTypes>(args)...),
-                    true);
-  }
-
-  template <typename CallableType, typename KernelType, typename... ArgTypes>
-  std::enable_if_t<!ndt::has_traits<KernelType>::value, callable> make_callable(const ndt::type &tp,
-                                                                                ArgTypes &&... args)
-  {
-    return callable(new CallableType(tp, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
-                                     &KernelType::alloc, &KernelType::data_init, &KernelType::resolve_dst_type,
-                                     &KernelType::instantiate, std::forward<ArgTypes>(args)...),
-                    true);
   }
 
   inline std::ostream &operator<<(std::ostream &o, const callable &rhs)

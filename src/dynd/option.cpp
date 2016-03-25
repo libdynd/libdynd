@@ -19,7 +19,7 @@ DYND_API nd::callable nd::assign_na::make()
                            complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id> type_ids;
 
   dispatcher<callable> dispatcher = callable::new_make_all<assign_na_callable, type_ids>();
-  dispatcher.insert({{uint32_id}, callable::make<assign_na_callable<uint32_id>>()});
+  dispatcher.insert({{uint32_id}, make_callable<assign_na_callable<uint32_id>>()});
   dynd::dispatcher<callable> dim_dispatcher;
 
   auto t = ndt::type("() -> ?Any");
