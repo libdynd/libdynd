@@ -66,12 +66,11 @@ namespace nd {
         }
       }
 
-      static void instantiate(callable &self, char *static_data, char *data, kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+      static void instantiate(callable &self, callable &child, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -169,13 +168,11 @@ namespace nd {
         }
       }
 
-      static void instantiate(callable &self, char *static_data, char *data, kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
-                              const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(callable &self, callable &child, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t nkwd,
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -285,12 +282,11 @@ namespace nd {
         }
       }
 
-      static void instantiate(callable &self, char *static_data, char *data, kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+      static void instantiate(callable &self, callable &child, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -394,13 +390,11 @@ namespace nd {
         }
       }
 
-      static void instantiate(callable &self, char *static_data, char *data, kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
-                              const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(callable &self, callable &child, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t nkwd,
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -577,12 +571,11 @@ namespace nd {
         }
       }
 
-      static void instantiate(callable &self, char *static_data, char *data, kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+      static void instantiate(callable &self, callable &child, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                               const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
                               const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -706,13 +699,11 @@ namespace nd {
         opchild(child, modified_dst, modified_dst_stride, NULL, NULL, dim_size);
       }
 
-      static void instantiate(callable &self, char *static_data, char *data, kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
-                              const std::map<std::string, ndt::type> &tp_vars)
+      static void instantiate(callable &self, callable &child, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t nkwd,
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();

@@ -50,10 +50,6 @@ namespace nd {
 
     virtual ~base_callable();
 
-    char *static_data() { return reinterpret_cast<char *>(this + 1); }
-
-    const char *static_data() const { return reinterpret_cast<const char *>(this + 1); }
-
     const ndt::type &get_type() const { return m_tp; }
 
     virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
@@ -154,15 +150,6 @@ namespace nd {
     void call(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc, const ndt::type *src_tp,
               const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd, const array *kwds,
               const std::map<std::string, ndt::type> &tp_vars);
-
-    static void *operator new(size_t size, size_t static_data_size = 0)
-    {
-      return ::operator new(size + static_data_size);
-    }
-
-    static void operator delete(void *ptr) { ::operator delete(ptr); }
-
-    static void operator delete(void *ptr, size_t DYND_UNUSED(static_data_size)) { ::operator delete(ptr); }
 
     friend void intrusive_ptr_retain(base_callable *ptr);
     friend void intrusive_ptr_release(base_callable *ptr);

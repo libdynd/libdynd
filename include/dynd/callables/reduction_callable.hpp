@@ -12,7 +12,7 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    typedef void (*callable_reduction_instantiate_t)(callable &self, char *static_data, char *data, kernel_builder *ckb,
+    typedef void (*callable_reduction_instantiate_t)(callable &self, callable &child, char *data, kernel_builder *ckb,
                                                      const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                                      const ndt::type *src_tp, const char *const *src_arrmeta,
                                                      kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
@@ -141,7 +141,7 @@ namespace nd {
         callable f = callable(this, true);
         table[src_tp[0].get_id() - fixed_dim_id][reinterpret_cast<data_type *>(data)
                                                      ->is_broadcast()][reinterpret_cast<data_type *>(data)->is_inner()](
-            f, static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+            f, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
       }
     };
 
