@@ -138,9 +138,9 @@ namespace nd {
   public:
     take_dispatch_callable() : base_callable(ndt::type("(Dims... * T, N * Ix) -> R * T")) {}
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
-                          const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                          const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
       if (mask_el_tp.get_id() == bool_id) {

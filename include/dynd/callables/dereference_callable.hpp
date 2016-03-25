@@ -17,9 +17,8 @@ namespace nd {
 
     array alloc(const ndt::type *dst_tp) const { return empty_shell(*dst_tp); }
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
-                          const nd::array *DYND_UNUSED(kwds),
+    void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                          const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       dst_tp = src_tp[0].extended<ndt::pointer_type>()->get_target_type();

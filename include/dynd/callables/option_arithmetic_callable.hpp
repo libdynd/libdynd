@@ -19,13 +19,12 @@ namespace nd {
   public:
     option_arithmetic_callable() : base_callable(ndt::type("(?Scalar, Scalar) -> ?Scalar")) {}
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp, intptr_t nsrc,
-                          const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                          const std::map<std::string, ndt::type> &tp_vars)
+    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                          const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       auto k = FuncType::get().get();
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(), src_tp[1]};
-      k->resolve_dst_type(k->static_data(), data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
+      k->resolve_dst_type(data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
       dst_tp = ndt::make_type<ndt::option_type>(dst_tp);
     }
 
@@ -65,13 +64,12 @@ namespace nd {
   public:
     option_arithmetic_callable() : base_callable(ndt::type("(Scalar, ?Scalar) -> ?Scalar")) {}
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp, intptr_t nsrc,
-                          const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                          const std::map<std::string, ndt::type> &tp_vars)
+    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                          const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       auto k = FuncType::get().get();
       const ndt::type child_src_tp[2] = {src_tp[0], src_tp[1].extended<ndt::option_type>()->get_value_type()};
-      k->resolve_dst_type(k->static_data(), data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
+      k->resolve_dst_type(data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
       dst_tp = ndt::make_type<ndt::option_type>(dst_tp);
     }
 
@@ -111,14 +109,13 @@ namespace nd {
   public:
     option_arithmetic_callable() : base_callable(ndt::type("(?Scalar, ?Scalar) -> ?Scalar")) {}
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp, intptr_t nsrc,
-                          const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                          const std::map<std::string, ndt::type> &tp_vars)
+    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                          const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       auto k = FuncType::get().get();
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(),
                                          src_tp[1].extended<ndt::option_type>()->get_value_type()};
-      k->resolve_dst_type(k->static_data(), data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
+      k->resolve_dst_type(data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
       dst_tp = ndt::make_type<ndt::option_type>(dst_tp);
     }
 

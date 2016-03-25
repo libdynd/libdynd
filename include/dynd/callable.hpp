@@ -82,10 +82,10 @@ namespace nd {
         return NULL;
       }
 
-      return get()->tp.extended<ndt::callable_type>();
+      return m_ptr->get_type().extended<ndt::callable_type>();
     }
 
-    const ndt::type &get_array_type() const { return get()->tp; }
+    const ndt::type &get_array_type() const { return m_ptr->get_type(); }
 
     const ndt::type &get_ret_type() const { return get_type()->get_return_type(); }
 
@@ -181,7 +181,7 @@ namespace nd {
 
   inline std::ostream &operator<<(std::ostream &o, const callable &rhs)
   {
-    return o << "<callable <" << rhs.get()->tp << "> at " << reinterpret_cast<const void *>(rhs.get()) << ">";
+    return o << "<callable <" << rhs->get_type() << "> at " << reinterpret_cast<const void *>(rhs.get()) << ">";
   }
 
   namespace detail {

@@ -26,8 +26,8 @@ namespace nd {
 
       reduction_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
-      char *data_init(char *DYND_UNUSED(static_data), const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                      intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      char *data_init(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
+                      const std::map<std::string, ndt::type> &tp_vars)
       {
         char *data = reinterpret_cast<char *>(new data_type());
 
@@ -62,20 +62,18 @@ namespace nd {
 
         ndt::type child_src_tp = src_tp[0].get_type_at_dimension(NULL, reinterpret_cast<data_type *>(data)->naxis);
         reinterpret_cast<data_type *>(data)->child_data =
-            m_child->data_init(m_child->static_data(), child_dst_tp, nsrc, &child_src_tp, nkwd - 3, kwds, tp_vars);
+            m_child->data_init(child_dst_tp, nsrc, &child_src_tp, nkwd - 3, kwds, tp_vars);
 
         return data;
       }
 
-      void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp, intptr_t nsrc,
-                            const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                            const std::map<std::string, ndt::type> &tp_vars)
+      void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                            const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         ndt::type child_dst_tp = m_child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
           ndt::type child_src_tp = src_tp[0].get_type_at_dimension(NULL, reinterpret_cast<data_type *>(data)->naxis);
-          m_child.get()->resolve_dst_type(m_child.get()->static_data(), NULL, child_dst_tp, nsrc, &child_src_tp, nkwd,
-                                          kwds, tp_vars);
+          m_child.get()->resolve_dst_type(NULL, child_dst_tp, nsrc, &child_src_tp, nkwd, kwds, tp_vars);
         }
 
         // check that the child_dst_tp and the child_src_tp are the same here

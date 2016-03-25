@@ -14,19 +14,18 @@ namespace nd {
   public:
     base_dispatch_callable(const ndt::type &tp) : base_callable(tp) {}
 
-    char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-                    const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    char *data_init(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
+                    const std::map<std::string, ndt::type> &tp_vars)
     {
       const callable &child = specialize(dst_tp, nsrc, src_tp);
 
       const ndt::type &child_dst_tp = child.get_type()->get_return_type();
 
-      return child->data_init(static_data, child_dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+      return child->data_init(child_dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp, intptr_t nsrc,
-                          const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                          const std::map<std::string, ndt::type> &tp_vars)
+    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                          const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       const callable &child = specialize(dst_tp, nsrc, src_tp);
       if (child.is_null()) {
@@ -35,7 +34,7 @@ namespace nd {
 
       const ndt::type &child_dst_tp = child.get_type()->get_return_type();
       if (child_dst_tp.is_symbolic()) {
-        child->resolve_dst_type(child->static_data(), data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+        child->resolve_dst_type(data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
       }
       else {
         dst_tp = child_dst_tp;

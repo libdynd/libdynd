@@ -25,9 +25,9 @@ namespace nd {
 
     template <bool real_to_complex>
     typename std::enable_if<real_to_complex, void>::type
-    resolve_dst_type_(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                      intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
-                      const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    resolve_dst_type_(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                      intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds[0];
 
@@ -40,9 +40,9 @@ namespace nd {
 
     template <bool real_to_complex>
     typename std::enable_if<!real_to_complex, void>::type
-    resolve_dst_type_(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                      intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
-                      const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    resolve_dst_type_(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                      intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds[0];
       if (shape.is_na()) {
@@ -57,11 +57,10 @@ namespace nd {
       }
     }
 
-    void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                          intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                          const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
-      resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(static_data, data, dst_tp, nsrc, src_tp, nkwd, kwds,
-                                                                    tp_vars);
+      resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
     void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,

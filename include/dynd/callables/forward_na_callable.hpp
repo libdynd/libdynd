@@ -21,9 +21,8 @@ namespace nd {
   public:
     forward_na_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp, intptr_t nsrc,
-                          const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                          const std::map<std::string, ndt::type> &tp_vars)
+    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                          const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       ndt::type child_src_tp[2];
       child_src_tp[I] = src_tp[I].extended<ndt::option_type>()->get_value_type();
@@ -31,7 +30,7 @@ namespace nd {
 
       const ndt::type &child_dst_tp = m_child.get_ret_type();
       if (child_dst_tp.is_symbolic()) {
-        m_child->resolve_dst_type(m_child->static_data(), data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
+        m_child->resolve_dst_type(data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
       }
       else {
         dst_tp = child_dst_tp;

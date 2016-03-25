@@ -38,12 +38,12 @@ namespace nd {
    * operation and a strided operation, or constructing
    * with different array arrmeta.
    */
-  struct DYND_API base_callable {
-    std::atomic_long use_count;
-    ndt::type tp;
+  class DYND_API base_callable {
+    std::atomic_long m_use_count;
+    ndt::type m_tp;
 
   public:
-    base_callable(const ndt::type &tp) : use_count(0), tp(tp) {}
+    base_callable(const ndt::type &tp) : m_use_count(0), m_tp(tp) {}
 
     // non-copyable
     base_callable(const base_callable &) = delete;
@@ -53,6 +53,8 @@ namespace nd {
     char *static_data() { return reinterpret_cast<char *>(this + 1); }
 
     const char *static_data() const { return reinterpret_cast<const char *>(this + 1); }
+
+    const ndt::type &get_type() const { return m_tp; }
 
     virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
 
@@ -66,9 +68,9 @@ namespace nd {
      * \param src_tp  An array of the source types.
      * \param kwds    An array of the.
      */
-    virtual char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp),
-                            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                            intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+    virtual char *data_init(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                            const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+                            const array *DYND_UNUSED(kwds),
                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       return NULL;
@@ -84,10 +86,9 @@ namespace nd {
      * \param nsrc  The number of source parameters.
      * \param src_tp  An array of the source types.
      */
-    virtual void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                  intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                                  const std::map<std::string, ndt::type> &tp_vars)
+    virtual void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+                                  const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars)
     {
       dst_tp = ndt::substitute(dst_tp, tp_vars, true);
     }
@@ -162,18 +163,22 @@ namespace nd {
     static void operator delete(void *ptr) { ::operator delete(ptr); }
 
     static void operator delete(void *ptr, size_t DYND_UNUSED(static_data_size)) { ::operator delete(ptr); }
+
+    friend void intrusive_ptr_retain(base_callable *ptr);
+    friend void intrusive_ptr_release(base_callable *ptr);
+    friend long intrusive_ptr_use_count(base_callable *ptr);
   };
 
-  inline void intrusive_ptr_retain(base_callable *ptr) { ++ptr->use_count; }
+  inline void intrusive_ptr_retain(base_callable *ptr) { ++ptr->m_use_count; }
 
   inline void intrusive_ptr_release(base_callable *ptr)
   {
-    if (--ptr->use_count == 0) {
+    if (--ptr->m_use_count == 0) {
       delete ptr;
     }
   }
 
-  inline long intrusive_ptr_use_count(base_callable *ptr) { return ptr->use_count; }
+  inline long intrusive_ptr_use_count(base_callable *ptr) { return ptr->m_use_count; }
 
 } // namespace dynd::nd
 } // namespace dynd

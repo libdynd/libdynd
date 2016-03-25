@@ -30,15 +30,15 @@ namespace nd {
 
     index_callable() : base_callable(ndt::type("(Any, i: Any) -> Any")) {}
 
-    char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+    char *data_init(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
                     const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd), const array *kwds,
                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       return reinterpret_cast<char *>(new data_type(kwds[0]));
     }
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                          const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const array *kwds,
+    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                          intptr_t DYND_UNUSED(nkwd), const array *kwds,
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       dst_tp = src_tp[0];
@@ -75,22 +75,20 @@ namespace nd {
 
     index_callable() : base_callable(ndt::type("(Any, i: Any) -> Any")) {}
 
-    char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+    char *data_init(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
                     const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd), const array *kwds,
                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       return reinterpret_cast<char *>(new data_type(kwds[0]));
     }
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp, intptr_t nsrc,
-                          const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                          const std::map<std::string, ndt::type> &tp_vars)
+    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                          const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       reinterpret_cast<data_type *>(data)->next();
 
       ndt::type child_src_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
-      index::get()->resolve_dst_type(index::get()->static_data(), data, dst_tp, nsrc, &child_src_tp, nkwd, kwds,
-                                     tp_vars);
+      index::get()->resolve_dst_type(data, dst_tp, nsrc, &child_src_tp, nkwd, kwds, tp_vars);
     }
 
     void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, const ndt::type &dst_tp,

@@ -17,11 +17,11 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
                                   const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   // Allocate, then initialize, the data
-  char *data = data_init(static_data(), dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+  char *data = data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Resolve the destination type
   if (dst_tp.is_symbolic()) {
-    resolve_dst_type(static_data(), data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+    resolve_dst_type(data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
   }
 
   // Allocate the destination array
@@ -42,11 +42,11 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
                                   const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   // Allocate, then initialize, the data
-  char *data = data_init(static_data(), dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+  char *data = data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Resolve the destination type
   if (dst_tp.is_symbolic()) {
-    resolve_dst_type(static_data(), data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+    resolve_dst_type(data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
   }
 
   // Allocate the destination array
@@ -66,7 +66,7 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, c
                              const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data,
                              intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
-  char *data = data_init(static_data(), dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+  char *data = data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
@@ -80,7 +80,7 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, a
                              const ndt::type *src_tp, const char *const *src_arrmeta, const array *src, intptr_t nkwd,
                              const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
-  char *data = data_init(static_data(), dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+  char *data = data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;

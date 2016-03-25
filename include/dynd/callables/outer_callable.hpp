@@ -20,14 +20,13 @@ namespace nd {
     public:
       outer_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
-      void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
-                            const ndt::type *src_tp, intptr_t nkwd, const dynd::nd::array *kwds,
-                            const std::map<std::string, ndt::type> &tp_vars)
+      void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                            intptr_t nkwd, const dynd::nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         const ndt::callable_type *child_tp = m_child.get_type();
 
         if (child_tp->get_return_type().is_symbolic()) {
-          m_child->resolve_dst_type(m_child->static_data(), NULL, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          m_child->resolve_dst_type(NULL, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         }
         else {
           dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);

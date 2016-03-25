@@ -22,25 +22,22 @@ namespace nd {
 
     mean_callable(const ndt::type &tp) : base_callable(nd::sum::get().get_array_type()), m_tp(tp) {}
 
-    char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+    char *data_init(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
                     const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       char *data = reinterpret_cast<char *>(new data_type());
-      reinterpret_cast<data_type *>(data)->sum_data = nd::sum::get().get()->data_init(
-          nd::sum::get().get()->static_data(), dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+      reinterpret_cast<data_type *>(data)->sum_data =
+          nd::sum::get().get()->data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
       reinterpret_cast<data_type *>(data)->compound_div_data =
-          nd::compound_div::get().get()->data_init(nd::compound_div::get().get()->static_data(), dst_tp, 1,
-                                                   reinterpret_cast<ndt::type *>(static_data), 0, NULL, tp_vars);
+          nd::compound_div::get().get()->data_init(dst_tp, 1, &m_tp, 0, NULL, tp_vars);
 
       return data;
     }
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp, intptr_t nsrc,
-                          const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                          const std::map<std::string, ndt::type> &tp_vars)
+    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                          const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
-      nd::sum::get().get()->resolve_dst_type(nd::sum::get().get()->static_data(),
-                                             reinterpret_cast<data_type *>(data)->sum_data, dst_tp, nsrc, src_tp, nkwd,
+      nd::sum::get().get()->resolve_dst_type(reinterpret_cast<data_type *>(data)->sum_data, dst_tp, nsrc, src_tp, nkwd,
                                              kwds, tp_vars);
     }
 
