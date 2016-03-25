@@ -97,36 +97,7 @@ namespace nd {
 
     template <type_id_t DstID, type_id_t DstBaseID, type_id_t Src0ID, type_id_t Src0BaseID,
               assign_error_mode... ErrorMode>
-    struct assignment_virtual_kernel : base_kernel<assignment_virtual_kernel<DstID, DstBaseID, Src0ID, Src0BaseID>> {
-      static void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-      {
-        assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
-        switch (error_mode) {
-        case assign_error_default:
-        case assign_error_nocheck:
-          assignment_kernel<DstID, DstBaseID, Src0ID, Src0BaseID, assign_error_nocheck>::instantiate(
-              static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-          break;
-        case assign_error_overflow:
-          assignment_kernel<DstID, DstBaseID, Src0ID, Src0BaseID, assign_error_overflow>::instantiate(
-              static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-          break;
-        case assign_error_fractional:
-          assignment_kernel<DstID, DstBaseID, Src0ID, Src0BaseID, assign_error_fractional>::instantiate(
-              static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-          break;
-        case assign_error_inexact:
-          assignment_kernel<DstID, DstBaseID, Src0ID, Src0BaseID, assign_error_inexact>::instantiate(
-              static_data, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
-          break;
-        default:
-          throw std::runtime_error("error");
-        }
-      }
-    };
+    struct assignment_virtual_kernel;
 
     template <type_id_t DstTypeID, type_id_t DstBaseID, type_id_t Src0TypeID, type_id_t Src0BaseID,
               assign_error_mode ErrorMode>
@@ -1199,15 +1170,6 @@ namespace nd {
         std::stringstream ss;
         ndt::type(src_id).print_data(ss, NULL, src[0]);
         dst_string_tp->set_from_utf8_string(dst_arrmeta, dst, ss.str(), &eval::default_eval_context);
-      }
-
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                              const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        ckb->emplace_back<assignment_kernel>(kernreq, dst_tp, src_tp[0].get_id(), dst_arrmeta);
       }
     };
 

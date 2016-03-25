@@ -45,18 +45,21 @@ DYND_API nd::callable nd::assign::make()
                      {{adapt_id, adapt_id}, make_callable<adapt_assign_from_callable>()}});
   dispatcher.insert({{fixed_string_id, char_id}, make_callable<assign_callable<fixed_string_id, fixed_string_id>>()});
   dispatcher.insert({{string_id, char_id}, make_callable<assign_callable<string_id, char_id>>()});
-  dispatcher.insert({{type_id, type_id}, callable::make<assignment_kernel<type_id, type_id>>()});
-  dispatcher.insert({{string_id, int32_id}, make_callable<assign_callable<string_id, int_kind_id>>()});
+  dispatcher.insert({{type_id, type_id}, make_callable<assign_callable<type_id, type_id>>()});
+  dispatcher.insert({{string_id, int32_id}, make_callable<string_to_int_assign_callable<int32_id>>()});
   dispatcher.insert(
       {{fixed_string_id, fixed_string_id}, make_callable<assign_callable<fixed_string_id, fixed_string_id>>()});
   dispatcher.insert({{fixed_string_id, string_id}, make_callable<assign_callable<fixed_string_id, string_id>>()});
-  dispatcher.insert({{fixed_string_id, uint8_id}, callable::make<assignment_kernel<fixed_string_id, uint8_id>>()});
-  dispatcher.insert({{fixed_string_id, uint16_id}, callable::make<assignment_kernel<fixed_string_id, uint16_id>>()});
-  dispatcher.insert({{fixed_string_id, uint32_id}, callable::make<assignment_kernel<fixed_string_id, uint32_id>>()});
-  dispatcher.insert({{fixed_string_id, uint64_id}, callable::make<assignment_kernel<fixed_string_id, uint64_id>>()});
-  dispatcher.insert({{fixed_string_id, uint128_id}, callable::make<assignment_kernel<fixed_string_id, uint128_id>>()});
+  //  dispatcher.insert({{fixed_string_id, uint8_id}, callable::make<assignment_kernel<fixed_string_id, uint8_id>>()});
+  //  dispatcher.insert({{fixed_string_id, uint16_id}, callable::make<assignment_kernel<fixed_string_id,
+  //  uint16_id>>()});
+  // dispatcher.insert({{fixed_string_id, uint32_id}, callable::make<assignment_kernel<fixed_string_id, uint32_id>>()});
+  //  dispatcher.insert({{fixed_string_id, uint64_id}, callable::make<assignment_kernel<fixed_string_id,
+  //  uint64_id>>()});
+  // dispatcher.insert({{fixed_string_id, uint128_id}, callable::make<assignment_kernel<fixed_string_id,
+  // uint128_id>>()});
   dispatcher.insert({{int32_id, fixed_string_id}, make_callable<int_to_string_assign_callable<int32_id>>()});
-  dispatcher.insert({{string_id, string_id}, callable::make<assignment_kernel<string_id, string_id>>()});
+  dispatcher.insert({{string_id, string_id}, make_callable<assign_callable<string_id, string_id>>()});
   dispatcher.insert({{string_id, fixed_string_id}, make_callable<assign_callable<string_id, fixed_string_id>>()});
   dispatcher.insert({{bool_id, string_id}, make_callable<assign_callable<bool_id, string_id>>()});
   dispatcher.insert({{{scalar_kind_id, option_id}, make_callable<option_to_value_callable>()},
@@ -71,10 +74,10 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert({{int16_id, string_id}, make_callable<int_to_string_assign_callable<int16_id>>()});
   dispatcher.insert({{int32_id, string_id}, make_callable<int_to_string_assign_callable<int32_id>>()});
   dispatcher.insert({{int64_id, string_id}, make_callable<int_to_string_assign_callable<int64_id>>()});
-  dispatcher.insert({{uint8_id, string_id}, callable::make<assignment_kernel<uint8_id, string_id>>()});
-  dispatcher.insert({{uint16_id, string_id}, callable::make<assignment_kernel<uint16_id, string_id>>()});
-  dispatcher.insert({{uint32_id, string_id}, callable::make<assignment_kernel<uint32_id, string_id>>()});
-  dispatcher.insert({{uint64_id, string_id}, callable::make<assignment_kernel<uint64_id, string_id>>()});
+  //  dispatcher.insert({{uint8_id, string_id}, callable::make<assignment_kernel<uint8_id, string_id>>()});
+  //  dispatcher.insert({{uint16_id, string_id}, callable::make<assignment_kernel<uint16_id, string_id>>()});
+  // dispatcher.insert({{uint32_id, string_id}, callable::make<assignment_kernel<uint32_id, string_id>>()});
+  // dispatcher.insert({{uint64_id, string_id}, callable::make<assignment_kernel<uint64_id, string_id>>()});
   dispatcher.insert({{float32_id, string_id}, make_callable<assign_callable<float32_id, string_id>>()});
   dispatcher.insert({{float64_id, string_id}, make_callable<assign_callable<float64_id, string_id>>()});
   dispatcher.insert({{tuple_id, tuple_id}, make_callable<assign_callable<tuple_id, tuple_id>>()});

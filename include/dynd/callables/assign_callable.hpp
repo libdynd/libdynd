@@ -21,35 +21,30 @@ namespace nd {
     {
     }
 
-    void instantiate(char *static_data, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                     kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars)
+    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                     intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
+                     const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
       switch (error_mode) {
       case assign_error_default:
       case assign_error_nocheck:
-        detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
-                                  assign_error_nocheck>::instantiate(static_data, data, ckb, dst_tp, dst_arrmeta, nsrc,
-                                                                     src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        ckb->emplace_back<detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
+                                                    assign_error_nocheck>>(kernreq);
         break;
       case assign_error_overflow:
-        detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
-                                  assign_error_overflow>::instantiate(static_data, data, ckb, dst_tp, dst_arrmeta, nsrc,
-                                                                      src_tp, src_arrmeta, kernreq, nkwd, kwds,
-                                                                      tp_vars);
+        ckb->emplace_back<detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
+                                                    assign_error_overflow>>(kernreq);
         break;
       case assign_error_fractional:
-        detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
-                                  assign_error_fractional>::instantiate(static_data, data, ckb, dst_tp, dst_arrmeta,
-                                                                        nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
-                                                                        tp_vars);
+        ckb->emplace_back<detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
+                                                    assign_error_fractional>>(kernreq);
         break;
       case assign_error_inexact:
-        detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
-                                  assign_error_inexact>::instantiate(static_data, data, ckb, dst_tp, dst_arrmeta, nsrc,
-                                                                     src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        ckb->emplace_back<detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
+                                                    assign_error_inexact>>(kernreq);
         break;
       default:
         throw std::runtime_error("error");
@@ -142,6 +137,27 @@ namespace nd {
       assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
       ckb->emplace_back<detail::assignment_kernel<IntID, int_kind_id, string_id, string_kind_id, assign_error_default>>(
           kernreq, src_tp[0], src_arrmeta[0], error_mode);
+    }
+  };
+
+  template <type_id_t IntID>
+  class string_to_int_assign_callable : public base_callable {
+  public:
+    string_to_int_assign_callable()
+        : base_callable(
+              ndt::callable_type::make(ndt::type(string_id), {ndt::type(IntID)}, {"error_mode"},
+                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())}))
+    {
+    }
+
+    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      ckb->emplace_back<detail::assignment_kernel<IntID, int_kind_id, string_id, string_kind_id, assign_error_default>>(
+          kernreq, src_tp[0], src_arrmeta[0]);
     }
   };
 
