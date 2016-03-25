@@ -48,19 +48,6 @@ namespace nd {
     DYND_API void check_arg(const ndt::callable_type *af_tp, intptr_t i, const ndt::type &actual_tp,
                             const char *actual_arrmeta, std::map<std::string, ndt::type> &tp_vars);
 
-    template <typename KernelType>
-    kernel_targets_t get_targets()
-    {
-      return kernel_targets_t{reinterpret_cast<void *>(KernelType::single_wrapper), NULL,
-                              reinterpret_cast<void *>(NULL)};
-    }
-
-    template <typename KernelType>
-    const volatile char *get_ir()
-    {
-      return KernelType::ir;
-    }
-
     template <template <type_id_t...> class KernelType>
     struct make_all;
 
@@ -81,14 +68,6 @@ namespace nd {
     using intrusive_ptr<base_callable>::intrusive_ptr;
 
     callable() = default;
-
-    callable(const ndt::type &self_tp, kernel_single_t single, kernel_strided_t strided)
-        : intrusive_ptr<base_callable>(
-              new (sizeof(kernel_targets_t)) base_callable(
-                  self_tp, kernel_targets_t{reinterpret_cast<void *>(single), NULL, reinterpret_cast<void *>(strided)}),
-              true)
-    {
-    }
 
     template <typename CallableType, typename... T, typename = std::enable_if_t<all_char_string_params<T...>::value>>
     explicit callable(CallableType f, T &&... names);
