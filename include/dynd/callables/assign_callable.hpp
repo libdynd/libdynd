@@ -58,6 +58,51 @@ namespace nd {
   };
 
   template <>
+  class assign_callable<bool_id, string_id> : public base_callable {
+  public:
+    assign_callable()
+        : base_callable(
+              ndt::callable_type::make(ndt::type(bool_id), {ndt::type(string_id)}, {"error_mode"},
+                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())}))
+    {
+    }
+
+    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
+      switch (error_mode) {
+      case assign_error_default:
+      case assign_error_nocheck:
+        ckb->emplace_back<
+            detail::assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
+            kernreq, src_tp[0], src_arrmeta[0]);
+        break;
+      case assign_error_overflow:
+        ckb->emplace_back<
+            detail::assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_overflow>>(
+            kernreq, src_tp[0], src_arrmeta[0]);
+        break;
+      case assign_error_fractional:
+        ckb->emplace_back<
+            detail::assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_fractional>>(
+            kernreq, src_tp[0], src_arrmeta[0]);
+        break;
+      case assign_error_inexact:
+        ckb->emplace_back<
+            detail::assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_inexact>>(
+            kernreq, src_tp[0], src_arrmeta[0]);
+        break;
+      default:
+        throw std::runtime_error("error");
+      }
+    }
+  };
+
+  template <>
   class assign_callable<fixed_bytes_id, fixed_bytes_id> : public base_callable {
   public:
     assign_callable()
@@ -655,6 +700,24 @@ namespace nd {
       const ndt::type &value_tp = dst_tp.value_type();
       inverse->instantiate(inverse->static_data(), data, ckb, dst_tp.storage_type(), dst_arrmeta, nsrc, &value_tp,
                            src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+    }
+  };
+
+  class assignment_option_callable : public base_callable {
+  public:
+    assignment_option_callable() : base_callable(ndt::type("(Any) -> ?Any")) {}
+
+    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                     const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    {
+      ndt::type val_dst_tp =
+          dst_tp.get_id() == option_id ? dst_tp.extended<ndt::option_type>()->get_value_type() : dst_tp;
+      ndt::type val_src_tp =
+          src_tp[0].get_id() == option_id ? src_tp[0].extended<ndt::option_type>()->get_value_type() : src_tp[0];
+      assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, val_dst_tp, dst_arrmeta, 1, &val_src_tp,
+                                 src_arrmeta, kernreq, nkwd, kwds, tp_vars);
     }
   };
 
