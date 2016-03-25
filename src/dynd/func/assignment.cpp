@@ -45,9 +45,9 @@ DYND_API nd::callable nd::assign::make()
        {{any_kind_id, adapt_id}, nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"))},
        {{adapt_id, adapt_id}, nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"))}});
   dispatcher.insert({{fixed_string_id, char_id}, make_callable<assign_callable<fixed_string_id, fixed_string_id>>()});
-  dispatcher.insert({{string_id, char_id}, callable::make<assignment_kernel<string_id, char_id>>()});
+  dispatcher.insert({{string_id, char_id}, make_callable<assign_callable<string_id, char_id>>()});
   dispatcher.insert({{type_id, type_id}, callable::make<assignment_kernel<type_id, type_id>>()});
-  dispatcher.insert({{string_id, int32_id}, callable::make<assignment_kernel<string_id, int32_id>>()});
+  dispatcher.insert({{string_id, int32_id}, make_callable<assign_callable<string_id, int_kind_id>>()});
   dispatcher.insert(
       {{fixed_string_id, fixed_string_id}, make_callable<assign_callable<fixed_string_id, fixed_string_id>>()});
   dispatcher.insert({{fixed_string_id, string_id}, make_callable<assign_callable<fixed_string_id, string_id>>()});
@@ -61,13 +61,13 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert({{string_id, fixed_string_id}, callable::make<assignment_kernel<string_id, fixed_string_id>>()});
   dispatcher.insert({{bool_id, string_id}, callable::make<assignment_kernel<bool_id, string_id>>()});
   dispatcher.insert(
-      {{{scalar_kind_id, option_id}, callable::make<option_to_value_ck>(ndt::type("(?Any) -> Any"))},
+      {{{scalar_kind_id, option_id}, make_callable<option_to_value_callable>()},
        {{option_id, option_id}, make_callable<assign_callable<option_id, option_id>>()},
        {{option_id, scalar_kind_id}, callable::make<detail::assignment_option_kernel>(ndt::type("(Any) -> ?Any"))}});
   dispatcher.insert({{option_id, string_id}, make_callable<assign_callable<option_id, string_id>>()});
   dispatcher.insert({{option_id, float64_id}, make_callable<assign_callable<option_id, float_kind_id>>()});
-  dispatcher.insert({{string_id, type_id}, callable::make<assignment_kernel<string_id, type_id>>()});
-  dispatcher.insert({{type_id, string_id}, callable::make<assignment_kernel<type_id, string_id>>()});
+  dispatcher.insert({{string_id, type_id}, make_callable<assign_callable<string_id, type_id>>()});
+  dispatcher.insert({{type_id, string_id}, make_callable<assign_callable<type_id, string_id>>()});
   dispatcher.insert({{pointer_id, pointer_id}, make_callable<assign_callable<pointer_id, pointer_id>>()});
   dispatcher.insert({{int8_id, string_id}, callable::make<assignment_kernel<int8_id, string_id>>()});
   dispatcher.insert({{int16_id, string_id}, callable::make<assignment_kernel<int16_id, string_id>>()});

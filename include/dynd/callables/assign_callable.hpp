@@ -156,6 +156,99 @@ namespace nd {
   };
 
   template <>
+  class assign_callable<string_id, int_kind_id> : public base_callable {
+  public:
+    assign_callable()
+        : base_callable(
+              ndt::callable_type::make(ndt::type(string_id), {ndt::type(int_kind_id)}, {"error_mode"},
+                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())}))
+    {
+    }
+
+    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                     intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      ckb->emplace_back<
+          detail::assignment_kernel<string_id, string_kind_id, int8_id, int_kind_id, assign_error_nocheck>>(
+          kernreq, dst_tp, src_tp[0].get_id(), dst_arrmeta);
+    }
+  };
+
+  template <>
+  class assign_callable<string_id, char_id> : public base_callable {
+  public:
+    assign_callable()
+        : base_callable(
+              ndt::callable_type::make(ndt::type(string_id), {ndt::type(char_id)}, {"error_mode"},
+                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())}))
+    {
+    }
+
+    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                     intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
+
+      ckb->emplace_back<
+          detail::assignment_kernel<string_id, string_kind_id, fixed_string_id, string_kind_id, assign_error_nocheck>>(
+          kernreq, dst_tp.extended<ndt::base_string_type>()->get_encoding(),
+          src_tp[0].extended<ndt::char_type>()->get_encoding(), src_tp[0].get_data_size(),
+          get_next_unicode_codepoint_function(src_tp[0].extended<ndt::char_type>()->get_encoding(), error_mode),
+          get_append_unicode_codepoint_function(dst_tp.extended<ndt::base_string_type>()->get_encoding(), error_mode));
+    }
+  };
+
+  template <>
+  class assign_callable<type_id, string_id> : public base_callable {
+  public:
+    assign_callable()
+        : base_callable(
+              ndt::callable_type::make(ndt::type(type_id), {ndt::type(string_id)}, {"error_mode"},
+                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())}))
+    {
+    }
+
+    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      ckb->emplace_back<
+          detail::assignment_kernel<type_id, scalar_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
+          kernreq, src_tp[0], src_arrmeta[0]);
+    }
+  };
+
+  template <>
+  class assign_callable<string_id, type_id> : public base_callable {
+  public:
+    assign_callable()
+        : base_callable(
+              ndt::callable_type::make(ndt::type(string_id), {ndt::type(type_id)}, {"error_mode"},
+                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())}))
+    {
+    }
+
+    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                     const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      ckb->emplace_back<
+          detail::assignment_kernel<string_id, string_kind_id, type_id, scalar_kind_id, assign_error_nocheck>>(
+          kernreq, dst_tp, dst_arrmeta);
+    }
+  };
+
+  template <>
   class assign_callable<char_id, string_id> : public base_callable {
   public:
     assign_callable()
@@ -422,6 +515,39 @@ namespace nd {
       std::stringstream ss;
       ss << "Cannot assign from " << src_tp[0] << " to " << dst_tp;
       throw dynd::type_error(ss.str());
+    }
+  };
+
+  class option_to_value_callable : public base_callable {
+  public:
+    option_to_value_callable() : base_callable(ndt::type("(Any) -> Any")) {}
+
+    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
+                     const std::map<std::string, ndt::type> &tp_vars)
+    {
+      intptr_t ckb_offset = ckb->size();
+      intptr_t root_ckb_offset = ckb_offset;
+      typedef dynd::nd::option_to_value_ck self_type;
+      if (dst_tp.get_id() == option_id || src_tp[0].get_id() != option_id) {
+        std::stringstream ss;
+        ss << "option to value kernel needs value/option types, got " << dst_tp << " and " << src_tp[0];
+        throw std::invalid_argument(ss.str());
+      }
+      const ndt::type &src_val_tp = src_tp[0].extended<ndt::option_type>()->get_value_type();
+      ckb->emplace_back<self_type>(kernreq);
+      // instantiate src_is_na
+      is_na::get()->instantiate(is_na::get()->static_data(), NULL, ckb, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
+                                src_arrmeta, kernreq | kernel_request_data_only, 0, nullptr, tp_vars);
+      ckb_offset = ckb->size();
+      // instantiate value_assign
+      ckb->reserve(ckb_offset + sizeof(kernel_prefix));
+      self_type *self = ckb->get_at<self_type>(root_ckb_offset);
+      self->m_value_assign_offset = ckb_offset - root_ckb_offset;
+
+      assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, 1, &src_val_tp,
+                                 src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
     }
   };
 
