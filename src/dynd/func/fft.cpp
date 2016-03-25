@@ -59,7 +59,7 @@ DYND_API nd::callable nd::ifft::make()
 DYND_API nd::callable nd::rfft::make()
 {
 #ifdef DYND_FFTW
-  return nd::make_callable<fftw_callable<fftw_complex, double>>(0);
+  return nd::make_callable<fftw_callable<fftw_complex, double>>();
 #else
   throw std::runtime_error("no fft enabled");
 #endif
