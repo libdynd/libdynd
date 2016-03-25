@@ -40,10 +40,9 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert({{char_id, char_id}, make_callable<assign_callable<fixed_string_id, fixed_string_id>>()});
   dispatcher.insert({{char_id, fixed_string_id}, make_callable<assign_callable<fixed_string_id, fixed_string_id>>()});
   dispatcher.insert({{char_id, string_id}, make_callable<assign_callable<char_id, string_id>>()});
-  dispatcher.insert(
-      {{{adapt_id, any_kind_id}, nd::callable::make<detail::adapt_assign_to_kernel>(ndt::type("(Any) -> Any"))},
-       {{any_kind_id, adapt_id}, nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"))},
-       {{adapt_id, adapt_id}, nd::callable::make<detail::adapt_assign_from_kernel>(ndt::type("(Any) -> Any"))}});
+  dispatcher.insert({{{adapt_id, any_kind_id}, make_callable<adapt_assign_to_callable>()},
+                     {{any_kind_id, adapt_id}, make_callable<adapt_assign_from_callable>()},
+                     {{adapt_id, adapt_id}, make_callable<adapt_assign_from_callable>()}});
   dispatcher.insert({{fixed_string_id, char_id}, make_callable<assign_callable<fixed_string_id, fixed_string_id>>()});
   dispatcher.insert({{string_id, char_id}, make_callable<assign_callable<string_id, char_id>>()});
   dispatcher.insert({{type_id, type_id}, callable::make<assignment_kernel<type_id, type_id>>()});
@@ -58,7 +57,7 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert({{fixed_string_id, uint128_id}, callable::make<assignment_kernel<fixed_string_id, uint128_id>>()});
   dispatcher.insert({{int32_id, fixed_string_id}, callable::make<assignment_kernel<int32_id, fixed_string_id>>()});
   dispatcher.insert({{string_id, string_id}, callable::make<assignment_kernel<string_id, string_id>>()});
-  dispatcher.insert({{string_id, fixed_string_id}, callable::make<assignment_kernel<string_id, fixed_string_id>>()});
+  dispatcher.insert({{string_id, fixed_string_id}, make_callable<assign_callable<string_id, fixed_string_id>>()});
   dispatcher.insert({{bool_id, string_id}, callable::make<assignment_kernel<bool_id, string_id>>()});
   dispatcher.insert(
       {{{scalar_kind_id, option_id}, make_callable<option_to_value_callable>()},
@@ -77,7 +76,7 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert({{uint16_id, string_id}, callable::make<assignment_kernel<uint16_id, string_id>>()});
   dispatcher.insert({{uint32_id, string_id}, callable::make<assignment_kernel<uint32_id, string_id>>()});
   dispatcher.insert({{uint64_id, string_id}, callable::make<assignment_kernel<uint64_id, string_id>>()});
-  dispatcher.insert({{float32_id, string_id}, callable::make<assignment_kernel<float32_id, string_id>>()});
+  dispatcher.insert({{float32_id, string_id}, make_callable<assign_callable<float32_id, string_id>>()});
   dispatcher.insert({{float64_id, string_id}, make_callable<assign_callable<float64_id, string_id>>()});
   dispatcher.insert({{tuple_id, tuple_id}, make_callable<assign_callable<tuple_id, tuple_id>>()});
   dispatcher.insert({{struct_id, int32_id}, make_callable<assign_callable<struct_id, struct_id>>()});

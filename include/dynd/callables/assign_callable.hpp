@@ -227,6 +227,57 @@ namespace nd {
   };
 
   template <>
+  class assign_callable<string_id, fixed_string_id> : public base_callable {
+  public:
+    assign_callable()
+        : base_callable(
+              ndt::callable_type::make(ndt::type(string_id), {ndt::type(fixed_string_id)}, {"error_mode"},
+                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())}))
+    {
+    }
+
+    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                     intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
+
+      ckb->emplace_back<
+          detail::assignment_kernel<string_id, string_kind_id, fixed_string_id, string_kind_id, assign_error_nocheck>>(
+          kernreq, dst_tp.extended<ndt::base_string_type>()->get_encoding(),
+          src_tp[0].extended<ndt::base_string_type>()->get_encoding(), src_tp[0].get_data_size(),
+          get_next_unicode_codepoint_function(src_tp[0].extended<ndt::base_string_type>()->get_encoding(), error_mode),
+          get_append_unicode_codepoint_function(dst_tp.extended<ndt::base_string_type>()->get_encoding(), error_mode));
+    }
+  };
+
+  template <>
+  class assign_callable<float32_id, string_id> : public base_callable {
+  public:
+    assign_callable()
+        : base_callable(
+              ndt::callable_type::make(ndt::type(float32_id), {ndt::type(string_id)}, {"error_mode"},
+                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())}))
+    {
+    }
+
+    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
+
+      ckb->emplace_back<
+          detail::assignment_kernel<float32_id, float_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
+          kernreq, src_tp[0], src_arrmeta[0], error_mode);
+    }
+  };
+
+  template <>
   class assign_callable<string_id, type_id> : public base_callable {
   public:
     assign_callable()
@@ -548,6 +599,62 @@ namespace nd {
 
       assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, dst_tp, dst_arrmeta, 1, &src_val_tp,
                                  src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
+    }
+  };
+
+  class adapt_assign_from_callable : public base_callable {
+  public:
+    adapt_assign_from_callable() : base_callable(ndt::type("(Any) -> Any")) {}
+
+    void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
+                     const std::map<std::string, ndt::type> &tp_vars)
+    {
+      intptr_t ckb_offset = ckb->size();
+      const ndt::type &storage_tp = src_tp[0].storage_type();
+      if (storage_tp.is_expression()) {
+        const callable &forward = src_tp[0].extended<ndt::adapt_type>()->get_forward();
+
+        intptr_t self_offset = ckb_offset;
+        ckb->emplace_back<detail::adapt_assign_from_kernel>(kernreq, storage_tp.get_canonical_type());
+        ckb_offset = ckb->size();
+
+        nd::assign::get()->instantiate(nd::assign::get()->static_data(), data, ckb, storage_tp.get_canonical_type(),
+                                       dst_arrmeta, nsrc, &storage_tp, src_arrmeta, kernel_request_single, nkwd, kwds,
+                                       tp_vars);
+        ckb_offset = ckb->size();
+        intptr_t forward_offset = ckb_offset - self_offset;
+        ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
+        forward->instantiate(forward->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp2, src_arrmeta,
+                             kernel_request_single, nkwd, kwds, tp_vars);
+        ckb_offset = ckb->size();
+        ckb->get_at<detail::adapt_assign_from_kernel>(self_offset)->forward_offset = forward_offset;
+      }
+      else {
+        const callable &forward = src_tp[0].extended<ndt::adapt_type>()->get_forward();
+
+        ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
+        forward->instantiate(forward->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp2, src_arrmeta,
+                             kernreq, nkwd, kwds, tp_vars);
+        ckb_offset = ckb->size();
+      }
+    }
+  };
+
+  class adapt_assign_to_callable : public base_callable {
+  public:
+    adapt_assign_to_callable() : base_callable(ndt::type("(Any) -> Any")) {}
+
+    void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
+                     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
+                     const std::map<std::string, ndt::type> &tp_vars)
+    {
+      const callable &inverse = dst_tp.extended<ndt::adapt_type>()->get_inverse();
+      const ndt::type &value_tp = dst_tp.value_type();
+      inverse->instantiate(inverse->static_data(), data, ckb, dst_tp.storage_type(), dst_arrmeta, nsrc, &value_tp,
+                           src_arrmeta, kernreq, nkwd, kwds, tp_vars);
     }
   };
 
