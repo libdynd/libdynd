@@ -123,6 +123,28 @@ namespace nd {
     }
   };
 
+  template <type_id_t IntID>
+  class int_to_string_assign_callable : public base_callable {
+  public:
+    int_to_string_assign_callable()
+        : base_callable(
+              ndt::callable_type::make(ndt::type(IntID), {ndt::type(string_id)}, {"error_mode"},
+                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())}))
+    {
+    }
+
+    void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
+      ckb->emplace_back<detail::assignment_kernel<IntID, int_kind_id, string_id, string_kind_id, assign_error_default>>(
+          kernreq, src_tp[0], src_arrmeta[0], error_mode);
+    }
+  };
+
   template <>
   class assign_callable<float64_id, string_id> : public base_callable {
   public:

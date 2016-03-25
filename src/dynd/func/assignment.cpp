@@ -55,7 +55,7 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert({{fixed_string_id, uint32_id}, callable::make<assignment_kernel<fixed_string_id, uint32_id>>()});
   dispatcher.insert({{fixed_string_id, uint64_id}, callable::make<assignment_kernel<fixed_string_id, uint64_id>>()});
   dispatcher.insert({{fixed_string_id, uint128_id}, callable::make<assignment_kernel<fixed_string_id, uint128_id>>()});
-  dispatcher.insert({{int32_id, fixed_string_id}, callable::make<assignment_kernel<int32_id, fixed_string_id>>()});
+  dispatcher.insert({{int32_id, fixed_string_id}, make_callable<int_to_string_assign_callable<int32_id>>()});
   dispatcher.insert({{string_id, string_id}, callable::make<assignment_kernel<string_id, string_id>>()});
   dispatcher.insert({{string_id, fixed_string_id}, make_callable<assign_callable<string_id, fixed_string_id>>()});
   dispatcher.insert({{bool_id, string_id}, make_callable<assign_callable<bool_id, string_id>>()});
@@ -67,10 +67,10 @@ DYND_API nd::callable nd::assign::make()
   dispatcher.insert({{string_id, type_id}, make_callable<assign_callable<string_id, type_id>>()});
   dispatcher.insert({{type_id, string_id}, make_callable<assign_callable<type_id, string_id>>()});
   dispatcher.insert({{pointer_id, pointer_id}, make_callable<assign_callable<pointer_id, pointer_id>>()});
-  dispatcher.insert({{int8_id, string_id}, callable::make<assignment_kernel<int8_id, string_id>>()});
-  dispatcher.insert({{int16_id, string_id}, callable::make<assignment_kernel<int16_id, string_id>>()});
-  dispatcher.insert({{int32_id, string_id}, callable::make<assignment_kernel<int32_id, string_id>>()});
-  dispatcher.insert({{int64_id, string_id}, callable::make<assignment_kernel<int64_id, string_id>>()});
+  dispatcher.insert({{int8_id, string_id}, make_callable<int_to_string_assign_callable<int8_id>>()});
+  dispatcher.insert({{int16_id, string_id}, make_callable<int_to_string_assign_callable<int16_id>>()});
+  dispatcher.insert({{int32_id, string_id}, make_callable<int_to_string_assign_callable<int32_id>>()});
+  dispatcher.insert({{int64_id, string_id}, make_callable<int_to_string_assign_callable<int64_id>>()});
   dispatcher.insert({{uint8_id, string_id}, callable::make<assignment_kernel<uint8_id, string_id>>()});
   dispatcher.insert({{uint16_id, string_id}, callable::make<assignment_kernel<uint16_id, string_id>>()});
   dispatcher.insert({{uint32_id, string_id}, callable::make<assignment_kernel<uint32_id, string_id>>()});

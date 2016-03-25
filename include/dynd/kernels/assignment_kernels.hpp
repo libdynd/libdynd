@@ -1402,16 +1402,18 @@ namespace nd {
 
       ndt::type src_string_tp;
       const char *src_arrmeta;
+      assign_error_mode error_mode;
 
-      assignment_kernel(const ndt::type &src_string_tp, const char *src_arrmeta)
-          : src_string_tp(src_string_tp), src_arrmeta(src_arrmeta)
+      assignment_kernel(const ndt::type &src_string_tp, const char *src_arrmeta,
+                        assign_error_mode error_mode = ErrorMode)
+          : src_string_tp(src_string_tp), src_arrmeta(src_arrmeta), error_mode(error_mode)
       {
       }
 
       void single(char *dst, char *const *src)
       {
         std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
-                            ->get_utf8_string(src_arrmeta, src[0], ErrorMode);
+                            ->get_utf8_string(src_arrmeta, src[0], error_mode);
         trim(s);
         bool negative = false;
         if (!s.empty() && s[0] == '-') {
@@ -1419,7 +1421,7 @@ namespace nd {
           negative = true;
         }
         T result;
-        if (ErrorMode == assign_error_nocheck) {
+        if (error_mode == assign_error_nocheck) {
           uint64_t value = parse<uint64_t>(s.data(), s.data() + s.size(), nocheck);
           result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
         }
@@ -1432,15 +1434,6 @@ namespace nd {
           result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
         }
         *reinterpret_cast<T *>(dst) = result;
-      }
-
-      static void instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), kernel_builder *ckb,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                              kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        ckb->emplace_back<assignment_kernel>(kernreq, src_tp[0], src_arrmeta[0]);
       }
     };
 
