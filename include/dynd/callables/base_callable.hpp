@@ -38,12 +38,12 @@ namespace nd {
    * operation and a strided operation, or constructing
    * with different array arrmeta.
    */
-  struct DYND_API base_callable {
-    std::atomic_long use_count;
-    ndt::type tp;
+  class DYND_API base_callable {
+    std::atomic_long m_use_count;
+    ndt::type m_tp;
 
   public:
-    base_callable(const ndt::type &tp) : use_count(0), tp(tp) {}
+    base_callable(const ndt::type &tp) : m_use_count(0), m_tp(tp) {}
 
     // non-copyable
     base_callable(const base_callable &) = delete;
@@ -53,6 +53,8 @@ namespace nd {
     char *static_data() { return reinterpret_cast<char *>(this + 1); }
 
     const char *static_data() const { return reinterpret_cast<const char *>(this + 1); }
+
+    const ndt::type &get_type() const { return m_tp; }
 
     virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
 
@@ -161,18 +163,22 @@ namespace nd {
     static void operator delete(void *ptr) { ::operator delete(ptr); }
 
     static void operator delete(void *ptr, size_t DYND_UNUSED(static_data_size)) { ::operator delete(ptr); }
+
+    friend void intrusive_ptr_retain(base_callable *ptr);
+    friend void intrusive_ptr_release(base_callable *ptr);
+    friend long intrusive_ptr_use_count(base_callable *ptr);
   };
 
-  inline void intrusive_ptr_retain(base_callable *ptr) { ++ptr->use_count; }
+  inline void intrusive_ptr_retain(base_callable *ptr) { ++ptr->m_use_count; }
 
   inline void intrusive_ptr_release(base_callable *ptr)
   {
-    if (--ptr->use_count == 0) {
+    if (--ptr->m_use_count == 0) {
       delete ptr;
     }
   }
 
-  inline long intrusive_ptr_use_count(base_callable *ptr) { return ptr->use_count; }
+  inline long intrusive_ptr_use_count(base_callable *ptr) { return ptr->m_use_count; }
 
 } // namespace dynd::nd
 } // namespace dynd

@@ -121,7 +121,8 @@ nd::array nd::callable::call(size_t args_size, const array *args_values, size_t 
       }
       else {
         std::stringstream ss;
-        ss << "passed an unexpected keyword \"" << kwds_values[i].first << "\" to callable with type " << get()->tp;
+        ss << "passed an unexpected keyword \"" << kwds_values[i].first << "\" to callable with type "
+           << m_ptr->get_type();
         throw std::invalid_argument(ss.str());
       }
     }
@@ -178,7 +179,7 @@ nd::array nd::callable::call(size_t args_size, const array *args_values, size_t 
     //       message
     ss << "callable requires keyword parameters that were not provided. "
           "callable signature "
-       << get()->tp;
+       << m_ptr->get_type();
     throw std::invalid_argument(ss.str());
   }
 
