@@ -29,8 +29,8 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
-  instantiate(static_data(), data, &ckb, dst_tp, dst.get()->metadata(), nsrc, src_tp, src_arrmeta,
-              kernel_request_single, nkwd, kwds, tp_vars);
+  instantiate(data, &ckb, dst_tp, dst.get()->metadata(), nsrc, src_tp, src_arrmeta, kernel_request_single, nkwd, kwds,
+              tp_vars);
   kernel_single_t fn = ckb.get()->get_function<kernel_single_t>();
   fn(ckb.get(), dst.data(), src_data);
 
@@ -54,8 +54,8 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
-  instantiate(static_data(), data, &ckb, dst_tp, dst.get()->metadata(), nsrc, src_tp, src_arrmeta, kernel_request_call,
-              nkwd, kwds, tp_vars);
+  instantiate(data, &ckb, dst_tp, dst.get()->metadata(), nsrc, src_tp, src_arrmeta, kernel_request_call, nkwd, kwds,
+              tp_vars);
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
   fn(ckb.get(), &dst, src_data);
 
@@ -70,8 +70,7 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, c
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
-  instantiate(static_data(), data, &ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single, nkwd,
-              kwds, tp_vars);
+  instantiate(data, &ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
   kernel_single_t fn = ckb.get()->get_function<kernel_single_t>();
   fn(ckb.get(), dst_data, src_data);
 }
@@ -84,8 +83,7 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, a
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
-  instantiate(static_data(), data, &ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_call, nkwd,
-              kwds, tp_vars);
+  instantiate(data, &ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_call, nkwd, kwds, tp_vars);
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
   fn(ckb.get(), dst, src);
 }

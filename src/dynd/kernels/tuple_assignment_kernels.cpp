@@ -68,7 +68,7 @@ void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const ndt::c
     field.dst_data_offset = dst_offsets[i];
     field.src_data_offset = src_offsets[i];
     nd::array error_mode = ndt::traits<assign_error_mode>::na();
-    const_cast<nd::base_callable *>(af)->instantiate(NULL, NULL, ckb, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i],
+    const_cast<nd::base_callable *>(af)->instantiate( NULL, ckb, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i],
                                                      &src_arrmeta[i], kernel_request_single, 1, &error_mode,
                                                      std::map<std::string, ndt::type>());
   }

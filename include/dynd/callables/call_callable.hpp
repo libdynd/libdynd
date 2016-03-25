@@ -27,13 +27,12 @@ namespace nd {
       CallableType::get()->resolve_dst_type(data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
-    void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                     kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars)
+    void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
+                     const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
-      CallableType::get()->instantiate(CallableType::get()->static_data(), data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp,
-                                       src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+      CallableType::get()->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
+                                       tp_vars);
     }
   };
 
