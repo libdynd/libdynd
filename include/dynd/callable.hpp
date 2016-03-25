@@ -90,14 +90,6 @@ namespace nd {
     {
     }
 
-    callable(const ndt::type &self_tp, kernel_targets_t targets, const volatile char *ir,
-             callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
-             callable_instantiate_t instantiate)
-        : intrusive_ptr<base_callable>(
-              new base_callable(self_tp, targets, ir, data_init, resolve_dst_type, instantiate), true)
-    {
-    }
-
     template <typename CallableType, typename... T, typename = std::enable_if_t<all_char_string_params<T...>::value>>
     explicit callable(CallableType f, T &&... names);
 

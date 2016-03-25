@@ -301,7 +301,6 @@ set(libdynd_SRC
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/fft_kernel.cpp
     src/dynd/kernels/kernel_builder.cpp
-    src/dynd/kernels/kernel_prefix.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
     include/dynd/kernels/apply.hpp
