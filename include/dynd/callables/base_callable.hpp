@@ -15,8 +15,6 @@
 namespace dynd {
 namespace nd {
 
-  typedef array (*callable_alloc_t)(const ndt::type *dst_tp);
-
   /**
    * Resolves any missing keyword arguments for this callable based on
    * the types of the positional arguments and the available keywords arguments.
@@ -122,37 +120,32 @@ namespace nd {
     ndt::type tp;
     kernel_targets_t targets;
     const char *ir;
-    callable_alloc_t m_alloc;
     callable_data_init_t m_data_init;
     callable_resolve_dst_type_t m_resolve_dst_type;
     callable_instantiate_t m_instantiate;
 
-    base_callable() : use_count(0), m_alloc(NULL), m_data_init(NULL), m_resolve_dst_type(NULL), m_instantiate(NULL) {}
+    base_callable() : use_count(0), m_data_init(NULL), m_resolve_dst_type(NULL), m_instantiate(NULL) {}
 
     base_callable(const ndt::type &tp, const base_callable &other)
-        : use_count(0), tp(tp), targets(other.targets), ir(other.ir), m_alloc(other.m_alloc),
-          m_data_init(other.m_data_init), m_resolve_dst_type(other.m_resolve_dst_type),
-          m_instantiate(other.m_instantiate)
+        : use_count(0), tp(tp), targets(other.targets), ir(other.ir), m_data_init(other.m_data_init),
+          m_resolve_dst_type(other.m_resolve_dst_type), m_instantiate(other.m_instantiate)
     {
     }
 
-    base_callable(const ndt::type &tp)
-        : base_callable(tp, kernel_targets_t(), nullptr, nullptr, nullptr, nullptr, nullptr)
-    {
-    }
+    base_callable(const ndt::type &tp) : base_callable(tp, kernel_targets_t(), nullptr, nullptr, nullptr, nullptr) {}
 
     base_callable(const ndt::type &tp, kernel_targets_t targets)
-        : use_count(0), tp(tp), targets(targets), m_alloc(&kernel_prefix::alloc),
-          m_data_init(&kernel_prefix::data_init), m_resolve_dst_type(NULL), m_instantiate(&kernel_prefix::instantiate)
+        : use_count(0), tp(tp), targets(targets), m_data_init(&kernel_prefix::data_init), m_resolve_dst_type(NULL),
+          m_instantiate(&kernel_prefix::instantiate)
     {
       new (static_data()) kernel_targets_t(targets);
     }
 
-    base_callable(const ndt::type &tp, kernel_targets_t targets, const volatile char *ir, callable_alloc_t alloc,
+    base_callable(const ndt::type &tp, kernel_targets_t targets, const volatile char *ir,
                   callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
                   callable_instantiate_t instantiate)
-        : use_count(0), tp(tp), targets(targets), ir(const_cast<const char *>(ir)), m_alloc(alloc),
-          m_data_init(data_init), m_resolve_dst_type(resolve_dst_type), m_instantiate(instantiate)
+        : use_count(0), tp(tp), targets(targets), ir(const_cast<const char *>(ir)), m_data_init(data_init),
+          m_resolve_dst_type(resolve_dst_type), m_instantiate(instantiate)
     {
     }
 
@@ -165,14 +158,7 @@ namespace nd {
 
     const char *static_data() const { return reinterpret_cast<const char *>(this + 1); }
 
-    virtual array alloc(const ndt::type *dst_tp) const
-    {
-      if (m_alloc != NULL) {
-        return m_alloc(dst_tp);
-      }
-
-      return empty(*dst_tp);
-    }
+    virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
 
     virtual char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                             intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)

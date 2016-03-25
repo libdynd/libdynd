@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include <dynd/callables/static_data_callable.hpp>
+#include <dynd/callables/base_callable.hpp>
 #include <dynd/dispatcher.hpp>
 #include <dynd/type_registry.hpp>
 #include <dynd/callables/apply_function_callable.hpp>
@@ -93,22 +93,11 @@ namespace nd {
     {
     }
 
-    callable(const ndt::type &self_tp, kernel_targets_t targets, const volatile char *ir, callable_alloc_t alloc,
+    callable(const ndt::type &self_tp, kernel_targets_t targets, const volatile char *ir,
              callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
              callable_instantiate_t instantiate)
         : intrusive_ptr<base_callable>(
-              new base_callable(self_tp, targets, ir, alloc, data_init, resolve_dst_type, instantiate), true)
-    {
-    }
-
-    template <typename T>
-    callable(const ndt::type &self_tp, kernel_targets_t targets, const volatile char *ir, T &&static_data,
-             callable_alloc_t alloc, callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
-             callable_instantiate_t instantiate)
-        : intrusive_ptr<base_callable>(
-              new static_data_callable<typename std::remove_reference<T>::type>(
-                  self_tp, targets, ir, alloc, data_init, resolve_dst_type, instantiate, std::forward<T>(static_data)),
-              true)
+              new base_callable(self_tp, targets, ir, data_init, resolve_dst_type, instantiate), true)
     {
     }
 
@@ -180,8 +169,8 @@ namespace nd {
     static typename std::enable_if<ndt::has_traits<KernelType>::value, callable>::type make()
     {
       return callable(ndt::traits<KernelType>::equivalent(), detail::get_targets<KernelType>(),
-                      detail::get_ir<KernelType>(), &KernelType::alloc, &KernelType::data_init,
-                      &KernelType::resolve_dst_type, &KernelType::instantiate);
+                      detail::get_ir<KernelType>(), &KernelType::data_init, &KernelType::resolve_dst_type,
+                      &KernelType::instantiate);
     }
 
     template <typename CallableType>
@@ -193,25 +182,7 @@ namespace nd {
     template <typename KernelType>
     static typename std::enable_if<!ndt::has_traits<KernelType>::value, callable>::type make(const ndt::type &tp)
     {
-      return callable(tp, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(), &KernelType::alloc,
-                      &KernelType::data_init, &KernelType::resolve_dst_type, &KernelType::instantiate);
-    }
-
-    template <typename KernelType, typename StaticDataType>
-    static typename std::enable_if<ndt::has_traits<KernelType>::value, callable>::type
-    make(StaticDataType &&static_data)
-    {
-      return callable(ndt::traits<KernelType>::equivalent(), detail::get_targets<KernelType>(),
-                      detail::get_ir<KernelType>(), std::forward<StaticDataType>(static_data), &KernelType::alloc,
-                      &KernelType::data_init, &KernelType::resolve_dst_type, &KernelType::instantiate);
-    }
-
-    template <typename KernelType, typename StaticDataType>
-    static typename std::enable_if<!ndt::has_traits<KernelType>::value, callable>::type
-    make(const ndt::type &tp, StaticDataType &&static_data)
-    {
-      return callable(tp, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
-                      std::forward<StaticDataType>(static_data), &KernelType::alloc, &KernelType::data_init,
+      return callable(tp, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(), &KernelType::data_init,
                       &KernelType::resolve_dst_type, &KernelType::instantiate);
     }
 
@@ -301,14 +272,14 @@ namespace nd {
       template <type_id_t TypeID, typename... A>
       void on_each(std::map<type_id_t, callable> &callables, A &&... a) const
       {
-        callables[TypeID] = callable::make<KernelType<TypeID>>(std::forward<A>(a)...);
+        callables[TypeID] = make_callable<KernelType<TypeID>>(std::forward<A>(a)...);
       }
 
       template <typename TypeIDSequence, typename... A>
       void on_each(std::map<std::array<type_id_t, TypeIDSequence::size2()>, callable> &callables, A &&... a) const
       {
         callables[i2a<TypeIDSequence>()] =
-            callable::make<typename apply<KernelType, TypeIDSequence>::type>(std::forward<A>(a)...);
+            make_callable<typename apply<KernelType, TypeIDSequence>::type>(std::forward<A>(a)...);
       }
     };
 
@@ -317,7 +288,7 @@ namespace nd {
       template <type_id_t TypeID, typename... A>
       void on_each(std::vector<std::pair<std::vector<type_id_t>, callable>> &callables, A &&... a) const
       {
-        callables.push_back({{TypeID}, callable::make<KernelType<TypeID>>(std::forward<A>(a)...)});
+        callables.push_back({{TypeID}, make_callable<KernelType<TypeID>>(std::forward<A>(a)...)});
       }
 
       template <typename TypeIDSequence, typename... A>
@@ -330,7 +301,7 @@ namespace nd {
         }
 
         callables.push_back(
-            {{v}, callable::make<typename apply<KernelType, TypeIDSequence>::type>(std::forward<A>(a)...)});
+            {{v}, make_callable<typename apply<KernelType, TypeIDSequence>::type>(std::forward<A>(a)...)});
       }
     };
 
