@@ -182,14 +182,12 @@ namespace nd {
         switch (dst_tp.get_id()) {
         case fixed_dim_id:
           if (src_all_strided) {
-            return elwise_ck<fixed_dim_id, fixed_dim_id, N>::instantiate(self, static_data(), data, ckb, dst_tp,
-                                                                         dst_arrmeta, nsrc, src_tp, src_arrmeta,
-                                                                         kernreq, nkwd, kwds, tp_vars);
+            return elwise_ck<fixed_dim_id, fixed_dim_id, N>::instantiate(
+                self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
           }
           else if (src_all_strided_or_var) {
-            return elwise_ck<fixed_dim_id, var_dim_id, N>::instantiate(self, static_data(), data, ckb, dst_tp,
-                                                                       dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
-                                                                       nkwd, kwds, tp_vars);
+            return elwise_ck<fixed_dim_id, var_dim_id, N>::instantiate(
+                self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
           }
           else {
             // TODO
@@ -197,9 +195,8 @@ namespace nd {
           break;
         case var_dim_id:
           if (src_all_strided_or_var) {
-            return elwise_ck<var_dim_id, fixed_dim_id, N>::instantiate(self, static_data(), data, ckb, dst_tp,
-                                                                       dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
-                                                                       nkwd, kwds, tp_vars);
+            return elwise_ck<var_dim_id, fixed_dim_id, N>::instantiate(
+                self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
           }
           else {
             // TODO
