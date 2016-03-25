@@ -15,8 +15,8 @@ namespace nd {
   public:
     copy_callable() : base_callable(ndt::type("(A... * S) -> B... * T")) {}
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
-                          const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+    void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                          intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       if (nsrc != 1) {

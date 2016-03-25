@@ -66,9 +66,9 @@ namespace nd {
      * \param src_tp  An array of the source types.
      * \param kwds    An array of the.
      */
-    virtual char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp),
-                            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                            intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+    virtual char *data_init(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                            const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+                            const array *DYND_UNUSED(kwds),
                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       return NULL;
@@ -84,10 +84,9 @@ namespace nd {
      * \param nsrc  The number of source parameters.
      * \param src_tp  An array of the source types.
      */
-    virtual void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                  intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                                  const std::map<std::string, ndt::type> &tp_vars)
+    virtual void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+                                  const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars)
     {
       dst_tp = ndt::substitute(dst_tp, tp_vars, true);
     }

@@ -15,19 +15,16 @@ namespace nd {
   public:
     call_callable(const ndt::type &tp) : base_callable(tp) {}
 
-    char *data_init(char *DYND_UNUSED(static_data), const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                    intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    char *data_init(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
+                    const std::map<std::string, ndt::type> &tp_vars)
     {
-      return CallableType::get()->data_init(CallableType::get()->static_data(), dst_tp, nsrc, src_tp, nkwd, kwds,
-                                            tp_vars);
+      return CallableType::get()->data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp, intptr_t nsrc,
-                          const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                          const std::map<std::string, ndt::type> &tp_vars)
+    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                          const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
-      CallableType::get()->resolve_dst_type(CallableType::get()->static_data(), data, dst_tp, nsrc, src_tp, nkwd, kwds,
-                                            tp_vars);
+      CallableType::get()->resolve_dst_type(data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
     void instantiate(char *DYND_UNUSED(static_data), char *data, kernel_builder *ckb, const ndt::type &dst_tp,

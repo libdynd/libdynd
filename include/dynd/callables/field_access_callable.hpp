@@ -15,9 +15,9 @@ namespace nd {
   public:
     field_access_callable() : base_callable(ndt::type("({...}, field_name : string) -> Any")) {}
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
-                          const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                          const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const array *kwds,
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       dst_tp = get_field_type(src_tp, kwds);
     }
@@ -65,9 +65,9 @@ namespace nd {
     {
     }
 
-    void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                          intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
-                          const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                          const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd), const array *kwds,
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       dst_tp = get_array_field_kernel::helper(kwds[0], m_i).get_type();
     }

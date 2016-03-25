@@ -77,8 +77,8 @@ namespace nd {
       {
       }
 
-      char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                      const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const array *kwds,
+      char *data_init(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                      intptr_t DYND_UNUSED(nkwd), const array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         char *data = reinterpret_cast<char *>(
@@ -92,9 +92,8 @@ namespace nd {
         return data;
       }
 
-      void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                            intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
-                            const array *DYND_UNUSED(kwds),
+      void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                            const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         // swap in the input dimension values for the Fixed**N
