@@ -14,10 +14,7 @@ namespace nd {
    * Returns an arrfunc which copies data from one
    * array to another, without broadcasting
    */
-  DYND_API extern struct DYND_API copy : declfunc<copy> {
-    static callable make();
-    static callable &get();
-  } copy;
+  extern DYND_API callable copy;
 
 } // namespace dynd::nd
 } // namespace dynd

@@ -11,14 +11,6 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::index::make()
-{
-  typedef type_id_sequence<int32_id, fixed_dim_id> type_ids;
-
-  auto dispatcher = callable::new_make_all<index_callable, type_ids>();
-  return make_callable<index_dispatch_callable>(ndt::type("(Any, i: Any) -> Any"), dispatcher);
-}
-
-DYND_DEFAULT_DECLFUNC_GET(nd::index)
-
-DYND_API struct nd::index nd::index;
+DYND_API nd::callable nd::index = nd::make_callable<nd::index_dispatch_callable>(
+    ndt::type("(Any, i: Any) -> Any"),
+    nd::callable::new_make_all<nd::index_callable, type_id_sequence<int32_id, fixed_dim_id>>());

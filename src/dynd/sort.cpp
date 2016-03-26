@@ -10,14 +10,6 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::sort::make() { return make_callable<sort_callable>(); }
+DYND_API nd::callable nd::sort = nd::make_callable<nd::sort_callable>();
 
-DYND_DEFAULT_DECLFUNC_GET(nd::sort)
-
-DYND_API struct nd::sort nd::sort;
-
-DYND_API nd::callable nd::unique::make() { return make_callable<unique_callable>(); }
-
-DYND_DEFAULT_DECLFUNC_GET(nd::unique)
-
-DYND_API struct nd::unique nd::unique;
+DYND_API nd::callable nd::unique = nd::make_callable<nd::unique_callable>();

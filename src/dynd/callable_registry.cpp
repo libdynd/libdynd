@@ -27,10 +27,10 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
 {
   static map<std::string, nd::callable> registry;
   if (registry.empty()) {
-    registry["take"] = take::get();
-    registry["sum"] = sum::get();
-    registry["min"] = min::get();
-    registry["max"] = max::get();
+    registry["take"] = take;
+    registry["sum"] = sum;
+    registry["min"] = min;
+    registry["max"] = max;
 
     // dynd/arithmetic.hpp
     registry["add"] = add::get();
@@ -47,20 +47,20 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
     registry["conj"] = conj;
 
     // dynd/io.hpp
-    registry["serialize"] = serialize::get();
+    registry["serialize"] = serialize;
 
     // dynd/math.hpp
-    registry["sin"] = sin::get();
-    registry["cos"] = cos::get();
-    registry["tan"] = tan::get();
-    registry["exp"] = exp::get();
+    registry["sin"] = sin;
+    registry["cos"] = cos;
+    registry["tan"] = tan;
+    registry["exp"] = exp;
 
     // dynd/option.hpp
     registry["assign_na"] = assign_na;
     registry["is_na"] = is_na;
 
     // dynd/pointer.hpp
-    registry["dereference"] = dereference::get();
+    registry["dereference"] = dereference;
 
     // dynd/random.hpp
     registry["uniform"] = random::uniform;

@@ -68,7 +68,7 @@ void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const ndt::c
     field.dst_data_offset = dst_offsets[i];
     field.src_data_offset = src_offsets[i];
     nd::array error_mode = ndt::traits<assign_error_mode>::na();
-    const_cast<nd::base_callable *>(af)->instantiate( NULL, ckb, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i],
+    const_cast<nd::base_callable *>(af)->instantiate(NULL, ckb, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i],
                                                      &src_arrmeta[i], kernel_request_single, 1, &error_mode,
                                                      std::map<std::string, ndt::type>());
   }
@@ -104,10 +104,9 @@ void dynd::make_tuple_identical_assignment_kernel(nd::kernel_builder *ckb, const
     src_fields_arrmeta[i] = src_arrmeta + arrmeta_offsets[i];
   }
 
-  make_tuple_unary_op_ckernel(nd::copy::get().get(), nd::copy::get().get_type(), ckb, field_count,
-                              sd->get_data_offsets(dst_arrmeta), sd->get_field_types().data(), dst_fields_arrmeta.get(),
-                              sd->get_data_offsets(src_arrmeta), sd->get_field_types().data(), src_fields_arrmeta.get(),
-                              kernreq);
+  make_tuple_unary_op_ckernel(nd::copy.get(), nd::copy.get_type(), ckb, field_count, sd->get_data_offsets(dst_arrmeta),
+                              sd->get_field_types().data(), dst_fields_arrmeta.get(), sd->get_data_offsets(src_arrmeta),
+                              sd->get_field_types().data(), src_fields_arrmeta.get(), kernreq);
 }
 
 /////////////////////////////////////////
@@ -152,7 +151,7 @@ void dynd::make_tuple_assignment_kernel(nd::kernel_builder *ckb, const ndt::type
     dst_fields_arrmeta[i] = dst_arrmeta + dst_arrmeta_offsets[i];
   }
 
-  make_tuple_unary_op_ckernel(nd::copy::get().get(), nd::copy::get().get_type(), ckb, field_count,
+  make_tuple_unary_op_ckernel(nd::copy.get(), nd::copy.get_type(), ckb, field_count,
                               dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types().data(),
                               dst_fields_arrmeta.get(), src_sd->get_data_offsets(src_arrmeta),
                               src_sd->get_field_types().data(), src_fields_arrmeta.get(), kernreq);
@@ -187,7 +186,7 @@ void dynd::make_broadcast_to_tuple_assignment_kernel(nd::kernel_builder *ckb, co
   vector<const char *> src_fields_arrmeta(field_count, src_arrmeta);
   vector<uintptr_t> src_data_offsets(field_count, 0);
 
-  make_tuple_unary_op_ckernel(nd::copy::get().get(), nd::copy::get().get_type(), ckb, field_count,
+  make_tuple_unary_op_ckernel(nd::copy.get(), nd::copy.get_type(), ckb, field_count,
                               dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types().data(),
                               dst_fields_arrmeta.get(), &src_data_offsets[0], &src_fields_tp[0], &src_fields_arrmeta[0],
                               kernreq);

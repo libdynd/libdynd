@@ -82,25 +82,14 @@ namespace nd {
 
 #endif
 
-  extern DYND_API struct DYND_API fft : declfunc<fft> {
-    static callable make();
-    static callable &get();
-  } fft;
+#ifdef DYND_FFTW
 
-  extern DYND_API struct DYND_API ifft : declfunc<ifft> {
-    static callable make();
-    static callable &get();
-  } ifft;
+  extern DYND_API callable fft;
+  extern DYND_API callable ifft;
+  extern DYND_API callable rfft;
+  extern DYND_API callable irfft;
 
-  extern DYND_API struct DYND_API rfft : declfunc<rfft> {
-    static callable make();
-    static callable &get();
-  } rfft;
-
-  extern DYND_API struct DYND_API irfft : declfunc<irfft> {
-    static callable make();
-    static callable &get();
-  } irfft;
+#endif
 
   /**
    * Shifts the zero-frequency element to the center of an array.

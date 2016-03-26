@@ -88,7 +88,7 @@ namespace nd {
       reinterpret_cast<data_type *>(data)->next();
 
       ndt::type child_src_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
-      index::get()->resolve_dst_type(data, dst_tp, nsrc, &child_src_tp, nkwd, kwds, tp_vars);
+      index->resolve_dst_type(data, dst_tp, nsrc, &child_src_tp, nkwd, kwds, tp_vars);
     }
 
     void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
@@ -103,8 +103,8 @@ namespace nd {
 
       ndt::type child_src_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
       const char *child_src_arrmeta = src_arrmeta[0] + sizeof(ndt::fixed_dim_type::metadata_type);
-      index::get()->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, &child_src_tp, &child_src_arrmeta,
-                                kernel_request_single, nkwd, kwds, tp_vars);
+      index->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, &child_src_tp, &child_src_arrmeta, kernel_request_single,
+                         nkwd, kwds, tp_vars);
     }
   };
 

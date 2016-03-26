@@ -411,25 +411,10 @@ complex<T> sin(complex<T> z)
 
 namespace nd {
 
-  extern DYND_API struct DYND_API cos : declfunc<cos> {
-    static callable make();
-    static callable &get();
-  } cos;
-
-  extern DYND_API struct DYND_API sin : declfunc<sin> {
-    static callable make();
-    static callable &get();
-  } sin;
-
-  extern DYND_API struct DYND_API tan : declfunc<tan> {
-    static callable make();
-    static callable &get();
-  } tan;
-
-  extern DYND_API struct DYND_API exp : declfunc<exp> {
-    static callable make();
-    static callable &get();
-  } exp;
+  extern DYND_API callable cos;
+  extern DYND_API callable sin;
+  extern DYND_API callable tan;
+  extern DYND_API callable exp;
 
 } // namespace dynd::nd
 } // namespace dynd
