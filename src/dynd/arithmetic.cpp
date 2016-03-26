@@ -3,14 +3,16 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/arithmetic.hpp>
+#include <dynd/arithmetic.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/callables/arithmetic_dispatch_callable.hpp>
 #include <dynd/callables/compound_arithmetic_dispatch_callable.hpp>
-#include <dynd/kernels/arithmetic.hpp>
 #include <dynd/callables/compound_add_callable.hpp>
 #include <dynd/callables/compound_div_callable.hpp>
 #include <dynd/callables/option_arithmetic_callable.hpp>
+#include <dynd/types/scalar_kind_type.hpp>
+#include <dynd/callables/sum_dispatch_callable.hpp>
+#include <dynd/callables/sum_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -99,3 +101,10 @@ DYND_API nd::callable nd::compound_add =
     make_compound_arithmetic<nd::compound_add, nd::compound_add_callable, binop_ids>();
 DYND_API nd::callable nd::compound_div =
     make_compound_arithmetic<nd::compound_div, nd::compound_div_callable, binop_ids>();
+
+DYND_API nd::callable nd::sum = nd::functional::reduction(nd::make_callable<nd::sum_dispatch_callable>(
+    ndt::callable_type::make(ndt::scalar_kind_type::make(), ndt::scalar_kind_type::make()),
+    nd::callable::new_make_all<
+        nd::sum_callable,
+        type_id_sequence<int8_id, int16_id, int32_id, int64_id, uint8_id, uint16_id, uint32_id, uint64_id, float16_id,
+                         float32_id, float64_id, complex_float32_id, complex_float64_id>>()));

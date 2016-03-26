@@ -12,7 +12,7 @@
 #include "../dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/comparison.hpp>
+#include <dynd/comparison.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
 

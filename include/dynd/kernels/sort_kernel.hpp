@@ -6,8 +6,7 @@
 #pragma once
 
 #include <dynd/bytes.hpp>
-#include <dynd/func/comparison.hpp>
-#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_strided_kernel.hpp>
 
 namespace dynd {
 namespace nd {

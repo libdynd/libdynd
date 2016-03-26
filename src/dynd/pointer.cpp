@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/pointer.hpp>
+#include <dynd/pointer.hpp>
 #include <dynd/callables/dereference_callable.hpp>
 
 using namespace std;

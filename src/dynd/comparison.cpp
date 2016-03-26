@@ -3,12 +3,12 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/comparison.hpp>
+#include <dynd/comparison.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/callables/comparison_dispatch_callable.hpp>
+#include <dynd/callables/equal_callable.hpp>
 #include <dynd/callables/greater_callable.hpp>
 #include <dynd/callables/greater_equal_callable.hpp>
-#include <dynd/callables/equal_callable.hpp>
 #include <dynd/callables/less_callable.hpp>
 #include <dynd/callables/less_equal_callable.hpp>
 #include <dynd/callables/not_equal_callable.hpp>

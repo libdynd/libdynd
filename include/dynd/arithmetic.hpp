@@ -23,5 +23,7 @@ namespace nd {
   extern DYND_API callable compound_add;
   extern DYND_API callable compound_div;
 
+  extern DYND_API callable sum;
+
 } // namespace dynd::nd
 } // namespace dynd

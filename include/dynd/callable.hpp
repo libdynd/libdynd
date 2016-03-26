@@ -15,8 +15,6 @@
 #include <dynd/callables/apply_member_function_callable.hpp>
 #include <dynd/callables/construct_then_apply_callable_callable.hpp>
 #include <dynd/types/callable_type.hpp>
-#include <dynd/types/option_type.hpp>
-#include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
 namespace nd {
