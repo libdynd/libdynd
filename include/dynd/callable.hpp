@@ -234,41 +234,6 @@ namespace nd {
 
   } // namespace dynd::nd::detail
 
-  template <typename FuncType>
-  struct declfunc {
-    template <typename DstType, typename... ArgTypes>
-    array operator()(ArgTypes &&... args)
-    {
-      return FuncType::get().template operator()<DstType>(std::forward<ArgTypes>(args)...);
-    }
-
-    template <typename... ArgTypes>
-    array operator()(ArgTypes &&... args)
-    {
-      return FuncType::get()(std::forward<ArgTypes>(args)...);
-    }
-
-    array operator()(const std::initializer_list<array> &args,
-                     const std::initializer_list<std::pair<const char *, array>> &kwds)
-    {
-      return FuncType::get()(args, kwds);
-    }
-  };
-
-// A macro for defining the get method.
-#define DYND_DEFAULT_DECLFUNC_GET(NAME)                                                                                \
-  DYND_API dynd::nd::callable &NAME::get()                                                                             \
-  {                                                                                                                    \
-    static dynd::nd::callable self = NAME::make();                                                                     \
-    return self;                                                                                                       \
-  }
-
-  template <typename FuncType>
-  std::ostream &operator<<(std::ostream &o, const declfunc<FuncType> &DYND_UNUSED(rhs))
-  {
-    return o << FuncType::get();
-  }
-
   namespace functional {
 
     /**
