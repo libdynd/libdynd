@@ -15,38 +15,14 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::real::make()
-{
-  dispatcher<callable> dispatcher =
-      callable::new_make_all<real_callable, type_id_sequence<complex_float32_id, complex_float64_id>>();
+DYND_API nd::callable nd::real = nd::functional::elwise(nd::make_callable<nd::real_dispatch_callable>(
+    ndt::type("(Scalar) -> Scalar"),
+    nd::callable::new_make_all<nd::real_callable, type_id_sequence<complex_float32_id, complex_float64_id>>()));
 
-  return functional::elwise(make_callable<real_dispatch_callable>(ndt::type("(Scalar) -> Scalar"), dispatcher));
-}
+DYND_API nd::callable nd::imag = nd::functional::elwise(nd::make_callable<nd::imag_dispatch_callable>(
+    ndt::type("(Scalar) -> Scalar"),
+    nd::callable::new_make_all<nd::imag_callable, type_id_sequence<complex_float32_id, complex_float64_id>>()));
 
-DYND_DEFAULT_DECLFUNC_GET(nd::real)
-
-DYND_API struct nd::real nd::real;
-
-DYND_API nd::callable nd::imag::make()
-{
-  dispatcher<callable> dispatcher =
-      callable::new_make_all<imag_callable, type_id_sequence<complex_float32_id, complex_float64_id>>();
-
-  return functional::elwise(make_callable<imag_dispatch_callable>(ndt::type("(Scalar) -> Scalar"), dispatcher));
-}
-
-DYND_DEFAULT_DECLFUNC_GET(nd::imag)
-
-DYND_API struct nd::imag nd::imag;
-
-DYND_API nd::callable nd::conj::make()
-{
-  dispatcher<callable> dispatcher =
-      callable::new_make_all<conj_callable, type_id_sequence<complex_float32_id, complex_float64_id>>();
-
-  return functional::elwise(make_callable<conj_dispatch_callable>(ndt::type("(Scalar) -> Scalar"), dispatcher));
-}
-
-DYND_DEFAULT_DECLFUNC_GET(nd::conj)
-
-DYND_API struct nd::conj nd::conj;
+DYND_API nd::callable nd::conj = nd::functional::elwise(nd::make_callable<nd::conj_dispatch_callable>(
+    ndt::type("(Scalar) -> Scalar"),
+    nd::callable::new_make_all<nd::conj_callable, type_id_sequence<complex_float32_id, complex_float64_id>>()));

@@ -10,10 +10,7 @@
 namespace dynd {
 namespace nd {
 
-  extern DYND_API struct DYND_API all : declfunc<all> {
-    static callable make();
-    static callable &get();
-  } all;
+  extern DYND_API callable all;
 
 } // namespace dynd::nd
 } // namespace dynd
