@@ -33,10 +33,10 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
     registry["max"] = max;
 
     // dynd/arithmetic.hpp
-    registry["add"] = add::get();
-    registry["subtract"] = subtract::get();
-    registry["multiply"] = multiply::get();
-    registry["divide"] = divide::get();
+    registry["add"] = add;
+    registry["subtract"] = subtract;
+    registry["multiply"] = multiply;
+    registry["divide"] = divide;
 
     // dynd/assign.hpp
     registry["assign"] = assign;

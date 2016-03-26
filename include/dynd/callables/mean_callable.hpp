@@ -28,7 +28,7 @@ namespace nd {
       char *data = reinterpret_cast<char *>(new data_type());
       reinterpret_cast<data_type *>(data)->sum_data = nd::sum->data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
       reinterpret_cast<data_type *>(data)->compound_div_data =
-          nd::compound_div::get().get()->data_init(dst_tp, 1, &m_tp, 0, NULL, tp_vars);
+          nd::compound_div->data_init(dst_tp, 1, &m_tp, 0, NULL, tp_vars);
 
       return data;
     }
@@ -52,8 +52,8 @@ namespace nd {
 
       mean_kernel *self = ckb->get_at<mean_kernel>(mean_offset);
       self->compound_div_offset = ckb->size();
-      nd::compound_div::get().get()->instantiate(reinterpret_cast<data_type *>(data)->compound_div_data, ckb, dst_tp,
-                                                 dst_arrmeta, 1, &m_tp, NULL, kernreq, nkwd, kwds, tp_vars);
+      nd::compound_div->instantiate(reinterpret_cast<data_type *>(data)->compound_div_data, ckb, dst_tp, dst_arrmeta, 1,
+                                    &m_tp, NULL, kernreq, nkwd, kwds, tp_vars);
 
       delete reinterpret_cast<data_type *>(data);
     }

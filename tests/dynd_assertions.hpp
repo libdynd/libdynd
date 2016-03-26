@@ -16,6 +16,7 @@
 #include <dynd/callable.hpp>
 #include <dynd/math.hpp>
 #include <dynd/func/elwise.hpp>
+#include <dynd/option.hpp>
 
 inline std::string ShapeFormatter(const std::vector<intptr_t> &shape)
 {
