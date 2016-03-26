@@ -37,9 +37,8 @@ namespace nd {
       ckb->emplace_back<option_arithmetic_kernel<FuncType, true, false>>(kernreq);
       ckb_offset = ckb->size();
 
-      auto is_na = is_na::get();
-      is_na.get()->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single, nkwd,
-                               kwds, tp_vars);
+      is_na->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single, nkwd, kwds,
+                         tp_vars);
       ckb_offset = ckb->size();
       option_arithmetic_kernel<FuncType, true, false> *self =
           ckb->get_at<option_arithmetic_kernel<FuncType, true, false>>(option_arith_offset);
@@ -51,9 +50,8 @@ namespace nd {
       ckb_offset = ckb->size();
       self = ckb->get_at<option_arithmetic_kernel<FuncType, true, false>>(option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
-      auto assign_na = nd::assign_na::get();
-      assign_na.get()->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, src_arrmeta,
-                                   kernel_request_single, nkwd, kwds, tp_vars);
+      assign_na->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, src_arrmeta, kernel_request_single,
+                             nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
     }
   };
@@ -81,9 +79,8 @@ namespace nd {
       ckb->emplace_back<option_arithmetic_kernel<FuncType, false, true>>(kernreq);
       ckb_offset = ckb->size();
 
-      auto is_na = is_na::get();
-      is_na.get()->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp[1], &src_arrmeta[1], kernel_request_single,
-                               nkwd, kwds, tp_vars);
+      is_na->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp[1], &src_arrmeta[1], kernel_request_single, nkwd,
+                         kwds, tp_vars);
       ckb_offset = ckb->size();
       option_arithmetic_kernel<FuncType, false, true> *self =
           ckb->get_at<option_arithmetic_kernel<FuncType, false, true>>(option_arith_offset);
@@ -95,9 +92,8 @@ namespace nd {
       ckb_offset = ckb->size();
       self = ckb->get_at<option_arithmetic_kernel<FuncType, false, true>>(option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
-      auto assign_na = nd::assign_na::get();
-      assign_na.get()->instantiate(data, ckb, src_tp[1], src_arrmeta[1], 0, nullptr, nullptr, kernel_request_single,
-                                   nkwd, kwds, tp_vars);
+      assign_na->instantiate(data, ckb, src_tp[1], src_arrmeta[1], 0, nullptr, nullptr, kernel_request_single, nkwd,
+                             kwds, tp_vars);
       ckb_offset = ckb->size();
     }
   };
@@ -126,16 +122,14 @@ namespace nd {
       ckb->emplace_back<option_arithmetic_kernel<FuncType, true, true>>(kernreq);
       ckb_offset = ckb->size();
 
-      auto is_na_lhs = is_na::get();
-      is_na_lhs.get()->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single,
-                                   nkwd, kwds, tp_vars);
+      is_na->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single, nkwd, kwds,
+                         tp_vars);
       ckb_offset = ckb->size();
       option_arithmetic_kernel<FuncType, true, true> *self =
           ckb->get_at<option_arithmetic_kernel<FuncType, true, true>>(option_arith_offset);
       self->is_na_rhs_offset = ckb_offset - option_arith_offset;
-      auto is_na_rhs = is_na::get();
-      is_na_rhs.get()->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single,
-                                   nkwd, kwds, tp_vars);
+      is_na->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single, nkwd, kwds,
+                         tp_vars);
       ckb_offset = ckb->size();
       self = ckb->get_at<option_arithmetic_kernel<FuncType, true, true>>(option_arith_offset);
       self->arith_offset = ckb_offset - option_arith_offset;
@@ -147,9 +141,8 @@ namespace nd {
       ckb_offset = ckb->size();
       self = ckb->get_at<option_arithmetic_kernel<FuncType, true, true>>(option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
-      auto assign_na = nd::assign_na::get();
-      assign_na.get()->instantiate(data, ckb, dst_tp, dst_arrmeta, 0, nullptr, nullptr, kernel_request_single, nkwd,
-                                   kwds, tp_vars);
+      assign_na->instantiate(data, ckb, dst_tp, dst_arrmeta, 0, nullptr, nullptr, kernel_request_single, nkwd, kwds,
+                             tp_vars);
       ckb_offset = ckb->size();
     }
   };

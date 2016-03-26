@@ -56,8 +56,8 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
     registry["exp"] = exp::get();
 
     // dynd/option.hpp
-    registry["assign_na"] = assign_na::get();
-    registry["is_na"] = is_na::get();
+    registry["assign_na"] = assign_na;
+    registry["is_na"] = is_na;
 
     // dynd/pointer.hpp
     registry["dereference"] = dereference::get();

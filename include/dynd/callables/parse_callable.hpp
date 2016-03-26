@@ -39,8 +39,8 @@ namespace nd {
         ckb->emplace_back<parse_kernel<option_id>>(kernreq);
         ckb_offset = ckb->size();
 
-        assign_na::get()->instantiate(data, ckb, dst_tp, dst_arrmeta, 0, nullptr, nullptr,
-                                      kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
+        assign_na->instantiate(data, ckb, dst_tp, dst_arrmeta, 0, nullptr, nullptr, kernreq | kernel_request_data_only,
+                               nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
 
         ckb->get_at<parse_kernel<option_id>>(self_offset)->parse_offset = ckb_offset - self_offset;
