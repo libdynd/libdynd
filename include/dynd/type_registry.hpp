@@ -60,6 +60,23 @@ inline type_id_t base_id(type_id_t id)
   return infos[id].base_ids.front();
 }
 
+template <type_id_t ID>
+std::enable_if_t<ID == any_kind_id, std::array<type_id_t, 0>> base_ids()
+{
+  return {};
+}
+
+template <type_id_t ID>
+std::enable_if_t<ID != any_kind_id, std::vector<type_id_t>> base_ids()
+{
+  std::vector<type_id_t> res{base_id_of<ID>::value};
+  for (type_id_t base_id : base_ids<base_id_of<ID>::value>()) {
+    res.push_back(base_id);
+  }
+
+  return res;
+}
+
 inline const std::vector<type_id_t> &base_ids(type_id_t id)
 {
   const std::vector<id_info> &infos = detail::infos();

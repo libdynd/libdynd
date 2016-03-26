@@ -21,17 +21,18 @@ using namespace dynd;
 
 ndt::type_registry::type_registry()
 {
-  new_id(base_id_of<scalar_kind_id>::value);
+  /*
+      new_id(base_id_of<scalar_kind_id>::value);
 
-  new_id(base_id_of<bool_kind_id>::value);
-  new_id(base_id_of<bool_id>::value);
+      new_id(base_id_of<bool_kind_id>::value);
+      new_id(base_id_of<bool_id>::value);
 
-  new_id(base_id_of<int_kind_id>::value);
-  new_id(base_id_of<int8_id>::value);
-  new_id(base_id_of<int16_id>::value);
-  new_id(base_id_of<int32_id>::value);
-  new_id(base_id_of<int64_id>::value);
-  new_id(base_id_of<int128_id>::value);
+    new_id(base_id_of<int_kind_id>::value);
+    new_id(base_id_of<int8_id>::value);
+    new_id(base_id_of<int16_id>::value);
+    new_id(base_id_of<int32_id>::value);
+    new_id(base_id_of<int64_id>::value);
+    new_id(base_id_of<int128_id>::value);
 
   new_id(base_id_of<uint_kind_id>::value);
   new_id(base_id_of<uint8_id>::value);
@@ -51,6 +52,7 @@ ndt::type_registry::type_registry()
   new_id(base_id_of<complex_float64_id>::value);
 
   new_id(base_id_of<void_id>::value);
+  */
 
   new_id(base_id_of<dim_kind_id>::value);
 
@@ -99,27 +101,34 @@ ndt::type_registry::type_registry()
 
 DYNDT_API class ndt::type_registry ndt::type_registry;
 
-/*
-template <type_id_t ID>
-std::enable_if_t<ID == any_kind_id, id_info> make_info()
-{
-  return id_info();
-}
-
-template <type_id_t ID>
-std::enable_if_t<ID != any_kind_id, id_info> make_info()
-{
-  const id_info &base_info = make_info<base_id_of<ID>::value>();
-
-  id_info info;
-
-  return info;
-}
-*/
-
 DYNDT_API vector<id_info> &detail::infos()
 {
-  static vector<id_info> infos{{}, id_info(any_kind_id)};
+  static vector<id_info> infos{{},
+                               {any_kind_id},
+                               {scalar_kind_id, base_ids<scalar_kind_id>()},
+                               {bool_kind_id, base_ids<bool_kind_id>()},
+                               {bool_id, base_ids<bool_id>()},
+                               {int_kind_id, base_ids<int_kind_id>()},
+                               {int8_id, base_ids<int8_id>()},
+                               {int16_id, base_ids<int16_id>()},
+                               {int32_id, base_ids<int32_id>()},
+                               {int64_id, base_ids<int64_id>()},
+                               {int128_id, base_ids<int128_id>()},
+                               {uint_kind_id, base_ids<uint_kind_id>()},
+                               {uint8_id, base_ids<uint8_id>()},
+                               {uint16_id, base_ids<uint16_id>()},
+                               {uint32_id, base_ids<uint32_id>()},
+                               {uint64_id, base_ids<uint64_id>()},
+                               {uint128_id, base_ids<uint128_id>()},
+                               {float_kind_id, base_ids<float_kind_id>()},
+                               {float16_id, base_ids<float16_id>()},
+                               {float32_id, base_ids<float32_id>()},
+                               {float64_id, base_ids<float64_id>()},
+                               {float128_id, base_ids<float128_id>()},
+                               {complex_kind_id, base_ids<complex_kind_id>()},
+                               {complex_float32_id, base_ids<complex_float32_id>()},
+                               {complex_float64_id, base_ids<complex_float64_id>()},
+                               {void_id, base_ids<void_id>()}};
 
   return infos;
 }
