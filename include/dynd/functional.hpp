@@ -11,6 +11,7 @@
 #include <dynd/callables/call_callable.hpp>
 #include <dynd/callables/forward_na_callable.hpp>
 #include <dynd/func/elwise.hpp>
+#include <dynd/func/reduction.hpp>
 #include <dynd/func/outer.hpp>
 #include <dynd/iterator.hpp>
 #include <dynd/callable.hpp>
