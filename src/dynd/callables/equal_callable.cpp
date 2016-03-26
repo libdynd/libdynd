@@ -33,7 +33,7 @@ void nd::equal_callable<tuple_id, tuple_id>::instantiate(char *DYND_UNUSED(data)
     ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::tuple_type>()->get_field_type(i),
                                  src_tp[1].extended<ndt::tuple_type>()->get_field_type(i)};
     const char *child_src_arrmeta[2] = {src_arrmeta[0] + arrmeta_offsets[i], src_arrmeta[1] + arrmeta_offsets[i]};
-    equal::get()->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-                              kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
+    equal->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
+                       kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
   }
 }

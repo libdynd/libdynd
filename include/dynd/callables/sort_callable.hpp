@@ -27,9 +27,8 @@ namespace nd {
           reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride, src0_element_tp.get_data_size());
 
       const ndt::type child_src_tp[2] = {src0_element_tp, src0_element_tp};
-      const callable &less = nd::less::get();
-      less.get()->instantiate(data, ckb, ndt::make_type<bool1>(), NULL, 2, child_src_tp, NULL, kernel_request_single,
-                              nkwd, kwds, tp_vars);
+      less->instantiate(data, ckb, ndt::make_type<bool1>(), NULL, 2, child_src_tp, NULL, kernel_request_single, nkwd,
+                        kwds, tp_vars);
     }
   };
 
