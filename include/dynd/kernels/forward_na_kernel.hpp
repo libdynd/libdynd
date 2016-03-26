@@ -35,12 +35,11 @@ namespace nd {
     }
   };
 
-  template <typename FuncType, bool Src0IsOption, bool Src1IsOption>
+  template <bool Src0IsOption, bool Src1IsOption>
   struct option_comparison_kernel;
 
-  template <typename FuncType>
-  struct option_comparison_kernel<FuncType, true, true>
-      : base_strided_kernel<option_comparison_kernel<FuncType, true, true>, 2> {
+  template <>
+  struct option_comparison_kernel<true, true> : base_strided_kernel<option_comparison_kernel<true, true>, 2> {
     intptr_t is_na_rhs_offset;
     intptr_t comp_offset;
     intptr_t assign_na_offset;

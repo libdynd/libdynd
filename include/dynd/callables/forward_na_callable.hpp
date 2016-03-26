@@ -67,11 +67,11 @@ namespace nd {
     }
   };
 
-  template <typename FuncType, bool Src0IsOption, bool Src1IsOption>
+  template <callable &Callable, bool Src0IsOption, bool Src1IsOption>
   class option_comparison_callable;
 
-  template <typename FuncType>
-  class option_comparison_callable<FuncType, true, true> : public base_callable {
+  template <callable &Callable>
+  class option_comparison_callable<Callable, true, true> : public base_callable {
   public:
     option_comparison_callable() : base_callable(ndt::type("(?Scalar, ?Scalar) -> ?bool")) {}
 
@@ -81,30 +81,30 @@ namespace nd {
     {
       intptr_t ckb_offset = ckb->size();
       intptr_t option_comp_offset = ckb_offset;
-      ckb->emplace_back<option_comparison_kernel<FuncType, true, true>>(kernreq);
+      ckb->emplace_back<option_comparison_kernel<true, true>>(kernreq);
       ckb_offset = ckb->size();
 
       auto is_na_lhs = is_na::get();
       is_na_lhs.get()->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp[0], &src_arrmeta[0],
                                    kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
-      option_comparison_kernel<FuncType, true, true> *self =
-          ckb->get_at<option_comparison_kernel<FuncType, true, true>>(option_comp_offset);
+      option_comparison_kernel<true, true> *self =
+          ckb->get_at<option_comparison_kernel<true, true>>(option_comp_offset);
       self->is_na_rhs_offset = ckb_offset - option_comp_offset;
 
       auto is_na_rhs = is_na::get();
       is_na_rhs.get()->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp[1], &src_arrmeta[1],
                                    kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
-      self = ckb->get_at<option_comparison_kernel<FuncType, true, true>>(option_comp_offset);
+      self = ckb->get_at<option_comparison_kernel<true, true>>(option_comp_offset);
       self->comp_offset = ckb_offset - option_comp_offset;
-      auto cmp = FuncType::get();
+      auto cmp = Callable;
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(),
                                          src_tp[1].extended<ndt::option_type>()->get_value_type()};
       cmp.get()->instantiate(data, ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc,
                              child_src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
-      self = ckb->get_at<option_comparison_kernel<FuncType, true, true>>(option_comp_offset);
+      self = ckb->get_at<option_comparison_kernel<true, true>>(option_comp_offset);
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
       assign_na.get()->instantiate(data, ckb, ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0,

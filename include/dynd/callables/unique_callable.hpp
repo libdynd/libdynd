@@ -27,10 +27,9 @@ namespace nd {
           kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
           reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride, src0_element_tp.get_data_size());
 
-      const callable &equal = nd::equal::get();
       const ndt::type equal_src_tp[2] = {src0_element_tp, src0_element_tp};
-      equal.get()->instantiate(data, ckb, ndt::make_type<bool1>(), NULL, 2, equal_src_tp, NULL, kernel_request_single,
-                               nkwd, kwds, tp_vars);
+      equal->instantiate(data, ckb, ndt::make_type<bool1>(), NULL, 2, equal_src_tp, NULL, kernel_request_single, nkwd,
+                         kwds, tp_vars);
     }
   };
 

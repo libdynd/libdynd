@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/comparison.hpp>
-#include <dynd/callables/equal_callable.hpp>
+#include <dynd/callables/not_equal_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -39,7 +39,7 @@ void nd::not_equal_callable<tuple_id, tuple_id>::instantiate(char *DYND_UNUSED(d
     const char *field_arrmeta = src_arrmeta[0] + arrmeta_offsets[i];
     ndt::type child_src_tp[2] = {ft, ft};
     const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
-    not_equal::get()->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-                                  kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
+    not_equal->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
+                           kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
   }
 }
