@@ -446,17 +446,15 @@ namespace nd {
       ckb->emplace_back<self_type>(kernreq);
       ckb_offset = ckb->size();
       // instantiate src_is_avail
-      nd::callable &is_na = nd::is_na::get();
-      is_na.get()->instantiate(NULL, ckb, ndt::make_type<bool1>(), NULL, nsrc, src_tp, src_arrmeta,
-                               kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
+      is_na->instantiate(NULL, ckb, ndt::make_type<bool1>(), NULL, nsrc, src_tp, src_arrmeta,
+                         kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
       // instantiate dst_assign_na
       ckb->reserve(ckb_offset + sizeof(kernel_prefix));
       self_type *self = ckb->get_at<self_type>(root_ckb_offset);
       self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
-      nd::callable &assign_na = nd::assign_na::get();
-      assign_na.get()->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, NULL, NULL, kernreq | kernel_request_data_only,
-                                   nkwd, kwds, tp_vars);
+      assign_na->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, NULL, NULL, kernreq | kernel_request_data_only, nkwd,
+                             kwds, tp_vars);
       ckb_offset = ckb->size();
       // instantiate value_assign
       ckb->reserve(ckb_offset + sizeof(kernel_prefix));
@@ -557,9 +555,8 @@ namespace nd {
       detail::string_to_option_tp_ck *self = ckb->get_at<detail::string_to_option_tp_ck>(root_ckb_offset);
       // Second child ckernel is the NA assignment
       self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
-      nd::callable &assign_na = nd::assign_na::get();
-      assign_na.get()->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
-                                   kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
+      assign_na->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
+                             kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
     }
   };
@@ -649,8 +646,8 @@ namespace nd {
       const ndt::type &src_val_tp = src_tp[0].extended<ndt::option_type>()->get_value_type();
       ckb->emplace_back<self_type>(kernreq);
       // instantiate src_is_na
-      is_na::get()->instantiate(NULL, ckb, ndt::make_type<bool1>(), NULL, nsrc, src_tp, src_arrmeta,
-                                kernreq | kernel_request_data_only, 0, nullptr, tp_vars);
+      is_na->instantiate(NULL, ckb, ndt::make_type<bool1>(), NULL, nsrc, src_tp, src_arrmeta,
+                         kernreq | kernel_request_data_only, 0, nullptr, tp_vars);
       ckb_offset = ckb->size();
       // instantiate value_assign
       ckb->reserve(ckb_offset + sizeof(kernel_prefix));
