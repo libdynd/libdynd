@@ -87,15 +87,8 @@ namespace nd {
     }
   };
 
-  extern DYND_API struct DYND_API byteswap : declfunc<byteswap> {
-    static callable make();
-    static callable &get();
-  } byteswap;
-
-  extern DYND_API struct DYND_API pairwise_byteswap : declfunc<pairwise_byteswap> {
-    static callable make();
-    static callable &get();
-  } pairwise_byteswap;
+  extern DYND_API callable byteswap;
+  extern DYND_API callable pairwise_byteswap;
 
 } // namespace dynd::nd
 } // namespace dynd

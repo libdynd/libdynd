@@ -95,6 +95,7 @@ DYND_API nd::callable nd::logical_and =
 DYND_API nd::callable nd::logical_or =
     make_binary_arithmetic<nd::logical_or, nd::logical_or_callable, binop_real_ids>();
 
-DYND_API nd::callable nd::compound_add = make_compound_arithmetic<nd::compound_add, compound_add_callable, binop_ids>();
+DYND_API nd::callable nd::compound_add =
+    make_compound_arithmetic<nd::compound_add, nd::compound_add_callable, binop_ids>();
 DYND_API nd::callable nd::compound_div =
     make_compound_arithmetic<nd::compound_div, nd::compound_div_callable, binop_ids>();
