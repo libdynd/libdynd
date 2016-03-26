@@ -21,37 +21,34 @@ namespace dynd {
 namespace nd {
   namespace json {
 
-    extern DYND_API struct DYND_API parse : declfunc<parse> {
-      array operator()(const ndt::type &ret_tp, const char *begin, const char *end)
-      {
-        skip_whitespace(begin, end);
+    extern DYND_API callable dynamic_parse;
 
-        ndt::type dst_tp2 = ret_tp;
-        char *args_data[2] = {reinterpret_cast<char *>(&begin), reinterpret_cast<char *>(&end)};
-        nd::array ret =
-            get()->call(dst_tp2, 0, nullptr, nullptr, args_data, 0, nullptr, std::map<std::string, ndt::type>());
+    inline array parse(const ndt::type &ret_tp, const char *begin, const char *end)
+    {
+      skip_whitespace(begin, end);
 
-        skip_whitespace(begin, end);
-        if (begin != end) {
-          throw json_parse_error(begin, "unexpected trailing JSON text", ret_tp);
-        }
+      ndt::type dst_tp2 = ret_tp;
+      char *args_data[2] = {reinterpret_cast<char *>(&begin), reinterpret_cast<char *>(&end)};
+      nd::array ret =
+          dynamic_parse->call(dst_tp2, 0, nullptr, nullptr, args_data, 0, nullptr, std::map<std::string, ndt::type>());
 
-        return ret;
+      skip_whitespace(begin, end);
+      if (begin != end) {
+        throw json_parse_error(begin, "unexpected trailing JSON text", ret_tp);
       }
 
-      array operator()(const ndt::type &ret_tp, const char *begin)
-      {
-        return (*this)(ret_tp, begin, begin + std::strlen(begin));
-      }
+      return ret;
+    }
 
-      array operator()(const ndt::type &ret_tp, const std::string &s)
-      {
-        return (*this)(ret_tp, s.c_str(), s.c_str() + s.size());
-      }
+    inline array parse(const ndt::type &ret_tp, const char *begin)
+    {
+      return parse(ret_tp, begin, begin + std::strlen(begin));
+    }
 
-      static callable make();
-      static callable &get();
-    } parse;
+    inline array parse(const ndt::type &ret_tp, const std::string &s)
+    {
+      return parse(ret_tp, s.c_str(), s.c_str() + s.size());
+    }
 
   } // namespace dynd::nd::json
 } // namespace dynd::nd

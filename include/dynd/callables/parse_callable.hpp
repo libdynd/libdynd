@@ -44,8 +44,8 @@ namespace nd {
         ckb_offset = ckb->size();
 
         ckb->get_at<parse_kernel<option_id>>(self_offset)->parse_offset = ckb_offset - self_offset;
-        parse::get()->instantiate(data, ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc,
-                                  src_tp, src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
+        dynamic_parse->instantiate(data, ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc,
+                                   src_tp, src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
       }
     };
@@ -73,9 +73,9 @@ namespace nd {
 
         for (size_t i = 0; i < field_count; ++i) {
           ckb->get_at<parse_kernel<struct_id>>(self_offset)->child_offsets[i] = ckb_offset - self_offset;
-          json::parse::get()->instantiate(data, ckb, dst_tp.extended<ndt::struct_type>()->get_field_type(i),
-                                          dst_arrmeta + arrmeta_offsets[i], nsrc, src_tp, src_arrmeta, kernreq, nkwd,
-                                          kwds, tp_vars);
+          dynamic_parse->instantiate(data, ckb, dst_tp.extended<ndt::struct_type>()->get_field_type(i),
+                                     dst_arrmeta + arrmeta_offsets[i], nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
+                                     tp_vars);
           ckb_offset = ckb->size();
         }
       }
@@ -98,9 +98,8 @@ namespace nd {
                                                       reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride);
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
-        json::parse::get()->instantiate(data, ckb, child_dst_tp,
-                                        dst_arrmeta + sizeof(ndt::fixed_dim_type::metadata_type), nsrc, src_tp,
-                                        src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        dynamic_parse->instantiate(data, ckb, child_dst_tp, dst_arrmeta + sizeof(ndt::fixed_dim_type::metadata_type),
+                                   nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
       }
     };
 
@@ -121,8 +120,8 @@ namespace nd {
             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->stride);
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::var_dim_type>()->get_element_type();
-        json::parse::get()->instantiate(data, ckb, child_dst_tp, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type),
-                                        nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        dynamic_parse->instantiate(data, ckb, child_dst_tp, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type),
+                                   nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
       }
     };
 
