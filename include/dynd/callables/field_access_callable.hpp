@@ -35,8 +35,8 @@ namespace nd {
       ckb->emplace_back<field_access_kernel>(kernreq, data_offset);
 
       static const array error_mode(opt<assign_error_mode>());
-      assign::get()->instantiate(data, ckb, dst_tp, dst_arrmeta, 1, field_type, field_metadata,
-                                 kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
+      assign->instantiate(data, ckb, dst_tp, dst_arrmeta, 1, field_type, field_metadata,
+                          kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
     };
 
     const ndt::type &get_field_type(const ndt::type *src_tp, const array *kwds)

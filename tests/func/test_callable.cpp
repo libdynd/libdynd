@@ -145,7 +145,7 @@ TEST(Callable, KeywordParsing)
 TEST(Callable, Assignment_CallInterface)
 {
   // Test with the unary operation prototype
-  nd::callable af = nd::assign::get().specialize(ndt::make_type<int>(), {ndt::make_type<ndt::string_type>()});
+  nd::callable af = nd::assign.specialize(ndt::make_type<int>(), {ndt::make_type<ndt::string_type>()});
 
   // Call it through the call() interface
   nd::array b = af("12345678");

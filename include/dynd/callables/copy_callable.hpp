@@ -34,8 +34,8 @@ namespace nd {
                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       array error_mode = eval::default_eval_context.errmode;
-      assign::get()->instantiate(NULL, ckb, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta, kernreq, 1, &error_mode,
-                                 std::map<std::string, ndt::type>());
+      assign->instantiate(NULL, ckb, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta, kernreq, 1, &error_mode,
+                          std::map<std::string, ndt::type>());
     }
   };
 

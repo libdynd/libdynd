@@ -34,8 +34,8 @@ namespace nd {
 
         nd::array error_mode = assign_error_default;
         const char *child_src_metadata = m_val.get()->metadata();
-        assign::get()->instantiate(NULL, ckb, dst_tp, dst_arrmeta, 1, &dst_tp, &child_src_metadata,
-                                   kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
+        assign->instantiate(NULL, ckb, dst_tp, dst_arrmeta, 1, &dst_tp, &child_src_metadata,
+                            kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
       }
     };
 

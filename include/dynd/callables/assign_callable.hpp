@@ -413,9 +413,9 @@ namespace nd {
       ckb->emplace_back<assignment_kernel<pointer_id, pointer_id>>(kernreq);
 
       const char *child_src_arrmeta = src_arrmeta[0] + sizeof(pointer_type_arrmeta);
-      assign::get()->instantiate(NULL, ckb, dst_tp.extended<ndt::pointer_type>()->get_target_type(), dst_arrmeta, 1,
-                                 &src_tp[0].extended<ndt::pointer_type>()->get_target_type(), &child_src_arrmeta,
-                                 kernel_request_single, nkwd, kwds, tp_vars);
+      assign->instantiate(NULL, ckb, dst_tp.extended<ndt::pointer_type>()->get_target_type(), dst_arrmeta, 1,
+                          &src_tp[0].extended<ndt::pointer_type>()->get_target_type(), &child_src_arrmeta,
+                          kernel_request_single, nkwd, kwds, tp_vars);
     }
   };
 
@@ -460,8 +460,8 @@ namespace nd {
       ckb->reserve(ckb_offset + sizeof(kernel_prefix));
       self = ckb->get_at<self_type>(root_ckb_offset);
       self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-      assign::get()->instantiate(NULL, ckb, dst_val_tp, dst_arrmeta, 1, &src_val_tp, src_arrmeta,
-                                 kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
+      assign->instantiate(NULL, ckb, dst_val_tp, dst_arrmeta, 1, &src_val_tp, src_arrmeta,
+                          kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
     }
   };
 
@@ -533,8 +533,8 @@ namespace nd {
         return;
       case string_id: {
         // Just a string to string assignment
-        assign::get()->instantiate(NULL, ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc,
-                                   src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+        assign->instantiate(NULL, ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc, src_tp,
+                            src_arrmeta, kernreq, nkwd, kwds, tp_vars);
         return;
       }
       default:
@@ -548,8 +548,8 @@ namespace nd {
       ckb->emplace_back<detail::string_to_option_tp_ck>(kernreq);
       ckb_offset = ckb->size();
       // First child ckernel is the value assignment
-      assign::get()->instantiate(NULL, ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc,
-                                 src_tp, src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
+      assign->instantiate(NULL, ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc, src_tp,
+                          src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
       // Re-acquire self because the address may have changed
       detail::string_to_option_tp_ck *self = ckb->get_at<detail::string_to_option_tp_ck>(root_ckb_offset);
@@ -654,8 +654,8 @@ namespace nd {
       self_type *self = ckb->get_at<self_type>(root_ckb_offset);
       self->m_value_assign_offset = ckb_offset - root_ckb_offset;
 
-      assign::get()->instantiate(NULL, ckb, dst_tp, dst_arrmeta, 1, &src_val_tp, src_arrmeta,
-                                 kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
+      assign->instantiate(NULL, ckb, dst_tp, dst_arrmeta, 1, &src_val_tp, src_arrmeta,
+                          kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
     }
   };
 
@@ -676,8 +676,8 @@ namespace nd {
         ckb->emplace_back<detail::adapt_assign_from_kernel>(kernreq, storage_tp.get_canonical_type());
         ckb_offset = ckb->size();
 
-        nd::assign::get()->instantiate(data, ckb, storage_tp.get_canonical_type(), dst_arrmeta, nsrc, &storage_tp,
-                                       src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
+        nd::assign->instantiate(data, ckb, storage_tp.get_canonical_type(), dst_arrmeta, nsrc, &storage_tp, src_arrmeta,
+                                kernel_request_single, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
         intptr_t forward_offset = ckb_offset - self_offset;
         ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
@@ -724,8 +724,8 @@ namespace nd {
           dst_tp.get_id() == option_id ? dst_tp.extended<ndt::option_type>()->get_value_type() : dst_tp;
       ndt::type val_src_tp =
           src_tp[0].get_id() == option_id ? src_tp[0].extended<ndt::option_type>()->get_value_type() : src_tp[0];
-      assign::get()->instantiate(NULL, ckb, val_dst_tp, dst_arrmeta, 1, &val_src_tp, src_arrmeta, kernreq, nkwd, kwds,
-                                 tp_vars);
+      assign->instantiate(NULL, ckb, val_dst_tp, dst_arrmeta, 1, &val_src_tp, src_arrmeta, kernreq, nkwd, kwds,
+                          tp_vars);
     }
   };
 

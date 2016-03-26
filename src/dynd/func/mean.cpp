@@ -14,8 +14,4 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::mean::make() { return make_callable<mean_callable>(ndt::type(int64_id)); }
-
-DYND_DEFAULT_DECLFUNC_GET(nd::mean)
-
-DYND_API struct nd::mean nd::mean;
+DYND_API nd::callable nd::mean = nd::make_callable<nd::mean_callable>(ndt::type(int64_id));
