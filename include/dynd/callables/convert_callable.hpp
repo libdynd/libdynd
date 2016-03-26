@@ -51,8 +51,8 @@ namespace nd {
           if (!self->m_bufs[i].is_null()) {
             self->m_src_buf_ck_offsets[i] = ckb_offset - root_ckb_offset;
             nd::array error_mode = eval::default_eval_context.errmode;
-            assign::get()->instantiate(NULL, ckb, src_tp_for_af[i], self->m_bufs[i].get_arrmeta(), 1, src_tp + i,
-                                       src_arrmeta + i, kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
+            assign->instantiate(NULL, ckb, src_tp_for_af[i], self->m_bufs[i].get_arrmeta(), 1, src_tp + i,
+                                src_arrmeta + i, kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
             ckb_offset = ckb->size();
             reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(kernel_prefix));
             if (i < nsrc - 1) {

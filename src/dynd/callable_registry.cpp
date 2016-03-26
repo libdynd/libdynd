@@ -39,7 +39,7 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
     registry["divide"] = divide::get();
 
     // dynd/assign.hpp
-    registry["assign"] = assign::get();
+    registry["assign"] = assign;
 
     // dynd/complex.hpp
     registry["real"] = real;

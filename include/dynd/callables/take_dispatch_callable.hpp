@@ -68,8 +68,8 @@ namespace nd {
 
       // Create the child element assignment ckernel
       nd::array error_mode = assign_error_default;
-      assign::get()->instantiate(NULL, ckb, dst_el_tp, dst_el_meta, 1, &src0_el_tp, &src0_el_meta,
-                                 kernel_request_strided, 1, &error_mode, tp_vars);
+      assign->instantiate(NULL, ckb, dst_el_tp, dst_el_meta, 1, &src0_el_tp, &src0_el_meta, kernel_request_strided, 1,
+                          &error_mode, tp_vars);
     }
   };
 
@@ -127,8 +127,8 @@ namespace nd {
 
       // Create the child element assignment ckernel
       nd::array error_mode = assign_error_default;
-      assign::get()->instantiate(NULL, ckb, dst_el_tp, dst_el_meta, 1, &src0_el_tp, &src0_el_meta,
-                                 kernel_request_single, 1, &error_mode, tp_vars);
+      assign->instantiate(NULL, ckb, dst_el_tp, dst_el_meta, 1, &src0_el_tp, &src0_el_meta, kernel_request_single, 1,
+                          &error_mode, tp_vars);
     }
   };
 

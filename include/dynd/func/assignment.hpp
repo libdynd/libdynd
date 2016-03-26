@@ -631,10 +631,7 @@ check_cast(ArgType s, inexact_check_t)
 
 namespace nd {
 
-  extern DYND_API struct DYND_API assign : declfunc<assign> {
-    static callable make();
-    static callable &get();
-  } assign;
+  extern DYND_API callable assign;
 
 } // namespace dynd::nd
 
