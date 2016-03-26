@@ -6,19 +6,20 @@
 #include <map>
 #include <cmath>
 
+#include <dynd/arithmetic.hpp>
 #include <dynd/callable_registry.hpp>
-#include <dynd/func/arithmetic.hpp>
+#include <dynd/pointer.hpp>
+
 #include <dynd/func/assignment.hpp>
 #include <dynd/io.hpp>
 #include <dynd/math.hpp>
 #include <dynd/option.hpp>
 #include <dynd/func/random.hpp>
-#include <dynd/func/sum.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/func/min.hpp>
 #include <dynd/func/max.hpp>
 #include <dynd/func/complex.hpp>
-#include <dynd/func/pointer.hpp>
+
 
 using namespace std;
 using namespace dynd;
@@ -28,7 +29,6 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
   static map<std::string, nd::callable> registry;
   if (registry.empty()) {
     registry["take"] = take;
-    registry["sum"] = sum;
     registry["min"] = min;
     registry["max"] = max;
 
@@ -37,6 +37,7 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
     registry["subtract"] = subtract;
     registry["multiply"] = multiply;
     registry["divide"] = divide;
+    registry["sum"] = sum;
 
     // dynd/assign.hpp
     registry["assign"] = assign;

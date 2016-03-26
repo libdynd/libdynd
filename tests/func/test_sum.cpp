@@ -10,7 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/func/sum.hpp>
+#include <dynd/arithmetic.hpp>
 #include <dynd/logic.hpp>
 
 #include "dynd_assertions.hpp"

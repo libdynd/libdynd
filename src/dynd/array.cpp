@@ -3,16 +3,18 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/arithmetic.hpp>
 #include <dynd/array.hpp>
+#include <dynd/comparison.hpp>
+
+
+
+
 #include <dynd/array_iter.hpp>
-#include <dynd/callable.hpp>
-#include <dynd/func/arithmetic.hpp>
 #include <dynd/callable_registry.hpp>
 #include <dynd/types/datashape_formatter.hpp>
 #include <dynd/func/complex.hpp>
-#include <dynd/func/pointer.hpp>
 #include <dynd/func/assignment.hpp>
-#include <dynd/func/comparison.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/option.hpp>
 #include <dynd/struct.hpp>

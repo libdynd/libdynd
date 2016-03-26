@@ -11,7 +11,7 @@
 #include "../test_memory_new.hpp"
 #include "../dynd_assertions.hpp"
 
-#include <dynd/func/arithmetic.hpp>
+#include <dynd/arithmetic.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/comparison.hpp>
 #include <dynd/callables/base_callable.hpp>
 #include <dynd/kernels/sort_kernel.hpp>
 

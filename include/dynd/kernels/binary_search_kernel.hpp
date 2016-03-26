@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <dynd/func/comparison.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 
 namespace dynd {

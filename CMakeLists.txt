@@ -249,14 +249,10 @@ set(libdynd_SRC
     include/dynd/types/substitute_typevars.hpp
     # Callables
     src/dynd/callables/base_callable.cpp
-    src/dynd/callables/equal_callable.cpp
-    src/dynd/callables/not_equal_callable.cpp
     include/dynd/callables/base_callable.hpp
     include/dynd/callables/base_dispatch_callable.hpp
     # Func
-    src/dynd/func/arithmetic.cpp
     src/dynd/func/assignment.cpp
-    src/dynd/func/comparison.cpp
     src/dynd/func/complex.cpp
     src/dynd/func/compose.cpp
     src/dynd/func/compound.cpp
@@ -270,16 +266,12 @@ set(libdynd_SRC
     src/dynd/func/mean.cpp
     src/dynd/func/neighborhood.cpp
     src/dynd/func/outer.cpp
-    src/dynd/func/pointer.cpp
     src/dynd/func/random.cpp
-    src/dynd/func/sum.cpp
     src/dynd/func/take.cpp
     src/dynd/func/view.cpp
-    include/dynd/func/arithmetic.hpp
     include/dynd/callable_registry.hpp
     include/dynd/func/assignment.hpp
     include/dynd/func/copy.hpp
-    include/dynd/func/comparison.hpp
     include/dynd/func/complex.hpp
     include/dynd/func/compose.hpp
     include/dynd/func/compound.hpp
@@ -292,9 +284,7 @@ set(libdynd_SRC
     include/dynd/func/min.hpp
     include/dynd/func/neighborhood.hpp
     include/dynd/func/outer.hpp
-    include/dynd/func/pointer.hpp
     include/dynd/func/random.hpp
-    include/dynd/func/sum.hpp
     include/dynd/func/take.hpp
     include/dynd/func/view.hpp
     # Kernels
@@ -309,7 +299,6 @@ set(libdynd_SRC
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/base_kernel.hpp
     include/dynd/kernels/byteswap_kernels.hpp
-    include/dynd/kernels/compare_kernels.hpp
     include/dynd/kernels/compose_kernel.hpp
     include/dynd/kernels/compound_kernel.hpp
     include/dynd/kernels/constant_kernel.hpp
@@ -337,16 +326,19 @@ set(libdynd_SRC
     include/dynd/kernels/uniform_kernel.hpp
     include/dynd/kernels/view_kernel.hpp
     # Main
+    src/dynd/arithmetic.cpp
     src/dynd/array.cpp
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
     src/dynd/callable.cpp
     src/dynd/callable_registry.cpp
+    src/dynd/comparison.cpp
     src/dynd/convert.cpp
     src/dynd/io.cpp
     src/dynd/math.cpp
     src/dynd/option.cpp
     src/dynd/parse.cpp
+    src/dynd/pointer.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp
     src/dynd/struct.cpp
@@ -356,6 +348,7 @@ set(libdynd_SRC
     src/dynd/logic.cpp
     src/dynd/string.cpp
     src/dynd/view.cpp
+    include/dynd/arithmetic.hpp
     include/dynd/array.hpp
     include/dynd/array_range.hpp
     include/dynd/array_iter.hpp
@@ -364,6 +357,7 @@ set(libdynd_SRC
     include/dynd/callable.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
+    include/dynd/comparison.hpp
     include/dynd/complex.hpp
     include/dynd/config.hpp
     include/dynd/cling_all.hpp
@@ -389,6 +383,7 @@ set(libdynd_SRC
     include/dynd/irange.hpp
     include/dynd/option.hpp
     include/dynd/platform_definitions.hpp
+    include/dynd/pointer.hpp
     include/dynd/shortvector.hpp
     include/dynd/string_encodings.hpp
     include/dynd/view.hpp

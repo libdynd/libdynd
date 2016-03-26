@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include <dynd/func/arithmetic.hpp>
-#include <dynd/func/sum.hpp>
+#include <dynd/arithmetic.hpp>
 #include <dynd/kernels/base_strided_kernel.hpp>
 #include <dynd/types/any_kind_type.hpp>
 

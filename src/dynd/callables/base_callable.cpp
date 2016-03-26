@@ -3,8 +3,6 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <memory>
-
 #include <dynd/callables/base_callable.hpp>
 
 using namespace std;
@@ -54,8 +52,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
-  instantiate(data, &ckb, dst_tp, dst.get()->metadata(), nsrc, src_tp, src_arrmeta, kernel_request_call, nkwd, kwds,
-              tp_vars);
+  instantiate(data, &ckb, dst_tp, dst->metadata(), nsrc, src_tp, src_arrmeta, kernel_request_call, nkwd, kwds, tp_vars);
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
   fn(ckb.get(), &dst, src_data);
 
