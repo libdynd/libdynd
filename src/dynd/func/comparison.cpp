@@ -39,24 +39,15 @@ DYND_API struct nd::greater_equal nd::greater_equal;
 
 nd::array nd::operator>=(const array &a0, const array &a1) { return greater_equal(a0, a1); }
 
-DYND_DEFAULT_DECLFUNC_GET(nd::greater)
-
-DYND_API struct nd::greater nd::greater;
+DYND_API nd::callable nd::greater = make_callable<comparison_dispatch_callable>(
+    ndt::type("(Any, Any) -> Any"), make_comparison_children<nd::greater, nd::greater_callable>());
 
 nd::array nd::operator>(const array &a0, const array &a1) { return greater(a0, a1); }
 
-nd::callable nd::total_order::make()
-{
-  dispatcher<callable> dispatcher;
-  dispatcher.insert(
-      {{fixed_string_id, fixed_string_id}, make_callable<total_order_callable<fixed_string_id, fixed_string_id>>()});
-  dispatcher.insert({{string_id, string_id}, make_callable<total_order_callable<string_id, string_id>>()});
-  dispatcher.insert({{int32_id, int32_id}, make_callable<total_order_callable<int32_id, int32_id>>()});
-  dispatcher.insert({{bool_id, bool_id}, make_callable<total_order_callable<bool_id, bool_id>>()});
-
-  return make_callable<comparison_dispatch_callable>(ndt::type("(Any, Any) -> Any"), dispatcher);
-}
-
-DYND_DEFAULT_DECLFUNC_GET(nd::total_order)
-
-DYND_API struct nd::total_order nd::total_order;
+DYND_API nd::callable nd::total_order = nd::make_callable<nd::comparison_dispatch_callable>(
+    ndt::type("(Any, Any) -> Any"),
+    dispatcher<callable>{{{fixed_string_id, fixed_string_id},
+                          nd::make_callable<nd::total_order_callable<fixed_string_id, fixed_string_id>>()},
+                         {{string_id, string_id}, nd::make_callable<nd::total_order_callable<string_id, string_id>>()},
+                         {{int32_id, int32_id}, nd::make_callable<nd::total_order_callable<int32_id, int32_id>>()},
+                         {{bool_id, bool_id}, nd::make_callable<nd::total_order_callable<bool_id, bool_id>>()}});

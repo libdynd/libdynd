@@ -34,8 +34,8 @@ namespace nd {
       ndt::type child_src_tp[2] = {element_tp, element_tp};
       const char *child_src_arrmeta[2] = {n_arrmeta, n_arrmeta};
 
-      total_order::get().get()->instantiate(data, ckb, ndt::make_type<int>(), NULL, 2, child_src_tp, child_src_arrmeta,
-                                            kernreq | kernel_request_data_only, 0, NULL, tp_vars);
+      total_order->instantiate(data, ckb, ndt::make_type<int>(), NULL, 2, child_src_tp, child_src_arrmeta,
+                               kernreq | kernel_request_data_only, 0, NULL, tp_vars);
     }
   };
 

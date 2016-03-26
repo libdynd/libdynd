@@ -28,6 +28,12 @@ namespace nd {
       return make_callable<call_callable<FuncType>>(tp);
     }
 
+    template <callable &Callable>
+    callable call(const ndt::type &tp)
+    {
+      return make_callable<new_call_callable<Callable>>(tp);
+    }
+
     inline callable adapt(const ndt::type &value_tp, const callable &forward)
     {
       return make_callable<adapt_callable>(value_tp, forward);
