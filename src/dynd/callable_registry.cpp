@@ -42,7 +42,7 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
     registry["assign"] = assign::get();
 
     // dynd/complex.hpp
-    registry["real"] = real::get();
+    registry["real"] = real;
     registry["imag"] = imag::get();
     registry["conj"] = conj::get();
 

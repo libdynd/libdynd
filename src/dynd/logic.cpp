@@ -10,4 +10,4 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::all = functional::reduction(make_callable<all_callable>());
+DYND_API nd::callable nd::all = nd::functional::reduction(nd::make_callable<nd::all_callable>());
