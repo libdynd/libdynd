@@ -19,101 +19,83 @@
 using namespace std;
 using namespace dynd;
 
-ndt::type_registry::type_registry()
+DYNDT_API vector<id_info> &detail::infos()
 {
-  m_infos.emplace_back();
+  static vector<id_info> infos{{},
+                               {"Any", any_kind_id, base_ids<any_kind_id>()},
+                               {"Scalar", scalar_kind_id, base_ids<scalar_kind_id>()},
+                               {"Bool", bool_kind_id, base_ids<bool_kind_id>()},
+                               {"bool", bool_id, base_ids<bool_id>()},
+                               {"Int", int_kind_id, base_ids<int_kind_id>()},
+                               {"int8", int8_id, base_ids<int8_id>()},
+                               {"int16", int16_id, base_ids<int16_id>()},
+                               {"int32", int32_id, base_ids<int32_id>()},
+                               {"int64", int64_id, base_ids<int64_id>()},
+                               {"int128", int128_id, base_ids<int128_id>()},
+                               {"UInt", uint_kind_id, base_ids<uint_kind_id>()},
+                               {"uint8", uint8_id, base_ids<uint8_id>()},
+                               {"uint16", uint16_id, base_ids<uint16_id>()},
+                               {"uint32", uint32_id, base_ids<uint32_id>()},
+                               {"uint64", uint64_id, base_ids<uint64_id>()},
+                               {"uint128", uint128_id, base_ids<uint128_id>()},
+                               {"Float", float_kind_id, base_ids<float_kind_id>()},
+                               {"float16", float16_id, base_ids<float16_id>()},
+                               {"float32", float32_id, base_ids<float32_id>()},
+                               {"float64", float64_id, base_ids<float64_id>()},
+                               {"float128", float128_id, base_ids<float128_id>()},
+                               {"Complex", complex_kind_id, base_ids<complex_kind_id>()},
+                               {"complex32", complex_float32_id, base_ids<complex_float32_id>()},
+                               {"complex64", complex_float64_id, base_ids<complex_float64_id>()},
+                               {"void", void_id, base_ids<void_id>()},
+                               {"Dim", dim_kind_id, base_ids<dim_kind_id>()},
+                               {"Bytes", bytes_kind_id, base_ids<bytes_kind_id>()},
+                               {"fixed_bytes", fixed_bytes_id, base_ids<fixed_bytes_id>()},
+                               {"bytes", bytes_id, base_ids<bytes_id>()},
+                               {"String", string_kind_id, base_ids<string_kind_id>()},
+                               {"fixed_string", fixed_string_id, base_ids<fixed_string_id>()},
+                               {"char", char_id, base_ids<char_id>()},
+                               {"string", string_id, base_ids<string_id>()},
+                               {"tuple", tuple_id, base_ids<tuple_id>()},
+                               {"struct", struct_id, base_ids<struct_id>()},
+                               {"Fixed", fixed_dim_kind_id, base_ids<fixed_dim_kind_id>()},
+                               {"fixed", fixed_dim_id, base_ids<fixed_dim_id>()},
+                               {"var", var_dim_id, base_ids<var_dim_id>()},
+                               {"categorical", categorical_id, base_ids<categorical_id>()},
+                               {"option", option_id, base_ids<option_id>()},
+                               {"pointer", pointer_id, base_ids<pointer_id>()},
+                               {"memory", memory_id, base_ids<memory_id>()},
+                               {"type", type_id, base_ids<type_id>()},
+                               {"array", array_id, base_ids<array_id>()},
+                               {"callable", callable_id, base_ids<callable_id>()},
+                               {"Expr", expr_kind_id, base_ids<expr_kind_id>()},
+                               {"adapt", adapt_id, base_ids<adapt_id>()},
+                               {"expr", expr_id, base_ids<expr_id>()},
+                               {"cuda_host", cuda_host_id, {any_kind_id}},
+                               {"cuda_device", cuda_device_id, {any_kind_id}},
+                               {"", kind_sym_id, {any_kind_id}},
+                               {"", int_sym_id, {any_kind_id}},
+                               {"", typevar_id, base_ids<typevar_id>()},
+                               {"", typevar_dim_id, {any_kind_id}},
+                               {"", typevar_constructed_id, {any_kind_id}},
+                               {"", pow_dimsym_id, {any_kind_id}},
+                               {"", ellipsis_dim_id, {any_kind_id}},
+                               {"", dim_fragment_id, {any_kind_id}}};
 
-  m_infos.emplace_back(any_kind_id, make_type<any_kind_type>());
-  insert(base_id_of<scalar_kind_id>::value, make_type<scalar_kind_type>());
-
-  insert(base_id_of<bool_kind_id>::value, type());
-  insert(base_id_of<bool_id>::value, type(reinterpret_cast<const base_type *>(bool_id), false));
-
-  insert(base_id_of<int_kind_id>::value, type());
-  insert(base_id_of<int8_id>::value, type(reinterpret_cast<const base_type *>(int8_id), false));
-  insert(base_id_of<int16_id>::value, type(reinterpret_cast<const base_type *>(int16_id), false));
-  insert(base_id_of<int32_id>::value, type(reinterpret_cast<const base_type *>(int32_id), false));
-  insert(base_id_of<int64_id>::value, type(reinterpret_cast<const base_type *>(int64_id), false));
-  insert(base_id_of<int128_id>::value, type(reinterpret_cast<const base_type *>(int128_id), false));
-
-  insert(base_id_of<uint_kind_id>::value, type());
-  insert(base_id_of<uint8_id>::value, type(reinterpret_cast<const base_type *>(uint8_id), false));
-  insert(base_id_of<uint16_id>::value, type(reinterpret_cast<const base_type *>(uint16_id), false));
-  insert(base_id_of<uint32_id>::value, type(reinterpret_cast<const base_type *>(uint32_id), false));
-  insert(base_id_of<uint64_id>::value, type(reinterpret_cast<const base_type *>(uint64_id), false));
-  insert(base_id_of<uint128_id>::value, type(reinterpret_cast<const base_type *>(uint128_id), false));
-
-  insert(base_id_of<float_kind_id>::value, type());
-  insert(base_id_of<float16_id>::value, type(reinterpret_cast<const base_type *>(float16_id), false));
-  insert(base_id_of<float32_id>::value, type(reinterpret_cast<const base_type *>(float32_id), false));
-  insert(base_id_of<float64_id>::value, type(reinterpret_cast<const base_type *>(float64_id), false));
-  insert(base_id_of<float128_id>::value, type(reinterpret_cast<const base_type *>(float128_id), false));
-
-  insert(base_id_of<complex_kind_id>::value, type());
-  insert(base_id_of<complex_float32_id>::value, type(reinterpret_cast<const base_type *>(complex_float32_id), false));
-  insert(base_id_of<complex_float64_id>::value, type(reinterpret_cast<const base_type *>(complex_float64_id), false));
-
-  insert(base_id_of<void_id>::value, type(reinterpret_cast<const base_type *>(void_id), false));
-
-  insert(base_id_of<dim_kind_id>::value, type());
-
-  insert(base_id_of<bytes_kind_id>::value, type());
-  insert(base_id_of<fixed_bytes_id>::value, fixed_bytes_kind_type::make());
-  insert(base_id_of<bytes_id>::value, bytes_type::make());
-
-  insert(base_id_of<string_kind_id>::value, type());
-  insert(base_id_of<fixed_string_id>::value, fixed_string_kind_type::make());
-  insert(base_id_of<char_id>::value, make_type<char_type>());
-  insert(base_id_of<string_id>::value, make_type<string_type>());
-
-  insert(base_id_of<tuple_id>::value, tuple_type::make(true));
-  insert(base_id_of<struct_id>::value, struct_type::make(true));
-
-  insert(base_id_of<fixed_dim_kind_id>::value, type());
-  insert(base_id_of<fixed_dim_id>::value, base_fixed_dim_type::make(any_kind_type::make()));
-  insert(base_id_of<var_dim_id>::value, var_dim_type::make(any_kind_type::make()));
-
-  insert(scalar_kind_id, categorical_kind_type::make());          // categorical_id
-  insert(any_kind_id, type("?Any"));                              // option_id
-  insert(any_kind_id, pointer_type::make(any_kind_type::make())); // pointer_id
-  insert(any_kind_id, type());                                    // memory_id
-
-  insert(base_id_of<type_id>::value, make_type<type_type>());
-  insert(base_id_of<array_id>::value, type());
-  insert(base_id_of<callable_id>::value, type());
-
-  insert(any_kind_id, type());  // expr_kind_id
-  insert(expr_kind_id, type()); // adapt_id
-  insert(expr_kind_id, type()); // expr_id
-
-  insert(any_kind_id, type()); // cuda_host_id
-  insert(any_kind_id, type()); // cuda_device_id
-
-  insert(any_kind_id, type()); // kind_sym_id
-  insert(any_kind_id, type()); // int_sym_id
-
-  insert(any_kind_id, type()); // typevar_id
-  insert(any_kind_id, type()); // typevar_dim_id
-  insert(any_kind_id, type()); // typevar_constructed_id
-  insert(any_kind_id, type()); // pow_dimsym_id
-  insert(any_kind_id, type()); // ellipsis_dim_id
-  insert(any_kind_id, type()); // dim_fragment_id
+  return infos;
 }
 
-DYNDT_API size_t ndt::type_registry::size() const { return m_infos.size(); }
-
-DYNDT_API type_id_t ndt::type_registry::insert(type_id_t base_id, const type &tp)
+DYNDT_API type_id_t dynd::new_id(const char *name, type_id_t base_id)
 {
-  type_id_t id = static_cast<type_id_t>(size());
+  vector<id_info> &infos = detail::infos();
+
+  type_id_t id = static_cast<type_id_t>(infos.size());
 
   vector<type_id_t> base_ids{base_id};
-  for (type_id_t id : m_infos[base_id].get_base_ids()) {
+  for (type_id_t id : infos[base_id].base_ids) {
     base_ids.push_back(id);
   }
 
-  m_infos.emplace_back(id, tp, base_ids);
+  infos.emplace_back(name, id, base_ids);
 
   return id;
 }
-
-DYNDT_API class ndt::type_registry ndt::type_registry;

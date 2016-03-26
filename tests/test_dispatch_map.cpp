@@ -19,48 +19,36 @@ using namespace dynd;
 
 TEST(TypeRegistry, Bases)
 {
-  EXPECT_EQ(vector<type_id_t>({any_kind_id}), ndt::type_registry[scalar_kind_id].get_base_ids());
+  EXPECT_EQ(vector<type_id_t>({any_kind_id}), base_ids(scalar_kind_id));
 
-  EXPECT_EQ(vector<type_id_t>({scalar_kind_id, any_kind_id}), ndt::type_registry[bool_kind_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({bool_kind_id, scalar_kind_id, any_kind_id}), ndt::type_registry[bool_id].get_base_ids());
+  EXPECT_EQ(vector<type_id_t>({scalar_kind_id, any_kind_id}), base_ids(bool_kind_id));
+  EXPECT_EQ(vector<type_id_t>({bool_kind_id, scalar_kind_id, any_kind_id}), base_ids(bool_id));
 
-  EXPECT_EQ(vector<type_id_t>({scalar_kind_id, any_kind_id}), ndt::type_registry[int_kind_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({int_kind_id, scalar_kind_id, any_kind_id}), ndt::type_registry[int8_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({int_kind_id, scalar_kind_id, any_kind_id}), ndt::type_registry[int16_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({int_kind_id, scalar_kind_id, any_kind_id}), ndt::type_registry[int32_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({int_kind_id, scalar_kind_id, any_kind_id}), ndt::type_registry[int64_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({int_kind_id, scalar_kind_id, any_kind_id}),
-            ndt::type_registry[int128_id].get_base_ids());
+  EXPECT_EQ(vector<type_id_t>({scalar_kind_id, any_kind_id}), base_ids(int_kind_id));
+  EXPECT_EQ(vector<type_id_t>({int_kind_id, scalar_kind_id, any_kind_id}), base_ids(int8_id));
+  EXPECT_EQ(vector<type_id_t>({int_kind_id, scalar_kind_id, any_kind_id}), base_ids(int16_id));
+  EXPECT_EQ(vector<type_id_t>({int_kind_id, scalar_kind_id, any_kind_id}), base_ids(int32_id));
+  EXPECT_EQ(vector<type_id_t>({int_kind_id, scalar_kind_id, any_kind_id}), base_ids(int64_id));
+  EXPECT_EQ(vector<type_id_t>({int_kind_id, scalar_kind_id, any_kind_id}), base_ids(int128_id));
 
-  EXPECT_EQ(vector<type_id_t>({scalar_kind_id, any_kind_id}), ndt::type_registry[uint_kind_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({uint_kind_id, scalar_kind_id, any_kind_id}),
-            ndt::type_registry[uint8_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({uint_kind_id, scalar_kind_id, any_kind_id}),
-            ndt::type_registry[uint16_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({uint_kind_id, scalar_kind_id, any_kind_id}),
-            ndt::type_registry[uint32_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({uint_kind_id, scalar_kind_id, any_kind_id}),
-            ndt::type_registry[uint64_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({uint_kind_id, scalar_kind_id, any_kind_id}),
-            ndt::type_registry[uint128_id].get_base_ids());
+  EXPECT_EQ(vector<type_id_t>({scalar_kind_id, any_kind_id}), base_ids(uint_kind_id));
+  EXPECT_EQ(vector<type_id_t>({uint_kind_id, scalar_kind_id, any_kind_id}), base_ids(uint8_id));
+  EXPECT_EQ(vector<type_id_t>({uint_kind_id, scalar_kind_id, any_kind_id}), base_ids(uint16_id));
+  EXPECT_EQ(vector<type_id_t>({uint_kind_id, scalar_kind_id, any_kind_id}), base_ids(uint32_id));
+  EXPECT_EQ(vector<type_id_t>({uint_kind_id, scalar_kind_id, any_kind_id}), base_ids(uint64_id));
+  EXPECT_EQ(vector<type_id_t>({uint_kind_id, scalar_kind_id, any_kind_id}), base_ids(uint128_id));
 
-  EXPECT_EQ(vector<type_id_t>({scalar_kind_id, any_kind_id}), ndt::type_registry[float_kind_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({float_kind_id, scalar_kind_id, any_kind_id}),
-            ndt::type_registry[float16_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({float_kind_id, scalar_kind_id, any_kind_id}),
-            ndt::type_registry[float32_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({float_kind_id, scalar_kind_id, any_kind_id}),
-            ndt::type_registry[float64_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({float_kind_id, scalar_kind_id, any_kind_id}),
-            ndt::type_registry[float128_id].get_base_ids());
+  EXPECT_EQ(vector<type_id_t>({scalar_kind_id, any_kind_id}), base_ids(float_kind_id));
+  EXPECT_EQ(vector<type_id_t>({float_kind_id, scalar_kind_id, any_kind_id}), base_ids(float16_id));
+  EXPECT_EQ(vector<type_id_t>({float_kind_id, scalar_kind_id, any_kind_id}), base_ids(float32_id));
+  EXPECT_EQ(vector<type_id_t>({float_kind_id, scalar_kind_id, any_kind_id}), base_ids(float64_id));
+  EXPECT_EQ(vector<type_id_t>({float_kind_id, scalar_kind_id, any_kind_id}), base_ids(float128_id));
 
-  EXPECT_EQ(vector<type_id_t>({scalar_kind_id, any_kind_id}), ndt::type_registry[complex_kind_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({complex_kind_id, scalar_kind_id, any_kind_id}),
-            ndt::type_registry[complex_float32_id].get_base_ids());
-  EXPECT_EQ(vector<type_id_t>({complex_kind_id, scalar_kind_id, any_kind_id}),
-            ndt::type_registry[complex_float64_id].get_base_ids());
+  EXPECT_EQ(vector<type_id_t>({scalar_kind_id, any_kind_id}), base_ids(complex_kind_id));
+  EXPECT_EQ(vector<type_id_t>({complex_kind_id, scalar_kind_id, any_kind_id}), base_ids(complex_float32_id));
+  EXPECT_EQ(vector<type_id_t>({complex_kind_id, scalar_kind_id, any_kind_id}), base_ids(complex_float64_id));
 
-  EXPECT_EQ(vector<type_id_t>({any_kind_id}), ndt::type_registry[void_id].get_base_ids());
+  EXPECT_EQ(vector<type_id_t>({any_kind_id}), base_ids(void_id));
 }
 
 TEST(TypeRegistry, Ambiguous)
@@ -71,8 +59,8 @@ TEST(TypeRegistry, Ambiguous)
 
 TEST(TypeRegistry, IsBaseIDOf)
 {
-  for (type_id_t id = ndt::type_registry.min(); id < void_id; id = static_cast<type_id_t>(id + 1)) {
-    for (type_id_t base_id : ndt::type_registry[id].get_base_ids()) {
+  for (type_id_t id = min_id(); id < void_id; id = static_cast<type_id_t>(id + 1)) {
+    for (type_id_t base_id : base_ids(id)) {
       EXPECT_TRUE(is_base_id_of(base_id, id));
     }
   }
