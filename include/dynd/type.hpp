@@ -787,7 +787,7 @@ namespace ndt {
      * Returns the equivalent type.
      */
     template <typename T, typename... ArgTypes>
-    auto make_type(int, ArgTypes &&... args) -> decltype(traits<T>::equivalent(std::forward<ArgTypes>(args)...))
+    auto _make_type(int, ArgTypes &&... args) -> decltype(traits<T>::equivalent(std::forward<ArgTypes>(args)...))
     {
       return traits<T>::equivalent(std::forward<ArgTypes>(args)...);
     }
@@ -796,7 +796,7 @@ namespace ndt {
      * Returns the equivalent type.
      */
     template <typename T, typename... ArgTypes>
-    auto make_type(char, ArgTypes &&... DYND_UNUSED(args)) -> decltype(traits<T>::equivalent())
+    auto _make_type(char, ArgTypes &&... DYND_UNUSED(args)) -> decltype(traits<T>::equivalent())
     {
       return traits<T>::equivalent();
     }
@@ -807,9 +807,9 @@ namespace ndt {
    * Returns the equivalent type.
    */
   template <typename T, typename... ArgTypes>
-  auto make_type(ArgTypes &&... args) -> decltype(detail::make_type<T>(0, std::forward<ArgTypes>(args)...))
+  auto make_type(ArgTypes &&... args) -> decltype(detail::_make_type<T>(0, std::forward<ArgTypes>(args)...))
   {
-    return detail::make_type<T>(0, std::forward<ArgTypes>(args)...);
+    return detail::_make_type<T>(0, std::forward<ArgTypes>(args)...);
   }
 
   template <typename ValueType>
@@ -1285,16 +1285,40 @@ namespace ndt {
    */
   DYNDT_API type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype, bool &out_any_var);
 
-  DYNDT_API type_id_t register_type(const std::string &name, type_make_t make);
+  /*
+    DYNDT_API type_id_t register_type(const std::string &name, type_make_t make);
 
-  template <typename TypeType>
-  type_id_t register_type(const std::string &name)
-  {
-    return register_type(name,
-                         [](type_id_t tp_id, const nd::array &args) { return type(new TypeType(tp_id, args), false); });
-  }
+    template <typename TypeType>
+    type_id_t register_type(const std::string &name)
+    {
+      return register_type(name,
+                           [](type_id_t tp_id, const nd::array &args) { return type(new TypeType(tp_id, args), false);
+    });
+    }
+  */
 
   DYNDT_API std::ostream &operator<<(std::ostream &o, const type &rhs);
+
+  //  new_id("Any");
+  //  new_id("Scalar", base_id);
+
+  // base_ids(id);
+  // is_base_id_of(base_id, id)
+
+  //    reg(name, tp, parser_func) // can get id from name
+  //  reg(name, callable)
+
+  struct reg_info_t {
+    type tp;
+  };
+
+  namespace detail {
+
+    DYNDT_API std::map<type_id_t, reg_info_t> &infos();
+
+  } // namespace dynd::ndt::detail
+
+  DYNDT_API void reg(type_id_t id, const ndt::type &tp);
 
 } // namespace dynd::ndt
 
@@ -1307,12 +1331,12 @@ DYNDT_API void hexadecimal_print(std::ostream &o, unsigned long value);
 DYNDT_API void hexadecimal_print(std::ostream &o, unsigned long long value);
 DYNDT_API void hexadecimal_print(std::ostream &o, const char *data, intptr_t element_size);
 DYNDT_API void hexadecimal_print_summarized(std::ostream &o, const char *data, intptr_t element_size,
-                                           intptr_t summary_size);
+                                            intptr_t summary_size);
 
 DYNDT_API void strided_array_summarized(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
-                                       intptr_t dim_size, intptr_t stride);
+                                        intptr_t dim_size, intptr_t stride);
 DYNDT_API void print_indented(std::ostream &o, const std::string &indent, const std::string &s,
-                             bool skipfirstline = false);
+                              bool skipfirstline = false);
 
 /** If 'src' can always be cast to 'dst' with no loss of information */
 DYNDT_API bool is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_tp);

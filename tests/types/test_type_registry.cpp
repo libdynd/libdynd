@@ -15,6 +15,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 struct custom_type : ndt::base_type {
   custom_type(type_id_t tp_id, const nd::array &DYND_UNUSED(args)) : base_type(tp_id, 0, 1, type_flag_none, 0, 0, 0) {}
 
@@ -31,3 +32,4 @@ TEST(Type, Registry)
   ndt::type tp = ndt::type::make(tp_id, a);
   EXPECT_EQ(tp_id, tp.get_id());
 }
+*/

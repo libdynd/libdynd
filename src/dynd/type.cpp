@@ -14,6 +14,7 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/any_kind_type.hpp>
+#include <dynd/types/scalar_kind_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/char_type.hpp>
@@ -31,20 +32,6 @@
 
 using namespace std;
 using namespace dynd;
-
-namespace dynd {
-namespace ndt {
-  namespace registry {
-
-    static struct {
-      std::string name;
-      type_make_t func;
-    } data[101];
-    static size_t size = dim_fragment_id + 1;
-
-  } // namespace dynd::ndt::registry
-} // namespace dynd::ndt
-} // namespace dynd
 
 char *dynd::iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, intptr_t DYND_UNUSED(level))
 {
@@ -70,7 +57,7 @@ char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, ch
   return data;
 }
 
-ndt::type::type(type_id_t id) : type(type_registry[id].get_type()) {}
+ndt::type::type(type_id_t id) : type(ndt::detail::infos()[id].tp) {}
 
 ndt::type::type(const std::string &rep) { type_from_datashape(rep).swap(*this); }
 
@@ -590,15 +577,64 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &
   }
 }
 
-type_id_t ndt::register_type(const std::string &name, type_make_t make)
-{
-  registry::data[registry::size].name = name;
-  registry::data[registry::size].func = make;
+// ndt::type ndt::type::make(type_id_t tp_id, const nd::array &args) { return registry::data[tp_id].func(tp_id, args); }
 
-  return static_cast<type_id_t>(registry::size++);
+DYNDT_API map<type_id_t, ndt::reg_info_t> &ndt::detail::infos()
+{
+  static map<type_id_t, reg_info_t> infos{
+      {any_kind_id, {make_type<any_kind_type>()}},
+      {scalar_kind_id, {make_type<scalar_kind_type>()}},
+      {bool_kind_id, {type()}},
+      {bool_id, {type(reinterpret_cast<const base_type *>(bool_id), false)}},
+      {int_kind_id, {type()}},
+      {int8_id, {type(reinterpret_cast<const base_type *>(int8_id), false)}},
+      {int16_id, {type(reinterpret_cast<const base_type *>(int16_id), false)}},
+      {int32_id, {type(reinterpret_cast<const base_type *>(int32_id), false)}},
+      {int64_id, {type(reinterpret_cast<const base_type *>(int64_id), false)}},
+      {int128_id, {type(reinterpret_cast<const base_type *>(int128_id), false)}},
+      {uint_kind_id, {type()}},
+      {uint8_id, {type(reinterpret_cast<const base_type *>(uint8_id), false)}},
+      {uint16_id, {type(reinterpret_cast<const base_type *>(uint16_id), false)}},
+      {uint32_id, {type(reinterpret_cast<const base_type *>(uint32_id), false)}},
+      {uint64_id, {type(reinterpret_cast<const base_type *>(uint64_id), false)}},
+      {uint128_id, {type(reinterpret_cast<const base_type *>(uint128_id), false)}},
+      {float_kind_id, {type()}},
+      {float16_id, {type(reinterpret_cast<const base_type *>(float16_id), false)}},
+      {float32_id, {type(reinterpret_cast<const base_type *>(float32_id), false)}},
+      {float64_id, {type(reinterpret_cast<const base_type *>(float64_id), false)}},
+      {float128_id, {type(reinterpret_cast<const base_type *>(float128_id), false)}},
+      {complex_kind_id, {type()}},
+      {complex_float32_id, {type(reinterpret_cast<const base_type *>(complex_float32_id), false)}},
+      {complex_float64_id, {type(reinterpret_cast<const base_type *>(complex_float64_id), false)}},
+      {void_id, {type(reinterpret_cast<const base_type *>(void_id), false)}},
+      {dim_kind_id, {type()}},
+      {bytes_kind_id, {type()}},
+      {fixed_bytes_id, {fixed_bytes_kind_type::make()}},
+      {bytes_id, {bytes_type::make()}},
+      {string_kind_id, {type()}},
+      {fixed_string_id, {fixed_string_kind_type::make()}},
+      {char_id, {make_type<char_type>()}},
+      {string_id, {make_type<string_type>()}},
+      {tuple_id, {tuple_type::make(true)}},
+      {struct_id, {struct_type::make(true)}},
+      {fixed_dim_kind_id, {type()}},
+      {fixed_dim_id, {base_fixed_dim_type::make(any_kind_type::make())}},
+      {var_dim_id, {var_dim_type::make(any_kind_type::make())}},
+      {categorical_id, {categorical_kind_type::make()}},
+      {option_id, {make_type<option_type>(any_kind_type::make())}},
+      {pointer_id, {pointer_type::make(any_kind_type::make())}},
+      {type_id, {make_type<type_type>()}},
+      {array_id, {type()}},
+      {callable_id, {type()}}};
+
+  return infos;
 }
 
-ndt::type ndt::type::make(type_id_t tp_id, const nd::array &args) { return registry::data[tp_id].func(tp_id, args); }
+DYNDT_API void ndt::reg(type_id_t id, const ndt::type &tp)
+{
+  map<type_id_t, reg_info_t> &infos = detail::infos();
+  infos[id].tp = tp;
+}
 
 template <class T, class Tas>
 static void print_as(std::ostream &o, const char *data)
@@ -913,7 +949,7 @@ void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *dat
   }
 }
 
-type_id_t ndt::type::get_base_id() const { return type_registry[get_id()].get_base_id(); }
+type_id_t ndt::type::get_base_id() const { return base_id(get_id()); }
 
 std::map<std::array<type_id_t, 2>, ndt::common_type::child_type> ndt::common_type::children;
 
