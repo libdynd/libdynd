@@ -11,28 +11,18 @@
 
 namespace dynd {
 
-namespace ndt {
-
-  extern DYNDT_API class type_registry {
-  public:
-    type_registry();
-  } type_registry;
-
-} // namespace dynd::ndt
-
 struct id_info {
+  std::string name;
   std::vector<type_id_t> base_ids;
   std::vector<char> is_base_id;
 
   id_info() = default;
 
-  id_info(type_id_t id, size_t size = 128) : is_base_id(size) { is_base_id[id] = true; }
-
-  id_info(type_id_t id, const std::vector<type_id_t> &base_ids, size_t size = 128)
-      : base_ids(base_ids), is_base_id(size)
+  id_info(const char *name, type_id_t id, const std::vector<type_id_t> &base_ids)
+      : name(name), base_ids(base_ids), is_base_id(128)
   {
     is_base_id[id] = true;
-    for (type_id_t base_id : this->base_ids) {
+    for (type_id_t base_id : base_ids) {
       is_base_id[base_id] = true;
     }
   }
@@ -44,7 +34,7 @@ namespace detail {
 
 } // namespace dynd::detail
 
-DYNDT_API type_id_t new_id(type_id_t base_id);
+DYNDT_API type_id_t new_id(const char *name, type_id_t base_id);
 
 inline type_id_t min_id() { return static_cast<type_id_t>(1); }
 
@@ -61,7 +51,7 @@ inline type_id_t base_id(type_id_t id)
 }
 
 template <type_id_t ID>
-std::enable_if_t<ID == any_kind_id, std::array<type_id_t, 0>> base_ids()
+std::enable_if_t<ID == any_kind_id, std::vector<type_id_t>> base_ids()
 {
   return {};
 }

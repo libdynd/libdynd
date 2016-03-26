@@ -597,6 +597,18 @@ struct base_id_of<pointer_id> : id_constant<any_kind_id> {
 };
 
 template <>
+struct base_id_of<memory_id> : id_constant<any_kind_id> {
+};
+
+template <>
+struct base_id_of<expr_kind_id> : id_constant<any_kind_id> {
+};
+
+template <>
+struct base_id_of<adapt_id> : id_constant<expr_kind_id> {
+};
+
+template <>
 struct base_id_of<tuple_id> : id_constant<scalar_kind_id> {
 };
 
@@ -630,6 +642,10 @@ struct base_id_of<array_id> : id_constant<scalar_kind_id> {
 
 template <>
 struct base_id_of<dim_kind_id> : id_constant<any_kind_id> {
+};
+
+template <>
+struct base_id_of<typevar_id> : id_constant<scalar_kind_id> {
 };
 
 namespace detail {
