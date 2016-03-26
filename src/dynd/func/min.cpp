@@ -13,14 +13,6 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::min::make()
-{
-  auto dispatcher = callable::new_make_all<min_callable, arithmetic_ids>();
-
-  return functional::reduction(make_callable<min_dispatch_callable>(
-      ndt::callable_type::make(ndt::scalar_kind_type::make(), ndt::scalar_kind_type::make()), dispatcher));
-}
-
-DYND_DEFAULT_DECLFUNC_GET(nd::min)
-
-DYND_API struct nd::min nd::min;
+DYND_API nd::callable nd::min = nd::functional::reduction(nd::make_callable<nd::min_dispatch_callable>(
+    ndt::callable_type::make(ndt::scalar_kind_type::make(), ndt::scalar_kind_type::make()),
+    nd::callable::new_make_all<nd::min_callable, arithmetic_ids>()));

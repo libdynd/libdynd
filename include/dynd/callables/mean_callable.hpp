@@ -20,14 +20,13 @@ namespace nd {
       char *compound_div_data;
     };
 
-    mean_callable(const ndt::type &tp) : base_callable(nd::sum::get().get_array_type()), m_tp(tp) {}
+    mean_callable(const ndt::type &tp) : base_callable(ndt::type("(Any) -> Any")), m_tp(tp) {}
 
     char *data_init(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
                     const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       char *data = reinterpret_cast<char *>(new data_type());
-      reinterpret_cast<data_type *>(data)->sum_data =
-          nd::sum::get().get()->data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+      reinterpret_cast<data_type *>(data)->sum_data = nd::sum->data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
       reinterpret_cast<data_type *>(data)->compound_div_data =
           nd::compound_div::get().get()->data_init(dst_tp, 1, &m_tp, 0, NULL, tp_vars);
 
@@ -37,8 +36,8 @@ namespace nd {
     void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
                           const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
-      nd::sum::get().get()->resolve_dst_type(reinterpret_cast<data_type *>(data)->sum_data, dst_tp, nsrc, src_tp, nkwd,
-                                             kwds, tp_vars);
+      nd::sum->resolve_dst_type(reinterpret_cast<data_type *>(data)->sum_data, dst_tp, nsrc, src_tp, nkwd, kwds,
+                                tp_vars);
     }
 
     void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
@@ -48,8 +47,8 @@ namespace nd {
       intptr_t mean_offset = ckb->size();
       ckb->emplace_back<mean_kernel>(kernreq, src_tp[0].get_size(src_arrmeta[0]));
 
-      nd::sum::get().get()->instantiate(reinterpret_cast<data_type *>(data)->sum_data, ckb, dst_tp, dst_arrmeta, nsrc,
-                                        src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+      nd::sum->instantiate(reinterpret_cast<data_type *>(data)->sum_data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp,
+                           src_arrmeta, kernreq, nkwd, kwds, tp_vars);
 
       mean_kernel *self = ckb->get_at<mean_kernel>(mean_offset);
       self->compound_div_offset = ckb->size();

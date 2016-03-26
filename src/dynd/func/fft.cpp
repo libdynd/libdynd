@@ -11,18 +11,16 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::fft::make()
+#ifdef DYND_FFTW
+
+namespace {
+
+nd::callable make_fft()
 {
   std::vector<nd::callable> children;
 
-#ifdef DYND_FFTW
-  typedef fftw_callable<fftw_complex, fftw_complex, FFTW_FORWARD> CKT;
+  typedef nd::fftw_callable<fftw_complex, fftw_complex, FFTW_FORWARD> CKT;
   children.push_back(nd::make_callable<CKT>());
-#endif
-
-  if (children.empty()) {
-    throw std::runtime_error("no fft enabled");
-  }
 
   return children[0];
   /*
@@ -34,17 +32,11 @@ DYND_API nd::callable nd::fft::make()
   */
 }
 
-DYND_API nd::callable nd::ifft::make()
+nd::callable make_ifft()
 {
   std::vector<nd::callable> children;
 
-#ifdef DYND_FFTW
-  children.push_back(nd::make_callable<fftw_callable<fftw_complex, fftw_complex, FFTW_BACKWARD>>());
-#endif
-
-  if (children.empty()) {
-    throw std::runtime_error("no fft enabled");
-  }
+  children.push_back(nd::make_callable<nd::fftw_callable<fftw_complex, fftw_complex, FFTW_BACKWARD>>());
 
   return children[0];
   /*
@@ -56,33 +48,24 @@ DYND_API nd::callable nd::ifft::make()
   */
 }
 
-DYND_API nd::callable nd::rfft::make()
+nd::callable make_rfft()
 {
-#ifdef DYND_FFTW
-  return nd::make_callable<fftw_callable<fftw_complex, double>>();
-#else
-  throw std::runtime_error("no fft enabled");
-#endif
+  return nd::make_callable<nd::fftw_callable<fftw_complex, double>>();
 }
 
-DYND_API nd::callable nd::irfft::make()
+nd::callable make_irfft()
 {
-#ifdef DYND_FFTW
-  return nd::make_callable<fftw_callable<double, fftw_complex>>();
-#else
-  throw std::runtime_error("no fft enabled");
-#endif
+  return nd::make_callable<nd::fftw_callable<double, fftw_complex>>();
 }
 
-DYND_DEFAULT_DECLFUNC_GET(nd::fft)
-DYND_DEFAULT_DECLFUNC_GET(nd::rfft)
-DYND_DEFAULT_DECLFUNC_GET(nd::ifft)
-DYND_DEFAULT_DECLFUNC_GET(nd::irfft)
+} // unnamed namespace
 
-DYND_API struct nd::fft nd::fft;
-DYND_API struct nd::rfft nd::rfft;
-DYND_API struct nd::ifft nd::ifft;
-DYND_API struct nd::irfft nd::irfft;
+DYND_API nd::callable nd::fft = make_fft();
+DYND_API nd::callable nd::ifft = make_ifft();
+DYND_API nd::callable nd::rfft = make_rfft();
+DYND_API nd::callable nd::irfft = make_irfft();
+
+#endif
 
 nd::array nd::fftshift(const nd::array &x)
 {

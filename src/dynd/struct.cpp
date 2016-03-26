@@ -14,11 +14,7 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::field_access::make() { return make_callable<field_access_callable>(); }
-
-DYND_DEFAULT_DECLFUNC_GET(nd::field_access)
-
-DYND_API struct nd::field_access nd::field_access;
+DYND_API nd::callable nd::field_access = nd::make_callable<nd::field_access_callable>();
 
 // Temporary solution until nd::field_access() handles views.
 DYND_API nd::callable nd::make_field_access_kernel(const ndt::type &dt, const std::string &name)

@@ -9,8 +9,4 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::copy::make() { return make_callable<copy_callable>(); }
-
-DYND_DEFAULT_DECLFUNC_GET(nd::copy)
-
-DYND_API struct nd::copy nd::copy;
+DYND_API nd::callable nd::copy = nd::make_callable<nd::copy_callable>();

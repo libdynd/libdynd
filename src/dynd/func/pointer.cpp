@@ -4,14 +4,9 @@
 //
 
 #include <dynd/func/pointer.hpp>
-#include <dynd/functional.hpp>
 #include <dynd/callables/dereference_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::dereference::make() { return make_callable<dereference_callable>(); }
-
-DYND_DEFAULT_DECLFUNC_GET(nd::dereference)
-
-DYND_API struct nd::dereference nd::dereference;
+DYND_API nd::callable nd::dereference = nd::make_callable<nd::dereference_callable>();

@@ -13,14 +13,6 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API nd::callable nd::max::make()
-{
-  auto dispatcher = callable::new_make_all<max_callable, arithmetic_ids>();
-
-  return functional::reduction(make_callable<max_dispatch_callable>(
-      ndt::callable_type::make(ndt::scalar_kind_type::make(), ndt::scalar_kind_type::make()), dispatcher));
-}
-
-DYND_DEFAULT_DECLFUNC_GET(nd::max)
-
-DYND_API struct nd::max nd::max;
+DYND_API nd::callable nd::max = nd::functional::reduction(nd::make_callable<nd::max_dispatch_callable>(
+    ndt::callable_type::make(ndt::scalar_kind_type::make(), ndt::scalar_kind_type::make()),
+    nd::callable::new_make_all<nd::max_callable, arithmetic_ids>()));

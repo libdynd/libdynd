@@ -14,10 +14,7 @@ namespace nd {
    * An callable which applies either a boolean masked or
    * an indexed take/"fancy indexing" operation.
    */
-  extern DYND_API struct DYND_API take : declfunc<take> {
-    static callable make();
-    static callable &get();
-  } take;
+  extern DYND_API callable take;
 
 } // namespace dynd::nd
 } // namespace dynd

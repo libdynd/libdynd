@@ -74,7 +74,7 @@ void dynd::make_struct_assignment_kernel(nd::kernel_builder *ckb, const ndt::typ
     dst_fields_arrmeta[i] = dst_arrmeta + dst_arrmeta_offsets[i];
   }
 
-  make_tuple_unary_op_ckernel(nd::copy::get().get(), nd::copy::get().get_type(), ckb, field_count,
+  make_tuple_unary_op_ckernel(nd::copy.get(), nd::copy.get_type(), ckb, field_count,
                               dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types().data(),
                               dst_fields_arrmeta.get(), src_data_offsets.get(), &src_fields_tp[0],
                               src_fields_arrmeta.get(), kernreq);

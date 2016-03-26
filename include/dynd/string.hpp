@@ -124,35 +124,12 @@ void string_replace(StringType &dst, const StringType &src, const StringType &ol
 
 namespace nd {
 
-  extern DYND_API struct DYND_API string_concatenation : declfunc<string_concatenation> {
-    static callable make();
-    static callable &get();
-  } string_concatenation;
-
-  extern DYND_API struct DYND_API string_count : declfunc<string_count> {
-    static callable make();
-    static callable &get();
-  } string_count;
-
-  extern DYND_API struct DYND_API string_find : declfunc<string_find> {
-    static callable make();
-    static callable &get();
-  } string_find;
-
-  extern DYND_API struct DYND_API string_rfind : declfunc<string_rfind> {
-    static callable make();
-    static callable &get();
-  } string_rfind;
-
-  extern DYND_API struct DYND_API string_replace : declfunc<string_replace> {
-    static callable make();
-    static callable &get();
-  } string_replace;
-
-  extern DYND_API struct DYND_API string_split : declfunc<string_split> {
-    static callable make();
-    static callable &get();
-  } string_split;
+  extern DYND_API callable string_concatenation;
+  extern DYND_API callable string_count;
+  extern DYND_API callable string_find;
+  extern DYND_API callable string_rfind;
+  extern DYND_API callable string_replace;
+  extern DYND_API callable string_split;
 
 } // namespace dynd::nd
 } // namespace dynd

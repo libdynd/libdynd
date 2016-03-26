@@ -282,9 +282,9 @@ uint32_t ndt::categorical_type::get_value_from_category(const char *category_arr
   type src_tp[2] = {m_categories.get_type(), m_category_tp};
   const char *src_arrmeta[2] = {m_categories.get()->metadata(), category_arrmeta};
   char *src_data[2] = {const_cast<char *>(m_categories.cdata()), const_cast<char *>(category_data)};
-  intptr_t i = nd::binary_search::get()
-                   ->call(dst_tp, 2, src_tp, src_arrmeta, src_data, 0, NULL, std::map<std::string, ndt::type>())
-                   .as<intptr_t>();
+  intptr_t i =
+      nd::binary_search->call(dst_tp, 2, src_tp, src_arrmeta, src_data, 0, NULL, std::map<std::string, ndt::type>())
+          .as<intptr_t>();
   if (i < 0) {
     stringstream ss;
     ss << "Unrecognized category value ";
