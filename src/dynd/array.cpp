@@ -6,6 +6,7 @@
 #include <dynd/array.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/callable.hpp>
+#include <dynd/func/arithmetic.hpp>
 #include <dynd/callable_registry.hpp>
 #include <dynd/types/datashape_formatter.hpp>
 #include <dynd/func/complex.hpp>
@@ -1503,3 +1504,35 @@ nd::array nd::operator!=(const array &a0, const array &a1) { return not_equal(a0
 nd::array nd::operator>=(const array &a0, const array &a1) { return greater_equal(a0, a1); }
 
 nd::array nd::operator>(const array &a0, const array &a1) { return greater(a0, a1); }
+
+nd::array nd::operator+(const array &a0) { return nd::plus(a0); }
+
+nd::array nd::operator-(const array &a0) { return nd::minus(a0); }
+
+nd::array nd::operator!(const array &a0) { return nd::logical_not(a0); }
+
+nd::array nd::operator~(const array &a0) { return nd::bitwise_not(a0); }
+
+nd::array nd::operator+(const array &a0, const array &a1) { return nd::add(a0, a1); }
+
+nd::array nd::operator-(const array &a0, const array &a1) { return nd::subtract(a0, a1); }
+
+nd::array nd::operator*(const array &a0, const array &a1) { return nd::multiply(a0, a1); }
+
+nd::array nd::operator/(const array &a0, const array &a1) { return nd::divide(a0, a1); }
+
+nd::array nd::operator&&(const array &a0, const array &a1) { return nd::logical_and(a0, a1); }
+
+nd::array nd::operator||(const array &a0, const array &a1) { return nd::logical_or(a0, a1); }
+
+nd::array &nd::array::operator+=(const array &rhs)
+{
+  nd::compound_add({rhs}, {{"dst", *this}});
+  return *this;
+}
+
+nd::array &nd::array::operator/=(const array &rhs)
+{
+  nd::compound_div({rhs}, {{"dst", *this}});
+  return *this;
+}

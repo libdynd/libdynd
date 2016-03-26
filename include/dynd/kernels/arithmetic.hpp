@@ -217,12 +217,11 @@ namespace nd {
 
 #undef DYND_DEF_BINARY_OP_CALLABLE_ZEROCHECK_INT
 
-  template <typename FuncType, bool Src0IsOption, bool Src1IsOption>
+  template <bool Src0IsOption, bool Src1IsOption>
   struct option_arithmetic_kernel;
 
-  template <typename FuncType>
-  struct option_arithmetic_kernel<FuncType, true, false>
-      : base_strided_kernel<option_arithmetic_kernel<FuncType, true, false>, 2> {
+  template <>
+  struct option_arithmetic_kernel<true, false> : base_strided_kernel<option_arithmetic_kernel<true, false>, 2> {
     intptr_t arith_offset;
     intptr_t assign_na_offset;
 
@@ -240,9 +239,8 @@ namespace nd {
     }
   };
 
-  template <typename FuncType>
-  struct option_arithmetic_kernel<FuncType, false, true>
-      : base_strided_kernel<option_arithmetic_kernel<FuncType, false, true>, 2> {
+  template <>
+  struct option_arithmetic_kernel<false, true> : base_strided_kernel<option_arithmetic_kernel<false, true>, 2> {
     intptr_t arith_offset;
     intptr_t assign_na_offset;
 
@@ -260,9 +258,8 @@ namespace nd {
     }
   };
 
-  template <typename FuncType>
-  struct option_arithmetic_kernel<FuncType, true, true>
-      : base_strided_kernel<option_arithmetic_kernel<FuncType, true, true>, 2> {
+  template <>
+  struct option_arithmetic_kernel<true, true> : base_strided_kernel<option_arithmetic_kernel<true, true>, 2> {
     intptr_t is_na_rhs_offset;
     intptr_t arith_offset;
     intptr_t assign_na_offset;
