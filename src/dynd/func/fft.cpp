@@ -19,7 +19,7 @@ nd::callable make_fft()
 {
   std::vector<nd::callable> children;
 
-  typedef fftw_callable<fftw_complex, fftw_complex, FFTW_FORWARD> CKT;
+  typedef nd::fftw_callable<fftw_complex, fftw_complex, FFTW_FORWARD> CKT;
   children.push_back(nd::make_callable<CKT>());
 
   return children[0];
@@ -36,7 +36,7 @@ nd::callable make_ifft()
 {
   std::vector<nd::callable> children;
 
-  children.push_back(nd::make_callable<fftw_callable<fftw_complex, fftw_complex, FFTW_BACKWARD>>());
+  children.push_back(nd::make_callable<nd::fftw_callable<fftw_complex, fftw_complex, FFTW_BACKWARD>>());
 
   return children[0];
   /*
@@ -50,12 +50,12 @@ nd::callable make_ifft()
 
 nd::callable make_rfft()
 {
-  return nd::make_callable<fftw_callable<fftw_complex, double>>();
+  return nd::make_callable<nd::fftw_callable<fftw_complex, double>>();
 }
 
 nd::callable make_irfft()
 {
-  return nd::make_callable<fftw_callable<double, fftw_complex>>();
+  return nd::make_callable<nd::fftw_callable<double, fftw_complex>>();
 }
 
 } // unnamed namespace
