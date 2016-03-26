@@ -1,3 +1,8 @@
+//
+// Copyright (C) 2011-15 DyND Developers
+// BSD 2-Clause License, see LICENSE.txt
+//
+
 #include <chrono>
 
 #include <dynd/func/random.hpp>
@@ -8,64 +13,18 @@
 using namespace std;
 using namespace dynd;
 
+namespace {
+
 template <typename GeneratorType>
 struct uniform_callable_alias {
   template <type_id_t DstTypeID>
   using type = nd::random::uniform_callable<DstTypeID, GeneratorType>;
 };
 
-DYND_API nd::callable nd::random::uniform::make()
-{
-  typedef type_id_sequence<int32_id, int64_id, uint32_id, uint64_id, float32_id, float64_id, complex_float32_id,
-                           complex_float64_id> numeric_ids;
+} // unnamed namespace
 
-  std::random_device random_device;
-
-  auto dispatcher = callable::new_make_all<uniform_callable_alias<std::default_random_engine>::type, numeric_ids>();
-  return functional::elwise(make_callable<uniform_dispatch_callable>(ndt::type("(a: ?R, b: ?R) -> R"), dispatcher));
-}
-
-DYND_DEFAULT_DECLFUNC_GET(nd::random::uniform)
-
-DYND_API struct nd::random::uniform nd::random::uniform;
-
-/*
-
-#ifdef DYND_CUDA
-
-template <kernel_request_t kernreq>
-typename std::enable_if<kernreq == kernel_request_cuda_device,
-                        nd::callable>::type
-nd::random::uniform::make()
-{
-  unsigned int blocks_per_grid = 512;
-  unsigned int threads_per_block = 512;
-
-  curandState_t *s;
-  cudaMalloc(&s, blocks_per_grid * threads_per_block * sizeof(curandState_t));
-  cuda_device_curand_init << <blocks_per_grid, threads_per_block>>> (s);
-
-  return nd::as_callable<uniform_ck, kernel_request_cuda_device, curandState_t,
-                        type_sequence<double, dynd::complex<double>>>(
-      ndt::type("(a: ?R, b: ?R) -> cuda_device[R]"), s);
-}
-
-#endif
-
-#ifdef DYND_CUDA
-  return nd::functional::elwise(nd::functional::multidispatch(
-      ndt::type("(a: ?R, b: ?R) -> M[R]"),
-      {make<kernel_request_host>(),
-       make<kernel_request_cuda_device>()}));
-#else
-
-#ifdef __CUDACC__
-
-__global__ void cuda_device_curand_init(curandState_t *s)
-{
-  curand_init(clock64(), blockIdx.x * blockDim.x + threadIdx.x, 0, s);
-}
-
-#endif
-
-*/
+DYND_API nd::callable nd::random::uniform = nd::functional::elwise(nd::make_callable<nd::uniform_dispatch_callable>(
+    ndt::type("(a: ?R, b: ?R) -> R"),
+    nd::callable::new_make_all<uniform_callable_alias<std::default_random_engine>::type,
+                               type_id_sequence<int32_id, int64_id, uint32_id, uint64_id, float32_id, float64_id,
+                                                complex_float32_id, complex_float64_id>>()));

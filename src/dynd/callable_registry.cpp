@@ -43,8 +43,8 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
 
     // dynd/complex.hpp
     registry["real"] = real;
-    registry["imag"] = imag::get();
-    registry["conj"] = conj::get();
+    registry["imag"] = imag;
+    registry["conj"] = conj;
 
     // dynd/io.hpp
     registry["serialize"] = serialize::get();
@@ -63,7 +63,7 @@ std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
     registry["dereference"] = dereference::get();
 
     // dynd/random.hpp
-    registry["uniform"] = random::uniform::get();
+    registry["uniform"] = random::uniform;
   }
 
   return registry;

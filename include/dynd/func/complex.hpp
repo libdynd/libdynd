@@ -11,16 +11,8 @@ namespace dynd {
 namespace nd {
 
   extern DYND_API callable real;
-
-  extern DYND_API struct DYND_API imag : declfunc<imag> {
-    static callable make();
-    static callable &get();
-  } imag;
-
-  extern DYND_API struct DYND_API conj : declfunc<conj> {
-    static callable make();
-    static callable &get();
-  } conj;
+  extern DYND_API callable imag;
+  extern DYND_API callable conj;
 
 } // namespace dynd::nd
 } // namespace dynd
