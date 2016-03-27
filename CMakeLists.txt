@@ -296,7 +296,6 @@ set(libdynd_SRC
     src/dynd/asarray.cpp
     src/dynd/assignment.cpp
     src/dynd/callable.cpp
-    src/dynd/callable_registry.cpp
     src/dynd/comparison.cpp
     src/dynd/convert.cpp
     src/dynd/fft.cpp

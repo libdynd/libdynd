@@ -17,7 +17,6 @@
 #include <dynd/index.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/assignment.hpp>
-#include <dynd/callable_registry.hpp>
 #include <dynd/convert.hpp>
 
 using namespace std;

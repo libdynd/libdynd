@@ -11,7 +11,6 @@
 
 
 #include <dynd/array_iter.hpp>
-#include <dynd/callable_registry.hpp>
 #include <dynd/types/datashape_formatter.hpp>
 #include <dynd/math.hpp>
 #include <dynd/assignment.hpp>
