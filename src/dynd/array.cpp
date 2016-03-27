@@ -13,7 +13,7 @@
 #include <dynd/array_iter.hpp>
 #include <dynd/callable_registry.hpp>
 #include <dynd/types/datashape_formatter.hpp>
-#include <dynd/func/complex.hpp>
+#include <dynd/math.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/option.hpp>
 #include <dynd/struct.hpp>

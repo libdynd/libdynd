@@ -253,18 +253,10 @@ set(libdynd_SRC
     include/dynd/callables/base_dispatch_callable.hpp
     # Func
     src/dynd/func/assignment.cpp
-    src/dynd/func/complex.cpp
-    src/dynd/func/max.cpp
-    src/dynd/func/min.cpp
-    src/dynd/func/mean.cpp
     src/dynd/func/take.cpp
     src/dynd/func/view.cpp
     include/dynd/callable_registry.hpp
     include/dynd/func/assignment.hpp
-    include/dynd/func/complex.hpp
-    include/dynd/func/max.hpp
-    include/dynd/func/mean.hpp
-    include/dynd/func/min.hpp
     include/dynd/func/take.hpp
     include/dynd/func/view.hpp
     # Kernels
@@ -324,6 +316,7 @@ set(libdynd_SRC
     src/dynd/random.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp
+    src/dynd/statistics.cpp
     src/dynd/struct.cpp
     src/dynd/index.cpp
     src/dynd/json_formatter.cpp
@@ -355,6 +348,7 @@ set(libdynd_SRC
     include/dynd/math.hpp
     include/dynd/random.hpp
     include/dynd/sort.hpp
+    include/dynd/statistics.hpp
     include/dynd/string.hpp
     include/dynd/string_search.hpp
     include/dynd/struct.hpp

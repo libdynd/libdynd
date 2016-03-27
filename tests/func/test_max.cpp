@@ -10,8 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/func/min.hpp>
-#include <dynd/func/max.hpp>
+#include <dynd/statistics.hpp>
 
 #include "dynd_assertions.hpp"
 

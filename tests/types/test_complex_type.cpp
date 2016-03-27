@@ -192,7 +192,7 @@ TEST(ComplexType, CreateFromValue)
   EXPECT_EQ(dynd::complex<double>(2.5, 3.0), n.as<dynd::complex<double>>());
 }
 
-#include <dynd/func/complex.hpp>
+#include <dynd/math.hpp>
 
 TEST(ComplexType, Properties)
 {

@@ -10,9 +10,9 @@
 namespace dynd {
 namespace nd {
 
-  extern DYND_API callable real;
-  extern DYND_API callable imag;
-  extern DYND_API callable conj;
+  extern DYND_API callable max;
+  extern DYND_API callable mean;
+  extern DYND_API callable min;
 
 } // namespace dynd::nd
 } // namespace dynd
