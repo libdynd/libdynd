@@ -11,7 +11,7 @@
 #include "inc_gtest.hpp"
 #include "dynd_assertions.hpp"
 
-#include <dynd/func/constant.hpp>
+#include <dynd/functional.hpp>
 
 using namespace std;
 using namespace dynd;

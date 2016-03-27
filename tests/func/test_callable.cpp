@@ -14,7 +14,6 @@
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/array.hpp>
 

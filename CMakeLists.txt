@@ -254,18 +254,11 @@ set(libdynd_SRC
     # Func
     src/dynd/func/assignment.cpp
     src/dynd/func/complex.cpp
-    src/dynd/func/compose.cpp
-    src/dynd/func/compound.cpp
     src/dynd/func/copy.cpp
-    src/dynd/func/constant.cpp
-    src/dynd/func/elwise.cpp
     src/dynd/func/fft.cpp
-    src/dynd/func/reduction.cpp
     src/dynd/func/max.cpp
     src/dynd/func/min.cpp
     src/dynd/func/mean.cpp
-    src/dynd/func/neighborhood.cpp
-    src/dynd/func/outer.cpp
     src/dynd/func/random.cpp
     src/dynd/func/take.cpp
     src/dynd/func/view.cpp
@@ -273,17 +266,10 @@ set(libdynd_SRC
     include/dynd/func/assignment.hpp
     include/dynd/func/copy.hpp
     include/dynd/func/complex.hpp
-    include/dynd/func/compose.hpp
-    include/dynd/func/compound.hpp
-    include/dynd/func/constant.hpp
-    include/dynd/func/elwise.hpp
     include/dynd/func/fft.hpp
-    include/dynd/func/reduction.hpp
     include/dynd/func/max.hpp
     include/dynd/func/mean.hpp
     include/dynd/func/min.hpp
-    include/dynd/func/neighborhood.hpp
-    include/dynd/func/outer.hpp
     include/dynd/func/random.hpp
     include/dynd/func/take.hpp
     include/dynd/func/view.hpp
@@ -334,6 +320,7 @@ set(libdynd_SRC
     src/dynd/callable_registry.cpp
     src/dynd/comparison.cpp
     src/dynd/convert.cpp
+    src/dynd/functional.cpp
     src/dynd/io.cpp
     src/dynd/math.cpp
     src/dynd/option.cpp
@@ -364,6 +351,7 @@ set(libdynd_SRC
     include/dynd/convert.hpp
     include/dynd/diagnostics.hpp
     include/dynd/ensure_immutable_contig.hpp
+    include/dynd/functional.hpp
     include/dynd/io.hpp
     include/dynd/iterator.hpp
     include/dynd/logic.hpp

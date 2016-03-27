@@ -5,7 +5,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/func/mean.hpp>
-#include <dynd/func/reduction.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/mean_kernel.hpp>
 #include <dynd/kernels/sum_kernel.hpp>

@@ -4,7 +4,6 @@
 //
 
 #include <dynd/func/max.hpp>
-#include <dynd/func/reduction.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/callables/max_callable.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
