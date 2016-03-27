@@ -10,7 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/func/reduction.hpp>
+#include <dynd/functional.hpp>
 
 #include "dynd_assertions.hpp"
 

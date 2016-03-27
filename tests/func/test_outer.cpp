@@ -10,8 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/func/elwise.hpp>
-#include <dynd/func/outer.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/func/random.hpp>
 
 using namespace std;
