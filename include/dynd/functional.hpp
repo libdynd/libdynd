@@ -6,7 +6,10 @@
 #pragma once
 
 #include <dynd/callable.hpp>
+#include <dynd/callables/apply_function_callable.hpp>
+#include <dynd/callables/apply_member_function_callable.hpp>
 #include <dynd/callables/call_callable.hpp>
+#include <dynd/callables/construct_then_apply_callable_callable.hpp>
 #include <dynd/callables/forward_na_callable.hpp>
 
 namespace dynd {
@@ -14,6 +17,89 @@ namespace nd {
   namespace functional {
 
     DYND_API callable adapt(const ndt::type &value_tp, const callable &forward);
+
+    /**
+     * Makes a callable out of function ``func``, using the provided keyword
+     * parameter names. This function takes ``func`` as a template
+     * parameter, so can call it efficiently.
+     */
+    template <kernel_request_t kernreq, typename func_type, func_type func, typename... T>
+    callable apply(T &&... names)
+    {
+      typedef apply_function_callable<func_type, func, arity_of<func_type>::value - sizeof...(T)> CKT;
+      return make_callable<CKT>(std::forward<T>(names)...);
+    }
+
+    template <typename func_type, func_type func, typename... T>
+    callable apply(T &&... names)
+    {
+      return apply<kernel_request_host, func_type, func>(std::forward<T>(names)...);
+    }
+
+    /**
+     * Makes a callable out of the function object ``func``, using the provided
+     * keyword parameter names. This version makes a copy of provided ``func``
+     * object.
+     */
+    template <kernel_request_t kernreq, typename func_type, typename... T>
+    typename std::enable_if<!is_function_pointer<func_type>::value, callable>::type apply(func_type func, T &&... names)
+    {
+      return make_callable<apply_callable_callable<func_type, arity_of<func_type>::value - sizeof...(T)>>(
+          func, std::forward<T>(names)...);
+    }
+
+    template <typename func_type, typename... T>
+    typename std::enable_if<!is_function_pointer<func_type>::value, callable>::type apply(func_type func, T &&... names)
+    {
+      static_assert(all_char_string_params<T...>::value, "All the names must be strings");
+      return apply<kernel_request_host>(func, std::forward<T>(names)...);
+    }
+
+    template <kernel_request_t kernreq, typename func_type, typename... T>
+    callable apply(func_type *func, T &&... names)
+    {
+      return make_callable<apply_callable_callable<func_type *, arity_of<func_type>::value - sizeof...(T)>>(
+          func, std::forward<T>(names)...);
+    }
+
+    template <typename func_type, typename... T>
+    callable apply(func_type *func, T &&... names)
+    {
+      return apply<kernel_request_host>(func, std::forward<T>(names)...);
+    }
+
+    /**
+     * Makes a callable out of the provided function object type, which
+     * constructs and calls the function object on demand.
+     */
+    template <typename func_type, typename... KwdTypes, typename... T>
+    callable apply(T &&... names)
+    {
+      return make_callable<construct_then_apply_callable_callable<func_type, KwdTypes...>>(std::forward<T>(names)...);
+    }
+
+    /**
+     * Makes a callable out of the provided function object type, specialized
+     * for a memory_type such as cuda_device based on the ``kernreq``.
+     */
+    template <kernel_request_t kernreq, typename func_type, typename... KwdTypes, typename... T>
+    callable apply(T &&... names)
+    {
+      return apply<func_type, KwdTypes...>(std::forward<T>(names)...);
+    }
+
+    template <typename T, typename R, typename... A, typename... S>
+    callable apply(T *obj, R (T::*mem_func)(A...), S &&... names)
+    {
+      return make_callable<apply_member_function_callable<T *, R (T::*)(A...), sizeof...(A) - sizeof...(S)>>(
+          obj, mem_func, std::forward<S>(names)...);
+    }
+
+    template <kernel_request_t kernreq, typename T, typename R, typename... A, typename... S>
+    callable apply(T *obj, R (T::*mem_func)(A...), S &&... names)
+    {
+      return apply(obj, mem_func, std::forward<S>(names)...);
+    }
 
     template <callable &Callable>
     callable call(const ndt::type &tp)

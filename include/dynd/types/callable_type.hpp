@@ -171,6 +171,11 @@ namespace ndt {
     }
   };
 
+  template <typename R, typename T, typename... A>
+  struct traits<R (T::*)(A...)> {
+    static type equivalent() { return make_type<typename funcproto_of<R (T::*)(A...)>::type>(); }
+  };
+
   DYNDT_API type make_generic_funcproto(intptr_t nargs);
 
 } // namespace dynd::ndt

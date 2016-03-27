@@ -1,6 +1,7 @@
 #pragma once
 
 #include <dynd/kernels/apply.hpp>
+#include <dynd/callables/apply_function_callable.hpp>
 #include <dynd/option.hpp>
 #include <dynd/types/option_type.hpp>
 
@@ -77,8 +78,7 @@ namespace nd {
     public:                                                                                                            \
       NAME##_callable()                                                                                                \
           : functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID>::f),                       \
-                                                &detail::inline_##NAME<Src0TypeID>::f>(                                \
-                ndt::make_type<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID>::f)>())                            \
+                                                &detail::inline_##NAME<Src0TypeID>::f>()                               \
       {                                                                                                                \
       }                                                                                                                \
     };                                                                                                                 \
@@ -109,8 +109,7 @@ namespace nd {
     public:                                                                                                            \
       NAME##_callable()                                                                                                \
           : functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),           \
-                                                &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f>(                    \
-                ndt::make_type<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID, Src1TypeID>::f)>())                \
+                                                &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f>()                   \
       {                                                                                                                \
       }                                                                                                                \
     };                                                                                                                 \
@@ -151,8 +150,7 @@ namespace nd {
     public:
       logical_xor_callable()
           : functional::apply_function_callable<decltype(&detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f),
-                                                &detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f>(
-                ndt::make_type<decltype(&dynd::nd::detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f)>())
+                                                &detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f>()
       {
       }
     };
@@ -203,8 +201,7 @@ namespace nd {
     public:                                                                                                            \
       NAME##_callable()                                                                                                \
           : functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),           \
-                                                &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f>(                    \
-                ndt::make_type<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID, Src1TypeID>::f)>())                \
+                                                &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f>()                   \
       {                                                                                                                \
       }                                                                                                                \
     };                                                                                                                 \

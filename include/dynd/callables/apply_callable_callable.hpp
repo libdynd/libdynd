@@ -14,10 +14,15 @@ namespace nd {
 
     template <typename func_type, int N>
     class apply_callable_callable : public base_callable {
-    public:
       func_type m_func;
 
-      apply_callable_callable(const ndt::type &tp, func_type func) : base_callable(tp), m_func(func) {}
+    public:
+      template <typename... T>
+      apply_callable_callable(func_type func, T &&... names)
+          : base_callable(ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...)),
+            m_func(func)
+      {
+      }
 
       void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
