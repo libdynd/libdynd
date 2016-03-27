@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/fft.hpp>
+#include <dynd/fft.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/callables/fft_callable.hpp>

@@ -12,7 +12,7 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/math.hpp>
-#include <dynd/func/random.hpp>
+#include <dynd/random.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -12,7 +12,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
-#include <dynd/func/copy.hpp>
+#include <dynd/func/assignment.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -9,6 +9,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/callables/assign_callable.hpp>
+#include <dynd/callables/copy_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -100,6 +101,8 @@ nd::callable make_assign()
 } // anonymous namespace
 
 DYND_API nd::callable nd::assign = make_assign();
+
+DYND_API nd::callable nd::copy = nd::make_callable<nd::copy_callable>();
 
 void dynd::make_assignment_kernel(nd::kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
                                   const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,

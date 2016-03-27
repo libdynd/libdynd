@@ -5,7 +5,7 @@
 
 #include <chrono>
 
-#include <dynd/func/random.hpp>
+#include <dynd/random.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/callables/uniform_callable.hpp>
 #include <dynd/callables/uniform_dispatch_callable.hpp>
