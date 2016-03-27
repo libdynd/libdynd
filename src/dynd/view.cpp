@@ -10,6 +10,7 @@
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/substitute_shape.hpp>
+#include <dynd/callables/view_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -404,7 +405,7 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
   throw type_error(ss.str());
 }
 
-nd::array nd::view(const nd::array &arr, const ndt::type &tp)
+nd::array nd::old_view(const nd::array &arr, const ndt::type &tp)
 {
   if (arr.get_type() == tp) {
     // If the types match exactly, simply return 'arr'
@@ -443,3 +444,5 @@ nd::array nd::view(const nd::array &arr, const ndt::type &tp)
   ss << " as type " << tp;
   throw type_error(ss.str());
 }
+
+DYND_API nd::callable nd::view = nd::make_callable<nd::view_callable>();

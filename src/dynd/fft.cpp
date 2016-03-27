@@ -4,7 +4,7 @@
 //
 
 #include <dynd/fft.hpp>
-#include <dynd/func/take.hpp>
+#include <dynd/index.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/callables/fft_callable.hpp>
 

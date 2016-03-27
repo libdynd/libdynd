@@ -253,12 +253,8 @@ set(libdynd_SRC
     include/dynd/callables/base_dispatch_callable.hpp
     # Func
     src/dynd/func/assignment.cpp
-    src/dynd/func/take.cpp
-    src/dynd/func/view.cpp
     include/dynd/callable_registry.hpp
     include/dynd/func/assignment.hpp
-    include/dynd/func/take.hpp
-    include/dynd/func/view.hpp
     # Kernels
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/fft_kernel.cpp

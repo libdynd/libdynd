@@ -8,6 +8,7 @@
 
 #include <dynd/arithmetic.hpp>
 #include <dynd/callable_registry.hpp>
+#include <dynd/index.hpp>
 #include <dynd/io.hpp>
 #include <dynd/math.hpp>
 #include <dynd/option.hpp>
@@ -17,7 +18,6 @@
 
 
 #include <dynd/func/assignment.hpp>
-#include <dynd/func/take.hpp>
 
 
 
