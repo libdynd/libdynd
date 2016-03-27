@@ -46,6 +46,17 @@ TEST(Callable, Construction)
   EXPECT_ARRAY_EQ(-4, f3({3}, {{"y", 7}}).as<int>());
 }
 
+TEST(Callable, FromKernel)
+{
+  struct kernel : nd::base_strided_kernel<kernel, 1> {
+    void single(char *res, char *const *args) { *reinterpret_cast<int *>(res) = *reinterpret_cast<int *>(args[0]) + 7; }
+  };
+
+  nd::callable f = nd::make_callable<kernel>(ndt::make_type<int(int)>());
+  EXPECT_EQ(ndt::make_type<int(int)>(), f.get_array_type());
+  EXPECT_ARRAY_EQ(9, f(2));
+}
+
 TEST(Callable, CallOperator)
 {
   nd::callable f([](int x, double y) { return 2.0 * x + y; });
