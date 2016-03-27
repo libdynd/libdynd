@@ -12,17 +12,22 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    template <typename func_type, typename... K>
+    template <typename func_type, typename... KwdTypes>
     class construct_then_apply_callable_callable : public base_callable {
     public:
-      construct_then_apply_callable_callable(const ndt::type &tp) : base_callable(tp) {}
+      template <typename... T>
+      construct_then_apply_callable_callable(T &&... names)
+          : base_callable(
+                ndt::make_type<typename funcproto_of<func_type, KwdTypes...>::type>(std::forward<T>(names)...))
+      {
+      }
 
       void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                        const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        typedef construct_then_apply_callable_kernel<func_type, K...> kernel_type;
+        typedef construct_then_apply_callable_kernel<func_type, KwdTypes...> kernel_type;
         ckb->emplace_back<kernel_type>(kernreq, typename kernel_type::args_type(src_tp, src_arrmeta, kwds),
                                        typename kernel_type::kwds_type(nkwd, kwds));
       }

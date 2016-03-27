@@ -15,7 +15,11 @@ namespace nd {
     template <typename func_type, func_type func, int N = arity_of<func_type>::value>
     class apply_function_callable : public base_callable {
     public:
-      apply_function_callable(const ndt::type &tp) : base_callable(tp) {}
+      template <typename... T>
+      apply_function_callable(T &&... names)
+          : base_callable(ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...))
+      {
+      }
 
       void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,

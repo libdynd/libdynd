@@ -14,11 +14,13 @@ namespace nd {
 
     template <typename T, typename mem_func_type, int N>
     class apply_member_function_callable : public base_callable {
-    public:
-      std::pair<T, mem_func_type> m_pair;
+      T m_obj;
+      mem_func_type m_mem_func;
 
-      apply_member_function_callable(const ndt::type &tp, T obj, mem_func_type mem_func)
-          : base_callable(tp), m_pair(obj, mem_func)
+    public:
+      template <typename... S>
+      apply_member_function_callable(T obj, mem_func_type mem_func, S &&... names)
+          : base_callable(ndt::make_type<mem_func_type>(std::forward<S>(names)...)), m_obj(obj), m_mem_func(mem_func)
       {
       }
 
@@ -28,7 +30,7 @@ namespace nd {
                        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         typedef apply_member_function_kernel<T, mem_func_type, N> kernel_type;
-        ckb->emplace_back<kernel_type>(kernreq, m_pair.first, dynd::detail::make_value_wrapper(m_pair.second),
+        ckb->emplace_back<kernel_type>(kernreq, m_obj, m_mem_func,
                                        typename kernel_type::args_type(src_tp, src_arrmeta, kwds),
                                        typename kernel_type::kwds_type(nkwd, kwds));
       }

@@ -6,14 +6,11 @@
 #pragma once
 
 #include <memory>
+#include <map>
 
-#include <dynd/callables/base_callable.hpp>
 #include <dynd/dispatcher.hpp>
 #include <dynd/type_registry.hpp>
-#include <dynd/callables/apply_function_callable.hpp>
 #include <dynd/callables/apply_callable_callable.hpp>
-#include <dynd/callables/apply_member_function_callable.hpp>
-#include <dynd/callables/construct_then_apply_callable_callable.hpp>
 
 namespace dynd {
 namespace nd {
@@ -74,7 +71,12 @@ namespace nd {
     callable() = default;
 
     template <typename CallableType, typename... T, typename = std::enable_if_t<all_char_string_params<T...>::value>>
-    explicit callable(CallableType f, T &&... names);
+    callable(CallableType f, T &&... names)
+        : callable(new functional::apply_callable_callable<CallableType, arity_of<CallableType>::value - sizeof...(T)>(
+                       f, std::forward<T>(names)...),
+                   true)
+    {
+    }
 
     bool is_null() const { return get() == NULL; }
 
@@ -237,113 +239,6 @@ namespace nd {
     };
 
   } // namespace dynd::nd::detail
-
-  namespace functional {
-
-    /**
-     * Makes a callable out of function ``func``, using the provided keyword
-     * parameter names. This function takes ``func`` as a template
-     * parameter, so can call it efficiently.
-     */
-    template <kernel_request_t kernreq, typename func_type, func_type func, typename... T>
-    callable apply(T &&... names)
-    {
-      typedef apply_function_callable<func_type, func, arity_of<func_type>::value - sizeof...(T)> CKT;
-      ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
-      return make_callable<CKT>(self_tp);
-    }
-
-    template <typename func_type, func_type func, typename... T>
-    callable apply(T &&... names)
-    {
-      return apply<kernel_request_host, func_type, func>(std::forward<T>(names)...);
-    }
-
-    /**
-     * Makes a callable out of the function object ``func``, using the provided
-     * keyword parameter names. This version makes a copy of provided ``func``
-     * object.
-     */
-    template <kernel_request_t kernreq, typename func_type, typename... T>
-    typename std::enable_if<!is_function_pointer<func_type>::value, callable>::type apply(func_type func, T &&... names)
-    {
-      typedef apply_callable_callable<func_type, arity_of<func_type>::value - sizeof...(T)> ck_type;
-
-      ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
-
-      return make_callable<ck_type>(self_tp, func);
-    }
-
-    template <typename func_type, typename... T>
-    typename std::enable_if<!is_function_pointer<func_type>::value, callable>::type apply(func_type func, T &&... names)
-    {
-      static_assert(all_char_string_params<T...>::value, "All the names must be strings");
-      return apply<kernel_request_host>(func, std::forward<T>(names)...);
-    }
-
-    template <kernel_request_t kernreq, typename func_type, typename... T>
-    callable apply(func_type *func, T &&... names)
-    {
-      typedef apply_callable_callable<func_type *, arity_of<func_type>::value - sizeof...(T)> ck_type;
-
-      ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
-
-      return make_callable<ck_type>(self_tp, func);
-    }
-
-    template <typename func_type, typename... T>
-    callable apply(func_type *func, T &&... names)
-    {
-      return apply<kernel_request_host>(func, std::forward<T>(names)...);
-    }
-
-    template <kernel_request_t kernreq, typename T, typename R, typename... A, typename... S>
-    callable apply(T *obj, R (T::*mem_func)(A...), S &&... names)
-    {
-      typedef apply_member_function_callable<T *, R (T::*)(A...), sizeof...(A) - sizeof...(S)> ck_type;
-
-      ndt::type self_tp = ndt::make_type<typename funcproto_of<R (T::*)(A...)>::type>(std::forward<S>(names)...);
-
-      return make_callable<ck_type>(self_tp, obj, mem_func);
-    }
-
-    template <typename O, typename R, typename... A, typename... T>
-    callable apply(O *obj, R (O::*mem_func)(A...), T &&... names)
-    {
-      return apply<kernel_request_host>(obj, mem_func, std::forward<T>(names)...);
-    }
-
-    /**
-     * Makes a callable out of the provided function object type, specialized
-     * for a memory_type such as cuda_device based on the ``kernreq``.
-     */
-    template <kernel_request_t kernreq, typename func_type, typename... K, typename... T>
-    callable apply(T &&... names)
-    {
-      typedef construct_then_apply_callable_callable<func_type, K...> ck_type;
-
-      ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type, K...>::type>(std::forward<T>(names)...);
-
-      return make_callable<ck_type>(self_tp);
-    }
-
-    /**
-     * Makes a callable out of the provided function object type, which
-     * constructs and calls the function object on demand.
-     */
-    template <typename func_type, typename... K, typename... T>
-    callable apply(T &&... names)
-    {
-      return apply<kernel_request_host, func_type, K...>(std::forward<T>(names)...);
-    }
-
-  } // namespace dynd::nd::functional
-
-  template <typename CallableType, typename... T, typename>
-  callable::callable(CallableType f, T &&... names)
-      : callable(nd::functional::apply(f, std::forward<T>(names)...))
-  {
-  }
 
   DYND_API std::map<std::string, callable> &callables();
 
