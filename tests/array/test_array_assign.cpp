@@ -13,7 +13,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/func/assignment.hpp>
+#include <dynd/assignment.hpp>
 
 using namespace std;
 using namespace dynd;

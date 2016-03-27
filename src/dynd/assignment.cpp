@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/assignment.hpp>
+#include <dynd/assignment.hpp>
 #include <dynd/callables/assign_dispatch_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>

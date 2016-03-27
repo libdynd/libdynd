@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/func/assignment.hpp>
+#include <dynd/assignment.hpp>
 #include <dynd/callables/base_callable.hpp>
 #include <dynd/kernels/constant_kernel.hpp>
 

@@ -251,10 +251,6 @@ set(libdynd_SRC
     src/dynd/callables/base_callable.cpp
     include/dynd/callables/base_callable.hpp
     include/dynd/callables/base_dispatch_callable.hpp
-    # Func
-    src/dynd/func/assignment.cpp
-    include/dynd/callable_registry.hpp
-    include/dynd/func/assignment.hpp
     # Kernels
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/fft_kernel.cpp
@@ -298,6 +294,7 @@ set(libdynd_SRC
     src/dynd/array.cpp
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
+    src/dynd/assignment.cpp
     src/dynd/callable.cpp
     src/dynd/callable_registry.cpp
     src/dynd/comparison.cpp
@@ -326,6 +323,7 @@ set(libdynd_SRC
     include/dynd/array_iter.hpp
     include/dynd/arrmeta_holder.hpp
     include/dynd/asarray.hpp
+    include/dynd/assignment.hpp
     include/dynd/callable.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp

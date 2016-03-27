@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include <dynd/arithmetic.hpp>
+#include <dynd/assignment.hpp>
 #include <dynd/callable_registry.hpp>
 #include <dynd/index.hpp>
 #include <dynd/io.hpp>
@@ -15,11 +16,6 @@
 #include <dynd/pointer.hpp>
 #include <dynd/random.hpp>
 #include <dynd/statistics.hpp>
-
-
-#include <dynd/func/assignment.hpp>
-
-
 
 using namespace std;
 using namespace dynd;

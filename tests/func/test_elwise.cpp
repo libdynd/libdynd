@@ -14,7 +14,7 @@
 #include <dynd/callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/index.hpp>
-#include <dynd/func/assignment.hpp>
+#include <dynd/assignment.hpp>
 #include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>
 #include "../dynd_assertions.hpp"

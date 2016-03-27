@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/assignment.hpp>
+#include <dynd/assignment.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/types/tuple_type.hpp>
