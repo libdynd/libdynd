@@ -8,17 +8,17 @@
 
 #include <dynd/arithmetic.hpp>
 #include <dynd/callable_registry.hpp>
-#include <dynd/pointer.hpp>
-
-#include <dynd/func/assignment.hpp>
+#include <dynd/index.hpp>
 #include <dynd/io.hpp>
 #include <dynd/math.hpp>
 #include <dynd/option.hpp>
-#include <dynd/func/random.hpp>
-#include <dynd/func/take.hpp>
-#include <dynd/func/min.hpp>
-#include <dynd/func/max.hpp>
-#include <dynd/func/complex.hpp>
+#include <dynd/pointer.hpp>
+#include <dynd/random.hpp>
+#include <dynd/statistics.hpp>
+
+
+#include <dynd/func/assignment.hpp>
+
 
 
 using namespace std;

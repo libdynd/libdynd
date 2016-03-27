@@ -12,5 +12,11 @@ namespace nd {
 
   extern DYND_API callable index;
 
+  /**
+   * An callable which applies either a boolean masked or
+   * an indexed take/"fancy indexing" operation.
+   */
+  extern DYND_API callable take;
+
 } // namespace dynd::nd
 } // namespace dynd

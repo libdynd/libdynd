@@ -13,7 +13,7 @@
 #include <dynd/array_iter.hpp>
 #include <dynd/callable_registry.hpp>
 #include <dynd/types/datashape_formatter.hpp>
-#include <dynd/func/complex.hpp>
+#include <dynd/math.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/option.hpp>
 #include <dynd/struct.hpp>
@@ -415,7 +415,7 @@ bool nd::array::equals_exact(const array &rhs) const
     // If there's a leading var dimension, convert it to strided and compare
     // (Note: this is an inefficient hack)
     ndt::type tp = ndt::make_fixed_dim(get_shape()[0], get_type().extended<ndt::base_dim_type>()->get_element_type());
-    return nd::view(*this, tp).equals_exact(nd::view(rhs, tp));
+    return nd::old_view(*this, tp).equals_exact(nd::old_view(rhs, tp));
   }
   else {
     // First compare the shape, to avoid triggering an exception in common cases
@@ -543,7 +543,7 @@ nd::array nd::array::ucast(const ndt::type &scalar_tp, intptr_t replace_ndim) co
   }
 }
 
-nd::array nd::array::view(const ndt::type &tp) const { return nd::view(*this, tp); }
+nd::array nd::array::view(const ndt::type &tp) const { return nd::old_view(*this, tp); }
 
 nd::array nd::array::uview(const ndt::type &uniform_dt, intptr_t replace_ndim) const
 {

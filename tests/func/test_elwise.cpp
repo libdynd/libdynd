@@ -13,7 +13,7 @@
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/functional.hpp>
-#include <dynd/func/take.hpp>
+#include <dynd/index.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>

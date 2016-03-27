@@ -416,5 +416,9 @@ namespace nd {
   extern DYND_API callable tan;
   extern DYND_API callable exp;
 
+  extern DYND_API callable real;
+  extern DYND_API callable imag;
+  extern DYND_API callable conj;
+
 } // namespace dynd::nd
 } // namespace dynd

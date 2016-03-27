@@ -10,7 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/func/take.hpp>
+#include <dynd/index.hpp>
 
 using namespace std;
 using namespace dynd;

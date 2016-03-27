@@ -11,7 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/functional.hpp>
-#include <dynd/func/random.hpp>
+#include <dynd/random.hpp>
 
 using namespace std;
 using namespace dynd;

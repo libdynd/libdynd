@@ -14,9 +14,9 @@
 #include <dynd/callable.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/functional.hpp>
-#include <dynd/func/take.hpp>
+#include <dynd/index.hpp>
 #include <dynd/functional.hpp>
-#include <dynd/func/copy.hpp>
+#include <dynd/func/assignment.hpp>
 #include <dynd/callable_registry.hpp>
 #include <dynd/convert.hpp>
 

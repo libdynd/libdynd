@@ -633,6 +633,12 @@ namespace nd {
 
   extern DYND_API callable assign;
 
+  /**
+   * Returns an arrfunc which copies data from one
+   * array to another, without broadcasting
+   */
+  extern DYND_API callable copy;
+
 } // namespace dynd::nd
 
 /**

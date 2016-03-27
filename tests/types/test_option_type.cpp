@@ -62,29 +62,29 @@ TEST(OptionType, OptionIntAssign)
   a = parse_json("2 * ?int8", "[-10, null]");
   b = nd::empty("2 * ?int16");
   b.vals() = a;
-  EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::view(b, "2 * int16"));
+  EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::old_view(b, "2 * int16"));
   tmp_ectx.errmode = assign_error_nocheck;
   b.assign(a, tmp_ectx.errmode);
-  EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::view(b, "2 * int16"));
+  EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::old_view(b, "2 * int16"));
 
   // Assignment from option[T] to T without any NAs
   a = parse_json("3 * ?int32", "[1, 2, 3]");
   b = nd::empty("3 * int32");
   b.vals() = a;
-  EXPECT_ARRAY_EQ(nd::view(a, "3 * int32"), b);
+  EXPECT_ARRAY_EQ(nd::old_view(a, "3 * int32"), b);
 
   // Assignment from T to option[T]
   a = parse_json("3 * int32", "[1, 3, 5]");
   b = nd::empty("3 * ?int32");
   b.vals() = a;
-  EXPECT_ARRAY_EQ(a, nd::view(b, "3 * int32"));
+  EXPECT_ARRAY_EQ(a, nd::old_view(b, "3 * int32"));
 
   // Assignment from string to option[int]
   a = parse_json("5 * string", "[\"null\", \"12\", \"NA\", \"34\", \"\"]");
   b = nd::empty("5 * ?int32");
   b.vals() = a;
   c = parse_json("5 * ?int32", "[null, 12, null, 34, null]");
-  EXPECT_ARRAY_EQ(nd::view(c, "Fixed * int32"), nd::view(b, "Fixed * int32"));
+  EXPECT_ARRAY_EQ(nd::old_view(c, "Fixed * int32"), nd::old_view(b, "Fixed * int32"));
 }
 
 TEST(OptionType, Cast)
@@ -94,7 +94,7 @@ TEST(OptionType, Cast)
   a = parse_json("3 * string", "[\"null\", \"NA\", \"25\"]");
   b = nd::empty(ndt::type("3 * ?int"));
   b.assign(a);
-  EXPECT_ARRAY_EQ(nd::view(parse_json("3 * ?int", "[null, null, 25]"), "3 * int"), nd::view(b, "3 * int"));
+  EXPECT_ARRAY_EQ(nd::old_view(parse_json("3 * ?int", "[null, null, 25]"), "3 * int"), nd::old_view(b, "3 * int"));
 }
 
 TEST(OptionType, FloatNAvsNaN)

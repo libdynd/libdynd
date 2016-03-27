@@ -23,23 +23,23 @@ using namespace dynd;
 
 TEST(View, SameType)
 {
-  // When the type is the same, nd::view should return the
+  // When the type is the same, nd::old_view should return the
   // exact same array
   nd::array a = nd::empty("5 * 3 * int32");
   nd::array b;
 
-  b = nd::view(a, a.get_type());
+  b = nd::old_view(a, a.get_type());
   EXPECT_EQ(a.get(), b.get());
 
   // Slicing with : keeps the same fixed dim type
   a = a(irange(), irange());
   EXPECT_EQ(ndt::type("5 * 3 * int32"), a.get_type());
-  b = nd::view(a, a.get_type());
+  b = nd::old_view(a, a.get_type());
   EXPECT_EQ(a.get(), b.get());
 
   // test also with a var dim and string type
   a = parse_json("3 * var * string", "[[\"this\", \"is\", \"for\"], [\"testing\"], []]");
-  b = nd::view(a, a.get_type());
+  b = nd::old_view(a, a.get_type());
   EXPECT_EQ(a.get(), b.get());
 }
 
@@ -48,11 +48,11 @@ TEST(View, Errors)
   nd::array a = nd::empty("5 * 3 * int32");
 
   // Shape mismatches
-  EXPECT_THROW(nd::view(a, ndt::type("Fixed * 2 * int32")), type_error);
-  EXPECT_THROW(nd::view(a, ndt::type("5 * 2 * int32")), type_error);
-  EXPECT_THROW(nd::view(a, ndt::type("6 * 3 * int32")), type_error);
+  EXPECT_THROW(nd::old_view(a, ndt::type("Fixed * 2 * int32")), type_error);
+  EXPECT_THROW(nd::old_view(a, ndt::type("5 * 2 * int32")), type_error);
+  EXPECT_THROW(nd::old_view(a, ndt::type("6 * 3 * int32")), type_error);
   // DType mismatches
-  EXPECT_THROW(nd::view(a, ndt::type("5 * 3 * uint64")), type_error);
+  EXPECT_THROW(nd::old_view(a, ndt::type("5 * 3 * uint64")), type_error);
 }
 
 /*
@@ -66,7 +66,7 @@ TEST(View, AsBytes)
 
   // View a scalar as bytes
   a = (int32_t)100;
-  b = nd::view(a, ndt::bytes_type::make(4));
+  b = nd::old_view(a, ndt::bytes_type::make(4));
   ASSERT_EQ(b.get_type(), ndt::bytes_type::make(4));
   // Confirm the bytes arrmeta points to the right data reference
   btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
@@ -79,7 +79,7 @@ TEST(View, AsBytes)
   // View a 1D array as bytes
   double a_data[2] = {1, 2};
   a = a_data;
-  b = nd::view(a, ndt::bytes_type::make(1));
+  b = nd::old_view(a, ndt::bytes_type::make(1));
   ASSERT_EQ(b.get_type(), ndt::bytes_type::make(1));
   // Confirm the bytes arrmeta points to the right data reference
   btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
@@ -92,7 +92,7 @@ TEST(View, AsBytes)
   // View a 2D array as bytes
   double a_data2[2][3] = {{1, 2, 3}, {1, 2, 5}};
   a = a_data2;
-  b = nd::view(a, ndt::bytes_type::make(2));
+  b = nd::old_view(a, ndt::bytes_type::make(2));
   ASSERT_EQ(b.get_type(), ndt::bytes_type::make(2));
   // Confirm the bytes arrmeta points to the right data reference
   btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
@@ -101,11 +101,11 @@ TEST(View, AsBytes)
   btd = reinterpret_cast<const bytes_type_data *>(b.cdata());
   EXPECT_EQ(a.cdata(), btd->begin());
   EXPECT_EQ(2 * 3 * 8, btd->end() - btd->begin());
-  EXPECT_THROW(nd::view(a(irange(), irange(0, 2)), ndt::bytes_type::make(1)), type_error);
+  EXPECT_THROW(nd::old_view(a(irange(), irange(0, 2)), ndt::bytes_type::make(1)), type_error);
 
   // View an array with var outer dimension
   a = parse_json("var * 2 * int16", "[[1, 2], [3, 4], [5, 6]]");
-  b = nd::view(a, ndt::bytes_type::make(1));
+  b = nd::old_view(a, ndt::bytes_type::make(1));
   ASSERT_EQ(b.get_type(), ndt::bytes_type::make(1));
   // Confirm the bytes arrmeta points to the right data reference
   btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
@@ -131,10 +131,10 @@ TEST(View, StructAsBytes) {
         "[[150, \"2002-06-27\", 391, 10.9307, \"abc\", 10, 2.2799, -10.6904]]");
     a = a(irange());
     // View this 1D array of struct as bytes
-    b = nd::view(a, ndt::make_bytes(1));
+    b = nd::old_view(a, ndt::make_bytes(1));
     EXPECT_EQ(ndt::make_bytes(1), b.get_type());
     // View it back as a struct
-    b = nd::view(
+    b = nd::old_view(
         b, ndt::type("{ix : int64, dt : date, rl : int64, v : float64, vt : "
                      "string[4], st : float64, tr : float64, r : float64}"));
     EXPECT_TRUE(b.equals_exact(a(0)));
@@ -153,7 +153,7 @@ TEST(View, FromBytes)
   double x = 3.25;
   a = nd::make_bytes_array(reinterpret_cast<const char *>(&x), sizeof(x), 8);
   ASSERT_EQ(ndt::bytes_type::make(8), a.get_type());
-  b = nd::view(a, ndt::make_type<double>());
+  b = nd::old_view(a, ndt::make_type<double>());
   EXPECT_EQ(3.25, b.as<double>());
   btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(a.get_arrmeta());
   btd = reinterpret_cast<const bytes_type_data *>(a.cdata());
@@ -167,7 +167,7 @@ TEST(View, FromBytes)
   float y[3] = {1.f, 2.5f, -1.25f};
   a = nd::make_bytes_array(reinterpret_cast<const char *>(&y), sizeof(y), 4);
   ASSERT_EQ(ndt::bytes_type::make(4), a.get_type());
-  b = nd::view(a, ndt::type("Fixed * float32"));
+  b = nd::old_view(a, ndt::type("Fixed * float32"));
   EXPECT_EQ(1.f, b(0).as<float>());
   EXPECT_EQ(2.5f, b(1).as<float>());
   EXPECT_EQ(-1.25f, b(2).as<float>());
@@ -187,7 +187,7 @@ TEST(View, WeakerAlignment)
 
   int64_t aval = 0x0102030405060708LL;
   a = nd::make_bytes_array(reinterpret_cast<const char *>(&aval), sizeof(aval), sizeof(aval));
-  b = nd::view(a, ndt::type("2 * int32"));
+  b = nd::old_view(a, ndt::type("2 * int32"));
 #ifdef DYND_BIG_ENDIAN
   EXPECT_EQ(0x01020304, b(0).as<int32_t>());
   EXPECT_EQ(0x05060708, b(1).as<int32_t>());
@@ -206,7 +206,7 @@ TEST(View, StringAsBytes)
   nd::array a, b;
 
   a = parse_json("string", "\"\\U00024B62\"");
-  b = nd::view(a, "bytes");
+  b = nd::old_view(a, "bytes");
   const bytes_type_data *btd = reinterpret_cast<const bytes_type_data *>(b.cdata());
   ASSERT_EQ(4, btd->end() - btd->begin());
   EXPECT_EQ('\xF0', btd->begin()[0]);

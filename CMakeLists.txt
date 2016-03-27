@@ -253,26 +253,8 @@ set(libdynd_SRC
     include/dynd/callables/base_dispatch_callable.hpp
     # Func
     src/dynd/func/assignment.cpp
-    src/dynd/func/complex.cpp
-    src/dynd/func/copy.cpp
-    src/dynd/func/fft.cpp
-    src/dynd/func/max.cpp
-    src/dynd/func/min.cpp
-    src/dynd/func/mean.cpp
-    src/dynd/func/random.cpp
-    src/dynd/func/take.cpp
-    src/dynd/func/view.cpp
     include/dynd/callable_registry.hpp
     include/dynd/func/assignment.hpp
-    include/dynd/func/copy.hpp
-    include/dynd/func/complex.hpp
-    include/dynd/func/fft.hpp
-    include/dynd/func/max.hpp
-    include/dynd/func/mean.hpp
-    include/dynd/func/min.hpp
-    include/dynd/func/random.hpp
-    include/dynd/func/take.hpp
-    include/dynd/func/view.hpp
     # Kernels
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/fft_kernel.cpp
@@ -320,14 +302,17 @@ set(libdynd_SRC
     src/dynd/callable_registry.cpp
     src/dynd/comparison.cpp
     src/dynd/convert.cpp
+    src/dynd/fft.cpp
     src/dynd/functional.cpp
     src/dynd/io.cpp
     src/dynd/math.cpp
     src/dynd/option.cpp
     src/dynd/parse.cpp
     src/dynd/pointer.cpp
+    src/dynd/random.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp
+    src/dynd/statistics.cpp
     src/dynd/struct.cpp
     src/dynd/index.cpp
     src/dynd/json_formatter.cpp
@@ -351,12 +336,15 @@ set(libdynd_SRC
     include/dynd/convert.hpp
     include/dynd/diagnostics.hpp
     include/dynd/ensure_immutable_contig.hpp
+    include/dynd/fft.hpp
     include/dynd/functional.hpp
     include/dynd/io.hpp
     include/dynd/iterator.hpp
     include/dynd/logic.hpp
     include/dynd/math.hpp
+    include/dynd/random.hpp
     include/dynd/sort.hpp
+    include/dynd/statistics.hpp
     include/dynd/string.hpp
     include/dynd/string_search.hpp
     include/dynd/struct.hpp

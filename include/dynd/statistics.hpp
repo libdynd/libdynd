@@ -10,11 +10,9 @@
 namespace dynd {
 namespace nd {
 
-  /**
-   * An callable which applies either a boolean masked or
-   * an indexed take/"fancy indexing" operation.
-   */
-  extern DYND_API callable take;
+  extern DYND_API callable max;
+  extern DYND_API callable mean;
+  extern DYND_API callable min;
 
 } // namespace dynd::nd
 } // namespace dynd

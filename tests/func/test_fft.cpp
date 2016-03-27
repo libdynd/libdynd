@@ -11,8 +11,8 @@
 #include "inc_gtest.hpp"
 #include "dynd_assertions.hpp"
 
-#include <dynd/func/fft.hpp>
-#include <dynd/func/random.hpp>
+#include <dynd/fft.hpp>
+#include <dynd/random.hpp>
 
 using namespace std;
 using namespace dynd;
