@@ -7,9 +7,6 @@
 #include <dynd/array.hpp>
 #include <dynd/comparison.hpp>
 
-
-
-
 #include <dynd/array_iter.hpp>
 #include <dynd/types/datashape_formatter.hpp>
 #include <dynd/math.hpp>
@@ -1247,8 +1244,6 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
   }
   return result;
 }
-
-nd::callable &nd::find_dynamic_function(const char *name) { return callable_registry[name]; }
 
 void dynd::broadcast_input_shapes(intptr_t ninputs, const nd::array *inputs, intptr_t &out_undim, dimvector &out_shape,
                                   shortvector<int> &out_axis_perm)

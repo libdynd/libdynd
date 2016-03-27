@@ -3,12 +3,15 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/arithmetic.hpp>
 #include <dynd/assignment.hpp>
-#include <dynd/callable.hpp>
-#include <dynd/kernels/base_kernel.hpp>
-#include <dynd/types/tuple_type.hpp>
-#include <dynd/types/option_type.hpp>
-#include <dynd/type.hpp>
+#include <dynd/index.hpp>
+#include <dynd/io.hpp>
+#include <dynd/math.hpp>
+#include <dynd/option.hpp>
+#include <dynd/pointer.hpp>
+#include <dynd/random.hpp>
+#include <dynd/statistics.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -38,6 +41,33 @@ public:
 };
 
 } // anonymous namespace
+
+std::map<std::string, nd::callable> &nd::detail::get_regfunctions()
+{
+  static map<std::string, callable> registry{{"take", take},
+                                             {"min", min},
+                                             {"max", max},
+                                             {"add", add},
+                                             {"subtract", subtract},
+                                             {"multiply", multiply},
+                                             {"divide", divide},
+                                             {"sum", sum},
+                                             {"real", real},
+                                             {"imag", imag},
+                                             {"conj", conj},
+                                             {"assign", assign},
+                                             {"serialize", serialize},
+                                             {"sin", sin},
+                                             {"cos", cos},
+                                             {"tan", tan},
+                                             {"exp", exp},
+                                             {"assign_na", assign_na},
+                                             {"is_na", is_na},
+                                             {"dereference", dereference},
+                                             {"uniform", random::uniform}};
+
+  return registry;
+}
 
 nd::callable dynd::make_callable_from_assignment(const ndt::type &dst_tp, const ndt::type &src_tp,
                                                  assign_error_mode errmode)
@@ -195,85 +225,20 @@ nd::array nd::callable::call(size_t args_size, const array *args_values, size_t 
   return dst;
 }
 
-#include <map>
-#include <cmath>
+std::map<std::string, nd::callable> &nd::callables() { return detail::get_regfunctions(); }
 
-#include <dynd/arithmetic.hpp>
-#include <dynd/assignment.hpp>
-#include <dynd/index.hpp>
-#include <dynd/io.hpp>
-#include <dynd/math.hpp>
-#include <dynd/option.hpp>
-#include <dynd/pointer.hpp>
-#include <dynd/random.hpp>
-#include <dynd/statistics.hpp>
-
-using namespace std;
-using namespace dynd;
-
-std::map<std::string, nd::callable> &nd::callable_registry::get_regfunctions()
+nd::callable &nd::reg(const std::string &name)
 {
-  static map<std::string, nd::callable> registry;
-  if (registry.empty()) {
-    registry["take"] = take;
-    registry["min"] = min;
-    registry["max"] = max;
-
-    // dynd/arithmetic.hpp
-    registry["add"] = add;
-    registry["subtract"] = subtract;
-    registry["multiply"] = multiply;
-    registry["divide"] = divide;
-    registry["sum"] = sum;
-
-    // dynd/assign.hpp
-    registry["assign"] = assign;
-
-    // dynd/complex.hpp
-    registry["real"] = real;
-    registry["imag"] = imag;
-    registry["conj"] = conj;
-
-    // dynd/io.hpp
-    registry["serialize"] = serialize;
-
-    // dynd/math.hpp
-    registry["sin"] = sin;
-    registry["cos"] = cos;
-    registry["tan"] = tan;
-    registry["exp"] = exp;
-
-    // dynd/option.hpp
-    registry["assign_na"] = assign_na;
-    registry["is_na"] = is_na;
-
-    // dynd/pointer.hpp
-    registry["dereference"] = dereference;
-
-    // dynd/random.hpp
-    registry["uniform"] = random::uniform;
-  }
-
-  return registry;
-}
-
-nd::callable &nd::callable_registry::operator[](const std::string &name)
-{
-  std::map<std::string, nd::callable> &registry = get_regfunctions();
+  std::map<std::string, callable> &registry = detail::get_regfunctions();
 
   auto it = registry.find(name);
   if (it != registry.end()) {
     return it->second;
   }
-  else {
-    stringstream ss;
-    ss << "No dynd function ";
-    print_escaped_utf8_string(ss, name);
-    ss << " has been registered";
-    throw invalid_argument(ss.str());
-  }
+
+  stringstream ss;
+  ss << "No dynd function ";
+  print_escaped_utf8_string(ss, name);
+  ss << " has been registered";
+  throw invalid_argument(ss.str());
 }
-
-DYND_API class nd::callable_registry nd::callable_registry;
-
-std::map<std::string, nd::callable> &nd::callables() { return callable_registry.get_regfunctions(); }
