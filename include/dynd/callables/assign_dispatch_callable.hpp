@@ -14,8 +14,8 @@ namespace nd {
     dispatcher<callable> m_dispatcher;
 
   public:
-    assign_dispatch_callable(const ndt::type &tp, std::shared_ptr<dispatcher<callable>> dispatcher)
-        : base_dispatch_callable(tp), m_dispatcher(*dispatcher.get())
+    assign_dispatch_callable(const ndt::type &tp, const dispatcher<callable> &dispatcher)
+        : base_dispatch_callable(tp), m_dispatcher(dispatcher)
     {
     }
 

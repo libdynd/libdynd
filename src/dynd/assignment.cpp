@@ -94,8 +94,7 @@ nd::callable make_assign()
   dispatcher.insert({{dim_kind_id, dim_kind_id},
                      nd::functional::elwise(nd::functional::call<nd::assign>(ndt::type("(Any) -> Any")))});
 
-  return nd::make_callable<nd::assign_dispatch_callable>(self_tp,
-                                                         std::make_shared<dynd::dispatcher<nd::callable>>(dispatcher));
+  return nd::make_callable<nd::assign_dispatch_callable>(self_tp, dispatcher);
 }
 
 } // anonymous namespace
