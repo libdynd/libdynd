@@ -10,8 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/array.hpp>
-#include <dynd/callable_registry.hpp>
+#include <dynd/callable.hpp>
 
 using namespace std;
 using namespace dynd;

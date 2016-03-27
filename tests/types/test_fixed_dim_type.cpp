@@ -10,7 +10,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/func/assignment.hpp>
+#include <dynd/assignment.hpp>
 #include <dynd/json_parser.hpp>
 
 using namespace std;

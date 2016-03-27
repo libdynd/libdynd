@@ -5,8 +5,8 @@
 
 #pragma once
 
+#include <dynd/assignment.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/func/assignment.hpp>
 #include <dynd/types/adapt_type.hpp>
 
 namespace dynd {

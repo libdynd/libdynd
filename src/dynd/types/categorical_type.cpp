@@ -11,7 +11,7 @@
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/array_range.hpp>
-#include <dynd/func/assignment.hpp>
+#include <dynd/assignment.hpp>
 #include <dynd/search.hpp>
 
 using namespace dynd;

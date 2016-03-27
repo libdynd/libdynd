@@ -11,10 +11,9 @@
 
 
 #include <dynd/array_iter.hpp>
-#include <dynd/callable_registry.hpp>
 #include <dynd/types/datashape_formatter.hpp>
 #include <dynd/math.hpp>
-#include <dynd/func/assignment.hpp>
+#include <dynd/assignment.hpp>
 #include <dynd/option.hpp>
 #include <dynd/struct.hpp>
 #include <dynd/types/var_dim_type.hpp>

@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/callables/base_callable.hpp>
-#include <dynd/func/assignment.hpp>
+#include <dynd/assignment.hpp>
 
 namespace dynd {
 namespace nd {
