@@ -319,6 +319,36 @@ struct pop_front {
 template <typename... S>
 struct outer;
 
+// Work around bug in MSVC 2015 update 1 and earlier.
+// This requires many more template instantiations, so only apply it in that case.
+#if defined(_MSC_FULL_VER) && !defined(__clang__) && _MSC_FULL_VER <= 190024720
+
+template <typename T0, T0 I0, typename T1, T1 I1>
+struct outer<integer_sequence<T0, I0>, integer_sequence<T1, I1>> {
+  typedef type_sequence<integer_sequence<typename std::common_type<T0, T1>::type, I0, I1>> type;
+};
+
+template <typename T0, T0 I0, typename T1, T1 I, T1... I1>
+struct outer<integer_sequence<T0, I0>, integer_sequence<T1, I, I1...>> {
+  typedef typename join<type_sequence<integer_sequence<typename std::common_type<T0, T1>::type, I0, I>>,
+                        typename outer<integer_sequence<T0, I0>, integer_sequence<T1, I1...>>::type>::type type;
+};
+
+template <typename T0, T0... I0, typename T1, T1 I1>
+struct outer<type_sequence<integer_sequence<T0, I0...>>, integer_sequence<T1, I1>> {
+  typedef type_sequence<integer_sequence<typename std::common_type<T0, T1>::type, I0..., I1>> type;
+};
+
+template <typename T0, T0... I0, typename T1, T1 I, T1... I1>
+struct outer<type_sequence<integer_sequence<T0, I0...>>, integer_sequence<T1, I, I1...>> {
+  typedef
+      typename join<type_sequence<integer_sequence<typename std::common_type<T0, T1>::type, I0..., I>>,
+                    typename outer<type_sequence<integer_sequence<T0, I0...>>, integer_sequence<T1, I1...>>::type>::type
+          type;
+};
+
+#else // defined(_MSC_FULL_VER) && !defined(__clang__) && _MSC_FULL_VER <= 190024720
+
 template <typename T0, T0 I0, typename T1, T1... I1>
 struct outer<integer_sequence<T0, I0>, integer_sequence<T1, I1...>> {
   typedef type_sequence<integer_sequence<typename std::common_type<T0, T1>::type, I0, I1>...> type;
@@ -328,6 +358,8 @@ template <typename T0, T0... I0, typename T1, T1... I1>
 struct outer<type_sequence<integer_sequence<T0, I0...>>, integer_sequence<T1, I1...>> {
   typedef type_sequence<integer_sequence<typename std::common_type<T0, T1>::type, I0..., I1>...> type;
 };
+
+#endif // defined(_MSC_FULL_VER) && !defined(__clang__) && _MSC_FULL_VER <= 190024720
 
 template <typename T0, typename... T1>
 struct outer<type_sequence<T0>, type_sequence<T1...>> {
