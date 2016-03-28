@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <array>
+
 #include <dynd/callables/base_instantiable_callable.hpp>
 #include <dynd/kernels/elwise_kernel.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
