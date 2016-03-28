@@ -50,8 +50,8 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
 
     kernel_builder ckb;
     for (auto frame : s) {
-      frame.func->new_instantiate(frame.data, &ckb, frame.dst_tp, nullptr, frame.nsrc, frame.src_tp.data(), nullptr,
-                                  frame.kernreq, nkwd, kwds);
+      frame.func->new_instantiate(frame.data, &ckb, frame.dst_tp, dst->metadata(), frame.nsrc, frame.src_tp.data(),
+                                  src_arrmeta, frame.kernreq, nkwd, kwds);
     }
 
     kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
