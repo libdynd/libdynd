@@ -6,8 +6,8 @@
 #pragma once
 
 #include <dynd/callables/base_instantiable_callable.hpp>
-#include <dynd/callables/call_stack.hpp>
 #include <dynd/callables/elwise_callable.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
 namespace nd {

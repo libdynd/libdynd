@@ -7,6 +7,10 @@
 
 #include <dynd/callables/base_instantiable_callable.hpp>
 #include <dynd/kernels/elwise_kernel.hpp>
+#include <dynd/types/ellipsis_dim_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
+#include <dynd/types/dim_fragment_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 
 namespace dynd {
 namespace nd {

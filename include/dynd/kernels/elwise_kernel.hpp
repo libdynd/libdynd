@@ -6,10 +6,6 @@
 #pragma once
 
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/types/ellipsis_dim_type.hpp>
-#include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/dim_fragment_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/callable.hpp>
 
 namespace dynd {
