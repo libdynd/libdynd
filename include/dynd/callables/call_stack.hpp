@@ -32,7 +32,7 @@ namespace nd {
   public:
     std::vector<call_frame> m_stack;
 
-    const ndt::type &res_type() { return m_stack.back().dst_tp; }
+    ndt::type &res_type() { return m_stack.back().dst_tp; }
 
     size_t narg() { return m_stack.back().src_tp.size(); }
 

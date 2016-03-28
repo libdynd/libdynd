@@ -7,7 +7,6 @@
 
 #include <dynd/arrmeta_holder.hpp>
 #include <dynd/callables/base_callable.hpp>
-#include <dynd/kernels/elwise.hpp>
 
 namespace dynd {
 namespace nd {

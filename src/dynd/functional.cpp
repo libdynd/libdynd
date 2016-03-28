@@ -8,7 +8,7 @@
 #include <dynd/callables/compose_callable.hpp>
 #include <dynd/callables/compound_callable.hpp>
 #include <dynd/callables/constant_callable.hpp>
-#include <dynd/callables/elwise_callable.hpp>
+#include <dynd/callables/elwise_dispatch_callable.hpp>
 #include <dynd/callables/outer_callable.hpp>
 #include <dynd/callables/neighborhood_callable.hpp>
 #include <dynd/callables/reduction_callable.hpp>
@@ -119,21 +119,21 @@ nd::callable nd::functional::elwise(const ndt::type &self_tp, const callable &ch
 {
   switch (self_tp.extended<ndt::callable_type>()->get_npos()) {
   case 0:
-    return make_callable<elwise_callable<0>>(self_tp, child);
+    return make_callable<elwise_dispatch_callable<0>>(self_tp, child);
   case 1:
-    return make_callable<elwise_callable<1>>(self_tp, child);
+    return make_callable<elwise_dispatch_callable<1>>(self_tp, child);
   case 2:
-    return make_callable<elwise_callable<2>>(self_tp, child);
+    return make_callable<elwise_dispatch_callable<2>>(self_tp, child);
   case 3:
-    return make_callable<elwise_callable<3>>(self_tp, child);
+    return make_callable<elwise_dispatch_callable<3>>(self_tp, child);
   case 4:
-    return make_callable<elwise_callable<4>>(self_tp, child);
+    return make_callable<elwise_dispatch_callable<4>>(self_tp, child);
   case 5:
-    return make_callable<elwise_callable<5>>(self_tp, child);
+    return make_callable<elwise_dispatch_callable<5>>(self_tp, child);
   case 6:
-    return make_callable<elwise_callable<6>>(self_tp, child);
+    return make_callable<elwise_dispatch_callable<6>>(self_tp, child);
   case 7:
-    return make_callable<elwise_callable<7>>(self_tp, child);
+    return make_callable<elwise_dispatch_callable<7>>(self_tp, child);
   default:
     throw std::runtime_error("callable with nsrc > 7 not implemented yet");
   }
