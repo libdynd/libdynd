@@ -82,11 +82,17 @@ if(WIN32)
     set(DYND_BUILD_BENCHMARKS OFF)
 endif()
 
-if(${MSVC} OR "${CMAKE_CXX_SIMULATED_ID}" STREQUAL "MSVC")
+if (DEFINED CMAKE_CXX_SIMULATED_ID)
+    set(DYND_SIMULATED_COMPILER ${CMAKE_CXX_SIMULATED_ID})
+else()
+    set(DYND_SIMULATED_COMPILER ${CMAKE_CXX_COMPILER_ID})
+endif()
+
+if("${MSVC}" OR "${DYND_SIMULATED_COMPILER}" STREQUAL "MSVC")
     # -WX: Treat warnings as errors
     # -bigobj: Allow lots of symbols (assignment_kernels.cpp and assignment_kernels.cu need this flag)
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        # If this is the clang-cl compiler have it act like MSVC 2015 and not 2013.
+        # If this is the clang-cl compiler.
         # Don't enable -WX here yet.
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHsc -bigobj -wd4503")
     elseif(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19)
