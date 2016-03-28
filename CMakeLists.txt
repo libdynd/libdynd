@@ -334,6 +334,8 @@ set(libdynd_SRC
     include/dynd/diagnostics.hpp
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/fft.hpp
+    include/dynd/func/elwise.hpp
+    include/dynd/func/reduction.hpp
     include/dynd/functional.hpp
     include/dynd/io.hpp
     include/dynd/iterator.hpp
