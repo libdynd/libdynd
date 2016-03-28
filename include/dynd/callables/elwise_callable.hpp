@@ -36,11 +36,12 @@ namespace nd {
         }
 
         const char *child_dst_arrmeta;
-        const char *child_src_arrmeta[N];
+        std::array<const char *, N> child_src_arrmeta;
         ndt::type child_dst_tp;
-        ndt::type child_src_tp[N];
+        std::array<ndt::type, N> child_src_tp;
 
-        intptr_t size, dst_stride, src_stride[N];
+        intptr_t size, dst_stride;
+        std::array<intptr_t, N> src_stride;
         if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride, &child_dst_tp, &child_dst_arrmeta)) {
           std::stringstream ss;
           ss << "make_elwise_strided_dimension_expr_kernel: error processing "
@@ -77,18 +78,17 @@ namespace nd {
           }
         }
 
-        ckb->emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(
-            kernreq, size, dst_stride, dynd::detail::make_array_wrapper<N>(src_stride));
+        ckb->emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return self->instantiate(data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-                                   kernel_request_strided, nkwd, kwds, tp_vars);
+          return self->instantiate(data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
         }
 
         // Instantiate the elementwise handler
-        return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-                                  kernel_request_strided, nkwd, kwds, tp_vars);
+        return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+                                  child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
     };
 
@@ -108,9 +108,9 @@ namespace nd {
         }
 
         const char *child_dst_arrmeta;
-        const char *child_src_arrmeta[N];
+        std::array<const char *, N> child_src_arrmeta;
         ndt::type child_dst_tp;
-        ndt::type child_src_tp[N];
+        std::array<ndt::type, N> child_src_tp;
 
         intptr_t size, dst_stride;
         if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride, &child_dst_tp, &child_dst_arrmeta)) {
@@ -121,8 +121,8 @@ namespace nd {
           throw type_error(ss.str());
         }
 
-        intptr_t src_stride[N], src_offset[N];
-        bool is_src_var[N];
+        std::array<intptr_t, N> src_stride, src_offset;
+        std::array<bool, N> is_src_var;
         bool finished = dst_ndim == 1;
         for (size_t i = 0; i < N; ++i) {
           intptr_t src_size;
@@ -160,17 +160,17 @@ namespace nd {
           }
         }
 
-        ckb->emplace_back<elwise_kernel<fixed_dim_id, var_dim_id, N>>(kernreq, size, dst_stride, src_stride, src_offset,
-                                                                      is_src_var);
+        ckb->emplace_back<elwise_kernel<fixed_dim_id, var_dim_id, N>>(kernreq, size, dst_stride, src_stride.data(),
+                                                                      src_offset.data(), is_src_var.data());
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return self->instantiate(data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-                                   kernel_request_strided, nkwd, kwds, tp_vars);
+          return self->instantiate(data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
         }
         // Instantiate the elementwise handler
-        return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-                                  kernel_request_strided, nkwd, kwds, tp_vars);
+        return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+                                  child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
     };
 
@@ -190,9 +190,9 @@ namespace nd {
         }
 
         const char *child_dst_arrmeta;
-        const char *child_src_arrmeta[N];
+        std::array<const char *, N> child_src_arrmeta;
         ndt::type child_dst_tp;
-        ndt::type child_src_tp[N];
+        std::array<ndt::type, N> child_src_tp;
 
         // The dst var parameters
         const ndt::var_dim_type *dst_vdd = dst_tp.extended<ndt::var_dim_type>();
@@ -202,8 +202,8 @@ namespace nd {
         child_dst_arrmeta = dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type);
         child_dst_tp = dst_vdd->get_element_type();
 
-        intptr_t src_stride[N], src_offset[N], src_size[N];
-        bool is_src_var[N];
+        std::array<intptr_t, N> src_stride, src_offset, src_size;
+        std::array<bool, N> is_src_var;
 
         bool finished = dst_ndim == 1;
         for (size_t i = 0; i < N; ++i) {
@@ -240,16 +240,16 @@ namespace nd {
 
         ckb->emplace_back<elwise_kernel<var_dim_id, fixed_dim_id, N>>(
             kernreq, dst_md->blockref.get(), dst_vdd->get_target_alignment(), dst_md->stride, dst_md->offset,
-            src_stride, src_offset, src_size, is_src_var);
+            src_stride.data(), src_offset.data(), src_size.data(), is_src_var.data());
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return self->instantiate(data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-                                   kernel_request_strided, nkwd, kwds, tp_vars);
+          return self->instantiate(data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
         }
         // All the types matched, so instantiate the elementwise handler
-        return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-                                  kernel_request_strided, nkwd, kwds, tp_vars);
+        return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+                                  child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
     };
 
