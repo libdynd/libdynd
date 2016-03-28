@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/callables/base_callable.hpp>
+#include <dynd/callables/call_stack.hpp>
 
 namespace dynd {
 namespace nd {
@@ -13,6 +14,14 @@ namespace nd {
   class base_dispatch_callable : public base_callable {
   public:
     base_dispatch_callable(const ndt::type &tp) : base_callable(tp) {}
+
+    void new_resolve(call_stack &stack, size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    {
+      const callable &child = specialize(stack.res_type(), stack.narg(), stack.arg_types());
+
+      stack.push_back(child, stack.res_type(), stack.narg(), stack.arg_types(), stack.kernreq());
+      child->new_resolve(stack, nkwd, kwds, tp_vars);
+    }
 
     char *data_init(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                     const std::map<std::string, ndt::type> &tp_vars)

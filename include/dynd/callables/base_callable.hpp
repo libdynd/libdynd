@@ -15,6 +15,8 @@
 namespace dynd {
 namespace nd {
 
+  class call_stack;
+
   enum callable_property {
     none = 0x00000000,
     left_associative = 0x00000001,
@@ -39,11 +41,13 @@ namespace nd {
    * with different array arrmeta.
    */
   class DYND_API base_callable {
+  protected:
     std::atomic_long m_use_count;
     ndt::type m_tp;
+    bool m_new_style; // whether or not this callable is operating in the new "resolve" framework
 
   public:
-    base_callable(const ndt::type &tp) : m_use_count(0), m_tp(tp) {}
+    base_callable(const ndt::type &tp) : m_use_count(0), m_tp(tp), m_new_style(false) {}
 
     // non-copyable
     base_callable(const base_callable &) = delete;
@@ -51,6 +55,17 @@ namespace nd {
     virtual ~base_callable();
 
     const ndt::type &get_type() const { return m_tp; }
+
+    virtual void new_resolve(call_stack &DYND_UNUSED(stack), size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)){};
+
+    virtual void new_instantiate(char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
+                                 const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                 const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
+                                 intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds))
+    {
+    }
 
     virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
 

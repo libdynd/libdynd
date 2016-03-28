@@ -337,7 +337,7 @@ struct is_char_string_param<char *> {
   static const bool value = true;
 };
 template <int N>
-struct is_char_string_param<const char (&)[N]> {
+struct is_char_string_param<const char(&)[N]> {
   static const bool value = true;
 };
 template <int N>
@@ -903,61 +903,6 @@ typename std::enable_if<std::is_floating_point<T>::value && is_integral<U>::valu
 } // namespace dynd
 
 namespace dynd {
-namespace detail {
-
-  template <typename T, int N>
-  class array_wrapper {
-    T m_data[N];
-
-  public:
-    array_wrapper() = default;
-
-    array_wrapper(const T *data) { memcpy(m_data, data, sizeof(m_data)); }
-
-    operator T *() { return m_data; }
-
-    operator const T *() const { return m_data; }
-
-    T &operator[](intptr_t i) { return m_data[i]; }
-
-    const T &operator[](intptr_t i) const { return m_data[i]; }
-  };
-
-  template <typename T>
-  class array_wrapper<T, 0> {
-  public:
-    array_wrapper() = default;
-
-    array_wrapper(const T *DYND_UNUSED(data)) {}
-
-    operator T *() { return NULL; }
-
-    operator const T *() const { return NULL; }
-  };
-
-  template <int N, typename T>
-  array_wrapper<T, N> make_array_wrapper(const T *data)
-  {
-    return array_wrapper<T, N>(data);
-  }
-
-  template <typename T>
-  class value_wrapper {
-    T m_value;
-
-  public:
-    value_wrapper(const T &value) : m_value(value) {}
-
-    operator T() const { return m_value; }
-  };
-
-  template <typename T>
-  value_wrapper<T> make_value_wrapper(const T &value)
-  {
-    return value_wrapper<T>(value);
-  }
-
-} // namespace dynd::detail
 
 using std::cos;
 using std::sin;
