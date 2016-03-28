@@ -268,7 +268,7 @@ set(libdynd_SRC
     include/dynd/kernels/constant_kernel.hpp
     include/dynd/kernels/cuda_launch.hpp
     include/dynd/kernels/dereference_kernel.hpp
-    include/dynd/kernels/elwise.hpp
+    include/dynd/kernels/elwise_kernel.hpp
     include/dynd/kernels/fft_kernel.hpp
     include/dynd/kernels/index_kernel.hpp
     include/dynd/kernels/is_na_kernel.hpp
