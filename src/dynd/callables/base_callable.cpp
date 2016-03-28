@@ -43,7 +43,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   if (m_new_style) {
     call_stack s;
     s.push_back(callable(this, true), dst_tp, nsrc, src_tp, kernel_request_call);
-    resolve(s, nkwd, kwds, tp_vars);
+    new_resolve(s, nkwd, kwds, tp_vars);
 
     // Allocate the destination array
     array dst = empty(dst_tp);

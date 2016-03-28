@@ -56,8 +56,8 @@ namespace nd {
 
     const ndt::type &get_type() const { return m_tp; }
 
-    virtual void resolve(call_stack &DYND_UNUSED(stack), size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)){};
+    virtual void new_resolve(call_stack &DYND_UNUSED(stack), size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)){};
 
     virtual void new_instantiate(char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
                                  const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
