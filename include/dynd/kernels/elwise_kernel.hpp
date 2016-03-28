@@ -411,7 +411,7 @@ namespace nd {
       }
     };
 
-    template <int N>
+    template <size_t N>
     struct elwise_kernel<var_dim_id, var_dim_id, N> : elwise_kernel<var_dim_id, fixed_dim_id, N> {
     };
 

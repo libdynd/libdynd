@@ -22,7 +22,7 @@ namespace nd {
      * This defines the type and keyword argument resolution for
      * an elwise callable.
      */
-    template <type_id_t DstTypeID, type_id_t SrcTypeID, int N>
+    template <type_id_t DstTypeID, type_id_t SrcTypeID, size_t N>
     class elwise_callable;
 
     template <size_t N>
