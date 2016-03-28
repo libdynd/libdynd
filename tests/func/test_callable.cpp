@@ -17,8 +17,38 @@
 #include <dynd/index.hpp>
 #include <dynd/array.hpp>
 
+#include <dynd/arithmetic.hpp>
+#include <dynd/callables/call_stack.hpp>
+
 using namespace std;
 using namespace dynd;
+
+/*
+TEST(Callable, Resolve)
+{
+  ndt::type dst_tp = ndt::type("Any");
+  size_t nsrc = 2;
+  ndt::type src_tp[2] = {ndt::type("10 * int32"), ndt::type("10 * int32")};
+
+  nd::call_stack s;
+  s.push_back(nd::add, dst_tp, nsrc, src_tp);
+  nd::add->resolve(s, 0, nullptr, std::map<std::string, ndt::type>());
+
+  for (auto it : s) {
+    std::cout << "func = " << it.func << std::endl;
+    std::cout << "dst_tp = " << it.dst_tp << std::endl;
+    std::cout << "nsrc = " << it.nsrc << std::endl;
+    for (size_t i = 0; i < it.nsrc; ++i) {
+      std::cout << "src_tp[" << i << "] = " << it.src_tp[i] << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  std::exit(-1);
+
+  //  s.push_back(callable(this, true), dst_tp, nsrc, src_tp);
+  //  resolve(s, nkwd, kwds, tp_vars);
+}
+*/
 
 /*
 TEST(Callable, SingleStridedConstructor)

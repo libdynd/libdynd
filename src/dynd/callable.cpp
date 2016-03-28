@@ -12,6 +12,7 @@
 #include <dynd/pointer.hpp>
 #include <dynd/random.hpp>
 #include <dynd/statistics.hpp>
+#include <dynd/callables/call_stack.hpp>
 
 using namespace std;
 using namespace dynd;

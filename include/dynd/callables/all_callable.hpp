@@ -13,7 +13,7 @@ namespace nd {
 
   class all_callable : public base_instantiable_callable<all_kernel> {
   public:
-    all_callable() : base_instantiable_callable<all_kernel>(ndt::type("(bool) -> bool")) {}
+    all_callable() : base_instantiable_callable<all_kernel>(ndt::type("(bool) -> bool")) { m_new_style = true; }
   };
 
 } // namespace dynd::nd

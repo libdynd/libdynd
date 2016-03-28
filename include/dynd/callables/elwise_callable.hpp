@@ -7,6 +7,7 @@
 
 #include <dynd/callables/base_instantiable_callable.hpp>
 #include <dynd/kernels/elwise.hpp>
+#include <dynd/callables/call_stack.hpp>
 
 namespace dynd {
 namespace nd {
@@ -16,12 +17,26 @@ namespace nd {
      * This defines the type and keyword argument resolution for
      * an elwise callable.
      */
-    template <int N>
+    template <size_t N>
     class elwise_callable : public base_callable {
       callable m_child;
 
     public:
       elwise_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
+
+      /*
+            void resolve(call_stack &stack, size_t nkwd, const array *kwds, const std::map<std::string, ndt::type>
+         &tp_vars)
+            {
+              ndt::type child_dst_tp;
+              std::vector<ndt::type> child_src_tp(stack.narg());
+
+              ndt::type dst_tp;
+              resolve_dst_type(nullptr, dst_tp, stack.narg(), stack.arg_types(), nkwd, kwds, tp_vars);
+
+              stack.push_back(m_child, dst_tp, stack.narg(), stack.arg_types());
+            }
+      */
 
       void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                             intptr_t nkwd, const dynd::nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
