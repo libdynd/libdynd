@@ -180,9 +180,16 @@ namespace nd {
   };
 
   template <typename CallableType, typename... ArgTypes>
-  callable make_callable(ArgTypes &&... args)
+  std::enable_if_t<std::is_base_of<base_callable, CallableType>::value, callable> make_callable(ArgTypes &&... args)
   {
     return callable(new CallableType(std::forward<ArgTypes>(args)...), true);
+  }
+
+  template <typename KernelType, typename... ArgTypes>
+  std::enable_if_t<std::is_base_of<base_kernel<KernelType>, KernelType>::value, callable>
+  make_callable(const ndt::type &tp)
+  {
+    return make_callable<base_instantiable_callable<KernelType>>(tp);
   }
 
   inline std::ostream &operator<<(std::ostream &o, const callable &rhs)
