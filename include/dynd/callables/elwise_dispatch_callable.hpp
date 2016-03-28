@@ -199,12 +199,14 @@ namespace nd {
         switch (dst_tp.get_id()) {
         case fixed_dim_id:
           if (src_all_strided) {
-            return elwise_callable<fixed_dim_id, fixed_dim_id, N>::instantiate(
+            elwise_callable<fixed_dim_id, fixed_dim_id, N>::instantiate(
                 self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+            return;
           }
           else if (src_all_strided_or_var) {
-            return elwise_callable<fixed_dim_id, var_dim_id, N>::instantiate(
+            elwise_callable<fixed_dim_id, var_dim_id, N>::instantiate(
                 self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+            return;
           }
           else {
             // TODO
@@ -212,8 +214,9 @@ namespace nd {
           break;
         case var_dim_id:
           if (src_all_strided_or_var) {
-            return elwise_callable<var_dim_id, fixed_dim_id, N>::instantiate(
+            elwise_callable<var_dim_id, fixed_dim_id, N>::instantiate(
                 self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+            return;
           }
           else {
             // TODO
