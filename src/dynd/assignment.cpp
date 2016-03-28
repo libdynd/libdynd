@@ -4,12 +4,12 @@
 //
 
 #include <dynd/assignment.hpp>
+#include <dynd/callables/assign_callable.hpp>
 #include <dynd/callables/assign_dispatch_callable.hpp>
+#include <dynd/callables/copy_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/any_kind_type.hpp>
-#include <dynd/callables/assign_callable.hpp>
-#include <dynd/callables/copy_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -25,8 +25,8 @@ struct DYND_API _bind {
 nd::callable make_assign()
 {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint8_id, uint16_id, uint32_id,
-                           uint64_id, uint128_id, float32_id, float64_id, complex_float32_id,
-                           complex_float64_id> numeric_ids;
+                           uint64_id, uint128_id, float32_id, float64_id, complex_float32_id, complex_float64_id>
+      numeric_ids;
 
   ndt::type self_tp = ndt::callable_type::make(ndt::any_kind_type::make(), {ndt::any_kind_type::make()}, {"error_mode"},
                                                {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())});

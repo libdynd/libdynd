@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/callable.hpp>
 #include <dynd/callables/base_callable.hpp>
 
 namespace dynd {
