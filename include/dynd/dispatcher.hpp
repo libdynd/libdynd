@@ -9,7 +9,7 @@
 
 // #include <sparsehash/dense_hash_map>
 
-#include <dynd/types/type_id.hpp>
+#include <dynd/type_registry.hpp>
 
 namespace dynd {
 
@@ -49,7 +49,7 @@ inline bool ambiguous(const std::vector<type_id_t> &lhs, const std::vector<type_
 }
 
 template <size_t N>
-bool supercedes(const type_id_t(&lhs)[N], const std::vector<type_id_t> &rhs)
+bool supercedes(const type_id_t (&lhs)[N], const std::vector<type_id_t> &rhs)
 {
   if (rhs.size() != N) {
     return false;
@@ -175,8 +175,7 @@ public:
   dispatcher(const dispatcher &other) : m_pairs(other.m_pairs), m_map(other.m_map) {}
 
   template <typename Iterator>
-  dispatcher(Iterator begin, Iterator end, const map_type &map = map_type())
-      : m_map(map)
+  dispatcher(Iterator begin, Iterator end, const map_type &map = map_type()) : m_map(map)
   {
     //    m_map.set_empty_key(uninitialized_id);
 
