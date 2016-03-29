@@ -40,10 +40,6 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
                                   const char *const *src_arrmeta, const array *src_data, intptr_t nkwd,
                                   const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
-  std::cout << "sizeof(ndt::fixed_dim_type::metadata_type) = " << sizeof(ndt::fixed_dim_type::metadata_type) << std::endl;
-  std::cout << "sizeof(ndt::var_dim_type::metadata_type) = " << sizeof(ndt::var_dim_type::metadata_type) << std::endl;
-  std::cout << std::endl;
-
   if (m_new_style) {
     std::vector<intptr_t> src_arrmeta_offsets(nsrc);
     for (intptr_t i = 0; i < nsrc; ++i) {
@@ -57,11 +53,12 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
     ndt::type resolved_dst_tp = s.m_stack.front().dst_tp;
 
     // Allocate the destination array
-    std::cout << "resolved_dst_type = " << resolved_dst_tp << std::endl;
+//    std::cout << "resolved_dst_type = " << resolved_dst_tp << std::endl;
     array dst = empty(resolved_dst_tp);
 
     kernel_builder ckb;
     for (auto frame : s) {
+/*
       std::cout << "frame.func = " << frame.func << std::endl;
       std::cout << "frame.kernreq = " << frame.kernreq << std::endl;
       std::cout << "frame.dst_tp = " << frame.dst_tp << std::endl;
@@ -71,6 +68,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
         std::cout << "frame.src_tp[" << i << "] = " << frame.src_tp[i] << std::endl;
         std::cout << "frame.src_arrmeta_offsets[" << i << "] = " << frame.src_arrmeta_offsets[i] << std::endl;
       }
+*/
       std::vector<const char *> temp_src_arrmeta(nsrc);
       for (int i = 0; i < nsrc; ++i) {
         temp_src_arrmeta[i] = src_arrmeta[i] + frame.src_arrmeta_offsets[i];

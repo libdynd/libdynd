@@ -59,7 +59,6 @@ namespace nd {
         std::array<ndt::type, N> child_src_tp;
 
         intptr_t size;
-        std::array<intptr_t, N> src_stride;
         size = dst_tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
         /*
                 if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride, &child_dst_tp, &child_dst_arrmeta)) {
@@ -77,7 +76,6 @@ namespace nd {
           intptr_t src_size = src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
           if (src_ndim < dst_ndim) {
             // This src value is getting broadcasted
-            src_stride[i] = 0;
             data.broadcast_src[i] = true;
             //            child_src_arrmeta[i] = src_arrmeta[i];
             child_src_tp[i] = src_tp[i];
@@ -132,15 +130,11 @@ namespace nd {
                            const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
                            const array *DYND_UNUSED(kwds))
       {
-        std::cout << "elwise::new_instantiate" << std::endl;
-        std::cout << reinterpret_cast<data_type *>(data)->broadcast_src[0] << std::endl;
-
         intptr_t size;
         size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
 
         intptr_t dst_stride;
         dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
-        std::cout << "dst_stride = " << dst_stride << std::endl;
 
         std::array<intptr_t, N> src_stride;
         for (size_t i = 0; i < N; ++i) {
@@ -150,7 +144,6 @@ namespace nd {
           else {
             src_stride[i] = reinterpret_cast<const size_stride_t *>(src_arrmeta[i])->stride;
           }
-          std::cout << "src_stride[" << i << "] = " << src_stride[i] << std::endl;
         }
 
         ckb->emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
@@ -358,7 +351,7 @@ namespace nd {
 
         child_dst_tp = dst_vdd->get_element_type();
 
-        std::array<intptr_t, N> src_stride, src_offset, src_size;
+        std::array<intptr_t, N> src_size;
 
         bool finished = dst_ndim == 1;
         for (size_t i = 0; i < N; ++i) {
@@ -366,8 +359,6 @@ namespace nd {
           intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
           if (src_ndim < dst_ndim) {
             // This src value is getting broadcasted
-            src_stride[i] = 0;
-            src_offset[i] = 0;
             src_size[i] = 1;
             data.broadcast_src[i] = true;
             data.is_src_var[i] = false;
@@ -377,7 +368,6 @@ namespace nd {
           else if (src_tp[i].get_id() == fixed_dim_id) { // src_tp[i].get_as_strided(src_arrmeta[i], &src_size[i],
                                                          // &src_stride[i], &child_src_tp[i],
             //                      &child_src_arrmeta[i])) {
-            src_offset[i] = 0;
             data.broadcast_src[i] = false;
             data.is_src_var[i] = false;
             finished &= src_ndim == 1;
