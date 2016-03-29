@@ -534,7 +534,7 @@ namespace nd {
             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta);
         const ndt::var_dim_type *dst_vdd = dst_tp.extended<ndt::var_dim_type>();
 
-        std::array<intptr_t, N> src_stride;
+        std::array<intptr_t, N> DYND_IGNORE_UNUSED(src_stride);
         std::array<intptr_t, N> src_offset;
         std::array<intptr_t, N> src_size;
         for (size_t i = 0; i < N; ++i) {
