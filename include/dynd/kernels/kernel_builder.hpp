@@ -6,8 +6,11 @@
 #pragma once
 
 #include <new>
+#include <cstring>
 #include <algorithm>
 #include <map>
+
+#include <dynd/visibility.hpp>
 
 namespace dynd {
 namespace nd {

@@ -7,6 +7,8 @@
 
 #include <dynd/callables/base_callable.hpp>
 #include <dynd/kernels/uniform_kernel.hpp>
+#include <dynd/types/callable_type.hpp>
+#include <dynd/types/option_type.hpp>
 
 namespace dynd {
 namespace nd {

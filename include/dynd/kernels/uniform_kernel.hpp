@@ -5,7 +5,11 @@
 
 #pragma once
 
+#include <memory>
+#include <random>
+
 #include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_strided_kernel.hpp>
 
 namespace dynd {
 
