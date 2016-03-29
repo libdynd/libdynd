@@ -30,6 +30,7 @@ namespace nd {
                          const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                          kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds))
     {
+      std::cout << "base_instantiable_callable::new_instantiate" << std::endl;
       ckb->emplace_back<KernelType>(kernreq);
     }
   };

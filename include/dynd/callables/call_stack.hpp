@@ -63,6 +63,7 @@ namespace nd {
     template <typename DataType>
     void push_back_data(DataType data)
     {
+      static_assert(sizeof(typename remove_reference_then_cv<DataType>::type) < 100, "needs more data");
       new (this->data()) DataType(data);
     }
 

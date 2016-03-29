@@ -58,7 +58,10 @@ namespace nd {
     const ndt::type &get_type() const { return m_tp; }
 
     virtual void new_resolve(call_stack &DYND_UNUSED(stack), size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)){};
+                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      std::cout << "base_callable::new_resolve" << std::endl;
+    };
 
     virtual void new_instantiate(char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
                                  const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
@@ -66,6 +69,7 @@ namespace nd {
                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
                                  intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds))
     {
+      std::cout << "base_callable::new_instantiate" << std::endl;
     }
 
     virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }

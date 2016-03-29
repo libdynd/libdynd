@@ -41,6 +41,8 @@ namespace nd {
       void new_resolve(call_stack &stack, size_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars)
       {
+        std::cout << "elwise_callable::new_resolve" << std::endl;
+
         data_type data;
 
         const ndt::type &dst_tp = stack.res_type();
@@ -60,15 +62,6 @@ namespace nd {
 
         intptr_t size;
         size = dst_tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
-        /*
-                if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride, &child_dst_tp, &child_dst_arrmeta)) {
-                  std::stringstream ss;
-                  ss << "make_elwise_strided_dimension_expr_kernel: error processing "
-                        "type "
-                     << dst_tp << " as strided";
-                  throw type_error(ss.str());
-                }
-        */
 
         bool finished = dst_ndim == 1;
         for (size_t i = 0; i < N; ++i) {
@@ -130,6 +123,8 @@ namespace nd {
                            const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
                            const array *DYND_UNUSED(kwds))
       {
+        std::cout << "elwise_callable<fixed_dim_id, fixed_dim_id>::new_instantiate" << std::endl;
+
         intptr_t size;
         size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
 

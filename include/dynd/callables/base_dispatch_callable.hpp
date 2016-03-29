@@ -18,6 +18,8 @@ namespace nd {
 
     void new_resolve(call_stack &stack, size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
+      std::cout << "base_dispatch_callable::new_resolve" << std::endl;
+
       const callable &child = specialize(stack.res_type(), stack.narg(), stack.arg_types());
 
       stack.push_back(child, stack.res_type(), stack.res_metadata_offset(), stack.narg(), stack.arg_types(),

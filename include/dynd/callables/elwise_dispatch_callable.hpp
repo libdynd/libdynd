@@ -30,6 +30,7 @@ namespace nd {
       void new_resolve(call_stack &stack, size_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars)
       {
+        std::cout << "elwise_dispatch_callable::new_resolve" << std::endl;
         //        m_child->new_resolve(stack, nkwd, kwds, tp_vars);
 
         resolve_dst_type(nullptr, stack.res_type(), stack.narg(), stack.arg_types(), nkwd, kwds, tp_vars);
