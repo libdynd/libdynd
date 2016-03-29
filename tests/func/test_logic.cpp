@@ -17,6 +17,7 @@
 using namespace std;
 using namespace dynd;
 
+
 TEST(All, FixedDim)
 {
   EXPECT_ARRAY_EQ(true, nd::all(nd::array{true, true, true, true}));

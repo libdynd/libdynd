@@ -33,7 +33,7 @@ namespace nd {
     public:
       struct data_type {
         bool broadcast_dst;
-        bool broadcast_src[N];
+        std::array<bool, N> broadcast_src;
       };
 
       elwise_callable(const callable &child) : base_callable(ndt::type()), m_child(child) {}
@@ -98,7 +98,7 @@ namespace nd {
         // If there are still dimensions to broadcast, recursively lift more
         stack.push_back_data(data);
         if (!finished) {
-          intptr_t src_metadata_offsets[N];
+          std::array<intptr_t, N> src_metadata_offsets;
           for (size_t i = 0; i < N; ++i) {
             src_metadata_offsets[i] = stack.arg_metadata_offsets()[i];
             if (!data.broadcast_src[i]) {
@@ -108,12 +108,12 @@ namespace nd {
 
           callable parent = stack.parent();
           stack.push_back(parent, child_dst_tp, stack.res_metadata_offset() + sizeof(size_stride_t), stack.narg(),
-                          child_src_tp.data(), src_metadata_offsets, kernel_request_strided);
+                          child_src_tp.data(), src_metadata_offsets.data(), kernel_request_strided);
           //            self->new_resolve(stack, nkwd, kwds, tp_vars);
           parent->new_resolve(stack, nkwd, kwds, tp_vars);
         }
         else {
-          intptr_t src_metadata_offsets[N];
+          std::array<intptr_t, N> src_metadata_offsets;
           for (size_t i = 0; i < N; ++i) {
             src_metadata_offsets[i] = stack.arg_metadata_offsets()[i];
             if (!data.broadcast_src[i]) {
@@ -122,7 +122,7 @@ namespace nd {
           }
 
           stack.push_back(m_child, child_dst_tp, stack.res_metadata_offset() + sizeof(size_stride_t), stack.narg(),
-                          child_src_tp.data(), src_metadata_offsets, kernel_request_strided);
+                          child_src_tp.data(), src_metadata_offsets.data(), kernel_request_strided);
           child->new_resolve(stack, nkwd, kwds, tp_vars);
         }
       }
@@ -391,7 +391,7 @@ namespace nd {
           }
         }
 
-        intptr_t src_arrmeta_offsets[N];
+        std::array<intptr_t, N> src_arrmeta_offsets;
         for (size_t i = 0; i < N; ++i) {
           src_arrmeta_offsets[i] = stack.arg_metadata_offsets()[i];
           if (data.is_src_var[i]) {
@@ -409,14 +409,14 @@ namespace nd {
 
           callable parent = stack.parent();
           stack.push_back(parent, child_dst_tp, stack.res_metadata_offset() + sizeof(ndt::var_dim_type::metadata_type),
-                          stack.narg(), child_src_tp.data(), src_arrmeta_offsets, kernel_request_strided);
+                          stack.narg(), child_src_tp.data(), src_arrmeta_offsets.data(), kernel_request_strided);
           parent->new_resolve(stack, nkwd, kwds, tp_vars);
         }
         else {
           // All the types matched, so instantiate the elementwise handler
 
           stack.push_back(m_child, child_dst_tp, stack.res_metadata_offset() + sizeof(ndt::var_dim_type::metadata_type),
-                          stack.narg(), child_src_tp.data(), src_arrmeta_offsets, kernel_request_strided);
+                          stack.narg(), child_src_tp.data(), src_arrmeta_offsets.data(), kernel_request_strided);
 
           m_child->new_resolve(stack, nkwd, kwds, tp_vars);
           //          return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
