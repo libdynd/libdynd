@@ -40,26 +40,44 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
                                   const char *const *src_arrmeta, const array *src_data, intptr_t nkwd,
                                   const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
+  std::cout << "sizeof(ndt::fixed_dim_type::metadata_type) = " << sizeof(ndt::fixed_dim_type::metadata_type) << std::endl;
+  std::cout << "sizeof(ndt::var_dim_type::metadata_type) = " << sizeof(ndt::var_dim_type::metadata_type) << std::endl;
+  std::cout << std::endl;
+
   if (m_new_style) {
+    std::vector<intptr_t> src_arrmeta_offsets(nsrc);
+    for (intptr_t i = 0; i < nsrc; ++i) {
+      src_arrmeta_offsets[i] = 0;
+    }
+
     call_stack s;
-    s.push_back(callable(this, true), dst_tp, nsrc, src_tp, kernel_request_call);
+    s.push_back(callable(this, true), dst_tp, 0, nsrc, src_tp, src_arrmeta_offsets.data(), kernel_request_call);
 
     new_resolve(s, nkwd, kwds, tp_vars);
     ndt::type resolved_dst_tp = s.m_stack.front().dst_tp;
 
     // Allocate the destination array
+    std::cout << "resolved_dst_type = " << resolved_dst_tp << std::endl;
     array dst = empty(resolved_dst_tp);
 
     kernel_builder ckb;
     for (auto frame : s) {
       std::cout << "frame.func = " << frame.func << std::endl;
+      std::cout << "frame.kernreq = " << frame.kernreq << std::endl;
       std::cout << "frame.dst_tp = " << frame.dst_tp << std::endl;
+      std::cout << "frame.dst_arrmeta_offset = " << frame.dst_arrmeta_offset << std::endl;
       std::cout << "nsrc = " << nsrc << std::endl;
       for (int i = 0; i < nsrc; ++i) {
         std::cout << "frame.src_tp[" << i << "] = " << frame.src_tp[i] << std::endl;
+        std::cout << "frame.src_arrmeta_offsets[" << i << "] = " << frame.src_arrmeta_offsets[i] << std::endl;
       }
-      frame.func->new_instantiate(frame.data, &ckb, frame.dst_tp, dst->metadata(), frame.nsrc, frame.src_tp.data(),
-                                  src_arrmeta, frame.kernreq, nkwd, kwds);
+      std::vector<const char *> temp_src_arrmeta(nsrc);
+      for (int i = 0; i < nsrc; ++i) {
+        temp_src_arrmeta[i] = src_arrmeta[i] + frame.src_arrmeta_offsets[i];
+      }
+
+      frame.func->new_instantiate(frame.data, &ckb, frame.dst_tp, dst->metadata() + frame.dst_arrmeta_offset,
+                                  frame.nsrc, frame.src_tp.data(), temp_src_arrmeta.data(), frame.kernreq, nkwd, kwds);
     }
 
     kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();

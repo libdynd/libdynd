@@ -22,7 +22,10 @@ namespace nd {
       callable m_child;
 
     public:
-      elwise_dispatch_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
+      elwise_dispatch_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child)
+      {
+        m_new_style = true;
+      }
 
       void new_resolve(call_stack &stack, size_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars)
@@ -52,8 +55,8 @@ namespace nd {
             }
           }
           if (i == nsrc) {
-            std::cout << "here" << std::endl;
-            stack.push_back(m_child, stack.res_type(), stack.narg(), stack.arg_types(), stack.kernreq());
+            stack.push_back(m_child, stack.res_type(), stack.res_metadata_offset(), stack.narg(), stack.arg_types(),
+                            stack.arg_metadata_offsets(), stack.kernreq());
             // No dimensions to lift, call the elementwise instantiate directly
             return m_child->new_resolve(stack, nkwd, kwds, tp_vars);
           }
@@ -95,7 +98,8 @@ namespace nd {
         case fixed_dim_id:
           if (src_all_strided) {
             callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, N>>(m_child);
-            stack.push_back(f, stack.res_type(), stack.narg(), stack.arg_types(), stack.kernreq());
+            stack.push_back(f, stack.res_type(), stack.res_metadata_offset(), stack.narg(), stack.arg_types(),
+                            stack.arg_metadata_offsets(), stack.kernreq());
             f->new_resolve(stack, nkwd, kwds, tp_vars);
 
             //            elwise_callable<fixed_dim_id, fixed_dim_id, N>::new_resolve(stack, nkwd, kwds, tp_vars);
@@ -114,7 +118,10 @@ namespace nd {
           break;
         case var_dim_id:
           if (src_all_strided_or_var) {
-            throw std::runtime_error("var_dim_id, fixed_dim_id");
+            callable f = make_callable<elwise_callable<var_dim_id, fixed_dim_id, N>>(m_child);
+            stack.push_back(f, stack.res_type(), stack.res_metadata_offset(), stack.narg(), stack.arg_types(),
+                            stack.arg_metadata_offsets(), stack.kernreq());
+            f->new_resolve(stack, nkwd, kwds, tp_vars);
             //            elwise_callable<var_dim_id, fixed_dim_id, N>::elwise_instantiate(
             //              self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd,
             //              kwds, tp_vars);

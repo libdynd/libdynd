@@ -20,7 +20,8 @@ namespace nd {
     {
       const callable &child = specialize(stack.res_type(), stack.narg(), stack.arg_types());
 
-      stack.push_back(child, stack.res_type(), stack.narg(), stack.arg_types(), stack.kernreq());
+      stack.push_back(child, stack.res_type(), stack.res_metadata_offset(), stack.narg(), stack.arg_types(),
+                      stack.arg_metadata_offsets(), stack.kernreq());
       child->new_resolve(stack, nkwd, kwds, tp_vars);
     }
 
