@@ -36,6 +36,8 @@ namespace nd {
   public:
     std::vector<call_frame> m_stack;
 
+    call_stack() { m_stack.reserve(100); }
+
     const callable &func() { return m_stack.back().func; }
 
     ndt::type &res_type() { return m_stack.back().dst_tp; }
