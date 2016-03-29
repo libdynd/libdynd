@@ -327,8 +327,8 @@ namespace nd {
     public:
       struct data_type {
         bool broadcast_dst;
-        bool broadcast_src[N];
-        bool is_src_var[N];
+        std::array<bool, N> broadcast_src;
+        std::array<bool, N> is_src_var;
       };
 
       elwise_callable(const callable &child) : base_callable(ndt::type()), m_child(child) {}
@@ -534,7 +534,7 @@ namespace nd {
             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta);
         const ndt::var_dim_type *dst_vdd = dst_tp.extended<ndt::var_dim_type>();
 
-        std::array<intptr_t, N> DYND_IGNORE_UNUSED(src_stride);
+        std::array<intptr_t, N> src_stride;
         std::array<intptr_t, N> src_offset;
         std::array<intptr_t, N> src_size;
         for (size_t i = 0; i < N; ++i) {
@@ -552,13 +552,15 @@ namespace nd {
             src_offset[i] = src_md->offset;
           }
           else {
+            src_stride[i] = reinterpret_cast<const size_stride_t *>(src_arrmeta[i])->stride;
             src_offset[i] = 0;
           }
         }
 
         ckb->emplace_back<elwise_kernel<var_dim_id, fixed_dim_id, N>>(
             kernreq, dst_md->blockref.get(), dst_vdd->get_target_alignment(), dst_md->stride, dst_md->offset,
-            src_stride.data(), src_offset.data(), src_size.data(), reinterpret_cast<data_type *>(data)->is_src_var);
+            src_stride.data(), src_offset.data(), src_size.data(),
+            reinterpret_cast<data_type *>(data)->is_src_var.data());
 
         /*
                 intptr_t size;
