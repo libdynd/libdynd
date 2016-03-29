@@ -44,9 +44,10 @@ namespace nd {
   protected:
     std::atomic_long m_use_count;
     ndt::type m_tp;
-    bool m_new_style; // whether or not this callable is operating in the new "resolve" framework
 
   public:
+    bool m_new_style; // whether or not this callable is operating in the new "resolve" framework
+
     base_callable(const ndt::type &tp) : m_use_count(0), m_tp(tp), m_new_style(false) {}
 
     // non-copyable

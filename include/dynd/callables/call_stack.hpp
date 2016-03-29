@@ -12,15 +12,15 @@ namespace nd {
 
   struct call_frame {
     callable func;
-    char *data;
     ndt::type dst_tp;
     size_t nsrc;
     std::vector<ndt::type> src_tp;
     kernel_request_t kernreq;
+    char data[100];
 
     call_frame(const callable &func, const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp,
                kernel_request_t kernreq)
-        : func(func), data(nullptr), dst_tp(dst_tp), nsrc(nsrc), src_tp(nsrc), kernreq(kernreq)
+        : func(func), dst_tp(dst_tp), nsrc(nsrc), src_tp(nsrc), kernreq(kernreq)
     {
       for (size_t i = 0; i < nsrc; ++i) {
         this->src_tp[i] = src_tp[i];
@@ -40,10 +40,18 @@ namespace nd {
 
     kernel_request_t kernreq() { return m_stack.back().kernreq; }
 
+    char *data() { return m_stack.back().data; }
+
     void push_back(const callable &func, const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp,
                    kernel_request_t kernreq)
     {
       m_stack.emplace_back(func, dst_tp, nsrc, src_tp, kernreq);
+    }
+
+    template <typename DataType>
+    void push_back_data(DataType data)
+    {
+      new (this->data()) DataType(data);
     }
 
     decltype(auto) begin() { return m_stack.begin(); }

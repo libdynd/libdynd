@@ -7,6 +7,7 @@
 
 #include <dynd/callables/base_instantiable_callable.hpp>
 #include <dynd/callables/elwise_callable.hpp>
+#include <dynd/callables/call_stack.hpp>
 
 namespace dynd {
 namespace nd {
@@ -23,21 +24,127 @@ namespace nd {
     public:
       elwise_dispatch_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
-      //      void new_resolve(call_stack &stack, size_t nkwd, const array *kwds,
-      //                     const std::map<std::string, ndt::type> &tp_vars)
-      //  {
-      // child->new_resolve(nkwd, kwds, tp_vars);
+      void new_resolve(call_stack &stack, size_t nkwd, const array *kwds,
+                       const std::map<std::string, ndt::type> &tp_vars)
+      {
+        //        m_child->new_resolve(stack, nkwd, kwds, tp_vars);
 
-      //        resolve_dst_type(nullptr, stack.res_type(), stack.narg(), stack.arg_types(), nkwd, kwds, tp_vars);
+        resolve_dst_type(nullptr, stack.res_type(), stack.narg(), stack.arg_types(), nkwd, kwds, tp_vars);
 
-      //        stack.push_back(child, stack.res_type(), stack.narg(), stack.arg_types(), stack.kernreq());
+        const ndt::callable_type *child_tp = m_child.get_type();
 
-      /*
-              const callable &child = specialize(stack.res_type(), stack.narg(), stack.arg_types());
+        const ndt::type &dst_tp = stack.res_type();
+        intptr_t nsrc = stack.narg();
+        const ndt::type *src_tp = stack.arg_types();
 
-              child->new_resolve(stack, nkwd, kwds, tp_vars);
-      */
-      //  }
+        // Check if no lifting is required
+        intptr_t dst_ndim = dst_tp.get_ndim();
+        if (!child_tp->get_return_type().is_symbolic()) {
+          dst_ndim -= child_tp->get_return_type().get_ndim();
+        }
+
+        if (dst_ndim == 0) {
+          intptr_t i = 0;
+          for (; i < nsrc; ++i) {
+            intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
+            if (src_ndim != 0) {
+              break;
+            }
+          }
+          if (i == nsrc) {
+            std::cout << "here" << std::endl;
+            stack.push_back(m_child, stack.res_type(), stack.narg(), stack.arg_types(), stack.kernreq());
+            // No dimensions to lift, call the elementwise instantiate directly
+            return m_child->new_resolve(stack, nkwd, kwds, tp_vars);
+          }
+          else {
+            intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
+            std::stringstream ss;
+            ss << "Trying to broadcast " << src_ndim << " dimensions of " << src_tp[i] << " into 0 dimensions of "
+               << dst_tp << ", the destination dimension count must be greater. The "
+                            "element "
+                            "callable type is \""
+               << ndt::type(child_tp, true) << "\"";
+            throw broadcast_error(ss.str());
+          }
+        }
+
+        // Do a pass through the src types to classify them
+        bool src_all_strided = true, src_all_strided_or_var = true;
+        for (intptr_t i = 0; i < nsrc; ++i) {
+          intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
+          switch (src_tp[i].get_id()) {
+          case fixed_dim_id:
+            break;
+          case var_dim_id:
+            src_all_strided = false;
+            break;
+          default:
+            // If it's a scalar, allow it to broadcast like
+            // a strided dimension
+            if (src_ndim > 0) {
+              src_all_strided_or_var = false;
+            }
+            break;
+          }
+        }
+
+        // Call to some special-case functions based on the
+        // destination type
+        switch (dst_tp.get_id()) {
+        case fixed_dim_id:
+          if (src_all_strided) {
+            callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, N>>(m_child);
+            stack.push_back(f, stack.res_type(), stack.narg(), stack.arg_types(), stack.kernreq());
+            f->new_resolve(stack, nkwd, kwds, tp_vars);
+
+            //            elwise_callable<fixed_dim_id, fixed_dim_id, N>::new_resolve(stack, nkwd, kwds, tp_vars);
+            return;
+          }
+          else if (src_all_strided_or_var) {
+            throw std::runtime_error("fixed_dim_id, var_dim_id");
+            //            elwise_callable<fixed_dim_id, var_dim_id, N>::elwise_instantiate(
+            //              self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd,
+            //              kwds, tp_vars);
+            return;
+          }
+          else {
+            // TODO
+          }
+          break;
+        case var_dim_id:
+          if (src_all_strided_or_var) {
+            throw std::runtime_error("var_dim_id, fixed_dim_id");
+            //            elwise_callable<var_dim_id, fixed_dim_id, N>::elwise_instantiate(
+            //              self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd,
+            //              kwds, tp_vars);
+            return;
+          }
+          else {
+            // TODO
+          }
+          break;
+        default:
+          break;
+        }
+
+        std::stringstream ss;
+        ss << "Cannot process lifted elwise expression from (";
+        for (intptr_t i = 0; i < nsrc; ++i) {
+          ss << src_tp[i];
+          if (i != nsrc - 1) {
+            ss << ", ";
+          }
+        }
+        ss << ") to " << dst_tp;
+        throw std::runtime_error(ss.str());
+
+        /*
+                const callable &child = specialize(stack.res_type(), stack.narg(), stack.arg_types());
+
+                child->new_resolve(stack, nkwd, kwds, tp_vars);
+        */
+      }
 
       void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                             intptr_t nkwd, const dynd::nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
@@ -198,12 +305,12 @@ namespace nd {
         switch (dst_tp.get_id()) {
         case fixed_dim_id:
           if (src_all_strided) {
-            elwise_callable<fixed_dim_id, fixed_dim_id, N>::instantiate(
+            elwise_callable<fixed_dim_id, fixed_dim_id, N>::elwise_instantiate(
                 self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
             return;
           }
           else if (src_all_strided_or_var) {
-            elwise_callable<fixed_dim_id, var_dim_id, N>::instantiate(
+            elwise_callable<fixed_dim_id, var_dim_id, N>::elwise_instantiate(
                 self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
             return;
           }
@@ -213,7 +320,7 @@ namespace nd {
           break;
         case var_dim_id:
           if (src_all_strided_or_var) {
-            elwise_callable<var_dim_id, fixed_dim_id, N>::instantiate(
+            elwise_callable<var_dim_id, fixed_dim_id, N>::elwise_instantiate(
                 self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
             return;
           }

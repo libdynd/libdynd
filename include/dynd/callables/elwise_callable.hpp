@@ -13,6 +13,7 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/callables/call_stack.hpp>
 
 namespace dynd {
 namespace nd {
@@ -26,12 +27,117 @@ namespace nd {
     class elwise_callable;
 
     template <size_t N>
-    class elwise_callable<fixed_dim_id, fixed_dim_id, N> {
+    class elwise_callable<fixed_dim_id, fixed_dim_id, N> : public base_callable {
+      callable m_child;
+
     public:
-      static void instantiate(callable &self, callable &child, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      struct data_type {
+        bool broadcast_dst;
+        bool broadcast_src[N];
+      };
+
+      elwise_callable(const callable &child) : base_callable(ndt::type()), m_child(child) {}
+
+      void new_resolve(call_stack &stack, size_t nkwd, const array *kwds,
+                       const std::map<std::string, ndt::type> &tp_vars)
+      {
+        data_type data;
+
+        const ndt::type &dst_tp = stack.res_type();
+        const ndt::type *src_tp = stack.arg_types();
+
+        callable &child = m_child;
+        const ndt::callable_type *child_tp = child.get_type();
+
+        intptr_t dst_ndim = dst_tp.get_ndim();
+        if (!child_tp->get_return_type().is_symbolic() ||
+            child_tp->get_return_type().get_id() == typevar_constructed_id) {
+          dst_ndim -= child_tp->get_return_type().get_ndim();
+        }
+
+        ndt::type child_dst_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
+        std::array<ndt::type, N> child_src_tp;
+
+        intptr_t size;
+        std::array<intptr_t, N> src_stride;
+        size = dst_tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+        /*
+                if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride, &child_dst_tp, &child_dst_arrmeta)) {
+                  std::stringstream ss;
+                  ss << "make_elwise_strided_dimension_expr_kernel: error processing "
+                        "type "
+                     << dst_tp << " as strided";
+                  throw type_error(ss.str());
+                }
+        */
+
+        bool finished = dst_ndim == 1;
+        for (size_t i = 0; i < N; ++i) {
+          intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
+          intptr_t src_size = src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+          if (src_ndim < dst_ndim) {
+            // This src value is getting broadcasted
+            src_stride[i] = 0;
+            data.broadcast_src[i] = true;
+            //            child_src_arrmeta[i] = src_arrmeta[i];
+            child_src_tp[i] = src_tp[i];
+            finished &= src_ndim == 0;
+          }
+          else {
+            data.broadcast_src[i] = false;
+            child_src_tp[i] = src_tp[i].extended<ndt::fixed_dim_type>()->get_element_type();
+            if (src_size != 1 && size != src_size) {
+              throw std::runtime_error("broadcast error");
+            }
+
+            finished &= src_ndim == 1;
+          }
+        }
+
+        // If there are still dimensions to broadcast, recursively lift more
+        stack.push_back_data(data);
+        if (!finished) {
+          stack.push_back(callable(), child_dst_tp, stack.narg(), child_src_tp.data(), kernel_request_strided);
+          //            self->new_resolve(stack, nkwd, kwds, tp_vars);
+        }
+        else {
+          stack.push_back(m_child, child_dst_tp, stack.narg(), child_src_tp.data(), kernel_request_strided);
+          child->new_resolve(stack, nkwd, kwds, tp_vars);
+        }
+      }
+
+      void new_instantiate(char *data, kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
+                           const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                           const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
+                           const array *DYND_UNUSED(kwds))
+      {
+        std::cout << "elwise::new_instantiate" << std::endl;
+        std::cout << reinterpret_cast<data_type *>(data)->broadcast_src[0] << std::endl;
+
+        intptr_t size;
+        size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
+
+        intptr_t dst_stride;
+        dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
+
+        std::array<intptr_t, N> src_stride;
+        for (size_t i = 0; i < N; ++i) {
+          if (reinterpret_cast<data_type *>(data)->broadcast_src[i]) {
+            src_stride[i] = 0;
+          }
+          else {
+            src_stride[i] = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
+          }
+        }
+
+        ckb->emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
+      }
+
+      static void elwise_instantiate(callable &self, callable &child, char *data, kernel_builder *ckb,
+                                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                     intptr_t nkwd, const nd::array *kwds,
+                                     const std::map<std::string, ndt::type> &tp_vars)
       {
         const ndt::callable_type *child_tp = child.get_type();
 
@@ -96,15 +202,25 @@ namespace nd {
         return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
+
+      virtual void instantiate(char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
+                               const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                               const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
+                               intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+      }
     };
 
     template <size_t N>
     class elwise_callable<fixed_dim_id, var_dim_id, N> {
     public:
-      static void instantiate(callable &self, callable &child, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void elwise_instantiate(callable &self, callable &child, char *data, kernel_builder *ckb,
+                                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                     intptr_t nkwd, const nd::array *kwds,
+                                     const std::map<std::string, ndt::type> &tp_vars)
       {
         const ndt::callable_type *child_tp = child.get_type();
 
@@ -183,10 +299,11 @@ namespace nd {
     template <size_t N>
     class elwise_callable<var_dim_id, fixed_dim_id, N> {
     public:
-      static void instantiate(callable &self, callable &child, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void elwise_instantiate(callable &self, callable &child, char *data, kernel_builder *ckb,
+                                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                     intptr_t nkwd, const nd::array *kwds,
+                                     const std::map<std::string, ndt::type> &tp_vars)
       {
         const ndt::callable_type *child_tp = child.get_type();
 

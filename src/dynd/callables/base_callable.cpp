@@ -43,15 +43,21 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   if (m_new_style) {
     call_stack s;
     s.push_back(callable(this, true), dst_tp, nsrc, src_tp, kernel_request_call);
-    ndt::type &resolved_dst_tp = s.res_type();
 
     new_resolve(s, nkwd, kwds, tp_vars);
+    ndt::type resolved_dst_tp = s.m_stack.front().dst_tp;
 
     // Allocate the destination array
     array dst = empty(resolved_dst_tp);
 
     kernel_builder ckb;
     for (auto frame : s) {
+      std::cout << "frame.func = " << frame.func << std::endl;
+      std::cout << "frame.dst_tp = " << frame.dst_tp << std::endl;
+      std::cout << "nsrc = " << nsrc << std::endl;
+      for (int i = 0; i < nsrc; ++i) {
+        std::cout << "frame.src_tp[" << i << "] = " << frame.src_tp[i] << std::endl;
+      }
       frame.func->new_instantiate(frame.data, &ckb, frame.dst_tp, dst->metadata(), frame.nsrc, frame.src_tp.data(),
                                   src_arrmeta, frame.kernreq, nkwd, kwds);
     }
