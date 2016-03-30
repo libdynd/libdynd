@@ -28,7 +28,6 @@ namespace nd {
       void new_resolve(base_callable *DYND_UNUSED(parent), call_graph &g, ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
-        std::cout << "elwise_dispatch_callable::new_resolve" << std::endl;
         //        m_child->new_resolve(stack, nkwd, kwds, tp_vars);
 
         resolve_dst_type(nullptr, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);

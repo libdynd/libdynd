@@ -7,7 +7,6 @@
 
 #include <atomic>
 #include <map>
-#include <typeinfo>
 
 #include <dynd/kernels/kernel_prefix.hpp>
 #include <dynd/array.hpp>
@@ -95,7 +94,6 @@ namespace nd {
                                  kernel_request_t DYND_UNUSED(kernreq), const char *DYND_UNUSED(dst_arrmeta),
                                  const char *const *DYND_UNUSED(src_arrmeta), size_t DYND_UNUSED(nkwd),
                                  const array *DYND_UNUSED(kwds)) {
-      std::cout << typeid(*this).name() << std::endl;
       throw std::runtime_error("calling base_callable::new_instantiate");
     }
 

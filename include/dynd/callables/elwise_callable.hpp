@@ -13,7 +13,6 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/callables/elwise_dispatch_callable.hpp>
 
 namespace dynd {
 namespace nd {
@@ -77,7 +76,6 @@ namespace nd {
 
             finished &= src_ndim == 1;
           }
-          std::cout << data->broadcast_src[i] << std::endl;
         }
 
         if (!finished) {
