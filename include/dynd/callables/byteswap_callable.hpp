@@ -23,6 +23,7 @@ namespace nd {
       ckb->emplace_back<byteswap_ck>(kernreq, src_tp[0].get_data_size());
     }
 
+/*
     virtual void new_instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                                  const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -30,6 +31,7 @@ namespace nd {
     {
       ckb->emplace_back<byteswap_ck>(kernreq, src_tp[0].get_data_size());
     }
+*/
   };
 
   class pairwise_byteswap_callable : public base_callable {
@@ -44,6 +46,7 @@ namespace nd {
       ckb->emplace_back<pairwise_byteswap_ck>(kernreq, src_tp[0].get_data_size());
     }
 
+/*
     virtual void new_instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                                  const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -51,6 +54,7 @@ namespace nd {
     {
       ckb->emplace_back<pairwise_byteswap_ck>(kernreq, src_tp[0].get_data_size());
     }
+*/
   };
 
 } // namespace dynd::nd

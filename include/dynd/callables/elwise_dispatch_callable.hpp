@@ -5,9 +5,8 @@
 
 #pragma once
 
-#include <dynd/callables/base_instantiable_callable.hpp>
+#include <dynd/callables/base_callable.hpp>
 #include <dynd/callables/elwise_callable.hpp>
-#include <dynd/callables/call_stack.hpp>
 
 namespace dynd {
 namespace nd {
@@ -24,22 +23,19 @@ namespace nd {
     public:
       elwise_dispatch_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child)
       {
-        m_new_style = true;
+        m_abstract = true;
       }
 
-      void new_resolve(call_stack &stack, size_t nkwd, const array *kwds,
+      void new_resolve(base_callable *DYND_UNUSED(parent), callable_graph &g, ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::type *src_tp, size_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars)
       {
         std::cout << "elwise_dispatch_callable::new_resolve" << std::endl;
         //        m_child->new_resolve(stack, nkwd, kwds, tp_vars);
 
-        resolve_dst_type(nullptr, stack.res_type(), stack.narg(), stack.arg_types(), nkwd, kwds, tp_vars);
+        resolve_dst_type(nullptr, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
         const ndt::callable_type *child_tp = m_child.get_type();
-
-        const ndt::type &dst_tp = stack.res_type();
-        intptr_t nsrc = stack.narg();
-        const ndt::type *src_tp = stack.arg_types();
 
         // Check if no lifting is required
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -56,10 +52,12 @@ namespace nd {
             }
           }
           if (i == nsrc) {
-            stack.push_back(m_child, stack.res_type(), stack.res_metadata_offset(), stack.narg(), stack.arg_types(),
-                            stack.arg_metadata_offsets(), stack.kernreq());
+            if (!m_child->is_abstract()) {
+              g.emplace_back(m_child.get());
+            }
+
             // No dimensions to lift, call the elementwise instantiate directly
-            return m_child->new_resolve(stack, nkwd, kwds, tp_vars);
+            return m_child->new_resolve(this, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
           }
           else {
             intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
@@ -99,9 +97,11 @@ namespace nd {
         case fixed_dim_id:
           if (src_all_strided) {
             callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, N>>(m_child);
-            stack.push_back(f, stack.res_type(), stack.res_metadata_offset(), stack.narg(), stack.arg_types(),
-                            stack.arg_metadata_offsets(), stack.kernreq());
-            f->new_resolve(stack, nkwd, kwds, tp_vars);
+            if (!f->is_abstract()) {
+              g.emplace_back(f.get());
+            }
+
+            f->new_resolve(this, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
             //            elwise_callable<fixed_dim_id, fixed_dim_id, N>::new_resolve(stack, nkwd, kwds, tp_vars);
             return;
@@ -120,9 +120,11 @@ namespace nd {
         case var_dim_id:
           if (src_all_strided_or_var) {
             callable f = make_callable<elwise_callable<var_dim_id, fixed_dim_id, N>>(m_child);
-            stack.push_back(f, stack.res_type(), stack.res_metadata_offset(), stack.narg(), stack.arg_types(),
-                            stack.arg_metadata_offsets(), stack.kernreq());
-            f->new_resolve(stack, nkwd, kwds, tp_vars);
+            if (!f->is_abstract()) {
+              g.emplace_back(f.get());
+            }
+
+            f->new_resolve(this, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
             //            elwise_callable<var_dim_id, fixed_dim_id, N>::elwise_instantiate(
             //              self, m_child, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd,
             //              kwds, tp_vars);
@@ -146,12 +148,6 @@ namespace nd {
         }
         ss << ") to " << dst_tp;
         throw std::runtime_error(ss.str());
-
-        /*
-                const callable &child = specialize(stack.res_type(), stack.narg(), stack.arg_types());
-
-                child->new_resolve(stack, nkwd, kwds, tp_vars);
-        */
       }
 
       void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,

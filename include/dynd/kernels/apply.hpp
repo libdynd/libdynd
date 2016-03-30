@@ -16,9 +16,7 @@ namespace nd {
     struct apply_arg {
       typedef typename std::remove_cv<typename std::remove_reference<A>::type>::type D;
 
-      apply_arg(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(arrmeta), const nd::array *DYND_UNUSED(kwds))
-      {
-      }
+      apply_arg(const char *DYND_UNUSED(arrmeta), const nd::array *DYND_UNUSED(kwds)) {}
 
       D &get(char *data) { return *reinterpret_cast<D *>(data); }
     };
@@ -27,10 +25,7 @@ namespace nd {
     struct apply_arg<fixed_dim<ElementType>, I> {
       fixed_dim<ElementType> value;
 
-      apply_arg(const ndt::type &DYND_UNUSED(tp), const char *arrmeta, const nd::array *DYND_UNUSED(kwds))
-          : value(arrmeta, NULL)
-      {
-      }
+      apply_arg(const char *arrmeta, const nd::array *DYND_UNUSED(kwds)) : value(arrmeta, NULL) {}
 
       fixed_dim<ElementType> &get(char *data)
       {
@@ -47,9 +42,8 @@ namespace nd {
 
     template <typename... A, size_t... I>
     struct apply_args<type_sequence<A...>, index_sequence<I...>> : apply_arg<A, I>... {
-      apply_args(const ndt::type *DYND_IGNORE_UNUSED(src_tp), const char *const *DYND_IGNORE_UNUSED(src_arrmeta),
-                 const nd::array *DYND_IGNORE_UNUSED(kwds))
-          : apply_arg<A, I>(src_tp[I], src_arrmeta[I], kwds)...
+      apply_args(const char *const *DYND_IGNORE_UNUSED(src_arrmeta), const nd::array *DYND_IGNORE_UNUSED(kwds))
+          : apply_arg<A, I>(src_arrmeta[I], kwds)...
       {
       }
     };

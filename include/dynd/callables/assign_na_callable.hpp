@@ -5,17 +5,17 @@
 
 #pragma once
 
-#include <dynd/callables/base_instantiable_callable.hpp>
+#include <dynd/callables/default_instantiable_callable.hpp>
 #include <dynd/kernels/assign_na_kernel.hpp>
 
 namespace dynd {
 namespace nd {
 
   template <type_id_t ResValueID>
-  class assign_na_callable : public base_instantiable_callable<assign_na_kernel<ResValueID>> {
+  class assign_na_callable : public default_instantiable_callable<assign_na_kernel<ResValueID>> {
   public:
     assign_na_callable()
-        : base_instantiable_callable<assign_na_kernel<ResValueID>>(
+        : default_instantiable_callable<assign_na_kernel<ResValueID>>(
               ndt::callable_type::make(ndt::make_type<ndt::option_type>(ResValueID)))
     {
     }

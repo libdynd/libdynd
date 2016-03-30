@@ -7,15 +7,15 @@
 
 #include <atomic>
 #include <map>
+#include <typeinfo>
 
 #include <dynd/kernels/kernel_prefix.hpp>
 #include <dynd/array.hpp>
 #include <dynd/types/substitute_typevars.hpp>
+#include <dynd/callables/callable_graph.hpp>
 
 namespace dynd {
 namespace nd {
-
-  class call_stack;
 
   enum callable_property {
     none = 0x00000000,
@@ -28,6 +28,13 @@ namespace nd {
   {
     return static_cast<callable_property>(static_cast<int>(a) | static_cast<int>(b));
   }
+
+  enum callable_flags_t {
+    // A symbolic name instead of just "0"
+    callable_flag_none = 0x00000000,
+    // This callable cannot be instantiated
+    callable_flag_abstract = 0x00000001,
+  };
 
   /**
    * This is a struct designed for interoperability at
@@ -44,32 +51,56 @@ namespace nd {
   protected:
     std::atomic_long m_use_count;
     ndt::type m_tp;
+    size_t m_frame_size;
 
   public:
-    bool m_new_style; // whether or not this callable is operating in the new "resolve" framework
+    struct call_frame {
+      base_callable *callee;
+      void (*destroy)(void *);
 
-    base_callable(const ndt::type &tp) : m_use_count(0), m_tp(tp), m_new_style(false) {}
+      call_frame(base_callable *callee) : callee(callee) { intrusive_ptr_retain(callee); }
+
+      call_frame *next()
+      {
+        return reinterpret_cast<call_frame *>(reinterpret_cast<char *>(this) + aligned_size(callee->get_frame_size()));
+      }
+    };
+
+    bool m_new_style; // whether or not this callable is operating in the new "resolve" framework
+    bool m_abstract;
+
+    base_callable(const ndt::type &tp, size_t frame_size = sizeof(call_frame))
+        : m_use_count(0), m_tp(tp), m_frame_size(frame_size), m_new_style(false), m_abstract(false)
+    {
+    }
 
     // non-copyable
     base_callable(const base_callable &) = delete;
 
     virtual ~base_callable();
 
+    bool is_abstract() { return m_abstract; }
+
     const ndt::type &get_type() const { return m_tp; }
 
-    virtual void new_resolve(call_stack &DYND_UNUSED(stack), size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      std::cout << "base_callable::new_resolve" << std::endl;
-    };
+    size_t get_frame_size() { return m_frame_size; }
 
-    virtual void new_instantiate(char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
-                                 const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
-                                 intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds))
+    virtual void new_resolve(base_callable *DYND_UNUSED(parent), callable_graph &DYND_UNUSED(g), ndt::type &dst_tp,
+                             intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                             const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars)
     {
-      std::cout << "base_callable::new_instantiate" << std::endl;
+      if (dst_tp.is_symbolic()) {
+        dst_tp = ndt::substitute(dst_tp, tp_vars, true);
+      }
+    }
+
+    virtual void new_instantiate(call_frame *DYND_UNUSED(frame), kernel_builder &DYND_UNUSED(ckb),
+                                 kernel_request_t DYND_UNUSED(kernreq), const char *DYND_UNUSED(dst_arrmeta),
+                                 const char *const *DYND_UNUSED(src_arrmeta), size_t DYND_UNUSED(nkwd),
+                                 const array *DYND_UNUSED(kwds))
+    {
+      std::cout << typeid(*this).name() << std::endl;
+      throw std::runtime_error("calling base_callable::new_instantiate");
     }
 
     virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }

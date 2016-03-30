@@ -208,6 +208,9 @@ TEST(ComplexType, Properties)
   dynd::complex<double> avals[3] = {dynd::complex<double>(1, 2), dynd::complex<double>(-1, 1.5),
                                     dynd::complex<double>(3, 21.75)};
   n = avals;
+  std::cout << "--" << std::endl;
+  n.f("real");
+  std::cout << "--" << std::endl;
   EXPECT_EQ(1., n.f("real")(0).as<double>());
   EXPECT_EQ(2., n.f("imag")(0).as<double>());
   EXPECT_EQ(-1., n.f("real")(1).as<double>());

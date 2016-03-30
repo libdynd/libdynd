@@ -7,24 +7,26 @@
 
 #include <dynd/callable.hpp>
 #include <dynd/callables/base_callable.hpp>
-#include <dynd/callables/call_stack.hpp>
+#include <dynd/callables/callable_graph.hpp>
 
 namespace dynd {
 namespace nd {
 
   class base_dispatch_callable : public base_callable {
   public:
-    base_dispatch_callable(const ndt::type &tp) : base_callable(tp) {}
+    base_dispatch_callable(const ndt::type &tp) : base_callable(tp) { m_abstract = true; }
 
-    void new_resolve(call_stack &stack, size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    void new_resolve(base_callable *DYND_UNUSED(parent), callable_graph &g, ndt::type &dst_tp, intptr_t nsrc,
+                     const ndt::type *src_tp, size_t nkwd, const array *kwds,
+                     const std::map<std::string, ndt::type> &tp_vars)
     {
-      std::cout << "base_dispatch_callable::new_resolve" << std::endl;
+      const callable &child = specialize(dst_tp, nsrc, src_tp);
+      if (!child->is_abstract()) {
+        g.emplace_back(child.get());
+      }
 
-      const callable &child = specialize(stack.res_type(), stack.narg(), stack.arg_types());
-
-      stack.push_back(child, stack.res_type(), stack.res_metadata_offset(), stack.narg(), stack.arg_types(),
-                      stack.arg_metadata_offsets(), stack.kernreq());
-      child->new_resolve(stack, nkwd, kwds, tp_vars);
+      dst_tp = child.get_type()->get_return_type();
+      child->new_resolve(this, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
     char *data_init(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,

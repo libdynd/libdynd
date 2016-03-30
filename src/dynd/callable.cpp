@@ -12,7 +12,6 @@
 #include <dynd/pointer.hpp>
 #include <dynd/random.hpp>
 #include <dynd/statistics.hpp>
-#include <dynd/callables/call_stack.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -34,16 +33,6 @@ public:
                    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
                    kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    eval::eval_context ectx_tmp;
-    ectx_tmp.errmode = errmode;
-    make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, &ectx_tmp);
-  }
-
-  void new_instantiate(char *DYND_UNUSED(data), nd::kernel_builder *ckb, const ndt::type &dst_tp,
-                       const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                       const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
-                       const nd::array *DYND_UNUSED(kwds))
   {
     eval::eval_context ectx_tmp;
     ectx_tmp.errmode = errmode;
