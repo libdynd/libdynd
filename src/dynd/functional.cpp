@@ -16,13 +16,11 @@
 using namespace std;
 using namespace dynd;
 
-nd::callable nd::functional::adapt(const ndt::type &value_tp, const callable &forward)
-{
+nd::callable nd::functional::adapt(const ndt::type &value_tp, const callable &forward) {
   return make_callable<adapt_callable>(value_tp, forward);
 }
 
-nd::callable nd::functional::compose(const nd::callable &first, const nd::callable &second, const ndt::type &buf_tp)
-{
+nd::callable nd::functional::compose(const nd::callable &first, const nd::callable &second, const ndt::type &buf_tp) {
   if (first.get_type()->get_npos() != 1) {
     throw runtime_error("Multi-parameter callable chaining is not implemented");
   }
@@ -53,8 +51,7 @@ nd::callable nd::functional::compose(const nd::callable &first, const nd::callab
 
 nd::callable nd::functional::constant(const array &val) { return make_callable<constant_callable>(val); }
 
-nd::callable nd::functional::left_compound(const callable &child)
-{
+nd::callable nd::functional::left_compound(const callable &child) {
   vector<ndt::type> pos_types = child.get_type()->get_pos_types();
   pos_types.resize(1);
 
@@ -63,8 +60,7 @@ nd::callable nd::functional::left_compound(const callable &child)
       child);
 }
 
-nd::callable nd::functional::right_compound(const callable &child)
-{
+nd::callable nd::functional::right_compound(const callable &child) {
   vector<ndt::type> pos_types = child.get_type()->get_pos_types();
   pos_types.erase(pos_types.begin());
 
@@ -73,8 +69,7 @@ nd::callable nd::functional::right_compound(const callable &child)
                                                 child);
 }
 
-ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp)
-{
+ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp) {
   const std::vector<ndt::type> &param_types = child_tp->get_pos_types();
   std::vector<ndt::type> out_param_types;
   std::string dimsname("Dims");
@@ -115,8 +110,7 @@ ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp)
   return ndt::callable_type::make(ret_tp, ndt::tuple_type::make(out_param_types), kwd_tp);
 }
 
-nd::callable nd::functional::elwise(const ndt::type &self_tp, const callable &child)
-{
+nd::callable nd::functional::elwise(const ndt::type &self_tp, const callable &child) {
   switch (self_tp.extended<ndt::callable_type>()->get_npos()) {
   case 0:
     return make_callable<elwise_dispatch_callable<0>>(self_tp, child);
@@ -141,8 +135,7 @@ nd::callable nd::functional::elwise(const ndt::type &self_tp, const callable &ch
 
 nd::callable nd::functional::elwise(const callable &child) { return elwise(elwise_make_type(child.get_type()), child); }
 
-nd::callable nd::functional::outer(const callable &child)
-{
+nd::callable nd::functional::outer(const callable &child) {
   const ndt::type &self_tp = outer_make_type(child.get_type());
   switch (self_tp.extended<ndt::callable_type>()->get_npos()) {
   case 0:
@@ -166,8 +159,7 @@ nd::callable nd::functional::outer(const callable &child)
   }
 }
 
-ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp)
-{
+ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp) {
   const std::vector<ndt::type> &param_types = child_tp->get_pos_types();
   std::vector<ndt::type> out_param_types;
 
@@ -184,8 +176,7 @@ ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp)
   return ndt::callable_type::make(ret_tp, ndt::tuple_type::make(out_param_types), kwd_tp);
 }
 
-nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const callable &boundary_child)
-{
+nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const callable &boundary_child) {
   const ndt::callable_type *funcproto_tp = neighborhood_op.get_array_type().extended<ndt::callable_type>();
 
   intptr_t nh_ndim = funcproto_tp->get_pos_type(0).get_ndim();
@@ -199,8 +190,7 @@ nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const
       neighborhood_op, boundary_child);
 }
 
-nd::callable nd::functional::reduction(const callable &child)
-{
+nd::callable nd::functional::reduction(const callable &child) {
   if (child.is_null()) {
     throw invalid_argument("'child' cannot be null");
   }
@@ -225,4 +215,9 @@ nd::callable nd::functional::reduction(const callable &child)
                                 ndt::make_type<ndt::option_type>(child.get_ret_type()),
                                 ndt::make_type<ndt::option_type>(ndt::make_type<bool1>())}),
       child);
+}
+
+template <size_t N>
+nd::callable &nd::functional::elwise_callable<fixed_dim_id, fixed_dim_id, N>::get_child(base_callable *parent) {
+  return dynamic_cast<elwise_dispatch_callable<N> *>(parent)->m_child;
 }

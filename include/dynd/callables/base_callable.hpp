@@ -26,8 +26,7 @@ namespace nd {
     commutative = 0x00000004
   };
 
-  inline callable_property operator|(callable_property a, callable_property b)
-  {
+  inline callable_property operator|(callable_property a, callable_property b) {
     return static_cast<callable_property>(static_cast<int>(a) | static_cast<int>(b));
   }
 
@@ -60,10 +59,9 @@ namespace nd {
       base_callable *callee;
       void (*destroy)(void *);
 
-      call_frame(base_callable *callee) : callee(callee) { intrusive_ptr_retain(callee); }
+      call_frame(base_callable *callee) : callee(callee) {}
 
-      call_frame *next()
-      {
+      call_frame *next() {
         return reinterpret_cast<call_frame *>(reinterpret_cast<char *>(this) + aligned_size(callee->get_frame_size()));
       }
     };
@@ -72,9 +70,7 @@ namespace nd {
     bool m_abstract;
 
     base_callable(const ndt::type &tp, size_t frame_size = sizeof(call_frame))
-        : m_use_count(0), m_tp(tp), m_frame_size(frame_size), m_new_style(false), m_abstract(false)
-    {
-    }
+        : m_use_count(0), m_tp(tp), m_frame_size(frame_size), m_new_style(false), m_abstract(false) {}
 
     // non-copyable
     base_callable(const base_callable &) = delete;
@@ -89,8 +85,7 @@ namespace nd {
 
     virtual void new_resolve(base_callable *DYND_UNUSED(parent), call_graph &DYND_UNUSED(g), ndt::type &dst_tp,
                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
-                             const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars)
-    {
+                             const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars) {
       if (dst_tp.is_symbolic()) {
         dst_tp = ndt::substitute(dst_tp, tp_vars, true);
       }
@@ -99,8 +94,7 @@ namespace nd {
     virtual void new_instantiate(call_frame *DYND_UNUSED(frame), kernel_builder &DYND_UNUSED(ckb),
                                  kernel_request_t DYND_UNUSED(kernreq), const char *DYND_UNUSED(dst_arrmeta),
                                  const char *const *DYND_UNUSED(src_arrmeta), size_t DYND_UNUSED(nkwd),
-                                 const array *DYND_UNUSED(kwds))
-    {
+                                 const array *DYND_UNUSED(kwds)) {
       std::cout << typeid(*this).name() << std::endl;
       throw std::runtime_error("calling base_callable::new_instantiate");
     }
@@ -120,8 +114,7 @@ namespace nd {
     virtual char *data_init(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
                             const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
                             const array *DYND_UNUSED(kwds),
-                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       return NULL;
     }
 
@@ -137,8 +130,7 @@ namespace nd {
      */
     virtual void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                                   const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
-                                  const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars)
-    {
+                                  const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars) {
       dst_tp = ndt::substitute(dst_tp, tp_vars, true);
     }
 
@@ -177,14 +169,12 @@ namespace nd {
                              const std::map<std::string, ndt::type> &tp_vars) = 0;
 
     virtual void overload(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
-                          const ndt::type *DYND_UNUSED(arg_tp), const callable &DYND_UNUSED(value))
-    {
+                          const ndt::type *DYND_UNUSED(arg_tp), const callable &DYND_UNUSED(value)) {
       throw std::runtime_error("callable is not overloadable");
     }
 
     virtual const callable &specialize(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
-                                       const ndt::type *DYND_UNUSED(arg_tp))
-    {
+                                       const ndt::type *DYND_UNUSED(arg_tp)) {
       throw std::runtime_error("callable is not specializable");
     }
 
@@ -211,8 +201,7 @@ namespace nd {
 
   inline void intrusive_ptr_retain(base_callable *ptr) { ++ptr->m_use_count; }
 
-  inline void intrusive_ptr_release(base_callable *ptr)
-  {
+  inline void intrusive_ptr_release(base_callable *ptr) {
     if (--ptr->m_use_count == 0) {
       delete ptr;
     }
@@ -246,8 +235,7 @@ namespace nd {
     DYND_API void destroy() {}
 
   public:
-    call_graph() : m_data(m_static_data), m_capacity(sizeof(m_static_data)), m_size(0), m_back_offset(0)
-    {
+    call_graph() : m_data(m_static_data), m_capacity(sizeof(m_static_data)), m_size(0), m_back_offset(0) {
       set(m_static_data, 0, sizeof(m_static_data));
     }
 
@@ -265,8 +253,7 @@ namespace nd {
      * should only be called during the construction phase
      * of the kernel when constructing a leaf kernel.
      */
-    void reserve(intptr_t requested_capacity)
-    {
+    void reserve(intptr_t requested_capacity) {
       if (m_capacity < requested_capacity) {
         // Grow by a factor of 1.5
         // https://github.com/facebook/folly/blob/master/folly/docs/FBVector.md
@@ -295,15 +282,13 @@ namespace nd {
      * at the requested offset.
      */
     template <typename T>
-    T *get_at(size_t offset)
-    {
+    T *get_at(size_t offset) {
       return reinterpret_cast<T *>(m_data + offset);
     }
 
     void *alloc(size_t size) { return std::malloc(size); }
 
-    void *realloc(void *ptr, size_t old_size, size_t new_size)
-    {
+    void *realloc(void *ptr, size_t old_size, size_t new_size) {
       if (using_static_data()) {
         // If we were previously using the static data, do a malloc
         void *new_data = alloc(new_size);
@@ -312,14 +297,12 @@ namespace nd {
           copy(new_data, ptr, old_size);
         }
         return new_data;
-      }
-      else {
+      } else {
         return std::realloc(ptr, new_size);
       }
     }
 
-    void free(void *ptr)
-    {
+    void free(void *ptr) {
       if (!using_static_data()) {
         std::free(ptr);
       }
@@ -329,8 +312,7 @@ namespace nd {
 
     void *set(void *dst, int value, size_t size) { return std::memset(dst, value, size); }
 
-    void emplace_back(size_t size)
-    {
+    void emplace_back(size_t size) {
       m_size += aligned_size(size);
       reserve(m_size);
     }
@@ -340,16 +322,14 @@ namespace nd {
     base_callable::call_frame *back() { return get_at<base_callable::call_frame>(m_back_offset); }
 
     template <typename CallFrameType>
-    CallFrameType *get_back()
-    {
+    CallFrameType *get_back() {
       return get_at<CallFrameType>(m_back_offset);
     }
 
     /**
      * Aligns a size as required by kernels.
      */
-    static constexpr size_t aligned_size(size_t size)
-    {
+    static constexpr size_t aligned_size(size_t size) {
       return (size + static_cast<size_t>(7)) & ~static_cast<size_t>(7);
     }
   };

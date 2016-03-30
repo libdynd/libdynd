@@ -13,6 +13,7 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/callables/elwise_dispatch_callable.hpp>
 
 namespace dynd {
 namespace nd {
@@ -32,16 +33,16 @@ namespace nd {
         std::array<bool, N> broadcast_src;
       };
 
-      callable m_child;
-
     public:
-      elwise_callable(const callable &child) : base_callable(ndt::type(), sizeof(elwise_call_frame)), m_child(child) {}
+      elwise_callable() : base_callable(ndt::type(), sizeof(elwise_call_frame)) {}
+
+      callable &get_child(base_callable *parent);
 
       void new_resolve(base_callable *parent, call_graph &cg, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                        size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         elwise_call_frame *data = reinterpret_cast<elwise_call_frame *>(cg.back());
 
-        callable &child = m_child;
+        callable &child = get_child(parent);
         const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
