@@ -38,8 +38,7 @@ namespace nd {
       elwise_callable(const callable &child) : base_callable(ndt::type(), sizeof(elwise_call_frame)), m_child(child) {}
 
       void new_resolve(base_callable *parent, call_graph &cg, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                       size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-      {
+                       size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         elwise_call_frame *data = reinterpret_cast<elwise_call_frame *>(cg.back());
 
         callable &child = m_child;
@@ -67,8 +66,7 @@ namespace nd {
             //            child_src_arrmeta[i] = src_arrmeta[i];
             child_src_tp[i] = src_tp[i];
             finished &= src_ndim == 0;
-          }
-          else {
+          } else {
             data->broadcast_src[i] = false;
             src_size = src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
             child_src_tp[i] = src_tp[i].extended<ndt::fixed_dim_type>()->get_element_type();
@@ -87,8 +85,7 @@ namespace nd {
           }
 
           parent->new_resolve(this, cg, child_dst_tp, nsrc, child_src_tp.data(), nkwd, kwds, tp_vars);
-        }
-        else {
+        } else {
           if (!child->is_abstract()) {
             cg.emplace_back(child.get());
           }
@@ -98,21 +95,19 @@ namespace nd {
       }
 
       void new_instantiate(call_frame *frame, kernel_builder &ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                           const char *const *src_arrmeta, size_t nkwd, const array *kwds)
-      {
+                           const char *const *src_arrmeta, size_t nkwd, const array *kwds) {
         elwise_call_frame *data = reinterpret_cast<elwise_call_frame *>(frame);
 
         intptr_t size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
         intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
 
-        const char *child_src_arrmeta[N];
+        std::array<const char *, N> child_src_arrmeta;
         std::array<intptr_t, N> src_stride;
         for (size_t i = 0; i < N; ++i) {
           if (data->broadcast_src[i]) {
             src_stride[i] = 0;
             child_src_arrmeta[i] = src_arrmeta[i];
-          }
-          else {
+          } else {
             src_stride[i] = reinterpret_cast<const size_stride_t *>(src_arrmeta[i])->stride;
             child_src_arrmeta[i] = src_arrmeta[i] + sizeof(size_stride_t);
           }
@@ -122,15 +117,14 @@ namespace nd {
 
         frame = frame->next();
         frame->callee->new_instantiate(frame, ckb, kernel_request_strided, dst_arrmeta + sizeof(size_stride_t),
-                                       child_src_arrmeta, nkwd, kwds);
+                                       child_src_arrmeta.data(), nkwd, kwds);
       }
 
       static void elwise_instantiate(callable &self, callable &child, char *data, kernel_builder *ckb,
                                      const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                      const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                      intptr_t nkwd, const nd::array *kwds,
-                                     const std::map<std::string, ndt::type> &tp_vars)
-      {
+                                     const std::map<std::string, ndt::type> &tp_vars) {
         const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -164,16 +158,14 @@ namespace nd {
             child_src_arrmeta[i] = src_arrmeta[i];
             child_src_tp[i] = src_tp[i];
             finished &= src_ndim == 0;
-          }
-          else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size, &src_stride[i], &child_src_tp[i],
-                                            &child_src_arrmeta[i])) {
+          } else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size, &src_stride[i], &child_src_tp[i],
+                                              &child_src_arrmeta[i])) {
             // Check for a broadcasting error
             if (src_size != 1 && size != src_size) {
               throw broadcast_error(dst_tp, dst_arrmeta, src_tp[i], src_arrmeta[i]);
             }
             finished &= src_ndim == 1;
-          }
-          else {
+          } else {
             std::stringstream ss;
             ss << "make_elwise_strided_dimension_expr_kernel: expected strided "
                   "or fixed dim, got "
@@ -200,9 +192,7 @@ namespace nd {
                                intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
                                intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-      }
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {}
     };
 
     template <size_t N>
@@ -212,8 +202,7 @@ namespace nd {
                                      const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                      const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                      intptr_t nkwd, const nd::array *kwds,
-                                     const std::map<std::string, ndt::type> &tp_vars)
-      {
+                                     const std::map<std::string, ndt::type> &tp_vars) {
         const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -250,9 +239,8 @@ namespace nd {
             child_src_arrmeta[i] = src_arrmeta[i];
             child_src_tp[i] = src_tp[i];
             finished &= src_ndim == 0;
-          }
-          else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size, &src_stride[i], &child_src_tp[i],
-                                            &child_src_arrmeta[i])) {
+          } else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size, &src_stride[i], &child_src_tp[i],
+                                              &child_src_arrmeta[i])) {
             // Check for a broadcasting error
             if (src_size != 1 && size != src_size) {
               throw broadcast_error(dst_tp, dst_arrmeta, src_tp[i], src_arrmeta[i]);
@@ -260,8 +248,7 @@ namespace nd {
             src_offset[i] = 0;
             is_src_var[i] = false;
             finished &= src_ndim == 1;
-          }
-          else {
+          } else {
             const ndt::var_dim_type *vdd = static_cast<const ndt::var_dim_type *>(src_tp[i].extended());
             const ndt::var_dim_type::metadata_type *src_md =
                 reinterpret_cast<const ndt::var_dim_type::metadata_type *>(src_arrmeta[i]);
@@ -399,8 +386,7 @@ namespace nd {
                                      const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                      const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                      intptr_t nkwd, const nd::array *kwds,
-                                     const std::map<std::string, ndt::type> &tp_vars)
-      {
+                                     const std::map<std::string, ndt::type> &tp_vars) {
         const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -437,14 +423,12 @@ namespace nd {
             child_src_arrmeta[i] = src_arrmeta[i];
             child_src_tp[i] = src_tp[i];
             finished &= src_ndim == 0;
-          }
-          else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size[i], &src_stride[i], &child_src_tp[i],
-                                            &child_src_arrmeta[i])) {
+          } else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size[i], &src_stride[i], &child_src_tp[i],
+                                              &child_src_arrmeta[i])) {
             src_offset[i] = 0;
             is_src_var[i] = false;
             finished &= src_ndim == 1;
-          }
-          else {
+          } else {
             const ndt::var_dim_type *vdd = static_cast<const ndt::var_dim_type *>(src_tp[i].extended());
             const ndt::var_dim_type::metadata_type *src_md =
                 reinterpret_cast<const ndt::var_dim_type::metadata_type *>(src_arrmeta[i]);
@@ -492,9 +476,7 @@ namespace nd {
                                intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
                                intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-      }
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {}
 
       /*
             virtual void new_instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char
