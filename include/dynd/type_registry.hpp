@@ -30,7 +30,7 @@ struct id_info {
 
 namespace detail {
 
-  DYNDT_API std::vector<id_info> &infos();
+  extern DYNDT_API std::vector<id_info> &infos();
 
 } // namespace dynd::detail
 

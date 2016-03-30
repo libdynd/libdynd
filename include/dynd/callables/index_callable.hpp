@@ -6,7 +6,10 @@
 #pragma once
 
 #include <dynd/callables/base_instantiable_callable.hpp>
+#include <dynd/index.hpp>
 #include <dynd/kernels/index_kernel.hpp>
+#include <dynd/type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 
 namespace dynd {
 namespace nd {

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_strided_kernel.hpp>
 #include <dynd/types/callable_type.hpp>
 
 namespace dynd {

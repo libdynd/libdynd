@@ -7,6 +7,7 @@
 
 #include <dynd/arrmeta_holder.hpp>
 #include <dynd/callables/base_callable.hpp>
+#include <dynd/functional.hpp>
 
 namespace dynd {
 namespace nd {
