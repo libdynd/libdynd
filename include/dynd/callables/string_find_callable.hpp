@@ -5,16 +5,16 @@
 
 #pragma once
 
-#include <dynd/callables/base_instantiable_callable.hpp>
+#include <dynd/callables/default_instantiable_callable.hpp>
 #include <dynd/kernels/string_find_kernel.hpp>
 
 namespace dynd {
 namespace nd {
 
-  class string_find_callable : public base_instantiable_callable<string_find_kernel> {
+  class string_find_callable : public default_instantiable_callable<string_find_kernel> {
   public:
     string_find_callable()
-        : base_instantiable_callable<string_find_kernel>(
+        : default_instantiable_callable<string_find_kernel>(
               ndt::callable_type::make(ndt::make_type<intptr_t>(), {ndt::type(string_id), ndt::type(string_id)}))
     {
     }

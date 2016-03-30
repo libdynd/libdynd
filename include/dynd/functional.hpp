@@ -114,6 +114,14 @@ namespace nd {
      */
     DYND_API callable elwise(const callable &child);
 
+    inline callable new_style_elwise(const callable &child)
+    {
+      callable res = elwise(child);
+      res->m_new_style = true;
+
+      return res;
+    }
+
     DYND_API callable elwise(const ndt::type &self_tp, const callable &child);
 
     DYND_API ndt::type elwise_make_type(const ndt::callable_type *child_tp);

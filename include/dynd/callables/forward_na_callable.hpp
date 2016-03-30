@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/callables/base_instantiable_callable.hpp>
+#include <dynd/callables/base_callable.hpp>
 #include <dynd/kernels/forward_na_kernel.hpp>
 
 namespace dynd {

@@ -5,17 +5,17 @@
 
 #pragma once
 
-#include <dynd/callables/base_instantiable_callable.hpp>
+#include <dynd/callables/default_instantiable_callable.hpp>
 #include <dynd/kernels/is_na_kernel.hpp>
 
 namespace dynd {
 namespace nd {
 
   template <type_id_t Arg0ValueID>
-  class is_na_callable : public base_instantiable_callable<is_na_kernel<Arg0ValueID>> {
+  class is_na_callable : public default_instantiable_callable<is_na_kernel<Arg0ValueID>> {
   public:
     is_na_callable()
-        : base_instantiable_callable<is_na_kernel<Arg0ValueID>>(
+        : default_instantiable_callable<is_na_kernel<Arg0ValueID>>(
               ndt::callable_type::make(ndt::make_type<bool1>(), ndt::make_type<ndt::option_type>(Arg0ValueID)))
     {
     }
@@ -30,11 +30,10 @@ namespace nd {
     {
     }
 
-    void instantiate( char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
+                     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
+                     const nd::array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       switch (src_tp->get_dtype().get_id()) {
       case bool_id:

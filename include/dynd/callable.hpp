@@ -189,7 +189,7 @@ namespace nd {
   std::enable_if_t<std::is_base_of<base_kernel<KernelType>, KernelType>::value, callable>
   make_callable(const ndt::type &tp)
   {
-    return make_callable<base_instantiable_callable<KernelType>>(tp);
+    return make_callable<default_instantiable_callable<KernelType>>(tp);
   }
 
   inline std::ostream &operator<<(std::ostream &o, const callable &rhs)

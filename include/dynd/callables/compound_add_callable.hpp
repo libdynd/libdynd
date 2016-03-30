@@ -5,17 +5,17 @@
 
 #pragma once
 
-#include <dynd/callables/base_instantiable_callable.hpp>
+#include <dynd/callables/default_instantiable_callable.hpp>
 #include <dynd/kernels/compound_add_kernel.hpp>
 
 namespace dynd {
 namespace nd {
 
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
-  class compound_add_callable : public base_instantiable_callable<compound_add_kernel_t<DstTypeID, Src0TypeID>> {
+  class compound_add_callable : public default_instantiable_callable<compound_add_kernel_t<DstTypeID, Src0TypeID>> {
   public:
     compound_add_callable()
-        : base_instantiable_callable<compound_add_kernel_t<DstTypeID, Src0TypeID>>(
+        : default_instantiable_callable<compound_add_kernel_t<DstTypeID, Src0TypeID>>(
               ndt::callable_type::make(ndt::type(DstTypeID), ndt::type(Src0TypeID)))
     {
     }

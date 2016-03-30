@@ -11,11 +11,20 @@ namespace dynd {
 namespace nd {
 
   template <typename KernelType>
-  class base_instantiable_callable : public base_callable {
+  class default_instantiable_callable : public base_callable {
   protected:
     using base_callable::base_callable;
 
   public:
+    default_instantiable_callable(const ndt::type &tp) : base_callable(tp) { m_new_style = true; }
+
+    void new_instantiate(call_frame *DYND_UNUSED(frame), kernel_builder &ckb, kernel_request_t kernreq,
+                         const char *DYND_UNUSED(dst_arrmeta), const char *const *DYND_UNUSED(src_arrmeta),
+                         size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds))
+    {
+      ckb.emplace_back<KernelType>(kernreq);
+    }
+
     void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                      const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),

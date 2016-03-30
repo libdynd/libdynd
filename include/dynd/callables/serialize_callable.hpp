@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/callables/base_instantiable_callable.hpp>
+#include <dynd/callables/default_instantiable_callable.hpp>
 #include <dynd/kernels/serialize_kernel.hpp>
 #include <dynd/types/callable_type.hpp>
 

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/callables/base_instantiable_callable.hpp>
+#include <dynd/callables/default_instantiable_callable.hpp>
 #include <dynd/kernels/parse_kernel.hpp>
 
 namespace dynd {
@@ -13,10 +13,10 @@ namespace nd {
   namespace json {
 
     template <type_id_t ResID>
-    class parse_callable : public base_instantiable_callable<parse_kernel<ResID>> {
+    class parse_callable : public default_instantiable_callable<parse_kernel<ResID>> {
     public:
       parse_callable()
-          : base_instantiable_callable<parse_kernel<ResID>>(
+          : default_instantiable_callable<parse_kernel<ResID>>(
                 ndt::callable_type::make(ResID, {ndt::make_type<char *>(), ndt::make_type<char *>()}))
       {
       }

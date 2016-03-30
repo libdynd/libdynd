@@ -4,7 +4,7 @@
 //
 
 #include <dynd/callables/base_callable.hpp>
-#include <dynd/callables/call_stack.hpp>
+#include <dynd/callables/call_graph.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -41,20 +41,17 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
                                   const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   if (m_new_style) {
-    call_stack s;
-    s.push_back(callable(this, true), dst_tp, nsrc, src_tp, kernel_request_call);
-    ndt::type &resolved_dst_tp = s.res_type();
-
-    new_resolve(s, nkwd, kwds, tp_vars);
-
-    // Allocate the destination array
-    array dst = empty(resolved_dst_tp);
+    call_graph g;
+    if (!is_abstract()) {
+      g.emplace_back(this);
+    }
+    new_resolve(nullptr, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
     kernel_builder ckb;
-    for (auto frame : s) {
-      frame.func->new_instantiate(frame.data, &ckb, frame.dst_tp, dst->metadata(), frame.nsrc, frame.src_tp.data(),
-                                  src_arrmeta, frame.kernreq, nkwd, kwds);
-    }
+    array dst = empty(dst_tp);
+
+    call_frame *frame = reinterpret_cast<call_frame *>(g.get());
+    frame->callee->new_instantiate(frame, ckb, kernel_request_call, dst->metadata(), src_arrmeta, nkwd, kwds);
 
     kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
     fn(ckb.get(), &dst, src_data);
@@ -106,4 +103,29 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, a
   instantiate(data, &ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_call, nkwd, kwds, tp_vars);
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
   fn(ckb.get(), dst, src);
+}
+
+nd::call_graph::call_graph(base_callable *callee)
+    : m_data(m_static_data), m_capacity(sizeof(m_static_data)), m_size(0)
+{
+
+  size_t offset = m_size;
+  m_size += aligned_size(callee->get_frame_size());
+  reserve(m_size);
+  new (this->get_at<base_callable::call_frame>(offset)) base_callable::call_frame(callee);
+
+  m_back_offset = 0;
+}
+
+void nd::call_graph::emplace_back(base_callable *callee)
+{
+  /* Alignment requirement of the type. */
+  //      static_assert(alignof(KernelType) <= 8, "kernel types require alignment to be at most 8 bytes");
+
+  m_back_offset = m_size;
+
+  size_t offset = m_size;
+  m_size += aligned_size(callee->get_frame_size());
+  reserve(m_size);
+  new (this->get_at<base_callable::call_frame>(offset)) base_callable::call_frame(callee);
 }
