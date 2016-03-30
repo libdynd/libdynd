@@ -7,6 +7,7 @@
 
 #include <dynd/callables/base_instantiable_callable.hpp>
 #include <dynd/kernels/conj_kernel.hpp>
+#include <dynd/types/callable_type.hpp>
 
 namespace dynd {
 namespace nd {
