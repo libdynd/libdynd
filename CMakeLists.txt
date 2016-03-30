@@ -5,6 +5,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 project(libdynd)
+include(CheckTypeSize)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
@@ -14,6 +15,16 @@ set(LIB_SUFFIX "" CACHE STRING
 if(NOT WIN32)
   set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
   set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+endif()
+
+CHECK_TYPE_SIZE("float" SIZEOF_FLOAT)
+if(NOT (SIZEOF_FLOAT EQUAL 4))
+  message(FATAL_ERROR "libdynd requires sizeof(float) == 4")
+endif()
+
+CHECK_TYPE_SIZE("double" SIZEOF_DOUBLE)
+if(NOT (SIZEOF_DOUBLE EQUAL 8))
+  message(FATAL_ERROR "libdynd requires sizeof(double) == 8")
 endif()
 
 # Only add these options if this is the top level CMakeLists.txt

@@ -85,8 +85,8 @@ static const map<std::string, ndt::type> &builtin_types()
     bit["float64"] = ndt::make_type<float64>();
     bit["real"] = ndt::make_type<double>();
     bit["float128"] = ndt::make_type<float128>();
-    bit["complex64"] = ndt::make_type<dynd::complex<float>>();
-    bit["complex128"] = ndt::make_type<dynd::complex<double>>();
+    bit["complex64"] = ndt::make_type<dynd::complex<float32>>();
+    bit["complex128"] = ndt::make_type<dynd::complex<float64>>();
     bit["complex"] = ndt::make_type<dynd::complex<double>>();
     bit["bytes"] = ndt::bytes_type::make(1);
     bit["type"] = ndt::make_type<ndt::type_type>();
