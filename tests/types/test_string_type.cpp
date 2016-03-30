@@ -223,7 +223,7 @@ TEST(StringType, Properties)
 {
   ndt::type d = ndt::make_type<ndt::string_type>();
 
-  EXPECT_EQ(string_encoding_utf_8, d.p<uint32_t>("encoding"));
+  EXPECT_EQ("utf8", d.p<std::string>("encoding"));
 }
 
 TEST(StringType, EncodingSizes)

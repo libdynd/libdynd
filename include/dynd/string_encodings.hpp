@@ -24,7 +24,6 @@ enum string_encoding_t : uint32_t {
   string_encoding_utf_16,
   string_encoding_utf_32,
 
-  string_encoding_latin1,
   // TODO: more codepages here
 
   string_encoding_invalid
@@ -45,31 +44,27 @@ inline bool is_variable_length_string_encoding(string_encoding_t encoding)
   return encoding == string_encoding_utf_8 || encoding == string_encoding_utf_16;
 }
 
-inline std::ostream &operator<<(std::ostream &o, string_encoding_t encoding)
+inline const char *encoding_as_string(string_encoding_t encoding)
 {
   switch (encoding) {
   case string_encoding_ascii:
-    o << "ascii";
-    break;
+    return "ascii";
   case string_encoding_ucs_2:
-    o << "ucs2";
-    break;
+    return "ucs2";
   case string_encoding_utf_8:
-    o << "utf8";
-    break;
+    return "utf8";
   case string_encoding_utf_16:
-    o << "utf16";
-    break;
+    return "utf16";
   case string_encoding_utf_32:
-    o << "utf32";
-    break;
-  case string_encoding_latin1:
-    o << "latin1";
-    break;
+    return "utf32";
   default:
-    o << "unknown string encoding";
-    break;
+    return "unknown string encoding";
   }
+}
+
+inline std::ostream &operator<<(std::ostream &o, string_encoding_t encoding)
+{
+  o << encoding_as_string(encoding);
 
   return o;
 }
@@ -98,16 +93,16 @@ typedef uint32_t (*next_unicode_codepoint_t)(const char *&it, const char *end);
  */
 typedef void (*append_unicode_codepoint_t)(uint32_t cp, char *&it, char *end);
 
-DYNDT_API next_unicode_codepoint_t get_next_unicode_codepoint_function(string_encoding_t encoding,
-                                                                      assign_error_mode errmode);
-DYNDT_API append_unicode_codepoint_t get_append_unicode_codepoint_function(string_encoding_t encoding,
-                                                                          assign_error_mode errmode);
+DYNDT_API next_unicode_codepoint_t
+get_next_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode);
+DYNDT_API append_unicode_codepoint_t
+get_append_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode);
 
 /**
  * Converts a string buffer provided as a range of bytes into a std::string as UTF8.
  */
 DYNDT_API std::string string_range_as_utf8_string(string_encoding_t encoding, const char *begin, const char *end,
-                                                 assign_error_mode errmode);
+                                                  assign_error_mode errmode);
 
 /**
  * Prints the given code point to the output stream, escaping it as necessary.
@@ -118,7 +113,7 @@ DYNDT_API void print_escaped_unicode_codepoint(std::ostream &o, uint32_t cp, boo
  * Prints the utf8 string, escaping as necessary.
  */
 DYNDT_API void print_escaped_utf8_string(std::ostream &o, const char *str_begin, const char *str_end,
-                                        bool single_quote = false);
+                                         bool single_quote = false);
 
 /**
  * Prints the utf8 string, escaping as necessary.

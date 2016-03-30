@@ -17,7 +17,8 @@ namespace ndt {
 
   class DYNDT_API fixed_string_type : public base_string_type {
     intptr_t m_stringsize;
-    string_encoding_t m_encoding;
+    const string_encoding_t m_encoding;
+    const std::string m_encoding_repr;
 
   public:
     fixed_string_type(intptr_t stringsize, string_encoding_t encoding);
@@ -49,6 +50,8 @@ namespace ndt {
                              const std::string &DYND_UNUSED(indent)) const
     {
     }
+
+    std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
     static type make(intptr_t stringsize, string_encoding_t encoding = string_encoding_utf_8)
     {

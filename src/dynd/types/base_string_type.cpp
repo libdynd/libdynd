@@ -23,7 +23,7 @@ size_t ndt::base_string_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) cons
 std::map<std::string, std::pair<ndt::type, const char *>> ndt::base_string_type::get_dynamic_type_properties() const
 {
   std::map<std::string, std::pair<ndt::type, const char *>> properties;
-  properties["encoding"] = {ndt::type("uint32"), reinterpret_cast<const char *>(&m_encoding)};
+  properties["encoding"] = {ndt::type("string"), reinterpret_cast<const char *>(&m_encoding_repr)};
 
   return properties;
 }
