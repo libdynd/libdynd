@@ -59,7 +59,9 @@ namespace ndt {
 
   class DYNDT_API string_type : public base_string_type {
   private:
-    const string_encoding_t m_encoding = string_encoding_utf_8;
+    const string_encoding_t m_encoding{string_encoding_utf_8};
+    const std::string m_encoding_repr{encoding_as_string(string_encoding_utf_8)};
+
   public:
     typedef string data_type;
 

@@ -137,7 +137,7 @@ void ndt::string_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), c
 std::map<std::string, std::pair<ndt::type, const char *>> ndt::string_type::get_dynamic_type_properties() const
 {
   std::map<std::string, std::pair<ndt::type, const char *>> properties;
-  properties["encoding"] = {ndt::type("uint32"), reinterpret_cast<const char *>(&m_encoding)};
+  properties["encoding"] = {ndt::type("string"), reinterpret_cast<const char *>(&m_encoding_repr)};
 
   return properties;
 }

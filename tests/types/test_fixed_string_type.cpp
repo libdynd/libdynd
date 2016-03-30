@@ -10,6 +10,7 @@
 #include "../dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
+#include <dynd/string_encodings.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
 
@@ -61,6 +62,25 @@ TEST(FixedstringDType, Create)
   EXPECT_EQ(4u * 129u, d.get_data_size());
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
+}
+
+TEST(FixedStringDType, Encoding)
+{
+  ndt::type t;
+
+  t = ndt::fixed_string_type::make(10, string_encoding_ascii);
+  EXPECT_EQ("ascii", t.p<std::string>("encoding"));
+
+  t = ndt::fixed_string_type::make(10, string_encoding_ucs_2);
+  EXPECT_EQ("ucs2", t.p<std::string>("encoding"));
+
+  t = ndt::fixed_string_type::make(10, string_encoding_utf_8);
+  EXPECT_EQ("utf8", t.p<std::string>("encoding"));
+
+  t = ndt::fixed_string_type::make(10, string_encoding_utf_16);
+  EXPECT_EQ("utf16", t.p<std::string>("encoding"));
+
+  EXPECT_THROW(ndt::fixed_string_type::make(10, string_encoding_invalid), std::runtime_error);
 }
 
 TEST(FixedStringDType, Basic)

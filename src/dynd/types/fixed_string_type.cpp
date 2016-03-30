@@ -5,6 +5,7 @@
 
 #include <algorithm>
 
+#include <dynd/string_encodings.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/exceptions.hpp>
@@ -13,7 +14,8 @@ using namespace std;
 using namespace dynd;
 
 ndt::fixed_string_type::fixed_string_type(intptr_t stringsize, string_encoding_t encoding)
-    : base_string_type(fixed_string_id, 0, 1, type_flag_none, 0), m_stringsize(stringsize), m_encoding(encoding)
+    : base_string_type(fixed_string_id, 0, 1, type_flag_none, 0), m_stringsize(stringsize), m_encoding(encoding),
+      m_encoding_repr(encoding_as_string(encoding))
 {
   switch (encoding) {
   case string_encoding_ascii:
@@ -149,4 +151,12 @@ bool ndt::fixed_string_type::operator==(const base_type &rhs) const
     const fixed_string_type *dt = static_cast<const fixed_string_type *>(&rhs);
     return m_encoding == dt->m_encoding && m_stringsize == dt->m_stringsize;
   }
+}
+
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::fixed_string_type::get_dynamic_type_properties() const
+{
+  std::map<std::string, std::pair<ndt::type, const char *>> properties;
+  properties["encoding"] = {ndt::type("string"), reinterpret_cast<const char *>(&m_encoding_repr)};
+
+  return properties;
 }
