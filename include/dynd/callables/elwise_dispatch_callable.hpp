@@ -26,7 +26,7 @@ namespace nd {
         m_abstract = true;
       }
 
-      void new_resolve(base_callable *DYND_UNUSED(parent), callable_graph &g, ndt::type &dst_tp, intptr_t nsrc,
+      void new_resolve(base_callable *DYND_UNUSED(parent), call_graph &g, ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars)
       {

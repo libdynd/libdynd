@@ -4,7 +4,7 @@
 //
 
 #include <dynd/callables/base_callable.hpp>
-#include <dynd/callables/callable_graph.hpp>
+#include <dynd/callables/call_graph.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -41,7 +41,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
                                   const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   if (m_new_style) {
-    callable_graph g;
+    call_graph g;
     if (!is_abstract()) {
       g.emplace_back(this);
     }
@@ -105,10 +105,24 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, a
   fn(ckb.get(), dst, src);
 }
 
-void nd::callable_graph::emplace_back(base_callable *callee)
+nd::call_graph::call_graph(base_callable *callee)
+    : m_data(m_static_data), m_capacity(sizeof(m_static_data)), m_size(0)
+{
+
+  size_t offset = m_size;
+  m_size += aligned_size(callee->get_frame_size());
+  reserve(m_size);
+  new (this->get_at<base_callable::call_frame>(offset)) base_callable::call_frame(callee);
+
+  m_back_offset = 0;
+}
+
+void nd::call_graph::emplace_back(base_callable *callee)
 {
   /* Alignment requirement of the type. */
   //      static_assert(alignof(KernelType) <= 8, "kernel types require alignment to be at most 8 bytes");
+
+  m_back_offset = m_size;
 
   size_t offset = m_size;
   m_size += aligned_size(callee->get_frame_size());

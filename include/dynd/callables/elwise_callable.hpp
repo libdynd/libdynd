@@ -7,7 +7,6 @@
 
 #include <array>
 
-#include <dynd/callables/callable_graph.hpp>
 #include <dynd/callables/base_callable.hpp>
 #include <dynd/kernels/elwise_kernel.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
@@ -38,11 +37,10 @@ namespace nd {
     public:
       elwise_callable(const callable &child) : base_callable(ndt::type(), sizeof(elwise_call_frame)), m_child(child) {}
 
-      void new_resolve(base_callable *parent, callable_graph &g, ndt::type &dst_tp, intptr_t nsrc,
-                       const ndt::type *src_tp, size_t nkwd, const array *kwds,
-                       const std::map<std::string, ndt::type> &tp_vars)
+      void new_resolve(base_callable *parent, call_graph &cg, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                       size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        elwise_call_frame *data = g.get_at<elwise_call_frame>(g.size() - aligned_size(sizeof(elwise_call_frame)));
+        elwise_call_frame *data = reinterpret_cast<elwise_call_frame *>(cg.back());
 
         callable &child = m_child;
         const ndt::callable_type *child_tp = child.get_type();
@@ -85,17 +83,17 @@ namespace nd {
 
         if (!finished) {
           if (!parent->is_abstract()) {
-            g.emplace_back(parent);
+            cg.emplace_back(parent);
           }
 
-          parent->new_resolve(this, g, child_dst_tp, nsrc, child_src_tp.data(), nkwd, kwds, tp_vars);
+          parent->new_resolve(this, cg, child_dst_tp, nsrc, child_src_tp.data(), nkwd, kwds, tp_vars);
         }
         else {
           if (!child->is_abstract()) {
-            g.emplace_back(child.get());
+            cg.emplace_back(child.get());
           }
 
-          child->new_resolve(this, g, child_dst_tp, nsrc, child_src_tp.data(), nkwd, kwds, tp_vars);
+          child->new_resolve(this, cg, child_dst_tp, nsrc, child_src_tp.data(), nkwd, kwds, tp_vars);
         }
       }
 

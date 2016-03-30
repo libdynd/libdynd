@@ -7,7 +7,7 @@
 
 #include <dynd/callable.hpp>
 #include <dynd/callables/base_callable.hpp>
-#include <dynd/callables/callable_graph.hpp>
+#include <dynd/callables/call_graph.hpp>
 
 namespace dynd {
 namespace nd {
@@ -16,7 +16,7 @@ namespace nd {
   public:
     base_dispatch_callable(const ndt::type &tp) : base_callable(tp) { m_abstract = true; }
 
-    void new_resolve(base_callable *DYND_UNUSED(parent), callable_graph &g, ndt::type &dst_tp, intptr_t nsrc,
+    void new_resolve(base_callable *DYND_UNUSED(parent), call_graph &g, ndt::type &dst_tp, intptr_t nsrc,
                      const ndt::type *src_tp, size_t nkwd, const array *kwds,
                      const std::map<std::string, ndt::type> &tp_vars)
     {
