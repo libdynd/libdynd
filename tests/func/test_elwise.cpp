@@ -31,10 +31,10 @@ TEST(Elwise, FixedDim) {
   tp = f.resolve({ndt::make_type<int>(), ndt::make_type<float[3]>()}, {});
   EXPECT_EQ(ndt::make_type<double[3]>(), tp);
 
+  /*
   tp = f.resolve({ndt::make_type<int[3]>(), ndt::make_type<float[3]>()}, {});
   EXPECT_EQ(ndt::make_type<double[3]>(), tp);
 
-  /*
     tp = f.resolve(ndt::make_type<double[3]>(), {ndt::make_type<int[3]>(), ndt::make_type<float[3]>()}, {});
     EXPECT_EQ(ndt::make_type<double[3]>(), tp);
 
