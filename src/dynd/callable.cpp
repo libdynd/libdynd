@@ -28,10 +28,9 @@ public:
   unary_assignment_callable(const ndt::type &tp, assign_error_mode error_mode)
       : base_callable(tp), errmode(error_mode) {}
 
-  const ndt::type &resolve(nd::call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
-                           const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
-                           const nd::array *DYND_UNUSED(kwds),
-                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+  ndt::type resolve(nd::call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                    const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
     return dst_tp;
   }
 

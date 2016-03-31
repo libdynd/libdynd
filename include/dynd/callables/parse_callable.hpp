@@ -26,7 +26,7 @@ namespace nd {
       parse_callable()
           : base_callable(ndt::callable_type::make(option_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
-      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+      ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                                const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                                const array *DYND_UNUSED(kwds),
                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -59,7 +59,7 @@ namespace nd {
       parse_callable()
           : base_callable(ndt::callable_type::make(struct_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
-      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+      ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                                const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                                const array *DYND_UNUSED(kwds),
                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -96,7 +96,7 @@ namespace nd {
           : base_callable(
                 ndt::callable_type::make(fixed_dim_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
-      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+      ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                                const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                                const array *DYND_UNUSED(kwds),
                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -123,7 +123,7 @@ namespace nd {
       parse_callable()
           : base_callable(ndt::callable_type::make(var_dim_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
-      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+      ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                                const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                                const array *DYND_UNUSED(kwds),
                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {

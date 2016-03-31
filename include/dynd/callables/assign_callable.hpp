@@ -19,7 +19,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(ResID), {ndt::type(Arg0ID)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -65,7 +65,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(bool_id), {ndt::type(string_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -114,7 +114,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(fixed_bytes_id), {ndt::type(fixed_bytes_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -138,7 +138,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(IntID), {ndt::type(string_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -164,7 +164,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(string_id), {ndt::type(IntID)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -189,7 +189,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(float64_id), {ndt::type(string_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -216,7 +216,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(fixed_string_id), {ndt::type(string_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -247,7 +247,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(fixed_string_id), {ndt::type(fixed_string_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -278,7 +278,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(string_id), {ndt::type(int_kind_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -304,7 +304,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(string_id), {ndt::type(char_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -335,7 +335,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(type_id), {ndt::type(string_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -361,7 +361,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(string_id), {ndt::type(fixed_string_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -392,7 +392,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(float32_id), {ndt::type(string_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -420,7 +420,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(string_id), {ndt::type(type_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -446,7 +446,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(char_id), {ndt::type(string_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -477,7 +477,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(pointer_id), {ndt::type(pointer_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -506,7 +506,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(option_id), {ndt::type(option_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -557,7 +557,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(option_id), {ndt::type(float_kind_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -585,7 +585,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(option_id), {ndt::type(string_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -662,7 +662,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(tuple_id), {ndt::type(tuple_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -696,7 +696,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type(struct_id), {ndt::type(struct_id)}, {"error_mode"},
                                        {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -729,7 +729,7 @@ namespace nd {
   public:
     option_to_value_callable() : base_callable(ndt::type("(Any) -> Any")) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -768,7 +768,7 @@ namespace nd {
   public:
     adapt_assign_from_callable() : base_callable(ndt::type("(Any) -> Any")) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -811,7 +811,7 @@ namespace nd {
   public:
     adapt_assign_to_callable() : base_callable(ndt::type("(Any) -> Any")) {}
 
-    const ndt::type &resolve(call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -832,7 +832,7 @@ namespace nd {
   public:
     assignment_option_callable() : base_callable(ndt::type("(Any) -> ?Any")) {}
 
-    const ndt::type &resolve(call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {

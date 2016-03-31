@@ -18,7 +18,7 @@ namespace nd {
         : base_callable(ndt::callable_type::make(ndt::make_type<intptr_t>(),
                                                  {ndt::type("Fixed * Scalar"), ndt::type("Scalar")})) {}
 
-    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                              const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                              const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {

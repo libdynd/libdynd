@@ -25,10 +25,51 @@ namespace nd {
         m_abstract = true;
       }
 
-      const ndt::type &resolve(call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
-                               const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
-                               const array *DYND_UNUSED(kwds),
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+      ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd,
+                        const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+        const ndt::callable_type *child_tp = m_child.get_type();
+
+        bool all_same = true;
+        for (size_t i = 0; i < nsrc; ++i) {
+          if (src_tp[i].get_ndim() != child_tp->get_pos_type(i).get_ndim()) {
+            all_same = false;
+            break;
+          }
+        }
+
+        if (all_same) {
+          return m_child->resolve(cg, dst_tp.is_symbolic() ? m_child.get_type()->get_return_type() : dst_tp, nsrc,
+                                  src_tp, nkwd, kwds, tp_vars);
+        }
+
+        // Do a pass through the src types to classify them
+        bool src_all_strided = true, src_all_strided_or_var = true;
+        for (size_t i = 0; i < nsrc; ++i) {
+          intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
+          switch (src_tp[i].get_id()) {
+          case fixed_dim_id:
+            break;
+          case var_dim_id:
+            src_all_strided = false;
+            break;
+          default:
+            // If it's a scalar, allow it to broadcast like
+            // a strided dimension
+            if (src_ndim > 0) {
+              src_all_strided_or_var = false;
+            }
+            break;
+          }
+        }
+
+        if (src_all_strided) {
+          static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, N>>();
+          return dynamic_cast<elwise_callable<fixed_dim_id, fixed_dim_id, N> *>(f.get())
+              ->resolve2(this, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+        } else if (src_all_strided_or_var) {
+          throw std::runtime_error("fixed_dim_id, var_dim_id");
+        }
+
         return dst_tp;
       }
 

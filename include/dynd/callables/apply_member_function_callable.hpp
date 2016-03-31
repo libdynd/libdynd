@@ -22,7 +22,7 @@ namespace nd {
       apply_member_function_callable(T obj, mem_func_type mem_func, S &&... names)
           : base_callable(ndt::make_type<mem_func_type>(std::forward<S>(names)...)), m_obj(obj), m_mem_func(mem_func) {}
 
-      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+      ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
                                const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
                                const array *DYND_UNUSED(kwds),
                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
