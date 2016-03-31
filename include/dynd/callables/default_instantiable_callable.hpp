@@ -16,12 +16,13 @@ namespace nd {
     using base_callable::base_callable;
 
   public:
-    default_instantiable_callable(const ndt::type &tp) : base_callable(tp) { m_new_style = true; }
+    default_instantiable_callable(const ndt::type &tp) : base_callable(tp) {}
+
+    void resolve(call_graph &cg) { cg.emplace_back(this); }
 
     void new_instantiate(call_frame *DYND_UNUSED(frame), kernel_builder &ckb, kernel_request_t kernreq,
                          const char *DYND_UNUSED(dst_arrmeta), const char *const *DYND_UNUSED(src_arrmeta),
-                         size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds))
-    {
+                         size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds)) {
       ckb.emplace_back<KernelType>(kernreq);
     }
 
@@ -29,8 +30,7 @@ namespace nd {
                      const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       ckb->emplace_back<KernelType>(kernreq);
     }
   };

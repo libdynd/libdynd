@@ -20,15 +20,16 @@ namespace nd {
     public:
       outer_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
+      void resolve(call_graph &DYND_UNUSED(cg)) {}
+
       void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                            intptr_t nkwd, const dynd::nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-      {
+                            intptr_t nkwd, const dynd::nd::array *kwds,
+                            const std::map<std::string, ndt::type> &tp_vars) {
         const ndt::callable_type *child_tp = m_child.get_type();
 
         if (child_tp->get_return_type().is_symbolic()) {
           m_child->resolve_dst_type(NULL, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-        }
-        else {
+        } else {
           dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);
         }
 
@@ -40,8 +41,7 @@ namespace nd {
         }
         if (dst_tp.get_base_id() == memory_id) {
           dst_tp = dst_tp.extended<ndt::base_memory_type>()->with_replaced_storage_type(tp);
-        }
-        else {
+        } else {
           dst_tp = tp;
         }
       }
@@ -49,8 +49,7 @@ namespace nd {
       void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
                        intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                        dynd::kernel_request_t kernreq, intptr_t nkwd, const dynd::nd::array *kwds,
-                       const std::map<std::string, ndt::type> &tp_vars)
-      {
+                       const std::map<std::string, ndt::type> &tp_vars) {
         intptr_t ndim = 0;
         for (intptr_t i = 0; i < nsrc; ++i) {
           ndim += src_tp[i].get_ndim();
@@ -83,8 +82,7 @@ namespace nd {
                   ->get_element_type()
                   .extended<ndt::base_dim_type>()
                   ->arrmeta_copy_construct_onedim(new_arrmeta, src_arrmeta[i], intrusive_ptr<memory_block_data>());
-            }
-            else {
+            } else {
               new_tp.extended<ndt::base_dim_type>()->arrmeta_copy_construct_onedim(new_arrmeta, src_arrmeta[i],
                                                                                    intrusive_ptr<memory_block_data>());
             }

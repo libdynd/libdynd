@@ -17,9 +17,9 @@ namespace nd {
     public:
       template <typename... T>
       apply_function_callable(T &&... names)
-          : base_callable(ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...)) {
-        m_new_style = true;
-      }
+          : base_callable(ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...)) {}
+
+      void resolve(call_graph &cg) { cg.emplace_back(this); }
 
       void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),

@@ -17,10 +17,11 @@ namespace nd {
 
     array alloc(const ndt::type *dst_tp) const { return empty_shell(*dst_tp); }
 
+    void resolve(call_graph &cg) { cg.emplace_back(this); }
+
     void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                           const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       dst_tp = src_tp[0].extended<ndt::pointer_type>()->get_target_type();
     }
 
@@ -28,8 +29,7 @@ namespace nd {
                      const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       ckb->emplace_back<dereference_kernel>(kernreq, dst_tp);
     }
   };

@@ -18,10 +18,11 @@ namespace nd {
 
       left_compound_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
+      void resolve(call_graph &cg) { cg.emplace_back(this); }
+
       void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                        const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-      {
+                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         ckb->emplace_back<left_compound_kernel>(kernreq);
 
         ndt::type child_src_tp[2] = {dst_tp, src_tp[0]};
@@ -37,10 +38,11 @@ namespace nd {
 
       right_compound_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
+      void resolve(call_graph &cg) { cg.emplace_back(this); }
+
       void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                        const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-      {
+                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         ckb->emplace_back<right_compound_kernel>(kernreq);
 
         ndt::type child_src_tp[2] = {src_tp[0], dst_tp};

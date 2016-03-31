@@ -19,16 +19,15 @@ namespace nd {
     fftw_callable()
         : base_callable(ndt::type("(Fixed**N * complex[float64], shape: ?N * int64, axes: "
                                   "?Fixed * int64, flags: ?int32) -> Fixed**N * "
-                                  "complex[float64]"))
-    {
-    }
+                                  "complex[float64]")) {}
+
+    void resolve(call_graph &cg) { cg.emplace_back(this); }
 
     template <bool real_to_complex>
     typename std::enable_if<real_to_complex, void>::type
     resolve_dst_type_(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
+                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       nd::array shape = kwds[0];
 
       intptr_t ndim = src_tp[0].get_ndim();
@@ -42,13 +41,11 @@ namespace nd {
     typename std::enable_if<!real_to_complex, void>::type
     resolve_dst_type_(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
+                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       nd::array shape = kwds[0];
       if (shape.is_na()) {
         dst_tp = src_tp[0];
-      }
-      else {
+      } else {
         if (shape.get_type().get_id() == pointer_id) {
           shape = shape.f("dereference");
         }
@@ -58,21 +55,18 @@ namespace nd {
     }
 
     void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-                          const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-    {
+                          const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
       resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
     void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
                      intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       int flags;
       if (kwds[2].is_na()) {
         flags = FFTW_ESTIMATE;
-      }
-      else {
+      } else {
         flags = kwds[2].as<int>();
       }
 
@@ -89,8 +83,7 @@ namespace nd {
         if (axes.get_type().get_id() == pointer_id) {
           axes = axes;
         }
-      }
-      else {
+      } else {
         axes = nd::range(src_tp[0].get_ndim());
       }
 

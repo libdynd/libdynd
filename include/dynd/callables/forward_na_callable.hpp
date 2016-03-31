@@ -21,9 +21,10 @@ namespace nd {
   public:
     forward_na_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
+    void resolve(call_graph &cg) { cg.emplace_back(this); }
+
     void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-                          const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-    {
+                          const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
       ndt::type child_src_tp[2];
       child_src_tp[I] = src_tp[I].extended<ndt::option_type>()->get_value_type();
       child_src_tp[1 - I] = src_tp[1 - I];
@@ -31,8 +32,7 @@ namespace nd {
       const ndt::type &child_dst_tp = m_child.get_ret_type();
       if (child_dst_tp.is_symbolic()) {
         m_child->resolve_dst_type(data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
-      }
-      else {
+      } else {
         dst_tp = child_dst_tp;
       }
       dst_tp = ndt::make_type<ndt::option_type>(dst_tp);
@@ -40,8 +40,7 @@ namespace nd {
 
     void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                      const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                     const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-    {
+                     const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
       size_t self_offset = ckb->size();
       size_t child_offsets[2];
 
@@ -75,10 +74,11 @@ namespace nd {
   public:
     option_comparison_callable() : base_callable(ndt::type("(?Scalar, ?Scalar) -> ?bool")) {}
 
+    void resolve(call_graph &cg) { cg.emplace_back(this); }
+
     void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                      const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                     const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-    {
+                     const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
       intptr_t ckb_offset = ckb->size();
       intptr_t option_comp_offset = ckb_offset;
       ckb->emplace_back<option_comparison_kernel<true, true>>(kernreq);

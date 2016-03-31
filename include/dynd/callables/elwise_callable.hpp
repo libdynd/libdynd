@@ -37,6 +37,8 @@ namespace nd {
 
       callable &get_child(base_callable *parent);
 
+      void resolve(call_graph &cg) { cg.emplace_back(this); }
+
       void new_resolve(base_callable *parent, call_graph &cg, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                        size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         elwise_call_frame *data = reinterpret_cast<elwise_call_frame *>(cg.back());
@@ -197,6 +199,8 @@ namespace nd {
     template <size_t N>
     class elwise_callable<fixed_dim_id, var_dim_id, N> {
     public:
+      void resolve(call_graph &cg) { cg.emplace_back(this); }
+
       static void elwise_instantiate(callable &self, callable &child, char *data, kernel_builder *ckb,
                                      const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                      const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -284,6 +288,8 @@ namespace nd {
         std::array<bool, N> broadcast_src;
         std::array<bool, N> is_src_var;
       };
+
+      void resolve(call_graph &cg) { cg.emplace_back(this); }
 
       elwise_callable(const callable &child) : base_callable(ndt::type()), m_child(child) {}
 

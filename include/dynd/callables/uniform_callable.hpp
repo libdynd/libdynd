@@ -24,32 +24,30 @@ namespace nd {
 
       public:
         uniform_callable()
-            : base_callable(ndt::callable_type::make(ResID, {}, {"a", "b"}, {ndt::make_type<ndt::option_type>(ResID),
-                                                                             ndt::make_type<ndt::option_type>(ResID)}))
-        {
-        }
+            : base_callable(
+                  ndt::callable_type::make(ResID, {}, {"a", "b"}, {ndt::make_type<ndt::option_type>(ResID),
+                                                                   ndt::make_type<ndt::option_type>(ResID)})) {}
+
+        void resolve(call_graph &cg) { cg.emplace_back(this); }
 
         void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                          const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                          kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-        {
+                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
           R a;
           if (kwds[0].is_na()) {
             a = 0;
-          }
-          else {
+          } else {
             a = kwds[0].as<R>();
           }
 
           R b;
           if (kwds[1].is_na()) {
             b = std::numeric_limits<R>::max();
-          }
-          else {
+          } else {
             b = kwds[1].as<R>();
           }
 
@@ -59,8 +57,7 @@ namespace nd {
 
       template <type_id_t ResID, typename GeneratorType>
       class uniform_callable<ResID, uint_kind_id, GeneratorType>
-          : public uniform_callable<ResID, int_kind_id, GeneratorType> {
-      };
+          : public uniform_callable<ResID, int_kind_id, GeneratorType> {};
 
       template <type_id_t ResID, typename GeneratorType>
       class uniform_callable<ResID, float_kind_id, GeneratorType> : public base_callable {
@@ -68,32 +65,30 @@ namespace nd {
 
       public:
         uniform_callable()
-            : base_callable(ndt::callable_type::make(ResID, {}, {"a", "b"}, {ndt::make_type<ndt::option_type>(ResID),
-                                                                             ndt::make_type<ndt::option_type>(ResID)}))
-        {
-        }
+            : base_callable(
+                  ndt::callable_type::make(ResID, {}, {"a", "b"}, {ndt::make_type<ndt::option_type>(ResID),
+                                                                   ndt::make_type<ndt::option_type>(ResID)})) {}
+
+        void resolve(call_graph &cg) { cg.emplace_back(this); }
 
         void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                          const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                          kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-        {
+                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
           R a;
           if (kwds[0].is_na()) {
             a = 0;
-          }
-          else {
+          } else {
             a = kwds[0].as<R>();
           }
 
           R b;
           if (kwds[1].is_na()) {
             b = 1;
-          }
-          else {
+          } else {
             b = kwds[1].as<R>();
           }
 
@@ -107,33 +102,30 @@ namespace nd {
 
       public:
         uniform_callable()
-            : base_callable(ndt::callable_type::make(ResID, {}, {"a", "b"}, {ndt::make_type<ndt::option_type>(ResID),
-                                                                             ndt::make_type<ndt::option_type>(ResID)}))
-        {
-        }
+            : base_callable(
+                  ndt::callable_type::make(ResID, {}, {"a", "b"}, {ndt::make_type<ndt::option_type>(ResID),
+                                                                   ndt::make_type<ndt::option_type>(ResID)})) {}
 
-        void instantiate( char *DYND_UNUSED(data), kernel_builder *ckb,
-                         const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                         intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                         intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-        {
+        void resolve(call_graph &cg) { cg.emplace_back(this); }
+
+        void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
+                         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                         const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                         kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
           R a;
           if (kwds[0].is_na()) {
             a = R(0, 0);
-          }
-          else {
+          } else {
             a = kwds[0].as<R>();
           }
 
           R b;
           if (kwds[1].is_na()) {
             b = R(1, 1);
-          }
-          else {
+          } else {
             b = kwds[1].as<R>();
           }
 

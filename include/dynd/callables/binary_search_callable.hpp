@@ -15,16 +15,15 @@ namespace nd {
   class binary_search_callable : public base_callable {
   public:
     binary_search_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::make_type<intptr_t>(), {ndt::type("Fixed * Scalar"), ndt::type("Scalar")}))
-    {
-    }
+        : base_callable(ndt::callable_type::make(ndt::make_type<intptr_t>(),
+                                                 {ndt::type("Fixed * Scalar"), ndt::type("Scalar")})) {}
+
+    void resolve(call_graph &cg) { cg.emplace_back(this); }
 
     void instantiate(char *data, kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                      const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                      const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
-                     const nd::array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars)
-    {
+                     const nd::array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars) {
       ckb->emplace_back<binary_search_kernel>(
           kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
           reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride);

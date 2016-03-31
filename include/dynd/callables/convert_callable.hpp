@@ -18,10 +18,11 @@ namespace nd {
     public:
       convert_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
+      void resolve(call_graph &cg) { cg.emplace_back(this); }
+
       void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
                        intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                       intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-      {
+                       intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         intptr_t ckb_offset = ckb->size();
         callable &af = m_child;
         const std::vector<ndt::type> &src_tp_for_af = af.get_type()->get_pos_types();
@@ -34,8 +35,7 @@ namespace nd {
         for (intptr_t i = 0; i < nsrc; ++i) {
           if (src_tp[i] == src_tp_for_af[i]) {
             buffered_arrmeta[i] = src_arrmeta[i];
-          }
-          else {
+          } else {
             self->m_bufs[i].allocate(src_tp_for_af[i]);
             buffered_arrmeta[i] = self->m_bufs[i].get_arrmeta();
           }
