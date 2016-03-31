@@ -22,7 +22,6 @@
 using namespace std;
 using namespace dynd;
 
-/*
 TEST(Elwise, FixedDim) {
   nd::callable f = nd::functional::elwise([](int, float) { return double(); });
 
@@ -63,11 +62,10 @@ TEST(Elwise, FixedDim) {
   tp = f.resolve({ndt::make_type<int[15][3][5]>(), ndt::make_type<float[3][1]>()}, {});
   EXPECT_EQ(ndt::make_type<double[15][3][5]>(), tp);
 
-  EXPECT_THROW(f.resolve({ndt::make_type<int[4]>(), ndt::make_type<float[3]>()}, {}), runtime_error);
-  EXPECT_THROW(f.resolve({ndt::make_type<int[7]>(), ndt::make_type<float[3]>()}, {}), runtime_error);
-  EXPECT_THROW(f.resolve({ndt::make_type<int[2][1]>(), ndt::make_type<float[8][4][3]>()}, {}), runtime_error);
+//  EXPECT_THROW(f.resolve({ndt::make_type<int[4]>(), ndt::make_type<float[3]>()}, {}), runtime_error);
+//  EXPECT_THROW(f.resolve({ndt::make_type<int[7]>(), ndt::make_type<float[3]>()}, {}), runtime_error);
+//  EXPECT_THROW(f.resolve({ndt::make_type<int[2][1]>(), ndt::make_type<float[8][4][3]>()}, {}), runtime_error);
 }
-*/
 
 TEST(Elwise, UnaryFixedDim) {
   nd::callable f = nd::functional::elwise(nd::functional::apply([](dynd::string s) { return s.size(); }));
