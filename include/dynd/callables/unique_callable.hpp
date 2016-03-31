@@ -13,15 +13,22 @@ namespace nd {
 
   class unique_callable : public base_callable {
   public:
-    unique_callable() : base_callable(ndt::callable_type::make(ndt::make_type<void>(), {ndt::type("Fixed * Scalar")}))
-    {
+    unique_callable()
+        : base_callable(ndt::callable_type::make(ndt::make_type<void>(), {ndt::type("Fixed * Scalar")})) {}
+
+    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                             const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                             const array *DYND_UNUSED(kwds),
+                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+      cg.emplace_back(this);
+      return dst_tp;
     }
+
 
     void instantiate(char *data, kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                      const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                      const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars)
-    {
+                     const std::map<std::string, ndt::type> &tp_vars) {
       const ndt::type &src0_element_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
       ckb->emplace_back<unique_kernel>(
           kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,

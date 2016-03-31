@@ -17,23 +17,26 @@ namespace nd {
     public:
       parse_callable()
           : default_instantiable_callable<parse_kernel<ResID>>(
-                ndt::callable_type::make(ResID, {ndt::make_type<char *>(), ndt::make_type<char *>()}))
-      {
-      }
+                ndt::callable_type::make(ResID, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
     };
 
     template <>
     class parse_callable<option_id> : public base_callable {
     public:
       parse_callable()
-          : base_callable(ndt::callable_type::make(option_id, {ndt::make_type<char *>(), ndt::make_type<char *>()}))
-      {
+          : base_callable(ndt::callable_type::make(option_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
+
+      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                               const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                               const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+        cg.emplace_back(this);
+        return dst_tp;
       }
 
       void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                        const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-      {
+                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         intptr_t ckb_offset = ckb->size();
         intptr_t self_offset = ckb_offset;
         ckb->emplace_back<parse_kernel<option_id>>(kernreq);
@@ -54,14 +57,19 @@ namespace nd {
     class parse_callable<struct_id> : public base_callable {
     public:
       parse_callable()
-          : base_callable(ndt::callable_type::make(struct_id, {ndt::make_type<char *>(), ndt::make_type<char *>()}))
-      {
+          : base_callable(ndt::callable_type::make(struct_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
+
+      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                               const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                               const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+        cg.emplace_back(this);
+        return dst_tp;
       }
 
       void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                        const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-      {
+                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         intptr_t ckb_offset = ckb->size();
         size_t field_count = dst_tp.extended<ndt::struct_type>()->get_field_count();
         const std::vector<uintptr_t> &arrmeta_offsets = dst_tp.extended<ndt::struct_type>()->get_arrmeta_offsets();
@@ -85,14 +93,20 @@ namespace nd {
     class parse_callable<fixed_dim_id> : public base_callable {
     public:
       parse_callable()
-          : base_callable(ndt::callable_type::make(fixed_dim_id, {ndt::make_type<char *>(), ndt::make_type<char *>()}))
-      {
+          : base_callable(
+                ndt::callable_type::make(fixed_dim_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
+
+      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                               const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                               const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+        cg.emplace_back(this);
+        return dst_tp;
       }
 
       void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                        const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-      {
+                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         ckb->emplace_back<parse_kernel<fixed_dim_id>>(kernreq, dst_tp,
                                                       reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size,
                                                       reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride);
@@ -107,14 +121,19 @@ namespace nd {
     class parse_callable<var_dim_id> : public base_callable {
     public:
       parse_callable()
-          : base_callable(ndt::callable_type::make(var_dim_id, {ndt::make_type<char *>(), ndt::make_type<char *>()}))
-      {
+          : base_callable(ndt::callable_type::make(var_dim_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
+
+      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                               const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                               const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+        cg.emplace_back(this);
+        return dst_tp;
       }
 
       void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                        const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-      {
+                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         ckb->emplace_back<parse_kernel<var_dim_id>>(
             kernreq, dst_tp, reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->blockref,
             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->stride);

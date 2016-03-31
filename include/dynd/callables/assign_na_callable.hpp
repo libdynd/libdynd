@@ -16,9 +16,7 @@ namespace nd {
   public:
     assign_na_callable()
         : default_instantiable_callable<assign_na_kernel<ResValueID>>(
-              ndt::callable_type::make(ndt::make_type<ndt::option_type>(ResValueID)))
-    {
-    }
+              ndt::callable_type::make(ndt::make_type<ndt::option_type>(ResValueID))) {}
   };
 
   template <>
@@ -26,12 +24,19 @@ namespace nd {
   public:
     assign_na_callable() : base_callable(ndt::callable_type::make(ndt::make_type<ndt::option_type>(fixed_dim_id))) {}
 
+    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                             const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                             const array *DYND_UNUSED(kwds),
+                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+      cg.emplace_back(this);
+      return dst_tp;
+    }
+
     void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
                      const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
+                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       switch (dst_tp.get_dtype().get_id()) {
       case bool_id:
         ckb->emplace_back<assign_na_kernel<bool_id>>(kernreq);

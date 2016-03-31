@@ -19,15 +19,20 @@ namespace nd {
     public:
       adapt_callable(const ndt::type &value_tp, const callable &forward)
           : base_callable(ndt::callable_type::make(value_tp, {ndt::type("Any")})), m_value_tp(value_tp),
-            m_forward(forward)
-      {
+            m_forward(forward) {}
+
+      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                               const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                               const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+        cg.emplace_back(this);
+        return dst_tp;
       }
 
       void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                             const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
                             const array *DYND_UNUSED(kwds),
-                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
         dst_tp = m_value_tp;
       }
 
@@ -35,8 +40,7 @@ namespace nd {
                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                        const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                        kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
+                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
         ckb->emplace_back<adapt_kernel>(kernreq, m_value_tp, m_forward);
       }
     };

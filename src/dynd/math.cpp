@@ -29,14 +29,14 @@ DYND_API nd::callable nd::sin = nd::functional::elwise(nd::functional::apply<dou
 DYND_API nd::callable nd::tan = nd::functional::elwise(nd::functional::apply<double (*)(double), &mytan>());
 DYND_API nd::callable nd::exp = nd::functional::elwise(nd::functional::apply<double (*)(double), &myexp>());
 
-DYND_API nd::callable nd::real = nd::functional::new_style_elwise(nd::make_callable<nd::real_dispatch_callable>(
+DYND_API nd::callable nd::real = nd::functional::elwise(nd::make_callable<nd::real_dispatch_callable>(
     ndt::type("(Scalar) -> Scalar"),
     nd::callable::new_make_all<nd::real_callable, type_id_sequence<complex_float32_id, complex_float64_id>>()));
 
-DYND_API nd::callable nd::imag = nd::functional::new_style_elwise(nd::make_callable<nd::imag_dispatch_callable>(
+DYND_API nd::callable nd::imag = nd::functional::elwise(nd::make_callable<nd::imag_dispatch_callable>(
     ndt::type("(Scalar) -> Scalar"),
     nd::callable::new_make_all<nd::imag_callable, type_id_sequence<complex_float32_id, complex_float64_id>>()));
 
-DYND_API nd::callable nd::conj = nd::functional::new_style_elwise(nd::make_callable<nd::conj_dispatch_callable>(
+DYND_API nd::callable nd::conj = nd::functional::elwise(nd::make_callable<nd::conj_dispatch_callable>(
     ndt::type("(Scalar) -> Scalar"),
     nd::callable::new_make_all<nd::conj_callable, type_id_sequence<complex_float32_id, complex_float64_id>>()));

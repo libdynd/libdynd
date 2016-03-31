@@ -25,15 +25,20 @@ class unary_assignment_callable : public nd::base_callable {
   assign_error_mode errmode;
 
 public:
-  unary_assignment_callable(const ndt::type &tp, assign_error_mode error_mode) : base_callable(tp), errmode(error_mode)
-  {
+  unary_assignment_callable(const ndt::type &tp, assign_error_mode error_mode)
+      : base_callable(tp), errmode(error_mode) {}
+
+  const ndt::type &resolve(nd::call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                           const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                           const nd::array *DYND_UNUSED(kwds),
+                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+    return dst_tp;
   }
 
   void instantiate(char *DYND_UNUSED(data), nd::kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
                    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
                    kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
+                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
     eval::eval_context ectx_tmp;
     ectx_tmp.errmode = errmode;
     make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, &ectx_tmp);
@@ -42,8 +47,7 @@ public:
 
 } // anonymous namespace
 
-std::map<std::string, nd::callable> &nd::detail::get_regfunctions()
-{
+std::map<std::string, nd::callable> &nd::detail::get_regfunctions() {
   static map<std::string, callable> registry{{"take", take},
                                              {"min", min},
                                              {"max", max},
@@ -70,13 +74,11 @@ std::map<std::string, nd::callable> &nd::detail::get_regfunctions()
 }
 
 nd::callable dynd::make_callable_from_assignment(const ndt::type &dst_tp, const ndt::type &src_tp,
-                                                 assign_error_mode errmode)
-{
+                                                 assign_error_mode errmode) {
   return nd::make_callable<unary_assignment_callable>(ndt::callable_type::make(dst_tp, src_tp), errmode);
 }
 
-void nd::detail::check_narg(const ndt::callable_type *af_tp, intptr_t narg)
-{
+void nd::detail::check_narg(const ndt::callable_type *af_tp, intptr_t narg) {
   if (!af_tp->is_pos_variadic() && narg != af_tp->get_npos()) {
     std::stringstream ss;
     ss << "callable expected " << af_tp->get_npos() << " positional arguments, but received " << narg;
@@ -85,8 +87,7 @@ void nd::detail::check_narg(const ndt::callable_type *af_tp, intptr_t narg)
 }
 
 void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i, const ndt::type &actual_tp,
-                           const char *DYND_UNUSED(actual_arrmeta), std::map<std::string, ndt::type> &tp_vars)
-{
+                           const char *DYND_UNUSED(actual_arrmeta), std::map<std::string, ndt::type> &tp_vars) {
   if (af_tp->is_pos_variadic()) {
     return;
   }
@@ -106,8 +107,7 @@ void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i, const nd
 }
 
 nd::array nd::callable::call(size_t args_size, const array *args_values, size_t kwds_size,
-                             const std::pair<const char *, array> *kwds_values) const
-{
+                             const std::pair<const char *, array> *kwds_values) const {
   std::map<std::string, ndt::type> tp_vars;
   const ndt::callable_type *self_tp = get_type();
 
@@ -147,15 +147,13 @@ nd::array nd::callable::call(size_t args_size, const array *args_values, size_t 
     intptr_t j = self_tp->get_kwd_index(kwds_values[i].first);
     if (j == -1) {
       if (detail::is_special_kwd(self_tp, dst, kwds_values[i].first, kwds_values[i].second)) {
-      }
-      else {
+      } else {
         std::stringstream ss;
         ss << "passed an unexpected keyword \"" << kwds_values[i].first << "\" to callable with type "
            << m_ptr->get_type();
         throw std::invalid_argument(ss.str());
       }
-    }
-    else {
+    } else {
       array &value = kwds_as_vector[j];
       if (!value.is_null()) {
         std::stringstream ss;
@@ -227,8 +225,7 @@ nd::array nd::callable::call(size_t args_size, const array *args_values, size_t 
 
 std::map<std::string, nd::callable> &nd::callables() { return detail::get_regfunctions(); }
 
-nd::callable &nd::reg(const std::string &name)
-{
+nd::callable &nd::reg(const std::string &name) {
   std::map<std::string, callable> &registry = detail::get_regfunctions();
 
   auto it = registry.find(name);

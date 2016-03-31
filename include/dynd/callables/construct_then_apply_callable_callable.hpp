@@ -18,16 +18,21 @@ namespace nd {
       template <typename... T>
       construct_then_apply_callable_callable(T &&... names)
           : base_callable(
-                ndt::make_type<typename funcproto_of<func_type, KwdTypes...>::type>(std::forward<T>(names)...))
-      {
-        m_new_style = true;
-      }
+                ndt::make_type<typename funcproto_of<func_type, KwdTypes...>::type>(std::forward<T>(names)...)) {}
+
+    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                             const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                             const array *DYND_UNUSED(kwds),
+                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+      cg.emplace_back(this);
+      return dst_tp;
+    }
+
 
       void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                        const ndt::type *DYND_UNUSED(src_tp), const char *const *src_arrmeta, kernel_request_t kernreq,
-                       intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
+                       intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
         typedef construct_then_apply_callable_kernel<func_type, KwdTypes...> kernel_type;
         ckb->emplace_back<kernel_type>(kernreq, typename kernel_type::args_type(src_arrmeta, kwds),
                                        typename kernel_type::kwds_type(nkwd, kwds));
@@ -35,8 +40,7 @@ namespace nd {
 
       void new_instantiate(call_frame *DYND_UNUSED(frame), kernel_builder &ckb, kernel_request_t kernreq,
                            const char *DYND_UNUSED(dst_arrmeta), const char *const *src_arrmeta, size_t nkwd,
-                           const array *kwds)
-      {
+                           const array *kwds) {
         typedef construct_then_apply_callable_kernel<func_type, KwdTypes...> kernel_type;
         ckb.emplace_back<kernel_type>(kernreq, typename kernel_type::args_type(src_arrmeta, kwds),
                                       typename kernel_type::kwds_type(nkwd, kwds));

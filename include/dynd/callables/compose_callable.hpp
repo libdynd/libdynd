@@ -19,8 +19,14 @@ namespace nd {
 
     public:
       compose_callable(const ndt::type &tp, const callable &first, const callable &second, const ndt::type &buffer_tp)
-          : base_callable(tp), m_first(first), m_second(second), m_buffer_tp(buffer_tp)
-      {
+          : base_callable(tp), m_first(first), m_second(second), m_buffer_tp(buffer_tp) {}
+
+      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                               const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                               const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+        cg.emplace_back(this);
+        return dst_tp;
       }
 
       /**
@@ -30,8 +36,7 @@ namespace nd {
       void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
                        intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
                        kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
-                       const std::map<std::string, ndt::type> &tp_vars)
-      {
+                       const std::map<std::string, ndt::type> &tp_vars) {
         intptr_t ckb_offset = ckb->size();
 
         intptr_t root_ckb_offset = ckb_offset;

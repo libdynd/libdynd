@@ -31,8 +31,7 @@ namespace nd {
         std::shared_ptr<bool> out_of_bounds;
 
         data_type(const ndt::type *src_tp, intptr_t ndim, int *shape, int *offset)
-            : src_tp(src_tp), src_arrmeta(NULL), ndim(ndim), offset(offset), out_of_bounds(std::make_shared<bool>())
-        {
+            : src_tp(src_tp), src_arrmeta(NULL), ndim(ndim), offset(offset), out_of_bounds(std::make_shared<bool>()) {
           this->shape = new intptr_t[ndim];
           for (int i = 0; i < ndim; ++i) {
             this->shape[i] = shape[i];
@@ -49,14 +48,12 @@ namespace nd {
           if (ndim == 1) {
             child_src_arrmeta[0].dim_size = shape[0];
             child_src_arrmeta[0].stride = sizeof(int);
-          }
-          else if (ndim == 2) {
+          } else if (ndim == 2) {
             child_src_arrmeta[0].dim_size = shape[0];
             child_src_arrmeta[0].stride = 4 * sizeof(int);
             child_src_arrmeta[1].dim_size = shape[1];
             child_src_arrmeta[1].stride = sizeof(int);
-          }
-          else if (ndim == 3) {
+          } else if (ndim == 3) {
             child_src_arrmeta[0].dim_size = shape[0];
             child_src_arrmeta[0].stride = 4 * 4 * sizeof(int);
             child_src_arrmeta[1].dim_size = shape[1];
@@ -66,21 +63,25 @@ namespace nd {
           }
         }
 
-        ~data_type()
-        {
+        ~data_type() {
           //          delete[] child_src_arrmeta;
         }
       };
 
       neighborhood_callable(const ndt::type &tp, const callable &child, const callable &boundary_child)
-          : base_callable(tp), m_child(child), m_boundary_child(boundary_child)
-      {
+          : base_callable(tp), m_child(child), m_boundary_child(boundary_child) {}
+
+      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                               const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                               const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+        cg.emplace_back(this);
+        return dst_tp;
       }
 
       char *data_init(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       intptr_t DYND_UNUSED(nkwd), const array *kwds,
-                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
+                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
         char *data = reinterpret_cast<char *>(
             new data_type(src_tp, kwds[0].get_dim_size(), reinterpret_cast<int *>(kwds[0].data()),
                           kwds[1].is_na() ? NULL : reinterpret_cast<int *>(kwds[1].data())));
@@ -94,8 +95,7 @@ namespace nd {
 
       void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                             const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
+                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
         // swap in the input dimension values for the Fixed**N
         intptr_t ndim = src_tp[0].get_ndim();
         dimvector shape(ndim);
@@ -105,8 +105,7 @@ namespace nd {
 
       void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                        const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
-      {
+                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         intptr_t neighborhood_offset = ckb->size();
         ckb->emplace_back<neighborhood_kernel<N>>(
             kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(dst_arrmeta)->stride,
