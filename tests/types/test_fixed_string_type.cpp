@@ -120,3 +120,15 @@ TEST(FixedstringDType, CanonicalDType)
   EXPECT_EQ((ndt::fixed_string_type::make(21, string_encoding_utf_32)),
             (ndt::fixed_string_type::make(21, string_encoding_utf_32).get_canonical_type()));
 }
+
+TEST(FixedstringDType, Repr)
+{
+  std::vector<const char *> roundtrip {
+    "fixed_string[10, 'utf32']",
+    "fixed_string[10]"
+  };
+
+  for (auto s : roundtrip) {
+    EXPECT_TYPE_REPR_EQ(s, ndt::type(s));
+  }
+}
