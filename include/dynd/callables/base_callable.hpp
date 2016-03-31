@@ -317,7 +317,7 @@ namespace nd {
       reserve(m_size);
     }
 
-    void emplace_back(base_callable *callee);
+    DYND_API void emplace_back(base_callable *callee);
 
     base_callable::call_frame *back() { return get_at<base_callable::call_frame>(m_back_offset); }
 
