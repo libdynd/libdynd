@@ -18,7 +18,13 @@ namespace nd {
   public:
     default_instantiable_callable(const ndt::type &tp) : base_callable(tp) {}
 
-    void resolve(call_graph &cg) { cg.emplace_back(this); }
+    const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                             const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                             const array *DYND_UNUSED(kwds),
+                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+      cg.emplace_back(this);
+      return dst_tp;
+    }
 
     void new_instantiate(call_frame *DYND_UNUSED(frame), kernel_builder &ckb, kernel_request_t kernreq,
                          const char *DYND_UNUSED(dst_arrmeta), const char *const *DYND_UNUSED(src_arrmeta),

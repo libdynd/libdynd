@@ -37,7 +37,13 @@ namespace nd {
 
       callable &get_child(base_callable *parent);
 
-      void resolve(call_graph &cg) { cg.emplace_back(this); }
+      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                               const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                               const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+        cg.emplace_back(this);
+        return dst_tp;
+      }
 
       void new_resolve(base_callable *parent, call_graph &cg, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                        size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
@@ -199,7 +205,13 @@ namespace nd {
     template <size_t N>
     class elwise_callable<fixed_dim_id, var_dim_id, N> {
     public:
-      void resolve(call_graph &cg) { cg.emplace_back(this); }
+      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                               const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                               const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+        cg.emplace_back(this);
+        return dst_tp;
+      }
 
       static void elwise_instantiate(callable &self, callable &child, char *data, kernel_builder *ckb,
                                      const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
@@ -289,7 +301,13 @@ namespace nd {
         std::array<bool, N> is_src_var;
       };
 
-      void resolve(call_graph &cg) { cg.emplace_back(this); }
+      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                               const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                               const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+        cg.emplace_back(this);
+        return dst_tp;
+      }
 
       elwise_callable(const callable &child) : base_callable(ndt::type()), m_child(child) {}
 

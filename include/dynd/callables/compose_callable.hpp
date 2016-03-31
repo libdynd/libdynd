@@ -21,7 +21,13 @@ namespace nd {
       compose_callable(const ndt::type &tp, const callable &first, const callable &second, const ndt::type &buffer_tp)
           : base_callable(tp), m_first(first), m_second(second), m_buffer_tp(buffer_tp) {}
 
-      void resolve(call_graph &cg) { cg.emplace_back(this); }
+      const ndt::type &resolve(call_graph &cg, const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                               const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                               const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+        cg.emplace_back(this);
+        return dst_tp;
+      }
 
       /**
        * Instantiate the chaining of callables ``first`` and ``second``, using ``buffer_tp`` as the intermediate type,
