@@ -45,15 +45,13 @@ namespace nd {
         callable &child = get_child(caller);
         const ndt::callable_type *child_tp = child.get_type();
 
+        // need to get the maximum ndim of the src_tp
+
         intptr_t max_ndim = 0;
-        size_t j = 0;
         for (size_t i = 0; i < N; ++i) {
           intptr_t ndim = src_tp[i].get_ndim();
-          if (ndim >= max_ndim) {
+          if (ndim > max_ndim) {
             max_ndim = ndim;
-            if (src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size() != 1) {
-              j = i;
-            }
           }
         }
 
@@ -61,7 +59,12 @@ namespace nd {
         intptr_t dst_size;
         ndt::type dst_element_tp;
         if (dst_variadic) {
-          dst_size = src_tp[j].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+          dst_size = 1;
+          for (size_t i = 0; i < N && dst_size == 1; ++i) {
+            if (src_tp[i].get_ndim() == max_ndim) {
+              dst_size = src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+            }
+          }
           dst_element_tp = dst_tp;
         } else {
           dst_size = dst_tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
@@ -401,7 +404,8 @@ namespace nd {
                   child_src_tp[i] = src_tp[i];
                   finished &= src_ndim == 0;
                 }
-                else if (src_tp[i].get_id() == fixed_dim_id) { // src_tp[i].get_as_strided(src_arrmeta[i], &src_size[i],
+                else if (src_tp[i].get_id() == fixed_dim_id) { // src_tp[i].get_as_strided(src_arrmeta[i],
+         &src_size[i],
                                                                // &src_stride[i], &child_src_tp[i],
                   //                      &child_src_arrmeta[i])) {
                   data.broadcast_src[i] = false;
@@ -436,7 +440,8 @@ namespace nd {
                 callable parent = stack.parent();
                 stack.push_back(parent, child_dst_tp, stack.res_metadata_offset() +
          sizeof(ndt::var_dim_type::metadata_type),
-                                stack.narg(), child_src_tp.data(), src_arrmeta_offsets.data(), kernel_request_strided);
+                                stack.narg(), child_src_tp.data(), src_arrmeta_offsets.data(),
+         kernel_request_strided);
                 parent->new_resolve(g, stack, nkwd, kwds, tp_vars);
               }
               else {
@@ -444,7 +449,8 @@ namespace nd {
 
                 stack.push_back(m_child, child_dst_tp, stack.res_metadata_offset() +
          sizeof(ndt::var_dim_type::metadata_type),
-                                stack.narg(), child_src_tp.data(), src_arrmeta_offsets.data(), kernel_request_strided);
+                                stack.narg(), child_src_tp.data(), src_arrmeta_offsets.data(),
+         kernel_request_strided);
 
                 m_child->new_resolve(g, stack, nkwd, kwds, tp_vars);
                 //          return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc,
