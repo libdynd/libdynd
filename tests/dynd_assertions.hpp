@@ -165,6 +165,21 @@ inline ::testing::AssertionResult MatchNdtTypes(const char *expr1, const char *e
   return MatchNdtTypes(expr1, expr2, dynd::ndt::type(pattern), dynd::ndt::type(candidate));
 }
 
+inline ::testing::AssertionResult CompareNdtTypeToString(const char *DYND_UNUSED(expr1), const char *DYND_UNUSED(expr2),
+                                                         const char *repr, const dynd::ndt::type &t)
+{
+  std::stringstream ss;
+
+  ss << t;
+  if (repr == ss.str()) {
+    return ::testing::AssertionSuccess();
+  }
+  else {
+    return ::testing::AssertionFailure() << "expected repr: " << "\"" << repr << "\" "
+                                         << "actual repr: " << "\"" << t << "\"";
+  }
+}
+
 inline ::testing::AssertionResult ExpectAllTrue(const char *DYND_UNUSED(expr1), const dynd::nd::array actual)
 {
   if (actual.as<bool>()) {
@@ -216,6 +231,13 @@ inline ::testing::AssertionResult ExpectAllFalse(const char *DYND_UNUSED(expr1),
  * EXPECT_TYPE_MATCH("Fixed * T", "10 * int32");
  */
 #define EXPECT_TYPE_MATCH(pattern, candidate) EXPECT_PRED_FORMAT2(MatchNdtTypes, pattern, candidate)
+
+/**
+ * Macro to compare a type's string representation to the expected string.
+ *
+ * EXPECT_TYPE_REPR_EQ("int32", ndt::type("int32"));
+ */
+#define EXPECT_TYPE_REPR_EQ(expected, actual) EXPECT_PRED_FORMAT2(CompareNdtTypeToString, expected, actual)
 
 inline float rel_error(float expected, float actual)
 {

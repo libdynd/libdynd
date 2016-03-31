@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 #include "inc_gtest.hpp"
+#include "../dynd_assertions.hpp"
 
 #include <dynd/types/fixed_bytes_type.hpp>
 
@@ -44,4 +45,16 @@ TEST(FixedBytesDType, Create)
   EXPECT_THROW(ndt::make_fixed_bytes(10, 5), runtime_error);
   // Alignment must divide size
   EXPECT_THROW(ndt::make_fixed_bytes(9, 4), runtime_error);
+}
+
+TEST(FixedBytesDType, Repr)
+{
+  std::vector<const char *> roundtrip {
+    "fixed_bytes[1600, align=8]",
+    "fixed_bytes[10]"
+  };
+
+  for (auto s : roundtrip) {
+    EXPECT_TYPE_REPR_EQ(s, ndt::type(s));
+  }
 }

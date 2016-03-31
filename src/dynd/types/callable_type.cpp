@@ -60,6 +60,8 @@ void ndt::callable_type::print_type(std::ostream &o) const
 {
   intptr_t npos = get_npos();
   intptr_t nkwd = get_nkwd();
+  const bool pos_variadic = m_pos_tuple.extended<tuple_type>()->is_variadic();
+  const bool kwd_variadic = m_kwd_struct.extended<struct_type>()->is_variadic();
 
   o << "(";
 
@@ -70,7 +72,7 @@ void ndt::callable_type::print_type(std::ostream &o) const
 
     o << get_pos_type(i);
   }
-  if (m_pos_tuple.extended<tuple_type>()->is_variadic()) {
+  if (pos_variadic) {
     if (npos > 0) {
       o << ", ...";
     }
@@ -79,7 +81,7 @@ void ndt::callable_type::print_type(std::ostream &o) const
     }
   }
   for (intptr_t i = 0; i < nkwd; ++i) {
-    if (i > 0 || npos > 0) {
+    if (i > 0 || npos > 0 || pos_variadic) {
       o << ", ";
     }
 
@@ -94,8 +96,8 @@ void ndt::callable_type::print_type(std::ostream &o) const
     }
     o << ": " << get_kwd_type(i);
   }
-  if (nkwd > 0 && m_kwd_struct.extended<struct_type>()->is_variadic()) {
-    o << "...";
+  if (nkwd > 0 && kwd_variadic) {
+    o << ", ...";
   }
 
   o << ") -> " << m_return_type;

@@ -26,6 +26,7 @@ set(tests_SRC
     types/test_bytes_type.cpp
 #    types/test_categorical_kind_type.cpp
 #    types/test_categorical_type.cpp
+    types/test_callable_type.cpp
     types/test_complex_type.cpp
     types/test_char_type.cpp
     types/test_cuda_host_type.cpp
