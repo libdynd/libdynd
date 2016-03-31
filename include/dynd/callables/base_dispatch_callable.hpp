@@ -16,18 +16,12 @@ namespace nd {
   public:
     base_dispatch_callable(const ndt::type &tp) : base_callable(tp) { m_abstract = true; }
 
-    ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd,
-                             const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-      std::cout << "base_dispatch_callable::resolve" << std::endl;
-      std::cout << m_tp << std::endl;
-      std::cout << "dst_tp = " << dst_tp << std::endl;
-      for (size_t i = 0; i < nsrc; ++i) {
-        std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
-      }
-
+    ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
+                      const ndt::type *src_tp, size_t nkwd, const array *kwds,
+                      const std::map<std::string, ndt::type> &tp_vars) {
       const callable &child = specialize(dst_tp, nsrc, src_tp);
-      return child->resolve(cg, dst_tp.is_symbolic() ? child.get_type()->get_return_type() : dst_tp, nsrc, src_tp, nkwd,
-                            kwds, tp_vars);
+      return child->resolve(this, cg, dst_tp.is_symbolic() ? child.get_type()->get_return_type() : dst_tp, nsrc, src_tp,
+                            nkwd, kwds, tp_vars);
     }
 
     void new_resolve(base_callable *DYND_UNUSED(parent), call_graph &g, ndt::type &dst_tp, intptr_t nsrc,

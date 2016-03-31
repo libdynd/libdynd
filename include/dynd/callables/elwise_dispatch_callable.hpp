@@ -25,8 +25,9 @@ namespace nd {
         m_abstract = true;
       }
 
-      ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd,
-                        const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+      ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
+                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
+                        const std::map<std::string, ndt::type> &tp_vars) {
         const ndt::callable_type *child_tp = m_child.get_type();
 
         bool all_same = true;
@@ -38,7 +39,7 @@ namespace nd {
         }
 
         if (all_same) {
-          return m_child->resolve(cg, dst_tp.is_symbolic() ? m_child.get_type()->get_return_type() : dst_tp, nsrc,
+          return m_child->resolve(this, cg, dst_tp.is_symbolic() ? m_child.get_type()->get_return_type() : dst_tp, nsrc,
                                   src_tp, nkwd, kwds, tp_vars);
         }
 
@@ -64,8 +65,7 @@ namespace nd {
 
         if (src_all_strided) {
           static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, N>>();
-          return dynamic_cast<elwise_callable<fixed_dim_id, fixed_dim_id, N> *>(f.get())
-              ->resolve2(this, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          return f->resolve(this, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else if (src_all_strided_or_var) {
           throw std::runtime_error("fixed_dim_id, var_dim_id");
         }

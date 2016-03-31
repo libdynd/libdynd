@@ -82,8 +82,9 @@ namespace nd {
 
     size_t get_frame_size() { return m_frame_size; }
 
-    virtual ndt::type resolve(call_graph &cg, const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp,
-                              size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) = 0;
+    virtual ndt::type resolve(base_callable *caller, call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
+                              const ndt::type *src_tp, size_t nkwd, const array *kwds,
+                              const std::map<std::string, ndt::type> &tp_vars) = 0;
 
     virtual void new_resolve(base_callable *DYND_UNUSED(parent), call_graph &DYND_UNUSED(g), ndt::type &dst_tp,
                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
