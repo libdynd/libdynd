@@ -16,6 +16,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/index.hpp>
 #include <dynd/array.hpp>
+#include <dynd/functional.hpp>
 
 #include <dynd/arithmetic.hpp>
 
@@ -33,8 +34,7 @@ TEST(Callable, SingleStridedConstructor)
 }
 */
 
-TEST(Callable, Construction)
-{
+TEST(Callable, Construction) {
   nd::callable f0([](int x, double y) { return 2.0 * x + y; });
   EXPECT_ARRAY_EQ(4.5, f0(1, 2.5));
 
@@ -48,8 +48,7 @@ TEST(Callable, Construction)
   EXPECT_ARRAY_EQ(-4, f3({3}, {{"y", 7}}).as<int>());
 }
 
-TEST(Callable, FromKernel)
-{
+TEST(Callable, FromKernel) {
   struct kernel : nd::base_strided_kernel<kernel, 1> {
     void single(char *res, char *const *args) { *reinterpret_cast<int *>(res) = *reinterpret_cast<int *>(args[0]) + 7; }
   };
@@ -59,8 +58,7 @@ TEST(Callable, FromKernel)
   EXPECT_ARRAY_EQ(9, f(2));
 }
 
-TEST(Callable, CallOperator)
-{
+TEST(Callable, CallOperator) {
   nd::callable f([](int x, double y) { return 2.0 * x + y; });
   // Calling with positional arguments
   EXPECT_EQ(4.5, f(1, 2.5).as<double>());
@@ -95,8 +93,7 @@ TEST(Callable, CallOperator)
   EXPECT_THROW(f({}, {{"y", 3.5}}), invalid_argument);
 }
 
-TEST(Callable, DynamicCall)
-{
+TEST(Callable, DynamicCall) {
   nd::array args[3] = {7, 2.5, 5};
   pair<const char *, nd::array> kwds[3] = {{"x", args[0]}, {"y", args[1]}, {"z", args[2]}};
 
@@ -113,8 +110,7 @@ TEST(Callable, DynamicCall)
   EXPECT_EQ(26.5, af.call(0, nullptr, 3, kwds).as<double>());
 }
 
-TEST(Callable, DecomposedDynamicCall)
-{
+TEST(Callable, DecomposedDynamicCall) {
   nd::callable af;
 
   ndt::type ret_tp;
@@ -144,8 +140,7 @@ TEST(Callable, DecomposedDynamicCall)
   //  EXPECT_EQ(26.5, af->call(ret_tp, 0, NULL, NULL, NULL, 3, values, map<string, ndt::type>()).as<double>());
 }
 
-TEST(Callable, KeywordParsing)
-{
+TEST(Callable, KeywordParsing) {
   nd::callable af0 = nd::functional::apply([](int x, int y) { return x + y; }, "y");
   EXPECT_EQ(5, af0({1}, {{"y", 4}}).as<int>());
   EXPECT_THROW(af0({1}, {{"z", 4}}).as<int>(), std::invalid_argument);
@@ -154,8 +149,7 @@ TEST(Callable, KeywordParsing)
   EXPECT_THROW(af0({1}, {{"y", 4}, {"y", 2.5}}).as<int>(), std::invalid_argument);
 }
 
-TEST(Callable, Assignment_CallInterface)
-{
+TEST(Callable, Assignment_CallInterface) {
   // Test with the unary operation prototype
   nd::callable af = nd::assign.specialize(ndt::make_type<int>(), {ndt::make_type<ndt::string_type>()});
 
