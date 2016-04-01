@@ -12,6 +12,7 @@
 #include <dynd/callables/outer_callable.hpp>
 #include <dynd/callables/neighborhood_callable.hpp>
 #include <dynd/callables/reduction_callable.hpp>
+#include <dynd/types/ellipsis_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;

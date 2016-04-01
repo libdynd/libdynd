@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/callables/base_callable.hpp>
+#include <dynd/callables/base_reduction_callable.hpp>
 #include <dynd/kernels/reduction_kernel.hpp>
 
 namespace dynd {
@@ -26,35 +27,37 @@ namespace nd {
 
       reduction_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
-      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
-                        const ndt::type &DYND_UNUSED(dst_tp), size_t nsrc, const ndt::type *src_tp, size_t nkwd,
-                        const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-        /*
-                const array &axes = kwds[0];
-                int naxis;
-                if (axes.is_na()) {
-                  naxis = src_tp[0].get_ndim() - m_child.get_type()->get_return_type().get_ndim();
-                }
+      typedef typename base_reduction_callable::data_type new_data_type;
 
-                bool keepdims;
-                if (kwds[2].is_na()) {
-                  keepdims = false;
-                } else {
-                  keepdims = kwds[2].as<bool>();
-                }
-        */
+      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
+                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
+                        const std::map<std::string, ndt::type> &tp_vars) {
+        new_data_type new_data;
+        if (data == nullptr) {
+          new_data.child = m_child;
+          if (kwds[0].is_na()) {
+            new_data.naxis = src_tp[0].get_ndim() - m_child.get_type()->get_return_type().get_ndim();
+            new_data.axes = NULL;
+          } else {
+            new_data.naxis = kwds[0].get_dim_size();
+            new_data.axes = reinterpret_cast<const int *>(kwds[0].cdata());
+          }
 
-        const ndt::type &child_ret_tp = m_child.get_ret_type();
-        //        std::cout << child_ret_tp << std::endl;
+          if (kwds[2].is_na()) {
+            new_data.keepdims = false;
+          } else {
+            new_data.keepdims = kwds[2].as<bool>();
+          }
 
-        intptr_t ndim = src_tp[0].get_ndim() - child_ret_tp.get_ndim();
-        ndt::type child_arg_tp[1] = {src_tp[0]};
-        for (int i = 0; i < ndim; ++i) {
-          child_arg_tp[0] = child_arg_tp[0].extended<ndt::base_dim_type>()->get_element_type();
+          intptr_t ndim = src_tp[0].get_ndim() - m_child.get_ret_type().get_ndim();
+          new_data.ndim = ndim;
+          new_data.axis = 0;
+
+          data = reinterpret_cast<char *>(&new_data);
         }
 
-        ndt::type ret_tp = m_child->resolve(this, nullptr, cg, child_ret_tp, nsrc, child_arg_tp, nkwd - 3, kwds + 3, tp_vars);
-        return ret_tp;
+        static callable f = make_callable<base_reduction_callable>();
+        return f->resolve(caller, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
       }
 
       char *data_init(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,

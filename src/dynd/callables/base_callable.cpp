@@ -66,7 +66,6 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
       return dst;
     }
   */
-
   call_graph g;
   ndt::type resolved_dst_tp = resolve(nullptr, nullptr, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 

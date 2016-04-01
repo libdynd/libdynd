@@ -7,6 +7,7 @@
 
 #include <dynd/callables/base_callable.hpp>
 #include <dynd/callables/elwise_callable.hpp>
+#include <dynd/types/dim_fragment_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -187,7 +188,7 @@ namespace nd {
           break;
         case var_dim_id:
           if (src_all_strided_or_var) {
-            callable f = make_callable<elwise_callable<var_dim_id, fixed_dim_id, N>>(m_child);
+            callable f;// = make_callable<elwise_callable<var_dim_id, fixed_dim_id, N>>(m_child);
             if (!f->is_abstract()) {
               g.emplace_back(f.get());
             }
