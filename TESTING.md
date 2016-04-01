@@ -2,7 +2,7 @@ Running C++ Tests
 =================
 
 The project in the `tests` subfolder contains a testsuite
-using google test. To run it, simply execute the `test_dynd`
+using google test. To run it, simply execute the `test_libdynd`
 executable. Here's how that looks on Windows:
 
 
@@ -33,7 +33,7 @@ If you want to see what options there are for running tests,
 run `test_dynd --help`. One useful ability is to filter tests
 with a white or black list.
 
-    D:\Develop\dynd\build\tests\RelWithDebInfo>test_dynd.exe --gtest_filter=DType.*
+    D:\Develop\dynd\build\tests\RelWithDebInfo>test_libdynd.exe --gtest_filter=DType.*
     Running main() from gtest_main.cc
     Note: Google Test filter = DType.*
     [==========] Running 1 test from 1 test case.
