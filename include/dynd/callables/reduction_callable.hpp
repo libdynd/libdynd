@@ -156,8 +156,9 @@ namespace nd {
           // f(Ret, Arg0_0)
           // f(Ret, Arg0_1)
           if (reinterpret_cast<data_type *>(data)->identity.is_null()) {
-            make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
-                                   &eval::default_eval_context);
+            nd::array error_mode = eval::default_eval_context.errmode;
+            nd::assign->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta, kernreq, 1,
+                                    &error_mode, std::map<std::string, ndt::type>());
             return;
           }
 

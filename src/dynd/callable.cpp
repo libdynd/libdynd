@@ -40,9 +40,9 @@ public:
                    const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                    intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-    eval::eval_context ectx_tmp;
-    ectx_tmp.errmode = errmode;
-    make_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, &ectx_tmp);
+    nd::array error_mode = errmode;
+    nd::assign->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta, kernreq, 1, &error_mode,
+                            std::map<std::string, ndt::type>());
   }
 };
 

@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
+#include "../dynd_assertions.hpp"
+
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/assignment.hpp>
@@ -16,8 +18,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(FixedDimType, Create)
-{
+TEST(FixedDimType, Create) {
   ndt::type d;
   const ndt::fixed_dim_type *fad;
 
@@ -54,8 +55,7 @@ TEST(FixedDimType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(FixedDimType, Basic)
-{
+TEST(FixedDimType, Basic) {
   nd::array a;
   float vals[3] = {1.5f, 2.5f, -1.5f};
 
@@ -77,8 +77,7 @@ TEST(FixedDimType, Basic)
   EXPECT_THROW(a(3), index_out_of_bounds);
 }
 
-TEST(FixedDimType, SimpleIndex)
-{
+TEST(FixedDimType, SimpleIndex) {
   nd::array a = parse_json("2 * 3 * int16", "[[1, 2, 3], [4, 5, 6]]");
   ASSERT_EQ(ndt::make_fixed_dim(2, ndt::make_fixed_dim(3, ndt::make_type<int16_t>())), a.get_type());
 
@@ -100,8 +99,7 @@ TEST(FixedDimType, SimpleIndex)
   EXPECT_THROW(a(-3), index_out_of_bounds);
 }
 
-TEST(FixedDimType, AssignKernel_ScalarToFixed)
-{
+TEST(FixedDimType, AssignKernel_ScalarToFixed) {
   nd::array a, b;
   nd::kernel_builder k;
 
@@ -110,18 +108,10 @@ TEST(FixedDimType, AssignKernel_ScalarToFixed)
   a.vals() = 0;
   b = 9.0;
   EXPECT_EQ(fixed_dim_id, a.get_type().get_id());
-  make_assignment_kernel(&k, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
-                         kernel_request_single, &eval::default_eval_context);
-  kernel_single_t fn = k.get()->get_function<kernel_single_t>();
-  char *src = const_cast<char *>(b.cdata());
-  fn(k.get(), a.data(), &src);
-  EXPECT_EQ(9, a(0).as<int>());
-  EXPECT_EQ(9, a(1).as<int>());
-  EXPECT_EQ(9, a(2).as<int>());
+  EXPECT_ARRAY_EQ(nd::array({9, 9, 9}), a.assign(b));
 }
 
-TEST(FixedDimType, AssignKernel_FixedToFixed)
-{
+TEST(FixedDimType, AssignKernel_FixedToFixed) {
   nd::array a, b;
   nd::kernel_builder k;
 
@@ -131,18 +121,10 @@ TEST(FixedDimType, AssignKernel_FixedToFixed)
   b = parse_json("3 * int32", "[3, 5, 7]");
   EXPECT_EQ(fixed_dim_id, a.get_type().get_id());
   EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
-  make_assignment_kernel(&k, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
-                         kernel_request_single, &eval::default_eval_context);
-  kernel_single_t fn = k.get()->get_function<kernel_single_t>();
-  char *src = const_cast<char *>(b.cdata());
-  fn(k.get(), a.data(), &src);
-  EXPECT_EQ(3, a(0).as<int>());
-  EXPECT_EQ(5, a(1).as<int>());
-  EXPECT_EQ(7, a(2).as<int>());
+  EXPECT_ARRAY_EQ(nd::array({3, 5, 7}), a.assign(b));
 }
 
-TEST(FixedDimType, AssignKernel_FixedToScalarError)
-{
+TEST(FixedDimType, AssignKernel_FixedToScalarError) {
   nd::array a, b;
   nd::kernel_builder k;
 
@@ -150,13 +132,10 @@ TEST(FixedDimType, AssignKernel_FixedToScalarError)
   a = 9.0;
   b = parse_json("3 * int32", "[3, 5, 7]");
   EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
-  EXPECT_THROW(make_assignment_kernel(&k, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
-                                      kernel_request_single, &eval::default_eval_context),
-               broadcast_error);
+  EXPECT_THROW(a.assign(b), runtime_error);
 }
 
-TEST(FixedDimType, IsTypeSubarray)
-{
+TEST(FixedDimType, IsTypeSubarray) {
   EXPECT_TRUE(ndt::type("3 * int32").is_type_subarray(ndt::type("3 * int32")));
   EXPECT_TRUE(ndt::type("10 * int32").is_type_subarray(ndt::type("10 * int32")));
   EXPECT_TRUE(ndt::type("3 * 10 * int32").is_type_subarray(ndt::type("10 * int32")));
@@ -170,8 +149,7 @@ TEST(FixedDimType, IsTypeSubarray)
   EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("3 * int32")));
 }
 
-TEST(FixedDimType, FromCArray)
-{
+TEST(FixedDimType, FromCArray) {
   EXPECT_EQ(ndt::make_type<int>(), ndt::type("int32"));
   EXPECT_EQ(ndt::make_type<int[1]>(), ndt::type("1 * int32"));
   EXPECT_EQ(ndt::make_type<int[2]>(), ndt::type("2 * int32"));

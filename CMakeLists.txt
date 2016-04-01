@@ -276,7 +276,6 @@ set(libdynd_SRC
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/fft_kernel.cpp
     src/dynd/kernels/kernel_builder.cpp
-    src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
     include/dynd/kernels/apply.hpp
     include/dynd/kernels/arithmetic.hpp
@@ -305,7 +304,6 @@ set(libdynd_SRC
     include/dynd/kernels/string_find_kernel.hpp
     include/dynd/kernels/string_rfind_kernel.hpp
     include/dynd/kernels/string_replace_kernel.hpp
-    include/dynd/kernels/struct_assignment_kernels.hpp
     include/dynd/kernels/take_kernel.hpp
     include/dynd/kernels/tuple_assignment_kernels.hpp
     include/dynd/kernels/uniform_kernel.hpp

@@ -7,6 +7,7 @@
 
 #include <dynd/callables/base_callable.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/functional.hpp>
 
 namespace dynd {
 namespace nd {
@@ -688,21 +689,41 @@ namespace nd {
     }
 
     void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                     intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      if (dst_tp.extended() == src_tp[0].extended()) {
-        make_tuple_identical_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_arrmeta[0], kernreq);
-      } else if (src_tp[0].get_id() == tuple_id || src_tp[0].get_id() == struct_id) {
-        make_tuple_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq);
-      } else if (src_tp[0].is_builtin()) {
-        make_broadcast_to_tuple_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq);
-      } else {
-        std::stringstream ss;
-        ss << "Cannot assign from " << src_tp[0] << " to " << dst_tp;
-        throw dynd::type_error(ss.str());
-      }
+                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
+                     const std::map<std::string, ndt::type> &tp_vars) {
+      auto f = functional::map(copy);
+      f->instantiate(nullptr, nullptr, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
+                     tp_vars);
+      /*
+            auto dst_sd = dst_tp.extended<ndt::tuple_type>();
+            auto src_sd = src_tp[0].extended<ndt::tuple_type>();
+            intptr_t field_count = dst_sd->get_field_count();
+
+            if (field_count != src_sd->get_field_count()) {
+              std::stringstream ss;
+              ss << "cannot assign dynd " << src_tp[0] << " to " << dst_tp
+                 << " because they have different numbers of fields";
+              throw type_error(ss.str());
+            }
+
+            const std::vector<uintptr_t> &src_arrmeta_offsets = src_sd->get_arrmeta_offsets();
+            shortvector<const char *> src_fields_arrmeta(field_count);
+            for (intptr_t i = 0; i != field_count; ++i) {
+              src_fields_arrmeta[i] = src_arrmeta[0] + src_arrmeta_offsets[i];
+            }
+
+            const std::vector<uintptr_t> &dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets();
+            shortvector<const char *> dst_fields_arrmeta(field_count);
+            for (intptr_t i = 0; i != field_count; ++i) {
+              dst_fields_arrmeta[i] = dst_arrmeta + dst_arrmeta_offsets[i];
+            }
+
+            make_tuple_unary_op_ckernel(nd::copy.get(), nd::copy.get_type(), ckb, field_count,
+                                        dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types().data(),
+                                        dst_fields_arrmeta.get(), src_sd->get_data_offsets(src_arrmeta[0]),
+                                        src_sd->get_field_types().data(), src_fields_arrmeta.get(), kernreq);
+      */
     }
   };
 
@@ -727,20 +748,48 @@ namespace nd {
                      const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                      intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      if (dst_tp.extended() == src_tp[0].extended()) {
-        make_tuple_identical_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_arrmeta[0], kernreq);
-        return;
-      } else if (src_tp[0].get_id() == struct_id) {
-        make_struct_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq);
-        return;
-      } else if (src_tp[0].is_builtin()) {
-        make_broadcast_to_tuple_assignment_kernel(ckb, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq);
-        return;
+      const ndt::struct_type *dst_sd = dst_tp.extended<ndt::struct_type>();
+      const ndt::struct_type *src_sd = src_tp[0].extended<ndt::struct_type>();
+      intptr_t field_count = dst_sd->get_field_count();
+
+      if (field_count != src_sd->get_field_count()) {
+        std::stringstream ss;
+        ss << "cannot assign dynd struct " << src_tp[0] << " to " << dst_tp;
+        ss << " because they have different numbers of fields";
+        throw std::runtime_error(ss.str());
       }
 
-      std::stringstream ss;
-      ss << "Cannot assign from " << src_tp[0] << " to " << dst_tp;
-      throw dynd::type_error(ss.str());
+      const std::vector<ndt::type> &src_fields_tp_orig = src_sd->get_field_types();
+      const std::vector<uintptr_t> &src_arrmeta_offsets_orig = src_sd->get_arrmeta_offsets();
+      const uintptr_t *src_data_offsets_orig = src_sd->get_data_offsets(src_arrmeta[0]);
+      std::vector<ndt::type> src_fields_tp(field_count);
+      shortvector<uintptr_t> src_data_offsets(field_count);
+      shortvector<const char *> src_fields_arrmeta(field_count);
+
+      // Match up the fields
+      for (intptr_t i = 0; i != field_count; ++i) {
+        const std::string &dst_name = dst_sd->get_field_name(i);
+        intptr_t src_i = src_sd->get_field_index(dst_name);
+        if (src_i < 0) {
+          std::stringstream ss;
+          ss << "cannot assign dynd struct " << src_tp[0] << " to " << dst_tp;
+          ss << " because they have different field names";
+          throw std::runtime_error(ss.str());
+        }
+        src_fields_tp[i] = src_fields_tp_orig[src_i];
+        src_data_offsets[i] = src_data_offsets_orig[src_i];
+        src_fields_arrmeta[i] = src_arrmeta[0] + src_arrmeta_offsets_orig[src_i];
+      }
+
+      const std::vector<uintptr_t> &dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets();
+      shortvector<const char *> dst_fields_arrmeta(field_count);
+      for (intptr_t i = 0; i != field_count; ++i) {
+        dst_fields_arrmeta[i] = dst_arrmeta + dst_arrmeta_offsets[i];
+      }
+      make_tuple_unary_op_ckernel(nd::copy.get(), nd::copy.get_type(), ckb, field_count,
+                                  dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types().data(),
+                                  dst_fields_arrmeta.get(), src_data_offsets.get(), &src_fields_tp[0],
+                                  src_fields_arrmeta.get(), kernreq);
     }
   };
 
