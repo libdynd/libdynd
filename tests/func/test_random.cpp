@@ -27,8 +27,7 @@ public:
 
 TYPED_TEST_CASE_P(Random);
 
-TYPED_TEST_P(Random, Uniform)
-{
+TYPED_TEST_P(Random, Uniform) {
   typename TestFixture::DType a = 0;
   typename TestFixture::DType b = 10;
   intptr_t size = 10000;

@@ -14,8 +14,8 @@ nd::base_callable::~base_callable() {}
 nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                                   const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
                                   const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-  //  call_graph g;
-  // resolve(g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+  call_graph g;
+  ndt::type resolved_dst_tp = resolve(nullptr, nullptr, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Allocate, then initialize, the data
   char *data = data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
@@ -25,8 +25,12 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
     resolve_dst_type(data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
   }
 
+  if (resolved_dst_tp != dst_tp) {
+    throw std::runtime_error("different types");
+  }
+
   // Allocate the destination array
-  array dst = alloc(&dst_tp);
+  array dst = alloc(&resolved_dst_tp);
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
@@ -75,17 +79,11 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   }
 
   if (resolved_dst_tp != dst_tp) {
-    //    for (int i = 0; i < nsrc; ++i) {
-    //    std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
-    //}
-
-    //    std::cout << "resolved_dst_tp = " << resolved_dst_tp << std::endl;
-    //  std::cout << "expected dst_tp = " << dst_tp << std::endl;
     throw std::runtime_error("different types");
   }
 
   // Allocate the destination array
-  array dst = empty(dst_tp);
+  array dst = empty(resolved_dst_tp);
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
@@ -99,8 +97,8 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
 void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
                              const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data,
                              intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-  // call_graph g;
-  //  resolve(g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+  call_graph g;
+  resolve(nullptr, nullptr, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   char *data = data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
@@ -114,8 +112,8 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, c
 void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, array *dst, intptr_t nsrc,
                              const ndt::type *src_tp, const char *const *src_arrmeta, const array *src, intptr_t nkwd,
                              const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-  //  call_graph g;
-  // resolve(g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+  call_graph g;
+  resolve(nullptr, nullptr, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   char *data = data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
@@ -130,7 +128,7 @@ nd::call_graph::call_graph(base_callable *callee)
     : m_data(m_static_data), m_capacity(sizeof(m_static_data)), m_size(0) {
 
   size_t offset = m_size;
-  m_size += aligned_size(callee->get_frame_size());
+  m_size += aligned_size(sizeof(base_callable::call_frame));
   reserve(m_size);
   new (this->get_at<base_callable::call_frame>(offset)) base_callable::call_frame(callee);
 
@@ -144,7 +142,7 @@ void nd::call_graph::emplace_back(base_callable *callee) {
   m_back_offset = m_size;
 
   size_t offset = m_size;
-  m_size += aligned_size(callee->get_frame_size());
+  m_size += aligned_size(sizeof(base_callable::call_frame));
   reserve(m_size);
   new (this->get_at<base_callable::call_frame>(offset)) base_callable::call_frame(callee);
 }

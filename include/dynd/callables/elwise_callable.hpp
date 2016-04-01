@@ -27,22 +27,25 @@ namespace nd {
 
     template <size_t N>
     class elwise_callable<fixed_dim_id, fixed_dim_id, N> : public base_callable {
+      struct data_type {
+        callable &child;
+      };
+
       struct elwise_call_frame : call_frame {
         bool broadcast_dst;
         std::array<bool, N> broadcast_src;
       };
 
     public:
-      elwise_callable() : base_callable(ndt::type(), sizeof(elwise_call_frame)) {}
+      elwise_callable() : base_callable(ndt::type()) {}
 
-      callable &get_child(base_callable *parent);
-
-      ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &res_tp,
+      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp,
                         size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
 
-        callable &child = get_child(caller);
+        callable &child = reinterpret_cast<data_type *>(data)->child;
+        const ndt::type &child_ret_tp = child.get_ret_type();
         const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
 
         std::array<intptr_t, N> arg_size;
@@ -63,6 +66,7 @@ namespace nd {
         bool res_variadic = res_tp.is_variadic();
         intptr_t res_size;
         ndt::type res_element_tp;
+        intptr_t ret_ndim = res_tp.get_ndim() - child_ret_tp.get_ndim();
         if (res_variadic) {
           res_size = 1;
           for (size_t i = 0; i < N && res_size == 1; ++i) {
@@ -72,13 +76,16 @@ namespace nd {
           }
           res_element_tp = res_tp;
         } else {
+          if (ret_ndim > max_ndim) {
+            max_ndim = ret_ndim;
+          }
           res_size = res_tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
           res_element_tp = res_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         }
 
         std::array<bool, N> arg_broadcast;
         std::array<ndt::type, N> arg_element_tp;
-        bool callback = true;
+        bool callback = ret_ndim > 1;
         for (size_t i = 0; i < N; ++i) {
           if (arg_ndim[i] == max_ndim) {
             arg_broadcast[i] = false;
@@ -110,7 +117,7 @@ namespace nd {
                        size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         elwise_call_frame *data = reinterpret_cast<elwise_call_frame *>(cg.back());
 
-        callable &child = get_child(parent);
+        callable child;
         const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -267,16 +274,19 @@ namespace nd {
     template <size_t N>
     class elwise_callable<fixed_dim_id, var_dim_id, N> : public base_callable {
     public:
+      struct data_type {
+        callable &child;
+      };
+
       elwise_callable() : base_callable(ndt::type()) {}
 
-      callable &get_child(base_callable *parent);
-
-      ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &res_tp,
+      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp,
                         size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
 
-        callable &child = get_child(caller);
+        callable &child = reinterpret_cast<data_type *>(data)->child;
+        const ndt::type &child_ret_tp = child.get_ret_type();
         const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
 
         std::array<intptr_t, N> arg_size;
@@ -306,6 +316,11 @@ namespace nd {
           }
           res_element_tp = res_tp;
         } else {
+          if (res_tp.get_ndim() - child_ret_tp.get_ndim() > max_ndim) {
+            max_ndim = res_tp.get_ndim() - child_ret_tp.get_ndim();
+          } else if (res_tp.get_ndim() - child_ret_tp.get_ndim() < max_ndim) {
+            throw std::runtime_error("broadcast error");
+          }
           res_size = res_tp.extended<ndt::base_dim_type>()->get_dim_size();
           res_element_tp = res_tp.extended<ndt::base_dim_type>()->get_element_type();
         }
@@ -441,6 +456,10 @@ namespace nd {
 
     public:
       struct data_type {
+        callable &child;
+      };
+
+      struct old_data_type {
         bool broadcast_dst;
         std::array<bool, N> broadcast_src;
         std::array<bool, N> is_src_var;
@@ -448,14 +467,13 @@ namespace nd {
 
       elwise_callable() : base_callable(ndt::type()) {}
 
-      callable &get_child(base_callable *parent);
-
-      ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &res_tp,
+      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp,
                         size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
 
-        callable &child = get_child(caller);
+        callable &child = reinterpret_cast<data_type *>(data)->child;
+        const ndt::type &child_ret_tp = child.get_ret_type();
         const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
 
         std::array<intptr_t, N> arg_size;
@@ -485,6 +503,9 @@ namespace nd {
           }
           res_element_tp = res_tp;
         } else {
+          if (res_tp.get_ndim() - child_ret_tp.get_ndim() > max_ndim) {
+            max_ndim = res_tp.get_ndim() - child_ret_tp.get_ndim();
+          }
           res_size = res_tp.extended<ndt::base_dim_type>()->get_dim_size();
           res_element_tp = res_tp.extended<ndt::base_dim_type>()->get_element_type();
         }
