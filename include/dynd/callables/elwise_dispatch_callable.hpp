@@ -34,7 +34,7 @@ namespace nd {
                         const std::map<std::string, ndt::type> &tp_vars) {
         const ndt::callable_type *child_tp = m_child.get_type();
 
-        data_type data{m_child};
+        data_type child_data{m_child};
 
         bool dst_variadic = dst_tp.is_variadic();
         bool all_same = true;
@@ -78,13 +78,13 @@ namespace nd {
 
         if ((dst_variadic || dst_tp.get_id() == fixed_dim_id) && src_all_strided) {
           static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, N>>();
-          return f->resolve(this, reinterpret_cast<char *>(&data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          return f->resolve(this, reinterpret_cast<char *>(&child_data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else if ((dst_variadic || dst_tp.get_id() == var_dim_id) && src_all_var) {
           static callable f = make_callable<elwise_callable<var_dim_id, fixed_dim_id, N>>();
-          return f->resolve(this, reinterpret_cast<char *>(&data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          return f->resolve(this, reinterpret_cast<char *>(&child_data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else if (src_all_strided_or_var) {
           static callable f = make_callable<elwise_callable<fixed_dim_id, var_dim_id, N>>();
-          return f->resolve(this, reinterpret_cast<char *>(&data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          return f->resolve(this, reinterpret_cast<char *>(&child_data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         }
 
         std::stringstream ss;

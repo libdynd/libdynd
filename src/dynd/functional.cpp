@@ -216,18 +216,3 @@ nd::callable nd::functional::reduction(const callable &child) {
                                 ndt::make_type<ndt::option_type>(ndt::make_type<bool1>())}),
       child);
 }
-
-template <size_t N>
-nd::callable &nd::functional::elwise_callable<fixed_dim_id, fixed_dim_id, N>::get_child(base_callable *parent) {
-  return dynamic_cast<elwise_dispatch_callable<N> *>(parent)->m_child;
-}
-
-template <size_t N>
-nd::callable &nd::functional::elwise_callable<fixed_dim_id, var_dim_id, N>::get_child(base_callable *parent) {
-  return dynamic_cast<elwise_dispatch_callable<N> *>(parent)->m_child;
-}
-
-template <size_t N>
-nd::callable &nd::functional::elwise_callable<var_dim_id, fixed_dim_id, N>::get_child(base_callable *parent) {
-  return dynamic_cast<elwise_dispatch_callable<N> *>(parent)->m_child;
-}

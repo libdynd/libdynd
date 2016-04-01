@@ -39,8 +39,6 @@ namespace nd {
     public:
       elwise_callable() : base_callable(ndt::type()) {}
 
-      callable &get_child(base_callable *parent);
-
       ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp,
                         size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
@@ -119,7 +117,7 @@ namespace nd {
                        size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         elwise_call_frame *data = reinterpret_cast<elwise_call_frame *>(cg.back());
 
-        callable &child = get_child(parent);
+        callable child;
         const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -276,16 +274,18 @@ namespace nd {
     template <size_t N>
     class elwise_callable<fixed_dim_id, var_dim_id, N> : public base_callable {
     public:
+      struct data_type {
+        callable &child;
+      };
+
       elwise_callable() : base_callable(ndt::type()) {}
 
-      callable &get_child(base_callable *parent);
-
-      ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &res_tp,
+      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp,
                         size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
 
-        callable &child = get_child(caller);
+        callable &child = reinterpret_cast<data_type *>(data)->child;
         const ndt::type &child_ret_tp = child.get_ret_type();
         const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
 
@@ -456,6 +456,10 @@ namespace nd {
 
     public:
       struct data_type {
+        callable &child;
+      };
+
+      struct old_data_type {
         bool broadcast_dst;
         std::array<bool, N> broadcast_src;
         std::array<bool, N> is_src_var;
@@ -463,14 +467,12 @@ namespace nd {
 
       elwise_callable() : base_callable(ndt::type()) {}
 
-      callable &get_child(base_callable *parent);
-
-      ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &res_tp,
+      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp,
                         size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
 
-        callable &child = get_child(caller);
+        callable &child = reinterpret_cast<data_type *>(data)->child;
         const ndt::type &child_ret_tp = child.get_ret_type();
         const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
 
