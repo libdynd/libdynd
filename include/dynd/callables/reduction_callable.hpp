@@ -128,9 +128,10 @@ namespace nd {
         }
       }
 
-      void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                       const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                       const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+      void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                       const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                       kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
+                       const std::map<std::string, ndt::type> &tp_vars) {
         static const callable_reduction_instantiate_t table[2][2][2] = {
             {{reduction_kernel<fixed_dim_id, false, false>::instantiate,
               reduction_kernel<fixed_dim_id, false, true>::instantiate},
@@ -140,7 +141,7 @@ namespace nd {
 
         if (reinterpret_cast<data_type *>(data)->ndim == 0) {
           callable &child = m_child;
-          child.get()->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
+          child.get()->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                    (reinterpret_cast<data_type *>(data)->stored_ndim == 0) ? kernel_request_single
                                                                                            : kernel_request_strided,
                                    nkwd - 3, kwds + 3, tp_vars);
@@ -161,7 +162,7 @@ namespace nd {
           }
 
           nd::callable constant = functional::constant(reinterpret_cast<data_type *>(data)->identity);
-          constant->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
+          constant->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
                                 tp_vars);
           return;
         }

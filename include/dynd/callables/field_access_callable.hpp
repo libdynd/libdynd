@@ -29,10 +29,10 @@ namespace nd {
       return get_field_type(arg_tp, kwds);
     }
 
-    void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
-                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars) {
+    void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                     const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
+                     const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
       const uintptr_t data_offset = get_data_offset(src_tp, src_arrmeta, kwds);
       const ndt::type field_type[1] = {get_field_type(src_tp, kwds)};
       const nd::array field_value = nd::empty(field_type[0]);
@@ -41,7 +41,7 @@ namespace nd {
       ckb->emplace_back<field_access_kernel>(kernreq, data_offset);
 
       static const array error_mode(opt<assign_error_mode>());
-      assign->instantiate(data, ckb, dst_tp, dst_arrmeta, 1, field_type, field_metadata,
+      assign->instantiate(nullptr, data, ckb, dst_tp, dst_arrmeta, 1, field_type, field_metadata,
                           kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
     };
 
@@ -67,9 +67,10 @@ namespace nd {
               ndt::callable_type::make(ndt::type("Any"), ndt::tuple_type::make(), ndt::struct_type::make("self"))),
           m_i(i) {}
 
-    ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg, const ndt::type &DYND_UNUSED(res_tp),
-                      size_t DYND_UNUSED(narg), const ndt::type *DYND_UNUSED(arg_tp), size_t DYND_UNUSED(nkwd),
-                      const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+    ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
+                      const ndt::type &DYND_UNUSED(res_tp), size_t DYND_UNUSED(narg),
+                      const ndt::type *DYND_UNUSED(arg_tp), size_t DYND_UNUSED(nkwd), const array *kwds,
+                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       cg.emplace_back(this);
       return get_array_field_kernel::helper(kwds[0], m_i).get_type();
     }
@@ -80,7 +81,7 @@ namespace nd {
       dst_tp = get_array_field_kernel::helper(kwds[0], m_i).get_type();
     }
 
-    void instantiate(char *DYND_UNUSED(data), nd::kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
+    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), nd::kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                      const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *kwds,

@@ -36,10 +36,11 @@ namespace nd {
           return dst_tp;
         }
 
-        void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
-                         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                         const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                         kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+        void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+                         const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                         intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                         intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
@@ -83,10 +84,11 @@ namespace nd {
           return dst_tp;
         }
 
-        void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
-                         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                         const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                         kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+        void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+                         const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                         intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                         intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
@@ -126,7 +128,7 @@ namespace nd {
           return dst_tp;
         }
 
-        void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
+        void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                          const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                          const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                          kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
