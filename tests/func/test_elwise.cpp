@@ -22,12 +22,35 @@
 using namespace std;
 using namespace dynd;
 
-/*
-TEST(Elwise, FixedDim) {
+TEST(Elwise, NullaryResolve) {
+  nd::callable f = nd::functional::elwise([]() { return double(); });
+
+  ndt::type tp = f.resolve(ndt::make_type<double>(), {}, {});
+  EXPECT_EQ(ndt::make_type<double>(), tp);
+
+  tp = f.resolve(ndt::make_type<double[3]>(), {}, {});
+  EXPECT_EQ(ndt::make_type<double[3]>(), tp);
+
+  tp = f.resolve(ndt::make_type<double[3][9]>(), {}, {});
+  EXPECT_EQ(ndt::make_type<double[3][9]>(), tp);
+}
+
+TEST(Elwise, BinaryResolve) {
   nd::callable f = nd::functional::elwise([](int, float) { return double(); });
 
   ndt::type tp = f.resolve({ndt::make_type<int[3]>(), ndt::make_type<float>()}, {});
   EXPECT_EQ(ndt::make_type<double[3]>(), tp);
+
+  EXPECT_THROW(f.resolve({ndt::make_type<int[4]>(), ndt::make_type<float[3]>()}, {}), runtime_error);
+  EXPECT_THROW(f.resolve({ndt::make_type<int[7]>(), ndt::make_type<float[3]>()}, {}), runtime_error);
+
+  tp = f.resolve(ndt::make_type<double[3]>(), {ndt::make_type<int>(), ndt::make_type<float[3]>()}, {});
+  EXPECT_EQ(ndt::make_type<double[3]>(), tp);
+
+  EXPECT_THROW(f.resolve(ndt::make_type<double[10]>(), {ndt::make_type<int>(), ndt::make_type<float[3]>()}, {}),
+               runtime_error);
+  EXPECT_THROW(f.resolve(ndt::make_type<double[1]>(), {ndt::make_type<int>(), ndt::make_type<float[3]>()}, {}),
+               runtime_error);
 
   tp = f.resolve({ndt::make_type<int>(), ndt::make_type<float[3]>()}, {});
   EXPECT_EQ(ndt::make_type<double[3]>(), tp);
@@ -37,6 +60,8 @@ TEST(Elwise, FixedDim) {
 
   tp = f.resolve(ndt::make_type<double[3]>(), {ndt::make_type<int[3]>(), ndt::make_type<float[3]>()}, {});
   EXPECT_EQ(ndt::make_type<double[3]>(), tp);
+
+  EXPECT_THROW(f.resolve({ndt::make_type<int[2][1]>(), ndt::make_type<float[8][4][3]>()}, {}), runtime_error);
 
   tp = f.resolve({ndt::make_type<int[256][256][3]>(), ndt::make_type<float[3]>()}, {});
   EXPECT_EQ(ndt::make_type<double[256][256][3]>(), tp);
@@ -63,11 +88,17 @@ TEST(Elwise, FixedDim) {
   tp = f.resolve({ndt::make_type<int[15][3][5]>(), ndt::make_type<float[3][1]>()}, {});
   EXPECT_EQ(ndt::make_type<double[15][3][5]>(), tp);
 
-  EXPECT_THROW(f.resolve({ndt::make_type<int[4]>(), ndt::make_type<float[3]>()}, {}), runtime_error);
-  EXPECT_THROW(f.resolve({ndt::make_type<int[7]>(), ndt::make_type<float[3]>()}, {}), runtime_error);
-  EXPECT_THROW(f.resolve({ndt::make_type<int[2][1]>(), ndt::make_type<float[8][4][3]>()}, {}), runtime_error);
+  f = nd::functional::elwise([](const int(&)[10], float) { return double(); });
+
+  tp = f.resolve({ndt::make_type<int[10]>(), ndt::make_type<float>()}, {});
+  EXPECT_EQ(ndt::make_type<double>(), tp);
+
+  tp = f.resolve({ndt::make_type<int[10]>(), ndt::make_type<float[10]>()}, {});
+  EXPECT_EQ(ndt::make_type<double[10]>(), tp);
+
+  tp = f.resolve({ndt::make_type<int[3][10]>(), ndt::make_type<float[3]>()}, {});
+  EXPECT_EQ(ndt::make_type<double[3]>(), tp);
 }
-*/
 
 TEST(Elwise, UnaryFixedDim) {
   nd::callable f = nd::functional::elwise(nd::functional::apply([](dynd::string s) { return s.size(); }));

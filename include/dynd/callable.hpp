@@ -90,7 +90,7 @@ namespace nd {
       std::map<std::string, ndt::type> tp_vars;
 
       call_graph cg;
-      return m_ptr->resolve(nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+      return m_ptr->resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
     ndt::type resolve(const ndt::type &dst_tp, std::initializer_list<ndt::type> src_tp,

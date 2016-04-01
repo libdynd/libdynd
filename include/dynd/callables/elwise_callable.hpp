@@ -37,64 +37,73 @@ namespace nd {
 
       callable &get_child(base_callable *parent);
 
-      ndt::type resolve(base_callable *caller, call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
-                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
+      ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &res_tp,
+                        size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
 
         callable &child = get_child(caller);
-        const ndt::callable_type *child_tp = child.get_type();
+        const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
 
+        std::array<intptr_t, N> arg_size;
+        std::array<intptr_t, N> arg_ndim;
         intptr_t max_ndim = 0;
-        size_t j = 0;
         for (size_t i = 0; i < N; ++i) {
-          intptr_t ndim = src_tp[i].get_ndim();
-          if (ndim >= max_ndim) {
-            max_ndim = ndim;
-            if (src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size() != 1) {
-              j = i;
+          arg_ndim[i] = arg_tp[i].get_ndim() - child_arg_tp[i].get_ndim();
+          if (arg_ndim[i] == 0) {
+            arg_size[i] = 1;
+          } else {
+            arg_size[i] = arg_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+            if (arg_ndim[i] > max_ndim) {
+              max_ndim = arg_ndim[i];
             }
           }
         }
 
-        bool dst_variadic = dst_tp.is_variadic();
-        intptr_t dst_size;
-        ndt::type dst_element_tp;
-        if (dst_variadic) {
-          dst_size = src_tp[j].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
-          dst_element_tp = dst_tp;
+        bool res_variadic = res_tp.is_variadic();
+        intptr_t res_size;
+        ndt::type res_element_tp;
+        if (res_variadic) {
+          res_size = 1;
+          for (size_t i = 0; i < N && res_size == 1; ++i) {
+            if (arg_ndim[i] == max_ndim) {
+              res_size = arg_size[i];
+            }
+          }
+          res_element_tp = res_tp;
         } else {
-          dst_size = dst_tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
-          dst_element_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
+          res_size = res_tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+          res_element_tp = res_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         }
 
-        bool finished = true;
-
-        std::array<bool, N> src_broadcast;
-        std::array<ndt::type, N> src_element_tp;
+        std::array<bool, N> arg_broadcast;
+        std::array<ndt::type, N> arg_element_tp;
+        bool callback = true;
         for (size_t i = 0; i < N; ++i) {
-          if (src_tp[i].get_ndim() == max_ndim) {
-            src_broadcast[i] = false;
-            intptr_t size = src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
-            if (dst_size != size && size != 1) {
+          if (arg_ndim[i] == max_ndim) {
+            arg_broadcast[i] = false;
+            if (res_size != arg_size[i] && arg_size[i] != 1) {
               throw std::runtime_error("broadcast error");
             }
-            src_element_tp[i] = src_tp[i].extended<ndt::fixed_dim_type>()->get_element_type();
+            arg_element_tp[i] = arg_tp[i].extended<ndt::fixed_dim_type>()->get_element_type();
           } else {
-            src_broadcast[i] = true;
-            src_element_tp[i] = src_tp[i];
+            arg_broadcast[i] = true;
+            arg_element_tp[i] = arg_tp[i];
           }
-          finished &= src_element_tp[i].get_ndim() == child_tp->get_pos_type(i).get_ndim();
+          if (arg_element_tp[i].get_ndim() != child_arg_tp[i].get_ndim()) {
+            callback = true;
+          }
         }
 
-        if (finished) {
+        if (callback) {
           return ndt::make_type<ndt::fixed_dim_type>(
-              dst_size, child->resolve(this, cg, dst_variadic ? child_tp->get_return_type() : dst_element_tp, nsrc,
-                                       src_element_tp.data(), nkwd, kwds, tp_vars));
+              res_size,
+              caller->resolve(this, nullptr, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
         }
 
         return ndt::make_type<ndt::fixed_dim_type>(
-            dst_size, caller->resolve(this, cg, dst_element_tp, nsrc, src_element_tp.data(), nkwd, kwds, tp_vars));
+            res_size, child->resolve(this, nullptr, cg, res_variadic ? child.get_ret_type() : res_element_tp, N,
+                                     arg_element_tp.data(), nkwd, kwds, tp_vars));
       }
 
       void new_resolve(base_callable *parent, call_graph &cg, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
@@ -254,14 +263,92 @@ namespace nd {
                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {}
     };
 
+    // src is either fixed or var
     template <size_t N>
-    class elwise_callable<fixed_dim_id, var_dim_id, N> {
+    class elwise_callable<fixed_dim_id, var_dim_id, N> : public base_callable {
     public:
-      ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp,
-                        size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
-                        const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+      elwise_callable() : base_callable(ndt::type()) {}
+
+      callable &get_child(base_callable *parent);
+
+      ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &res_tp,
+                        size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
+                        const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
-        return dst_tp;
+
+        callable &child = get_child(caller);
+        const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
+
+        std::array<intptr_t, N> arg_size;
+        std::array<intptr_t, N> arg_ndim;
+        intptr_t max_ndim = 0;
+        for (size_t i = 0; i < N; ++i) {
+          arg_ndim[i] = arg_tp[i].get_ndim() - child_arg_tp[i].get_ndim();
+          if (arg_ndim[i] == 0) {
+            arg_size[i] = 1;
+          } else {
+            arg_size[i] = arg_tp[i].extended<ndt::base_dim_type>()->get_dim_size();
+            if (arg_ndim[i] > max_ndim) {
+              max_ndim = arg_ndim[i];
+            }
+          }
+        }
+
+        bool res_variadic = res_tp.is_variadic();
+        intptr_t res_size;
+        ndt::type res_element_tp;
+        if (res_variadic) {
+          res_size = 1;
+          for (size_t i = 0; i < N && res_size == 1; ++i) {
+            if (arg_ndim[i] == max_ndim && arg_size[i] != -1) {
+              res_size = arg_size[i];
+            }
+          }
+          res_element_tp = res_tp;
+        } else {
+          res_size = res_tp.extended<ndt::base_dim_type>()->get_dim_size();
+          res_element_tp = res_tp.extended<ndt::base_dim_type>()->get_element_type();
+        }
+
+        std::array<bool, N> arg_broadcast;
+        std::array<ndt::type, N> arg_element_tp;
+        bool callback = true;
+        for (size_t i = 0; i < N; ++i) {
+          if (arg_ndim[i] == max_ndim) {
+            arg_broadcast[i] = false;
+            if (arg_size[i] != -1 && res_size != -1 && res_size != arg_size[i] && arg_size[i] != 1) {
+              throw std::runtime_error("broadcast error");
+            }
+            arg_element_tp[i] = arg_tp[i].extended<ndt::base_dim_type>()->get_element_type();
+          } else {
+            arg_broadcast[i] = true;
+            arg_element_tp[i] = arg_tp[i];
+          }
+          if (arg_element_tp[i].get_ndim() != child_arg_tp[i].get_ndim()) {
+            callback = true;
+          }
+        }
+
+        if (callback) {
+          if (res_size == 1) {
+            return ndt::make_type<ndt::var_dim_type>(
+                caller->resolve(this, nullptr, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
+          } else {
+            return ndt::make_type<ndt::fixed_dim_type>(
+                res_size,
+                caller->resolve(this, nullptr, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
+          }
+        }
+
+        if (res_size == 1) {
+          return ndt::make_type<ndt::var_dim_type>(child->resolve(this, nullptr, cg,
+                                                                  res_variadic ? child.get_ret_type() : res_element_tp,
+                                                                  N, arg_element_tp.data(), nkwd, kwds, tp_vars));
+        } else {
+          return ndt::make_type<ndt::fixed_dim_type>(
+              res_size, child->resolve(this, nullptr, cg, res_variadic ? child.get_ret_type() : res_element_tp, N,
+                                       arg_element_tp.data(), nkwd, kwds, tp_vars));
+        }
       }
 
       static void elwise_instantiate(callable &self, callable &child, char *data, kernel_builder *ckb,
@@ -339,6 +426,13 @@ namespace nd {
         return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
+
+      virtual void instantiate(char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
+                               const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                               const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
+                               intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {}
     };
 
     template <size_t N>
@@ -352,11 +446,76 @@ namespace nd {
         std::array<bool, N> is_src_var;
       };
 
-      ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp,
-                        size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
-                        const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+      elwise_callable() : base_callable(ndt::type()) {}
+
+      callable &get_child(base_callable *parent);
+
+      ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &res_tp,
+                        size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
+                        const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
-        return dst_tp;
+
+        callable &child = get_child(caller);
+        const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
+
+        std::array<intptr_t, N> arg_size;
+        std::array<intptr_t, N> arg_ndim;
+        intptr_t max_ndim = 0;
+        for (size_t i = 0; i < N; ++i) {
+          arg_ndim[i] = arg_tp[i].get_ndim() - child_arg_tp[i].get_ndim();
+          if (arg_ndim[i] == 0) {
+            arg_size[i] = 1;
+          } else {
+            arg_size[i] = arg_tp[i].extended<ndt::base_dim_type>()->get_dim_size();
+            if (arg_ndim[i] > max_ndim) {
+              max_ndim = arg_ndim[i];
+            }
+          }
+        }
+
+        bool res_variadic = res_tp.is_variadic();
+        intptr_t res_size;
+        ndt::type res_element_tp;
+        if (res_variadic) {
+          res_size = 1;
+          for (size_t i = 0; i < N && res_size == 1; ++i) {
+            if (arg_ndim[i] == max_ndim && arg_size[i] != -1) {
+              res_size = arg_size[i];
+            }
+          }
+          res_element_tp = res_tp;
+        } else {
+          res_size = res_tp.extended<ndt::base_dim_type>()->get_dim_size();
+          res_element_tp = res_tp.extended<ndt::base_dim_type>()->get_element_type();
+        }
+
+        std::array<bool, N> arg_broadcast;
+        std::array<ndt::type, N> arg_element_tp;
+        bool callback = true;
+        for (size_t i = 0; i < N; ++i) {
+          if (arg_ndim[i] == max_ndim) {
+            arg_broadcast[i] = false;
+            if (arg_size[i] != -1 && res_size != -1 && res_size != arg_size[i] && arg_size[i] != 1) {
+              throw std::runtime_error("broadcast error");
+            }
+            arg_element_tp[i] = arg_tp[i].extended<ndt::base_dim_type>()->get_element_type();
+          } else {
+            arg_broadcast[i] = true;
+            arg_element_tp[i] = arg_tp[i];
+          }
+          if (arg_element_tp[i].get_ndim() != child_arg_tp[i].get_ndim()) {
+            callback = true;
+          }
+        }
+
+        if (callback) {
+          return ndt::make_type<ndt::var_dim_type>(
+              caller->resolve(this, nullptr, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
+        }
+
+        return ndt::make_type<ndt::var_dim_type>(child->resolve(this, nullptr, cg,
+                                                                res_variadic ? child.get_ret_type() : res_element_tp, N,
+                                                                arg_element_tp.data(), nkwd, kwds, tp_vars));
       }
 
       elwise_callable(const callable &child) : base_callable(ndt::type()), m_child(child) {}
@@ -401,7 +560,8 @@ namespace nd {
                   child_src_tp[i] = src_tp[i];
                   finished &= src_ndim == 0;
                 }
-                else if (src_tp[i].get_id() == fixed_dim_id) { // src_tp[i].get_as_strided(src_arrmeta[i], &src_size[i],
+                else if (src_tp[i].get_id() == fixed_dim_id) { // src_tp[i].get_as_strided(src_arrmeta[i],
+         &src_size[i],
                                                                // &src_stride[i], &child_src_tp[i],
                   //                      &child_src_arrmeta[i])) {
                   data.broadcast_src[i] = false;
@@ -436,7 +596,8 @@ namespace nd {
                 callable parent = stack.parent();
                 stack.push_back(parent, child_dst_tp, stack.res_metadata_offset() +
          sizeof(ndt::var_dim_type::metadata_type),
-                                stack.narg(), child_src_tp.data(), src_arrmeta_offsets.data(), kernel_request_strided);
+                                stack.narg(), child_src_tp.data(), src_arrmeta_offsets.data(),
+         kernel_request_strided);
                 parent->new_resolve(g, stack, nkwd, kwds, tp_vars);
               }
               else {
@@ -444,7 +605,8 @@ namespace nd {
 
                 stack.push_back(m_child, child_dst_tp, stack.res_metadata_offset() +
          sizeof(ndt::var_dim_type::metadata_type),
-                                stack.narg(), child_src_tp.data(), src_arrmeta_offsets.data(), kernel_request_strided);
+                                stack.narg(), child_src_tp.data(), src_arrmeta_offsets.data(),
+         kernel_request_strided);
 
                 m_child->new_resolve(g, stack, nkwd, kwds, tp_vars);
                 //          return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc,

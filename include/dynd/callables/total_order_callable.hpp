@@ -26,9 +26,10 @@ namespace nd {
         : base_callable(ndt::callable_type::make(ndt::make_type<int>(),
                                                  {ndt::type(fixed_string_id), ndt::type(fixed_string_id)})) {}
 
-    ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp,
-                      size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
-                      const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+    ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
+                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                      size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       cg.emplace_back(this);
       return dst_tp;
     }

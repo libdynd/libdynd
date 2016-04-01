@@ -25,8 +25,8 @@ namespace nd {
         m_abstract = true;
       }
 
-      ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
-                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
+      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
+                        const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         const ndt::callable_type *child_tp = m_child.get_type();
 
@@ -39,16 +39,17 @@ namespace nd {
         }
 
         if (all_same) {
-          return m_child->resolve(this, cg, dst_tp.is_symbolic() ? m_child.get_type()->get_return_type() : dst_tp, nsrc,
+          return m_child->resolve(this,nullptr, cg, dst_tp.is_symbolic() ? m_child.get_type()->get_return_type() : dst_tp, nsrc,
                                   src_tp, nkwd, kwds, tp_vars);
         }
 
         // Do a pass through the src types to classify them
-        bool src_all_strided = true, src_all_strided_or_var = true;
+        bool src_all_strided = true, src_all_strided_or_var = true, src_all_var = true;
         for (size_t i = 0; i < nsrc; ++i) {
           intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
           switch (src_tp[i].get_id()) {
           case fixed_dim_id:
+            src_all_var = false;
             break;
           case var_dim_id:
             src_all_strided = false;
@@ -58,6 +59,7 @@ namespace nd {
             // a strided dimension
             if (src_ndim > 0) {
               src_all_strided_or_var = false;
+              src_all_var = false;
             }
             break;
           }
@@ -65,15 +67,28 @@ namespace nd {
 
         if (src_all_strided) {
           static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, N>>();
-          return f->resolve(this, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          return f->resolve(this, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+        } else if (src_all_var) {
+          static callable f = make_callable<elwise_callable<var_dim_id, fixed_dim_id, N>>();
+          return f->resolve(this, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else if (src_all_strided_or_var) {
-          throw std::runtime_error("fixed_dim_id, var_dim_id");
+          static callable f = make_callable<elwise_callable<fixed_dim_id, var_dim_id, N>>();
+          return f->resolve(this, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         }
 
-        return dst_tp;
+        std::stringstream ss;
+        ss << "Cannot process lifted elwise expression from (";
+        for (size_t i = 0; i < nsrc; ++i) {
+          ss << src_tp[i];
+          if (i != nsrc - 1) {
+            ss << ", ";
+          }
+        }
+        ss << ") to " << dst_tp;
+        throw std::runtime_error(ss.str());
       }
 
-      void new_resolve(base_callable *DYND_UNUSED(parent), call_graph &g, ndt::type &dst_tp, intptr_t nsrc,
+      void new_resolve(base_callable *DYND_UNUSED(parent),  call_graph &g, ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
         //        m_child->new_resolve(stack, nkwd, kwds, tp_vars);

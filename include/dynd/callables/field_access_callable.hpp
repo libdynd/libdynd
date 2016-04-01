@@ -21,11 +21,12 @@ namespace nd {
       dst_tp = get_field_type(src_tp, kwds);
     }
 
-    ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp,
-                      size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
-                      const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+    ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
+                      const ndt::type &DYND_UNUSED(res_tp), size_t DYND_UNUSED(narg), const ndt::type *arg_tp,
+                      size_t DYND_UNUSED(nkwd), const array *kwds,
+                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       cg.emplace_back(this);
-      return dst_tp;
+      return get_field_type(arg_tp, kwds);
     }
 
     void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -66,11 +67,11 @@ namespace nd {
               ndt::callable_type::make(ndt::type("Any"), ndt::tuple_type::make(), ndt::struct_type::make("self"))),
           m_i(i) {}
 
-    ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp,
-                      size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
-                      const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+    ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg, const ndt::type &DYND_UNUSED(res_tp),
+                      size_t DYND_UNUSED(narg), const ndt::type *DYND_UNUSED(arg_tp), size_t DYND_UNUSED(nkwd),
+                      const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       cg.emplace_back(this);
-      return dst_tp;
+      return get_array_field_kernel::helper(kwds[0], m_i).get_type();
     }
 
     void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),

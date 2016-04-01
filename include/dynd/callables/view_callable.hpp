@@ -15,17 +15,22 @@ namespace nd {
   public:
     view_callable() : default_instantiable_callable<view_kernel>(ndt::type("(Any) -> Any")) {}
 
+    ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg, const ndt::type &DYND_UNUSED(dst_tp),
+                      size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t DYND_UNUSED(nkwd),
+                      const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+      cg.emplace_back(this);
+      return src_tp[0];
+    }
+
     void new_resolve(base_callable *DYND_UNUSED(parent), call_graph &DYND_UNUSED(cg), ndt::type &dst_tp,
                      intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t DYND_UNUSED(nkwd),
-                     const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
+                     const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       dst_tp = src_tp[0];
     }
 
     void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                           const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
+                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       dst_tp = src_tp[0];
     }
   };
