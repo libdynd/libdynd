@@ -316,7 +316,7 @@ struct pop_front {
 template <typename... S>
 struct outer;
 
-// Work around bug in MSVC 2015 update 1 and earlier.
+// Work around bug in MSVC 2015 update 2 and earlier.
 // This requires many more template instantiations, so only apply it in that case.
 #if defined(_MSC_FULL_VER) && !defined(__clang__) && _MSC_FULL_VER <= 190025123
 
