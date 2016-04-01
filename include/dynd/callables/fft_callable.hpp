@@ -59,9 +59,9 @@ namespace nd {
       }
     }
 
-    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-                          const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-      resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+    void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                          intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+      dst_tp = resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
     void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
