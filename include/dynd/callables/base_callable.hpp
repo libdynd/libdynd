@@ -55,20 +55,20 @@ namespace nd {
     size_t m_frame_size;
 
   public:
-    struct call_frame {
+    struct call_node {
       base_callable *callee;
       void (*destroy)(void *);
 
-      call_frame(base_callable *callee) : callee(callee) {}
+      call_node(base_callable *callee) : callee(callee) {}
 
-      call_frame *next() {
-        return reinterpret_cast<call_frame *>(reinterpret_cast<char *>(this) + aligned_size(callee->get_frame_size()));
+      call_node *next() {
+        return reinterpret_cast<call_node *>(reinterpret_cast<char *>(this) + aligned_size(callee->get_frame_size()));
       }
     };
 
     bool m_abstract;
 
-    base_callable(const ndt::type &tp, size_t frame_size = sizeof(call_frame))
+    base_callable(const ndt::type &tp, size_t frame_size = sizeof(call_node))
         : m_use_count(0), m_tp(tp), m_frame_size(frame_size), m_abstract(false) {}
 
     // non-copyable
@@ -94,7 +94,7 @@ namespace nd {
       }
     }
 
-    virtual void new_instantiate(call_frame *DYND_UNUSED(frame), kernel_builder &DYND_UNUSED(ckb),
+    virtual void new_instantiate(call_node *DYND_UNUSED(frame), kernel_builder &DYND_UNUSED(ckb),
                                  kernel_request_t DYND_UNUSED(kernreq), const char *DYND_UNUSED(dst_arrmeta),
                                  const char *const *DYND_UNUSED(src_arrmeta), size_t DYND_UNUSED(nkwd),
                                  const array *DYND_UNUSED(kwds)) {
@@ -165,9 +165,9 @@ namespace nd {
      *                 values.
      * \param kwds  A struct array of named auxiliary arguments.
      */
-    virtual void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
-                             intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                             kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
+    virtual void instantiate(call_node *node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                             const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                              const std::map<std::string, ndt::type> &tp_vars) = 0;
 
     virtual void overload(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
@@ -321,7 +321,7 @@ namespace nd {
 
     DYND_API void emplace_back(base_callable *callee);
 
-    base_callable::call_frame *back() { return get_at<base_callable::call_frame>(m_back_offset); }
+    base_callable::call_node *back() { return get_at<base_callable::call_node>(m_back_offset); }
 
     template <typename CallFrameType>
     CallFrameType *get_back() {
@@ -335,6 +335,8 @@ namespace nd {
       return (size + static_cast<size_t>(7)) & ~static_cast<size_t>(7);
     }
   };
+
+  typedef typename base_callable::call_node call_node;
 
 } // namespace dynd::nd
 } // namespace dynd

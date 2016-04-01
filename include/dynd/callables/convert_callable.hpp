@@ -26,9 +26,10 @@ namespace nd {
         return dst_tp;
       }
 
-      void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
-                       intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                       intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+      void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+                       const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                       const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
+                       const std::map<std::string, ndt::type> &tp_vars) {
         intptr_t ckb_offset = ckb->size();
         callable &af = m_child;
         const std::vector<ndt::type> &src_tp_for_af = af.get_type()->get_pos_types();
@@ -47,7 +48,7 @@ namespace nd {
           }
         }
         // Instantiate the callable being buffered
-        af.get()->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp_for_af.data(), &buffered_arrmeta[0],
+        af.get()->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp_for_af.data(), &buffered_arrmeta[0],
                               kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
         reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(kernel_prefix));
@@ -57,7 +58,7 @@ namespace nd {
           if (!self->m_bufs[i].is_null()) {
             self->m_src_buf_ck_offsets[i] = ckb_offset - root_ckb_offset;
             nd::array error_mode = eval::default_eval_context.errmode;
-            assign->instantiate(NULL, ckb, src_tp_for_af[i], self->m_bufs[i].get_arrmeta(), 1, src_tp + i,
+            assign->instantiate(nullptr, NULL, ckb, src_tp_for_af[i], self->m_bufs[i].get_arrmeta(), 1, src_tp + i,
                                 src_arrmeta + i, kernreq | kernel_request_data_only, 1, &error_mode, tp_vars);
             ckb_offset = ckb->size();
             reinterpret_cast<kernel_builder *>(ckb)->reserve(ckb_offset + sizeof(kernel_prefix));

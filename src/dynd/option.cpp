@@ -15,8 +15,7 @@ using namespace dynd;
 
 namespace {
 
-nd::callable make_assign_na()
-{
+nd::callable make_assign_na() {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, float32_id, float64_id,
                            complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id> type_ids;
 
@@ -34,8 +33,7 @@ nd::callable make_assign_na()
   return nd::make_callable<nd::assign_na_dispatch_callable>(t, dispatcher, dim_dispatcher);
 }
 
-nd::callable make_is_na()
-{
+nd::callable make_is_na() {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint32_id, float32_id, float64_id,
                            complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id> type_ids;
 
@@ -56,32 +54,28 @@ nd::callable make_is_na()
 DYND_API nd::callable nd::assign_na = make_assign_na();
 DYND_API nd::callable nd::is_na = make_is_na();
 
-void nd::old_assign_na(const ndt::type &option_tp, const char *arrmeta, char *data)
-{
+void nd::old_assign_na(const ndt::type &option_tp, const char *arrmeta, char *data) {
   const ndt::type &value_tp = option_tp.extended<ndt::option_type>()->get_value_type();
   if (value_tp.is_builtin()) {
     assign_na_builtin(value_tp.get_id(), data);
-  }
-  else {
+  } else {
     nd::kernel_builder ckb;
-    assign_na->instantiate(NULL, &ckb, option_tp, arrmeta, 0, NULL, NULL, kernel_request_single, 0, NULL,
+    assign_na->instantiate(nullptr, NULL, &ckb, option_tp, arrmeta, 0, NULL, NULL, kernel_request_single, 0, NULL,
                            std::map<std::string, ndt::type>());
     nd::kernel_prefix *ckp = ckb.get();
     ckp->get_function<kernel_single_t>()(ckp, data, NULL);
   }
 }
 
-bool nd::old_is_avail(const ndt::type &option_tp, const char *arrmeta, const char *data)
-{
+bool nd::old_is_avail(const ndt::type &option_tp, const char *arrmeta, const char *data) {
   const ndt::type value_tp = option_tp.extended<ndt::option_type>()->get_value_type();
   if (value_tp.is_builtin()) {
     return is_avail_builtin(value_tp.get_id(), data);
-  }
-  else {
+  } else {
     nd::kernel_builder ckb;
     ndt::type src_tp[1] = {option_tp};
-    is_na->instantiate(NULL, &ckb, ndt::make_type<bool1>(), NULL, 1, src_tp, &arrmeta, kernel_request_single, 0, NULL,
-                       std::map<std::string, ndt::type>());
+    is_na->instantiate(nullptr, NULL, &ckb, ndt::make_type<bool1>(), NULL, 1, src_tp, &arrmeta, kernel_request_single,
+                       0, NULL, std::map<std::string, ndt::type>());
     nd::kernel_prefix *ckp = ckb.get();
     char result;
     ckp->get_function<kernel_single_t>()(ckp, &result, const_cast<char **>(&data));
@@ -90,22 +84,18 @@ bool nd::old_is_avail(const ndt::type &option_tp, const char *arrmeta, const cha
 }
 
 void nd::set_option_from_utf8_string(const ndt::type &option_tp, const char *arrmeta, char *data,
-                                     const char *utf8_begin, const char *utf8_end, const eval::eval_context *ectx)
-{
+                                     const char *utf8_begin, const char *utf8_end, const eval::eval_context *ectx) {
   const ndt::type value_tp = option_tp.extended<ndt::option_type>()->get_value_type();
   if (value_tp.get_base_id() != string_kind_id && parse_na(utf8_begin, utf8_end)) {
     nd::old_assign_na(option_tp, arrmeta, data);
-  }
-  else {
+  } else {
     if (value_tp.is_builtin()) {
       if (value_tp.unchecked_get_builtin_id() == bool_id) {
         *reinterpret_cast<bool1 *>(data) = parse<bool>(utf8_begin, utf8_end);
-      }
-      else {
+      } else {
         string_to_number(data, value_tp.unchecked_get_builtin_id(), utf8_begin, utf8_end, ectx->errmode);
       }
-    }
-    else {
+    } else {
       value_tp.extended()->set_from_utf8_string(arrmeta, data, utf8_begin, utf8_end, ectx);
     }
   }

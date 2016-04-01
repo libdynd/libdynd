@@ -26,15 +26,13 @@ struct tuple_unary_op_item {
 struct tuple_unary_op_ck : nd::base_strided_kernel<tuple_unary_op_ck, 1> {
   vector<tuple_unary_op_item> m_fields;
 
-  ~tuple_unary_op_ck()
-  {
+  ~tuple_unary_op_ck() {
     for (size_t i = 0; i < m_fields.size(); ++i) {
       get_child(m_fields[i].child_kernel_offset)->destroy();
     }
   }
 
-  void single(char *dst, char *const *src)
-  {
+  void single(char *dst, char *const *src) {
     const tuple_unary_op_item *fi = &m_fields[0];
     intptr_t field_count = m_fields.size();
     kernel_prefix *child;
@@ -55,8 +53,7 @@ void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const ndt::c
                                        nd::kernel_builder *ckb, intptr_t field_count, const uintptr_t *dst_offsets,
                                        const ndt::type *dst_tp, const char *const *dst_arrmeta,
                                        const uintptr_t *src_offsets, const ndt::type *src_tp,
-                                       const char *const *src_arrmeta, kernel_request_t kernreq)
-{
+                                       const char *const *src_arrmeta, kernel_request_t kernreq) {
   intptr_t self_offset = ckb->size();
   ckb->emplace_back<tuple_unary_op_ck>(kernreq);
   tuple_unary_op_ck *self = ckb->get_at<tuple_unary_op_ck>(self_offset);
@@ -68,7 +65,7 @@ void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const ndt::c
     field.dst_data_offset = dst_offsets[i];
     field.src_data_offset = src_offsets[i];
     nd::array error_mode = ndt::traits<assign_error_mode>::na();
-    const_cast<nd::base_callable *>(af)->instantiate(NULL, ckb, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i],
+    const_cast<nd::base_callable *>(af)->instantiate(NULL, NULL, ckb, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i],
                                                      &src_arrmeta[i], kernel_request_single, 1, &error_mode,
                                                      std::map<std::string, ndt::type>());
   }
@@ -79,8 +76,7 @@ void dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const ndt::c
 
 void dynd::make_tuple_identical_assignment_kernel(nd::kernel_builder *ckb, const ndt::type &val_tup_tp,
                                                   const char *dst_arrmeta, const char *src_arrmeta,
-                                                  kernel_request_t kernreq)
-{
+                                                  kernel_request_t kernreq) {
   if (val_tup_tp.get_id() != tuple_id && val_tup_tp.get_id() != struct_id) {
     stringstream ss;
     ss << "make_tuple_identical_assignment_kernel: provided type " << val_tup_tp << " is not of tuple or struct kind";
@@ -115,8 +111,7 @@ void dynd::make_tuple_identical_assignment_kernel(nd::kernel_builder *ckb, const
 
 void dynd::make_tuple_assignment_kernel(nd::kernel_builder *ckb, const ndt::type &dst_tuple_tp, const char *dst_arrmeta,
                                         const ndt::type &src_tuple_tp, const char *src_arrmeta,
-                                        kernel_request_t kernreq)
-{
+                                        kernel_request_t kernreq) {
   if (src_tuple_tp.get_id() != tuple_id && src_tuple_tp.get_id() != struct_id) {
     stringstream ss;
     ss << "make_tuple_assignment_kernel: provided source type " << src_tuple_tp << " is not of tuple or struct kind";
@@ -162,8 +157,7 @@ void dynd::make_tuple_assignment_kernel(nd::kernel_builder *ckb, const ndt::type
 
 void dynd::make_broadcast_to_tuple_assignment_kernel(nd::kernel_builder *ckb, const ndt::type &dst_tuple_tp,
                                                      const char *dst_arrmeta, const ndt::type &src_tp,
-                                                     const char *src_arrmeta, kernel_request_t kernreq)
-{
+                                                     const char *src_arrmeta, kernel_request_t kernreq) {
   // This implementation uses the same struct to struct kernel, just with
   // an offset of 0 for each source value. A kernel tailored to this
   // case can be made if better performance is needed.

@@ -58,10 +58,10 @@ namespace nd {
         }
       }
 
-      void instantiate(char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
-                       intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                       dynd::kernel_request_t kernreq, intptr_t nkwd, const dynd::nd::array *kwds,
-                       const std::map<std::string, ndt::type> &tp_vars) {
+      void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+                       const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+                       const char *const *src_arrmeta, dynd::kernel_request_t kernreq, intptr_t nkwd,
+                       const dynd::nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         intptr_t ndim = 0;
         for (intptr_t i = 0; i < nsrc; ++i) {
           ndim += src_tp[i].get_ndim();
@@ -112,7 +112,7 @@ namespace nd {
         }
 
         callable f = elwise(m_child);
-        f->instantiate(NULL, ckb, dst_tp, dst_arrmeta, nsrc, new_src_tp.data(), new_src_arrmeta.data(), kernreq, nkwd,
+        f->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, nsrc, new_src_tp.data(), new_src_arrmeta.data(), kernreq, nkwd,
                        kwds, tp_vars);
 
         delete[] new_src_arrmeta_holder;

@@ -58,16 +58,18 @@ namespace nd {
       child->resolve_dst_type(data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
-    void instantiate(char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                     const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+    void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
+                     const std::map<std::string, ndt::type> &tp_vars) {
       const callable &child = specialize(dst_tp, nsrc, src_tp);
       if (child.is_null()) {
         std::stringstream ss;
         ss << "no suitable child for multidispatch for types " << src_tp[0] << ", and " << dst_tp << "\n";
         throw std::runtime_error(ss.str());
       }
-      child->instantiate(data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+      child->instantiate(nullptr, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
+                         tp_vars);
     }
   };
 

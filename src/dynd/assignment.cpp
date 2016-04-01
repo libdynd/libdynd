@@ -22,11 +22,10 @@ struct DYND_API _bind {
   using type = T<TypeID0, TypeID1>;
 };
 
-nd::callable make_assign()
-{
+nd::callable make_assign() {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint8_id, uint16_id, uint32_id,
-                           uint64_id, uint128_id, float32_id, float64_id, complex_float32_id, complex_float64_id>
-      numeric_ids;
+                           uint64_id, uint128_id, float32_id, float64_id, complex_float32_id,
+                           complex_float64_id> numeric_ids;
 
   ndt::type self_tp = ndt::callable_type::make(ndt::any_kind_type::make(), {ndt::any_kind_type::make()}, {"error_mode"},
                                                {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())});
@@ -105,16 +104,14 @@ DYND_API nd::callable nd::copy = nd::make_callable<nd::copy_callable>();
 
 void dynd::make_assignment_kernel(nd::kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
                                   const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-                                  const eval::eval_context *ectx)
-{
+                                  const eval::eval_context *ectx) {
   nd::array error_mode = ectx->errmode;
-  nd::assign->instantiate(NULL, ckb, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, 1, &error_mode,
+  nd::assign->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, 1, &error_mode,
                           std::map<std::string, ndt::type>());
 }
 
 void dynd::make_pod_typed_data_assignment_kernel(nd::kernel_builder *ckb, size_t data_size,
-                                                 size_t DYND_UNUSED(data_alignment), kernel_request_t kernreq)
-{
+                                                 size_t DYND_UNUSED(data_alignment), kernel_request_t kernreq) {
   // Aligned specialization tables
   switch (data_size) {
   case 1:

@@ -22,7 +22,7 @@ namespace nd {
 
     template <size_t N>
     class elwise_callable<fixed_dim_id, fixed_dim_id, N> : public base_elwise_callable<N> {
-      struct elwise_call_frame : dynd::nd::base_callable::call_frame {
+      struct elwise_call_node : dynd::nd::base_callable::call_node {
         bool broadcast_dst;
         std::array<bool, N> broadcast_src;
       };
@@ -34,7 +34,7 @@ namespace nd {
 
       void new_resolve(base_callable *parent, call_graph &cg, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                        size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-        elwise_call_frame *data = reinterpret_cast<elwise_call_frame *>(cg.back());
+        elwise_call_node *data = reinterpret_cast<elwise_call_node *>(cg.back());
 
         callable child;
         const ndt::callable_type *child_tp = child.get_type();
@@ -88,9 +88,9 @@ namespace nd {
         }
       }
 
-      void new_instantiate(dynd::nd::base_callable::call_frame *frame, kernel_builder &ckb, kernel_request_t kernreq,
+      void new_instantiate(dynd::nd::base_callable::call_node *frame, kernel_builder &ckb, kernel_request_t kernreq,
                            const char *dst_arrmeta, const char *const *src_arrmeta, size_t nkwd, const array *kwds) {
-        elwise_call_frame *data = reinterpret_cast<elwise_call_frame *>(frame);
+        elwise_call_node *data = reinterpret_cast<elwise_call_node *>(frame);
 
         intptr_t size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
         intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
@@ -172,12 +172,12 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return self->instantiate(data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+          return self->instantiate(nullptr, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                    child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
         }
 
         // Instantiate the elementwise handler
-        return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+        return child->instantiate(nullptr, NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
     };
@@ -262,11 +262,11 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return self->instantiate(data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+          return self->instantiate(nullptr, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                    child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
         }
         // Instantiate the elementwise handler
-        return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+        return child->instantiate(nullptr, NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
     };
@@ -446,11 +446,11 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return self->instantiate(data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+          return self->instantiate(nullptr, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                    child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
         }
         // All the types matched, so instantiate the elementwise handler
-        return child->instantiate(NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+        return child->instantiate(nullptr, NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
 
