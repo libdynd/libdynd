@@ -49,13 +49,13 @@ namespace nd {
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       nd::array shape = kwds[0];
       if (shape.is_na()) {
-        dst_tp = src_tp[0];
+        return src_tp[0];
       } else {
         if (shape.get_type().get_id() == pointer_id) {
           shape = shape.f("dereference");
         }
-        dst_tp = ndt::make_fixed_dim(shape.get_dim_size(), reinterpret_cast<const intptr_t *>(shape.data()),
-                                     ndt::make_type<complex<double>>());
+        return ndt::make_fixed_dim(shape.get_dim_size(), reinterpret_cast<const intptr_t *>(shape.data()),
+                                   ndt::make_type<complex<double>>());
       }
     }
 
