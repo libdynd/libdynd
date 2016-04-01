@@ -23,7 +23,7 @@ namespace nd {
         size_t naxis;
         const int *axes;
         int axis;
-        int ndim;
+        intptr_t ndim;
       };
 
       base_reduction_callable() : base_callable(ndt::type()) {}

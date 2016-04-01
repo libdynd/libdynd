@@ -49,7 +49,7 @@ namespace nd {
             new_data.keepdims = kwds[2].as<bool>();
           }
 
-          int ndim = src_tp[0].get_ndim() - m_child.get_ret_type().get_ndim();
+          intptr_t ndim = src_tp[0].get_ndim() - m_child.get_ret_type().get_ndim();
           new_data.ndim = ndim;
           new_data.axis = 0;
 
