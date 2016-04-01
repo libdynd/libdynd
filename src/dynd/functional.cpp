@@ -9,8 +9,9 @@
 #include <dynd/callables/compound_callable.hpp>
 #include <dynd/callables/constant_callable.hpp>
 #include <dynd/callables/elwise_dispatch_callable.hpp>
-#include <dynd/callables/outer_callable.hpp>
+#include <dynd/callables/map_callable.hpp>
 #include <dynd/callables/neighborhood_callable.hpp>
+#include <dynd/callables/outer_callable.hpp>
 #include <dynd/callables/reduction_callable.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 
@@ -175,6 +176,10 @@ ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp) {
   ret_tp = ndt::make_ellipsis_dim("Dims", child_tp->get_return_type());
 
   return ndt::callable_type::make(ret_tp, ndt::tuple_type::make(out_param_types), kwd_tp);
+}
+
+nd::callable nd::functional::map(const callable &child) {
+  return make_callable<map_callable>(ndt::type("(Any) -> Any"), child);
 }
 
 nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const callable &boundary_child) {
