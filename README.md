@@ -19,20 +19,20 @@ is a C++ library for dynamic, multidimensional arrays. It is inspired
 by NumPy, the Python array programming library at the core of the
 scientific Python stack, but tries to address a number of obstacles
 encountered by some of its users. Examples of this are support for
-variable-sized string and ragged array types. The library is in a
-preview development state, and can be thought of as a sandbox where
-features are being tried and tweaked to gain experience with them.
+variable-sized string and ragged array types. DyND is still
+experimental, so many of the interfaces provided here will continue
+to change. That said, feedback and bug reports are greatly appreciated.
+
+This library is actively developed together with its Python
+bindings. The Python bindings provide a good way to become familiar
+with the library from a high level perspective. See
+[the github site for the Python bindings](https://github.com/libdynd/dynd-python).
 
 C++ is a first-class target of the library, the intent is that all
-its features should be easily usable in the language. This has many
-benefits, such as that development within LibDyND using its own
-components is more natural than in a library designed primarily
-for embedding in another language.
-
-This library is being actively developed together with its Python
-bindings, which are a good way to get a taste of the library from
-a high level perspective. See
-[the Python bindings github site](https://github.com/libdynd/dynd-python).
+its features should be easily usable in the language. This approach
+makes it so that DyND can expose a more uniform interface to C++,
+Python, and hopefully other languages that eventually get bindings
+to the core DyND library.
 
 To get started as a developer of libdynd, begin by working through the
 [LibDyND Developer Guide](docs/developer-guide.md). To discuss
