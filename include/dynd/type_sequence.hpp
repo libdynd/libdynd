@@ -68,8 +68,7 @@ namespace detail {
 } // namespace dynd::detail
 
 template <typename SequenceType>
-const std::array<typename SequenceType::value_type, SequenceType::size> &i2a()
-{
+const std::array<typename SequenceType::value_type, SequenceType::size> &i2a() {
   return detail::i2a<SequenceType>::value;
 }
 
@@ -117,12 +116,10 @@ namespace detail {
   struct make_integer_sequence;
 
   template <int flags, typename T, T stop>
-  struct make_integer_sequence<flags, T, stop> : make_integer_sequence<flags, T, 0, stop> {
-  };
+  struct make_integer_sequence<flags, T, stop> : make_integer_sequence<flags, T, 0, stop> {};
 
   template <int flags, typename T, T start, T stop>
-  struct make_integer_sequence<flags, T, start, stop> : make_integer_sequence<flags, T, start, stop, 1> {
-  };
+  struct make_integer_sequence<flags, T, start, stop> : make_integer_sequence<flags, T, start, stop, 1> {};
 
   template <typename T, T start, T stop, T step>
   struct make_integer_sequence<-1, T, start, stop, step> : make_integer_sequence<(start < stop), T, start, stop, step> {
@@ -321,7 +318,7 @@ struct outer;
 
 // Work around bug in MSVC 2015 update 1 and earlier.
 // This requires many more template instantiations, so only apply it in that case.
-#if defined(_MSC_FULL_VER) && !defined(__clang__) && _MSC_FULL_VER <= 190024720
+#if defined(_MSC_FULL_VER) && !defined(__clang__) && _MSC_FULL_VER <= 190025123
 
 template <typename T0, T0 I0, typename T1, T1 I1>
 struct outer<integer_sequence<T0, I0>, integer_sequence<T1, I1>> {
@@ -347,7 +344,7 @@ struct outer<type_sequence<integer_sequence<T0, I0...>>, integer_sequence<T1, I,
           type;
 };
 
-#else // defined(_MSC_FULL_VER) && !defined(__clang__) && _MSC_FULL_VER <= 190024720
+#else // defined(_MSC_FULL_VER) && !defined(__clang__) && _MSC_FULL_VER <= 190025123
 
 template <typename T0, T0 I0, typename T1, T1... I1>
 struct outer<integer_sequence<T0, I0>, integer_sequence<T1, I1...>> {
@@ -359,7 +356,7 @@ struct outer<type_sequence<integer_sequence<T0, I0...>>, integer_sequence<T1, I1
   typedef type_sequence<integer_sequence<typename std::common_type<T0, T1>::type, I0..., I1>...> type;
 };
 
-#endif // defined(_MSC_FULL_VER) && !defined(__clang__) && _MSC_FULL_VER <= 190024720
+#endif // defined(_MSC_FULL_VER) && !defined(__clang__) && _MSC_FULL_VER <= 190025123
 
 template <typename T0, typename... T1>
 struct outer<type_sequence<T0>, type_sequence<T1...>> {
@@ -383,20 +380,17 @@ struct outer<S0, S1, S...> {
 };
 
 template <typename S, typename A0, typename... A>
-typename std::enable_if<S::size == 1 && is_integer_sequence<S>::value, void>::type for_each(A0 &&a0, A &&... a)
-{
+typename std::enable_if<S::size == 1 && is_integer_sequence<S>::value, void>::type for_each(A0 &&a0, A &&... a) {
   a0.template on_each<front<S>::value>(std::forward<A>(a)...);
 }
 
 template <typename S, typename A0, typename... A>
-typename std::enable_if<S::size == 1 && is_type_sequence<S>::value, void>::type for_each(A0 &&a0, A &&... a)
-{
+typename std::enable_if<S::size == 1 && is_type_sequence<S>::value, void>::type for_each(A0 &&a0, A &&... a) {
   a0.template on_each<typename front<S>::type>(std::forward<A>(a)...);
 }
 
 template <typename S, typename... A>
-typename std::enable_if<(S::size2() > 1), void>::type for_each(A &&... a)
-{
+typename std::enable_if<(S::size2() > 1), void>::type for_each(A &&... a) {
   for_each<typename to<S, 1>::type>(std::forward<A>(a)...);
   for_each<typename pop_front<S>::type>(std::forward<A>(a)...);
 }
