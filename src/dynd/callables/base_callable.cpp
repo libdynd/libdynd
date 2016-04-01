@@ -81,8 +81,9 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
 
     std::cout << "resolved_dst_tp = " << resolved_dst_tp << std::endl;
     std::cout << "expected dst_tp = " << dst_tp << std::endl;
-    std::exit(-1);
+    throw std::runtime_error("different types");
   }
+
 
   // Allocate the destination array
   array dst = empty(dst_tp);

@@ -20,10 +20,18 @@ namespace nd {
     public:
       outer_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
-      ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp,
-                        size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
-                        const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-        return dst_tp;
+      ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
+                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
+                        const std::map<std::string, ndt::type> &tp_vars) {
+        ndt::type tp = m_child->resolve(this, cg, dst_tp.is_symbolic() ? m_child.get_ret_type() : dst_tp, nsrc, src_tp,
+                                        nkwd, kwds, tp_vars);
+        for (intptr_t i = nsrc - 1; i >= 0; --i) {
+          if (!src_tp[i].is_scalar()) {
+            tp = src_tp[i].with_replaced_dtype(tp);
+          }
+        }
+
+        return tp;
       }
 
       void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,

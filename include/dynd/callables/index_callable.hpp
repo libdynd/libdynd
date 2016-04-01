@@ -31,11 +31,11 @@ namespace nd {
 
     index_callable() : base_callable(ndt::type("(Any, i: Any) -> Any")) {}
 
-    ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp,
-                      size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+    ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &DYND_UNUSED(dst_tp),
+                      size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t DYND_UNUSED(nkwd),
                       const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       cg.emplace_back(this);
-      return dst_tp;
+      return src_tp[0];
     }
 
     char *data_init(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
@@ -85,11 +85,13 @@ namespace nd {
       return reinterpret_cast<char *>(new data_type(kwds[0]));
     }
 
-    ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp,
-                      size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
-                      const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+    ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
+                      const ndt::type *src_tp, size_t nkwd, const array *kwds,
+                      const std::map<std::string, ndt::type> &tp_vars) {
       cg.emplace_back(this);
-      return dst_tp;
+
+      ndt::type child_src_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
+      return index->resolve(this, cg, dst_tp, nsrc, &child_src_tp, nkwd, kwds, tp_vars);
     }
 
     void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
