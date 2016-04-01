@@ -37,67 +37,72 @@ namespace nd {
 
       callable &get_child(base_callable *parent);
 
-      ndt::type resolve(base_callable *caller, call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
-                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
+      ndt::type resolve(base_callable *caller, call_graph &cg, const ndt::type &res_tp, size_t DYND_UNUSED(narg),
+                        const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
 
         callable &child = get_child(caller);
-        const ndt::callable_type *child_tp = child.get_type();
+        const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
 
-        // need to get the maximum ndim of the src_tp
-
+        std::array<intptr_t, N> arg_size;
+        std::array<intptr_t, N> arg_ndim;
         intptr_t max_ndim = 0;
         for (size_t i = 0; i < N; ++i) {
-          intptr_t ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
-          if (ndim > max_ndim) {
-            max_ndim = ndim;
-          }
-        }
-
-        bool dst_variadic = dst_tp.is_variadic();
-        intptr_t dst_size;
-        ndt::type dst_element_tp;
-        if (dst_variadic) {
-          dst_size = 1;
-          for (size_t i = 0; i < N && dst_size == 1; ++i) {
-            if (src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim() == max_ndim) {
-              dst_size = src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+          arg_ndim[i] = arg_tp[i].get_ndim() - child_arg_tp[i].get_ndim();
+          if (arg_ndim[i] == 0) {
+            arg_size[i] = 1;
+          } else {
+            arg_size[i] = arg_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+            if (arg_ndim[i] > max_ndim) {
+              max_ndim = arg_ndim[i];
             }
           }
-          dst_element_tp = dst_tp;
-        } else {
-          dst_size = dst_tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
-          dst_element_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         }
 
-        bool finished = true;
+        bool res_variadic = res_tp.is_variadic();
+        intptr_t res_size;
+        ndt::type res_element_tp;
+        if (res_variadic) {
+          res_size = 1;
+          for (size_t i = 0; i < N && res_size == 1; ++i) {
+            if (arg_ndim[i] == max_ndim) {
+              res_size = arg_size[i];
+            }
+          }
+          res_element_tp = res_tp;
+        } else {
+          res_size = res_tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+          res_element_tp = res_tp.extended<ndt::fixed_dim_type>()->get_element_type();
+        }
 
-        std::array<bool, N> src_broadcast;
-        std::array<ndt::type, N> src_element_tp;
+        std::array<bool, N> arg_broadcast;
+        std::array<ndt::type, N> arg_element_tp;
+        bool callback = true;
         for (size_t i = 0; i < N; ++i) {
-          if (src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim() == max_ndim) {
-            src_broadcast[i] = false;
-            intptr_t size = src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
-            if (dst_size != size && size != 1) {
+          if (arg_ndim[i] == max_ndim) {
+            arg_broadcast[i] = false;
+            if (res_size != arg_size[i] && arg_size[i] != 1) {
               throw std::runtime_error("broadcast error");
             }
-            src_element_tp[i] = src_tp[i].extended<ndt::fixed_dim_type>()->get_element_type();
+            arg_element_tp[i] = arg_tp[i].extended<ndt::fixed_dim_type>()->get_element_type();
           } else {
-            src_broadcast[i] = true;
-            src_element_tp[i] = src_tp[i];
+            arg_broadcast[i] = true;
+            arg_element_tp[i] = arg_tp[i];
           }
-          finished &= src_element_tp[i].get_ndim() == child_tp->get_pos_type(i).get_ndim();
+          if (arg_element_tp[i].get_ndim() != child_arg_tp[i].get_ndim()) {
+            callback = true;
+          }
         }
 
-        if (finished) {
+        if (callback) {
           return ndt::make_type<ndt::fixed_dim_type>(
-              dst_size, child->resolve(this, cg, dst_variadic ? child_tp->get_return_type() : dst_element_tp, nsrc,
-                                       src_element_tp.data(), nkwd, kwds, tp_vars));
+              res_size, caller->resolve(this, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
         }
 
         return ndt::make_type<ndt::fixed_dim_type>(
-            dst_size, caller->resolve(this, cg, dst_element_tp, nsrc, src_element_tp.data(), nkwd, kwds, tp_vars));
+            res_size, child->resolve(this, cg, res_variadic ? child.get_ret_type() : res_element_tp, N,
+                                     arg_element_tp.data(), nkwd, kwds, tp_vars));
       }
 
       void new_resolve(base_callable *parent, call_graph &cg, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,

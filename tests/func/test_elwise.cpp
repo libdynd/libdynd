@@ -22,7 +22,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(Elwise, Nullary_FixedDim) {
+TEST(Elwise, NullaryResolve) {
   nd::callable f = nd::functional::elwise([]() { return double(); });
 
   ndt::type tp = f.resolve(ndt::make_type<double>(), {}, {});
@@ -35,7 +35,7 @@ TEST(Elwise, Nullary_FixedDim) {
   EXPECT_EQ(ndt::make_type<double[3][9]>(), tp);
 }
 
-TEST(Elwise, Resolve_FixedDim_FixedDim) {
+TEST(Elwise, BinaryResolve) {
   nd::callable f = nd::functional::elwise([](int, float) { return double(); });
 
   ndt::type tp = f.resolve({ndt::make_type<int[3]>(), ndt::make_type<float>()}, {});
@@ -95,6 +95,9 @@ TEST(Elwise, Resolve_FixedDim_FixedDim) {
 
   tp = f.resolve({ndt::make_type<int[10]>(), ndt::make_type<float[10]>()}, {});
   EXPECT_EQ(ndt::make_type<double[10]>(), tp);
+
+  tp = f.resolve({ndt::make_type<int[3][10]>(), ndt::make_type<float[3]>()}, {});
+  EXPECT_EQ(ndt::make_type<double[3]>(), tp);
 }
 
 TEST(Elwise, UnaryFixedDim) {
