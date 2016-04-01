@@ -30,7 +30,7 @@ namespace nd {
 
     template <bool real_to_complex>
     typename std::enable_if<real_to_complex, ndt::type>::type
-    resolve_dst_type_(const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+    resolve_dst_type_(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       nd::array shape = kwds[0];
@@ -44,7 +44,7 @@ namespace nd {
 
     template <bool real_to_complex>
     typename std::enable_if<!real_to_complex, ndt::type>::type
-    resolve_dst_type_(const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+    resolve_dst_type_(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       nd::array shape = kwds[0];
