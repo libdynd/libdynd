@@ -49,7 +49,7 @@ namespace nd {
 
         intptr_t max_ndim = 0;
         for (size_t i = 0; i < N; ++i) {
-          intptr_t ndim = src_tp[i].get_ndim();
+          intptr_t ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
           if (ndim > max_ndim) {
             max_ndim = ndim;
           }
@@ -61,7 +61,7 @@ namespace nd {
         if (dst_variadic) {
           dst_size = 1;
           for (size_t i = 0; i < N && dst_size == 1; ++i) {
-            if (src_tp[i].get_ndim() == max_ndim) {
+            if (src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim() == max_ndim) {
               dst_size = src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
             }
           }
@@ -76,7 +76,7 @@ namespace nd {
         std::array<bool, N> src_broadcast;
         std::array<ndt::type, N> src_element_tp;
         for (size_t i = 0; i < N; ++i) {
-          if (src_tp[i].get_ndim() == max_ndim) {
+          if (src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim() == max_ndim) {
             src_broadcast[i] = false;
             intptr_t size = src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
             if (dst_size != size && size != 1) {
