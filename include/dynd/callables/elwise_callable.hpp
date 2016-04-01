@@ -43,6 +43,7 @@ namespace nd {
         cg.emplace_back(this);
 
         callable &child = get_child(caller);
+        const ndt::type &child_ret_tp = child.get_ret_type();
         const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
 
         std::array<intptr_t, N> arg_size;
@@ -72,6 +73,9 @@ namespace nd {
           }
           res_element_tp = res_tp;
         } else {
+          if (res_tp.get_ndim() - child_ret_tp.get_ndim() > max_ndim) {
+            max_ndim = res_tp.get_ndim() - child_ret_tp.get_ndim();
+          }
           res_size = res_tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
           res_element_tp = res_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         }
@@ -277,6 +281,7 @@ namespace nd {
         cg.emplace_back(this);
 
         callable &child = get_child(caller);
+        const ndt::type &child_ret_tp = child.get_ret_type();
         const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
 
         std::array<intptr_t, N> arg_size;
@@ -306,6 +311,11 @@ namespace nd {
           }
           res_element_tp = res_tp;
         } else {
+          if (res_tp.get_ndim() - child_ret_tp.get_ndim() > max_ndim) {
+            max_ndim = res_tp.get_ndim() - child_ret_tp.get_ndim();
+          } else if (res_tp.get_ndim() - child_ret_tp.get_ndim() < max_ndim) {
+            throw std::runtime_error("broadcast error");
+          }
           res_size = res_tp.extended<ndt::base_dim_type>()->get_dim_size();
           res_element_tp = res_tp.extended<ndt::base_dim_type>()->get_element_type();
         }
@@ -456,6 +466,7 @@ namespace nd {
         cg.emplace_back(this);
 
         callable &child = get_child(caller);
+        const ndt::type &child_ret_tp = child.get_ret_type();
         const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
 
         std::array<intptr_t, N> arg_size;
@@ -485,6 +496,9 @@ namespace nd {
           }
           res_element_tp = res_tp;
         } else {
+          if (res_tp.get_ndim() - child_ret_tp.get_ndim() > max_ndim) {
+            max_ndim = res_tp.get_ndim() - child_ret_tp.get_ndim();
+          }
           res_size = res_tp.extended<ndt::base_dim_type>()->get_dim_size();
           res_element_tp = res_tp.extended<ndt::base_dim_type>()->get_element_type();
         }

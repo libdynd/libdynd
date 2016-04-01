@@ -30,7 +30,11 @@ namespace nd {
                         const std::map<std::string, ndt::type> &tp_vars) {
         const ndt::callable_type *child_tp = m_child.get_type();
 
+        bool dst_variadic = dst_tp.is_variadic();
         bool all_same = true;
+        if (!dst_tp.is_symbolic()) {
+          all_same = dst_tp.get_ndim() == child_tp->get_return_type().get_ndim();
+        }
         for (size_t i = 0; i < nsrc; ++i) {
           if (src_tp[i].get_ndim() != child_tp->get_pos_type(i).get_ndim()) {
             all_same = false;
@@ -39,8 +43,9 @@ namespace nd {
         }
 
         if (all_same) {
-          return m_child->resolve(this,nullptr, cg, dst_tp.is_symbolic() ? m_child.get_type()->get_return_type() : dst_tp, nsrc,
-                                  src_tp, nkwd, kwds, tp_vars);
+          return m_child->resolve(this, nullptr, cg,
+                                  dst_tp.is_symbolic() ? m_child.get_type()->get_return_type() : dst_tp, nsrc, src_tp,
+                                  nkwd, kwds, tp_vars);
         }
 
         // Do a pass through the src types to classify them
@@ -65,10 +70,10 @@ namespace nd {
           }
         }
 
-        if (src_all_strided) {
+        if ((dst_variadic || dst_tp.get_id() == fixed_dim_id) && src_all_strided) {
           static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, N>>();
           return f->resolve(this, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-        } else if (src_all_var) {
+        } else if ((dst_variadic || dst_tp.get_id() == var_dim_id) && src_all_var) {
           static callable f = make_callable<elwise_callable<var_dim_id, fixed_dim_id, N>>();
           return f->resolve(this, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else if (src_all_strided_or_var) {
@@ -88,7 +93,7 @@ namespace nd {
         throw std::runtime_error(ss.str());
       }
 
-      void new_resolve(base_callable *DYND_UNUSED(parent),  call_graph &g, ndt::type &dst_tp, intptr_t nsrc,
+      void new_resolve(base_callable *DYND_UNUSED(parent), call_graph &g, ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
         //        m_child->new_resolve(stack, nkwd, kwds, tp_vars);
