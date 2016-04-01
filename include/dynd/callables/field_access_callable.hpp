@@ -21,8 +21,9 @@ namespace nd {
       dst_tp = get_field_type(src_tp, kwds);
     }
 
-    ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &DYND_UNUSED(res_tp),
-                      size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t DYND_UNUSED(nkwd), const array *kwds,
+    ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
+                      const ndt::type &DYND_UNUSED(res_tp), size_t DYND_UNUSED(narg), const ndt::type *arg_tp,
+                      size_t DYND_UNUSED(nkwd), const array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       cg.emplace_back(this);
       return get_field_type(arg_tp, kwds);
@@ -66,7 +67,7 @@ namespace nd {
               ndt::callable_type::make(ndt::type("Any"), ndt::tuple_type::make(), ndt::struct_type::make("self"))),
           m_i(i) {}
 
-    ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &DYND_UNUSED(res_tp),
+    ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg, const ndt::type &DYND_UNUSED(res_tp),
                       size_t DYND_UNUSED(narg), const ndt::type *DYND_UNUSED(arg_tp), size_t DYND_UNUSED(nkwd),
                       const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       cg.emplace_back(this);

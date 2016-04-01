@@ -64,7 +64,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   */
 
   call_graph g;
-  ndt::type resolved_dst_tp = resolve(nullptr, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+  ndt::type resolved_dst_tp = resolve(nullptr, nullptr, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Allocate, then initialize, the data
   char *data = data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
@@ -75,15 +75,14 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   }
 
   if (resolved_dst_tp != dst_tp) {
-//    for (int i = 0; i < nsrc; ++i) {
-  //    std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
+    //    for (int i = 0; i < nsrc; ++i) {
+    //    std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
     //}
 
-//    std::cout << "resolved_dst_tp = " << resolved_dst_tp << std::endl;
-  //  std::cout << "expected dst_tp = " << dst_tp << std::endl;
+    //    std::cout << "resolved_dst_tp = " << resolved_dst_tp << std::endl;
+    //  std::cout << "expected dst_tp = " << dst_tp << std::endl;
     throw std::runtime_error("different types");
   }
-
 
   // Allocate the destination array
   array dst = empty(dst_tp);

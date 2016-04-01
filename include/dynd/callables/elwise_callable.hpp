@@ -37,8 +37,8 @@ namespace nd {
 
       callable &get_child(base_callable *parent);
 
-      ndt::type resolve(base_callable *caller, call_graph &cg, const ndt::type &res_tp, size_t DYND_UNUSED(narg),
-                        const ndt::type *arg_tp, size_t nkwd, const array *kwds,
+      ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &res_tp,
+                        size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
 
@@ -97,11 +97,12 @@ namespace nd {
 
         if (callback) {
           return ndt::make_type<ndt::fixed_dim_type>(
-              res_size, caller->resolve(this, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
+              res_size,
+              caller->resolve(this, nullptr, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
         }
 
         return ndt::make_type<ndt::fixed_dim_type>(
-            res_size, child->resolve(this, cg, res_variadic ? child.get_ret_type() : res_element_tp, N,
+            res_size, child->resolve(this, nullptr, cg, res_variadic ? child.get_ret_type() : res_element_tp, N,
                                      arg_element_tp.data(), nkwd, kwds, tp_vars));
       }
 
@@ -270,8 +271,8 @@ namespace nd {
 
       callable &get_child(base_callable *parent);
 
-      ndt::type resolve(base_callable *caller, call_graph &cg, const ndt::type &res_tp, size_t DYND_UNUSED(narg),
-                        const ndt::type *arg_tp, size_t nkwd, const array *kwds,
+      ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &res_tp,
+                        size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
 
@@ -331,20 +332,21 @@ namespace nd {
         if (callback) {
           if (res_size == 1) {
             return ndt::make_type<ndt::var_dim_type>(
-                caller->resolve(this, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
+                caller->resolve(this, nullptr, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
           } else {
             return ndt::make_type<ndt::fixed_dim_type>(
-                res_size, caller->resolve(this, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
+                res_size,
+                caller->resolve(this, nullptr, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
           }
         }
 
         if (res_size == 1) {
-          return ndt::make_type<ndt::var_dim_type>(child->resolve(this, cg,
+          return ndt::make_type<ndt::var_dim_type>(child->resolve(this, nullptr, cg,
                                                                   res_variadic ? child.get_ret_type() : res_element_tp,
                                                                   N, arg_element_tp.data(), nkwd, kwds, tp_vars));
         } else {
           return ndt::make_type<ndt::fixed_dim_type>(
-              res_size, child->resolve(this, cg, res_variadic ? child.get_ret_type() : res_element_tp, N,
+              res_size, child->resolve(this, nullptr, cg, res_variadic ? child.get_ret_type() : res_element_tp, N,
                                        arg_element_tp.data(), nkwd, kwds, tp_vars));
         }
       }
@@ -448,8 +450,8 @@ namespace nd {
 
       callable &get_child(base_callable *parent);
 
-      ndt::type resolve(base_callable *caller, call_graph &cg, const ndt::type &res_tp, size_t DYND_UNUSED(narg),
-                        const ndt::type *arg_tp, size_t nkwd, const array *kwds,
+      ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &res_tp,
+                        size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
 
@@ -508,10 +510,10 @@ namespace nd {
 
         if (callback) {
           return ndt::make_type<ndt::var_dim_type>(
-              caller->resolve(this, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
+              caller->resolve(this, nullptr, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars));
         }
 
-        return ndt::make_type<ndt::var_dim_type>(child->resolve(this, cg,
+        return ndt::make_type<ndt::var_dim_type>(child->resolve(this, nullptr, cg,
                                                                 res_variadic ? child.get_ret_type() : res_element_tp, N,
                                                                 arg_element_tp.data(), nkwd, kwds, tp_vars));
       }
