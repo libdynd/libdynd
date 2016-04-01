@@ -29,6 +29,7 @@ namespace nd {
       ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &DYND_UNUSED(dst_tp),
                         size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
+/*
         const array &axes = kwds[0];
         int naxis;
         if (axes.is_na()) {
@@ -41,9 +42,10 @@ namespace nd {
         } else {
           keepdims = kwds[2].as<bool>();
         }
+*/
 
         const ndt::type &child_ret_tp = m_child.get_ret_type();
-        std::cout << child_ret_tp << std::endl;
+//        std::cout << child_ret_tp << std::endl;
 
         intptr_t ndim = src_tp[0].get_ndim() - child_ret_tp.get_ndim();
         ndt::type child_arg_tp[1] = {src_tp[0]};
