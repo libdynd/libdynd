@@ -20,8 +20,8 @@ namespace nd {
                       const ndt::type *src_tp, size_t nkwd, const array *kwds,
                       const std::map<std::string, ndt::type> &tp_vars) {
       const callable &child = specialize(dst_tp, nsrc, src_tp);
-      return child->resolve(this, cg, dst_tp.is_symbolic() ? child.get_type()->get_return_type() : dst_tp, nsrc, src_tp,
-                            nkwd, kwds, tp_vars);
+      return child->resolve(this, cg, dst_tp.is_symbolic() ? child.get_ret_type() : dst_tp, nsrc, src_tp, nkwd, kwds,
+                            tp_vars);
     }
 
     void new_resolve(base_callable *DYND_UNUSED(parent), call_graph &g, ndt::type &dst_tp, intptr_t nsrc,

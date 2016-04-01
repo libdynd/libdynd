@@ -15,10 +15,10 @@ namespace nd {
   public:
     call_callable(const ndt::type &tp) : base_callable(tp) {}
 
-    ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &DYND_UNUSED(cg), const ndt::type &dst_tp,
-                      size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
-                      const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      return dst_tp;
+    ndt::type resolve(base_callable *DYND_UNUSED(caller), call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
+                      const ndt::type *src_tp, size_t nkwd, const array *kwds,
+                      const std::map<std::string, ndt::type> &tp_vars) {
+      return Callable->resolve(this, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
     char *data_init(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
