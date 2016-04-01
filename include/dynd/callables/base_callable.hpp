@@ -336,5 +336,7 @@ namespace nd {
     }
   };
 
+  typedef typename base_callable::call_node call_node;
+
 } // namespace dynd::nd
 } // namespace dynd
