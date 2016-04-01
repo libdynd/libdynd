@@ -27,22 +27,26 @@ namespace nd {
 
     template <size_t N>
     class elwise_callable<fixed_dim_id, fixed_dim_id, N> : public base_callable {
+      struct data_type {
+        callable &child;
+      };
+
       struct elwise_call_frame : call_frame {
         bool broadcast_dst;
         std::array<bool, N> broadcast_src;
       };
 
     public:
-      elwise_callable() : base_callable(ndt::type(), sizeof(elwise_call_frame)) {}
+      elwise_callable() : base_callable(ndt::type()) {}
 
       callable &get_child(base_callable *parent);
 
-      ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &res_tp,
+      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp,
                         size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back(this);
 
-        callable &child = get_child(caller);
+        callable &child = reinterpret_cast<data_type *>(data)->child;
         const ndt::type &child_ret_tp = child.get_ret_type();
         const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
 

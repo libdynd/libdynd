@@ -128,7 +128,7 @@ nd::call_graph::call_graph(base_callable *callee)
     : m_data(m_static_data), m_capacity(sizeof(m_static_data)), m_size(0) {
 
   size_t offset = m_size;
-  m_size += aligned_size(callee->get_frame_size());
+  m_size += aligned_size(sizeof(base_callable::call_frame));
   reserve(m_size);
   new (this->get_at<base_callable::call_frame>(offset)) base_callable::call_frame(callee);
 
@@ -142,7 +142,7 @@ void nd::call_graph::emplace_back(base_callable *callee) {
   m_back_offset = m_size;
 
   size_t offset = m_size;
-  m_size += aligned_size(callee->get_frame_size());
+  m_size += aligned_size(sizeof(base_callable::call_frame));
   reserve(m_size);
   new (this->get_at<base_callable::call_frame>(offset)) base_callable::call_frame(callee);
 }
