@@ -82,11 +82,6 @@ void dynd::make_tuple_identical_assignment_kernel(nd::kernel_builder *ckb, const
     ss << "make_tuple_identical_assignment_kernel: provided type " << val_tup_tp << " is not of tuple or struct kind";
     throw runtime_error(ss.str());
   }
-  if (val_tup_tp.is_pod()) {
-    // For POD structs, get a trivial memory copy kernel
-    make_pod_typed_data_assignment_kernel(ckb, val_tup_tp.get_data_size(), val_tup_tp.get_data_alignment(), kernreq);
-    return;
-  }
 
   auto sd = val_tup_tp.extended<ndt::tuple_type>();
   intptr_t field_count = sd->get_field_count();

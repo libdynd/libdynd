@@ -109,25 +109,3 @@ void dynd::make_assignment_kernel(nd::kernel_builder *ckb, const ndt::type &dst_
   nd::assign->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, 1, &error_mode,
                           std::map<std::string, ndt::type>());
 }
-
-void dynd::make_pod_typed_data_assignment_kernel(nd::kernel_builder *ckb, size_t data_size,
-                                                 size_t DYND_UNUSED(data_alignment), kernel_request_t kernreq) {
-  // Aligned specialization tables
-  switch (data_size) {
-  case 1:
-    ckb->emplace_back<nd::trivial_copy_kernel<1>>(kernreq);
-    break;
-  case 2:
-    ckb->emplace_back<nd::trivial_copy_kernel<2>>(kernreq);
-    break;
-  case 4:
-    ckb->emplace_back<nd::trivial_copy_kernel<4>>(kernreq);
-    break;
-  case 8:
-    ckb->emplace_back<nd::trivial_copy_kernel<8>>(kernreq);
-    break;
-  default:
-    ckb->emplace_back<nd::unaligned_copy_ck>(kernreq, data_size);
-    break;
-  }
-}

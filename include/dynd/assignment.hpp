@@ -674,17 +674,4 @@ inline void make_assignment_kernel(nd::kernel_builder *ckb, const ndt::type &dst
   make_assignment_kernel(ckb, dst_tp, dst_arrmeta, *src_tp, *src_arrmeta, kernreq, ectx);
 }
 
-/**
- * Creates an assignment kernel when the src and the dst are the same,
- * and are POD (plain old data).
- *
- * \param ckb  The hierarchical assignment kernel being constructed.
- * \param ckb_offset  The offset within 'ckb'.
- * \param data_size  The size of the data being assigned.
- * \param data_alignment  The alignment of the data being assigned.
- * \param kernreq  What kind of kernel must be placed in 'ckb'.
- */
-DYND_API void make_pod_typed_data_assignment_kernel(nd::kernel_builder *ckb, size_t data_size, size_t data_alignment,
-                                                    kernel_request_t kernreq);
-
 } // namespace dynd
