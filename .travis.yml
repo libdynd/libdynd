@@ -18,6 +18,7 @@ cache:
 matrix:
   include:
   - compiler: gcc
+    sudo: required
     env: VALGRIND DYND_FFTW=ON
     addons:
       apt:
