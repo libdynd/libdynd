@@ -277,7 +277,9 @@ namespace nd {
       }
     }
 
-    void *get() const { return reinterpret_cast<void *>(m_data); }
+    typename base_callable::call_node *get() const {
+      return reinterpret_cast<typename base_callable::call_node *>(m_data);
+    }
 
     /**
      * For use during construction, gets the ckernel component
@@ -318,6 +320,16 @@ namespace nd {
       m_size += aligned_size(size);
       reserve(m_size);
     }
+    /**
+     * Creates the kernel, and increments ``m_size`` to the position after it.
+     */
+    template <typename NodeType, typename... ArgTypes>
+    NodeType *emplace_back(ArgTypes &&... args) {
+      size_t offset = m_size;
+      m_size += aligned_size(sizeof(NodeType));
+      reserve(m_size);
+      return new (this->get_at<NodeType>(offset)) NodeType(std::forward<ArgTypes>(args)...);
+    }
 
     DYND_API void emplace_back(base_callable *callee);
 
@@ -337,6 +349,10 @@ namespace nd {
   };
 
   typedef typename base_callable::call_node call_node;
+
+  inline call_node *next(call_node *node) {
+    return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) + aligned_size(node->callee->get_frame_size()));
+  }
 
 } // namespace dynd::nd
 } // namespace dynd

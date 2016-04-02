@@ -22,15 +22,22 @@ namespace nd {
         callable &child;
       };
 
+      struct node_type : call_node {
+        using call_node::call_node;
+
+        std::array<bool, N> arg_broadcast;
+        std::array<bool, N> arg_var;
+      };
+
     public:
-      base_elwise_callable() : base_callable(ndt::type()) {}
+      base_elwise_callable() : base_callable(ndt::type(), sizeof(node_type)) {}
 
       virtual ndt::type with_ret_type(intptr_t ret_size, const ndt::type &ret_element_tp) = 0;
 
       ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp,
                         size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
-        cg.emplace_back(this);
+        node_type *node = cg.emplace_back<node_type>(this);
 
         callable &child = reinterpret_cast<data_type *>(data)->child;
         const ndt::type &child_ret_tp = child.get_ret_type();
@@ -49,6 +56,10 @@ namespace nd {
               max_ndim = arg_ndim[i];
             }
           }
+        }
+
+        for (size_t i = 0; i < N; ++i) {
+          node->arg_var[i] = arg_size[i] == -1;
         }
 
         bool res_variadic = res_tp.is_variadic();
@@ -73,18 +84,17 @@ namespace nd {
           res_element_tp = res_tp.extended<ndt::base_dim_type>()->get_element_type();
         }
 
-        std::array<bool, N> arg_broadcast;
         std::array<ndt::type, N> arg_element_tp;
         bool callback = ret_ndim > 1;
         for (size_t i = 0; i < N; ++i) {
           if (arg_ndim[i] == max_ndim) {
-            arg_broadcast[i] = false;
+            node->arg_broadcast[i] = false;
             if (arg_size[i] != -1 && res_size != -1 && res_size != arg_size[i] && arg_size[i] != 1) {
               throw std::runtime_error("broadcast error");
             }
             arg_element_tp[i] = arg_tp[i].extended<ndt::base_dim_type>()->get_element_type();
           } else {
-            arg_broadcast[i] = true;
+            node->arg_broadcast[i] = true;
             arg_element_tp[i] = arg_tp[i];
           }
           if (arg_element_tp[i].get_ndim() != child_arg_tp[i].get_ndim()) {

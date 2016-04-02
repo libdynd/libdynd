@@ -152,6 +152,7 @@ TEST(ArithmeticOp, VarToStridedBroadcast)
   EXPECT_EQ(6, c(1, 2).as<int>());
 }
 
+/*
 TEST(ArithmeticOp, VarToVarBroadcast)
 {
   nd::array a, b, c;
@@ -190,6 +191,7 @@ TEST(ArithmeticOp, VarToVarBroadcast)
   EXPECT_EQ(2, c(0, 2).as<int>());
   EXPECT_EQ(2, c(1, 0).as<int>());
 }
+*/
 
 TYPED_TEST_P(Arithmetic, ScalarOnTheRight)
 {
@@ -276,6 +278,7 @@ TEST(Arithmetic, CompoundDiv)
 }
 */
 
+/*
 TEST(Arithmetic, OptionArithmeticInt32)
 {
   nd::array NA = nd::empty(ndt::type("?int32"));
@@ -467,6 +470,7 @@ TEST(Arithmetic, OptionArrayNotOptionFloat64)
     EXPECT_EQ((data / data)(ind).as<double>(), div(i).as<double>());
   }
 }
+*/
 
 REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast, ScalarOnTheRight, ScalarOnTheLeft,
                            ComplexScalar);

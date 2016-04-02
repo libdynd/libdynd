@@ -66,8 +66,8 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
       return dst;
     }
   */
-  call_graph g;
-  ndt::type resolved_dst_tp = resolve(nullptr, nullptr, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+  call_graph cg;
+  ndt::type resolved_dst_tp = resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Allocate, then initialize, the data
   char *data = data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
@@ -86,8 +86,8 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
-  instantiate(nullptr, data, &ckb, dst_tp, dst->metadata(), nsrc, src_tp, src_arrmeta, kernel_request_call, nkwd, kwds,
-              tp_vars);
+  cg.get()->callee->instantiate(cg.get(), data, &ckb, dst_tp, dst->metadata(), nsrc, src_tp, src_arrmeta,
+                                kernel_request_call, nkwd, kwds, tp_vars);
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
   fn(ckb.get(), &dst, src_data);
 
