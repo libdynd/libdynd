@@ -45,27 +45,6 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
 nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                                   const char *const *src_arrmeta, const array *src_data, intptr_t nkwd,
                                   const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-
-  /*
-    if (m_new_style) {
-      call_graph g;
-      if (!is_abstract()) {
-        g.emplace_back(this);
-      }
-      new_resolve(nullptr, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-
-      kernel_builder ckb;
-      array dst = empty(dst_tp);
-
-      call_frame *frame = reinterpret_cast<call_frame *>(g.get());
-      frame->callee->new_instantiate(frame, ckb, kernel_request_call, dst->metadata(), src_arrmeta, nkwd, kwds);
-
-      kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
-      fn(ckb.get(), &dst, src_data);
-
-      return dst;
-    }
-  */
   call_graph cg;
   ndt::type resolved_dst_tp = resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
@@ -81,12 +60,12 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
     throw std::runtime_error("different types");
   }
 
-/*
-  std::cout << "resolved_dst_tp = " << resolved_dst_tp << std::endl;
-  for (int i = 0; i < nsrc; ++i) {
-    std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
-  }
-*/
+  /*
+    std::cout << "resolved_dst_tp = " << resolved_dst_tp << std::endl;
+    for (int i = 0; i < nsrc; ++i) {
+      std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
+    }
+  */
 
   // Allocate the destination array
   array dst = empty(resolved_dst_tp);
