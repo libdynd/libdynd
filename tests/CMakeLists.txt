@@ -42,7 +42,7 @@ set(tests_SRC
     types/test_pointer_type.cpp
     types/test_scalar_kind_type.cpp
     types/test_string_type.cpp
-#    types/test_struct_type.cpp
+    types/test_struct_type.cpp
 #    types/test_symbolic_types.cpp
 #    types/test_tuple_type.cpp
 #    types/test_type.cpp
