@@ -56,12 +56,11 @@ namespace nd {
         }
 
         // Do a pass through the src types to classify them
-        bool src_all_strided = true, src_all_strided_or_var = true, src_all_var = true;
+        bool src_all_strided = true, src_all_strided_or_var = true;
         for (size_t i = 0; i < nsrc; ++i) {
           intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
           switch (src_tp[i].get_id()) {
           case fixed_dim_id:
-            src_all_var = false;
             break;
           case var_dim_id:
             src_all_strided = false;
@@ -71,7 +70,6 @@ namespace nd {
             // a strided dimension
             if (src_ndim > 0) {
               src_all_strided_or_var = false;
-              src_all_var = false;
             }
             break;
           }
