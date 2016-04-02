@@ -63,10 +63,12 @@ namespace nd {
  * \param src_arrmeta  An array with one src arrmeta for each field.
  * \param kernreq  What kind of ckernel to create (single, strided).
  */
+/*
 DYND_API void make_tuple_unary_op_ckernel(const nd::base_callable *af, const ndt::callable_type *af_tp,
                                           nd::kernel_builder *ckb, intptr_t field_count, const uintptr_t *dst_offsets,
                                           const ndt::type *dst_tp, const char *const *dst_arrmeta,
                                           const uintptr_t *src_offsets, const ndt::type *src_tp,
                                           const char *const *src_arrmeta, kernel_request_t kernreq);
+*/
 
 } // namespace dynd
