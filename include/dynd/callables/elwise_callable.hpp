@@ -265,8 +265,6 @@ namespace nd {
                        const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                        const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
-        intptr_t target_alignment = 1;
-
         const ndt::var_dim_type::metadata_type *dst_md =
             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta);
 
@@ -275,31 +273,31 @@ namespace nd {
         std::array<intptr_t, N> src_offset;
         std::array<intptr_t, N> src_size;
         for (size_t i = 0; i < N; ++i) {
-          if (reinterpret_cast<node_type *>(node)->arg_broadcast[i] &&
-              !reinterpret_cast<node_type *>(node)->arg_var[i]) {
-            src_stride[i] = 0;
-            src_offset[i] = 0;
-            src_size[i] = 1;
-            child_src_arrmeta[i] = src_arrmeta[i];
-          } else if (!reinterpret_cast<node_type *>(node)->arg_broadcast[i] &&
-                     !reinterpret_cast<node_type *>(node)->arg_var[i]) {
-            src_offset[i] = 0;
-            src_size[i] = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
-            src_stride[i] = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
-
-          } else {
+          if (reinterpret_cast<node_type *>(node)->arg_var[i]) {
             const ndt::var_dim_type::metadata_type *src_md =
                 reinterpret_cast<const ndt::var_dim_type::metadata_type *>(src_arrmeta[i]);
-
             src_stride[i] = src_md->stride;
             src_offset[i] = src_md->offset;
             child_src_arrmeta[i] = src_arrmeta[i] + sizeof(ndt::var_dim_type::metadata_type);
+//            src_size[i] = -1;
+          } else {
+            if (reinterpret_cast<node_type *>(node)->arg_broadcast[i]) {
+              src_stride[i] = 0;
+              src_offset[i] = 0;
+              child_src_arrmeta[i] = src_arrmeta[i];
+              src_size[i] = 1;
+            } else {
+              src_offset[i] = 0;
+              src_stride[i] = reinterpret_cast<const size_stride_t *>(src_arrmeta[i])->stride;
+              src_size[i] = reinterpret_cast<const size_stride_t *>(src_arrmeta[i])->dim_size;
+            }
           }
         }
 
         ckb->emplace_back<elwise_kernel<var_dim_id, fixed_dim_id, N>>(
-            kernreq, dst_md->blockref.get(), target_alignment, dst_md->stride, dst_md->offset, src_stride.data(),
-            src_offset.data(), src_size.data(), reinterpret_cast<node_type *>(node)->arg_var.data());
+            kernreq, dst_md->blockref.get(), reinterpret_cast<node_type *>(node)->res_alignment, dst_md->stride,
+            dst_md->offset, src_stride.data(), src_offset.data(), src_size.data(),
+            reinterpret_cast<node_type *>(node)->arg_var.data());
 
         node = next(node);
         node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), N,

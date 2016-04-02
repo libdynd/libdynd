@@ -24,13 +24,11 @@ using namespace std;
 using namespace dynd;
 
 template <typename T>
-class Arithmetic : public Memory<T> {
-};
+class Arithmetic : public Memory<T> {};
 
 TYPED_TEST_CASE_P(Arithmetic);
 
-TYPED_TEST_P(Arithmetic, SimpleBroadcast)
-{
+TYPED_TEST_P(Arithmetic, SimpleBroadcast) {
   nd::array a, b, c;
 
   // Two arrays with broadcasting
@@ -74,8 +72,7 @@ TYPED_TEST_P(Arithmetic, SimpleBroadcast)
   EXPECT_EQ(-3, c(1, 2).as<int>());
 }
 
-TYPED_TEST_P(Arithmetic, StridedScalarBroadcast)
-{
+TYPED_TEST_P(Arithmetic, StridedScalarBroadcast) {
   nd::array a, b, c;
 
   // Two arrays with broadcasting
@@ -120,8 +117,7 @@ TYPED_TEST_P(Arithmetic, StridedScalarBroadcast)
   EXPECT_EQ(3, c(2).as<int>());
 }
 
-TEST(ArithmeticOp, VarToStridedBroadcast)
-{
+TEST(ArithmeticOp, VarToStridedBroadcast) {
   nd::array a, b, c;
 
   a = parse_json("2 * var * int32", "[[1, 2, 3], [4]]");
@@ -152,9 +148,7 @@ TEST(ArithmeticOp, VarToStridedBroadcast)
   EXPECT_EQ(6, c(1, 2).as<int>());
 }
 
-/*
-TEST(ArithmeticOp, VarToVarBroadcast)
-{
+TEST(ArithmeticOp, VarToVarBroadcast) {
   nd::array a, b, c;
 
   a = parse_json("2 * var * int32", "[[1, 2, 3], [4]]");
@@ -191,10 +185,8 @@ TEST(ArithmeticOp, VarToVarBroadcast)
   EXPECT_EQ(2, c(0, 2).as<int>());
   EXPECT_EQ(2, c(1, 0).as<int>());
 }
-*/
 
-TYPED_TEST_P(Arithmetic, ScalarOnTheRight)
-{
+TYPED_TEST_P(Arithmetic, ScalarOnTheRight) {
   nd::array a, b, c;
 
   const int v0[] = {1, 2, 3};
@@ -219,8 +211,7 @@ TYPED_TEST_P(Arithmetic, ScalarOnTheRight)
   EXPECT_EQ(1, c(2).as<int>());
 }
 
-TYPED_TEST_P(Arithmetic, ScalarOnTheLeft)
-{
+TYPED_TEST_P(Arithmetic, ScalarOnTheLeft) {
   nd::array a, b, c;
 
   const int v0[] = {1, 2, 3};
@@ -245,8 +236,7 @@ TYPED_TEST_P(Arithmetic, ScalarOnTheLeft)
   EXPECT_EQ(-2, c(2).as<int>());
 }
 
-TYPED_TEST_P(Arithmetic, ComplexScalar)
-{
+TYPED_TEST_P(Arithmetic, ComplexScalar) {
   nd::array a, c;
 
   // Two arrays with broadcasting
@@ -264,8 +254,7 @@ TYPED_TEST_P(Arithmetic, ComplexScalar)
   EXPECT_EQ(dynd::complex<double>(0, -3), c(2).as<dynd::complex<double>>());
 }
 
-TEST(Arithmetic, Minus)
-{
+TEST(Arithmetic, Minus) {
   nd::array a = {0.0, 1.0, 2.0, 3.0, 4.0};
   EXPECT_ARRAY_EQ(nd::array({-0.0, -1.0, -2.0, -3.0, -4.0}), -a);
 }

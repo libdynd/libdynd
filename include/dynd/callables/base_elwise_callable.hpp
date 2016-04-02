@@ -27,6 +27,7 @@ namespace nd {
 
         std::array<bool, N> arg_broadcast;
         std::array<bool, N> arg_var;
+        intptr_t res_alignment;
       };
 
     public:
@@ -59,7 +60,7 @@ namespace nd {
         }
 
         for (size_t i = 0; i < N; ++i) {
-          node->arg_var[i] = arg_size[i] == -1;
+          node->arg_var[i] = arg_tp[i].get_id() == var_dim_id;
         }
 
         bool res_variadic = res_tp.is_variadic();
@@ -102,14 +103,21 @@ namespace nd {
           }
         }
 
+        ndt::type resolved_ret_tp;
         if (callback) {
-          return with_ret_type(res_size, caller->resolve(this, nullptr, cg, res_element_tp, N, arg_element_tp.data(),
-                                                         nkwd, kwds, tp_vars));
+          resolved_ret_tp = with_ret_type(res_size, caller->resolve(this, nullptr, cg, res_element_tp, N,
+                                                                    arg_element_tp.data(), nkwd, kwds, tp_vars));
+        } else {
+          resolved_ret_tp = with_ret_type(res_size, child->resolve(this, nullptr, cg,
+                                                                   res_variadic ? child.get_ret_type() : res_element_tp,
+                                                                   N, arg_element_tp.data(), nkwd, kwds, tp_vars));
         }
 
-        return with_ret_type(res_size,
-                             child->resolve(this, nullptr, cg, res_variadic ? child.get_ret_type() : res_element_tp, N,
-                                            arg_element_tp.data(), nkwd, kwds, tp_vars));
+        if (resolved_ret_tp.get_id() == var_dim_id) {
+          node->res_alignment = resolved_ret_tp.extended<ndt::var_dim_type>()->get_target_alignment();
+        }
+
+        return resolved_ret_tp;
       }
 
       void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),

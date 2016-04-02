@@ -77,10 +77,17 @@ namespace nd {
           }
         }
 
+        bool var_broadcast = !src_all_strided;
+        for (size_t i = 0; i < N; ++i) {
+          var_broadcast &= src_tp[i].get_id() == var_dim_id ||
+                           (src_tp[i].get_id() == fixed_dim_id &&
+                            src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size() == 1);
+        }
+
         if ((dst_variadic || dst_tp.get_id() == fixed_dim_id) && src_all_strided) {
           static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, N>>();
           return f->resolve(this, reinterpret_cast<char *>(&child_data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-        } else if ((dst_variadic || dst_tp.get_id() == var_dim_id) && src_all_var) {
+        } else if (((dst_variadic) || dst_tp.get_id() == var_dim_id) && var_broadcast) {
           static callable f = make_callable<elwise_callable<var_dim_id, fixed_dim_id, N>>();
           return f->resolve(this, reinterpret_cast<char *>(&child_data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else if (src_all_strided_or_var) {
@@ -216,8 +223,8 @@ namespace nd {
           }
           if (i == nsrc) {
             // No dimensions to lift, call the elementwise instantiate directly
-            return child.get()->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd,
-                                            kwds, tp_vars);
+            return child.get()->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
+                                            nkwd, kwds, tp_vars);
           } else {
             intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
             std::stringstream ss;
