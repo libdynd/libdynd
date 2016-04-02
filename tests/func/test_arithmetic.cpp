@@ -267,9 +267,7 @@ TEST(Arithmetic, CompoundDiv)
 }
 */
 
-/*
-TEST(Arithmetic, OptionArithmeticInt32)
-{
+TEST(Arithmetic, OptionArithmeticInt32) {
   nd::array NA = nd::empty(ndt::type("?int32"));
   NA.assign_na();
   EXPECT_ALL_TRUE(nd::is_na(NA + 1));
@@ -288,8 +286,7 @@ TEST(Arithmetic, OptionArithmeticInt32)
   EXPECT_ALL_TRUE(nd::is_na(NA / NA));
 }
 
-TEST(Arithmetic, OptionArithmeticFloat64)
-{
+TEST(Arithmetic, OptionArithmeticFloat64) {
   nd::array NA = nd::empty(ndt::type("?float64"));
   NA.assign_na();
   EXPECT_ALL_TRUE(nd::is_na(NA + 1));
@@ -308,8 +305,7 @@ TEST(Arithmetic, OptionArithmeticFloat64)
   EXPECT_ALL_TRUE(nd::is_na(NA / NA));
 }
 
-TEST(Arithmetic, OptionArrayLHSInt32)
-{
+TEST(Arithmetic, OptionArrayLHSInt32) {
   nd::array data = parse_json("5 * ?int32", "[null, 0, 40, null, 1]");
   nd::array expected = nd::array{true, false, false, true, false};
   nd::array indices = {1L, 2L, 4L};
@@ -333,8 +329,7 @@ TEST(Arithmetic, OptionArrayLHSInt32)
   }
 }
 
-TEST(Arithmetic, OptionArrayLHSFloat64)
-{
+TEST(Arithmetic, OptionArrayLHSFloat64) {
   nd::array data = parse_json("5 * ?int32", "[null, 0, 40, null, 1]");
   nd::array expected = nd::array{true, false, false, true, false};
   nd::array indices = {1L, 2L, 4L};
@@ -358,8 +353,7 @@ TEST(Arithmetic, OptionArrayLHSFloat64)
   }
 }
 
-TEST(Arithmetic, OptionArrayRHS)
-{
+TEST(Arithmetic, OptionArrayRHS) {
   nd::array data = parse_json("5 * ?int32", "[null, -1, 40, null, 1]");
   nd::array expected = nd::array{true, false, false, true, false};
   nd::array indices = {1L, 2L, 4L};
@@ -383,8 +377,7 @@ TEST(Arithmetic, OptionArrayRHS)
   }
 }
 
-TEST(Arithmetic, OptionArrayOptionInt32)
-{
+TEST(Arithmetic, OptionArrayOptionInt32) {
   nd::array data = parse_json("5 * ?int32", "[null, -1, 40, null, 1]");
   nd::array expected = nd::array{true, false, false, true, false};
   nd::array indices = {1L, 2L, 4L};
@@ -408,8 +401,7 @@ TEST(Arithmetic, OptionArrayOptionInt32)
   }
 }
 
-TEST(Arithmetic, OptionArrayOptionFloat64)
-{
+TEST(Arithmetic, OptionArrayOptionFloat64) {
   nd::array data = parse_json("5 * ?int32", "[null, -1, 40, null, 1]");
   nd::array expected = nd::array{true, false, false, true, false};
   nd::array indices = {1L, 2L, 4L};
@@ -434,8 +426,7 @@ TEST(Arithmetic, OptionArrayOptionFloat64)
   }
 }
 
-TEST(Arithmetic, OptionArrayNotOptionFloat64)
-{
+TEST(Arithmetic, OptionArrayNotOptionFloat64) {
   nd::array data = parse_json("5 * ?int32", "[null, -1, 40, null, 1]");
   nd::array not_na_data = parse_json("5 * float64", "[2, -1, 40, 30, 1]");
   nd::array expected = nd::array{true, false, false, true, false};
@@ -459,7 +450,6 @@ TEST(Arithmetic, OptionArrayNotOptionFloat64)
     EXPECT_EQ((data / data)(ind).as<double>(), div(i).as<double>());
   }
 }
-*/
 
 REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast, ScalarOnTheRight, ScalarOnTheLeft,
                            ComplexScalar);
