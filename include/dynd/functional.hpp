@@ -130,8 +130,6 @@ namespace nd {
 
     DYND_API ndt::type outer_make_type(const ndt::callable_type *child_tp);
 
-    DYND_API callable map(const callable &child);
-
     /**
      * Create an callable which applies a given window_op in a
      * rolling window fashion.
