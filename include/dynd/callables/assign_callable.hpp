@@ -786,10 +786,25 @@ namespace nd {
       for (intptr_t i = 0; i != field_count; ++i) {
         dst_fields_arrmeta[i] = dst_arrmeta + dst_arrmeta_offsets[i];
       }
-      make_tuple_unary_op_ckernel(nd::copy.get(), nd::copy.get_type(), ckb, field_count,
-                                  dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types().data(),
-                                  dst_fields_arrmeta.get(), src_data_offsets.get(), &src_fields_tp[0],
-                                  src_fields_arrmeta.get(), kernreq);
+
+      const uintptr_t *dst_offsets = dst_sd->get_data_offsets(dst_arrmeta);
+      const std::vector<ndt::type> &dst_fields_tp = dst_sd->get_field_types();
+
+      intptr_t self_offset = ckb->size();
+      ckb->emplace_back<nd::tuple_unary_op_ck>(kernreq);
+      nd::tuple_unary_op_ck *self = ckb->get_at<nd::tuple_unary_op_ck>(self_offset);
+      self->m_fields.resize(field_count);
+      for (intptr_t i = 0; i < field_count; ++i) {
+        self = ckb->get_at<nd::tuple_unary_op_ck>(self_offset);
+        nd::tuple_unary_op_item &field = self->m_fields[i];
+        field.child_kernel_offset = ckb->size() - self_offset;
+        field.dst_data_offset = dst_offsets[i];
+        field.src_data_offset = src_data_offsets[i];
+        nd::array error_mode = ndt::traits<assign_error_mode>::na();
+        nd::copy->instantiate(NULL, NULL, ckb, dst_fields_tp[i], dst_fields_arrmeta[i], 1, &src_fields_tp[i],
+                              &src_fields_arrmeta[i], kernel_request_single, 1, &error_mode,
+                              std::map<std::string, ndt::type>());
+      }
     }
   };
 
