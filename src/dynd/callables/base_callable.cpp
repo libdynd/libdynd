@@ -99,15 +99,22 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, c
 void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, array *dst, intptr_t nsrc,
                              const ndt::type *src_tp, const char *const *src_arrmeta, const array *src, intptr_t nkwd,
                              const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-  call_graph g;
-  resolve(nullptr, nullptr, g, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+  call_graph cg;
+  ndt::type resolved_dst_tp = resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+
+/*
+  std::cout << "resolved_dst_tp = " << resolved_dst_tp << std::endl;
+  for (int i = 0; i < nsrc; ++i) {
+    std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
+  }
+*/
 
   char *data = data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
-  instantiate(nullptr, data, &ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_call, nkwd, kwds,
-              tp_vars);
+  cg.get()->callee->instantiate(cg.get(), data, &ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
+                                kernel_request_call, nkwd, kwds, tp_vars);
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
   fn(ckb.get(), dst, src);
 }

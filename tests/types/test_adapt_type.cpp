@@ -16,8 +16,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(AdaptType, Byteswap)
-{
+TEST(AdaptType, Byteswap) {
   ndt::type tp = ndt::make_type<ndt::adapt_type>(
       ndt::make_type<float>(), ndt::make_fixed_bytes(sizeof(float), alignof(float)), nd::byteswap, nd::byteswap);
   // The value has the native byte-order type
@@ -39,8 +38,7 @@ TEST(AdaptType, Byteswap)
   EXPECT_TRUE(tp.is_expression());
 }
 
-TEST(AdaptType, ByteswapEval)
-{
+TEST(AdaptType, ByteswapEval) {
   nd::array a = nd::empty(ndt::make_type<ndt::adapt_type>(
       ndt::make_type<int16_t>(), ndt::make_fixed_bytes(sizeof(int16_t), alignof(int16_t)), nd::byteswap, nd::byteswap));
   a.assign(0x1362);

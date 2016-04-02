@@ -910,10 +910,14 @@ namespace nd {
   public:
     adapt_assign_to_callable() : base_callable(ndt::type("(Any) -> Any")) {}
 
-    ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),
-                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                      size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+    ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
+                      const ndt::type &dst_tp, size_t nsrc, const ndt::type *DYND_UNUSED(src_tp), size_t nkwd,
+                      const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+      const callable &inverse = dst_tp.extended<ndt::adapt_type>()->get_inverse();
+      const ndt::type &value_tp = dst_tp.value_type();
+
+      inverse->resolve(this, nullptr, cg, dst_tp.storage_type(), nsrc, &value_tp, nkwd, kwds, tp_vars);
+
       return dst_tp;
     }
 
