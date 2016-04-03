@@ -19,13 +19,13 @@ namespace nd {
                                                      kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                                                      const std::map<std::string, ndt::type> &tp_vars);
 
-    class reduction_callable : public base_callable {
+    class reduction_dispatch_callable : public base_callable {
       callable m_child;
 
     public:
       typedef reduction_data_type data_type;
 
-      reduction_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
+      reduction_dispatch_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
       typedef typename base_reduction_callable::data_type new_data_type;
 
@@ -56,7 +56,7 @@ namespace nd {
           data = reinterpret_cast<char *>(&new_data);
         }
 
-        static callable f = make_callable<base_reduction_callable>();
+        static callable f = make_callable<reduction_callable<fixed_dim_id>>();
         return f->resolve(caller, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
       }
 

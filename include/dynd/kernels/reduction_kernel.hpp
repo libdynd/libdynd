@@ -275,11 +275,18 @@ namespace nd {
 
       void single_first(char *dst, char *const *src)
       {
+        std::cout << "reduction_kernel<fixed_dim_id, false, true>::single_first" << std::endl;
+
         char *src0 = src[0];
+        std::cout << "src0 = " << *reinterpret_cast<double *>(src0) << std::endl;
+
+        std::cout << "init_offset = " << init_offset << std::endl;
 
         // Initialize the dst values
         get_child(init_offset)->single(dst, src);
         src0 += src_stride_first;
+
+        std::cout << "after init" << std::endl;
 
         // Do the reduction
         get_child()->strided(dst, 0, &src0, &src_stride, size_first);

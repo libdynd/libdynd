@@ -34,7 +34,6 @@ namespace nd {
                      intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                      const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
                      const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-
       assign_error_mode error_mode =
           (kwds == NULL || kwds[0].is_na()) ? assign_error_default : kwds[0].as<assign_error_mode>();
       switch (error_mode) {
