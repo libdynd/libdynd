@@ -37,12 +37,11 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   call_graph cg;
   dst_tp = resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
-  /*
-    std::cout << "dst_tp = " << dst_tp << std::endl;
-    for (int i = 0; i < nsrc; ++i) {
-      std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
-    }
-  */
+  std::cout << "POST_RESOLVE" << std::endl;
+  std::cout << "dst_tp = " << dst_tp << std::endl;
+  for (int i = 0; i < nsrc; ++i) {
+    std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
+  }
 
   // Allocate the destination array
   array dst = empty(dst_tp);

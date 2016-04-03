@@ -102,38 +102,130 @@ namespace nd {
         std::cout << "broadcast = " << reinterpret_cast<node_type *>(node)->broadcast << std::endl;
 
         bool inner = reinterpret_cast<node_type *>(node)->inner;
+        bool broadcast = reinterpret_cast<node_type *>(node)->broadcast;
         if (inner) {
-          intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
-          intptr_t src_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
+          if (!broadcast) {
+            intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
+            intptr_t src_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
 
-          typedef reduction_kernel<fixed_dim_id, false, true> self_type;
-          intptr_t root_ckb_offset = ckb->size();
+            typedef reduction_kernel<fixed_dim_id, false, true> self_type;
+            intptr_t root_ckb_offset = ckb->size();
             std::cout << "reduction_kernel<fixed_dim_id, false, true>" << std::endl;
-          ckb->emplace_back<self_type>(kernreq);
-          node = next(node);
-          self_type *e = ckb->get_at<self_type>(root_ckb_offset);
-          e->src_stride = src_stride;
-          e->_size = src_size;
+            ckb->emplace_back<self_type>(kernreq);
+            node = next(node);
+            self_type *e = ckb->get_at<self_type>(root_ckb_offset);
+            e->src_stride = src_stride;
+            e->_size = src_size;
 
-          if (true) { // identity is null
-            e->size_first = e->_size - 1;
-            e->src_stride_first = e->src_stride;
+            if (true) { // identity is null
+              e->size_first = e->_size - 1;
+              e->src_stride_first = e->src_stride;
+            } else {
+              e->size_first = e->_size;
+              e->src_stride_first = 0;
+            }
+
+            const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
+
+            node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta + sizeof(size_stride_t), nsrc,
+                                      nullptr, &src0_element_arrmeta, kernel_request_strided, nkwd - 3, kwds + 3,
+                                      tp_vars);
+
+            intptr_t init_offset = ckb->size();
+            node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta + sizeof(size_stride_t), nsrc,
+                                      nullptr, &src0_element_arrmeta, kernel_request_single, 0, nullptr, tp_vars);
+
+            e = ckb->get_at<self_type>(root_ckb_offset);
+            e->init_offset = init_offset - root_ckb_offset;
           } else {
-            e->size_first = e->_size;
-            e->src_stride_first = 0;
+            const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
+
+            intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
+            intptr_t src_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
+            intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
+            std::cout << dst_stride << std::endl;
+
+            const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
+
+            typedef reduction_kernel<fixed_dim_id, true, true> self_type;
+            intptr_t root_ckb_offset = ckb->size();
+            ckb->emplace_back<self_type>(kernreq, dst_stride, src_stride);
+            node = next(node);
+
+            self_type *self_k = ckb->get_at<self_type>(root_ckb_offset);
+
+            // The striding parameters
+            self_k->_size = src_size;
+            // Need to retrieve 'e' again because it may have moved
+            if (true) { // identity is null
+              self_k->size_first = self_k->_size - 1;
+              self_k->dst_stride_first = self_k->dst_stride;
+              self_k->src_stride_first = self_k->src_stride;
+            } else {
+              self_k->size_first = self_k->_size;
+              self_k->dst_stride_first = 0;
+              self_k->src_stride_first = 0;
+            }
+
+            node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_element_arrmeta, nsrc, nullptr,
+                                      &src0_element_arrmeta, kernel_request_strided, nkwd - 3, kwds + 3, tp_vars);
+
+            intptr_t init_offset = ckb->size();
+            node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_element_arrmeta, nsrc, nullptr,
+                                      &src0_element_arrmeta, kernel_request_strided, 0, nullptr, tp_vars);
+
+            self_k = ckb->get_at<self_type>(root_ckb_offset);
+            self_k->dst_init_kernel_offset = init_offset - root_ckb_offset;
+
+            std::cout << "here" << std::endl;
+
+            //            self_k = ckb->get_at<self_type>(root_ckb_offset);
+            //          self_k->dst_init_kernel_offset = reinterpret_cast<data_type *>(data)->init_offset -
+            //          root_ckb_offset;
+
+            /*
+              const ndt::type &src0_element_tp = src_tp[0].extended<ndt::base_dim_type>()->get_element_type();
+              const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
+
+              intptr_t src_size = src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+              intptr_t src_stride = src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_stride(src_arrmeta[0]);
+              intptr_t dst_stride = dst_tp.extended<ndt::fixed_dim_type>()->get_fixed_stride(dst_arrmeta);
+
+              const array &identity = reinterpret_cast<data_type *>(data)->identity;
+
+              const ndt::type &dst_element_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
+              const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
+
+              intptr_t root_ckb_offset = ckb->size();
+              ckb->emplace_back<reduction_kernel>(kernreq, dst_stride, src_stride);
+              reduction_kernel *self_k = ckb->get_at<reduction_kernel>(root_ckb_offset);
+
+              // The striding parameters
+              self_k->_size = src_size;
+
+              // Need to retrieve 'e' again because it may have moved
+              if (identity.is_null()) {
+                self_k->size_first = self_k->_size - 1;
+                self_k->dst_stride_first = self_k->dst_stride;
+                self_k->src_stride_first = self_k->src_stride;
+              }
+              else {
+                self_k->size_first = self_k->_size;
+                self_k->dst_stride_first = 0;
+                self_k->src_stride_first = 0;
+              }
+
+              --reinterpret_cast<data_type *>(data)->ndim;
+
+              call_node *node = NULL;
+              self->instantiate(node, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
+              &src0_element_arrmeta,
+                                kernel_request_strided, nkwd, kwds, tp_vars);
+              self_k = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
+              self_k->dst_init_kernel_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
+
+            */
           }
-
-          const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
-
-          node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta + sizeof(size_stride_t), nsrc, nullptr,
-                                    &src0_element_arrmeta, kernel_request_strided, nkwd - 3, kwds + 3, tp_vars);
-
-          intptr_t init_offset = ckb->size();
-          node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta + sizeof(size_stride_t), nsrc, nullptr,
-                                    &src0_element_arrmeta, kernel_request_single, 0, nullptr, tp_vars);
-
-          e = ckb->get_at<self_type>(root_ckb_offset);
-          e->init_offset = init_offset - root_ckb_offset;
         } else {
           const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
 
@@ -152,8 +244,8 @@ namespace nd {
           }
           node = next(node);
 
-          node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta + sizeof(size_stride_t), nsrc, nullptr,
-                                    &src0_element_arrmeta, kernreq, 0, nullptr, tp_vars);
+          node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta, nsrc, nullptr, &src0_element_arrmeta,
+                                    kernreq, 0, nullptr, tp_vars);
         }
       }
     };
