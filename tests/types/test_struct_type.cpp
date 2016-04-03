@@ -181,13 +181,13 @@ TEST(StructType, EqualTypeAssign) {
                                         {ndt::make_type<int>(), ndt::make_type<double>(), ndt::make_type<short>()});
   nd::array a = nd::empty(2, dt);
   a(0, 0).vals() = 3;
-/*
   a(0, 1).vals() = 4.25;
   a(0, 2).vals() = 5;
   a(1, 0).vals() = 6;
   a(1, 1).vals() = 7.25;
   a(1, 2).vals() = 8;
 
+/*
   nd::array b = nd::empty(2, dt);
   b.assign(a);
   EXPECT_EQ(3, a(0, 0).as<int>());
