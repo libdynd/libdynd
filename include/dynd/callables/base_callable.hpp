@@ -298,17 +298,14 @@ namespace nd {
 
     void *realloc(void *ptr, size_t old_size, size_t new_size) {
       if (using_static_data()) {
-        std::cout << "malloc from static" << std::endl;
         // If we were previously using the static data, do a malloc
         void *new_data = alloc(new_size);
-        std::cout << "(new_data != NULL) = " << (new_data != NULL) << std::endl;
         // If the allocation succeeded, copy the old data as the realloc would
         if (new_data != NULL) {
           copy(new_data, ptr, old_size);
         }
         return new_data;
       } else {
-        std::cout << "realloc" << std::endl;
         return std::realloc(ptr, new_size);
       }
     }

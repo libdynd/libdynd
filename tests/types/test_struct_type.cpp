@@ -197,7 +197,6 @@ TEST(StructType, EqualTypeAssign) {
   EXPECT_EQ(8, a(1, 2).as<short>());
 }
 
-/*
 TEST(StructType, DifferentTypeAssign) {
   ndt::type dt = ndt::struct_type::make({"x", "y", "z"},
                                         {ndt::make_type<int>(), ndt::make_type<double>(), ndt::make_type<short>()});
@@ -436,4 +435,3 @@ TEST(StructType, InvalidFieldName) {
   EXPECT_THROW(dt.extended<ndt::struct_type>()->get_data_offset(arrmeta, "z"), invalid_argument);
   EXPECT_THROW(s.p("z"), invalid_argument);
 }
-*/
