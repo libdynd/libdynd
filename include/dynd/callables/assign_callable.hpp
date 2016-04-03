@@ -768,8 +768,9 @@ namespace nd {
               sizeof(node_type)) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
-                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
-                      const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                      size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       node_type *node = cg.emplace_back<node_type>(this);
 
       const ndt::struct_type *dst_sd = dst_tp.extended<ndt::struct_type>();
@@ -783,36 +784,38 @@ namespace nd {
         throw std::runtime_error(ss.str());
       }
 
-      const std::vector<ndt::type> &src_fields_tp_orig = src_sd->get_field_types();
-      const std::vector<uintptr_t> &src_arrmeta_offsets_orig = src_sd->get_arrmeta_offsets();
-      std::vector<ndt::type> src_fields_tp(node->field_count);
+      /*
+            const std::vector<ndt::type> &src_fields_tp_orig = src_sd->get_field_types();
+            const std::vector<uintptr_t> &src_arrmeta_offsets_orig = src_sd->get_arrmeta_offsets();
+            std::vector<ndt::type> src_fields_tp(node->field_count);
 
-      // Match up the fields
-      for (intptr_t i = 0; i != node->field_count; ++i) {
-        const std::string &dst_name = dst_sd->get_field_name(i);
-        intptr_t src_i = src_sd->get_field_index(dst_name);
-        if (src_i < 0) {
-          std::stringstream ss;
-          ss << "cannot assign dynd struct " << src_tp[0] << " to " << dst_tp;
-          ss << " because they have different field names";
-          throw std::runtime_error(ss.str());
-        }
-        src_fields_tp[i] = src_fields_tp_orig[src_i];
-        //        src_data_offsets[i] = src_data_offsets_orig[src_i];
-        node->src_fields_arrmeta_offsets[i] = src_arrmeta_offsets_orig[src_i];
-        node->src_permutation[i] = src_i;
-      }
+            // Match up the fields
+            for (intptr_t i = 0; i != node->field_count; ++i) {
+              const std::string &dst_name = dst_sd->get_field_name(i);
+              intptr_t src_i = src_sd->get_field_index(dst_name);
+              if (src_i < 0) {
+                std::stringstream ss;
+                ss << "cannot assign dynd struct " << src_tp[0] << " to " << dst_tp;
+                ss << " because they have different field names";
+                throw std::runtime_error(ss.str());
+              }
+              src_fields_tp[i] = src_fields_tp_orig[src_i];
+              //        src_data_offsets[i] = src_data_offsets_orig[src_i];
+              node->src_fields_arrmeta_offsets[i] = src_arrmeta_offsets_orig[src_i];
+              node->src_permutation[i] = src_i;
+            }
 
-      const std::vector<ndt::type> &dst_fields_tp = dst_sd->get_field_types();
-      const std::vector<uintptr_t> &dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets();
-      for (intptr_t i = 0; i != node->field_count; ++i) {
-        node->dst_arrmeta_offsets[i] = dst_arrmeta_offsets[i];
-      }
+            const std::vector<ndt::type> &dst_fields_tp = dst_sd->get_field_types();
+            const std::vector<uintptr_t> &dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets();
+            for (intptr_t i = 0; i != node->field_count; ++i) {
+              node->dst_arrmeta_offsets[i] = dst_arrmeta_offsets[i];
+            }
 
-      intptr_t field_count = node->field_count;
-      for (intptr_t i = 0; i < field_count; ++i) {
-        nd::assign->resolve(this, nullptr, cg, dst_fields_tp[i], 1, &src_fields_tp[i], nkwd, kwds, tp_vars);
-      }
+            intptr_t field_count = node->field_count;
+            for (intptr_t i = 0; i < field_count; ++i) {
+              nd::assign->resolve(this, nullptr, cg, dst_fields_tp[i], 1, &src_fields_tp[i], nkwd, kwds, tp_vars);
+            }
+      */
 
       return dst_tp;
     }
