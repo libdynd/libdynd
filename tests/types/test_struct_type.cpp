@@ -187,9 +187,9 @@ TEST(StructType, EqualTypeAssign) {
   a(1, 1).vals() = 7.25;
   a(1, 2).vals() = 8;
 
-/*
   nd::array b = nd::empty(2, dt);
   b.assign(a);
+/*
   EXPECT_EQ(3, a(0, 0).as<int>());
   EXPECT_EQ(4.25, a(0, 1).as<double>());
   EXPECT_EQ(5, a(0, 2).as<short>());
