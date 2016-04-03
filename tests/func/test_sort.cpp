@@ -17,8 +17,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(Sort, 1D)
-{
+TEST(Sort, 1D) {
   nd::array a{2.5, 1.25, 0.0};
   nd::sort(a);
   EXPECT_ARRAY_EQ((nd::array{0.0, 1.25, 2.5}), a);
