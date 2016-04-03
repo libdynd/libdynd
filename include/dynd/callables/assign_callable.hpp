@@ -754,7 +754,7 @@ namespace nd {
     struct node_type : call_node {
       intptr_t field_count;
       uintptr_t dst_arrmeta_offsets[8];
-  //    intptr_t src_permutation[8];
+      intptr_t src_permutation[8];
     //  uintptr_t src_fields_arrmeta_offsets[8];
 
       node_type(base_callable *callee) : call_node(callee) {}
