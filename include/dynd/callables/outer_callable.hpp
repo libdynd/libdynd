@@ -16,13 +16,17 @@ namespace nd {
     template <int N>
     class outer_callable : public base_callable {
       callable m_child;
+      callable m_elwise;
 
     public:
-      outer_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
+      outer_callable(const ndt::type &tp, const callable &child)
+          : base_callable(tp), m_child(child), m_elwise(elwise(child)) {}
 
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                         const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
+        cg.emplace_back(this);
+
         ndt::type tp = m_child->resolve(this, nullptr, cg, dst_tp.is_symbolic() ? m_child.get_ret_type() : dst_tp, nsrc,
                                         src_tp, nkwd, kwds, tp_vars);
         for (intptr_t i = nsrc - 1; i >= 0; --i) {
@@ -32,30 +36,6 @@ namespace nd {
         }
 
         return tp;
-      }
-
-      void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                            intptr_t nkwd, const dynd::nd::array *kwds,
-                            const std::map<std::string, ndt::type> &tp_vars) {
-        const ndt::callable_type *child_tp = m_child.get_type();
-
-        if (child_tp->get_return_type().is_symbolic()) {
-          m_child->resolve_dst_type(NULL, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-        } else {
-          dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);
-        }
-
-        ndt::type tp = dst_tp.without_memory_type();
-        for (intptr_t i = nsrc - 1; i >= 0; --i) {
-          if (!src_tp[i].without_memory_type().is_scalar()) {
-            tp = src_tp[i].without_memory_type().with_replaced_dtype(tp);
-          }
-        }
-        if (dst_tp.get_base_id() == memory_id) {
-          dst_tp = dst_tp.extended<ndt::base_memory_type>()->with_replaced_storage_type(tp);
-        } else {
-          dst_tp = tp;
-        }
       }
 
       void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
@@ -111,9 +91,8 @@ namespace nd {
           new_src_arrmeta.push_back(new_src_arrmeta_holder[i].get());
         }
 
-        callable f = elwise(m_child);
-        f->instantiate(node, NULL, ckb, dst_tp, dst_arrmeta, nsrc, new_src_tp.data(), new_src_arrmeta.data(), kernreq,
-                       nkwd, kwds, tp_vars);
+        m_elwise->instantiate(node, NULL, ckb, dst_tp, dst_arrmeta, nsrc, new_src_tp.data(), new_src_arrmeta.data(),
+                              kernreq, nkwd, kwds, tp_vars);
 
         delete[] new_src_arrmeta_holder;
       }
