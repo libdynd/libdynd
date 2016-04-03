@@ -768,21 +768,23 @@ namespace nd {
               sizeof(node_type)) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
-                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      node_type *node = cg.emplace_back<node_type>(this);
+      cg.emplace_back<node_type>(this);
 
-      const ndt::struct_type *dst_sd = dst_tp.extended<ndt::struct_type>();
-      const ndt::struct_type *src_sd = src_tp[0].extended<ndt::struct_type>();
-      node->field_count = dst_sd->get_field_count();
+      /*
+            const ndt::struct_type *dst_sd = dst_tp.extended<ndt::struct_type>();
+            const ndt::struct_type *src_sd = src_tp[0].extended<ndt::struct_type>();
+            node->field_count = dst_sd->get_field_count();
 
-      if (node->field_count != src_sd->get_field_count()) {
-        std::stringstream ss;
-        ss << "cannot assign dynd struct " << src_tp[0] << " to " << dst_tp;
-        ss << " because they have different numbers of fields";
-        throw std::runtime_error(ss.str());
-      }
+            if (node->field_count != src_sd->get_field_count()) {
+              std::stringstream ss;
+              ss << "cannot assign dynd struct " << src_tp[0] << " to " << dst_tp;
+              ss << " because they have different numbers of fields";
+              throw std::runtime_error(ss.str());
+            }
+      */
 
       /*
             const std::vector<ndt::type> &src_fields_tp_orig = src_sd->get_field_types();
