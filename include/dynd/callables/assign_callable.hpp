@@ -771,7 +771,7 @@ namespace nd {
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      cg.emplace_back<node_type>(this);
+      cg.emplace_back(this);
 
       /*
             const ndt::struct_type *dst_sd = dst_tp.extended<ndt::struct_type>();
