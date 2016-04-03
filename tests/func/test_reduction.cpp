@@ -59,7 +59,6 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
   EXPECT_ARRAY_EQ(1.5 - 2.0, f(nd::array{{1.5, -2.0}}));
 }
 
-/*
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
   nd::callable f = nd::functional::reduction(nd::functional::apply([](double x, double y) { return x + y; }));
 
@@ -67,7 +66,6 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
       initializer_list<initializer_list<double>>{{1.5 + 2.0 + 7.0 - 2.25 + 7.0 + 2.125}},
       f({initializer_list<initializer_list<double>>{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}}, {{"keepdims", true}}));
 }
-*/
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
   nd::callable f = nd::functional::reduction([](double x, double y) { return x + y; });
@@ -77,7 +75,6 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
   EXPECT_ARRAY_EQ(nd::array{1.5 - 2.0}, f({nd::array{{1.5, -2.0}}}, {{"axes", nd::array{1}}}));
 }
 
-/*
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
   nd::callable f = nd::functional::reduction(nd::functional::apply([](double x, double y) { return x + y; }));
 
@@ -85,7 +82,6 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
                   f({initializer_list<initializer_list<double>>{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}},
                     {{"axes", nd::array(initializer_list<int>{1})}, {"keepdims", true}}));
 }
-*/
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
   nd::callable f = nd::functional::reduction([](double x, double y) { return x + y; });
@@ -95,7 +91,6 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
   EXPECT_ARRAY_EQ((nd::array{1.5, -2.0}), f({nd::array{{1.5, -2.0}}}, {{"axes", nd::array{0}}}));
 }
 
-/*
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
   nd::callable f = nd::functional::reduction(nd::functional::apply([](double x, double y) { return x + y; }));
 
@@ -103,7 +98,6 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
                   f({initializer_list<initializer_list<double>>{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}},
                     {{"axes", nd::array(initializer_list<int>{0})}, {"keepdims", true}}));
 }
-*/
 
 /*
 TEST(Reduction, FixedVar) {
@@ -153,7 +147,6 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
       f({{{{1.5, -2.375}, {2.0, 1.25}, {7.0, -0.5}}, {{-2.25, 1.0}, {7.0, 0.0}, {2.125, 0.25}}}}, {{"axes", {0, 2}}}));
 }
 
-/*
 TEST(Reduction, Except) {
   // Cannot have a null child
   EXPECT_THROW(nd::functional::reduction(nd::callable()), invalid_argument);
@@ -167,4 +160,3 @@ TEST(Reduction, Except) {
   EXPECT_THROW(nd::functional::reduction(nd::functional::apply([](int x, double y, double z) { return x ? y : z; })),
                invalid_argument);
 }
-*/

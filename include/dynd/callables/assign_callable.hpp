@@ -36,7 +36,6 @@ namespace nd {
                      const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       assign_error_mode error_mode =
           (kwds == NULL || kwds[0].is_na()) ? assign_error_default : kwds[0].as<assign_error_mode>();
-      std::cout << "assign_callable<" << ResID << ", " << Arg0ID << ">::instantiate" << std::endl;
       switch (error_mode) {
       case assign_error_default:
       case assign_error_nocheck:
