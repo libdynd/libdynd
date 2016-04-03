@@ -59,8 +59,8 @@ set(tests_SRC
     func/test_callable.cpp
     func/test_comparison.cpp
     func/test_compose.cpp
-#    func/test_compound.cpp
-#    func/test_constant.cpp
+    func/test_compound.cpp
+    func/test_constant.cpp
 #    func/test_elwise.cpp
 #    func/test_fft.cpp
 #    func/test_index.cpp
