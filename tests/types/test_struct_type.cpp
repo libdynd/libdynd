@@ -163,7 +163,6 @@ TEST(StructType, IsExpression) {
   EXPECT_FALSE(d.at(irange(0, 3, 2)).is_expression());
 }
 
-/*
 TEST(StructType, PropertyAccess) {
   ndt::type dt = ndt::struct_type::make({"x", "y", "z"},
                                         {ndt::make_type<int>(), ndt::make_type<double>(), ndt::make_type<short>()});
@@ -177,6 +176,7 @@ TEST(StructType, PropertyAccess) {
   EXPECT_THROW(a.p("w"), invalid_argument);
 }
 
+/*
 TEST(StructType, EqualTypeAssign) {
   ndt::type dt = ndt::struct_type::make({"x", "y", "z"},
                                         {ndt::make_type<int>(), ndt::make_type<double>(), ndt::make_type<short>()});
