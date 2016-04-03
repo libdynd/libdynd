@@ -754,8 +754,8 @@ namespace nd {
     struct node_type : call_node {
       intptr_t field_count;
       uintptr_t dst_arrmeta_offsets[8];
-      intptr_t src_permutation[8];
-      uintptr_t src_fields_arrmeta_offsets[8];
+  //    intptr_t src_permutation[8];
+    //  uintptr_t src_fields_arrmeta_offsets[8];
 
       node_type(base_callable *callee) : call_node(callee) {}
     };
@@ -771,7 +771,7 @@ namespace nd {
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      cg.emplace_back(this);
+      cg.emplace_back<node_type>(this);
 
       /*
             const ndt::struct_type *dst_sd = dst_tp.extended<ndt::struct_type>();
