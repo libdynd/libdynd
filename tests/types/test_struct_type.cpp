@@ -32,6 +32,7 @@ TEST(StructType, Basic) {
             ndt::struct_type::make({"x"}, {ndt::make_type<int>()}));
 }
 
+/*
 TEST(StructType, Equality) {
   EXPECT_EQ(ndt::type("{x: int32, y: float16, z: int32}"), ndt::type("{x: int32, y: float16, z: int32}"));
   EXPECT_NE(ndt::type("{x: int32, y: float16, z: int32}"), ndt::type("{x: int32, y: float16, z: int32, ...}"));
@@ -196,6 +197,7 @@ TEST(StructType, EqualTypeAssign) {
   EXPECT_EQ(7.25, a(1, 1).as<double>());
   EXPECT_EQ(8, a(1, 2).as<short>());
 }
+*/
 
 /*
 TEST(StructType, DifferentTypeAssign) {

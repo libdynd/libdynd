@@ -325,6 +325,10 @@ namespace nd {
      */
     template <typename NodeType, typename... ArgTypes>
     NodeType *emplace_back(ArgTypes &&... args) {
+      static_assert(alignof(NodeType) <= 8, "nodes types require alignment to be at most 8 bytes");
+
+      m_back_offset = m_size;
+
       size_t offset = m_size;
       m_size += aligned_size(sizeof(NodeType));
       reserve(m_size);
