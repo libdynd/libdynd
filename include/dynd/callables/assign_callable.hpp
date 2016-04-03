@@ -817,44 +817,52 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *node, char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &DYND_UNUSED(dst_tp), const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                     const ndt::type *DYND_UNUSED(src_tp), const char *const *src_arrmeta, kernel_request_t kernreq,
-                     intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars) {
-      intptr_t field_count = reinterpret_cast<node_type *>(node)->field_count;
-      const uintptr_t *src_data_offsets_orig = reinterpret_cast<const uintptr_t *>(src_arrmeta[0]);
-      shortvector<uintptr_t> src_data_offsets(field_count);
-      shortvector<const char *> src_fields_arrmeta(field_count);
+    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+                     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                     intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
+                     const nd::array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+      struct fake_kernel : base_strided_kernel<fake_kernel, 1> {
+        void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {}
+      };
+      ckb->emplace_back<fake_kernel>(kernreq);
 
-      // Match up the fields
-      for (intptr_t i = 0; i != field_count; ++i) {
-        intptr_t src_i = reinterpret_cast<node_type *>(node)->src_permutation[i];
-        src_data_offsets[i] = src_data_offsets_orig[src_i];
-        src_fields_arrmeta[i] = src_arrmeta[0] + reinterpret_cast<node_type *>(node)->src_fields_arrmeta_offsets[src_i];
-      }
+      /*
+              intptr_t field_count = reinterpret_cast<node_type *>(node)->field_count;
+              const uintptr_t *src_data_offsets_orig = reinterpret_cast<const uintptr_t *>(src_arrmeta[0]);
+              shortvector<uintptr_t> src_data_offsets(field_count);
+              shortvector<const char *> src_fields_arrmeta(field_count);
 
-      shortvector<const char *> dst_fields_arrmeta(reinterpret_cast<node_type *>(node)->field_count);
-      for (intptr_t i = 0; i != reinterpret_cast<node_type *>(node)->field_count; ++i) {
-        dst_fields_arrmeta[i] = dst_arrmeta + reinterpret_cast<node_type *>(node)->dst_arrmeta_offsets[i];
-      }
+              // Match up the fields
+              for (intptr_t i = 0; i != field_count; ++i) {
+                intptr_t src_i = reinterpret_cast<node_type *>(node)->src_permutation[i];
+                src_data_offsets[i] = src_data_offsets_orig[src_i];
+                src_fields_arrmeta[i] = src_arrmeta[0] + reinterpret_cast<node_type
+           *>(node)->src_fields_arrmeta_offsets[src_i];
+              }
 
-      const uintptr_t *dst_offsets = reinterpret_cast<const uintptr_t *>(dst_arrmeta);
+              shortvector<const char *> dst_fields_arrmeta(reinterpret_cast<node_type *>(node)->field_count);
+              for (intptr_t i = 0; i != reinterpret_cast<node_type *>(node)->field_count; ++i) {
+                dst_fields_arrmeta[i] = dst_arrmeta + reinterpret_cast<node_type *>(node)->dst_arrmeta_offsets[i];
+              }
 
-      intptr_t self_offset = ckb->size();
-      ckb->emplace_back<nd::tuple_unary_op_ck>(kernreq);
-      nd::tuple_unary_op_ck *self = ckb->get_at<nd::tuple_unary_op_ck>(self_offset);
-      self->m_fields.resize(field_count);
-      for (intptr_t i = 0; i < field_count; ++i) {
-        self = ckb->get_at<nd::tuple_unary_op_ck>(self_offset);
-        nd::tuple_unary_op_item &field = self->m_fields[i];
-        field.child_kernel_offset = ckb->size() - self_offset;
-        field.dst_data_offset = dst_offsets[i];
-        field.src_data_offset = src_data_offsets[i];
-        node = next(node);
-        node->callee->instantiate(node, NULL, ckb, ndt::type(), dst_fields_arrmeta[i], 1, nullptr,
-                                  &src_fields_arrmeta[i], kernel_request_single, 1, kwds, tp_vars);
-      }
+              const uintptr_t *dst_offsets = reinterpret_cast<const uintptr_t *>(dst_arrmeta);
+
+              intptr_t self_offset = ckb->size();
+              ckb->emplace_back<nd::tuple_unary_op_ck>(kernreq);
+              nd::tuple_unary_op_ck *self = ckb->get_at<nd::tuple_unary_op_ck>(self_offset);
+              self->m_fields.resize(field_count);
+              for (intptr_t i = 0; i < field_count; ++i) {
+                self = ckb->get_at<nd::tuple_unary_op_ck>(self_offset);
+                nd::tuple_unary_op_item &field = self->m_fields[i];
+                field.child_kernel_offset = ckb->size() - self_offset;
+                field.dst_data_offset = dst_offsets[i];
+                field.src_data_offset = src_data_offsets[i];
+                node = next(node);
+                node->callee->instantiate(node, NULL, ckb, ndt::type(), dst_fields_arrmeta[i], 1, nullptr,
+                                          &src_fields_arrmeta[i], kernel_request_single, 1, kwds, tp_vars);
+              }
+        */
     }
   };
 
