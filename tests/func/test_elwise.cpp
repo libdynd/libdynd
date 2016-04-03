@@ -143,17 +143,9 @@ TEST(Elwise, UnaryExpr_VarToVarDim) {
 
   // Test it on some data
   nd::kernel_builder ckb;
-  nd::array in = nd::empty("var * fixed_string[16]");
+  nd::array in = nd::empty("var * fixed_string[16]").assign({"172", "-139", "12345", "-1111", "284"});
   nd::array out = nd::empty("var * int32");
-  const char *in_vals[] = {"172", "-139", "12345", "-1111", "284"};
-  in.vals() = in_vals;
-  const char *in_ptr = in.cdata();
-  const char *src_arrmeta[1] = {in.get()->metadata()};
-  af.get()->instantiate(nullptr, NULL, &ckb, out.get_type(), out.get()->metadata(), af.get_type()->get_npos(),
-                        &in.get_type(), src_arrmeta, kernel_request_single, 0, NULL,
-                        std::map<std::string, ndt::type>());
-  kernel_single_t usngo = ckb.get()->get_function<kernel_single_t>();
-  usngo(ckb.get(), out.data(), const_cast<char **>(&in_ptr));
+  af({in}, {{"dst", out}});
   EXPECT_EQ(5, out.get_shape()[0]);
   EXPECT_EQ(172, out(0).as<int>());
   EXPECT_EQ(-139, out(1).as<int>());
