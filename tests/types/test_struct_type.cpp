@@ -176,12 +176,12 @@ TEST(StructType, PropertyAccess) {
   EXPECT_THROW(a.p("w"), invalid_argument);
 }
 
-/*
 TEST(StructType, EqualTypeAssign) {
   ndt::type dt = ndt::struct_type::make({"x", "y", "z"},
                                         {ndt::make_type<int>(), ndt::make_type<double>(), ndt::make_type<short>()});
   nd::array a = nd::empty(2, dt);
   a(0, 0).vals() = 3;
+/*
   a(0, 1).vals() = 4.25;
   a(0, 2).vals() = 5;
   a(1, 0).vals() = 6;
@@ -196,8 +196,8 @@ TEST(StructType, EqualTypeAssign) {
   EXPECT_EQ(6, a(1, 0).as<int>());
   EXPECT_EQ(7.25, a(1, 1).as<double>());
   EXPECT_EQ(8, a(1, 2).as<short>());
-}
 */
+}
 
 /*
 TEST(StructType, DifferentTypeAssign) {
