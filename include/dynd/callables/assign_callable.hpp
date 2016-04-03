@@ -753,9 +753,9 @@ namespace nd {
   class assign_callable<struct_id, struct_id> : public base_callable {
     struct node_type : call_node {
       intptr_t field_count;
-      uintptr_t dst_arrmeta_offsets[14];
-      intptr_t src_permutation[14];
-      uintptr_t src_fields_arrmeta_offsets[14];
+      uintptr_t dst_arrmeta_offsets[8];
+      intptr_t src_permutation[8];
+      uintptr_t src_fields_arrmeta_offsets[8];
 
       node_type(base_callable *callee) : call_node(callee) {}
     };
@@ -785,10 +785,7 @@ namespace nd {
 
       const std::vector<ndt::type> &src_fields_tp_orig = src_sd->get_field_types();
       const std::vector<uintptr_t> &src_arrmeta_offsets_orig = src_sd->get_arrmeta_offsets();
-      //    const uintptr_t *src_data_offsets_orig = src_sd->get_data_offsets(src_arrmeta[0]);
       std::vector<ndt::type> src_fields_tp(node->field_count);
-      //      shortvector<uintptr_t> src_data_offsets(field_count);
-      //      shortvector<const char *> src_fields_arrmeta(field_count);
 
       // Match up the fields
       for (intptr_t i = 0; i != node->field_count; ++i) {
@@ -812,7 +809,8 @@ namespace nd {
         node->dst_arrmeta_offsets[i] = dst_arrmeta_offsets[i];
       }
 
-      for (intptr_t i = 0; i < node->field_count; ++i) {
+      intptr_t field_count = node->field_count;
+      for (intptr_t i = 0; i < field_count; ++i) {
         nd::assign->resolve(this, nullptr, cg, dst_fields_tp[i], 1, &src_fields_tp[i], nkwd, kwds, tp_vars);
       }
 
