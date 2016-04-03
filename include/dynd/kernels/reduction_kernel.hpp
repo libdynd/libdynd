@@ -528,6 +528,8 @@ namespace nd {
 
       void single_first(char *dst, char *const *src)
       {
+        std::cout << "reduction_kernel<fixed_dim_id, true, false>::single_first" << std::endl;
+
         reduction_kernel_prefix *child = get_reduction_child();
         child->strided_first(dst, dst_stride, src, &src_stride, _size);
       }

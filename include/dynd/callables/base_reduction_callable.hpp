@@ -29,6 +29,7 @@ namespace nd {
 
       struct node_type : call_node {
         bool inner;
+        bool broadcast;
 
         node_type(base_callable *callee) : call_node(callee) {}
       };
@@ -39,6 +40,8 @@ namespace nd {
                         size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         std::cout << "base_reduction_callable::resolve" << std::endl;
+        std::cout << "res_tp = " << res_tp << std::endl;
+        std::cout << "src_tp[0] = " << src_tp[0] << std::endl;
 
         node_type *node = cg.emplace_back<node_type>(this);
 
@@ -51,12 +54,13 @@ namespace nd {
             reduce = true;
           }
         }
+        node->broadcast = !reduce;
 
         ndt::type arg_element_tp[1];
         if (reduce) {
           arg_element_tp[0] = src_tp[0].extended<ndt::base_dim_type>()->get_element_type();
         } else {
-          arg_element_tp[0] = src_tp[0];
+          arg_element_tp[0] = src_tp[0].extended<ndt::base_dim_type>()->get_element_type();
         }
         ++reinterpret_cast<data_type *>(data)->axis;
 
@@ -95,6 +99,7 @@ namespace nd {
                        const ndt::type *DYND_UNUSED(src_tp), const char *const *src_arrmeta, kernel_request_t kernreq,
                        intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         std::cout << "reduction_callable<fixed_dim_id>::instantiate" << std::endl;
+        std::cout << "broadcast = " << reinterpret_cast<node_type *>(node)->broadcast << std::endl;
 
         bool inner = reinterpret_cast<node_type *>(node)->inner;
         if (inner) {
@@ -103,6 +108,7 @@ namespace nd {
 
           typedef reduction_kernel<fixed_dim_id, false, true> self_type;
           intptr_t root_ckb_offset = ckb->size();
+            std::cout << "reduction_kernel<fixed_dim_id, false, true>" << std::endl;
           ckb->emplace_back<self_type>(kernreq);
           node = next(node);
           self_type *e = ckb->get_at<self_type>(root_ckb_offset);
@@ -134,11 +140,20 @@ namespace nd {
           intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
           intptr_t src_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
 
-          ckb->emplace_back<reduction_kernel<fixed_dim_id, false, false>>(kernreq, src_size, src_stride);
+          if (reinterpret_cast<node_type *>(node)->broadcast) {
+            std::cout << "reduction_kernel<fixed_dim_id, true, false>" << std::endl;
+            ckb->emplace_back<reduction_kernel<fixed_dim_id, true, false>>(
+                kernreq, src_size, reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride, src_stride);
+            kernreq = kernel_request_strided;
+          } else {
+            std::cout << "reduction_kernel<fixed_dim_id, false, false>" << std::endl;
+            ckb->emplace_back<reduction_kernel<fixed_dim_id, false, false>>(kernreq, src_size, src_stride);
+            kernreq = kernel_request_single;
+          }
           node = next(node);
 
           node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta + sizeof(size_stride_t), nsrc, nullptr,
-                                    &src0_element_arrmeta, kernel_request_single, 0, nullptr, tp_vars);
+                                    &src0_element_arrmeta, kernreq, 0, nullptr, tp_vars);
         }
       }
     };
