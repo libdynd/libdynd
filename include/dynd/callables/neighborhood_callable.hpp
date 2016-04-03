@@ -115,6 +115,7 @@ namespace nd {
             reinterpret_cast<data_type *>(data)->shape[0],
             (reinterpret_cast<data_type *>(data)->offset == NULL) ? 0 : reinterpret_cast<data_type *>(data)->offset[0],
             reinterpret_cast<data_type *>(data)->out_of_bounds);
+        node = next(node);
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         const char *child_dst_arrmeta = dst_arrmeta + sizeof(fixed_dim_type_arrmeta);

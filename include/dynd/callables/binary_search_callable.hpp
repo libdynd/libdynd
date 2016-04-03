@@ -33,6 +33,7 @@ namespace nd {
       ckb->emplace_back<binary_search_kernel>(
           kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
           reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride);
+      node = next(node);
 
       const char *n_arrmeta = src_arrmeta[0];
       ndt::type element_tp = src_tp[0].at_single(0, &n_arrmeta);

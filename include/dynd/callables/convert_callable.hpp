@@ -37,6 +37,7 @@ namespace nd {
         intptr_t root_ckb_offset = ckb_offset;
         ckb->emplace_back<convert_kernel>(kernreq, nsrc);
         ckb_offset = ckb->size();
+        node = next(node);
         std::vector<const char *> buffered_arrmeta(nsrc);
         convert_kernel *self = ckb->get_at<convert_kernel>(root_ckb_offset);
         for (intptr_t i = 0; i < nsrc; ++i) {

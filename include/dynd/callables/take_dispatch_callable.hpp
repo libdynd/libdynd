@@ -31,6 +31,7 @@ namespace nd {
 
       intptr_t ckb_offset = ckb->size();
       ckb->emplace_back<self_type>(kernreq);
+      node = next(node);
       self_type *self = ckb->get_at<self_type>(ckb_offset);
 
       if (dst_tp.get_id() != var_dim_id) {
@@ -98,6 +99,7 @@ namespace nd {
                      const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars) {
       intptr_t self_offset = ckb->size();
       ckb->emplace_back<indexed_take_ck>(kernreq);
+        node = next(node);
       indexed_take_ck *self = ckb->get_at<indexed_take_ck>(self_offset);
 
       ndt::type dst_el_tp;

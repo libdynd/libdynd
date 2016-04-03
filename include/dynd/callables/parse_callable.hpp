@@ -42,6 +42,7 @@ namespace nd {
         intptr_t self_offset = ckb_offset;
         ckb->emplace_back<parse_kernel<option_id>>(kernreq);
         ckb_offset = ckb->size();
+        node = next(node);
 
         assign_na->instantiate(node, data, ckb, dst_tp, dst_arrmeta, 0, nullptr, nullptr,
                                kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
@@ -79,6 +80,9 @@ namespace nd {
         intptr_t self_offset = ckb_offset;
         ckb->emplace_back<parse_kernel<struct_id>>(kernreq, dst_tp, field_count,
                                                    dst_tp.extended<ndt::struct_type>()->get_data_offsets(dst_arrmeta));
+        node = next(node);
+
+
         ckb_offset = ckb->size();
 
         for (size_t i = 0; i < field_count; ++i) {
@@ -113,6 +117,8 @@ namespace nd {
         ckb->emplace_back<parse_kernel<fixed_dim_id>>(kernreq, dst_tp,
                                                       reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size,
                                                       reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride);
+        node = next(node);
+
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         dynamic_parse->instantiate(node, data, ckb, child_dst_tp,
@@ -142,6 +148,7 @@ namespace nd {
         ckb->emplace_back<parse_kernel<var_dim_id>>(
             kernreq, dst_tp, reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->blockref,
             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->stride);
+        node = next(node);
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::var_dim_type>()->get_element_type();
         dynamic_parse->instantiate(node, data, ckb, child_dst_tp,

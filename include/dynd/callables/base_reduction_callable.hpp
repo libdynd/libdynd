@@ -102,6 +102,7 @@ namespace nd {
           typedef reduction_kernel<fixed_dim_id, false, true> self_type;
           intptr_t root_ckb_offset = ckb->size();
           ckb->emplace_back<self_type>(kernreq);
+          node = next(node);
           self_type *e = ckb->get_at<self_type>(root_ckb_offset);
           e->src_stride = src_stride;
           e->_size = src_size;
@@ -116,13 +117,11 @@ namespace nd {
 
           const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
 
-          node = next(node);
           std::cout << "instantiating " << callable(node->callee, true) << std::endl;
           node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta + sizeof(size_stride_t), nsrc, nullptr,
                                     &src0_element_arrmeta, kernel_request_strided, nkwd - 3, kwds + 3, tp_vars);
 
           intptr_t init_offset = ckb->size();
-          node = next(node);
           std::cout << "instantiating " << callable(node->callee, true) << std::endl;
           node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta + sizeof(size_stride_t), nsrc, nullptr,
                                     &src0_element_arrmeta, kernel_request_single, nkwd - 3, kwds + 3, tp_vars);

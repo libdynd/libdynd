@@ -63,8 +63,8 @@ namespace nd {
 
       ckb->emplace_back<forward_na_kernel<I>>(kernreq);
       ckb->emplace_back(2 * sizeof(size_t));
-
       node = next(node);
+
       node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp + I, src_arrmeta + I,
                                 kernel_request_single, nkwd, kwds, tp_vars);
 
@@ -73,12 +73,10 @@ namespace nd {
       child_src_tp[1 - I] = src_tp[1 - I];
 
       child_offsets[0] = ckb->size() - self_offset;
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
                                 nsrc, child_src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
 
       child_offsets[1] = ckb->size() - self_offset;
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp, nullptr, 0, nullptr, nullptr, kernel_request_single, nkwd,
                                 kwds, tp_vars);
 
@@ -117,9 +115,9 @@ namespace nd {
       intptr_t ckb_offset = ckb->size();
       intptr_t option_comp_offset = ckb_offset;
       ckb->emplace_back<option_comparison_kernel<true, true>>(kernreq);
+      node = next(node);
       ckb_offset = ckb->size();
 
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp[0], &src_arrmeta[0],
                                 kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
@@ -127,7 +125,6 @@ namespace nd {
           ckb->get_at<option_comparison_kernel<true, true>>(option_comp_offset);
       self->is_na_rhs_offset = ckb_offset - option_comp_offset;
 
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp[1], &src_arrmeta[1],
                                 kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
@@ -136,13 +133,11 @@ namespace nd {
       auto cmp = Callable;
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(),
                                          src_tp[1].extended<ndt::option_type>()->get_value_type()};
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
                                 nsrc, child_src_tp, src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
       self = ckb->get_at<option_comparison_kernel<true, true>>(option_comp_offset);
       self->assign_na_offset = ckb_offset - option_comp_offset;
-      node = next(node);
       node->callee->instantiate(node, data, ckb, ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0,
                                 nullptr, nullptr, kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();

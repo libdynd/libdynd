@@ -46,9 +46,9 @@ namespace nd {
       intptr_t ckb_offset = ckb->size();
       intptr_t option_arith_offset = ckb_offset;
       ckb->emplace_back<option_arithmetic_kernel<true, false>>(kernreq);
+      node = next(node);
       ckb_offset = ckb->size();
 
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single,
                                 nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
@@ -56,13 +56,11 @@ namespace nd {
           ckb->get_at<option_arithmetic_kernel<true, false>>(option_arith_offset);
       self->arith_offset = ckb_offset - option_arith_offset;
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(), src_tp[1]};
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, src_arrmeta,
                                 kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
       self = ckb->get_at<option_arithmetic_kernel<true, false>>(option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, src_arrmeta,
                                 kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
@@ -101,9 +99,9 @@ namespace nd {
       intptr_t ckb_offset = ckb->size();
       intptr_t option_arith_offset = ckb_offset;
       ckb->emplace_back<option_arithmetic_kernel<false, true>>(kernreq);
+      node = next(node);
       ckb_offset = ckb->size();
 
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp[1], &src_arrmeta[1],
                                 kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
@@ -111,13 +109,11 @@ namespace nd {
           ckb->get_at<option_arithmetic_kernel<false, true>>(option_arith_offset);
       self->arith_offset = ckb_offset - option_arith_offset;
       const ndt::type child_src_tp[2] = {src_tp[0], src_tp[1].extended<ndt::option_type>()->get_value_type()};
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, src_arrmeta,
                                 kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
       self = ckb->get_at<option_arithmetic_kernel<false, true>>(option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
-      node = next(node);
       node->callee->instantiate(node, data, ckb, src_tp[1], src_arrmeta[1], 0, nullptr, nullptr, kernel_request_single,
                                 nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
@@ -159,16 +155,15 @@ namespace nd {
       intptr_t ckb_offset = ckb->size();
       intptr_t option_arith_offset = ckb_offset;
       ckb->emplace_back<option_arithmetic_kernel<true, true>>(kernreq);
+      node = next(node);
       ckb_offset = ckb->size();
 
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single,
                                 nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
       option_arithmetic_kernel<true, true> *self =
           ckb->get_at<option_arithmetic_kernel<true, true>>(option_arith_offset);
       self->is_na_rhs_offset = ckb_offset - option_arith_offset;
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single,
                                 nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
@@ -176,13 +171,11 @@ namespace nd {
       self->arith_offset = ckb_offset - option_arith_offset;
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(),
                                          src_tp[1].extended<ndt::option_type>()->get_value_type()};
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, src_arrmeta,
                                 kernel_request_single, nkwd, kwds, tp_vars);
       ckb_offset = ckb->size();
       self = ckb->get_at<option_arithmetic_kernel<true, true>>(option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
-      node = next(node);
       node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, 0, nullptr, nullptr, kernel_request_single, nkwd,
                                 kwds, tp_vars);
       ckb_offset = ckb->size();

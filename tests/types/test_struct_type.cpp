@@ -239,7 +239,9 @@ TEST(StructType, SingleCompare) {
   // EXPECT_FALSE(a.op_sorting_less(b));
   // EXPECT_THROW((a < b), not_comparable_error);
   // EXPECT_THROW((a <= b), not_comparable_error);
+  std::cout << "--" << std::endl;
   EXPECT_TRUE((a == b).as<bool>());
+  std::cout << "--" << std::endl;
   EXPECT_FALSE((a != b).as<bool>());
   //  EXPECT_THROW((a >= b), not_comparable_error);
   //  EXPECT_THROW((a > b), not_comparable_error);

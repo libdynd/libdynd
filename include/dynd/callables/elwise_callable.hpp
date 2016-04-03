@@ -49,8 +49,8 @@ namespace nd {
         }
 
         ckb->emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
-
         node = next(node);
+
         node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta + sizeof(size_stride_t), N, src_tp,
                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
@@ -171,8 +171,8 @@ namespace nd {
         ckb->emplace_back<elwise_kernel<fixed_dim_id, var_dim_id, N>>(
             kernreq, dst_size, dst_stride, src_stride.data(), src_offset.data(),
             reinterpret_cast<node_type *>(node)->arg_var.data());
-
         node = next(node);
+
         node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta + sizeof(size_stride_t), N, src_tp,
                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
@@ -302,8 +302,8 @@ namespace nd {
             kernreq, dst_md->blockref.get(), reinterpret_cast<node_type *>(node)->res_alignment, dst_md->stride,
             dst_md->offset, src_stride.data(), src_offset.data(), src_size.data(),
             reinterpret_cast<node_type *>(node)->arg_var.data());
-
         node = next(node);
+
         node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), N,
                                   src_tp, child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }

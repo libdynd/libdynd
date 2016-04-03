@@ -44,16 +44,15 @@ namespace nd {
 
         intptr_t root_ckb_offset = ckb_offset;
         ckb->emplace_back<compose_kernel>(kernreq, m_buffer_tp);
+        node = next(node);
         ckb_offset = ckb->size();
         compose_kernel *self = ckb->get_at<compose_kernel>(root_ckb_offset);
-        node = next(node);
         node->callee->instantiate(node, data, ckb, m_buffer_tp, self->buffer_arrmeta.get(), 1, src_tp, src_arrmeta,
                                   kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
         self = ckb->get_at<compose_kernel>(root_ckb_offset);
         self->second_offset = ckb_offset - root_ckb_offset;
         const char *buffer_arrmeta = self->buffer_arrmeta.get();
-        node = next(node);
         node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta, 1, &m_buffer_tp, &buffer_arrmeta,
                                   kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();

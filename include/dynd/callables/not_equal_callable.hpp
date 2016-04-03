@@ -28,10 +28,19 @@ namespace nd {
     }
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
-                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                      size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
+                      const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+      std::cout << "not_equal_callable<tuple_id, tuple_id>" << std::endl;
+
       cg.emplace_back(this);
+
+      size_t field_count = src_tp[0].extended<ndt::tuple_type>()->get_field_count();
+      for (size_t i = 0; i != field_count; ++i) {
+        ndt::type src_field_tp[2] = {src_tp[0].extended<ndt::tuple_type>()->get_field_type(i),
+                                     src_tp[1].extended<ndt::tuple_type>()->get_field_type(i)};
+        not_equal->resolve(this, nullptr, cg, dst_tp, 1, src_field_tp, nkwd, kwds, tp_vars);
+      }
+
       return dst_tp;
     }
 
@@ -46,6 +55,7 @@ namespace nd {
       ckb->emplace_back<not_equal_kernel<tuple_id, tuple_id>>(
           kernreq, field_count, bsd->get_data_offsets(src_arrmeta[0]), bsd->get_data_offsets(src_arrmeta[1]));
       ckb->emplace_back(field_count * sizeof(size_t));
+      node = next(node);
 
       not_equal_kernel<tuple_id, tuple_id> *e = ckb->get_at<not_equal_kernel<tuple_id, tuple_id>>(self_offset);
       size_t *field_kernel_offsets;

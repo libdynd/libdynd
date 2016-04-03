@@ -40,8 +40,8 @@ namespace nd {
                        kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                        const std::map<std::string, ndt::type> &tp_vars) {
         ckb->emplace_back<constant_kernel>(kernreq, const_cast<char *>(m_val.cdata()));
-
         node = next(node);
+
         const char *child_src_metadata = m_val.get()->metadata();
         node->callee->instantiate(node, NULL, ckb, ndt::type(), dst_arrmeta, 1, nullptr, &child_src_metadata,
                                   kernreq | kernel_request_data_only, 0, nullptr, tp_vars);
