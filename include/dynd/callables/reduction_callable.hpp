@@ -60,6 +60,7 @@ namespace nd {
         return f->resolve(caller, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
       }
 
+/*
       char *data_init(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                       const std::map<std::string, ndt::type> &tp_vars) {
         char *data = reinterpret_cast<char *>(new data_type());
@@ -97,7 +98,9 @@ namespace nd {
 
         return data;
       }
+*/
 
+/*
       void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
                             const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         ndt::type child_dst_tp = m_child.get_type()->get_return_type();
@@ -127,6 +130,7 @@ namespace nd {
           }
         }
       }
+*/
 
       void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
