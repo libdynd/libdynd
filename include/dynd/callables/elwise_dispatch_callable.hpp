@@ -85,7 +85,7 @@ namespace nd {
         if ((dst_variadic || dst_tp.get_id() == fixed_dim_id) && src_all_strided) {
           static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, N>>();
           return f->resolve(this, reinterpret_cast<char *>(&child_data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-        } else if (((dst_variadic) || dst_tp.get_id() == var_dim_id) && var_broadcast) {
+        } else if (((dst_variadic) || dst_tp.get_id() == var_dim_id) && (var_broadcast || src_all_strided)) {
           static callable f = make_callable<elwise_callable<var_dim_id, fixed_dim_id, N>>();
           return f->resolve(this, reinterpret_cast<char *>(&child_data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else if (src_all_strided_or_var) {

@@ -102,12 +102,12 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, a
   call_graph cg;
   ndt::type resolved_dst_tp = resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
-  /*
-    std::cout << "resolved_dst_tp = " << resolved_dst_tp << std::endl;
-    for (int i = 0; i < nsrc; ++i) {
-      std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
-    }
-  */
+/*
+  std::cout << "resolved_dst_tp = " << resolved_dst_tp << std::endl;
+  for (int i = 0; i < nsrc; ++i) {
+    std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
+  }
+*/
 
   char *data = data_init(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
