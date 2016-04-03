@@ -243,7 +243,11 @@ namespace nd {
 
     call_graph(base_callable *callee);
 
-    ~call_graph() { destroy(); }
+    ~call_graph() {
+      if (!using_static_data()) {
+        free(m_data);
+      }
+    }
 
     size_t size() const { return m_size; }
 
