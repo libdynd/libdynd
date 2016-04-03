@@ -88,7 +88,7 @@ namespace nd {
 
     template <>
     class reduction_callable<fixed_dim_id> : public base_reduction_callable {
-      void instantiate(call_node *node, char *DYND_UNUSED(data), kernel_builder *ckb,
+      void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb,
                        const ndt::type &DYND_UNUSED(dst_tp), const char *dst_arrmeta, intptr_t nsrc,
                        const ndt::type *DYND_UNUSED(src_tp), const char *const *src_arrmeta, kernel_request_t kernreq,
                        intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {

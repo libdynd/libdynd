@@ -54,9 +54,10 @@ namespace nd {
       dst_tp = ndt::make_type<ndt::option_type>(dst_tp);
     }
 
-    void instantiate(call_node *node, char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
-                     intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                     intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+    void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
+                     const std::map<std::string, ndt::type> &tp_vars) {
       size_t self_offset = ckb->size();
       size_t child_offsets[2];
 
@@ -109,9 +110,10 @@ namespace nd {
                                 nullptr, nkwd, kwds, tp_vars);
     }
 
-    void instantiate(call_node *node, char *data, kernel_builder *ckb, const ndt::type &dst_tp, const char *dst_arrmeta,
-                     intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                     intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+    void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
+                     const std::map<std::string, ndt::type> &tp_vars) {
       intptr_t ckb_offset = ckb->size();
       intptr_t option_comp_offset = ckb_offset;
       ckb->emplace_back<option_comparison_kernel<true, true>>(kernreq);

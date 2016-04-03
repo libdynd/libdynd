@@ -165,7 +165,7 @@ namespace nd {
      *                 values.
      * \param kwds  A struct array of named auxiliary arguments.
      */
-    virtual void instantiate(call_node *node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+    virtual void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                              const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                              const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                              const std::map<std::string, ndt::type> &tp_vars) = 0;

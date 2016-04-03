@@ -103,7 +103,7 @@ namespace nd {
         dst_tp = ndt::substitute_shape(dst_tp, ndim, shape.get());
       }
 
-      void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                        kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
@@ -131,13 +131,13 @@ namespace nd {
 
           const char *child_src_arrmeta =
               reinterpret_cast<char *>(reinterpret_cast<data_type *>(data)->child_src_arrmeta);
-          child.get()->instantiate(nullptr, NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc,
+          child.get()->instantiate(node, NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc,
                                    &reinterpret_cast<data_type *>(data)->child_src_tp, &child_src_arrmeta,
                                    kernel_request_single, nkwd - 3, kwds + 3, tp_vars);
           ckb->get_at<neighborhood_kernel<N>>(neighborhood_offset)->boundary_child_offset =
               ckb->size() - neighborhood_offset;
 
-          boundary_child.get()->instantiate(nullptr, NULL, ckb, child_dst_tp, child_dst_arrmeta, 0, NULL, NULL,
+          boundary_child.get()->instantiate(node, NULL, ckb, child_dst_tp, child_dst_arrmeta, 0, NULL, NULL,
                                             kernel_request_single, nkwd - 3, kwds + 3, tp_vars);
 
           delete reinterpret_cast<data_type *>(data);
@@ -154,7 +154,7 @@ namespace nd {
         ckb->get_at<neighborhood_kernel<N>>(neighborhood_offset)->boundary_child_offset =
             sizeof(neighborhood_kernel<N>);
 
-        return instantiate(nullptr, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
+        return instantiate(node, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
                            kernel_request_single, nkwd, kwds, tp_vars);
       }
     };

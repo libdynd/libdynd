@@ -195,7 +195,7 @@ namespace nd {
         dst_tp = child_dst_tp;
       }
 
-      void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                        dynd::kernel_request_t kernreq, intptr_t nkwd, const dynd::nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars)
@@ -221,7 +221,7 @@ namespace nd {
           }
           if (i == nsrc) {
             // No dimensions to lift, call the elementwise instantiate directly
-            return child.get()->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
+            return child.get()->instantiate(node, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
                                             nkwd, kwds, tp_vars);
           } else {
             intptr_t src_ndim = src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();

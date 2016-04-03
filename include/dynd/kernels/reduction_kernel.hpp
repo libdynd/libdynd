@@ -231,15 +231,16 @@ namespace nd {
           ++reinterpret_cast<data_type *>(data)->axes;
         }
 
+        call_node *node = NULL;
         if (reinterpret_cast<data_type *>(data)->keepdims) {
           const ndt::type &dst_element_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
           const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
 
-          return self->instantiate(nullptr, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
+          return self->instantiate(node, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
                                    &src0_element_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
         }
 
-        return self->instantiate(nullptr, data, ckb, dst_tp, dst_arrmeta, nsrc, &src0_element_tp, &src0_element_arrmeta,
+        return self->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, &src0_element_tp, &src0_element_arrmeta,
                                  kernel_request_single, nkwd, kwds, tp_vars);
       }
     };
@@ -378,15 +379,16 @@ namespace nd {
           ++reinterpret_cast<data_type *>(data)->axes;
         }
 
+        call_node *node = NULL;
         if (reinterpret_cast<data_type *>(data)->keepdims) {
           const ndt::type &dst_element_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
           const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
 
-          self->instantiate(nullptr, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
+          self->instantiate(node, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
                             &src0_element_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
         }
         else {
-          self->instantiate(nullptr, data, ckb, dst_tp, dst_arrmeta, nsrc, &src0_element_tp, &src0_element_arrmeta,
+          self->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, &src0_element_tp, &src0_element_arrmeta,
                             kernel_request_single, nkwd, kwds, tp_vars);
         }
 
@@ -486,7 +488,8 @@ namespace nd {
         --reinterpret_cast<data_type *>(data)->ndim;
         --reinterpret_cast<data_type *>(data)->naxis;
 
-        self->instantiate(nullptr, data, ckb, dst_tp, dst_arrmeta, nsrc, &src0_element_tp, &src0_element_arrmeta,
+        call_node *node = NULL;
+        self->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, &src0_element_tp, &src0_element_arrmeta,
                           kernel_request_single, nkwd, kwds, tp_vars);
 
         reduction_kernel *self_k = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
@@ -599,7 +602,8 @@ namespace nd {
         const ndt::type &dst_element_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
 
-        return self->instantiate(nullptr, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
+        call_node *node = NULL;
+        return self->instantiate(node, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
                                  &src0_element_arrmeta, kernel_request_strided, nkwd, kwds, tp_vars);
       }
     };
@@ -744,7 +748,8 @@ namespace nd {
 
         --reinterpret_cast<data_type *>(data)->ndim;
 
-        self->instantiate(nullptr, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp, &src0_element_arrmeta,
+        call_node *node = NULL;
+        self->instantiate(node, data, ckb, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp, &src0_element_arrmeta,
                           kernel_request_strided, nkwd, kwds, tp_vars);
         self_k = reinterpret_cast<kernel_builder *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
         self_k->dst_init_kernel_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;

@@ -29,7 +29,7 @@ namespace nd {
         return dst_tp;
       }
 
-      void instantiate(call_node *node, char *data, kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
+      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
                        const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
@@ -59,7 +59,7 @@ namespace nd {
         return dst_tp;
       }
 
-      void instantiate(call_node *node, char *data, kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
+      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
                        const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {

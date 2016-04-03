@@ -34,7 +34,7 @@ namespace nd {
         return dst_tp;
       }
 
-      void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                        kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
@@ -43,14 +43,13 @@ namespace nd {
         ckb->emplace_back<parse_kernel<option_id>>(kernreq);
         ckb_offset = ckb->size();
 
-        assign_na->instantiate(nullptr, data, ckb, dst_tp, dst_arrmeta, 0, nullptr, nullptr,
+        assign_na->instantiate(node, data, ckb, dst_tp, dst_arrmeta, 0, nullptr, nullptr,
                                kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
 
         ckb->get_at<parse_kernel<option_id>>(self_offset)->parse_offset = ckb_offset - self_offset;
-        dynamic_parse->instantiate(nullptr, data, ckb, dst_tp.extended<ndt::option_type>()->get_value_type(),
-                                   dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq | kernel_request_data_only, nkwd,
-                                   kwds, tp_vars);
+        dynamic_parse->instantiate(node, data, ckb, dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
+                                   nsrc, src_tp, src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
       }
     };
@@ -69,7 +68,7 @@ namespace nd {
         return dst_tp;
       }
 
-      void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                        kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
@@ -84,7 +83,7 @@ namespace nd {
 
         for (size_t i = 0; i < field_count; ++i) {
           ckb->get_at<parse_kernel<struct_id>>(self_offset)->child_offsets[i] = ckb_offset - self_offset;
-          dynamic_parse->instantiate(nullptr, data, ckb, dst_tp.extended<ndt::struct_type>()->get_field_type(i),
+          dynamic_parse->instantiate(node, data, ckb, dst_tp.extended<ndt::struct_type>()->get_field_type(i),
                                      dst_arrmeta + arrmeta_offsets[i], nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
                                      tp_vars);
           ckb_offset = ckb->size();
@@ -107,7 +106,7 @@ namespace nd {
         return dst_tp;
       }
 
-      void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                        kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
@@ -116,7 +115,7 @@ namespace nd {
                                                       reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride);
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
-        dynamic_parse->instantiate(nullptr, data, ckb, child_dst_tp,
+        dynamic_parse->instantiate(node, data, ckb, child_dst_tp,
                                    dst_arrmeta + sizeof(ndt::fixed_dim_type::metadata_type), nsrc, src_tp, src_arrmeta,
                                    kernreq, nkwd, kwds, tp_vars);
       }
@@ -136,7 +135,7 @@ namespace nd {
         return dst_tp;
       }
 
-      void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                        kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
@@ -145,7 +144,7 @@ namespace nd {
             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->stride);
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::var_dim_type>()->get_element_type();
-        dynamic_parse->instantiate(nullptr, data, ckb, child_dst_tp,
+        dynamic_parse->instantiate(node, data, ckb, child_dst_tp,
                                    dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), nsrc, src_tp, src_arrmeta,
                                    kernreq, nkwd, kwds, tp_vars);
       }

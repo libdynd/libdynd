@@ -29,7 +29,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                      intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                      const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
@@ -76,7 +76,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                      intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
@@ -125,7 +125,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
+    void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
                      const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                      intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                      const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
@@ -174,7 +174,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *node, char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                      intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
@@ -220,7 +220,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *node, char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &DYND_UNUSED(dst_tp), const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
@@ -246,7 +246,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                      intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
@@ -295,7 +295,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *node, char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                      intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                      const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
@@ -327,7 +327,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                      intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
@@ -359,7 +359,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                      intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
@@ -386,7 +386,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                      intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
@@ -418,7 +418,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                      intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
@@ -445,7 +445,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                      intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
@@ -477,7 +477,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                      intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
@@ -506,7 +506,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
@@ -533,7 +533,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                      intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
@@ -565,14 +565,14 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                     const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
+                     const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
+                     const std::map<std::string, ndt::type> &tp_vars) {
       ckb->emplace_back<assignment_kernel<pointer_id, pointer_id>>(kernreq);
 
       const char *child_src_arrmeta = src_arrmeta[0] + sizeof(pointer_type_arrmeta);
-      assign->instantiate(nullptr, NULL, ckb, dst_tp.extended<ndt::pointer_type>()->get_target_type(), dst_arrmeta, 1,
+      assign->instantiate(node, NULL, ckb, dst_tp.extended<ndt::pointer_type>()->get_target_type(), dst_arrmeta, 1,
                           &src_tp[0].extended<ndt::pointer_type>()->get_target_type(), &child_src_arrmeta,
                           kernel_request_single, nkwd, kwds, tp_vars);
     }
@@ -601,7 +601,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
+    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
                      const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                      const std::map<std::string, ndt::type> &tp_vars) {
@@ -655,16 +655,16 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
+    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
+                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                      const std::map<std::string, ndt::type> &tp_vars) {
       // Deal with some float32 to option[T] conversions where any NaN is
       // interpreted
       // as NA.
       ndt::type src_tp_as_option = ndt::make_type<ndt::option_type>(src_tp[0]);
       callable f = make_callable<assign_callable<option_id, option_id>>();
-      f->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp_as_option, src_arrmeta, kernreq, nkwd, kwds,
+      f->instantiate(node, NULL, ckb, dst_tp, dst_arrmeta, nsrc, &src_tp_as_option, src_arrmeta, kernreq, nkwd, kwds,
                      tp_vars);
     }
   };
@@ -689,7 +689,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
+    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
                      const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                      const std::map<std::string, ndt::type> &tp_vars) {
@@ -793,7 +793,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
+    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
                      const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                      const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                      const std::map<std::string, ndt::type> &tp_vars) {
@@ -897,7 +897,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *node, char *DYND_UNUSED(data), kernel_builder *ckb,
+    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb,
                      const ndt::type &DYND_UNUSED(dst_tp), const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *DYND_UNUSED(src_tp), const char *const *src_arrmeta, kernel_request_t kernreq,
                      intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
@@ -954,7 +954,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
+    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
                      const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                      const std::map<std::string, ndt::type> &tp_vars) {
@@ -991,7 +991,7 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+    void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                      const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                      const std::map<std::string, ndt::type> &tp_vars) {
@@ -1004,12 +1004,12 @@ namespace nd {
         ckb->emplace_back<detail::adapt_assign_from_kernel>(kernreq, storage_tp.get_canonical_type());
         ckb_offset = ckb->size();
 
-        nd::assign->instantiate(nullptr, data, ckb, storage_tp.get_canonical_type(), dst_arrmeta, nsrc, &storage_tp,
+        nd::assign->instantiate(node, data, ckb, storage_tp.get_canonical_type(), dst_arrmeta, nsrc, &storage_tp,
                                 src_arrmeta, kernel_request_single, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
         intptr_t forward_offset = ckb_offset - self_offset;
         ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
-        forward->instantiate(nullptr, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp2, src_arrmeta, kernel_request_single,
+        forward->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp2, src_arrmeta, kernel_request_single,
                              nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
         ckb->get_at<detail::adapt_assign_from_kernel>(self_offset)->forward_offset = forward_offset;
@@ -1017,7 +1017,7 @@ namespace nd {
         const callable &forward = src_tp[0].extended<ndt::adapt_type>()->get_forward();
 
         ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
-        forward->instantiate(nullptr, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp2, src_arrmeta, kernreq, nkwd, kwds,
+        forward->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp2, src_arrmeta, kernreq, nkwd, kwds,
                              tp_vars);
         ckb_offset = ckb->size();
       }
@@ -1039,14 +1039,14 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+    void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                      const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
                      const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                      const std::map<std::string, ndt::type> &tp_vars) {
       const callable &inverse = dst_tp.extended<ndt::adapt_type>()->get_inverse();
       const ndt::type &value_tp = dst_tp.value_type();
-      inverse->instantiate(nullptr, data, ckb, dst_tp.storage_type(), dst_arrmeta, nsrc, &value_tp, src_arrmeta,
-                           kernreq, nkwd, kwds, tp_vars);
+      inverse->instantiate(node, data, ckb, dst_tp.storage_type(), dst_arrmeta, nsrc, &value_tp, src_arrmeta, kernreq,
+                           nkwd, kwds, tp_vars);
     }
   };
 
@@ -1066,15 +1066,15 @@ namespace nd {
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd,
-                     const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
+                     const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
+                     const std::map<std::string, ndt::type> &tp_vars) {
       ndt::type val_dst_tp =
           dst_tp.get_id() == option_id ? dst_tp.extended<ndt::option_type>()->get_value_type() : dst_tp;
       ndt::type val_src_tp =
           src_tp[0].get_id() == option_id ? src_tp[0].extended<ndt::option_type>()->get_value_type() : src_tp[0];
-      assign->instantiate(nullptr, NULL, ckb, val_dst_tp, dst_arrmeta, 1, &val_src_tp, src_arrmeta, kernreq, nkwd, kwds,
+      assign->instantiate(node, NULL, ckb, val_dst_tp, dst_arrmeta, 1, &val_src_tp, src_arrmeta, kernreq, nkwd, kwds,
                           tp_vars);
     }
   };

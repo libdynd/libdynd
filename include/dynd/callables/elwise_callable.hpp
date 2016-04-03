@@ -29,7 +29,7 @@ namespace nd {
         return ndt::make_type<ndt::fixed_dim_type>(ret_size, ret_element_tp);
       }
 
-      void instantiate(call_node *node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                        const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
@@ -109,16 +109,18 @@ namespace nd {
           }
         }
 
+        call_node *node = NULL;
+
         ckb->emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return self->instantiate(nullptr, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+          return self->instantiate(node, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                    child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
         }
 
         // Instantiate the elementwise handler
-        return child->instantiate(nullptr, NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+        return child->instantiate(node, NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
     };
@@ -137,7 +139,7 @@ namespace nd {
         return ndt::make_type<ndt::fixed_dim_type>(ret_size, ret_element_tp);
       }
 
-      void instantiate(call_node *node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                        const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
@@ -241,13 +243,15 @@ namespace nd {
         ckb->emplace_back<elwise_kernel<fixed_dim_id, var_dim_id, N>>(kernreq, size, dst_stride, src_stride.data(),
                                                                       src_offset.data(), is_src_var.data());
 
+        call_node *node = NULL;
+
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return self->instantiate(nullptr, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+          return self->instantiate(node, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                    child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
         }
         // Instantiate the elementwise handler
-        return child->instantiate(nullptr, NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+        return child->instantiate(node, NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
     };
@@ -261,7 +265,7 @@ namespace nd {
         return ndt::make_type<ndt::var_dim_type>(ret_element_tp);
       }
 
-      void instantiate(call_node *node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                        const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
@@ -279,7 +283,7 @@ namespace nd {
             src_stride[i] = src_md->stride;
             src_offset[i] = src_md->offset;
             child_src_arrmeta[i] = src_arrmeta[i] + sizeof(ndt::var_dim_type::metadata_type);
-//            src_size[i] = -1;
+            //            src_size[i] = -1;
           } else {
             if (reinterpret_cast<node_type *>(node)->arg_broadcast[i]) {
               src_stride[i] = 0;
@@ -367,13 +371,15 @@ namespace nd {
             kernreq, dst_md->blockref.get(), dst_vdd->get_target_alignment(), dst_md->stride, dst_md->offset,
             src_stride.data(), src_offset.data(), src_size.data(), is_src_var.data());
 
+        call_node *node = NULL;
+
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return self->instantiate(nullptr, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+          return self->instantiate(node, data, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                    child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
         }
         // All the types matched, so instantiate the elementwise handler
-        return child->instantiate(nullptr, NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
+        return child->instantiate(node, NULL, ckb, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp.data(),
                                   child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
       }
     };

@@ -120,7 +120,7 @@ namespace nd {
         return resolved_ret_tp;
       }
 
-      void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
+      void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
                        const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
