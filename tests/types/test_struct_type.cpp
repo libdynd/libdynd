@@ -32,7 +32,6 @@ TEST(StructType, Basic) {
             ndt::struct_type::make({"x"}, {ndt::make_type<int>()}));
 }
 
-/*
 TEST(StructType, Equality) {
   EXPECT_EQ(ndt::type("{x: int32, y: float16, z: int32}"), ndt::type("{x: int32, y: float16, z: int32}"));
   EXPECT_NE(ndt::type("{x: int32, y: float16, z: int32}"), ndt::type("{x: int32, y: float16, z: int32, ...}"));
@@ -164,6 +163,7 @@ TEST(StructType, IsExpression) {
   EXPECT_FALSE(d.at(irange(0, 3, 2)).is_expression());
 }
 
+/*
 TEST(StructType, PropertyAccess) {
   ndt::type dt = ndt::struct_type::make({"x", "y", "z"},
                                         {ndt::make_type<int>(), ndt::make_type<double>(), ndt::make_type<short>()});
