@@ -140,8 +140,6 @@ namespace nd {
       ~reduction_kernel() { get_child()->destroy(); }
 
       void single_first(char *dst, char *const *src) {
-        std::cout << "reduction_kernel<fixed_dim_id, false, false>::single_first" << std::endl;
-
         reduction_kernel_prefix *child = get_reduction_child();
         // The first call at the "dst" address
         child->single_first(dst, src);
@@ -264,18 +262,11 @@ namespace nd {
       }
 
       void single_first(char *dst, char *const *src) {
-        std::cout << "reduction_kernel<fixed_dim_id, false, true>::single_first" << std::endl;
-
         char *src0 = src[0];
-        std::cout << "src0 = " << *reinterpret_cast<double *>(src0) << std::endl;
-
-        std::cout << "init_offset = " << init_offset << std::endl;
 
         // Initialize the dst values
         get_child(init_offset)->single(dst, src);
         src0 += src_stride_first;
-
-        std::cout << "after init" << std::endl;
 
         // Do the reduction
         get_child()->strided(dst, 0, &src0, &src_stride, size_first);
@@ -501,8 +492,6 @@ namespace nd {
       ~reduction_kernel() { get_child()->destroy(); }
 
       void single_first(char *dst, char *const *src) {
-        std::cout << "reduction_kernel<fixed_dim_id, true, false>::single_first" << std::endl;
-
         reduction_kernel_prefix *child = get_reduction_child();
         child->strided_first(dst, dst_stride, src, &src_stride, _size);
       }
@@ -615,14 +604,8 @@ namespace nd {
       }
 
       void single_first(char *dst, char *const *src) {
-        std::cout << "reduction_kernel<fixed_dim_id, true, true>::single_first" << std::endl;
-
         // Initialize the dst values
-        std::cout << "dst_stride = " << dst_stride << std::endl;
-        std::cout << "src_stride_first = " << src_stride_first << std::endl;
-        std::cout << "_size = " << _size << std::endl;
         get_child(dst_init_kernel_offset)->strided(dst, dst_stride, src, &src_stride_first, _size);
-        std::cout << "after dst_init_kernel " << std::endl;
         if (src_stride_first == 0) {
           // Then do the accumulation
           get_child()->strided(dst, dst_stride, src, &src_stride, _size);
