@@ -38,6 +38,8 @@ namespace nd {
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *data, call_graph &cg, const ndt::type &res_tp,
                         size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
+        std::cout << "base_reduction_callable::resolve" << std::endl;
+
         node_type *node = cg.emplace_back<node_type>(this);
 
         callable &child = reinterpret_cast<data_type *>(data)->child;
@@ -126,14 +128,18 @@ namespace nd {
 
           e = ckb->get_at<self_type>(root_ckb_offset);
           e->init_offset = init_offset - root_ckb_offset;
-        }
+        } else {
+          const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
 
-        /*
-                std::cout << reinterpret_cast<node_type *>(node)->inner << std::endl;
-                ckb->emplace_back<reduction_kernel<fixed_dim_id, false, true>>(
-                    kernreq, reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size,
-                    reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride);
-        */
+          intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
+          intptr_t src_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
+
+          ckb->emplace_back<reduction_kernel<fixed_dim_id, false, false>>(kernreq, src_size, src_stride);
+          node = next(node);
+
+          node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta + sizeof(size_stride_t), nsrc, nullptr,
+                                    &src0_element_arrmeta, kernel_request_single, 0, nullptr, tp_vars);
+        }
       }
     };
 
