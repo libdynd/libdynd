@@ -16,15 +16,13 @@
 using namespace std;
 using namespace dynd;
 
-TEST(Option, IsAvail)
-{
+TEST(Option, IsAvail) {
   nd::array x = nd::empty("?int64");
   x.assign_na();
   EXPECT_TRUE(nd::is_na(x).as<bool>());
 }
 
-TEST(Option, IsAvailArray)
-{
+TEST(Option, IsAvailArray) {
   nd::array data = parse_json("3 * ?int", "[0, null, 2]");
   nd::array expected{false, true, false};
   EXPECT_ARRAY_EQ(nd::is_na(data), expected);
@@ -46,18 +44,17 @@ TEST(Option, IsAvailArray)
   EXPECT_ARRAY_EQ(nd::is_na(data), expected);
 }
 
-TEST(Option, AssignNA)
-{
+TEST(Option, AssignNA) {
   nd::array x = nd::assign_na({}, {{"dst_tp", ndt::type("?int64")}});
   EXPECT_TRUE(nd::is_na(x).as<bool>());
 }
 
-TEST(Option, AssignNAArray)
-{
+TEST(Option, AssignNAArray) {
   nd::array a = nd::empty("3 * ?int64");
   a(0).vals() = nd::assign_na({}, {{"dst_tp", ndt::type("?int64")}});
   a(1).vals() = 1.0;
   a(2).vals() = 3.0;
+
   nd::array expected = {true, false, false};
   EXPECT_ARRAY_EQ(nd::is_na(a), expected);
 }
