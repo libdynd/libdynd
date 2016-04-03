@@ -60,12 +60,12 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
     throw std::runtime_error("different types");
   }
 
-  /*
-    std::cout << "resolved_dst_tp = " << resolved_dst_tp << std::endl;
-    for (int i = 0; i < nsrc; ++i) {
-      std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
-    }
-  */
+/*
+  std::cout << "resolved_dst_tp = " << resolved_dst_tp << std::endl;
+  for (int i = 0; i < nsrc; ++i) {
+    std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
+  }
+*/
 
   // Allocate the destination array
   array dst = empty(resolved_dst_tp);

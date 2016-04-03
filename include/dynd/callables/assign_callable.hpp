@@ -35,7 +35,7 @@ namespace nd {
                      const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
                      const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
 
-      assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
+      assign_error_mode error_mode = (kwds == NULL || kwds[0].is_na()) ? assign_error_default : kwds[0].as<assign_error_mode>();
       switch (error_mode) {
       case assign_error_default:
       case assign_error_nocheck:
@@ -209,7 +209,8 @@ namespace nd {
                      intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
+      assign_error_mode error_mode = (kwds == NULL || kwds[0].is_na()) ? assign_error_default : kwds[0].as<assign_error_mode>();
+
       ckb->emplace_back<
           detail::assignment_kernel<float64_id, float_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
           kernreq, src_tp[0], src_arrmeta[0], error_mode);
