@@ -117,14 +117,12 @@ namespace nd {
 
           const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
 
-          std::cout << "instantiating " << callable(node->callee, true) << std::endl;
           node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta + sizeof(size_stride_t), nsrc, nullptr,
                                     &src0_element_arrmeta, kernel_request_strided, nkwd - 3, kwds + 3, tp_vars);
 
           intptr_t init_offset = ckb->size();
-          std::cout << "instantiating " << callable(node->callee, true) << std::endl;
           node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta + sizeof(size_stride_t), nsrc, nullptr,
-                                    &src0_element_arrmeta, kernel_request_single, nkwd - 3, kwds + 3, tp_vars);
+                                    &src0_element_arrmeta, kernel_request_single, 0, nullptr, tp_vars);
 
           e = ckb->get_at<self_type>(root_ckb_offset);
           e->init_offset = init_offset - root_ckb_offset;
