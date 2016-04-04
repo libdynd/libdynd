@@ -91,8 +91,8 @@ set(tests_SRC
     array/test_asarray.cpp
 #    array/test_json_formatter.cpp
 #    array/test_json_parser.cpp
-#    array/test_memmap.cpp
-#    array/test_view.cpp
+    array/test_memmap.cpp
+    array/test_view.cpp
     array/test_with.cpp
     test_bool1.cpp
     test_config.cpp
@@ -105,10 +105,12 @@ set(tests_SRC
     test_type_sequence.cpp
 #    test_parse.cpp
     test_platform.cpp
-#    test_pointer.cpp
+    test_pointer.cpp
     ../thirdparty/gtest/gtest-all.cc
     ../thirdparty/gtest/gtest_main.cc
     )
+
+# memap, array/test_view.cpp, array/test_pointer.cpp
 
 include_directories(
     ../thirdparty
