@@ -89,8 +89,8 @@ set(tests_SRC
     array/test_array_compare.cpp
     array/test_array_views.cpp
     array/test_asarray.cpp
-#    array/test_json_formatter.cpp
-#    array/test_json_parser.cpp
+    array/test_json_formatter.cpp
+    array/test_json_parser.cpp
     array/test_memmap.cpp
     array/test_view.cpp
     array/test_with.cpp
