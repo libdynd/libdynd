@@ -70,15 +70,31 @@ namespace nd {
   };
 
   class indexed_take_callable : public base_callable {
+    struct node_type : call_node {
+      type_id_t src1_id;
+
+      node_type(base_callable *callee, type_id_t src1_id) : call_node(callee), src1_id(src1_id) {}
+    };
+
   public:
-    indexed_take_callable() : base_callable(ndt::type("(Any) -> Any")) {}
+    indexed_take_callable() : base_callable(ndt::type("(Any) -> Any"), sizeof(node_type)) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
-                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                      const ndt::type &DYND_UNUSED(dst_tp), size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      cg.emplace_back(this);
-      return dst_tp;
+                      const std::map<std::string, ndt::type> &tp_vars) {
+      cg.emplace_back<node_type>(this, src_tp[1].get_id());
+
+      ndt::type src0_element_tp = src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type();
+
+      nd::array error_mode = assign_error_default;
+      assign->resolve(this, nullptr, cg, src0_element_tp, 1, &src0_element_tp, 1, &error_mode, tp_vars);
+
+      if (src_tp[1].get_id() == var_dim_id) {
+        return ndt::var_dim_type::make(src0_element_tp);
+      } else {
+        return ndt::make_fixed_dim(src_tp[1].get_dim_size(NULL, NULL), src0_element_tp);
+      }
     }
 
     void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
@@ -88,6 +104,7 @@ namespace nd {
       intptr_t self_offset = ckb->size();
       ckb->emplace_back<indexed_take_ck>(kernreq);
       node = next(node);
+
       indexed_take_ck *self = ckb->get_at<indexed_take_ck>(self_offset);
 
       ndt::type dst_el_tp;
@@ -122,7 +139,7 @@ namespace nd {
         ss << index_dim_size << " and " << self->m_dst_dim_size;
         throw std::invalid_argument(ss.str());
       }
-      if (index_el_tp.get_id() != (type_id_t)type_id_of<intptr_t>::value) {
+      if (index_el_tp.get_id() != type_id_of<intptr_t>::value) {
         std::stringstream ss;
         ss << "indexed take arrfunc: index type should be intptr, not ";
         ss << index_el_tp;
@@ -130,9 +147,8 @@ namespace nd {
       }
 
       // Create the child element assignment ckernel
-      nd::array error_mode = assign_error_default;
-      assign->instantiate(node, NULL, ckb, dst_el_tp, dst_el_meta, 1, &src0_el_tp, &src0_el_meta, kernel_request_single,
-                          1, &error_mode, tp_vars);
+      node->callee->instantiate(node, NULL, ckb, ndt::type(), dst_el_meta, 1, nullptr, &src0_el_meta,
+                                kernel_request_single, 0, nullptr, tp_vars);
     }
   };
 
@@ -147,15 +163,9 @@ namespace nd {
       if (mask_el_tp.get_id() == bool_id) {
         static callable f = make_callable<take_callable<bool_id>>();
         return f->resolve(this, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-      } else if (mask_el_tp.get_id() == (type_id_t)type_id_of<intptr_t>::value) {
+      } else if (mask_el_tp.get_id() == type_id_of<intptr_t>::value) {
         static callable f = make_callable<indexed_take_callable>();
-        f->resolve(this, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-        if (src_tp[1].get_id() == var_dim_id) {
-          return ndt::var_dim_type::make(src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
-        } else {
-          return ndt::make_fixed_dim(src_tp[1].get_dim_size(NULL, NULL),
-                                     src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
-        }
+        return f->resolve(this, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
       } else {
         std::stringstream ss;
         ss << "take: unsupported type for the index " << mask_el_tp << ", need bool or intptr";
