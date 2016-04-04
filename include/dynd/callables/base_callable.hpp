@@ -60,24 +60,17 @@ namespace nd {
                                          const char *dst_arrmeta, intptr_t nsrc, const char *const *src_arrmeta);
       typedef void (*destroy_type_t)(call_node *node);
 
-      base_callable *callee;
       destroy_type_t destroy;
       instantiate_type_t instantiate;
       size_t data_size;
 
-      call_node() : callee(NULL), instantiate(NULL) {}
-
-      call_node(base_callable *callee);
+      call_node() : instantiate(NULL) {}
 
       call_node(instantiate_type_t instantiate, size_t data_size = sizeof(call_node))
           : instantiate(instantiate), data_size(data_size) {}
 
       call_node(instantiate_type_t instantiate, destroy_type_t destroy, size_t data_size = sizeof(call_node))
           : destroy(destroy), instantiate(instantiate), data_size(data_size) {}
-
-      call_node *next() {
-        return reinterpret_cast<call_node *>(reinterpret_cast<char *>(this) + aligned_size(callee->get_frame_size()));
-      }
 
       /*
             void instantiate(call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
@@ -269,8 +262,6 @@ namespace nd {
       set(m_static_data, 0, sizeof(m_static_data));
     }
 
-    call_graph(base_callable *callee);
-
     ~call_graph() {
       intptr_t offset = 0;
       while (offset != m_size) {
@@ -374,8 +365,6 @@ namespace nd {
       return new (this->get_at<NodeType>(offset)) NodeType(std::forward<ArgTypes>(args)...);
     }
 
-    DYND_API void emplace_back(base_callable *callee);
-
     template <typename T>
     void push_back(T node) {
       struct node_type : base_callable::call_node {
@@ -420,9 +409,6 @@ namespace nd {
     //    return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) +
     //    aligned_size(node->callee->get_frame_size()));
   }
-
-  inline base_callable::call_node::call_node(base_callable *DYND_UNUSED(callee))
-      : callee(nullptr), instantiate(nullptr) {}
 
 } // namespace dynd::nd
 } // namespace dynd

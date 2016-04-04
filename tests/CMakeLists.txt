@@ -60,7 +60,7 @@ set(tests_SRC
     func/test_comparison.cpp
     func/test_compose.cpp
     func/test_compound.cpp
-#    func/test_constant.cpp
+    func/test_constant.cpp
     func/test_elwise.cpp
 #    func/test_fft.cpp
 #    func/test_index.cpp
@@ -77,7 +77,7 @@ set(tests_SRC
     func/test_registry.cpp
     func/test_search.cpp
     func/test_sort.cpp
-#    func/test_struct.cpp
+    func/test_struct.cpp
 #    func/test_sum.cpp
     func/test_take.cpp
     func/test_view.cpp

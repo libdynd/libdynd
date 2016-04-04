@@ -90,16 +90,3 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, a
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
   fn(ckb.get(), dst, src);
 }
-
-nd::call_graph::call_graph(base_callable *callee)
-    : m_data(m_static_data), m_capacity(sizeof(m_static_data)), m_size(0) {
-
-  size_t offset = m_size;
-  m_size += aligned_size(sizeof(base_callable::call_node));
-  reserve(m_size);
-  new (this->get_at<base_callable::call_node>(offset)) base_callable::call_node(callee);
-
-  m_back_offset = 0;
-}
-
-void nd::call_graph::emplace_back(base_callable *DYND_UNUSED(callee)) {}
