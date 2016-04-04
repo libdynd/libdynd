@@ -410,16 +410,8 @@ namespace nd {
     //    aligned_size(node->callee->get_frame_size()));
   }
 
-  inline base_callable::call_node::call_node(base_callable *callee)
-      : callee(callee), instantiate([](call_node *&node, kernel_builder * ckb, kernel_request_t kernreq,
-                                       const char *dst_arrmeta, intptr_t nsrc, const char *const *src_arrmeta) {
-          node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta, nsrc, nullptr, src_arrmeta, kernreq,
-                                    0, nullptr, std::map<std::string, ndt::type>());
-        }) {}
-
-  /*
-  ,
-  */
+  inline base_callable::call_node::call_node(base_callable *DYND_UNUSED(callee))
+      : callee(nullptr), instantiate(nullptr) {}
 
 } // namespace dynd::nd
 } // namespace dynd

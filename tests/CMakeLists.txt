@@ -58,7 +58,7 @@ set(tests_SRC
     func/test_arithmetic.cpp
     func/test_callable.cpp
     func/test_comparison.cpp
-#    func/test_compose.cpp
+    func/test_compose.cpp
 #    func/test_compound.cpp
 #    func/test_constant.cpp
     func/test_elwise.cpp
@@ -72,9 +72,9 @@ set(tests_SRC
 #    func/test_neighborhood.cpp
     func/test_option.cpp
 #    func/test_outer.cpp
-#    func/test_random.cpp
+    func/test_random.cpp
 #    func/test_reduction.cpp
-#    func/test_registry.cpp
+    func/test_registry.cpp
 #    func/test_search.cpp
 #    func/test_sort.cpp
 #    func/test_struct.cpp

@@ -153,52 +153,40 @@ namespace nd {
 
   template <type_id_t IntID>
   class int_to_string_assign_callable : public base_callable {
-    struct node_type : call_node {
-      type_id_t src0_id;
-      size_t src0_size;
-      string_encoding_t src0_encoding;
-      assign_error_mode error_mode;
-
-      node_type(base_callable *callee, const ndt::type &src0_tp, assign_error_mode error_mode)
-          : call_node(callee), src0_id(src0_tp.get_id()), error_mode(error_mode) {
-        if (src0_id == fixed_string_id) {
-          src0_size = src0_tp.extended<ndt::fixed_string_type>()->get_size();
-          src0_encoding = src0_tp.extended<ndt::fixed_string_type>()->get_encoding();
-        }
-      }
-
-      ndt::type string_type() {
-        return src0_id == fixed_string_id ? ndt::make_type<ndt::fixed_string_type>(src0_size, src0_encoding)
-                                          : ndt::make_type<ndt::string_type>();
-      }
-    };
-
   public:
     int_to_string_assign_callable()
         : base_callable(
               ndt::callable_type::make(ndt::type(IntID), {ndt::type(string_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())}),
-              sizeof(node_type)) {}
+                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       size_t DYND_UNUSED(nkwd), const array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
-      cg.emplace_back<node_type>(this, src_tp[0], error_mode);
+
+      type_id_t src0_id = src_tp[0].get_id();
+      size_t src0_size = 0;
+      string_encoding_t src0_encoding = string_encoding_ascii;
+      if (src0_id == fixed_string_id) {
+        src0_size = src_tp[0].extended<ndt::fixed_string_type>()->get_size();
+        src0_encoding = src_tp[0].extended<ndt::fixed_string_type>()->get_encoding();
+      }
+
+      cg.push_back([src0_id, src0_size, src0_encoding, error_mode](
+          call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
+          intptr_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+        ndt::type string_type = src0_id == fixed_string_id
+                                    ? ndt::make_type<ndt::fixed_string_type>(src0_size, src0_encoding)
+                                    : ndt::make_type<ndt::string_type>();
+
+        ckb->emplace_back<
+            detail::assignment_kernel<IntID, int_kind_id, string_id, string_kind_id, assign_error_default>>(
+            kernreq, string_type, src_arrmeta[0], error_mode);
+        node = next(node);
+      });
 
       return dst_tp;
-    }
-
-    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                     intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), const char *const *src_arrmeta,
-                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      ckb->emplace_back<detail::assignment_kernel<IntID, int_kind_id, string_id, string_kind_id, assign_error_default>>(
-          kernreq, reinterpret_cast<node_type *>(node)->string_type(), src_arrmeta[0],
-          reinterpret_cast<node_type *>(node)->error_mode);
-      node = next(node);
     }
   };
 
@@ -258,24 +246,21 @@ namespace nd {
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                      size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                      size_t DYND_UNUSED(nkwd), const array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      cg.emplace_back(this);
-      return dst_tp;
-    }
-
-    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       assign_error_mode error_mode =
           (kwds == NULL || kwds[0].is_na()) ? assign_error_default : kwds[0].as<assign_error_mode>();
 
-      ckb->emplace_back<
-          detail::assignment_kernel<float64_id, float_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
-          kernreq, src_tp[0], src_arrmeta[0], error_mode);
-      node = next(node);
+      cg.push_back([error_mode](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                                const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                const char *const *src_arrmeta) {
+        ckb->emplace_back<
+            detail::assignment_kernel<float64_id, float_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
+            kernreq, ndt::type(string_id), src_arrmeta[0], error_mode);
+        node = next(node);
+      });
+
+      return dst_tp;
     }
   };
 
