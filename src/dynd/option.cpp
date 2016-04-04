@@ -69,7 +69,6 @@ void nd::old_assign_na(const ndt::type &option_tp, const char *arrmeta, char *da
 }
 
 bool nd::old_is_avail(const ndt::type &option_tp, const char *arrmeta, const char *data) {
-  std::cout << "old_is_avail" << std::endl;
 
   const ndt::type value_tp = option_tp.extended<ndt::option_type>()->get_value_type();
   if (value_tp.is_builtin()) {

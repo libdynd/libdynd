@@ -55,8 +55,8 @@ set(tests_SRC
 #    types/test_type_promotion.cpp
     types/test_var_dim_type.cpp
     func/test_apply.cpp
-#    func/test_arithmetic.cpp
-#    func/test_callable.cpp
+    func/test_arithmetic.cpp
+    func/test_callable.cpp
 #    func/test_comparison.cpp
 #    func/test_compose.cpp
 #    func/test_compound.cpp
