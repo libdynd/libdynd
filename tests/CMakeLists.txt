@@ -61,7 +61,7 @@ set(tests_SRC
 #    func/test_compose.cpp
 #    func/test_compound.cpp
 #    func/test_constant.cpp
-#    func/test_elwise.cpp
+    func/test_elwise.cpp
 #    func/test_fft.cpp
 #    func/test_index.cpp
 #    func/test_logic.cpp
@@ -70,7 +70,7 @@ set(tests_SRC
 #    func/test_mean.cpp
 #    func/test_multidispatch.cpp
 #    func/test_neighborhood.cpp
-#    func/test_option.cpp
+    func/test_option.cpp
 #    func/test_outer.cpp
 #    func/test_random.cpp
 #    func/test_reduction.cpp

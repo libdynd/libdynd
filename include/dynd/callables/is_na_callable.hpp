@@ -27,62 +27,95 @@ namespace nd {
               ndt::callable_type::make(ndt::make_type<bool1>(), ndt::make_type<ndt::option_type>(fixed_dim_kind_id))) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
-                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      cg.emplace_back(this);
-      return dst_tp;
-    }
-
-    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      switch (src_tp->get_dtype().get_id()) {
+      switch (src_tp[0].get_dtype().get_id()) {
       case bool_id:
-        ckb->emplace_back<is_na_kernel<bool_id>>(kernreq);
-        node = next(node);
+        cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *const *DYND_UNUSED(src_arrmeta)) {
+          ckb->emplace_back<is_na_kernel<bool_id>>(kernreq);
+          node = next(node);
+        });
         break;
       case int8_id:
-        ckb->emplace_back<is_na_kernel<int8_id>>(kernreq);
-        node = next(node);
+        cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *const *DYND_UNUSED(src_arrmeta)) {
+          ckb->emplace_back<is_na_kernel<int8_id>>(kernreq);
+          node = next(node);
+        });
         break;
       case int16_id:
-        ckb->emplace_back<is_na_kernel<int16_id>>(kernreq);
-        node = next(node);
+        cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *const *DYND_UNUSED(src_arrmeta)) {
+          ckb->emplace_back<is_na_kernel<int16_id>>(kernreq);
+          node = next(node);
+        });
         break;
       case int32_id:
-        ckb->emplace_back<is_na_kernel<int32_id>>(kernreq);
-        node = next(node);
+        cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *const *DYND_UNUSED(src_arrmeta)) {
+          ckb->emplace_back<is_na_kernel<int32_id>>(kernreq);
+          node = next(node);
+        });
         break;
       case int64_id:
-        ckb->emplace_back<is_na_kernel<int64_id>>(kernreq);
-        node = next(node);
+        cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *const *DYND_UNUSED(src_arrmeta)) {
+          ckb->emplace_back<is_na_kernel<int64_id>>(kernreq);
+          node = next(node);
+        });
         break;
       case int128_id:
-        ckb->emplace_back<is_na_kernel<int128_id>>(kernreq);
-        node = next(node);
+        cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *const *DYND_UNUSED(src_arrmeta)) {
+          ckb->emplace_back<is_na_kernel<int128_id>>(kernreq);
+          node = next(node);
+        });
         break;
       case float32_id:
-        ckb->emplace_back<is_na_kernel<float32_id>>(kernreq);
-        node = next(node);
+        cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *const *DYND_UNUSED(src_arrmeta)) {
+          ckb->emplace_back<is_na_kernel<float32_id>>(kernreq);
+          node = next(node);
+        });
         break;
       case float64_id:
-        ckb->emplace_back<is_na_kernel<float64_id>>(kernreq);
-        node = next(node);
+        cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *const *DYND_UNUSED(src_arrmeta)) {
+          ckb->emplace_back<is_na_kernel<float64_id>>(kernreq);
+          node = next(node);
+        });
         break;
       case complex_float32_id:
-        ckb->emplace_back<is_na_kernel<complex_float32_id>>(kernreq);
-        node = next(node);
+        cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *const *DYND_UNUSED(src_arrmeta)) {
+          ckb->emplace_back<is_na_kernel<complex_float32_id>>(kernreq);
+          node = next(node);
+        });
         break;
       case complex_float64_id:
-        ckb->emplace_back<is_na_kernel<complex_float64_id>>(kernreq);
-        node = next(node);
+        cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *const *DYND_UNUSED(src_arrmeta)) {
+          ckb->emplace_back<is_na_kernel<complex_float64_id>>(kernreq);
+          node = next(node);
+        });
         break;
       default:
-        throw type_error("fixed_dim_is_avail: expected built-in type");
+        throw type_error("fixed_dim_assign_na: expected built-in type");
       }
+
+      return dst_tp;
     }
   };
 
