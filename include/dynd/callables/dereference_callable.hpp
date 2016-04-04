@@ -11,9 +11,9 @@
 namespace dynd {
 namespace nd {
 
-  class dereference_callable : public base_callable {
+  class dereference_callable : public default_instantiable_callable<dereference_kernel> {
   public:
-    dereference_callable() : base_callable(ndt::type("(pointer[Any]) -> Any")) {}
+    dereference_callable() : default_instantiable_callable(ndt::type("(pointer[Any]) -> Any")) {}
 
     array alloc(const ndt::type *dst_tp) const { return empty_shell(*dst_tp); }
 
@@ -23,21 +23,6 @@ namespace nd {
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       cg.emplace_back(this);
       return src_tp[0].extended<ndt::pointer_type>()->get_target_type();
-    }
-
-    void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                          const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      dst_tp = src_tp[0].extended<ndt::pointer_type>()->get_target_type();
-    }
-
-    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
-                     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                     const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      ckb->emplace_back<dereference_kernel>(kernreq, dst_tp);
-      node = next(node);
     }
   };
 
