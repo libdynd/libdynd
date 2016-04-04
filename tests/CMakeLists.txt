@@ -93,18 +93,18 @@ set(tests_SRC
 #    array/test_json_parser.cpp
 #    array/test_memmap.cpp
 #    array/test_view.cpp
-#    array/test_with.cpp
-#    test_bool1.cpp
-#    test_config.cpp
-#    test_dispatch_map.cpp
-#    test_float16.cpp
-#    test_integer_sequence.cpp
+    array/test_with.cpp
+    test_bool1.cpp
+    test_config.cpp
+    test_dispatch_map.cpp
+    test_float16.cpp
+    test_integer_sequence.cpp
 #    test_io.cpp
-#    test_iterator.cpp
-#    test_shape_tools.cpp
-#    test_type_sequence.cpp
+    test_iterator.cpp
+    test_shape_tools.cpp
+    test_type_sequence.cpp
 #    test_parse.cpp
-#    test_platform.cpp
+    test_platform.cpp
 #    test_pointer.cpp
     ../thirdparty/gtest/gtest-all.cc
     ../thirdparty/gtest/gtest_main.cc
