@@ -31,7 +31,7 @@ namespace nd {
     public:
       base_elwise_callable() : base_callable(ndt::type()) {}
 
-      virtual void resolve(call_graph &DYND_UNUSED(cg), const char *DYND_UNUSED(data)){};
+      virtual void resolve(call_graph &cg, const char *data) = 0;
 
       virtual ndt::type with_return_type(intptr_t ret_size, const ndt::type &ret_element_tp) = 0;
 
