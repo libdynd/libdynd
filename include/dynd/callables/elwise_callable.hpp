@@ -22,48 +22,49 @@ namespace nd {
 
     template <size_t N>
     class elwise_callable<fixed_dim_id, fixed_dim_id, N> : public base_elwise_callable<N> {
-      typedef typename base_elwise_callable<N>::node_type node_type;
+      typedef typename base_elwise_callable<N>::data_type data_type;
 
     public:
-      ndt::type with_ret_type(intptr_t ret_size, const ndt::type &ret_element_tp) {
-        return ndt::make_type<ndt::fixed_dim_type>(ret_size, ret_element_tp);
+      void resolve(call_graph &cg, const char *data) {
+        const std::array<bool, N> &arg_broadcast = reinterpret_cast<const data_type *>(data)->arg_broadcast;
+        cg.push_back([arg_broadcast](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                                     const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                                     const char *const *src_arrmeta) {
+          intptr_t size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
+          intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
+
+          std::array<const char *, N> child_src_arrmeta;
+          std::array<intptr_t, N> src_stride;
+          for (size_t i = 0; i < N; ++i) {
+            if (arg_broadcast[i]) {
+              src_stride[i] = 0;
+              child_src_arrmeta[i] = src_arrmeta[i];
+            } else {
+              src_stride[i] = reinterpret_cast<const size_stride_t *>(src_arrmeta[i])->stride;
+              child_src_arrmeta[i] = src_arrmeta[i] + sizeof(size_stride_t);
+            }
+          }
+
+          ckb->emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
+          node = next(node);
+
+          node->instantiate(node, ckb, kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N,
+                            child_src_arrmeta.data());
+        });
       }
 
-      void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb,
-                       const ndt::type &DYND_UNUSED(dst_tp), const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                       const ndt::type *DYND_UNUSED(src_tp), const char *const *src_arrmeta, kernel_request_t kernreq,
-                       intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-        intptr_t size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
-        intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
-
-        std::array<const char *, N> child_src_arrmeta;
-        std::array<intptr_t, N> src_stride;
-        for (size_t i = 0; i < N; ++i) {
-          if (reinterpret_cast<node_type *>(node)->arg_broadcast[i]) {
-            src_stride[i] = 0;
-            child_src_arrmeta[i] = src_arrmeta[i];
-          } else {
-            src_stride[i] = reinterpret_cast<const size_stride_t *>(src_arrmeta[i])->stride;
-            child_src_arrmeta[i] = src_arrmeta[i] + sizeof(size_stride_t);
-          }
-        }
-
-        ckb->emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
-        node = next(node);
-
-        node->instantiate(node, ckb, kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N,
-                          child_src_arrmeta.data());
+      ndt::type with_return_type(intptr_t ret_size, const ndt::type &ret_element_tp) {
+        return ndt::make_type<ndt::fixed_dim_type>(ret_size, ret_element_tp);
       }
     };
 
     // src is either fixed or var
     template <size_t N>
     class elwise_callable<fixed_dim_id, var_dim_id, N> : public base_elwise_callable<N> {
-      typedef typename base_elwise_callable<N>::node_type node_type;
+      typedef typename base_elwise_callable<N>::data_type node_type;
 
     public:
-      ndt::type with_ret_type(intptr_t ret_size, const ndt::type &ret_element_tp) {
+      ndt::type with_return_type(intptr_t ret_size, const ndt::type &ret_element_tp) {
         if (ret_size == 1) {
           return ndt::make_type<ndt::var_dim_type>(ret_element_tp);
         }
@@ -112,10 +113,10 @@ namespace nd {
 
     template <size_t N>
     class elwise_callable<var_dim_id, fixed_dim_id, N> : public base_elwise_callable<N> {
-      typedef typename base_elwise_callable<N>::node_type node_type;
+      typedef typename base_elwise_callable<N>::data_type node_type;
 
     public:
-      ndt::type with_ret_type(intptr_t DYND_UNUSED(ret_size), const ndt::type &ret_element_tp) {
+      ndt::type with_return_type(intptr_t DYND_UNUSED(ret_size), const ndt::type &ret_element_tp) {
         return ndt::make_type<ndt::var_dim_type>(ret_element_tp);
       }
 

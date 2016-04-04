@@ -190,7 +190,7 @@ namespace nd {
                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
                              intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-//      std::cout << typeid(*this).name() << std::endl;
+      //      std::cout << typeid(*this).name() << std::endl;
       throw std::runtime_error("calling unimplemented instantiate");
     }
 
@@ -405,11 +405,9 @@ namespace nd {
   typedef typename base_callable::call_node call_node;
 
   inline call_node *next(call_node *node) {
-    if (node->callee == nullptr) {
-      return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) + aligned_size(node->data_size));
-    }
-
-    return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) + aligned_size(node->callee->get_frame_size()));
+    return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) + aligned_size(node->data_size));
+    //    return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) +
+    //    aligned_size(node->callee->get_frame_size()));
   }
 
   inline base_callable::call_node::call_node(base_callable *callee)
