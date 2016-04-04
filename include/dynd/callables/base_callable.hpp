@@ -56,14 +56,33 @@ namespace nd {
 
   public:
     struct call_node {
+      typedef void (*instantiate_type_t)(call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                                         const char *dst_arrmeta, intptr_t nsrc, const char *const *src_arrmeta);
+
       base_callable *callee;
       void (*destroy)(void *);
+      instantiate_type_t instantiate;
+      size_t data_size;
 
-      call_node(base_callable *callee) : callee(callee) {}
+      call_node() : callee(NULL), instantiate(NULL) {}
+
+      call_node(base_callable *callee);
+
+      call_node(instantiate_type_t instantiate, size_t data_size = sizeof(call_node))
+          : instantiate(instantiate), data_size(data_size) {}
 
       call_node *next() {
         return reinterpret_cast<call_node *>(reinterpret_cast<char *>(this) + aligned_size(callee->get_frame_size()));
       }
+
+      /*
+            void instantiate(call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
+                             intptr_t nsrc, const char *const *src_arrmeta) {
+              node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta, nsrc, nullptr, src_arrmeta,
+         kernreq, 0,
+                                        nullptr, std::map<std::string, ndt::type>());
+            }
+      */
     };
 
     bool m_abstract;
@@ -345,6 +364,28 @@ namespace nd {
 
     DYND_API void emplace_back(base_callable *callee);
 
+    template <typename T>
+    void push_back(T node) {
+      struct node_type : base_callable::call_node {
+        T lambda;
+
+        node_type(T lambda)
+            : call_node(
+                  [](call_node *&node, kernel_builder * ckb, kernel_request_t kernreq, const char *dst_arrmeta,
+                     intptr_t nsrc, const char *const *src_arrmeta) {
+                    reinterpret_cast<node_type *>(node)->lambda(node, ckb, kernreq, dst_arrmeta, nsrc, src_arrmeta);
+                  },
+                  sizeof(node_type)),
+              lambda(lambda) {}
+      };
+
+      this->emplace_back<node_type>(node);
+    }
+
+    void push_back(base_callable::call_node::instantiate_type_t instantiate) {
+      this->emplace_back<base_callable::call_node>(instantiate);
+    }
+
     base_callable::call_node *back() { return get_at<base_callable::call_node>(m_back_offset); }
 
     template <typename CallFrameType>
@@ -363,8 +404,23 @@ namespace nd {
   typedef typename base_callable::call_node call_node;
 
   inline call_node *next(call_node *node) {
+    if (node->callee == nullptr) {
+      return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) + aligned_size(node->data_size));
+    }
+
     return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) + aligned_size(node->callee->get_frame_size()));
   }
+
+  inline base_callable::call_node::call_node(base_callable *callee)
+      : callee(callee), instantiate([](call_node *&node, kernel_builder * ckb, kernel_request_t kernreq,
+                                       const char *dst_arrmeta, intptr_t nsrc, const char *const *src_arrmeta) {
+          node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta, nsrc, nullptr, src_arrmeta, kernreq,
+                                    0, nullptr, std::map<std::string, ndt::type>());
+        }) {}
+
+  /*
+  ,
+  */
 
 } // namespace dynd::nd
 } // namespace dynd

@@ -37,12 +37,12 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   call_graph cg;
   dst_tp = resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
-/*
-  std::cout << "dst_tp = " << dst_tp << std::endl;
-  for (int i = 0; i < nsrc; ++i) {
-    std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
-  }
-*/
+  /*
+    std::cout << "dst_tp = " << dst_tp << std::endl;
+    for (int i = 0; i < nsrc; ++i) {
+      std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
+    }
+  */
 
   // Allocate the destination array
   array dst = empty(dst_tp);
@@ -50,8 +50,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   // Generate and evaluate the ckernel
   kernel_builder ckb;
   call_node *node = cg.get();
-  node->callee->instantiate(node, nullptr, &ckb, dst_tp, dst->metadata(), nsrc, src_tp, src_arrmeta,
-                            kernel_request_call, nkwd, kwds, tp_vars);
+  node->instantiate(node, &ckb, kernel_request_call, dst->metadata(), nsrc, src_arrmeta);
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
   fn(ckb.get(), &dst, src_data);
 
