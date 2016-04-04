@@ -81,19 +81,19 @@ set(tests_SRC
 #    func/test_sum.cpp
 #    func/test_take.cpp
     func/test_view.cpp
-#    array/test_array.cpp
-#    array/test_array_range.cpp
-#    array/test_array_assign.cpp
-#    array/test_array_at.cpp
-#    array/test_array_cast.cpp
-#    array/test_array_compare.cpp
-#    array/test_array_views.cpp
-#    array/test_asarray.cpp
-#    array/test_json_formatter.cpp
-#    array/test_json_parser.cpp
-#    array/test_memmap.cpp
-#    array/test_view.cpp
-#    array/test_with.cpp
+    array/test_array.cpp
+    array/test_array_range.cpp
+    array/test_array_assign.cpp
+    array/test_array_at.cpp
+    array/test_array_cast.cpp
+    array/test_array_compare.cpp
+    array/test_array_views.cpp
+    array/test_asarray.cpp
+    array/test_json_formatter.cpp
+    array/test_json_parser.cpp
+    array/test_memmap.cpp
+    array/test_view.cpp
+    array/test_with.cpp
     test_bool1.cpp
     test_config.cpp
     test_dispatch_map.cpp
