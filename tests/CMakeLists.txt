@@ -21,13 +21,13 @@ endif()
 
 set(tests_SRC
     dynd_assertions.hpp
-#    types/test_adapt_type.cpp
-#    types/test_array_type.cpp
-#    types/test_bytes_type.cpp
-##    types/test_categorical_kind_type.cpp
-##    types/test_categorical_type.cpp
-#    types/test_callable_type.cpp
-#    types/test_complex_type.cpp
+    types/test_adapt_type.cpp
+    types/test_array_type.cpp
+    types/test_bytes_type.cpp
+#    types/test_categorical_kind_type.cpp
+#    types/test_categorical_type.cpp
+    types/test_callable_type.cpp
+    types/test_complex_type.cpp
 #    types/test_char_type.cpp
 #    types/test_cuda_host_type.cpp
 #    types/test_cuda_device_type.cpp
@@ -76,7 +76,7 @@ set(tests_SRC
 #    func/test_reduction.cpp
 #    func/test_registry.cpp
 #    func/test_search.cpp
-    func/test_sort.cpp
+#    func/test_sort.cpp
 #    func/test_struct.cpp
 #    func/test_sum.cpp
 #    func/test_take.cpp

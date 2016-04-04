@@ -29,10 +29,11 @@ namespace nd {
         return ndt::make_type<ndt::fixed_dim_type>(ret_size, ret_element_tp);
       }
 
-      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                       const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                       const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
-                       const std::map<std::string, ndt::type> &tp_vars) {
+      void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb,
+                       const ndt::type &DYND_UNUSED(dst_tp), const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                       const ndt::type *DYND_UNUSED(src_tp), const char *const *src_arrmeta, kernel_request_t kernreq,
+                       intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
         intptr_t size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
         intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
 
@@ -51,8 +52,8 @@ namespace nd {
         ckb->emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
         node = next(node);
 
-        node->callee->instantiate(node, data, ckb, dst_tp, dst_arrmeta + sizeof(size_stride_t), N, src_tp,
-                                  child_src_arrmeta.data(), kernel_request_strided, nkwd, kwds, tp_vars);
+        node->instantiate(node, ckb, kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N,
+                          child_src_arrmeta.data());
       }
     };
 

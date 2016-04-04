@@ -1048,16 +1048,6 @@ namespace nd {
 
       return dst_tp;
     }
-
-    void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
-                     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars) {
-      const callable &inverse = dst_tp.extended<ndt::adapt_type>()->get_inverse();
-      const ndt::type &value_tp = dst_tp.value_type();
-      inverse->instantiate(node, data, ckb, dst_tp.storage_type(), dst_arrmeta, nsrc, &value_tp, src_arrmeta, kernreq,
-                           nkwd, kwds, tp_vars);
-    }
   };
 
   class assignment_option_callable : public base_callable {

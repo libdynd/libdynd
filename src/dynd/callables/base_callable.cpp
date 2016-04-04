@@ -88,8 +88,7 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, a
   // Generate and evaluate the ckernel
   kernel_builder ckb;
   call_node *node = cg.get();
-  node->callee->instantiate(node, nullptr, &ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_call,
-                            nkwd, kwds, tp_vars);
+  node->instantiate(node, &ckb, kernel_request_call, dst_arrmeta, nsrc, src_arrmeta);
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
   fn(ckb.get(), dst, src);
 }

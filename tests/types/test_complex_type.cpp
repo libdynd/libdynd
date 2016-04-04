@@ -24,13 +24,11 @@ using namespace dynd;
 #define REL_ERROR_MAX 4E-15
 
 template <typename T>
-class ComplexType : public ::testing::Test {
-};
+class ComplexType : public ::testing::Test {};
 
 TYPED_TEST_CASE_P(ComplexType);
 
-TEST(Complex, Math)
-{
+TEST(Complex, Math) {
   dynd::complex<double> z;
   typedef std::complex<double> cdbl;
   typedef std::complex<double> cdbl;
@@ -151,8 +149,7 @@ TEST(Complex, Math)
 
 #undef ASSERT_COMPLEX_DOUBLE_EQ
 
-TEST(ComplexDType, Create)
-{
+TEST(ComplexDType, Create) {
   ndt::type d;
 
   // complex[float32]
@@ -178,8 +175,7 @@ TEST(ComplexDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(ComplexType, CreateFromValue)
-{
+TEST(ComplexType, CreateFromValue) {
   nd::array n;
 
   n = dynd::complex<float>(1.5f, 2.0f);
@@ -193,8 +189,7 @@ TEST(ComplexType, CreateFromValue)
 
 #include <dynd/math.hpp>
 
-TEST(ComplexType, Properties)
-{
+TEST(ComplexType, Properties) {
   nd::array n;
 
   n = dynd::complex<float>(1.5f, 2.0f);
@@ -216,8 +211,7 @@ TEST(ComplexType, Properties)
   EXPECT_EQ(21.75, n.f("imag")(2).as<double>());
 }
 
-TYPED_TEST_P(ComplexType, Arithmetic)
-{
+TYPED_TEST_P(ComplexType, Arithmetic) {
   EXPECT_EQ(std::complex<TypeParam>(1.5, 0.5) + static_cast<TypeParam>(1), dynd::complex<TypeParam>(1.5, 0.5) + 1);
   EXPECT_EQ(static_cast<TypeParam>(1) + std::complex<TypeParam>(1.5, 0.5), 1 + dynd::complex<TypeParam>(1.5, 0.5));
 
