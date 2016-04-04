@@ -33,7 +33,7 @@ namespace nd {
       size_t field_count = src_tp[0].extended<ndt::tuple_type>()->get_field_count();
 
       auto bsd = src_tp->extended<ndt::tuple_type>();
-      uintptr_t arrmeta_offsets[8];
+      std::array<uintptr_t, 8> arrmeta_offsets;
       for (size_t i = 0; i < field_count; ++i) {
         arrmeta_offsets[i] = bsd->get_arrmeta_offsets()[i];
       }

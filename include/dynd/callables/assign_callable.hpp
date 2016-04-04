@@ -756,8 +756,8 @@ namespace nd {
         throw type_error(ss.str());
       }
 
-      uintptr_t dst_arrmeta_offsets[8];
-      uintptr_t src_arrmeta_offsets[8];
+      std::array<uintptr_t, 8> dst_arrmeta_offsets;
+      std::array<uintptr_t, 8> src_arrmeta_offsets;
       for (int i = 0; i < field_count; ++i) {
         src_arrmeta_offsets[i] = src_sd->get_arrmeta_offsets()[i];
         dst_arrmeta_offsets[i] = dst_sd->get_arrmeta_offsets()[i];
@@ -818,9 +818,9 @@ namespace nd {
       const ndt::struct_type *dst_sd = dst_tp.extended<ndt::struct_type>();
       const ndt::struct_type *src_sd = src_tp[0].extended<ndt::struct_type>();
       intptr_t field_count = dst_sd->get_field_count();
-      intptr_t src_permutation[8];
-      uintptr_t src_fields_arrmeta_offsets[8];
-      uintptr_t dst_arrmeta_offsets[8];
+      std::array<intptr_t, 8> src_permutation;
+      std::array<uintptr_t, 8> src_fields_arrmeta_offsets;
+      std::array<uintptr_t, 8> dst_arrmeta_offsets;
 
       if (field_count != src_sd->get_field_count()) {
         std::stringstream ss;
