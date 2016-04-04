@@ -165,10 +165,14 @@ namespace nd {
      *                 values.
      * \param kwds  A struct array of named auxiliary arguments.
      */
-    virtual void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                             const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
-                             const std::map<std::string, ndt::type> &tp_vars) = 0;
+    virtual void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
+                             const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                             intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                             const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
+                             intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+      throw std::runtime_error("calling unimplemented instantiate");
+    }
 
     virtual void overload(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
                           const ndt::type *DYND_UNUSED(arg_tp), const callable &DYND_UNUSED(value)) {
