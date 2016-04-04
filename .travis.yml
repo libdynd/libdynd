@@ -145,7 +145,7 @@ matrix:
     - pushd build
     - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_COVERAGE=${DYND_COVERAGE} ..
     script:
-    - make -j3 || exit 1
+    - make -j2 || exit 1
     - make coverage
     after_script:
     # Must upload coverage results from the root of the project so
