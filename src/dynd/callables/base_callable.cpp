@@ -36,12 +36,12 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   call_graph cg;
   dst_tp = resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
-/*
-  std::cout << "dst_tp = " << dst_tp << std::endl;
-  for (int i = 0; i < nsrc; ++i) {
-    std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
-  }
-*/
+  /*
+    std::cout << "dst_tp = " << dst_tp << std::endl;
+    for (int i = 0; i < nsrc; ++i) {
+      std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
+    }
+  */
 
   // Allocate the destination array
   array dst = empty(dst_tp);
@@ -76,12 +76,12 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, a
   call_graph cg;
   resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
-/*
-  std::cout << "dst_tp = " << dst_tp << std::endl;
-  for (int i = 0; i < nsrc; ++i) {
-    std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
-  }
-*/
+  /*
+    std::cout << "dst_tp = " << dst_tp << std::endl;
+    for (int i = 0; i < nsrc; ++i) {
+      std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
+    }
+  */
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
@@ -102,16 +102,4 @@ nd::call_graph::call_graph(base_callable *callee)
   m_back_offset = 0;
 }
 
-void nd::call_graph::emplace_back(base_callable *callee) {
-  static_assert(alignof(base_callable::call_node) <= 8, "nodes types require alignment to be at most 8 bytes");
-
-  /* Alignment requirement of the type. */
-  //      static_assert(alignof(KernelType) <= 8, "kernel types require alignment to be at most 8 bytes");
-
-  m_back_offset = m_size;
-
-  size_t offset = m_size;
-  m_size += aligned_size(sizeof(base_callable::call_node));
-  reserve(m_size);
-  new (this->get_at<base_callable::call_node>(offset)) base_callable::call_node(callee);
-}
+void nd::call_graph::emplace_back(base_callable *DYND_UNUSED(callee)) {}
