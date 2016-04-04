@@ -71,6 +71,19 @@ namespace nd {
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &tp_vars) {
+
+      ndt::type src0_element_tp = src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type();
+
+      nd::array error_mode = assign_error_default;
+      assign->resolve(this, nullptr, cg, src0_element_tp, 1, &src0_element_tp, 1, &error_mode, tp_vars);
+
+      ndt::type resolved_dst_tp;
+      if (src_tp[1].get_id() == var_dim_id) {
+        resolved_dst_tp = ndt::var_dim_type::make(src0_element_tp);
+      } else {
+        resolved_dst_tp = ndt::make_fixed_dim(src_tp[1].get_dim_size(NULL, NULL), src0_element_tp);
+      }
+
       cg.push_back([=](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
                        intptr_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
         intptr_t self_offset = ckb->size();
@@ -78,7 +91,6 @@ namespace nd {
         node = next(node);
 
         indexed_take_ck *self = ckb->get_at<indexed_take_ck>(self_offset);
-        std::cout << "here" << std::endl;
 
         ndt::type dst_el_tp;
         const char *dst_el_meta;
@@ -123,24 +135,13 @@ namespace nd {
         node->instantiate(node, ckb, kernel_request_single, dst_el_meta, 1, &src0_el_meta);
       });
 
-      ndt::type src0_element_tp = src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type();
-
-      nd::array error_mode = assign_error_default;
-      assign->resolve(this, nullptr, cg, src0_element_tp, 1, &src0_element_tp, 1, &error_mode, tp_vars);
-
-      if (src_tp[1].get_id() == var_dim_id) {
-        return ndt::var_dim_type::make(src0_element_tp);
-      } else {
-        return ndt::make_fixed_dim(src_tp[1].get_dim_size(NULL, NULL), src0_element_tp);
-      }
+      return resolved_dst_tp;
     }
 
     void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
                      const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                      const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
                      const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      std::cout << "here" << std::endl;
-
       intptr_t self_offset = ckb->size();
       ckb->emplace_back<indexed_take_ck>(kernreq);
       node = next(node);
