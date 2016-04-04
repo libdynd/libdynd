@@ -58,9 +58,10 @@ namespace nd {
     struct call_node {
       typedef void (*instantiate_type_t)(call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
                                          const char *dst_arrmeta, intptr_t nsrc, const char *const *src_arrmeta);
+      typedef void (*destroy_type_t)(call_node *node);
 
       base_callable *callee;
-      void (*destroy)(void *);
+      destroy_type_t destroy;
       instantiate_type_t instantiate;
       size_t data_size;
 
@@ -70,6 +71,9 @@ namespace nd {
 
       call_node(instantiate_type_t instantiate, size_t data_size = sizeof(call_node))
           : instantiate(instantiate), data_size(data_size) {}
+
+      call_node(instantiate_type_t instantiate, destroy_type_t destroy, size_t data_size = sizeof(call_node))
+          : destroy(destroy), instantiate(instantiate), data_size(data_size) {}
 
       call_node *next() {
         return reinterpret_cast<call_node *>(reinterpret_cast<char *>(this) + aligned_size(callee->get_frame_size()));
@@ -268,6 +272,13 @@ namespace nd {
     call_graph(base_callable *callee);
 
     ~call_graph() {
+      intptr_t offset = 0;
+      while (offset != m_size) {
+        typename base_callable::call_node *node = get_at<typename base_callable::call_node>(offset);
+        offset += aligned_size(node->data_size);
+        node->destroy(node);
+      }
+
       if (!using_static_data()) {
         free(m_data);
       }
@@ -376,7 +387,7 @@ namespace nd {
                      intptr_t nsrc, const char *const *src_arrmeta) {
                     reinterpret_cast<node_type *>(node)->lambda(node, ckb, kernreq, dst_arrmeta, nsrc, src_arrmeta);
                   },
-                  sizeof(node_type)),
+                  [](call_node *node) { reinterpret_cast<node_type *>(node)->~node_type(); }, sizeof(node_type)),
               lambda(lambda) {}
       };
 
