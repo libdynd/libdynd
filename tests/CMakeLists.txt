@@ -59,28 +59,28 @@ set(tests_SRC
     func/test_callable.cpp
     func/test_comparison.cpp
     func/test_compose.cpp
-#    func/test_compound.cpp
+    func/test_compound.cpp
 #    func/test_constant.cpp
     func/test_elwise.cpp
 #    func/test_fft.cpp
 #    func/test_index.cpp
 #    func/test_logic.cpp
-#    func/test_math.cpp
+    func/test_math.cpp
 #    func/test_max.cpp
 #    func/test_mean.cpp
-#    func/test_multidispatch.cpp
+    func/test_multidispatch.cpp
 #    func/test_neighborhood.cpp
     func/test_option.cpp
 #    func/test_outer.cpp
     func/test_random.cpp
 #    func/test_reduction.cpp
     func/test_registry.cpp
-#    func/test_search.cpp
-#    func/test_sort.cpp
+    func/test_search.cpp
+    func/test_sort.cpp
 #    func/test_struct.cpp
 #    func/test_sum.cpp
 #    func/test_take.cpp
-#    func/test_view.cpp
+    func/test_view.cpp
 #    array/test_array.cpp
 #    array/test_array_range.cpp
 #    array/test_array_assign.cpp
@@ -94,18 +94,18 @@ set(tests_SRC
 #    array/test_memmap.cpp
 #    array/test_view.cpp
 #    array/test_with.cpp
-#    test_bool1.cpp
-#    test_config.cpp
-#    test_dispatch_map.cpp
-#    test_float16.cpp
-#    test_integer_sequence.cpp
+    test_bool1.cpp
+    test_config.cpp
+    test_dispatch_map.cpp
+    test_float16.cpp
+    test_integer_sequence.cpp
 #    test_io.cpp
-#    test_iterator.cpp
-#    test_shape_tools.cpp
-#    test_type_sequence.cpp
+    test_iterator.cpp
+    test_shape_tools.cpp
+    test_type_sequence.cpp
 #    test_parse.cpp
-#    test_platform.cpp
-#    test_pointer.cpp
+    test_platform.cpp
+    test_pointer.cpp
     ../thirdparty/gtest/gtest-all.cc
     ../thirdparty/gtest/gtest_main.cc
     )
