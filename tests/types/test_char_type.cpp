@@ -16,8 +16,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(CharDType, Create)
-{
+TEST(CharDType, Create) {
   ndt::type d;
 
   // Chars of various encodings
@@ -70,8 +69,7 @@ TEST(CharDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(CharDType, Assign)
-{
+TEST(CharDType, Assign) {
   nd::array a, b, c;
 
   // Round-trip a string through a char assignment

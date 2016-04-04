@@ -190,6 +190,7 @@ namespace nd {
                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
                              intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+//      std::cout << typeid(*this).name() << std::endl;
       throw std::runtime_error("calling unimplemented instantiate");
     }
 
