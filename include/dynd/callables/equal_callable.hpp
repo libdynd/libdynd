@@ -28,16 +28,23 @@ namespace nd {
     }
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
-                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                      size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+                      const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
+                      const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
       cg.emplace_back(this);
+
+      size_t field_count = src_tp[0].extended<ndt::tuple_type>()->get_field_count();
+      for (size_t i = 0; i != field_count; ++i) {
+        ndt::type src_field_tp[2] = {src_tp[0].extended<ndt::tuple_type>()->get_field_type(i),
+                                     src_tp[1].extended<ndt::tuple_type>()->get_field_type(i)};
+        equal->resolve(this, nullptr, cg, dst_tp, 1, src_field_tp, nkwd, kwds, tp_vars);
+      }
+
       return dst_tp;
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *ckb,
-                     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
+    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
+                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                     kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                      const std::map<std::string, ndt::type> &tp_vars) {
       intptr_t self_offset = ckb->size();
       size_t field_count = src_tp[0].extended<ndt::tuple_type>()->get_field_count();
@@ -46,6 +53,7 @@ namespace nd {
           kernreq, field_count, src_tp[0].extended<ndt::tuple_type>()->get_data_offsets(src_arrmeta[0]),
           src_tp[1].extended<ndt::tuple_type>()->get_data_offsets(src_arrmeta[1]));
       ckb->emplace_back(field_count * sizeof(size_t));
+      node = next(node);
 
       equal_kernel<tuple_id, tuple_id> *self = ckb->get_at<equal_kernel<tuple_id, tuple_id>>(self_offset);
       const std::vector<uintptr_t> &arrmeta_offsets = src_tp[0].extended<ndt::tuple_type>()->get_arrmeta_offsets();
@@ -56,8 +64,8 @@ namespace nd {
         ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::tuple_type>()->get_field_type(i),
                                      src_tp[1].extended<ndt::tuple_type>()->get_field_type(i)};
         const char *child_src_arrmeta[2] = {src_arrmeta[0] + arrmeta_offsets[i], src_arrmeta[1] + arrmeta_offsets[i]};
-        equal->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-                           kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
+        node->callee->instantiate(node, NULL, ckb, dst_tp, dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
+                                  kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
       }
     }
   };

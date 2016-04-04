@@ -25,22 +25,19 @@
 using namespace std;
 using namespace dynd;
 
-TEST(StructType, Basic)
-{
+TEST(StructType, Basic) {
   EXPECT_NE(ndt::struct_type::make({"x"}, {ndt::make_type<int>()}),
             ndt::struct_type::make({"y"}, {ndt::make_type<int>()}));
   EXPECT_NE(ndt::struct_type::make({"x"}, {ndt::make_type<float>()}),
             ndt::struct_type::make({"x"}, {ndt::make_type<int>()}));
 }
 
-TEST(StructType, Equality)
-{
+TEST(StructType, Equality) {
   EXPECT_EQ(ndt::type("{x: int32, y: float16, z: int32}"), ndt::type("{x: int32, y: float16, z: int32}"));
   EXPECT_NE(ndt::type("{x: int32, y: float16, z: int32}"), ndt::type("{x: int32, y: float16, z: int32, ...}"));
 }
 
-TEST(StructType, IOStream)
-{
+TEST(StructType, IOStream) {
   stringstream ss;
   ndt::type tp;
 
@@ -62,8 +59,7 @@ TEST(StructType, IOStream)
   EXPECT_EQ("{x: int32, y: int16, 'Verbose Field!': float32}", ss.str());
 }
 
-TEST(StructType, CreateOneField)
-{
+TEST(StructType, CreateOneField) {
   ndt::type dt;
   const ndt::struct_type *tdt;
 
@@ -87,8 +83,7 @@ struct two_field_struct {
   int32_t b;
 };
 
-TEST(StructType, CreateTwoField)
-{
+TEST(StructType, CreateTwoField) {
   ndt::type dt;
   const ndt::struct_type *tdt;
 
@@ -115,8 +110,7 @@ struct three_field_struct {
   char z[5];
 };
 
-TEST(StructType, CreateThreeField)
-{
+TEST(StructType, CreateThreeField) {
   ndt::type dt;
   const ndt::struct_type *tdt;
 
@@ -142,8 +136,7 @@ TEST(StructType, CreateThreeField)
   EXPECT_EQ("z", tdt->get_field_name(2));
 }
 
-TEST(StructType, TypeAt)
-{
+TEST(StructType, TypeAt) {
   ndt::type dt, dt2;
 
   // Struct with three fields
@@ -159,8 +152,7 @@ TEST(StructType, TypeAt)
   EXPECT_EQ(ndt::struct_type::make({"z", "y"}, {d3, d2}), dt.at(irange(2, 0, -1)));
 }
 
-TEST(StructType, IsExpression)
-{
+TEST(StructType, IsExpression) {
   ndt::type d1 = ndt::make_type<float>();
   ndt::type d2 = ndt::make_type<ndt::adapt_type>(
       ndt::make_type<int32_t>(), ndt::make_fixed_bytes(sizeof(int32_t), alignof(int32_t)), nd::byteswap, nd::byteswap);
@@ -171,8 +163,7 @@ TEST(StructType, IsExpression)
   EXPECT_FALSE(d.at(irange(0, 3, 2)).is_expression());
 }
 
-TEST(StructType, PropertyAccess)
-{
+TEST(StructType, PropertyAccess) {
   ndt::type dt = ndt::struct_type::make({"x", "y", "z"},
                                         {ndt::make_type<int>(), ndt::make_type<double>(), ndt::make_type<short>()});
   nd::array a = nd::empty(dt);
@@ -185,8 +176,7 @@ TEST(StructType, PropertyAccess)
   EXPECT_THROW(a.p("w"), invalid_argument);
 }
 
-TEST(StructType, EqualTypeAssign)
-{
+TEST(StructType, EqualTypeAssign) {
   ndt::type dt = ndt::struct_type::make({"x", "y", "z"},
                                         {ndt::make_type<int>(), ndt::make_type<double>(), ndt::make_type<short>()});
   nd::array a = nd::empty(2, dt);
@@ -207,8 +197,7 @@ TEST(StructType, EqualTypeAssign)
   EXPECT_EQ(8, a(1, 2).as<short>());
 }
 
-TEST(StructType, DifferentTypeAssign)
-{
+TEST(StructType, DifferentTypeAssign) {
   ndt::type dt = ndt::struct_type::make({"x", "y", "z"},
                                         {ndt::make_type<int>(), ndt::make_type<double>(), ndt::make_type<short>()});
   nd::array a = nd::empty(2, dt);
@@ -231,8 +220,7 @@ TEST(StructType, DifferentTypeAssign)
   EXPECT_EQ(8, b(1, 1).as<short>());
 }
 
-TEST(StructType, SingleCompare)
-{
+TEST(StructType, SingleCompare) {
   nd::array a, b;
   ndt::type sdt = ndt::struct_type::make(
       {"a", "b", "c"}, {ndt::make_type<int32_t>(), ndt::make_type<float>(), ndt::make_type<int64_t>()});
@@ -330,8 +318,7 @@ TEST(StructType, SingleCompare)
   //      EXPECT_THROW((b > a), not_comparable_error);
 }
 
-TEST(StructType, SingleCompareDifferentArrmeta)
-{
+TEST(StructType, SingleCompareDifferentArrmeta) {
   nd::array a, b;
   ndt::type sdt = ndt::struct_type::make(
       {"a", "b", "c"}, {ndt::make_type<int32_t>(), ndt::make_type<float>(), ndt::make_type<int64_t>()});
@@ -439,8 +426,7 @@ TEST(StructType, SingleCompareDifferentArrmeta)
   //     EXPECT_THROW((b > a), not_comparable_error);
 }
 
-TEST(StructType, InvalidFieldName)
-{
+TEST(StructType, InvalidFieldName) {
   const nd::array s = nd::as_struct({{"x", 100}, {"y", 1729.22}});
   const ndt::type dt = s.get_type();
   const char *arrmeta = s.get()->metadata();

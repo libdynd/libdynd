@@ -11,12 +11,8 @@ namespace dynd {
 namespace nd {
 
   struct dereference_kernel : base_strided_kernel<dereference_kernel, 1> {
-    ndt::type dst_tp;
-
-    dereference_kernel(const ndt::type &dst_tp) : dst_tp(dst_tp) {}
-
-    void call(const array *dst, const array *src)
-    {
+    void call(const array *dst, const array *src) {
+      const ndt::type &dst_tp = dst->get_type();
       if (!dst_tp.is_builtin()) {
         dst_tp.extended()->arrmeta_copy_construct((*dst)->metadata(), src[0]->metadata() + sizeof(pointer_type_arrmeta),
                                                   intrusive_ptr<memory_block_data>(src[0].get(), true));

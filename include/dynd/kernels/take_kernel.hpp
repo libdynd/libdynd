@@ -13,14 +13,12 @@ namespace dynd {
 namespace nd {
 
   struct DYND_API masked_take_ck : base_strided_kernel<masked_take_ck, 2> {
-    ndt::type m_dst_tp;
     const char *m_dst_meta;
     intptr_t m_dim_size, m_src0_stride, m_mask_stride;
 
     ~masked_take_ck() { get_child()->destroy(); }
 
-    void single(char *dst, char *const *src)
-    {
+    void single(char *dst, char *const *src) {
       kernel_prefix *child = get_child();
       kernel_strided_t child_fn = child->get_function<kernel_strided_t>();
       char *src0 = src[0];
@@ -69,8 +67,7 @@ namespace nd {
 
     ~indexed_take_ck() { get_child()->destroy(); }
 
-    void single(char *dst, char *const *src)
-    {
+    void single(char *dst, char *const *src) {
       kernel_prefix *child = get_child();
       kernel_single_t child_fn = child->get_function<kernel_single_t>();
       char *src0 = src[0];

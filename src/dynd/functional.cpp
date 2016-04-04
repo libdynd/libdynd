@@ -208,7 +208,7 @@ nd::callable nd::functional::reduction(const callable &child) {
   }
   }
 
-  return make_callable<reduction_callable>(
+  return make_callable<reduction_dispatch_callable>(
       ndt::callable_type::make(ndt::ellipsis_dim_type::make_if_not_variadic(child.get_ret_type()),
                                {ndt::ellipsis_dim_type::make_if_not_variadic(child.get_arg_type(0))},
                                {"axes", "identity", "keepdims"},

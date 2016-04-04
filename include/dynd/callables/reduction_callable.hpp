@@ -19,13 +19,13 @@ namespace nd {
                                                      kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                                                      const std::map<std::string, ndt::type> &tp_vars);
 
-    class reduction_callable : public base_callable {
+    class reduction_dispatch_callable : public base_callable {
       callable m_child;
 
     public:
       typedef reduction_data_type data_type;
 
-      reduction_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
+      reduction_dispatch_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
       typedef typename base_reduction_callable::data_type new_data_type;
 
@@ -56,10 +56,11 @@ namespace nd {
           data = reinterpret_cast<char *>(&new_data);
         }
 
-        static callable f = make_callable<base_reduction_callable>();
+        static callable f = make_callable<reduction_callable<fixed_dim_id>>();
         return f->resolve(caller, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
       }
 
+/*
       char *data_init(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                       const std::map<std::string, ndt::type> &tp_vars) {
         char *data = reinterpret_cast<char *>(new data_type());
@@ -97,7 +98,9 @@ namespace nd {
 
         return data;
       }
+*/
 
+/*
       void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
                             const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         ndt::type child_dst_tp = m_child.get_type()->get_return_type();
@@ -127,8 +130,9 @@ namespace nd {
           }
         }
       }
+*/
 
-      void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                        kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
@@ -141,7 +145,7 @@ namespace nd {
 
         if (reinterpret_cast<data_type *>(data)->ndim == 0) {
           callable &child = m_child;
-          child.get()->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
+          child.get()->instantiate(node, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                    (reinterpret_cast<data_type *>(data)->stored_ndim == 0) ? kernel_request_single
                                                                                            : kernel_request_strided,
                                    nkwd - 3, kwds + 3, tp_vars);
@@ -157,13 +161,13 @@ namespace nd {
           // f(Ret, Arg0_1)
           if (reinterpret_cast<data_type *>(data)->identity.is_null()) {
             nd::array error_mode = eval::default_eval_context.errmode;
-            nd::assign->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta, kernreq, 1,
+            nd::assign->instantiate(node, NULL, ckb, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta, kernreq, 1,
                                     &error_mode, std::map<std::string, ndt::type>());
             return;
           }
 
           nd::callable constant = functional::constant(reinterpret_cast<data_type *>(data)->identity);
-          constant->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
+          constant->instantiate(node, NULL, ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, nkwd, kwds,
                                 tp_vars);
           return;
         }

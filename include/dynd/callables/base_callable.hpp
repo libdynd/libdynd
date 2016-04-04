@@ -165,10 +165,14 @@ namespace nd {
      *                 values.
      * \param kwds  A struct array of named auxiliary arguments.
      */
-    virtual void instantiate(call_node *node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                             const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                             const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
-                             const std::map<std::string, ndt::type> &tp_vars) = 0;
+    virtual void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
+                             const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                             intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                             const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
+                             intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+      throw std::runtime_error("calling unimplemented instantiate");
+    }
 
     virtual void overload(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
                           const ndt::type *DYND_UNUSED(arg_tp), const callable &DYND_UNUSED(value)) {
@@ -243,7 +247,11 @@ namespace nd {
 
     call_graph(base_callable *callee);
 
-    ~call_graph() { destroy(); }
+    ~call_graph() {
+      if (!using_static_data()) {
+        free(m_data);
+      }
+    }
 
     size_t size() const { return m_size; }
 
@@ -277,7 +285,9 @@ namespace nd {
       }
     }
 
-    void *get() const { return reinterpret_cast<void *>(m_data); }
+    typename base_callable::call_node *get() const {
+      return reinterpret_cast<typename base_callable::call_node *>(m_data);
+    }
 
     /**
      * For use during construction, gets the ckernel component
@@ -318,6 +328,20 @@ namespace nd {
       m_size += aligned_size(size);
       reserve(m_size);
     }
+    /**
+     * Creates the kernel, and increments ``m_size`` to the position after it.
+     */
+    template <typename NodeType, typename... ArgTypes>
+    NodeType *emplace_back(ArgTypes &&... args) {
+      static_assert(alignof(NodeType) <= 8, "nodes types require alignment to be at most 8 bytes");
+
+      m_back_offset = m_size;
+
+      size_t offset = m_size;
+      m_size += aligned_size(sizeof(NodeType));
+      reserve(m_size);
+      return new (this->get_at<NodeType>(offset)) NodeType(std::forward<ArgTypes>(args)...);
+    }
 
     DYND_API void emplace_back(base_callable *callee);
 
@@ -337,6 +361,10 @@ namespace nd {
   };
 
   typedef typename base_callable::call_node call_node;
+
+  inline call_node *next(call_node *node) {
+    return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) + aligned_size(node->callee->get_frame_size()));
+  }
 
 } // namespace dynd::nd
 } // namespace dynd

@@ -19,8 +19,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(OptionType, Create)
-{
+TEST(OptionType, Create) {
   ndt::type d;
 
   d = ndt::make_type<ndt::option_type>(ndt::make_type<int16_t>());
@@ -53,8 +52,7 @@ TEST(OptionType, Create)
   EXPECT_THROW(ndt::type("option[option[bool]]"), type_error);
 }
 
-TEST(OptionType, OptionIntAssign)
-{
+TEST(OptionType, OptionIntAssign) {
   nd::array a, b, c;
   eval::eval_context tmp_ectx;
 
@@ -87,8 +85,7 @@ TEST(OptionType, OptionIntAssign)
   EXPECT_ARRAY_EQ(nd::old_view(c, "Fixed * int32"), nd::old_view(b, "Fixed * int32"));
 }
 
-TEST(OptionType, Cast)
-{
+TEST(OptionType, Cast) {
   nd::array a, b;
 
   a = parse_json("3 * string", "[\"null\", \"NA\", \"25\"]");
@@ -97,8 +94,7 @@ TEST(OptionType, Cast)
   EXPECT_ARRAY_EQ(nd::old_view(parse_json("3 * ?int", "[null, null, 25]"), "3 * int"), nd::old_view(b, "3 * int"));
 }
 
-TEST(OptionType, FloatNAvsNaN)
-{
+TEST(OptionType, FloatNAvsNaN) {
   nd::array a = nd::empty("3 * ?float64");
 
   parse_json(a, "[0, null, \"nan\"]");
@@ -109,8 +105,7 @@ TEST(OptionType, FloatNAvsNaN)
   // TODO: An isnan arrfunc should return false, NA, true
 }
 
-TEST(OptionType, Float)
-{
+TEST(OptionType, Float) {
   nd::array a = nd::empty("5 * float64");
 
   parse_json(a, "[12, 0, \"nan\", -99, \"nan\"]");

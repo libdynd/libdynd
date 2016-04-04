@@ -28,20 +28,24 @@ public:
   unary_assignment_callable(const ndt::type &tp, assign_error_mode error_mode)
       : base_callable(tp), errmode(error_mode) {}
 
-  ndt::type resolve(nd::base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), nd::call_graph &DYND_UNUSED(cg),
-                    const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+  ndt::type resolve(nd::base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), nd::call_graph &cg,
+                    const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                     size_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+                    const std::map<std::string, ndt::type> &tp_vars) {
+    nd::array error_mode = errmode;
+    nd::assign->resolve(this, nullptr, cg, dst_tp, 1, src_tp, 1, &error_mode, tp_vars);
+
     return dst_tp;
   }
 
-  void instantiate(call_node *DYND_UNUSED(node), char *DYND_UNUSED(data), nd::kernel_builder *ckb,
+  void instantiate(call_node *&node, char *DYND_UNUSED(data), nd::kernel_builder *ckb,
                    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                    const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                    intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+
     nd::array error_mode = errmode;
-    nd::assign->instantiate(nullptr, NULL, ckb, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta, kernreq, 1, &error_mode,
+    nd::assign->instantiate(node, NULL, ckb, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta, kernreq, 1, &error_mode,
                             std::map<std::string, ndt::type>());
   }
 };

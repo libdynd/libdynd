@@ -28,8 +28,7 @@ TEST(Comparison, Simple)
 }
 */
 
-TEST(Comparison, OptionScalar)
-{
+TEST(Comparison, OptionScalar) {
   nd::array NA = nd::empty(ndt::type("?int32"));
   NA.assign_na();
   EXPECT_ALL_TRUE(nd::is_na(NA < 1));
@@ -54,8 +53,7 @@ TEST(Comparison, OptionScalar)
   EXPECT_ALL_TRUE(nd::is_na(NA != NA));
 }
 
-TEST(Comparison, OptionArray)
-{
+TEST(Comparison, OptionArray) {
   nd::array data = parse_json("5 * ?int32", "[null, 0, 40, null, 1]");
   nd::array expected = nd::array{true, false, false, true, false};
   EXPECT_ARRAY_EQ(nd::is_na(data < 1), expected);

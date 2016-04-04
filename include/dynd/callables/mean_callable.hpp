@@ -46,19 +46,20 @@ namespace nd {
                                 tp_vars);
     }
 
-    void instantiate(call_node *DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+    void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                      const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t nkwd, const array *kwds,
                      const std::map<std::string, ndt::type> &tp_vars) {
       intptr_t mean_offset = ckb->size();
       ckb->emplace_back<mean_kernel>(kernreq, src_tp[0].get_size(src_arrmeta[0]));
+      node = next(node);
 
-      nd::sum->instantiate(nullptr, reinterpret_cast<data_type *>(data)->sum_data, ckb, dst_tp, dst_arrmeta, nsrc,
-                           src_tp, src_arrmeta, kernreq, nkwd, kwds, tp_vars);
+      nd::sum->instantiate(node, reinterpret_cast<data_type *>(data)->sum_data, ckb, dst_tp, dst_arrmeta, nsrc, src_tp,
+                           src_arrmeta, kernreq, nkwd, kwds, tp_vars);
 
       mean_kernel *self = ckb->get_at<mean_kernel>(mean_offset);
       self->compound_div_offset = ckb->size();
-      nd::compound_div->instantiate(nullptr, reinterpret_cast<data_type *>(data)->compound_div_data, ckb, dst_tp,
+      nd::compound_div->instantiate(node, reinterpret_cast<data_type *>(data)->compound_div_data, ckb, dst_tp,
                                     dst_arrmeta, 1, &m_tp, NULL, kernreq, nkwd, kwds, tp_vars);
 
       delete reinterpret_cast<data_type *>(data);

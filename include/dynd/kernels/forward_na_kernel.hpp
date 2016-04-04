@@ -26,11 +26,11 @@ namespace nd {
 
       if (is_na) {
         // assign_na
-        this->template get_child<1>()->single(res, nullptr);
+        this->template get_child<2>()->single(res, nullptr);
       }
       else {
         // call the actual child
-        this->template get_child<2>()->single(res, args);
+        this->template get_child<1>()->single(res, args);
       }
     }
   };
