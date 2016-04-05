@@ -24,12 +24,10 @@ namespace nd {
       }
     }
 
-    template <typename T>
-    void push_back(T node) {
-      this->emplace_back<closure_call<T>>(node);
+    template <typename ClosureType>
+    void emplace_back(ClosureType node) {
+      storagebuf<call_node, call_graph>::emplace_back<closure_call<ClosureType>>(node);
     }
-
-    void push_back(call_node::instantiate_type_t instantiate) { this->emplace_back<call_node>(instantiate); }
   };
 
 } // namespace dynd::nd

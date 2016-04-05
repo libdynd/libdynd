@@ -20,10 +20,9 @@ namespace nd {
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       size_t src0_data_size = src_tp[0].get_data_size();
-      cg.push_back([src0_data_size](kernel_builder *ckb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                                    size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-        ckb->emplace_back<byteswap_ck>(kernreq, src0_data_size);
-      });
+      cg.emplace_back([src0_data_size](
+          kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+          const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<byteswap_ck>(kernreq, src0_data_size); });
 
       return dst_tp;
     }
@@ -38,9 +37,10 @@ namespace nd {
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       size_t src0_data_size = src_tp[0].get_data_size();
-      cg.push_back([src0_data_size](kernel_builder *ckb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                                    size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-        ckb->emplace_back<pairwise_byteswap_ck>(kernreq, src0_data_size);
+      cg.emplace_back([src0_data_size](kernel_builder &kb, kernel_request_t kernreq,
+                                       const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                                       const char *const *DYND_UNUSED(src_arrmeta)) {
+        kb.emplace_back<pairwise_byteswap_ck>(kernreq, src0_data_size);
       });
 
       return dst_tp;
