@@ -22,7 +22,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
 
   // Generate and evaluate the ckernel
   kernel_builder kb(cg.get());
-  kb.instantiate(kernel_request_single, dst->metadata(), nsrc, src_arrmeta);
+  kb(kernel_request_single, dst->metadata(), nsrc, src_arrmeta);
 
   kernel_single_t fn = kb.get()->get_function<kernel_single_t>();
   fn(kb.get(), dst.data(), src_data);
@@ -41,7 +41,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
 
   // Generate and evaluate the kernel
   kernel_builder kb(cg.get());
-  kb.instantiate(kernel_request_call, dst->metadata(), nsrc, src_arrmeta);
+  kb(kernel_request_call, dst->metadata(), nsrc, src_arrmeta);
 
   kernel_call_t fn = kb.get()->get_function<kernel_call_t>();
   fn(kb.get(), &dst, src_data);
@@ -57,7 +57,7 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, c
 
   // Generate and evaluate the ckernel
   kernel_builder kb(cg.get());
-  kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+  kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
   kernel_single_t fn = kb.get()->get_function<kernel_single_t>();
   fn(kb.get(), dst_data, src_data);
@@ -71,7 +71,7 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, a
 
   // Generate and evaluate the ckernel
   kernel_builder kb(cg.get());
-  kb.instantiate(kernel_request_call, dst_arrmeta, nsrc, src_arrmeta);
+  kb(kernel_request_call, dst_arrmeta, nsrc, src_arrmeta);
 
   kernel_call_t fn = kb.get()->get_function<kernel_call_t>();
   fn(kb.get(), dst, src);

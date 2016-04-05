@@ -26,7 +26,7 @@ namespace nd {
           kb.emplace_back<left_compound_kernel>(kernreq);
 
           const char *child_src_arrmeta[2] = {dst_arrmeta, src_arrmeta[0]};
-          kb.instantiate(kernreq | kernel_request_data_only, dst_arrmeta, nsrc + 1, child_src_arrmeta);
+          kb(kernreq | kernel_request_data_only, dst_arrmeta, nsrc + 1, child_src_arrmeta);
         });
 
         ndt::type child_src_tp[2] = {dst_tp, src_tp[0]};
@@ -50,7 +50,7 @@ namespace nd {
           kb.emplace_back<right_compound_kernel>(kernreq);
 
           const char *child_src_arrmeta[2] = {src_arrmeta[0], dst_arrmeta};
-          kb.instantiate(kernreq | kernel_request_data_only, dst_arrmeta, nsrc + 1, child_src_arrmeta);
+          kb(kernreq | kernel_request_data_only, dst_arrmeta, nsrc + 1, child_src_arrmeta);
         });
 
         ndt::type child_src_tp[2] = {src_tp[0], dst_tp};
