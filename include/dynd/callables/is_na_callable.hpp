@@ -33,7 +33,7 @@ namespace nd {
       switch (src_tp[0].get_dtype().get_id()) {
       case bool_id:
         cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                         const char *const *DYND_UNUSED(src_arrmeta)) {
           ckb->emplace_back<is_na_kernel<bool_id>>(kernreq);
           node = next(node);
@@ -41,7 +41,7 @@ namespace nd {
         break;
       case int8_id:
         cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                         const char *const *DYND_UNUSED(src_arrmeta)) {
           ckb->emplace_back<is_na_kernel<int8_id>>(kernreq);
           node = next(node);
@@ -49,7 +49,7 @@ namespace nd {
         break;
       case int16_id:
         cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                         const char *const *DYND_UNUSED(src_arrmeta)) {
           ckb->emplace_back<is_na_kernel<int16_id>>(kernreq);
           node = next(node);
@@ -57,7 +57,7 @@ namespace nd {
         break;
       case int32_id:
         cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                         const char *const *DYND_UNUSED(src_arrmeta)) {
           ckb->emplace_back<is_na_kernel<int32_id>>(kernreq);
           node = next(node);
@@ -65,7 +65,7 @@ namespace nd {
         break;
       case int64_id:
         cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                         const char *const *DYND_UNUSED(src_arrmeta)) {
           ckb->emplace_back<is_na_kernel<int64_id>>(kernreq);
           node = next(node);
@@ -73,7 +73,7 @@ namespace nd {
         break;
       case int128_id:
         cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                         const char *const *DYND_UNUSED(src_arrmeta)) {
           ckb->emplace_back<is_na_kernel<int128_id>>(kernreq);
           node = next(node);
@@ -81,7 +81,7 @@ namespace nd {
         break;
       case float32_id:
         cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                         const char *const *DYND_UNUSED(src_arrmeta)) {
           ckb->emplace_back<is_na_kernel<float32_id>>(kernreq);
           node = next(node);
@@ -89,7 +89,7 @@ namespace nd {
         break;
       case float64_id:
         cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                         const char *const *DYND_UNUSED(src_arrmeta)) {
           ckb->emplace_back<is_na_kernel<float64_id>>(kernreq);
           node = next(node);
@@ -97,7 +97,7 @@ namespace nd {
         break;
       case complex_float32_id:
         cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                         const char *const *DYND_UNUSED(src_arrmeta)) {
           ckb->emplace_back<is_na_kernel<complex_float32_id>>(kernreq);
           node = next(node);
@@ -105,7 +105,7 @@ namespace nd {
         break;
       case complex_float64_id:
         cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                        const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                         const char *const *DYND_UNUSED(src_arrmeta)) {
           ckb->emplace_back<is_na_kernel<complex_float64_id>>(kernreq);
           node = next(node);

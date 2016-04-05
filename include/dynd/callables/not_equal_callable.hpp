@@ -39,7 +39,7 @@ namespace nd {
       }
 
       cg.push_back([field_count, arrmeta_offsets](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                                                  const char *dst_arrmeta, intptr_t nsrc,
+                                                  const char *dst_arrmeta, size_t nsrc,
                                                   const char *const *src_arrmeta) {
         intptr_t self_offset = ckb->size();
 

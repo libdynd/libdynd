@@ -23,7 +23,7 @@ namespace nd {
       uintptr_t arrmeta_offset = arg_tp[0].extended<ndt::struct_type>()->get_arrmeta_offset(i);
 
       cg.push_back([i, arrmeta_offset](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                                       const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                                       const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
                                        const char *const *src_arrmeta) {
         uintptr_t data_offset = *(reinterpret_cast<const uintptr_t *>(src_arrmeta[0]) + i);
         const char *field_metadata[1] = {src_arrmeta[0] + arrmeta_offset};
@@ -55,7 +55,7 @@ namespace nd {
                       const ndt::type *DYND_UNUSED(arg_tp), size_t DYND_UNUSED(nkwd), const array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       cg.push_back([ kwds, m_i = m_i ](call_node * &node, kernel_builder * ckb, kernel_request_t kernreq,
-                                       const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                       const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                        const char *const *DYND_UNUSED(src_arrmeta)) {
         ckb->emplace_back<get_array_field_kernel>(kernreq, kwds[0], m_i);
         node = next(node);

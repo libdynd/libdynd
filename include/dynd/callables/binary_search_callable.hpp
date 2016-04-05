@@ -23,8 +23,7 @@ namespace nd {
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &tp_vars) {
       cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                      const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                      const char *const *src_arrmeta) {
+                      const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
         ckb->emplace_back<binary_search_kernel>(
             kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
             reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride);

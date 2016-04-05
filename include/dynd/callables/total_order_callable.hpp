@@ -32,7 +32,7 @@ namespace nd {
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       size_t src0_size = src_tp[0].extended<ndt::fixed_string_type>()->get_size();
       cg.push_back([src0_size](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                               const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                               const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                const char *const *DYND_UNUSED(src_arrmeta)) {
         ckb->emplace_back<total_order_kernel<fixed_string_id, fixed_string_id>>(kernreq, src0_size);
         node = next(node);

@@ -24,7 +24,7 @@ namespace nd {
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &tp_vars) {
       cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                      intptr_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+                      size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
         typedef nd::masked_take_ck self_type;
 
         intptr_t ckb_offset = ckb->size();
@@ -85,7 +85,7 @@ namespace nd {
       }
 
       cg.push_back([=](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                       intptr_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+                       size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
         intptr_t self_offset = ckb->size();
         ckb->emplace_back<indexed_take_ck>(kernreq);
         node = next(node);

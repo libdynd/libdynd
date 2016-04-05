@@ -29,8 +29,8 @@ namespace nd {
 
       typedef typename base_reduction_callable::data_type new_data_type;
 
-      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
-                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
+      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *data, call_graph &cg, const ndt::type &dst_tp,
+                        size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         new_data_type new_data;
         if (data == nullptr) {
@@ -42,6 +42,8 @@ namespace nd {
             new_data.naxis = kwds[0].get_dim_size();
             new_data.axes = reinterpret_cast<const int *>(kwds[0].cdata());
           }
+
+          new_data.identity = kwds[1];
 
           if (kwds[2].is_na()) {
             new_data.keepdims = false;
@@ -56,81 +58,14 @@ namespace nd {
           data = reinterpret_cast<char *>(&new_data);
         }
 
-        static callable f = make_callable<reduction_callable<fixed_dim_id>>();
-        return f->resolve(caller, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-      }
-
-/*
-      char *data_init(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                      const std::map<std::string, ndt::type> &tp_vars) {
-        char *data = reinterpret_cast<char *>(new data_type());
-
-        const array &identity = kwds[1];
-        if (!identity.is_na()) {
-          reinterpret_cast<data_type *>(data)->identity = identity;
-        }
-
-        if (kwds[0].is_na()) {
-          reinterpret_cast<data_type *>(data)->naxis =
-              src_tp[0].get_ndim() - m_child.get_type()->get_return_type().get_ndim();
-          reinterpret_cast<data_type *>(data)->axes = NULL;
+        if (src_tp[0].get_id() == fixed_dim_id) {
+          static callable f = make_callable<reduction_callable<fixed_dim_id>>();
+          return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else {
-          reinterpret_cast<data_type *>(data)->naxis = kwds[0].get_dim_size();
-          reinterpret_cast<data_type *>(data)->axes = reinterpret_cast<const int *>(kwds[0].cdata());
-        }
-
-        if (kwds[2].is_na()) {
-          reinterpret_cast<data_type *>(data)->keepdims = false;
-        } else {
-          reinterpret_cast<data_type *>(data)->keepdims = kwds[2].as<bool>();
-        }
-
-        const ndt::type &child_dst_tp = m_child.get_type()->get_return_type();
-
-        if (!dst_tp.is_symbolic()) {
-          reinterpret_cast<data_type *>(data)->ndim = src_tp[0].get_ndim() - child_dst_tp.get_ndim();
-          reinterpret_cast<data_type *>(data)->stored_ndim = reinterpret_cast<data_type *>(data)->ndim;
-        }
-
-        ndt::type child_src_tp = src_tp[0].get_type_at_dimension(NULL, reinterpret_cast<data_type *>(data)->naxis);
-        reinterpret_cast<data_type *>(data)->child_data =
-            m_child->data_init(child_dst_tp, nsrc, &child_src_tp, nkwd - 3, kwds, tp_vars);
-
-        return data;
-      }
-*/
-
-/*
-      void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-                            const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-        ndt::type child_dst_tp = m_child.get_type()->get_return_type();
-        if (child_dst_tp.is_symbolic()) {
-          ndt::type child_src_tp = src_tp[0].get_type_at_dimension(NULL, reinterpret_cast<data_type *>(data)->naxis);
-          m_child.get()->resolve_dst_type(NULL, child_dst_tp, nsrc, &child_src_tp, nkwd, kwds, tp_vars);
-        }
-
-        // check that the child_dst_tp and the child_src_tp are the same here
-
-        dst_tp = child_dst_tp;
-        reinterpret_cast<data_type *>(data)->ndim = src_tp[0].get_ndim() - dst_tp.get_ndim();
-        reinterpret_cast<data_type *>(data)->stored_ndim = reinterpret_cast<data_type *>(data)->ndim;
-
-        for (intptr_t i = reinterpret_cast<data_type *>(data)->ndim - 1,
-                      j = reinterpret_cast<data_type *>(data)->naxis - 1;
-             i >= 0; --i) {
-          if (reinterpret_cast<data_type *>(data)->axes == NULL ||
-              (j >= 0 && i == reinterpret_cast<data_type *>(data)->axes[j])) {
-            if (reinterpret_cast<data_type *>(data)->keepdims) {
-              dst_tp = ndt::make_fixed_dim(1, dst_tp);
-            }
-            --j;
-          } else {
-            ndt::type dim_tp = src_tp[0].get_type_at_dimension(NULL, i);
-            dst_tp = dim_tp.extended<ndt::base_dim_type>()->with_element_type(dst_tp);
-          }
+          static callable f = make_callable<reduction_callable<var_dim_id>>();
+          return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         }
       }
-*/
 
       void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,

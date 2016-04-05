@@ -25,7 +25,7 @@ namespace nd {
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
                       const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
       cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                      intptr_t nsrc, const char *const *src_arrmeta) {
+                      size_t nsrc, const char *const *src_arrmeta) {
         size_t self_offset = ckb->size();
         size_t child_offsets[2];
 
@@ -70,7 +70,7 @@ namespace nd {
                       const ndt::type &DYND_UNUSED(dst_tp), size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
       cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                      intptr_t nsrc, const char *const *src_arrmeta) {
+                      size_t nsrc, const char *const *src_arrmeta) {
         intptr_t ckb_offset = ckb->size();
         intptr_t option_comp_offset = ckb_offset;
         ckb->emplace_back<option_comparison_kernel<true, true>>(kernreq);
