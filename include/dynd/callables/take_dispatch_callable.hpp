@@ -23,13 +23,12 @@ namespace nd {
                       const ndt::type &DYND_UNUSED(dst_tp), size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &tp_vars) {
-      cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                      size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+      cg.push_back([](kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
+                      const char *const *src_arrmeta) {
         typedef nd::masked_take_ck self_type;
 
         intptr_t ckb_offset = ckb->size();
         ckb->emplace_back<masked_take_ck>(kernreq);
-        node = next(node);
 
         self_type *self = ckb->get_at<self_type>(ckb_offset);
         self->m_dst_meta = dst_arrmeta;
@@ -50,8 +49,8 @@ namespace nd {
         self->m_dim_size = src0_dim_size;
 
         // Create the child element assignment ckernel
-        node->instantiate(node, ckb, kernel_request_strided, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), 1,
-                          &src0_el_meta);
+        ckb->instantiate(kernel_request_strided, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), 1,
+                         &src0_el_meta);
       });
 
       ndt::type src0_element_tp = src_tp[0].extended<ndt::base_dim_type>()->get_element_type();
@@ -84,11 +83,10 @@ namespace nd {
         resolved_dst_tp = ndt::make_fixed_dim(src_tp[1].get_dim_size(NULL, NULL), src0_element_tp);
       }
 
-      cg.push_back([=](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                       size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+      cg.push_back([=](kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
+                       const char *const *src_arrmeta) {
         intptr_t self_offset = ckb->size();
         ckb->emplace_back<indexed_take_ck>(kernreq);
-        node = next(node);
 
         indexed_take_ck *self = ckb->get_at<indexed_take_ck>(self_offset);
 
@@ -132,64 +130,67 @@ namespace nd {
         }
 
         // Create the child element assignment ckernel
-        node->instantiate(node, ckb, kernel_request_single, dst_el_meta, 1, &src0_el_meta);
+        ckb->instantiate(kernel_request_single, dst_el_meta, 1, &src0_el_meta);
       });
 
       return resolved_dst_tp;
     }
 
-    void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
-                     const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                     const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
-                     const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      intptr_t self_offset = ckb->size();
-      ckb->emplace_back<indexed_take_ck>(kernreq);
-      node = next(node);
+    /*
+        void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
+                         const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                         const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
+                         const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+          intptr_t self_offset = ckb->size();
+          ckb->emplace_back<indexed_take_ck>(kernreq);
+          node = next(node);
 
-      indexed_take_ck *self = ckb->get_at<indexed_take_ck>(self_offset);
+          indexed_take_ck *self = ckb->get_at<indexed_take_ck>(self_offset);
 
-      ndt::type dst_el_tp;
-      const char *dst_el_meta;
-      if (!dst_tp.get_as_strided(dst_arrmeta, &self->m_dst_dim_size, &self->m_dst_stride, &dst_el_tp, &dst_el_meta)) {
-        std::stringstream ss;
-        ss << "indexed take arrfunc: could not process type " << dst_tp;
-        ss << " as a strided dimension";
-        throw type_error(ss.str());
-      }
+          ndt::type dst_el_tp;
+          const char *dst_el_meta;
+          if (!dst_tp.get_as_strided(dst_arrmeta, &self->m_dst_dim_size, &self->m_dst_stride, &dst_el_tp, &dst_el_meta))
+       {
+            std::stringstream ss;
+            ss << "indexed take arrfunc: could not process type " << dst_tp;
+            ss << " as a strided dimension";
+            throw type_error(ss.str());
+          }
 
-      intptr_t index_dim_size;
-      ndt::type src0_el_tp, index_el_tp;
-      const char *src0_el_meta, *index_el_meta;
-      if (!src_tp[0].get_as_strided(src_arrmeta[0], &self->m_src0_dim_size, &self->m_src0_stride, &src0_el_tp,
-                                    &src0_el_meta)) {
-        std::stringstream ss;
-        ss << "indexed take arrfunc: could not process type " << src_tp[0];
-        ss << " as a strided dimension";
-        throw type_error(ss.str());
-      }
-      if (!src_tp[1].get_as_strided(src_arrmeta[1], &index_dim_size, &self->m_index_stride, &index_el_tp,
-                                    &index_el_meta)) {
-        std::stringstream ss;
-        ss << "take arrfunc: could not process type " << src_tp[1];
-        ss << " as a strided dimension";
-        throw type_error(ss.str());
-      }
-      if (self->m_dst_dim_size != index_dim_size) {
-        std::stringstream ss;
-        ss << "indexed take arrfunc: index data and dest have different sizes, ";
-        ss << index_dim_size << " and " << self->m_dst_dim_size;
-        throw std::invalid_argument(ss.str());
-      }
-      if (index_el_tp.get_id() != type_id_of<intptr_t>::value) {
-        std::stringstream ss;
-        ss << "indexed take arrfunc: index type should be intptr, not ";
-        ss << index_el_tp;
-        throw type_error(ss.str());
-      }
+          intptr_t index_dim_size;
+          ndt::type src0_el_tp, index_el_tp;
+          const char *src0_el_meta, *index_el_meta;
+          if (!src_tp[0].get_as_strided(src_arrmeta[0], &self->m_src0_dim_size, &self->m_src0_stride, &src0_el_tp,
+                                        &src0_el_meta)) {
+            std::stringstream ss;
+            ss << "indexed take arrfunc: could not process type " << src_tp[0];
+            ss << " as a strided dimension";
+            throw type_error(ss.str());
+          }
+          if (!src_tp[1].get_as_strided(src_arrmeta[1], &index_dim_size, &self->m_index_stride, &index_el_tp,
+                                        &index_el_meta)) {
+            std::stringstream ss;
+            ss << "take arrfunc: could not process type " << src_tp[1];
+            ss << " as a strided dimension";
+            throw type_error(ss.str());
+          }
+          if (self->m_dst_dim_size != index_dim_size) {
+            std::stringstream ss;
+            ss << "indexed take arrfunc: index data and dest have different sizes, ";
+            ss << index_dim_size << " and " << self->m_dst_dim_size;
+            throw std::invalid_argument(ss.str());
+          }
+          if (index_el_tp.get_id() != type_id_of<intptr_t>::value) {
+            std::stringstream ss;
+            ss << "indexed take arrfunc: index type should be intptr, not ";
+            ss << index_el_tp;
+            throw type_error(ss.str());
+          }
 
-      // Create the child element assignment ckernel
-      node->instantiate(node, ckb, kernel_request_single, dst_el_meta, 1, &src0_el_meta);
-    }
+          // Create the child element assignment ckernel
+          node->instantiate(node, ckb, kernel_request_single, dst_el_meta, 1, &src0_el_meta);
+        }
+    */
   };
 
   class take_dispatch_callable : public base_callable {

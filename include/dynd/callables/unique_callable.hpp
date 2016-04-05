@@ -23,6 +23,7 @@ namespace nd {
       return dst_tp;
     }
 
+/*
     void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                      const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                      const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
@@ -37,6 +38,7 @@ namespace nd {
       equal->instantiate(node, data, ckb, ndt::make_type<bool1>(), NULL, 2, equal_src_tp, NULL, kernel_request_single,
                          nkwd, kwds, tp_vars);
     }
+*/
   };
 
 } // namespace dynd::nd

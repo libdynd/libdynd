@@ -22,25 +22,24 @@ namespace nd {
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &res_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
                       const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-      cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                      size_t nsrc, const char *const *src_arrmeta) {
+      cg.push_back([](kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
+                      const char *const *src_arrmeta) {
         intptr_t ckb_offset = ckb->size();
         intptr_t option_arith_offset = ckb_offset;
         ckb->emplace_back<option_arithmetic_kernel<true, false>>(kernreq);
-        node = next(node);
         ckb_offset = ckb->size();
 
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
         ckb_offset = ckb->size();
         option_arithmetic_kernel<true, false> *self =
             ckb->get_at<option_arithmetic_kernel<true, false>>(option_arith_offset);
         self->arith_offset = ckb_offset - option_arith_offset;
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
         ckb_offset = ckb->size();
         self = ckb->get_at<option_arithmetic_kernel<true, false>>(option_arith_offset);
         self->assign_na_offset = ckb_offset - option_arith_offset;
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
         ckb_offset = ckb->size();
       });
 
@@ -61,24 +60,23 @@ namespace nd {
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
                       const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-      cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                      size_t nsrc, const char *const *src_arrmeta) {
+      cg.push_back([](kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
+                      const char *const *src_arrmeta) {
         intptr_t ckb_offset = ckb->size();
         intptr_t option_arith_offset = ckb_offset;
         ckb->emplace_back<option_arithmetic_kernel<false, true>>(kernreq);
-        node = next(node);
         ckb_offset = ckb->size();
 
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, &src_arrmeta[1]);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, &src_arrmeta[1]);
         ckb_offset = ckb->size();
         option_arithmetic_kernel<false, true> *self =
             ckb->get_at<option_arithmetic_kernel<false, true>>(option_arith_offset);
         self->arith_offset = ckb_offset - option_arith_offset;
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
         ckb_offset = ckb->size();
         self = ckb->get_at<option_arithmetic_kernel<false, true>>(option_arith_offset);
         self->assign_na_offset = ckb_offset - option_arith_offset;
-        node->instantiate(node, ckb, kernel_request_single, src_arrmeta[1], 0, nullptr);
+        ckb->instantiate(kernel_request_single, src_arrmeta[1], 0, nullptr);
         ckb_offset = ckb->size();
       });
 
@@ -99,31 +97,30 @@ namespace nd {
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
                       const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-      cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                      size_t nsrc, const char *const *src_arrmeta) {
+      cg.push_back([](kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
+                      const char *const *src_arrmeta) {
         intptr_t ckb_offset = ckb->size();
         intptr_t option_arith_offset = ckb_offset;
         ckb->emplace_back<option_arithmetic_kernel<true, true>>(kernreq);
-        node = next(node);
         ckb_offset = ckb->size();
 
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
         ckb_offset = ckb->size();
         option_arithmetic_kernel<true, true> *self =
             ckb->get_at<option_arithmetic_kernel<true, true>>(option_arith_offset);
         self->is_na_rhs_offset = ckb_offset - option_arith_offset;
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
         ckb_offset = ckb->size();
         self = ckb->get_at<option_arithmetic_kernel<true, true>>(option_arith_offset);
         self->arith_offset = ckb_offset - option_arith_offset;
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
         ckb_offset = ckb->size();
         self = ckb->get_at<option_arithmetic_kernel<true, true>>(option_arith_offset);
         self->assign_na_offset = ckb_offset - option_arith_offset;
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, 0, nullptr);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, 0, nullptr);
         ckb_offset = ckb->size();
       });
 

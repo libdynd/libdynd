@@ -27,9 +27,8 @@ namespace nd {
     public:
       void resolve(call_graph &cg, const char *data) {
         const std::array<bool, N> &arg_broadcast = reinterpret_cast<const data_type *>(data)->arg_broadcast;
-        cg.push_back([arg_broadcast](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                                     const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
-                                     const char *const *src_arrmeta) {
+        cg.push_back([arg_broadcast](kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
+                                     size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
           intptr_t size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
           intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
 
@@ -46,10 +45,8 @@ namespace nd {
           }
 
           ckb->emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
-          node = next(node);
 
-          node->instantiate(node, ckb, kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N,
-                            child_src_arrmeta.data());
+          ckb->instantiate(kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N, child_src_arrmeta.data());
         });
       }
 
@@ -68,9 +65,8 @@ namespace nd {
         std::array<bool, N> arg_broadcast = reinterpret_cast<const data_type *>(data)->arg_broadcast;
         std::array<bool, N> arg_var = reinterpret_cast<const data_type *>(data)->arg_var;
 
-        cg.push_back([arg_broadcast, arg_var](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                                              const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
-                                              const char *const *src_arrmeta) {
+        cg.push_back([arg_broadcast, arg_var](kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
+                                              size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
           intptr_t dst_size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
           intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
 
@@ -98,10 +94,8 @@ namespace nd {
 
           ckb->emplace_back<elwise_kernel<fixed_dim_id, var_dim_id, N>>(
               kernreq, dst_size, dst_stride, src_stride.data(), src_offset.data(), arg_var.data());
-          node = next(node);
 
-          node->instantiate(node, ckb, kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N,
-                            child_src_arrmeta.data());
+          ckb->instantiate(kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N, child_src_arrmeta.data());
         });
       }
 
@@ -128,9 +122,9 @@ namespace nd {
         std::array<bool, N> arg_var = reinterpret_cast<const node_type *>(data)->arg_var;
         intptr_t res_alignment = reinterpret_cast<const node_type *>(data)->res_alignment;
 
-        cg.push_back([arg_broadcast, arg_var, res_alignment](call_node *&node, kernel_builder *ckb,
-                                                             kernel_request_t kernreq, const char *dst_arrmeta,
-                                                             size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+        cg.push_back([arg_broadcast, arg_var, res_alignment](kernel_builder *ckb, kernel_request_t kernreq,
+                                                             const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
+                                                             const char *const *src_arrmeta) {
           const ndt::var_dim_type::metadata_type *dst_md =
               reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta);
 
@@ -163,10 +157,9 @@ namespace nd {
           ckb->emplace_back<elwise_kernel<var_dim_id, fixed_dim_id, N>>(
               kernreq, dst_md->blockref.get(), res_alignment, dst_md->stride, dst_md->offset, src_stride.data(),
               src_offset.data(), src_size.data(), arg_var.data());
-          node = next(node);
 
-          node->instantiate(node, ckb, kernel_request_strided, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type),
-                            N, child_src_arrmeta.data());
+          ckb->instantiate(kernel_request_strided, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), N,
+                           child_src_arrmeta.data());
         });
       }
     };

@@ -26,10 +26,9 @@ namespace nd {
         typedef construct_then_apply_callable_kernel<func_type, KwdTypes...> kernel_type;
 
         cg.push_back([kwds = typename kernel_type::kwds_type(nkwd, kwds)](
-            call_node * &node, kernel_builder * ckb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
+            kernel_builder * ckb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
             size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
           ckb->emplace_back<kernel_type>(kernreq, typename kernel_type::args_type(src_arrmeta, nullptr), kwds);
-          node = next(node);
         });
 
         return dst_tp;

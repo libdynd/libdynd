@@ -33,7 +33,8 @@ namespace nd {
         return dst_tp;
       }
 
-      void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+/*
+      void instantiate(call_node *&DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                        kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars) {
@@ -41,7 +42,6 @@ namespace nd {
         intptr_t self_offset = ckb_offset;
         ckb->emplace_back<parse_kernel<option_id>>(kernreq);
         ckb_offset = ckb->size();
-        node = next(node);
 
         assign_na->instantiate(node, data, ckb, dst_tp, dst_arrmeta, 0, nullptr, nullptr,
                                kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
@@ -52,6 +52,7 @@ namespace nd {
                                    nsrc, src_tp, src_arrmeta, kernreq | kernel_request_data_only, nkwd, kwds, tp_vars);
         ckb_offset = ckb->size();
       }
+*/
     };
 
     template <>
@@ -67,6 +68,7 @@ namespace nd {
         return dst_tp;
       }
 
+/*
       void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                        kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
@@ -90,6 +92,7 @@ namespace nd {
           ckb_offset = ckb->size();
         }
       }
+*/
     };
 
     template <>
@@ -106,6 +109,7 @@ namespace nd {
         return dst_tp;
       }
 
+/*
       void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                        kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
@@ -120,6 +124,7 @@ namespace nd {
                                    dst_arrmeta + sizeof(ndt::fixed_dim_type::metadata_type), nsrc, src_tp, src_arrmeta,
                                    kernreq, nkwd, kwds, tp_vars);
       }
+*/
     };
 
     template <>
@@ -135,6 +140,7 @@ namespace nd {
         return dst_tp;
       }
 
+/*
       void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                        const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                        kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
@@ -149,6 +155,7 @@ namespace nd {
                                    dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), nsrc, src_tp, src_arrmeta,
                                    kernreq, nkwd, kwds, tp_vars);
       }
+*/
     };
 
   } // namespace dynd::nd::json

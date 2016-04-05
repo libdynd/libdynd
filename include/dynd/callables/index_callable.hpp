@@ -51,6 +51,7 @@ namespace nd {
       new (data) data_type(kwds[0]);
     }
 
+/*
     void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
                      const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
@@ -60,6 +61,7 @@ namespace nd {
       node = next(node);
       delete reinterpret_cast<data_type *>(data);
     }
+*/
   };
 
   template <>
@@ -101,6 +103,7 @@ namespace nd {
       index->resolve_dst_type(data, dst_tp, nsrc, &child_src_tp, nkwd, kwds, tp_vars);
     }
 
+/*
     void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
                      const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                      kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
@@ -117,6 +120,7 @@ namespace nd {
       index->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, &child_src_tp, &child_src_arrmeta,
                          kernel_request_single, nkwd, kwds, tp_vars);
     }
+*/
   };
 
 } // namespace dynd::nd
