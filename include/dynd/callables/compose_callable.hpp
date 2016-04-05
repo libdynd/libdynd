@@ -34,13 +34,13 @@ namespace nd {
 
           kb_offset = kb.size();
           compose_kernel *self = kb.get_at<compose_kernel>(root_kb_offset);
-          kb.instantiate(kernreq | kernel_request_data_only, self->buffer_arrmeta.get(), 1, src_arrmeta);
+          kb(kernreq | kernel_request_data_only, self->buffer_arrmeta.get(), 1, src_arrmeta);
 
           kb_offset = kb.size();
           self = kb.get_at<compose_kernel>(root_kb_offset);
           self->second_offset = kb_offset - root_kb_offset;
           const char *buffer_arrmeta = self->buffer_arrmeta.get();
-          kb.instantiate(kernreq | kernel_request_data_only, dst_arrmeta, 1, &buffer_arrmeta);
+          kb(kernreq | kernel_request_data_only, dst_arrmeta, 1, &buffer_arrmeta);
           kb_offset = kb.size();
         });
 

@@ -46,7 +46,7 @@ namespace nd {
 
           kb.emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
 
-          kb.instantiate(kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N, child_src_arrmeta.data());
+          kb(kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N, child_src_arrmeta.data());
         });
       }
 
@@ -95,7 +95,7 @@ namespace nd {
           kb.emplace_back<elwise_kernel<fixed_dim_id, var_dim_id, N>>(kernreq, dst_size, dst_stride, src_stride.data(),
                                                                       src_offset.data(), arg_var.data());
 
-          kb.instantiate(kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N, child_src_arrmeta.data());
+          kb(kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N, child_src_arrmeta.data());
         });
       }
 
@@ -158,7 +158,7 @@ namespace nd {
               kernreq, dst_md->blockref.get(), res_alignment, dst_md->stride, dst_md->offset, src_stride.data(),
               src_offset.data(), src_size.data(), arg_var.data());
 
-          kb.instantiate(kernel_request_strided, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), N,
+          kb(kernel_request_strided, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), N,
                          child_src_arrmeta.data());
         });
       }

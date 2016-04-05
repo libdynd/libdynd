@@ -134,10 +134,10 @@ namespace nd {
 
               const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
 
-              kb.instantiate(kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), nsrc, &src0_element_arrmeta);
+              kb(kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), nsrc, &src0_element_arrmeta);
 
               intptr_t init_offset = kb.size();
-              kb.instantiate(kernel_request_single, dst_arrmeta + sizeof(size_stride_t), nsrc, &src0_element_arrmeta);
+              kb(kernel_request_single, dst_arrmeta + sizeof(size_stride_t), nsrc, &src0_element_arrmeta);
 
               e = kb.get_at<self_type>(root_ckb_offset);
               e->init_offset = init_offset - root_ckb_offset;
@@ -169,10 +169,10 @@ namespace nd {
                 self_k->src_stride_first = 0;
               }
 
-              kb.instantiate(kernel_request_strided, dst_element_arrmeta, nsrc, &src0_element_arrmeta);
+              kb(kernel_request_strided, dst_element_arrmeta, nsrc, &src0_element_arrmeta);
 
               intptr_t init_offset = kb.size();
-              kb.instantiate(kernel_request_strided, dst_element_arrmeta, nsrc, &src0_element_arrmeta);
+              kb(kernel_request_strided, dst_element_arrmeta, nsrc, &src0_element_arrmeta);
 
               self_k = kb.get_at<self_type>(root_ckb_offset);
               self_k->dst_init_kernel_offset = init_offset - root_ckb_offset;
@@ -192,8 +192,7 @@ namespace nd {
               kernreq = kernel_request_single;
             }
 
-            kb.instantiate(kernreq, keepdim ? (dst_arrmeta + sizeof(size_stride_t)) : dst_arrmeta, nsrc,
-                            &src0_element_arrmeta);
+            kb(kernreq, keepdim ? (dst_arrmeta + sizeof(size_stride_t)) : dst_arrmeta, nsrc, &src0_element_arrmeta);
           }
         });
       }
@@ -217,10 +216,10 @@ namespace nd {
           self_type *e = kb.get_at<self_type>(root_ckb_offset);
           const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(ndt::var_dim_type::metadata_type);
 
-          kb.instantiate(kernel_request_strided, dst_arrmeta, nsrc, &src0_element_arrmeta);
+          kb(kernel_request_strided, dst_arrmeta, nsrc, &src0_element_arrmeta);
 
           intptr_t init_offset = kb.size();
-          kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, &src0_element_arrmeta);
+          kb(kernel_request_single, dst_arrmeta, nsrc, &src0_element_arrmeta);
 
           e = kb.get_at<self_type>(root_ckb_offset);
           e->init_offset = init_offset - root_ckb_offset;

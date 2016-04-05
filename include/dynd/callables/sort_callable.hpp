@@ -29,7 +29,7 @@ namespace nd {
             kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
             reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride, src0_element_data_size);
 
-        kb.instantiate(kernel_request_single, nullptr, 2, nullptr);
+        kb(kernel_request_single, nullptr, 2, nullptr);
       });
 
       const ndt::type child_src_tp[2] = {src0_element_tp, src0_element_tp};

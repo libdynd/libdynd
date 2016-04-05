@@ -31,7 +31,7 @@ namespace nd {
           kb.emplace_back<constant_kernel>(kernreq, const_cast<char *>(val.cdata()));
 
           const char *child_src_metadata = val.get()->metadata();
-          kb.instantiate(kernreq | kernel_request_data_only, dst_arrmeta, 1, &child_src_metadata);
+          kb(kernreq | kernel_request_data_only, dst_arrmeta, 1, &child_src_metadata);
         });
 
         nd::array error_mode = assign_error_default;

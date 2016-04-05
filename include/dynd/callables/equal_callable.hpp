@@ -60,7 +60,7 @@ namespace nd {
           field_kernel_offsets[i] = kb.size() - self_offset;
           const char *field_arrmeta = src_arrmeta[0] + arrmeta_offsets[i];
           const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
-          kb.instantiate(kernreq | kernel_request_data_only, dst_arrmeta, nsrc, child_src_arrmeta);
+          kb(kernreq | kernel_request_data_only, dst_arrmeta, nsrc, child_src_arrmeta);
         }
       });
 

@@ -29,7 +29,7 @@ namespace nd {
 
         kb.emplace_back<field_access_kernel>(kernreq, data_offset);
 
-        kb.instantiate(kernreq | kernel_request_data_only, dst_arrmeta, 1, field_metadata);
+        kb(kernreq | kernel_request_data_only, dst_arrmeta, 1, field_metadata);
       });
 
       ndt::type field_tp = arg_tp[0].extended<ndt::struct_type>()->get_field_type(i);
@@ -52,7 +52,7 @@ namespace nd {
                       const ndt::type &DYND_UNUSED(res_tp), size_t DYND_UNUSED(narg),
                       const ndt::type *DYND_UNUSED(arg_tp), size_t DYND_UNUSED(nkwd), const array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      cg.emplace_back([ kwds, m_i = m_i ](kernel_builder &kb, kernel_request_t kernreq,
+      cg.emplace_back([ kwds, m_i = m_i ](kernel_builder & kb, kernel_request_t kernreq,
                                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                           const char *const *DYND_UNUSED(src_arrmeta)) {
         kb.emplace_back<get_array_field_kernel>(kernreq, kwds[0], m_i);

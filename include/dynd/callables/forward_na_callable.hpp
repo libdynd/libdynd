@@ -32,13 +32,13 @@ namespace nd {
         kb.emplace_back<forward_na_kernel<I>>(kernreq);
         kb.emplace_back(2 * sizeof(size_t));
 
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta + I);
+        kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta + I);
 
         child_offsets[0] = kb.size() - self_offset;
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
         child_offsets[1] = kb.size() - self_offset;
-        kb.instantiate(kernel_request_single, nullptr, 0, nullptr);
+        kb(kernel_request_single, nullptr, 0, nullptr);
 
         memcpy(kb.get_at<forward_na_kernel<I>>(self_offset)->get_offsets(), child_offsets, 2 * sizeof(size_t));
       });
@@ -75,22 +75,22 @@ namespace nd {
         kb.emplace_back<option_comparison_kernel<true, true>>(kernreq);
         ckb_offset = kb.size();
 
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, &src_arrmeta[0]);
+        kb(kernel_request_single, dst_arrmeta, nsrc, &src_arrmeta[0]);
         ckb_offset = kb.size();
         option_comparison_kernel<true, true> *self =
             kb.get_at<option_comparison_kernel<true, true>>(option_comp_offset);
         self->is_na_rhs_offset = ckb_offset - option_comp_offset;
 
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, &src_arrmeta[1]);
+        kb(kernel_request_single, dst_arrmeta, nsrc, &src_arrmeta[1]);
         ckb_offset = kb.size();
         self = kb.get_at<option_comparison_kernel<true, true>>(option_comp_offset);
         self->comp_offset = ckb_offset - option_comp_offset;
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
         ckb_offset = kb.size();
         self = kb.get_at<option_comparison_kernel<true, true>>(option_comp_offset);
         self->assign_na_offset = ckb_offset - option_comp_offset;
-        kb.instantiate(kernel_request_single, nullptr, 0, nullptr);
+        kb(kernel_request_single, nullptr, 0, nullptr);
         ckb_offset = kb.size();
       });
 

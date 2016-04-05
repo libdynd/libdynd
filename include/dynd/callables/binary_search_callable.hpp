@@ -29,7 +29,7 @@ namespace nd {
             reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride);
 
         const char *child_src_arrmeta[2] = {src_arrmeta[0], src_arrmeta[0]};
-        kb.instantiate(kernreq | kernel_request_data_only, nullptr, 2, child_src_arrmeta);
+        kb(kernreq | kernel_request_data_only, nullptr, 2, child_src_arrmeta);
       });
 
       ndt::type element_tp = src_tp[0].at_single(0, nullptr);

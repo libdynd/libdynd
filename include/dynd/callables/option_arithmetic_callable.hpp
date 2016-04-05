@@ -29,17 +29,17 @@ namespace nd {
         kb.emplace_back<option_arithmetic_kernel<true, false>>(kernreq);
         ckb_offset = kb.size();
 
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
         ckb_offset = kb.size();
         option_arithmetic_kernel<true, false> *self =
             kb.get_at<option_arithmetic_kernel<true, false>>(option_arith_offset);
         self->arith_offset = ckb_offset - option_arith_offset;
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
         ckb_offset = kb.size();
         self = kb.get_at<option_arithmetic_kernel<true, false>>(option_arith_offset);
         self->assign_na_offset = ckb_offset - option_arith_offset;
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
         ckb_offset = kb.size();
       });
 
@@ -67,16 +67,16 @@ namespace nd {
         kb.emplace_back<option_arithmetic_kernel<false, true>>(kernreq);
         ckb_offset = kb.size();
 
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, &src_arrmeta[1]);
+        kb(kernel_request_single, dst_arrmeta, nsrc, &src_arrmeta[1]);
         ckb_offset = kb.size();
         option_arithmetic_kernel<false, true> *self =
             kb.get_at<option_arithmetic_kernel<false, true>>(option_arith_offset);
         self->arith_offset = ckb_offset - option_arith_offset;
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
         ckb_offset = kb.size();
         self = kb.get_at<option_arithmetic_kernel<false, true>>(option_arith_offset);
         self->assign_na_offset = ckb_offset - option_arith_offset;
-        kb.instantiate(kernel_request_single, src_arrmeta[1], 0, nullptr);
+        kb(kernel_request_single, src_arrmeta[1], 0, nullptr);
         ckb_offset = kb.size();
       });
 
@@ -104,23 +104,23 @@ namespace nd {
         kb.emplace_back<option_arithmetic_kernel<true, true>>(kernreq);
         ckb_offset = kb.size();
 
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
         ckb_offset = kb.size();
         option_arithmetic_kernel<true, true> *self =
             kb.get_at<option_arithmetic_kernel<true, true>>(option_arith_offset);
         self->is_na_rhs_offset = ckb_offset - option_arith_offset;
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
         ckb_offset = kb.size();
         self = kb.get_at<option_arithmetic_kernel<true, true>>(option_arith_offset);
         self->arith_offset = ckb_offset - option_arith_offset;
-        kb.instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
         ckb_offset = kb.size();
         self = kb.get_at<option_arithmetic_kernel<true, true>>(option_arith_offset);
         self->assign_na_offset = ckb_offset - option_arith_offset;
-        kb.instantiate(kernel_request_single, dst_arrmeta, 0, nullptr);
+        kb(kernel_request_single, dst_arrmeta, 0, nullptr);
         ckb_offset = kb.size();
       });
 

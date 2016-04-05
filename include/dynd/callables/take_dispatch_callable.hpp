@@ -49,8 +49,7 @@ namespace nd {
         self->m_dim_size = src0_dim_size;
 
         // Create the child element assignment ckernel
-        kb.instantiate(kernel_request_strided, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), 1,
-                       &src0_el_meta);
+        kb(kernel_request_strided, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), 1, &src0_el_meta);
       });
 
       ndt::type src0_element_tp = src_tp[0].extended<ndt::base_dim_type>()->get_element_type();
@@ -130,7 +129,7 @@ namespace nd {
         }
 
         // Create the child element assignment ckernel
-        kb.instantiate(kernel_request_single, dst_el_meta, 1, &src0_el_meta);
+        kb(kernel_request_single, dst_el_meta, 1, &src0_el_meta);
       });
 
       return resolved_dst_tp;
