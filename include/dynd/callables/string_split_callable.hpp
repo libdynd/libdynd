@@ -21,8 +21,8 @@ namespace nd {
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      cg.push_back([](call_node *&DYND_UNUSED(node), kernel_builder * ckb, kernel_request_t kernreq,
-                      const char *dst_arrmeta, size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+      cg.push_back([](kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
+                      const char *const *DYND_UNUSED(src_arrmeta)) {
         ckb->emplace_back<string_split_kernel>(
             kernreq, reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->blockref);
       });

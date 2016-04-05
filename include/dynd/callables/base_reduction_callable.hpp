@@ -109,9 +109,9 @@ namespace nd {
         bool broadcast = reinterpret_cast<node_type *>(data)->broadcast;
         bool keepdim = reinterpret_cast<node_type *>(data)->keepdim;
         bool identity = reinterpret_cast<node_type *>(data)->identity;
-        cg.push_back([inner, broadcast, keepdim, identity](call_node *&DYND_UNUSED(node), kernel_builder * ckb,
-                                                           kernel_request_t kernreq, const char *dst_arrmeta,
-                                                           size_t nsrc, const char *const *src_arrmeta) {
+        cg.push_back([inner, broadcast, keepdim, identity](kernel_builder *ckb, kernel_request_t kernreq,
+                                                           const char *dst_arrmeta, size_t nsrc,
+                                                           const char *const *src_arrmeta) {
           if (inner) {
             if (!broadcast) {
               intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
@@ -207,9 +207,9 @@ namespace nd {
         bool broadcast = reinterpret_cast<node_type *>(data)->broadcast;
         bool keepdim = reinterpret_cast<node_type *>(data)->keepdim;
         bool identity = reinterpret_cast<node_type *>(data)->identity;
-        cg.push_back([inner, broadcast, keepdim, identity](call_node *&DYND_UNUSED(node), kernel_builder * ckb,
-                                                           kernel_request_t kernreq, const char *dst_arrmeta,
-                                                           size_t nsrc, const char *const *src_arrmeta) {
+        cg.push_back([inner, broadcast, keepdim, identity](kernel_builder *ckb, kernel_request_t kernreq,
+                                                           const char *dst_arrmeta, size_t nsrc,
+                                                           const char *const *src_arrmeta) {
           typedef reduction_kernel<var_dim_id, false, true> self_type;
           intptr_t root_ckb_offset = ckb->size();
           ckb->emplace_back<self_type>(

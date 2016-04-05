@@ -26,7 +26,7 @@ namespace nd {
 
     static void instantiate_wrapper(call_node *&self, kernel_builder *ckb, kernel_request_t kernreq,
                                     const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta) {
-      reinterpret_cast<closure_call *>(self)->closure(self, ckb, kernreq, dst_arrmeta, nsrc, src_arrmeta);
+      reinterpret_cast<closure_call *>(self)->closure(ckb, kernreq, dst_arrmeta, nsrc, src_arrmeta);
     }
   };
 

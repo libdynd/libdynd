@@ -21,8 +21,8 @@ namespace nd {
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                         const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
-        cg.push_back([](call_node *&DYND_UNUSED(node), kernel_builder * ckb, kernel_request_t kernreq,
-                        const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta) {
+        cg.push_back([](kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
+                        const char *const *src_arrmeta) {
           ckb->emplace_back<left_compound_kernel>(kernreq);
 
           const char *child_src_arrmeta[2] = {dst_arrmeta, src_arrmeta[0]};
@@ -45,8 +45,8 @@ namespace nd {
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                         const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
-        cg.push_back([](call_node *&DYND_UNUSED(node), kernel_builder * ckb, kernel_request_t kernreq,
-                        const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta) {
+        cg.push_back([](kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
+                        const char *const *src_arrmeta) {
           ckb->emplace_back<right_compound_kernel>(kernreq);
 
           const char *child_src_arrmeta[2] = {src_arrmeta[0], dst_arrmeta};

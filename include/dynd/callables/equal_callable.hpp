@@ -38,8 +38,8 @@ namespace nd {
         arrmeta_offsets[i] = bsd->get_arrmeta_offsets()[i];
       }
 
-      cg.push_back([field_count, arrmeta_offsets](call_node *&DYND_UNUSED(node), kernel_builder * ckb,
-                                                  kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
+      cg.push_back([field_count, arrmeta_offsets](kernel_builder *ckb, kernel_request_t kernreq,
+                                                  const char *dst_arrmeta, size_t nsrc,
                                                   const char *const *src_arrmeta) {
         intptr_t self_offset = ckb->size();
 
