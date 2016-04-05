@@ -21,7 +21,7 @@ namespace nd {
   class kernel_builder;
 
   struct call_node {
-    typedef void (*instantiate_type_t)(call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+    typedef void (*instantiate_type_t)(call_node *node, kernel_builder *ckb, kernel_request_t kernreq,
                                        const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta);
     typedef void (*destroy_type_t)(call_node *node);
 

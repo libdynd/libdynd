@@ -22,14 +22,14 @@ namespace nd {
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &tp_vars) {
-      cg.push_back([]( kernel_builder * ckb, kernel_request_t kernreq,
-                      const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
-        ckb->emplace_back<binary_search_kernel>(
+      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
+                         size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+        kb.emplace_back<binary_search_kernel>(
             kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
             reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride);
 
         const char *child_src_arrmeta[2] = {src_arrmeta[0], src_arrmeta[0]};
-        ckb->instantiate(kernreq | kernel_request_data_only, nullptr, 2, child_src_arrmeta);
+        kb.instantiate(kernreq | kernel_request_data_only, nullptr, 2, child_src_arrmeta);
       });
 
       ndt::type element_tp = src_tp[0].at_single(0, nullptr);

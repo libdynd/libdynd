@@ -38,29 +38,29 @@ namespace nd {
         arrmeta_offsets[i] = bsd->get_arrmeta_offsets()[i];
       }
 
-      cg.push_back([field_count, arrmeta_offsets](kernel_builder *ckb, kernel_request_t kernreq,
-                                                  const char *dst_arrmeta, size_t nsrc,
-                                                  const char *const *src_arrmeta) {
-        intptr_t self_offset = ckb->size();
+      cg.emplace_back([field_count, arrmeta_offsets](kernel_builder &kb, kernel_request_t kernreq,
+                                                     const char *dst_arrmeta, size_t nsrc,
+                                                     const char *const *src_arrmeta) {
+        intptr_t self_offset = kb.size();
 
-        ckb->emplace_back<not_equal_kernel<tuple_id, tuple_id>>(kernreq, field_count,
-                                                                reinterpret_cast<const uintptr_t *>(src_arrmeta[0]),
-                                                                reinterpret_cast<const uintptr_t *>(src_arrmeta[1]));
-        ckb->emplace_back(field_count * sizeof(size_t));
+        kb.emplace_back<not_equal_kernel<tuple_id, tuple_id>>(kernreq, field_count,
+                                                              reinterpret_cast<const uintptr_t *>(src_arrmeta[0]),
+                                                              reinterpret_cast<const uintptr_t *>(src_arrmeta[1]));
+        kb.emplace_back(field_count * sizeof(size_t));
 
-        not_equal_kernel<tuple_id, tuple_id> *e = ckb->get_at<not_equal_kernel<tuple_id, tuple_id>>(self_offset);
+        not_equal_kernel<tuple_id, tuple_id> *e = kb.get_at<not_equal_kernel<tuple_id, tuple_id>>(self_offset);
         size_t *field_kernel_offsets;
         for (size_t i = 0; i != field_count; ++i) {
           // Reserve space for the child, and save the offset to this
           // field comparison kernel. Have to re-get
           // the pointer because creating the field comparison kernel may
           // move the memory.
-          e = reinterpret_cast<kernel_builder *>(ckb)->get_at<not_equal_kernel<tuple_id, tuple_id>>(self_offset);
+          e = kb.get_at<not_equal_kernel<tuple_id, tuple_id>>(self_offset);
           field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
-          field_kernel_offsets[i] = ckb->size() - self_offset;
+          field_kernel_offsets[i] = kb.size() - self_offset;
           const char *field_arrmeta = src_arrmeta[0] + arrmeta_offsets[i];
           const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
-          ckb->instantiate(kernreq | kernel_request_data_only, dst_arrmeta, nsrc, child_src_arrmeta);
+          kb.instantiate(kernreq | kernel_request_data_only, dst_arrmeta, nsrc, child_src_arrmeta);
         }
       });
 
