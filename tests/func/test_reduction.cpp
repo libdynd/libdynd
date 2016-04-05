@@ -43,14 +43,12 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
   EXPECT_ARRAY_EQ(3.75, f(nd::array{3.75}));
 }
 
-/*
 TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
   nd::callable f = nd::functional::reduction(nd::functional::apply([](double x, double y) { return x + y; }));
 
   EXPECT_ARRAY_EQ(100.0 + 1.5 - 22.0 + 3.75 + 1.125 - 3.375,
                   f({initializer_list<double>{1.5, -22., 3.75, 1.125, -3.375}}, {{"identity", 100.0}}));
 }
-*/
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
   nd::callable f = nd::functional::reduction([](double x, double y) { return x + y; });

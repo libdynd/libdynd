@@ -25,15 +25,17 @@ namespace nd {
         const int *axes;
         int axis;
         intptr_t ndim;
+        array identity;
       };
 
       struct node_type {
         bool inner;
         bool broadcast;
         bool keepdim;
+        bool identity;
       };
 
-      base_reduction_callable() : base_callable(ndt::type(), sizeof(node_type)) {}
+      base_reduction_callable() : base_callable(ndt::type()) {}
 
       virtual void resolve(call_graph &cg, char *data) = 0;
 
@@ -63,6 +65,7 @@ namespace nd {
         ++reinterpret_cast<data_type *>(data)->axis;
 
         ndt::type ret_element_tp;
+        node.identity = !reinterpret_cast<data_type *>(data)->identity.is_na();
         if (reinterpret_cast<data_type *>(data)->axis == reinterpret_cast<data_type *>(data)->ndim) {
           node.inner = true;
           resolve(cg, reinterpret_cast<char *>(&node));
@@ -70,8 +73,13 @@ namespace nd {
           ret_element_tp =
               child->resolve(this, nullptr, cg, child_ret_tp, nsrc, arg_element_tp, nkwd - 3, kwds + 3, tp_vars);
 
-          nd::array error_mode = eval::default_eval_context.errmode;
-          assign->resolve(this, nullptr, cg, ret_element_tp, 1, arg_element_tp, 1, &error_mode, tp_vars);
+          if (reinterpret_cast<data_type *>(data)->identity.is_na()) {
+            nd::array error_mode = eval::default_eval_context.errmode;
+            assign->resolve(this, nullptr, cg, ret_element_tp, 1, arg_element_tp, 1, &error_mode, tp_vars);
+          } else {
+            nd::callable constant = functional::constant(reinterpret_cast<data_type *>(data)->identity);
+            constant->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          }
         } else {
           node.inner = false;
           resolve(cg, reinterpret_cast<char *>(&node));
@@ -100,9 +108,10 @@ namespace nd {
         bool inner = reinterpret_cast<node_type *>(data)->inner;
         bool broadcast = reinterpret_cast<node_type *>(data)->broadcast;
         bool keepdim = reinterpret_cast<node_type *>(data)->keepdim;
-        cg.push_back([inner, broadcast, keepdim](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                                                 const char *dst_arrmeta, intptr_t nsrc,
-                                                 const char *const *src_arrmeta) {
+        bool identity = reinterpret_cast<node_type *>(data)->identity;
+        cg.push_back([inner, broadcast, keepdim, identity](call_node *&node, kernel_builder *ckb,
+                                                           kernel_request_t kernreq, const char *dst_arrmeta,
+                                                           intptr_t nsrc, const char *const *src_arrmeta) {
           if (inner) {
             if (!broadcast) {
               intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
@@ -116,7 +125,7 @@ namespace nd {
               e->src_stride = src_stride;
               e->_size = src_size;
 
-              if (true) { // identity is null
+              if (!identity) { // identity is null
                 e->size_first = e->_size - 1;
                 e->src_stride_first = e->src_stride;
               } else {
@@ -154,7 +163,7 @@ namespace nd {
               // The striding parameters
               self_k->_size = src_size;
               // Need to retrieve 'e' again because it may have moved
-              if (true) { // identity is null
+              if (!identity) { // identity is null
                 self_k->size_first = self_k->_size - 1;
                 self_k->dst_stride_first = self_k->dst_stride;
                 self_k->src_stride_first = self_k->src_stride;
@@ -178,15 +187,16 @@ namespace nd {
             intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
             intptr_t src_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
 
-            if (reinterpret_cast<node_type *>(node)->broadcast) {
+            if (broadcast) {
               ckb->emplace_back<reduction_kernel<fixed_dim_id, true, false>>(
                   kernreq, src_size, reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride, src_stride);
+              node = next(node);
               kernreq = kernel_request_strided;
             } else {
               ckb->emplace_back<reduction_kernel<fixed_dim_id, false, false>>(kernreq, src_size, src_stride);
+              node = next(node);
               kernreq = kernel_request_single;
             }
-            node = next(node);
 
             node->instantiate(node, ckb, kernreq, keepdim ? (dst_arrmeta + sizeof(size_stride_t)) : dst_arrmeta, nsrc,
                               &src0_element_arrmeta);
