@@ -29,8 +29,8 @@ namespace nd {
 
       typedef typename base_reduction_callable::data_type new_data_type;
 
-      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
-                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
+      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *data, call_graph &cg, const ndt::type &dst_tp,
+                        size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         new_data_type new_data;
         if (data == nullptr) {
@@ -58,8 +58,13 @@ namespace nd {
           data = reinterpret_cast<char *>(&new_data);
         }
 
-        static callable f = make_callable<reduction_callable<fixed_dim_id>>();
-        return f->resolve(caller, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+        if (src_tp[0].get_id() == fixed_dim_id) {
+          static callable f = make_callable<reduction_callable<fixed_dim_id>>();
+          return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+        } else {
+          static callable f = make_callable<reduction_callable<var_dim_id>>();
+          return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+        }
       }
 
       void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,

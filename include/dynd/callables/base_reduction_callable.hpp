@@ -39,8 +39,8 @@ namespace nd {
 
       virtual void resolve(call_graph &cg, char *data) = 0;
 
-      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *data, call_graph &cg, const ndt::type &res_tp,
-                        size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
+      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp, size_t nsrc,
+                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         node_type node;
 
@@ -84,7 +84,7 @@ namespace nd {
           node.inner = false;
           resolve(cg, reinterpret_cast<char *>(&node));
 
-          ret_element_tp = this->resolve(this, data, cg, res_tp, nsrc, arg_element_tp, nkwd, kwds, tp_vars);
+          ret_element_tp = caller->resolve(this, data, cg, res_tp, nsrc, arg_element_tp, nkwd, kwds, tp_vars);
         }
 
         if (reduce) {
@@ -201,6 +201,36 @@ namespace nd {
             node->instantiate(node, ckb, kernreq, keepdim ? (dst_arrmeta + sizeof(size_stride_t)) : dst_arrmeta, nsrc,
                               &src0_element_arrmeta);
           }
+        });
+      }
+    };
+
+    template <>
+    class reduction_callable<var_dim_id> : public base_reduction_callable {
+      void resolve(call_graph &cg, char *data) {
+        bool inner = reinterpret_cast<node_type *>(data)->inner;
+        bool broadcast = reinterpret_cast<node_type *>(data)->broadcast;
+        bool keepdim = reinterpret_cast<node_type *>(data)->keepdim;
+        bool identity = reinterpret_cast<node_type *>(data)->identity;
+        cg.push_back([inner, broadcast, keepdim, identity](call_node *&node, kernel_builder *ckb,
+                                                           kernel_request_t kernreq, const char *dst_arrmeta,
+                                                           intptr_t nsrc, const char *const *src_arrmeta) {
+          typedef reduction_kernel<var_dim_id, false, true> self_type;
+          intptr_t root_ckb_offset = ckb->size();
+          ckb->emplace_back<self_type>(
+              kernreq, reinterpret_cast<const ndt::var_dim_type::metadata_type *>(src_arrmeta[0])->stride);
+          node = next(node);
+
+          self_type *e = ckb->get_at<self_type>(root_ckb_offset);
+          const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(ndt::var_dim_type::metadata_type);
+
+          node->instantiate(node, ckb, kernel_request_strided, dst_arrmeta, nsrc, &src0_element_arrmeta);
+
+          intptr_t init_offset = ckb->size();
+          node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, &src0_element_arrmeta);
+
+          e = ckb->get_at<self_type>(root_ckb_offset);
+          e->init_offset = init_offset - root_ckb_offset;
         });
       }
     };
