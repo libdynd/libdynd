@@ -17,8 +17,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(FixedstringDType, Create)
-{
+TEST(FixedstringDType, Create) {
   ndt::type d;
 
   // Strings with various encodings and sizes
@@ -64,8 +63,7 @@ TEST(FixedstringDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(FixedStringDType, Encoding)
-{
+TEST(FixedStringDType, Encoding) {
   ndt::type t;
 
   t = ndt::fixed_string_type::make(10, string_encoding_ascii);
@@ -83,8 +81,7 @@ TEST(FixedStringDType, Encoding)
   EXPECT_THROW(ndt::fixed_string_type::make(10, string_encoding_invalid), std::runtime_error);
 }
 
-TEST(FixedStringDType, Basic)
-{
+TEST(FixedStringDType, Basic) {
   nd::array a;
 
   // Trivial string going in and out of the system
@@ -96,8 +93,7 @@ TEST(FixedStringDType, Basic)
   EXPECT_EQ("abcdefg", b.as<std::string>());
 }
 
-TEST(FixedstringDType, Casting)
-{
+TEST(FixedstringDType, Casting) {
   nd::array a;
 
   a = nd::empty(ndt::fixed_string_type::make(16, string_encoding_utf_16));
@@ -109,8 +105,7 @@ TEST(FixedstringDType, Casting)
   EXPECT_EQ("abc", a.as<std::string>());
 }
 
-TEST(FixedstringDType, CanonicalDType)
-{
+TEST(FixedstringDType, CanonicalDType) {
   EXPECT_EQ((ndt::fixed_string_type::make(12, string_encoding_ascii)),
             (ndt::fixed_string_type::make(12, string_encoding_ascii).get_canonical_type()));
   EXPECT_EQ((ndt::fixed_string_type::make(14, string_encoding_utf_8)),
@@ -121,12 +116,8 @@ TEST(FixedstringDType, CanonicalDType)
             (ndt::fixed_string_type::make(21, string_encoding_utf_32).get_canonical_type()));
 }
 
-TEST(FixedstringDType, Repr)
-{
-  std::vector<const char *> roundtrip {
-    "fixed_string[10, 'utf32']",
-    "fixed_string[10]"
-  };
+TEST(FixedstringDType, Repr) {
+  std::vector<const char *> roundtrip{"fixed_string[10, 'utf32']", "fixed_string[10]"};
 
   for (auto s : roundtrip) {
     EXPECT_TYPE_REPR_EQ(s, ndt::type(s));

@@ -26,11 +26,10 @@ namespace nd {
       parse_callable()
           : base_callable(ndt::callable_type::make(option_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
-      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
+      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),
                         const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                         size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-        cg.emplace_back(this);
         return dst_tp;
       }
 
@@ -61,11 +60,10 @@ namespace nd {
       parse_callable()
           : base_callable(ndt::callable_type::make(struct_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
-      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
+      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),
                         const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                         size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-        cg.emplace_back(this);
         return dst_tp;
       }
 
@@ -81,7 +79,6 @@ namespace nd {
         ckb->emplace_back<parse_kernel<struct_id>>(kernreq, dst_tp, field_count,
                                                    dst_tp.extended<ndt::struct_type>()->get_data_offsets(dst_arrmeta));
         node = next(node);
-
 
         ckb_offset = ckb->size();
 
@@ -102,11 +99,10 @@ namespace nd {
           : base_callable(
                 ndt::callable_type::make(fixed_dim_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
-      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
+      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),
                         const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                         size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-        cg.emplace_back(this);
         return dst_tp;
       }
 
@@ -118,7 +114,6 @@ namespace nd {
                                                       reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size,
                                                       reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride);
         node = next(node);
-
 
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         dynamic_parse->instantiate(node, data, ckb, child_dst_tp,
@@ -133,11 +128,10 @@ namespace nd {
       parse_callable()
           : base_callable(ndt::callable_type::make(var_dim_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
-      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
+      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),
                         const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                         size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-        cg.emplace_back(this);
         return dst_tp;
       }
 

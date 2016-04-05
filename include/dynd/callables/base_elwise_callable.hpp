@@ -18,29 +18,29 @@ namespace nd {
     template <size_t N>
     class base_elwise_callable : public base_callable {
     protected:
-      struct data_type {
+      struct codata_type {
         callable &child;
       };
 
-      struct node_type : call_node {
-        using call_node::call_node;
-
+      struct data_type {
         std::array<bool, N> arg_broadcast;
         std::array<bool, N> arg_var;
         intptr_t res_alignment;
       };
 
     public:
-      base_elwise_callable() : base_callable(ndt::type(), sizeof(node_type)) {}
+      base_elwise_callable() : base_callable(ndt::type()) {}
 
-      virtual ndt::type with_ret_type(intptr_t ret_size, const ndt::type &ret_element_tp) = 0;
+      virtual void resolve(call_graph &cg, const char *data) = 0;
 
-      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp,
+      virtual ndt::type with_return_type(intptr_t ret_size, const ndt::type &ret_element_tp) = 0;
+
+      ndt::type resolve(base_callable *caller, char *codata, call_graph &cg, const ndt::type &res_tp,
                         size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
-        node_type *node = cg.emplace_back<node_type>(this);
+        data_type data;
 
-        callable &child = reinterpret_cast<data_type *>(data)->child;
+        callable &child = reinterpret_cast<codata_type *>(codata)->child;
         const ndt::type &child_ret_tp = child.get_ret_type();
         const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
 
@@ -60,7 +60,7 @@ namespace nd {
         }
 
         for (size_t i = 0; i < N; ++i) {
-          node->arg_var[i] = arg_tp[i].get_id() == var_dim_id;
+          data.arg_var[i] = arg_tp[i].get_id() == var_dim_id;
         }
 
         bool res_variadic = res_tp.is_variadic();
@@ -89,13 +89,13 @@ namespace nd {
         bool callback = ret_ndim > 1;
         for (size_t i = 0; i < N; ++i) {
           if (arg_ndim[i] == max_ndim) {
-            node->arg_broadcast[i] = false;
+            data.arg_broadcast[i] = false;
             if (arg_size[i] != -1 && res_size != -1 && res_size != arg_size[i] && arg_size[i] != 1) {
               throw std::runtime_error("broadcast error");
             }
             arg_element_tp[i] = arg_tp[i].extended<ndt::base_dim_type>()->get_element_type();
           } else {
-            node->arg_broadcast[i] = true;
+            data.arg_broadcast[i] = true;
             arg_element_tp[i] = arg_tp[i];
           }
           if (arg_element_tp[i].get_ndim() != child_arg_tp[i].get_ndim()) {
@@ -103,18 +103,20 @@ namespace nd {
           }
         }
 
+        resolve(cg, reinterpret_cast<char *>(&data));
+
         ndt::type resolved_ret_tp;
         if (callback) {
-          resolved_ret_tp = with_ret_type(res_size, caller->resolve(this, nullptr, cg, res_element_tp, N,
-                                                                    arg_element_tp.data(), nkwd, kwds, tp_vars));
+          resolved_ret_tp = with_return_type(res_size, caller->resolve(this, nullptr, cg, res_element_tp, N,
+                                                                       arg_element_tp.data(), nkwd, kwds, tp_vars));
         } else {
-          resolved_ret_tp = with_ret_type(res_size, child->resolve(this, nullptr, cg,
-                                                                   res_variadic ? child.get_ret_type() : res_element_tp,
-                                                                   N, arg_element_tp.data(), nkwd, kwds, tp_vars));
+          resolved_ret_tp = with_return_type(
+              res_size, child->resolve(this, nullptr, cg, res_variadic ? child.get_ret_type() : res_element_tp, N,
+                                       arg_element_tp.data(), nkwd, kwds, tp_vars));
         }
 
         if (resolved_ret_tp.get_id() == var_dim_id) {
-          node->res_alignment = resolved_ret_tp.extended<ndt::var_dim_type>()->get_target_alignment();
+          data.res_alignment = resolved_ret_tp.extended<ndt::var_dim_type>()->get_target_alignment();
         }
 
         return resolved_ret_tp;

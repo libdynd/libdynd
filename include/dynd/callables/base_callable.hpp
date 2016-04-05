@@ -56,14 +56,30 @@ namespace nd {
 
   public:
     struct call_node {
-      base_callable *callee;
-      void (*destroy)(void *);
+      typedef void (*instantiate_type_t)(call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
+                                         const char *dst_arrmeta, intptr_t nsrc, const char *const *src_arrmeta);
+      typedef void (*destroy_type_t)(call_node *node);
 
-      call_node(base_callable *callee) : callee(callee) {}
+      destroy_type_t destroy;
+      instantiate_type_t instantiate;
+      size_t data_size;
 
-      call_node *next() {
-        return reinterpret_cast<call_node *>(reinterpret_cast<char *>(this) + aligned_size(callee->get_frame_size()));
-      }
+      call_node() : instantiate(NULL) {}
+
+      call_node(instantiate_type_t instantiate, size_t data_size = sizeof(call_node))
+          : instantiate(instantiate), data_size(data_size) {}
+
+      call_node(instantiate_type_t instantiate, destroy_type_t destroy, size_t data_size = sizeof(call_node))
+          : destroy(destroy), instantiate(instantiate), data_size(data_size) {}
+
+      /*
+            void instantiate(call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
+                             intptr_t nsrc, const char *const *src_arrmeta) {
+              node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta, nsrc, nullptr, src_arrmeta,
+         kernreq, 0,
+                                        nullptr, std::map<std::string, ndt::type>());
+            }
+      */
     };
 
     bool m_abstract;
@@ -171,6 +187,7 @@ namespace nd {
                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
                              intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+      //      std::cout << typeid(*this).name() << std::endl;
       throw std::runtime_error("calling unimplemented instantiate");
     }
 
@@ -245,9 +262,14 @@ namespace nd {
       set(m_static_data, 0, sizeof(m_static_data));
     }
 
-    call_graph(base_callable *callee);
-
     ~call_graph() {
+      intptr_t offset = 0;
+      while (offset != m_size) {
+        typename base_callable::call_node *node = get_at<typename base_callable::call_node>(offset);
+        offset += aligned_size(node->data_size);
+        node->destroy(node);
+      }
+
       if (!using_static_data()) {
         free(m_data);
       }
@@ -343,7 +365,27 @@ namespace nd {
       return new (this->get_at<NodeType>(offset)) NodeType(std::forward<ArgTypes>(args)...);
     }
 
-    DYND_API void emplace_back(base_callable *callee);
+    template <typename T>
+    void push_back(T node) {
+      struct node_type : base_callable::call_node {
+        T lambda;
+
+        node_type(T lambda)
+            : call_node(
+                  [](call_node *&node, kernel_builder * ckb, kernel_request_t kernreq, const char *dst_arrmeta,
+                     intptr_t nsrc, const char *const *src_arrmeta) {
+                    reinterpret_cast<node_type *>(node)->lambda(node, ckb, kernreq, dst_arrmeta, nsrc, src_arrmeta);
+                  },
+                  [](call_node *node) { reinterpret_cast<node_type *>(node)->~node_type(); }, sizeof(node_type)),
+              lambda(lambda) {}
+      };
+
+      this->emplace_back<node_type>(node);
+    }
+
+    void push_back(base_callable::call_node::instantiate_type_t instantiate) {
+      this->emplace_back<base_callable::call_node>(instantiate);
+    }
 
     base_callable::call_node *back() { return get_at<base_callable::call_node>(m_back_offset); }
 
@@ -363,7 +405,9 @@ namespace nd {
   typedef typename base_callable::call_node call_node;
 
   inline call_node *next(call_node *node) {
-    return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) + aligned_size(node->callee->get_frame_size()));
+    return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) + aligned_size(node->data_size));
+    //    return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) +
+    //    aligned_size(node->callee->get_frame_size()));
   }
 
 } // namespace dynd::nd

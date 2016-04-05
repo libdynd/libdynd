@@ -23,8 +23,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   // Generate and evaluate the ckernel
   kernel_builder ckb;
   call_node *node = cg.get();
-  instantiate(node, nullptr, &ckb, dst_tp, dst.get()->metadata(), nsrc, src_tp, src_arrmeta, kernel_request_single,
-              nkwd, kwds, tp_vars);
+  node->instantiate(node, &ckb, kernel_request_single, dst->metadata(), nsrc, src_arrmeta);
   kernel_single_t fn = ckb.get()->get_function<kernel_single_t>();
   fn(ckb.get(), dst.data(), src_data);
 
@@ -50,8 +49,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   // Generate and evaluate the ckernel
   kernel_builder ckb;
   call_node *node = cg.get();
-  node->callee->instantiate(node, nullptr, &ckb, dst_tp, dst->metadata(), nsrc, src_tp, src_arrmeta,
-                            kernel_request_call, nkwd, kwds, tp_vars);
+  node->instantiate(node, &ckb, kernel_request_call, dst->metadata(), nsrc, src_arrmeta);
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
   fn(ckb.get(), &dst, src_data);
 
@@ -67,8 +65,7 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, c
   // Generate and evaluate the ckernel
   kernel_builder ckb;
   call_node *node = cg.get();
-  instantiate(node, nullptr, &ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single, nkwd, kwds,
-              tp_vars);
+  node->instantiate(node, &ckb, kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
   kernel_single_t fn = ckb.get()->get_function<kernel_single_t>();
   fn(ckb.get(), dst_data, src_data);
 }
@@ -79,43 +76,17 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, a
   call_graph cg;
   resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
-  /*
-    std::cout << "dst_tp = " << dst_tp << std::endl;
-    for (int i = 0; i < nsrc; ++i) {
-      std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
-    }
-  */
+/*
+  std::cout << "dst_tp = " << dst_tp << std::endl;
+  for (int i = 0; i < nsrc; ++i) {
+    std::cout << "src_tp[" << i << "] = " << src_tp[i] << std::endl;
+  }
+*/
 
   // Generate and evaluate the ckernel
   kernel_builder ckb;
   call_node *node = cg.get();
-  node->callee->instantiate(node, nullptr, &ckb, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_call,
-                            nkwd, kwds, tp_vars);
+  node->instantiate(node, &ckb, kernel_request_call, dst_arrmeta, nsrc, src_arrmeta);
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
   fn(ckb.get(), dst, src);
-}
-
-nd::call_graph::call_graph(base_callable *callee)
-    : m_data(m_static_data), m_capacity(sizeof(m_static_data)), m_size(0) {
-
-  size_t offset = m_size;
-  m_size += aligned_size(sizeof(base_callable::call_node));
-  reserve(m_size);
-  new (this->get_at<base_callable::call_node>(offset)) base_callable::call_node(callee);
-
-  m_back_offset = 0;
-}
-
-void nd::call_graph::emplace_back(base_callable *callee) {
-  static_assert(alignof(base_callable::call_node) <= 8, "nodes types require alignment to be at most 8 bytes");
-
-  /* Alignment requirement of the type. */
-  //      static_assert(alignof(KernelType) <= 8, "kernel types require alignment to be at most 8 bytes");
-
-  m_back_offset = m_size;
-
-  size_t offset = m_size;
-  m_size += aligned_size(sizeof(base_callable::call_node));
-  reserve(m_size);
-  new (this->get_at<base_callable::call_node>(offset)) base_callable::call_node(callee);
 }
