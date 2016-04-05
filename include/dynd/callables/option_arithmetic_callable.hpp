@@ -23,7 +23,7 @@ namespace nd {
                       const ndt::type &res_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
                       const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
       cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                      intptr_t nsrc, const char *const *src_arrmeta) {
+                      size_t nsrc, const char *const *src_arrmeta) {
         intptr_t ckb_offset = ckb->size();
         intptr_t option_arith_offset = ckb_offset;
         ckb->emplace_back<option_arithmetic_kernel<true, false>>(kernreq);
@@ -62,7 +62,7 @@ namespace nd {
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
                       const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
       cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                      intptr_t nsrc, const char *const *src_arrmeta) {
+                      size_t nsrc, const char *const *src_arrmeta) {
         intptr_t ckb_offset = ckb->size();
         intptr_t option_arith_offset = ckb_offset;
         ckb->emplace_back<option_arithmetic_kernel<false, true>>(kernreq);
@@ -100,7 +100,7 @@ namespace nd {
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
                       const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
       cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                      intptr_t nsrc, const char *const *src_arrmeta) {
+                      size_t nsrc, const char *const *src_arrmeta) {
         intptr_t ckb_offset = ckb->size();
         intptr_t option_arith_offset = ckb_offset;
         ckb->emplace_back<option_arithmetic_kernel<true, true>>(kernreq);

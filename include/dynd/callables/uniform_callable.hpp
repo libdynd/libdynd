@@ -49,7 +49,7 @@ namespace nd {
           }
 
           cg.push_back([g, a, b](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                 const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                  const char *const *DYND_UNUSED(src_arrmeta)) {
             ckb->emplace_back<uniform_kernel<ResID, int_kind_id, GeneratorType>>(kernreq, g.get(), a, b);
             node = next(node);
@@ -94,7 +94,7 @@ namespace nd {
           }
 
           cg.push_back([g, a, b](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                 const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                  const char *const *DYND_UNUSED(src_arrmeta)) {
             ckb->emplace_back<uniform_kernel<ResID, float_kind_id, GeneratorType>>(kernreq, g.get(), a, b);
             node = next(node);
@@ -135,7 +135,7 @@ namespace nd {
           }
 
           cg.push_back([g, a, b](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                 const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                  const char *const *DYND_UNUSED(src_arrmeta)) {
             ckb->emplace_back<uniform_kernel<ResID, complex_kind_id, GeneratorType>>(kernreq, g.get(), a, b);
             node = next(node);

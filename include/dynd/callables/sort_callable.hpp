@@ -23,7 +23,7 @@ namespace nd {
       const ndt::type &src0_element_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
       size_t src0_element_data_size = src0_element_tp.get_data_size();
       cg.push_back([src0_element_data_size](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                                            const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                            const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                             const char *const *src_arrmeta) {
         ckb->emplace_back<sort_kernel>(
             kernreq, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,

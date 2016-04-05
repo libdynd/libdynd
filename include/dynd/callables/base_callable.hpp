@@ -52,12 +52,11 @@ namespace nd {
   protected:
     std::atomic_long m_use_count;
     ndt::type m_tp;
-    size_t m_frame_size;
 
   public:
     struct call_node {
       typedef void (*instantiate_type_t)(call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                                         const char *dst_arrmeta, intptr_t nsrc, const char *const *src_arrmeta);
+                                         const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta);
       typedef void (*destroy_type_t)(call_node *node);
 
       destroy_type_t destroy;
@@ -71,51 +70,20 @@ namespace nd {
 
       call_node(instantiate_type_t instantiate, destroy_type_t destroy, size_t data_size = sizeof(call_node))
           : destroy(destroy), instantiate(instantiate), data_size(data_size) {}
-
-      /*
-            void instantiate(call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                             intptr_t nsrc, const char *const *src_arrmeta) {
-              node->callee->instantiate(node, nullptr, ckb, ndt::type(), dst_arrmeta, nsrc, nullptr, src_arrmeta,
-         kernreq, 0,
-                                        nullptr, std::map<std::string, ndt::type>());
-            }
-      */
     };
 
-    bool m_abstract;
-
-    base_callable(const ndt::type &tp, size_t frame_size = sizeof(call_node))
-        : m_use_count(0), m_tp(tp), m_frame_size(frame_size), m_abstract(false) {}
+    base_callable(const ndt::type &tp) : m_use_count(0), m_tp(tp) {}
 
     // non-copyable
     base_callable(const base_callable &) = delete;
 
     virtual ~base_callable();
 
-    bool is_abstract() { return m_abstract; }
-
     const ndt::type &get_type() const { return m_tp; }
 
-    size_t get_frame_size() { return m_frame_size; }
-
-    virtual ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
-                              const ndt::type *src_tp, size_t nkwd, const array *kwds,
+    virtual ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp, size_t narg,
+                              const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                               const std::map<std::string, ndt::type> &tp_vars) = 0;
-
-    virtual void new_resolve(base_callable *DYND_UNUSED(parent), call_graph &DYND_UNUSED(g), ndt::type &dst_tp,
-                             intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
-                             const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars) {
-      if (dst_tp.is_symbolic()) {
-        dst_tp = ndt::substitute(dst_tp, tp_vars, true);
-      }
-    }
-
-    virtual void new_instantiate(call_node *DYND_UNUSED(frame), kernel_builder &DYND_UNUSED(ckb),
-                                 kernel_request_t DYND_UNUSED(kernreq), const char *DYND_UNUSED(dst_arrmeta),
-                                 const char *const *DYND_UNUSED(src_arrmeta), size_t DYND_UNUSED(nkwd),
-                                 const array *DYND_UNUSED(kwds)) {
-      throw std::runtime_error("calling base_callable::new_instantiate");
-    }
 
     virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
 
@@ -247,7 +215,6 @@ namespace nd {
     char *m_data;
     intptr_t m_capacity;
     intptr_t m_size;
-    intptr_t m_back_offset;
 
     // When the amount of data is small, this static data is used,
     // otherwise dynamic memory is allocated when it gets too big
@@ -258,7 +225,7 @@ namespace nd {
     DYND_API void destroy() {}
 
   public:
-    call_graph() : m_data(m_static_data), m_capacity(sizeof(m_static_data)), m_size(0), m_back_offset(0) {
+    call_graph() : m_data(m_static_data), m_capacity(sizeof(m_static_data)), m_size(0) {
       set(m_static_data, 0, sizeof(m_static_data));
     }
 
@@ -357,8 +324,6 @@ namespace nd {
     NodeType *emplace_back(ArgTypes &&... args) {
       static_assert(alignof(NodeType) <= 8, "nodes types require alignment to be at most 8 bytes");
 
-      m_back_offset = m_size;
-
       size_t offset = m_size;
       m_size += aligned_size(sizeof(NodeType));
       reserve(m_size);
@@ -373,7 +338,7 @@ namespace nd {
         node_type(T lambda)
             : call_node(
                   [](call_node *&node, kernel_builder * ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                     intptr_t nsrc, const char *const *src_arrmeta) {
+                     size_t nsrc, const char *const *src_arrmeta) {
                     reinterpret_cast<node_type *>(node)->lambda(node, ckb, kernreq, dst_arrmeta, nsrc, src_arrmeta);
                   },
                   [](call_node *node) { reinterpret_cast<node_type *>(node)->~node_type(); }, sizeof(node_type)),
@@ -385,13 +350,6 @@ namespace nd {
 
     void push_back(base_callable::call_node::instantiate_type_t instantiate) {
       this->emplace_back<base_callable::call_node>(instantiate);
-    }
-
-    base_callable::call_node *back() { return get_at<base_callable::call_node>(m_back_offset); }
-
-    template <typename CallFrameType>
-    CallFrameType *get_back() {
-      return get_at<CallFrameType>(m_back_offset);
     }
 
     /**
