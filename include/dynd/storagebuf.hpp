@@ -115,25 +115,24 @@ public:
     return (size + static_cast<size_t>(7)) & ~static_cast<size_t>(7);
   }
 
-    /**
-     * Creates the kernel, and increments ``m_size`` to the position after it.
-     */
-    template <typename KernelType, typename... ArgTypes>
-    void emplace_back(ArgTypes &&... args) {
-      /* Alignment requirement of the type. */
-      static_assert(alignof(KernelType) <= 8, "kernel types require alignment to be at most 8 bytes");
+  /**
+   * Creates the kernel, and increments ``m_size`` to the position after it.
+   */
+  template <typename KernelType, typename... ArgTypes>
+  void emplace_back(ArgTypes &&... args) {
+    /* Alignment requirement of the type. */
+    static_assert(alignof(KernelType) <= 8, "kernel types require alignment to be at most 8 bytes");
 
-      size_t offset = m_size;
-      m_size += aligned_size(sizeof(KernelType));
-      reserve(m_size);
-      KernelType::init(this->get_at<KernelType>(offset), std::forward<ArgTypes>(args)...);
-    }
+    size_t offset = m_size;
+    m_size += aligned_size(sizeof(KernelType));
+    reserve(m_size);
+    KernelType::init(this->get_at<KernelType>(offset), std::forward<ArgTypes>(args)...);
+  }
 
-    void emplace_back(size_t size) {
-      m_size += aligned_size(size);
-      reserve(m_size);
-    }
-
+  void emplace_back(size_t size) {
+    m_size += aligned_size(size);
+    reserve(m_size);
+  }
 };
 
 } // namespace dynd

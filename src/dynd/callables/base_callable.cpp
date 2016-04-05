@@ -21,7 +21,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   array dst = alloc(&dst_tp);
 
   // Generate and evaluate the ckernel
-  kernel_builder ckb;
+  kernel_builder ckb(cg.get());
   call_node *node = cg.get();
   node->instantiate(node, &ckb, kernel_request_single, dst->metadata(), nsrc, src_arrmeta);
   kernel_single_t fn = ckb.get()->get_function<kernel_single_t>();
@@ -40,7 +40,7 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   array dst = empty(dst_tp);
 
   // Generate and evaluate the ckernel
-  kernel_builder ckb;
+  kernel_builder ckb(cg.get());
   call_node *node = cg.get();
   node->instantiate(node, &ckb, kernel_request_call, dst->metadata(), nsrc, src_arrmeta);
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
@@ -56,7 +56,7 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, c
   resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Generate and evaluate the ckernel
-  kernel_builder ckb;
+  kernel_builder ckb(cg.get());
   call_node *node = cg.get();
   node->instantiate(node, &ckb, kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
   kernel_single_t fn = ckb.get()->get_function<kernel_single_t>();
@@ -70,7 +70,7 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, a
   resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Generate and evaluate the ckernel
-  kernel_builder ckb;
+  kernel_builder ckb(cg.get());
   call_node *node = cg.get();
   node->instantiate(node, &ckb, kernel_request_call, dst_arrmeta, nsrc, src_arrmeta);
   kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();

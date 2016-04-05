@@ -38,8 +38,8 @@ namespace nd {
         arrmeta_offsets[i] = bsd->get_arrmeta_offsets()[i];
       }
 
-      cg.push_back([field_count, arrmeta_offsets](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                                                  const char *dst_arrmeta, size_t nsrc,
+      cg.push_back([field_count, arrmeta_offsets](call_node *&DYND_UNUSED(node), kernel_builder * ckb,
+                                                  kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
                                                   const char *const *src_arrmeta) {
         intptr_t self_offset = ckb->size();
 
@@ -47,7 +47,6 @@ namespace nd {
                                                             reinterpret_cast<const uintptr_t *>(src_arrmeta[0]),
                                                             reinterpret_cast<const uintptr_t *>(src_arrmeta[1]));
         ckb->emplace_back(field_count * sizeof(size_t));
-        node = next(node);
 
         equal_kernel<tuple_id, tuple_id> *e = ckb->get_at<equal_kernel<tuple_id, tuple_id>>(self_offset);
         size_t *field_kernel_offsets;
@@ -61,7 +60,7 @@ namespace nd {
           field_kernel_offsets[i] = ckb->size() - self_offset;
           const char *field_arrmeta = src_arrmeta[0] + arrmeta_offsets[i];
           const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
-          node->instantiate(node, ckb, kernreq | kernel_request_data_only, dst_arrmeta, nsrc, child_src_arrmeta);
+          ckb->instantiate(kernreq | kernel_request_data_only, dst_arrmeta, nsrc, child_src_arrmeta);
         }
       });
 

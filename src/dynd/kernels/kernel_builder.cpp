@@ -9,8 +9,7 @@
 using namespace std;
 using namespace dynd;
 
-void nd::kernel_builder::destroy()
-{
+void nd::kernel_builder::destroy() {
   if (m_data != NULL) {
     // Destroy whatever was created
     reinterpret_cast<kernel_prefix *>(m_data)->destroy();

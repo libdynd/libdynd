@@ -26,14 +26,13 @@ namespace nd {
                         const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                         size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                         const std::map<std::string, ndt::type> &tp_vars) {
-        cg.push_back([val = m_val](call_node * &node, kernel_builder * ckb, kernel_request_t kernreq,
+        cg.push_back([val = m_val](call_node * &DYND_UNUSED(node), kernel_builder * ckb, kernel_request_t kernreq,
                                    const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
                                    const char *const *DYND_UNUSED(src_arrmeta)) {
           ckb->emplace_back<constant_kernel>(kernreq, const_cast<char *>(val.cdata()));
-          node = next(node);
 
           const char *child_src_metadata = val.get()->metadata();
-          node->instantiate(node, ckb, kernreq | kernel_request_data_only, dst_arrmeta, 1, &child_src_metadata);
+          ckb->instantiate(kernreq | kernel_request_data_only, dst_arrmeta, 1, &child_src_metadata);
         });
 
         nd::array error_mode = assign_error_default;

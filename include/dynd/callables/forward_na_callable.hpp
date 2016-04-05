@@ -24,22 +24,21 @@ namespace nd {
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
                       const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-      cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                      size_t nsrc, const char *const *src_arrmeta) {
+      cg.push_back([](call_node *&DYND_UNUSED(node), kernel_builder * ckb, kernel_request_t kernreq,
+                      const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta) {
         size_t self_offset = ckb->size();
         size_t child_offsets[2];
 
         ckb->emplace_back<forward_na_kernel<I>>(kernreq);
         ckb->emplace_back(2 * sizeof(size_t));
-        node = next(node);
 
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, src_arrmeta + I);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta + I);
 
         child_offsets[0] = ckb->size() - self_offset;
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
         child_offsets[1] = ckb->size() - self_offset;
-        node->instantiate(node, ckb, kernel_request_single, nullptr, 0, nullptr);
+        ckb->instantiate(kernel_request_single, nullptr, 0, nullptr);
 
         memcpy(ckb->get_at<forward_na_kernel<I>>(self_offset)->get_offsets(), child_offsets, 2 * sizeof(size_t));
       });
@@ -69,30 +68,29 @@ namespace nd {
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &DYND_UNUSED(dst_tp), size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-      cg.push_back([](call_node *&node, kernel_builder *ckb, kernel_request_t kernreq, const char *dst_arrmeta,
-                      size_t nsrc, const char *const *src_arrmeta) {
+      cg.push_back([](call_node *&DYND_UNUSED(node), kernel_builder * ckb, kernel_request_t kernreq,
+                      const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta) {
         intptr_t ckb_offset = ckb->size();
         intptr_t option_comp_offset = ckb_offset;
         ckb->emplace_back<option_comparison_kernel<true, true>>(kernreq);
-        node = next(node);
         ckb_offset = ckb->size();
 
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, &src_arrmeta[0]);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, &src_arrmeta[0]);
         ckb_offset = ckb->size();
         option_comparison_kernel<true, true> *self =
             ckb->get_at<option_comparison_kernel<true, true>>(option_comp_offset);
         self->is_na_rhs_offset = ckb_offset - option_comp_offset;
 
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, &src_arrmeta[1]);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, &src_arrmeta[1]);
         ckb_offset = ckb->size();
         self = ckb->get_at<option_comparison_kernel<true, true>>(option_comp_offset);
         self->comp_offset = ckb_offset - option_comp_offset;
-        node->instantiate(node, ckb, kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        ckb->instantiate(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
         ckb_offset = ckb->size();
         self = ckb->get_at<option_comparison_kernel<true, true>>(option_comp_offset);
         self->assign_na_offset = ckb_offset - option_comp_offset;
-        node->instantiate(node, ckb, kernel_request_single, nullptr, 0, nullptr);
+        ckb->instantiate(kernel_request_single, nullptr, 0, nullptr);
         ckb_offset = ckb->size();
       });
 

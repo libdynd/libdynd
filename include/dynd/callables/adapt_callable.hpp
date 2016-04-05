@@ -28,6 +28,7 @@ namespace nd {
         return dst_tp;
       }
 
+/*
       void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb,
                        const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -37,6 +38,7 @@ namespace nd {
         ckb->emplace_back<adapt_kernel>(kernreq, m_value_tp, m_forward);
         node = next(node);
       }
+*/
     };
 
   } // namespace dynd::nd::functional

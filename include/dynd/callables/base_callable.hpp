@@ -55,29 +55,6 @@ namespace nd {
     ndt::type m_tp;
 
   public:
-    struct call_node {
-      typedef void (*instantiate_type_t)(call_node *&node, kernel_builder *ckb, kernel_request_t kernreq,
-                                         const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta);
-      typedef void (*destroy_type_t)(call_node *node);
-
-      destroy_type_t destroy;
-      instantiate_type_t instantiate;
-      size_t data_size;
-
-      call_node() : instantiate(NULL) {}
-
-      call_node(instantiate_type_t instantiate, size_t data_size = sizeof(call_node))
-          : instantiate(instantiate), data_size(data_size) {}
-
-      call_node(instantiate_type_t instantiate, destroy_type_t destroy, size_t data_size = sizeof(call_node))
-          : destroy(destroy), instantiate(instantiate), data_size(data_size) {}
-
-      template <typename... ArgTypes>
-      static void init(call_node *self, ArgTypes &&... args) {
-        new (self) call_node(std::forward<ArgTypes>(args)...);
-      }
-    };
-
     base_callable(const ndt::type &tp) : m_use_count(0), m_tp(tp) {}
 
     // non-copyable
@@ -217,58 +194,6 @@ namespace nd {
   }
 
   inline long intrusive_ptr_use_count(base_callable *ptr) { return ptr->m_use_count; }
-
-  template <typename T>
-  struct node_type : base_callable::call_node {
-    T lambda;
-
-    node_type(T lambda)
-        : call_node(
-              [](call_node *&node, kernel_builder * ckb, kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
-                 const char *const *src_arrmeta) {
-                reinterpret_cast<node_type *>(node)->lambda(node, ckb, kernreq, dst_arrmeta, nsrc, src_arrmeta);
-              },
-              [](call_node *node) { reinterpret_cast<node_type *>(node)->~node_type(); }, sizeof(node_type)),
-          lambda(lambda) {}
-
-    template <typename... ArgTypes>
-    static void init(node_type *self, ArgTypes &&... args) {
-      new (self) node_type(std::forward<ArgTypes>(args)...);
-    }
-  };
-
-  class call_graph : public storagebuf<base_callable::call_node, call_graph> {
-  public:
-    typedef storagebuf<base_callable::call_node, call_graph> T;
-
-    DYND_API void destroy() {}
-
-    ~call_graph() {
-      intptr_t offset = 0;
-      while (offset != m_size) {
-        typename base_callable::call_node *node = get_at<typename base_callable::call_node>(offset);
-        offset += aligned_size(node->data_size);
-        node->destroy(node);
-      }
-    }
-
-    template <typename T>
-    void push_back(T node) {
-      this->emplace_back<node_type<T>>(node);
-    }
-
-    void push_back(base_callable::call_node::instantiate_type_t instantiate) {
-      this->emplace_back<base_callable::call_node>(instantiate) ;
-    }
-  };
-
-  typedef typename base_callable::call_node call_node;
-
-  inline call_node *next(call_node *node) {
-    return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) + aligned_size(node->data_size));
-    //    return reinterpret_cast<call_node *>(reinterpret_cast<char *>(node) +
-    //    aligned_size(node->callee->get_frame_size()));
-  }
 
 } // namespace dynd::nd
 } // namespace dynd
