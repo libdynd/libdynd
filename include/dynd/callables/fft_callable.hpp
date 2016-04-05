@@ -63,6 +63,7 @@ namespace nd {
       dst_tp = resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
     }
 
+/*
     void instantiate(call_node *&node, char *DYND_UNUSED(data), kernel_builder *ckb, const ndt::type &dst_tp,
                      const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                      const char *const *src_arrmeta, kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd),
@@ -120,8 +121,8 @@ namespace nd {
           kernreq, detail::fftw_plan_guru_dft(rank, dims.get(), howmany_rank, howmany_dims.get(),
                                               reinterpret_cast<fftw_src_type *>(src.data()),
                                               reinterpret_cast<fftw_dst_type *>(dst.data()), sign, flags));
-      node = next(node);
     }
+*/
   };
 
 #endif
