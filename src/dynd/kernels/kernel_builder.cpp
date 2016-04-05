@@ -14,7 +14,5 @@ void nd::kernel_builder::destroy()
   if (m_data != NULL) {
     // Destroy whatever was created
     reinterpret_cast<kernel_prefix *>(m_data)->destroy();
-    // Free the memory
-    free(m_data);
   }
 }
