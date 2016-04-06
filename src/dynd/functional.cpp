@@ -134,7 +134,7 @@ nd::callable nd::functional::elwise(const ndt::type &self_tp, const callable &ch
   }
 }
 
-nd::callable nd::functional::cyclic_elwise(const ndt::type &tp) {
+nd::callable nd::functional::elwise(const ndt::type &tp) {
   switch (tp.extended<ndt::callable_type>()->get_npos()) {
   case 0:
     return make_callable<elwise_dispatch_callable<0>>(tp, callable());

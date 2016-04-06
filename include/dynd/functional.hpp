@@ -109,7 +109,7 @@ namespace nd {
      */
     DYND_API callable elwise(const callable &child);
 
-    DYND_API callable cyclic_elwise(const ndt::type &tp);
+    DYND_API callable elwise(const ndt::type &tp);
 
     DYND_API callable elwise(const ndt::type &self_tp, const callable &child);
 
