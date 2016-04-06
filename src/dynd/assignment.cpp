@@ -86,12 +86,9 @@ nd::callable make_assign() {
   dispatcher.insert({{tuple_id, tuple_id}, nd::make_callable<nd::assign_callable<tuple_id, tuple_id>>()});
   dispatcher.insert({{struct_id, int32_id}, nd::make_callable<nd::assign_callable<struct_id, struct_id>>()});
   dispatcher.insert({{struct_id, struct_id}, nd::make_callable<nd::assign_callable<struct_id, struct_id>>()});
-  dispatcher.insert({{scalar_kind_id, dim_kind_id},
-                     nd::functional::elwise(nd::functional::call<nd::assign>(ndt::type("(Any) -> Any")))});
-  dispatcher.insert({{dim_kind_id, scalar_kind_id},
-                     nd::functional::elwise(nd::functional::call<nd::assign>(ndt::type("(Any) -> Any")))});
-  dispatcher.insert({{dim_kind_id, dim_kind_id},
-                     nd::functional::elwise(nd::functional::call<nd::assign>(ndt::type("(Any) -> Any")))});
+  dispatcher.insert({{scalar_kind_id, dim_kind_id}, nd::functional::elwise(ndt::type("(Any) -> Any"))});
+  dispatcher.insert({{dim_kind_id, scalar_kind_id}, nd::functional::elwise(ndt::type("(Any) -> Any"))});
+  dispatcher.insert({{dim_kind_id, dim_kind_id}, nd::functional::elwise(ndt::type("(Any) -> Any"))});
 
   return nd::make_callable<nd::assign_dispatch_callable>(self_tp, dispatcher);
 }

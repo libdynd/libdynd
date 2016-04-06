@@ -63,11 +63,6 @@ namespace nd {
           obj, mem_func, std::forward<S>(names)...);
     }
 
-    template <callable &Callable>
-    callable call(const ndt::type &tp) {
-      return make_callable<call_callable<Callable>>(tp);
-    }
-
     /**
      * Returns an callable which composes the two callables together.
      * The buffer used to connect them is made out of the provided ``buf_tp``.
@@ -114,6 +109,13 @@ namespace nd {
     DYND_API callable elwise(const ndt::type &self_tp, const callable &child);
 
     DYND_API ndt::type elwise_make_type(const ndt::callable_type *child_tp);
+
+    template <int... I>
+    callable forward_na(const ndt::type &ret_tp) {
+      ndt::type tp =
+          ndt::callable_type::make(ndt::make_type<ndt::option_type>(ret_tp), {ndt::type("Any"), ndt::type("Any")});
+      return make_callable<forward_na_callable<I...>>(tp, callable());
+    }
 
     template <int... I>
     callable forward_na(const callable &child) {
