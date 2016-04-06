@@ -24,8 +24,7 @@ namespace nd {
      * parameter, so can call it efficiently.
      */
     template <typename func_type, func_type func, typename... T>
-    callable apply(T &&... names)
-    {
+    callable apply(T &&... names) {
       return make_callable<apply_function_callable<func_type, func, arity_of<func_type>::value - sizeof...(T)>>(
           std::forward<T>(names)...);
     }
@@ -36,16 +35,15 @@ namespace nd {
      * object.
      */
     template <typename func_type, typename... T>
-    typename std::enable_if<!is_function_pointer<func_type>::value, callable>::type apply(func_type func, T &&... names)
-    {
+    typename std::enable_if<!is_function_pointer<func_type>::value, callable>::type apply(func_type func,
+                                                                                          T &&... names) {
       static_assert(all_char_string_params<T...>::value, "All the names must be strings");
       return make_callable<apply_callable_callable<func_type, arity_of<func_type>::value - sizeof...(T)>>(
           func, std::forward<T>(names)...);
     }
 
     template <typename func_type, typename... T>
-    callable apply(func_type *func, T &&... names)
-    {
+    callable apply(func_type *func, T &&... names) {
       return make_callable<apply_callable_callable<func_type *, arity_of<func_type>::value - sizeof...(T)>>(
           func, std::forward<T>(names)...);
     }
@@ -55,21 +53,18 @@ namespace nd {
      * constructs and calls the function object on demand.
      */
     template <typename func_type, typename... KwdTypes, typename... T>
-    callable apply(T &&... names)
-    {
+    callable apply(T &&... names) {
       return make_callable<construct_then_apply_callable_callable<func_type, KwdTypes...>>(std::forward<T>(names)...);
     }
 
     template <typename T, typename R, typename... A, typename... S>
-    callable apply(T *obj, R (T::*mem_func)(A...), S &&... names)
-    {
+    callable apply(T *obj, R (T::*mem_func)(A...), S &&... names) {
       return make_callable<apply_member_function_callable<T *, R (T::*)(A...), sizeof...(A) - sizeof...(S)>>(
           obj, mem_func, std::forward<S>(names)...);
     }
 
     template <callable &Callable>
-    callable call(const ndt::type &tp)
-    {
+    callable call(const ndt::type &tp) {
       return make_callable<call_callable<Callable>>(tp);
     }
 
@@ -114,13 +109,14 @@ namespace nd {
      */
     DYND_API callable elwise(const callable &child);
 
+    DYND_API callable cyclic_elwise(const ndt::type &tp);
+
     DYND_API callable elwise(const ndt::type &self_tp, const callable &child);
 
     DYND_API ndt::type elwise_make_type(const ndt::callable_type *child_tp);
 
     template <int... I>
-    callable forward_na(const callable &child)
-    {
+    callable forward_na(const callable &child) {
       ndt::type tp = ndt::callable_type::make(ndt::make_type<ndt::option_type>(child.get_ret_type()),
                                               {ndt::type("Any"), ndt::type("Any")});
       return make_callable<forward_na_callable<I...>>(tp, child);

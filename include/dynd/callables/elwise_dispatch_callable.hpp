@@ -21,19 +21,28 @@ namespace nd {
     class elwise_dispatch_callable : public base_callable {
     public:
       struct data_type {
-        callable &child;
+        base_callable *child;
       };
 
       callable m_child;
 
       elwise_dispatch_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
-      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
-                        const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
+      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
+                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
-        const ndt::callable_type *child_tp = m_child.get_type();
+        data_type child_data;
+        if (data == nullptr) {
+          if (m_child.is_null()) {
+            child_data.child = caller;
+          } else {
+            child_data.child = m_child.get();
+          }
+          data = reinterpret_cast<char *>(&child_data);
+        }
 
-        data_type child_data{m_child};
+        const ndt::callable_type *child_tp =
+            reinterpret_cast<data_type *>(data)->child->get_type().template extended<ndt::callable_type>();
 
         bool dst_variadic = dst_tp.is_variadic();
         bool all_same = true;
@@ -48,9 +57,10 @@ namespace nd {
         }
 
         if (all_same) {
-          return m_child->resolve(this, nullptr, cg,
-                                  dst_tp.is_symbolic() ? m_child.get_type()->get_return_type() : dst_tp, nsrc, src_tp,
-                                  nkwd, kwds, tp_vars);
+          return reinterpret_cast<data_type *>(data)->child->resolve(
+              this, nullptr, cg,
+              dst_tp.is_symbolic() ? reinterpret_cast<data_type *>(data)->child->get_return_type() : dst_tp, nsrc,
+              src_tp, nkwd, kwds, tp_vars);
         }
 
         // Do a pass through the src types to classify them
@@ -82,13 +92,13 @@ namespace nd {
 
         if ((dst_variadic || dst_tp.get_id() == fixed_dim_id) && src_all_strided) {
           static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, N>>();
-          return f->resolve(this, reinterpret_cast<char *>(&child_data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else if (((dst_variadic) || dst_tp.get_id() == var_dim_id) && (var_broadcast || src_all_strided)) {
           static callable f = make_callable<elwise_callable<var_dim_id, fixed_dim_id, N>>();
-          return f->resolve(this, reinterpret_cast<char *>(&child_data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else if (src_all_strided_or_var) {
           static callable f = make_callable<elwise_callable<fixed_dim_id, var_dim_id, N>>();
-          return f->resolve(this, reinterpret_cast<char *>(&child_data), cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         }
 
         std::stringstream ss;

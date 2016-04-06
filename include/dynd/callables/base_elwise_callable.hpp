@@ -19,7 +19,7 @@ namespace nd {
     class base_elwise_callable : public base_callable {
     protected:
       struct codata_type {
-        callable &child;
+        base_callable *child;
       };
 
       struct data_type {
@@ -40,9 +40,9 @@ namespace nd {
                         const std::map<std::string, ndt::type> &tp_vars) {
         data_type data;
 
-        callable &child = reinterpret_cast<codata_type *>(codata)->child;
-        const ndt::type &child_ret_tp = child.get_ret_type();
-        const std::vector<ndt::type> &child_arg_tp = child.get_arg_types();
+        base_callable *child = reinterpret_cast<codata_type *>(codata)->child;
+        const ndt::type &child_ret_tp = child->get_return_type();
+        const std::vector<ndt::type> &child_arg_tp = child->get_argument_types();
 
         std::array<intptr_t, N> arg_size;
         std::array<intptr_t, N> arg_ndim;
@@ -107,11 +107,11 @@ namespace nd {
 
         ndt::type resolved_ret_tp;
         if (callback) {
-          resolved_ret_tp = with_return_type(res_size, caller->resolve(this, nullptr, cg, res_element_tp, N,
+          resolved_ret_tp = with_return_type(res_size, caller->resolve(this, codata, cg, res_element_tp, N,
                                                                        arg_element_tp.data(), nkwd, kwds, tp_vars));
         } else {
           resolved_ret_tp = with_return_type(
-              res_size, child->resolve(this, nullptr, cg, res_variadic ? child.get_ret_type() : res_element_tp, N,
+              res_size, child->resolve(this, nullptr, cg, res_variadic ? child->get_return_type() : res_element_tp, N,
                                        arg_element_tp.data(), nkwd, kwds, tp_vars));
         }
 

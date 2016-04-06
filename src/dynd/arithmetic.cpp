@@ -26,23 +26,21 @@ typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int
                          float64_id> binop_real_ids;
 
 template <nd::callable &Callable, template <type_id_t> class CallableType, typename TypeIDSequence>
-nd::callable make_unary_arithmetic()
-{
+nd::callable make_unary_arithmetic() {
   dispatcher<nd::callable> dispatcher = nd::callable::new_make_all<CallableType, TypeIDSequence>();
 
   const nd::callable self = nd::functional::call<Callable>(ndt::type("(Any) -> Any"));
 
   for (type_id_t i0 : i2a<dim_ids>()) {
     const ndt::type child_tp = ndt::callable_type::make(self.get_type()->get_return_type(), ndt::type(i0));
-    dispatcher.insert({{i0}, nd::functional::elwise(child_tp, self)});
+    dispatcher.insert({{i0}, nd::functional::cyclic_elwise(child_tp)});
   }
 
   return nd::make_callable<nd::arithmetic_dispatch_callable<1>>(self.get_array_type(), dispatcher);
 }
 
 template <nd::callable &Callable, template <type_id_t, type_id_t> class KernelType, typename TypeIDSequence>
-nd::callable make_binary_arithmetic()
-{
+nd::callable make_binary_arithmetic() {
   nd::callable self = nd::functional::call<Callable>(ndt::type("(Any, Any) -> Any"));
 
   auto dispatcher = nd::callable::new_make_all<KernelType, TypeIDSequence, TypeIDSequence>();
@@ -50,16 +48,15 @@ nd::callable make_binary_arithmetic()
       {{{option_id, any_kind_id}, nd::make_callable<nd::option_arithmetic_callable<Callable, true, false>>()},
        {{any_kind_id, option_id}, nd::make_callable<nd::option_arithmetic_callable<Callable, false, true>>()},
        {{option_id, option_id}, nd::make_callable<nd::option_arithmetic_callable<Callable, true, true>>()},
-       {{dim_kind_id, scalar_kind_id}, nd::functional::elwise(self)},
-       {{scalar_kind_id, dim_kind_id}, nd::functional::elwise(self)},
-       {{dim_kind_id, dim_kind_id}, nd::functional::elwise(self)}});
+       {{dim_kind_id, scalar_kind_id}, nd::functional::cyclic_elwise(ndt::type("(Any, Any) -> Any"))},
+       {{scalar_kind_id, dim_kind_id}, nd::functional::cyclic_elwise(ndt::type("(Any, Any) -> Any"))},
+       {{dim_kind_id, dim_kind_id}, nd::functional::cyclic_elwise(ndt::type("(Any, Any) -> Any"))}});
 
   return nd::make_callable<nd::arithmetic_dispatch_callable<2>>(ndt::type("(Any, Any) -> Any"), dispatcher);
 }
 
 template <nd::callable &Callable, template <type_id_t, type_id_t> class KernelType, typename TypeIDSequence>
-nd::callable make_compound_arithmetic()
-{
+nd::callable make_compound_arithmetic() {
   auto dispatcher = nd::callable::new_make_all<KernelType, TypeIDSequence, TypeIDSequence>();
 
   nd::callable self = nd::functional::call<Callable>(ndt::type("(Any, Any) -> Any"));
