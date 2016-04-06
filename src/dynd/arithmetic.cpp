@@ -4,10 +4,27 @@
 //
 
 #include <dynd/arithmetic.hpp>
+#include <dynd/callables/add_callable.hpp>
 #include <dynd/callables/arithmetic_dispatch_callable.hpp>
+#include <dynd/callables/bitwise_and_callable.hpp>
+#include <dynd/callables/bitwise_not_callable.hpp>
+#include <dynd/callables/bitwise_or_callable.hpp>
+#include <dynd/callables/bitwise_xor_callable.hpp>
 #include <dynd/callables/compound_add_callable.hpp>
 #include <dynd/callables/compound_arithmetic_dispatch_callable.hpp>
 #include <dynd/callables/compound_div_callable.hpp>
+#include <dynd/callables/divide_callable.hpp>
+#include <dynd/callables/left_shift_callable.hpp>
+#include <dynd/callables/logical_and_callable.hpp>
+#include <dynd/callables/logical_not_callable.hpp>
+#include <dynd/callables/logical_or_callable.hpp>
+#include <dynd/callables/logical_xor_callable.hpp>
+#include <dynd/callables/mod_callable.hpp>
+#include <dynd/callables/minus_callable.hpp>
+#include <dynd/callables/multiply_callable.hpp>
+#include <dynd/callables/plus_callable.hpp>
+#include <dynd/callables/right_shift_callable.hpp>
+#include <dynd/callables/subtract_callable.hpp>
 #include <dynd/callables/sum_callable.hpp>
 #include <dynd/callables/sum_dispatch_callable.hpp>
 #include <dynd/functional.hpp>
