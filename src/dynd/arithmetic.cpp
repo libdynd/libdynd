@@ -5,11 +5,11 @@
 
 #include <dynd/arithmetic.hpp>
 #include <dynd/functional.hpp>
+#include <dynd/kernels/arithmetic.hpp>
 #include <dynd/callables/arithmetic_dispatch_callable.hpp>
 #include <dynd/callables/compound_arithmetic_dispatch_callable.hpp>
 #include <dynd/callables/compound_add_callable.hpp>
 #include <dynd/callables/compound_div_callable.hpp>
-#include <dynd/callables/option_arithmetic_callable.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
 #include <dynd/callables/sum_dispatch_callable.hpp>
 #include <dynd/callables/sum_callable.hpp>
@@ -42,9 +42,9 @@ nd::callable make_binary_arithmetic() {
   const ndt::type &tp = ndt::type("(Any, Any) -> Any");
 
   auto dispatcher = nd::callable::new_make_all<KernelType, TypeIDSequence, TypeIDSequence>();
-  dispatcher.insert({{{option_id, any_kind_id}, nd::make_callable<nd::option_arithmetic_callable<true, false>>()},
-                     {{any_kind_id, option_id}, nd::make_callable<nd::option_arithmetic_callable<false, true>>()},
-                     {{option_id, option_id}, nd::make_callable<nd::option_arithmetic_callable<true, true>>()},
+  dispatcher.insert({{{option_id, any_kind_id}, nd::functional::forward_na<0>(ndt::type("Any"))},
+                     {{any_kind_id, option_id}, nd::functional::forward_na<1>(ndt::type("Any"))},
+                     {{option_id, option_id}, nd::functional::forward_na<0, 1>(ndt::type("Any"))},
                      {{dim_kind_id, scalar_kind_id}, nd::functional::elwise(tp)},
                      {{scalar_kind_id, dim_kind_id}, nd::functional::elwise(tp)},
                      {{dim_kind_id, dim_kind_id}, nd::functional::elwise(tp)}});
