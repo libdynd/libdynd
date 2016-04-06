@@ -2,15 +2,12 @@
 
 #include <dynd/kernels/apply.hpp>
 #include <dynd/callables/apply_function_callable.hpp>
-#include <dynd/option.hpp>
-#include <dynd/types/option_type.hpp>
 
 namespace dynd {
 
 namespace detail {
   template <typename>
-  struct sfinae_true : std::true_type {
-  };
+  struct sfinae_true : std::true_type {};
 
 #define DYND_CHECK_UNARY_OP(OP, NAME)                                                                                  \
   template <typename T>                                                                                                \
@@ -20,8 +17,7 @@ namespace detail {
   static auto NAME##_isdef_test(long)->std::false_type;                                                                \
                                                                                                                        \
   template <type_id_t Src0TypeID>                                                                                      \
-  struct isdef_##NAME : decltype(NAME##_isdef_test<typename type_of<Src0TypeID>::type>(0)) {                           \
-  };
+  struct isdef_##NAME : decltype(NAME##_isdef_test<typename type_of<Src0TypeID>::type>(0)) {};
 
   DYND_CHECK_UNARY_OP(+, plus)
   DYND_ALLOW_UNSIGNED_UNARY_MINUS
@@ -42,8 +38,7 @@ namespace detail {
                                                                                                                        \
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
   struct isdef_##NAME                                                                                                  \
-      : decltype(NAME##_isdef_test<typename type_of<Src0TypeID>::type, typename type_of<Src1TypeID>::type>(0)) {       \
-  };
+      : decltype(NAME##_isdef_test<typename type_of<Src0TypeID>::type, typename type_of<Src1TypeID>::type>(0)) {};
 
   DYND_CHECK_BINARY_OP(+, add)
   DYND_CHECK_BINARY_OP(-, subtract)
@@ -78,9 +73,7 @@ namespace nd {
     public:                                                                                                            \
       NAME##_callable()                                                                                                \
           : functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID>::f),                       \
-                                                &detail::inline_##NAME<Src0TypeID>::f>()                               \
-      {                                                                                                                \
-      }                                                                                                                \
+                                                &detail::inline_##NAME<Src0TypeID>::f>() {}                            \
     };                                                                                                                 \
   } /* namespace detail */                                                                                             \
   template <type_id_t Src0TypeID>                                                                                      \
@@ -109,9 +102,7 @@ namespace nd {
     public:                                                                                                            \
       NAME##_callable()                                                                                                \
           : functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),           \
-                                                &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f>()                   \
-      {                                                                                                                \
-      }                                                                                                                \
+                                                &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f>() {}                \
     };                                                                                                                 \
   } /* namespace detail */                                                                                             \
                                                                                                                        \
@@ -150,9 +141,7 @@ namespace nd {
     public:
       logical_xor_callable()
           : functional::apply_function_callable<decltype(&detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f),
-                                                &detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f>()
-      {
-      }
+                                                &detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f>() {}
     };
   } /* namespace detail */
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
@@ -160,8 +149,7 @@ namespace nd {
 
   namespace detail {
     template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-    constexpr bool needs_zero_check()
-    {
+    constexpr bool needs_zero_check() {
       using Base0 = base_id_of<Src0TypeID>;
       using Base1 = base_id_of<Src1TypeID>;
       return ((Base0::value == bool_kind_id) || (Base0::value == int_kind_id) || (Base0::value == uint_kind_id)) &&
@@ -176,8 +164,7 @@ namespace nd {
                                                                                                                        \
     template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                              \
     struct inline_##NAME##_base<Src0TypeID, Src1TypeID, true> {                                                        \
-      static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b)                        \
-      {                                                                                                                \
+      static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) {                      \
         if (b == 0) {                                                                                                  \
           throw dynd::zero_division_error("Integer division or modulo by zero.");                                      \
         }                                                                                                              \
@@ -201,9 +188,7 @@ namespace nd {
     public:                                                                                                            \
       NAME##_callable()                                                                                                \
           : functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),           \
-                                                &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f>()                   \
-      {                                                                                                                \
-      }                                                                                                                \
+                                                &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f>() {}                \
     };                                                                                                                 \
   } /* namespace detail */                                                                                             \
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
@@ -213,70 +198,6 @@ namespace nd {
   DYND_DEF_BINARY_OP_CALLABLE_ZEROCHECK_INT(%, mod)
 
 #undef DYND_DEF_BINARY_OP_CALLABLE_ZEROCHECK_INT
-
-  template <bool Src0IsOption, bool Src1IsOption>
-  struct option_arithmetic_kernel;
-
-  template <>
-  struct option_arithmetic_kernel<true, false> : base_strided_kernel<option_arithmetic_kernel<true, false>, 2> {
-    intptr_t arith_offset;
-    intptr_t assign_na_offset;
-
-    void single(char *dst, char *const *src)
-    {
-      auto is_na = this->get_child();
-      bool1 child_dst;
-      is_na->single(reinterpret_cast<char *>(&child_dst), &src[0]);
-      if (!child_dst) {
-        this->get_child(arith_offset)->single(dst, src);
-      }
-      else {
-        this->get_child(assign_na_offset)->single(dst, nullptr);
-      }
-    }
-  };
-
-  template <>
-  struct option_arithmetic_kernel<false, true> : base_strided_kernel<option_arithmetic_kernel<false, true>, 2> {
-    intptr_t arith_offset;
-    intptr_t assign_na_offset;
-
-    void single(char *dst, char *const *src)
-    {
-      auto is_na = this->get_child();
-      bool1 child_dst;
-      is_na->single(reinterpret_cast<char *>(&child_dst), &src[1]);
-      if (!child_dst) {
-        this->get_child(arith_offset)->single(dst, src);
-      }
-      else {
-        this->get_child(assign_na_offset)->single(dst, nullptr);
-      }
-    }
-  };
-
-  template <>
-  struct option_arithmetic_kernel<true, true> : base_strided_kernel<option_arithmetic_kernel<true, true>, 2> {
-    intptr_t is_na_rhs_offset;
-    intptr_t arith_offset;
-    intptr_t assign_na_offset;
-
-    void single(char *dst, char *const *src)
-    {
-      auto is_na_lhs = this->get_child();
-      auto is_na_rhs = this->get_child(is_na_rhs_offset);
-      bool child_dst_lhs;
-      bool child_dst_rhs;
-      is_na_lhs->single(reinterpret_cast<char *>(&child_dst_lhs), &src[0]);
-      is_na_rhs->single(reinterpret_cast<char *>(&child_dst_rhs), &src[1]);
-      if (!child_dst_lhs && !child_dst_rhs) {
-        this->get_child(arith_offset)->single(dst, src);
-      }
-      else {
-        this->get_child(assign_na_offset)->single(dst, nullptr);
-      }
-    }
-  };
 
 } // namespace dynd::nd
 

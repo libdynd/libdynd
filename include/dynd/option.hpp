@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/callable.hpp>
+#include <dynd/types/option_type.hpp>
 
 namespace dynd {
 namespace nd {

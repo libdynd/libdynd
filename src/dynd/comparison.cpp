@@ -19,7 +19,7 @@ using namespace dynd;
 
 namespace {
 
-template <nd::callable &Func, template <type_id_t...> class KernelType>
+template <template <type_id_t...> class KernelType>
 dispatcher<nd::callable> make_comparison_children() {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, uint8_id, uint16_id, uint32_id, uint64_id,
                            float32_id, float64_id> numeric_ids;
@@ -37,7 +37,7 @@ dispatcher<nd::callable> make_comparison_children() {
     dispatcher.insert({{option_id, i}, nd::functional::forward_na<0>(ndt::type("Any"))});
     dispatcher.insert({{i, option_id}, nd::functional::forward_na<1>(ndt::type("Any"))});
   }
-  dispatcher.insert({{option_id, option_id}, nd::make_callable<nd::option_comparison_callable<true, true>>()});
+  dispatcher.insert({{option_id, option_id}, nd::functional::forward_na<0, 1>(ndt::type("Any"))});
 
   for (type_id_t dim_tp_id : i2a<dim_ids>()) {
     dispatcher.insert({{dim_tp_id, option_id}, nd::functional::elwise(ndt::type("(Any, Any) -> Any"))});
@@ -57,18 +57,18 @@ dispatcher<nd::callable> make_comparison_children() {
   return dispatcher;
 }
 
-template <nd::callable &Callable, template <type_id_t...> class CallableType>
+template <template <type_id_t...> class CallableType>
 nd::callable make_comparison_callable() {
   return nd::make_callable<nd::comparison_dispatch_callable>(ndt::type("(Any, Any) -> Any"),
-                                                             make_comparison_children<Callable, CallableType>());
+                                                             make_comparison_children<CallableType>());
 }
 
-nd::callable make_less() { return make_comparison_callable<nd::less, nd::less_callable>(); }
+nd::callable make_less() { return make_comparison_callable<nd::less_callable>(); }
 
-nd::callable make_less_equal() { return make_comparison_callable<nd::less_equal, nd::less_equal_callable>(); }
+nd::callable make_less_equal() { return make_comparison_callable<nd::less_equal_callable>(); }
 
 nd::callable make_equal() {
-  dispatcher<nd::callable> dispatcher = make_comparison_children<nd::equal, nd::equal_callable>();
+  dispatcher<nd::callable> dispatcher = make_comparison_children<nd::equal_callable>();
   dispatcher.insert({{complex_float32_id, complex_float32_id},
                      nd::make_callable<nd::equal_callable<complex_float32_id, complex_float32_id>>()});
   dispatcher.insert({{complex_float64_id, complex_float64_id},
@@ -82,7 +82,7 @@ nd::callable make_equal() {
 }
 
 nd::callable make_not_equal() {
-  dispatcher<nd::callable> dispatcher = make_comparison_children<nd::not_equal, nd::not_equal_callable>();
+  dispatcher<nd::callable> dispatcher = make_comparison_children<nd::not_equal_callable>();
   dispatcher.insert({{complex_float32_id, complex_float32_id},
                      nd::make_callable<nd::not_equal_callable<complex_float32_id, complex_float32_id>>()});
   dispatcher.insert({{complex_float64_id, complex_float64_id},
@@ -95,9 +95,9 @@ nd::callable make_not_equal() {
   return nd::make_callable<nd::comparison_dispatch_callable>(ndt::type("(Any, Any) -> Any"), dispatcher);
 }
 
-nd::callable make_greater_equal() { return make_comparison_callable<nd::greater_equal, nd::greater_equal_callable>(); }
+nd::callable make_greater_equal() { return make_comparison_callable<nd::greater_equal_callable>(); }
 
-nd::callable make_greater() { return make_comparison_callable<nd::greater, nd::greater_callable>(); }
+nd::callable make_greater() { return make_comparison_callable<nd::greater_callable>(); }
 
 nd::callable make_total_order() {
   return nd::make_callable<nd::comparison_dispatch_callable>(
