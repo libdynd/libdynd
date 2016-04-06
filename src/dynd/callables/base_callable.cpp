@@ -11,9 +11,9 @@ using namespace dynd;
 
 nd::base_callable::~base_callable() {}
 
-nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                                  const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
-                                  const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+nd::array nd::base_callable::call(ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp,
+                                  const char *const *src_arrmeta, char *const *src_data, size_t nkwd, const array *kwds,
+                                  const std::map<std::string, ndt::type> &tp_vars) {
   call_graph cg;
   dst_tp = resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
@@ -30,9 +30,9 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   return dst;
 }
 
-nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                                  const char *const *src_arrmeta, const array *src_data, intptr_t nkwd,
-                                  const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+nd::array nd::base_callable::call(ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp,
+                                  const char *const *src_arrmeta, const array *src_data, size_t nkwd, const array *kwds,
+                                  const std::map<std::string, ndt::type> &tp_vars) {
   call_graph cg;
   dst_tp = resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
@@ -49,9 +49,9 @@ nd::array nd::base_callable::call(ndt::type &dst_tp, intptr_t nsrc, const ndt::t
   return dst;
 }
 
-void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
+void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, size_t nsrc,
                              const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data,
-                             intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
+                             size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
   call_graph cg;
   resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
@@ -63,8 +63,8 @@ void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, c
   fn(kb.get(), dst_data, src_data);
 }
 
-void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, array *dst, intptr_t nsrc,
-                             const ndt::type *src_tp, const char *const *src_arrmeta, const array *src, intptr_t nkwd,
+void nd::base_callable::call(const ndt::type &dst_tp, const char *dst_arrmeta, array *dst, size_t nsrc,
+                             const ndt::type *src_tp, const char *const *src_arrmeta, const array *src, size_t nkwd,
                              const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
   call_graph cg;
   resolve(nullptr, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
