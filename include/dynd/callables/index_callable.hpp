@@ -38,30 +38,17 @@ namespace nd {
       return src_tp[0];
     }
 
-    char *data_init(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                    const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd), const array *kwds,
-                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      return reinterpret_cast<char *>(new data_type(kwds[0]));
-    }
-
-    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                          intptr_t DYND_UNUSED(nkwd), const array *kwds,
-                          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      dst_tp = src_tp[0];
-      new (data) data_type(kwds[0]);
-    }
-
-/*
-    void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
-                     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                     const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                     kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      ckb->emplace_back<index_kernel<Arg0ID>>(kernreq);
-      node = next(node);
-      delete reinterpret_cast<data_type *>(data);
-    }
-*/
+    /*
+        void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &DYND_UNUSED(dst_tp),
+                         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                         const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                         kernel_request_t kernreq, intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
+          ckb->emplace_back<index_kernel<Arg0ID>>(kernreq);
+          node = next(node);
+          delete reinterpret_cast<data_type *>(data);
+        }
+    */
   };
 
   template <>
@@ -82,45 +69,31 @@ namespace nd {
 
     index_callable() : base_callable(ndt::type("(Any, i: Any) -> Any")) {}
 
-    char *data_init(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                    const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd), const array *kwds,
-                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      return reinterpret_cast<char *>(new data_type(kwds[0]));
-    }
-
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                       const std::map<std::string, ndt::type> &tp_vars) {
       ndt::type child_src_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
       return index->resolve(this, nullptr, cg, dst_tp, nsrc, &child_src_tp, nkwd, kwds, tp_vars);
     }
+    /*
+        void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
+                         const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const
+       *src_arrmeta,
+                         kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
+                         const std::map<std::string, ndt::type> &tp_vars) {
+          ckb->emplace_back<index_kernel<fixed_dim_id>>(
+              kernreq, *reinterpret_cast<data_type *>(data)->indices,
+              reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(src_arrmeta[0])->stride);
+          node = next(node);
 
-    void resolve_dst_type(char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-                          const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-      reinterpret_cast<data_type *>(data)->next();
+          reinterpret_cast<data_type *>(data)->next();
 
-      ndt::type child_src_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
-      index->resolve_dst_type(data, dst_tp, nsrc, &child_src_tp, nkwd, kwds, tp_vars);
-    }
-
-/*
-    void instantiate(call_node *&node, char *data, kernel_builder *ckb, const ndt::type &dst_tp,
-                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                     kernel_request_t kernreq, intptr_t nkwd, const nd::array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars) {
-      ckb->emplace_back<index_kernel<fixed_dim_id>>(
-          kernreq, *reinterpret_cast<data_type *>(data)->indices,
-          reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(src_arrmeta[0])->stride);
-      node = next(node);
-
-      reinterpret_cast<data_type *>(data)->next();
-
-      ndt::type child_src_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
-      const char *child_src_arrmeta = src_arrmeta[0] + sizeof(ndt::fixed_dim_type::metadata_type);
-      index->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, &child_src_tp, &child_src_arrmeta,
-                         kernel_request_single, nkwd, kwds, tp_vars);
-    }
-*/
+          ndt::type child_src_tp = src_tp[0].extended<ndt::fixed_dim_type>()->get_element_type();
+          const char *child_src_arrmeta = src_arrmeta[0] + sizeof(ndt::fixed_dim_type::metadata_type);
+          index->instantiate(node, data, ckb, dst_tp, dst_arrmeta, nsrc, &child_src_tp, &child_src_arrmeta,
+                             kernel_request_single, nkwd, kwds, tp_vars);
+        }
+    */
   };
 
 } // namespace dynd::nd

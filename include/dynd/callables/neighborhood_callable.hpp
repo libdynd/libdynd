@@ -78,6 +78,7 @@ namespace nd {
         return dst_tp;
       }
 
+/*
       char *data_init(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       intptr_t DYND_UNUSED(nkwd), const array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -91,7 +92,9 @@ namespace nd {
 
         return data;
       }
+*/
 
+/*
       void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                             const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
@@ -101,6 +104,7 @@ namespace nd {
         src_tp[0].extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
         dst_tp = ndt::substitute_shape(dst_tp, ndim, shape.get());
       }
+*/
 
 /*
       void instantiate(call_node *&DYND_UNUSED(node), char *data, kernel_builder *ckb, const ndt::type &dst_tp,

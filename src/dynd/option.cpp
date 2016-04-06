@@ -59,12 +59,8 @@ void nd::old_assign_na(const ndt::type &option_tp, const char *arrmeta, char *da
   if (value_tp.is_builtin()) {
     assign_na_builtin(value_tp.get_id(), data);
   } else {
-    nd::kernel_builder ckb;
-    call_node *node = nullptr;
-    assign_na->instantiate(node, NULL, &ckb, option_tp, arrmeta, 0, NULL, NULL, kernel_request_single, 0, NULL,
-                           std::map<std::string, ndt::type>());
-    nd::kernel_prefix *ckp = ckb.get();
-    ckp->get_function<kernel_single_t>()(ckp, data, NULL);
+    assign_na->call(option_tp, arrmeta, data, 0, nullptr, nullptr, nullptr, 0, nullptr,
+                    std::map<std::string, ndt::type>());
   }
 }
 
@@ -74,14 +70,10 @@ bool nd::old_is_avail(const ndt::type &option_tp, const char *arrmeta, const cha
   if (value_tp.is_builtin()) {
     return is_avail_builtin(value_tp.get_id(), data);
   } else {
-    nd::kernel_builder ckb;
     ndt::type src_tp[1] = {option_tp};
-    call_node *node = nullptr;
-    is_na->instantiate(node, NULL, &ckb, ndt::make_type<bool1>(), NULL, 1, src_tp, &arrmeta, kernel_request_single,
-                       0, NULL, std::map<std::string, ndt::type>());
-    nd::kernel_prefix *ckp = ckb.get();
     char result;
-    ckp->get_function<kernel_single_t>()(ckp, &result, const_cast<char **>(&data));
+    is_na->call(ndt::make_type<bool1>(), nullptr, &result, 1, src_tp, &arrmeta, const_cast<char **>(&data), 0, nullptr,
+                std::map<std::string, ndt::type>());
     return result == 0;
   }
 }

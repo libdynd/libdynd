@@ -25,8 +25,8 @@ namespace nd {
     }
 
     template <typename ClosureType>
-    void emplace_back(ClosureType node) {
-      storagebuf<call_node, call_graph>::emplace_back<closure_call<ClosureType>>(node);
+    void emplace_back(ClosureType closure) {
+      storagebuf<call_node, call_graph>::emplace_back<closure_call<ClosureType>>(closure);
     }
   };
 

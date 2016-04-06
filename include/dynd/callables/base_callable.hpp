@@ -76,45 +76,6 @@ namespace nd {
       return m_tp.extended<ndt::callable_type>()->get_pos_types();
     }
 
-    virtual ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp, size_t narg,
-                              const ndt::type *arg_tp, size_t nkwd, const array *kwds,
-                              const std::map<std::string, ndt::type> &tp_vars) = 0;
-
-    virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
-
-    /**
-     * Resolves any missing keyword arguments for this callable based on
-     * the types of the positional arguments and the available keywords arguments.
-     *
-     * \param self    The callable.
-     * \param self_tp The function prototype of the callable.
-     * \param nsrc    The number of positional arguments.
-     * \param src_tp  An array of the source types.
-     * \param kwds    An array of the.
-     */
-    virtual char *data_init(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                            const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
-                            const array *DYND_UNUSED(kwds),
-                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      return NULL;
-    }
-
-    /**
-     * Resolves the destination type for this callable based on the types
-     * of the source parameters.
-     *
-     * \param self  The callable.
-     * \param af_tp  The function prototype of the callable.
-     * \param dst_tp  To be filled with the destination type.
-     * \param nsrc  The number of source parameters.
-     * \param src_tp  An array of the source types.
-     */
-    virtual void resolve_dst_type(char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                                  const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
-                                  const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars) {
-      dst_tp = ndt::substitute(dst_tp, tp_vars, true);
-    }
-
     /**
      * Function prototype for instantiating a kernel from an
      * callable. To use this function, the
@@ -124,35 +85,21 @@ namespace nd {
      * data types of the kernel require arrmeta, such as for 'strided'
      * or 'var' dimension types, the arrmeta must be provided as well.
      *
-     * \param self  The callable.
-     * \param self_tp  The function prototype of the callable.
-     * \param ckb  A ckernel_builder instance where the kernel is placed.
-     * \param ckb_offset  The offset into the output ckernel_builder `ckb`
-     *                    where the kernel should be placed.
+     * \param caller  The calling callable.
      * \param dst_tp  The destination type of the ckernel to generate. This may be
      *                different from the one in the function prototype, but must
      *                match its pattern.
-     * \param dst_arrmeta  The destination arrmeta.
      * \param nsrc  The number of source arrays.
      * \param src_tp  An array of the source types of the ckernel to generate. These
      *                may be different from the ones in the function prototype, but
      *                must match the patterns.
-     * \param src_arrmeta  An array of dynd arrmeta pointers,
-     *                     corresponding to the source types.
-     * \param kernreq  What kind of C function prototype the resulting ckernel
-     *                 should follow. Defined by the enum with kernel_request_*
-     *                 values.
      * \param kwds  A struct array of named auxiliary arguments.
      */
-    virtual void instantiate(call_node *&DYND_UNUSED(node), char *DYND_UNUSED(data), kernel_builder *DYND_UNUSED(ckb),
-                             const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                             intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                             const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
-                             intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      //      std::cout << typeid(*this).name() << std::endl;
-      throw std::runtime_error("calling unimplemented instantiate");
-    }
+    virtual ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp, size_t narg,
+                              const ndt::type *arg_tp, size_t nkwd, const array *kwds,
+                              const std::map<std::string, ndt::type> &tp_vars) = 0;
+
+    virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
 
     virtual void overload(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
                           const ndt::type *DYND_UNUSED(arg_tp), const callable &DYND_UNUSED(value)) {
@@ -164,20 +111,18 @@ namespace nd {
       throw std::runtime_error("callable is not specializable");
     }
 
-    array call(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-               char *const *src_data, intptr_t nkwd, const array *kwds,
-               const std::map<std::string, ndt::type> &tp_vars);
+    array call(ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+               char *const *src_data, size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
-    array call(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-               const array *src_data, intptr_t nkwd, const array *kwds,
-               const std::map<std::string, ndt::type> &tp_vars);
+    array call(ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+               const array *src_data, size_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
-    void call(const ndt::type &dst_tp, const char *dst_arrmeta, array *dst_data, intptr_t nsrc, const ndt::type *src_tp,
-              const char *const *src_arrmeta, const array *src_data, intptr_t nkwd, const array *kwds,
+    void call(const ndt::type &dst_tp, const char *dst_arrmeta, array *dst_data, size_t nsrc, const ndt::type *src_tp,
+              const char *const *src_arrmeta, const array *src_data, size_t nkwd, const array *kwds,
               const std::map<std::string, ndt::type> &tp_vars);
 
-    void call(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc, const ndt::type *src_tp,
-              const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd, const array *kwds,
+    void call(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, size_t nsrc, const ndt::type *src_tp,
+              const char *const *src_arrmeta, char *const *src_data, size_t nkwd, const array *kwds,
               const std::map<std::string, ndt::type> &tp_vars);
 
     friend void intrusive_ptr_retain(base_callable *ptr);
