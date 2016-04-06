@@ -4,15 +4,15 @@
 //
 
 #include <dynd/arithmetic.hpp>
+#include <dynd/callables/arithmetic_dispatch_callable.hpp>
+#include <dynd/callables/compound_add_callable.hpp>
+#include <dynd/callables/compound_arithmetic_dispatch_callable.hpp>
+#include <dynd/callables/compound_div_callable.hpp>
+#include <dynd/callables/sum_callable.hpp>
+#include <dynd/callables/sum_dispatch_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/kernels/arithmetic.hpp>
-#include <dynd/callables/arithmetic_dispatch_callable.hpp>
-#include <dynd/callables/compound_arithmetic_dispatch_callable.hpp>
-#include <dynd/callables/compound_add_callable.hpp>
-#include <dynd/callables/compound_div_callable.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
-#include <dynd/callables/sum_dispatch_callable.hpp>
-#include <dynd/callables/sum_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -20,14 +20,16 @@ using namespace dynd;
 namespace {
 
 typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int16_id, int32_id, int64_id, float32_id,
-                         float64_id, complex_float32_id, complex_float64_id> binop_ids;
+                         float64_id, complex_float32_id, complex_float64_id>
+    binop_ids;
 
 typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int16_id, int32_id, int64_id, float32_id,
-                         float64_id> binop_real_ids;
+                         float64_id>
+    binop_real_ids;
 
-template <template <type_id_t> class CallableType, typename TypeIDSequence>
+template <template <type_id_t> class CallableType, template <type_id_t> class Condition, typename TypeIDSequence>
 nd::callable make_unary_arithmetic() {
-  dispatcher<nd::callable> dispatcher = nd::callable::new_make_all<CallableType, TypeIDSequence>();
+  dispatcher<nd::callable> dispatcher = nd::callable::make_all_if<CallableType, Condition, TypeIDSequence>();
 
   const ndt::type &tp = ndt::type("(Any) -> Any");
   for (type_id_t i0 : i2a<dim_ids>()) {
@@ -37,11 +39,12 @@ nd::callable make_unary_arithmetic() {
   return nd::make_callable<nd::arithmetic_dispatch_callable<1>>(tp, dispatcher);
 }
 
-template <template <type_id_t, type_id_t> class KernelType, typename TypeIDSequence>
+template <template <type_id_t, type_id_t> class KernelType, template <type_id_t, type_id_t> class Condition,
+          typename TypeIDSequence>
 nd::callable make_binary_arithmetic() {
   const ndt::type &tp = ndt::type("(Any, Any) -> Any");
 
-  auto dispatcher = nd::callable::new_make_all<KernelType, TypeIDSequence, TypeIDSequence>();
+  auto dispatcher = nd::callable::make_all_if<KernelType, Condition, TypeIDSequence, TypeIDSequence>();
   dispatcher.insert({{{option_id, any_kind_id}, nd::functional::forward_na<0>(ndt::type("Any"))},
                      {{any_kind_id, option_id}, nd::functional::forward_na<1>(ndt::type("Any"))},
                      {{option_id, option_id}, nd::functional::forward_na<0, 1>(ndt::type("Any"))},
@@ -75,17 +78,24 @@ nd::callable make_compound_arithmetic() {
 
 } // unnamed namespace
 
-DYND_API nd::callable nd::plus = make_unary_arithmetic<nd::plus_callable, arithmetic_ids>();
-DYND_API nd::callable nd::minus = make_unary_arithmetic<nd::minus_callable, arithmetic_ids>();
-DYND_API nd::callable nd::logical_not = make_unary_arithmetic<nd::logical_not_callable, arithmetic_ids>();
-DYND_API nd::callable nd::bitwise_not = make_unary_arithmetic<nd::bitwise_not_callable, integral_ids>();
+DYND_API nd::callable nd::plus = make_unary_arithmetic<nd::plus_callable, dynd::detail::isdef_plus, arithmetic_ids>();
+DYND_API nd::callable nd::minus =
+    make_unary_arithmetic<nd::minus_callable, dynd::detail::isdef_minus, arithmetic_ids>();
+DYND_API nd::callable nd::logical_not =
+    make_unary_arithmetic<nd::logical_not_callable, dynd::detail::isdef_logical_not, arithmetic_ids>();
+DYND_API nd::callable nd::bitwise_not =
+    make_unary_arithmetic<nd::bitwise_not_callable, dynd::detail::isdef_bitwise_not, integral_ids>();
 
-DYND_API nd::callable nd::add = make_binary_arithmetic<nd::add_callable, binop_ids>();
-DYND_API nd::callable nd::subtract = make_binary_arithmetic<nd::subtract_callable, binop_ids>();
-DYND_API nd::callable nd::multiply = make_binary_arithmetic<nd::multiply_callable, binop_ids>();
-DYND_API nd::callable nd::divide = make_binary_arithmetic<nd::divide_callable, binop_ids>();
-DYND_API nd::callable nd::logical_and = make_binary_arithmetic<nd::logical_and_callable, binop_real_ids>();
-DYND_API nd::callable nd::logical_or = make_binary_arithmetic<nd::logical_or_callable, binop_real_ids>();
+DYND_API nd::callable nd::add = make_binary_arithmetic<nd::add_callable, dynd::detail::isdef_add, binop_ids>();
+DYND_API nd::callable nd::subtract =
+    make_binary_arithmetic<nd::subtract_callable, dynd::detail::isdef_subtract, binop_ids>();
+DYND_API nd::callable nd::multiply =
+    make_binary_arithmetic<nd::multiply_callable, dynd::detail::isdef_multiply, binop_ids>();
+DYND_API nd::callable nd::divide = make_binary_arithmetic<nd::divide_callable, dynd::detail::isdef_divide, binop_ids>();
+DYND_API nd::callable nd::logical_and =
+    make_binary_arithmetic<nd::logical_and_callable, dynd::detail::isdef_logical_and, binop_real_ids>();
+DYND_API nd::callable nd::logical_or =
+    make_binary_arithmetic<nd::logical_or_callable, dynd::detail::isdef_logical_or, binop_real_ids>();
 
 DYND_API nd::callable nd::compound_add = make_compound_arithmetic<nd::compound_add_callable, binop_ids>();
 DYND_API nd::callable nd::compound_div = make_compound_arithmetic<nd::compound_div_callable, binop_ids>();
