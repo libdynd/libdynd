@@ -24,10 +24,9 @@ nd::callable make_assign_na() {
   dynd::dispatcher<nd::callable> dim_dispatcher;
 
   auto t = ndt::type("() -> ?Any");
-  nd::callable self = nd::functional::call<nd::assign_na>(t);
 
   for (auto tp_id : {fixed_dim_id, var_dim_id}) {
-    dim_dispatcher.insert({{tp_id}, nd::functional::elwise(self)});
+    dim_dispatcher.insert({{tp_id}, nd::functional::elwise(t)});
   }
 
   return nd::make_callable<nd::assign_na_dispatch_callable>(t, dispatcher, dim_dispatcher);
@@ -40,10 +39,8 @@ nd::callable make_is_na() {
   dispatcher<nd::callable> dispatcher = nd::callable::new_make_all<nd::is_na_callable, type_ids>();
   dynd::dispatcher<nd::callable> dim_dispatcher;
 
-  nd::callable self = nd::functional::call<nd::is_na>(ndt::type("(Any) -> Any"));
-
   for (auto tp_id : {fixed_dim_id, var_dim_id}) {
-    dim_dispatcher.insert({{tp_id}, nd::functional::elwise(self)});
+    dim_dispatcher.insert({{tp_id}, nd::functional::elwise(ndt::type("(Any) -> Any"))});
   }
 
   return nd::make_callable<nd::is_na_dispatch_callable>(ndt::type("(Any) -> Any"), dispatcher, dim_dispatcher);
