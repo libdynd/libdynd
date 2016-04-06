@@ -19,19 +19,12 @@ using namespace dynd;
 
 namespace {
 
-template <nd::callable &Callable>
-nd::callable call(const ndt::type &tp) {
-  return nd::make_callable<nd::functional::call_callable<Callable>>(tp);
-}
-
 template <nd::callable &Func, template <type_id_t...> class KernelType>
 dispatcher<nd::callable> make_comparison_children() {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, uint8_id, uint16_id, uint32_id, uint64_id,
                            float32_id, float64_id> numeric_ids;
 
   dispatcher<nd::callable> dispatcher = nd::callable::new_make_all<KernelType, numeric_ids, numeric_ids>();
-
-  nd::callable self = call<Func>(ndt::type("(Any, Any) -> Any"));
 
   for (type_id_t i0 : i2a<numeric_ids>()) {
     for (type_id_t i1 : i2a<dim_ids>()) {
@@ -41,8 +34,8 @@ dispatcher<nd::callable> make_comparison_children() {
   }
 
   for (type_id_t i : i2a<numeric_ids>()) {
-    dispatcher.insert({{option_id, i}, nd::functional::forward_na<0>(self)});
-    dispatcher.insert({{i, option_id}, nd::functional::forward_na<1>(self)});
+    dispatcher.insert({{option_id, i}, nd::functional::forward_na<0>(ndt::type("Any"))});
+    dispatcher.insert({{i, option_id}, nd::functional::forward_na<1>(ndt::type("Any"))});
   }
   dispatcher.insert({{option_id, option_id}, nd::make_callable<nd::option_comparison_callable<true, true>>()});
 

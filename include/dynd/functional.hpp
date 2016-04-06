@@ -8,7 +8,6 @@
 #include <dynd/callable.hpp>
 #include <dynd/callables/apply_function_callable.hpp>
 #include <dynd/callables/apply_member_function_callable.hpp>
-#include <dynd/callables/call_callable.hpp>
 #include <dynd/callables/construct_then_apply_callable_callable.hpp>
 #include <dynd/callables/forward_na_callable.hpp>
 
