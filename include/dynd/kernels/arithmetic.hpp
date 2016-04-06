@@ -1,7 +1,6 @@
 #pragma once
 
-#include <dynd/kernels/apply.hpp>
-#include <dynd/callables/apply_function_callable.hpp>
+#include <dynd/config.hpp>
 
 namespace dynd {
 
@@ -65,19 +64,7 @@ namespace nd {
     struct inline_##NAME {                                                                                             \
       static auto f(typename type_of<Src0TypeID>::type a) { return OP a; }                                             \
     };                                                                                                                 \
-                                                                                                                       \
-    template <type_id_t Src0TypeID, bool Defined = dynd::detail::isdef_##NAME<Src0TypeID>::value>                      \
-    class NAME##_callable                                                                                              \
-        : public functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID>::f),                  \
-                                                     &detail::inline_##NAME<Src0TypeID>::f> {                          \
-    public:                                                                                                            \
-      NAME##_callable()                                                                                                \
-          : functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID>::f),                       \
-                                                &detail::inline_##NAME<Src0TypeID>::f>() {}                            \
-    };                                                                                                                 \
-  } /* namespace detail */                                                                                             \
-  template <type_id_t Src0TypeID>                                                                                      \
-  using NAME##_callable = detail::NAME##_callable<Src0TypeID>;
+  } /* namespace detail */
 
   DYND_DEF_UNARY_OP_CALLABLE(+, plus)
   DYND_ALLOW_UNSIGNED_UNARY_MINUS
@@ -94,20 +81,7 @@ namespace nd {
     struct inline_##NAME {                                                                                             \
       static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return a OP b; }     \
     };                                                                                                                 \
-    template <type_id_t Src0TypeID, type_id_t Src1TypeID,                                                              \
-              bool Defined = dynd::detail::isdef_##NAME<Src0TypeID, Src1TypeID>::value>                                \
-    class NAME##_callable                                                                                              \
-        : public functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),      \
-                                                     &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f> {              \
-    public:                                                                                                            \
-      NAME##_callable()                                                                                                \
-          : functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),           \
-                                                &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f>() {}                \
-    };                                                                                                                 \
-  } /* namespace detail */                                                                                             \
-                                                                                                                       \
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
-  using NAME##_callable = detail::NAME##_callable<Src0TypeID, Src1TypeID>;
+  } /* namespace detail */
 
   DYND_DEF_BINARY_OP_CALLABLE(+, add)
   DYND_DEF_BINARY_OP_CALLABLE(-, subtract)
@@ -132,20 +106,7 @@ namespace nd {
     // a boolean value, so we can just check if the logical not operator is defined.
     // If that is no longer true at some point, we can give logical_xor its own
     // expression SFINAE based test for existence.
-    template <type_id_t Src0TypeID, type_id_t Src1TypeID, bool Defined =
-                                                              dynd::detail::isdef_logical_not<Src0TypeID>::value
-                                                                  &&dynd::detail::isdef_logical_not<Src1TypeID>::value>
-    class logical_xor_callable
-        : public functional::apply_function_callable<decltype(&detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f),
-                                                     &detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f> {
-    public:
-      logical_xor_callable()
-          : functional::apply_function_callable<decltype(&detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f),
-                                                &detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f>() {}
-    };
   } /* namespace detail */
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  using logical_xor_callable = detail::logical_xor_callable<Src0TypeID, Src1TypeID>;
 
   namespace detail {
     template <type_id_t Src0TypeID, type_id_t Src1TypeID>
@@ -180,19 +141,7 @@ namespace nd {
     template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                              \
     using inline_##NAME = inline_##NAME##_base<Src0TypeID, Src1TypeID, needs_zero_check<Src0TypeID, Src1TypeID>()>;    \
                                                                                                                        \
-    template <type_id_t Src0TypeID, type_id_t Src1TypeID,                                                              \
-              bool Defined = dynd::detail::isdef_##NAME<Src0TypeID, Src1TypeID>::value>                                \
-    class NAME##_callable                                                                                              \
-        : public functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),      \
-                                                     &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f> {              \
-    public:                                                                                                            \
-      NAME##_callable()                                                                                                \
-          : functional::apply_function_callable<decltype(&detail::inline_##NAME<Src0TypeID, Src1TypeID>::f),           \
-                                                &detail::inline_##NAME<Src0TypeID, Src1TypeID>::f>() {}                \
-    };                                                                                                                 \
-  } /* namespace detail */                                                                                             \
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
-  using NAME##_callable = detail::NAME##_callable<Src0TypeID, Src1TypeID>;
+  } /* namespace detail */
 
   DYND_DEF_BINARY_OP_CALLABLE_ZEROCHECK_INT(/, divide)
   DYND_DEF_BINARY_OP_CALLABLE_ZEROCHECK_INT(%, mod)
