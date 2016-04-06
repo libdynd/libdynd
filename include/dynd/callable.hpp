@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include <memory>
 #include <map>
+#include <memory>
 
+#include <dynd/callables/apply_callable_callable.hpp>
 #include <dynd/dispatcher.hpp>
 #include <dynd/type_registry.hpp>
-#include <dynd/callables/apply_callable_callable.hpp>
 
 namespace dynd {
 namespace nd {
@@ -178,6 +178,25 @@ namespace nd {
 
       return dispatcher<callable>(callables.begin(), callables.end());
     }
+
+    template <template <type_id_t> class KernelType, template <type_id_t> class Condition, typename I0, typename... A>
+    static dispatcher<callable> make_all_if(A &&... a) {
+      std::vector<std::pair<std::vector<type_id_t>, callable>> callables;
+      for_each<I0>(detail::make_all_if<KernelType, Condition>(), callables, std::forward<A>(a)...);
+
+      return dispatcher<callable>(callables.begin(), callables.end());
+    }
+
+    template <template <type_id_t, type_id_t, type_id_t...> class KernelType,
+              template <type_id_t, type_id_t, type_id_t...> class Condition, typename I0, typename I1, typename... I,
+              typename... A>
+    static dispatcher<callable> make_all_if(A &&... a) {
+      std::vector<std::pair<std::vector<type_id_t>, callable>> callables;
+      for_each<typename outer<I0, I1, I...>::type>(detail::make_all_if<KernelType, Condition>(), callables,
+                                                   std::forward<A>(a)...);
+
+      return dispatcher<callable>(callables.begin(), callables.end());
+    }
   };
 
   template <typename CallableType, typename... ArgTypes>
@@ -236,6 +255,31 @@ namespace nd {
 
         callables.push_back(
             {{v}, make_callable<typename apply<KernelType, TypeIDSequence>::type>(std::forward<A>(a)...)});
+      }
+    };
+
+    template <template <type_id_t...> class KernelType, template <type_id_t...> class Condition>
+    struct make_all_if {
+      template <type_id_t TypeID, typename... A>
+      void on_each(std::vector<std::pair<std::vector<type_id_t>, callable>> &callables, A &&... a) const {
+        if (Condition<TypeID>::value) {
+          callables.push_back({{TypeID}, make_callable<KernelType<TypeID>>(std::forward<A>(a)...)});
+        }
+      }
+
+      template <typename TypeIDSequence, typename... A>
+      void on_each(std::vector<std::pair<std::vector<type_id_t>, callable>> &callables, A &&... a) const {
+        if (apply<Condition, TypeIDSequence>::type::value) {
+          auto arr = i2a<TypeIDSequence>();
+          std::vector<type_id_t> v;
+          for (size_t i = 0; i < arr.size(); ++i) {
+
+            v.push_back(arr[i]);
+          }
+
+          callables.push_back(
+              {{v}, make_callable<typename apply<KernelType, TypeIDSequence>::type>(std::forward<A>(a)...)});
+        }
       }
     };
 
