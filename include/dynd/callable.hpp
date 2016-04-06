@@ -53,6 +53,9 @@ namespace nd {
     template <template <type_id_t...> class KernelType>
     struct new_make_all;
 
+    template <template <type_id_t...> class KernelType, template <type_id_t...> class Condition>
+    struct make_all_if;
+
   } // namespace dynd::nd::detail
 
   typedef array callable_arg_t;
