@@ -1,5 +1,7 @@
 sudo: false
+
 dist: trusty
+
 addons:
   apt:
     sources:
@@ -12,9 +14,11 @@ addons:
     - valgrind
     - libfftw3-dev
     - s3cmd
+
 cache:
   directories:
   - $HOME/libdynd/build
+
 matrix:
   include:
   - compiler: gcc
@@ -148,6 +152,7 @@ language: cpp
 before_install:
 before_script:
   - cd ..
+  - pwd
   - mkdir build
   - pushd build
   - cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME ..
