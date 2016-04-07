@@ -11,7 +11,7 @@ addons:
     - cmake
     - valgrind
     - libfftw3-dev
-    - s3cmd ls -tp | grep -v '/$' | tail -n +2 | xargs -I {} rm -- {}
+    - s3cmd
 cache:
   directories:
   - $HOME/libdynd/build
@@ -58,7 +58,7 @@ matrix:
       bucket: libdynd
       local_dir: deploy
     after_deploy:
-      - s3cmd --help
+      - s3cmd ls -tp | grep -v '/$' | tail -n +1 | xargs -I {} rm -- {}
   - compiler: gcc
     env: CONDA=true
     before_install:
