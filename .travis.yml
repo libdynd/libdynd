@@ -41,7 +41,6 @@ matrix:
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
-    - echo $TRAVIS_COMMIT
     - make -j4 install || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
     before_deploy:
@@ -154,14 +153,15 @@ matrix:
 language: cpp
 before_install:
 before_script:
+- echo $TRAVIS_COMMIT
 - mkdir deploy
 - cd deploy
-- mkdir libdynd-${TRAVIS-COMMIT}
+- mkdir libdynd-$TRAVIS_COMMIT
 - ls
 - cd ..
 - mkdir build
 - pushd build
-- cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-${TRAVIS-COMMIT} ..
+- cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-$TRAVIS_COMMIT ..
 script:
 - make -j4 || exit 1
 - ./tests/test_libdynd
