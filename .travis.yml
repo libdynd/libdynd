@@ -175,7 +175,7 @@ before_deploy:
   - cd ../../..
   - mkdir deploy
   - cd deploy
-  - tar -xjf /home/travis/miniconda2/conda-bld/linux-64/libdynd-0.7.2-4576.tar.bz2
+  - tar -cJf libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME /home/travis/miniconda2/envs/_build/lib/libdynd.so
   - ls
   - pwd
 
