@@ -53,7 +53,11 @@ matrix:
     - make -j4 || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
     deploy:
-      - echo "success"
+      skip_cleanup: true
+      provider: s3
+      access_key_id: "YOUR AWS ACCESS KEY"
+      secret_access_key: "YOUR AWS SECRET KEY"
+      bucket: "S3 Bucket"
   - compiler: gcc
     env: CONDA=true
     before_install:
