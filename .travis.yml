@@ -4,7 +4,7 @@ addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
-    - kalakris-cmake
+    - kalakris-cmake 
     packages:
     - gcc-4.9
     - g++-4.9
