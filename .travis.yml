@@ -162,8 +162,9 @@ after_script:
 before_deploy:
   - "echo 'ready?'"
   - cd ../../..
+  - pwd
+  - echo $TRAVIS_BUILD_DIR
   - mkdir deploy
-  - cd deploy
   - ls /home/travis/miniconda2
   - ls /home/travis/miniconda2/lib
   - ls /home/travis/miniconda2/bin  
@@ -172,8 +173,9 @@ before_deploy:
   - ls /home/travis/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER
   - ls /home/travis/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER/lib
   - ls /home/travis/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER/bin
-  - tar -cJf libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME.tar.xz -C /home/travis/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER lib/libdynd.*
-  - ls
+  - pushd /home/travis/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER
+  - tar -cJf $TRAVIS_BUILD_DIR/deploy/libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME.tar.xz lib/libdynd.*
+  - popd
   - pwd
   - cd ..
 
