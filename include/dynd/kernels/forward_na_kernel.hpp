@@ -16,7 +16,7 @@ namespace nd {
     size_t assign_na_offset;
 
     void single(char *res, char *const *args) {
-      for (intptr_t i : {I...}) {
+      for (intptr_t i : std::array<intptr_t, sizeof...(I)>({I...})) {
         bool1 is_na;
         this->get_child(is_na_offset[i])->single(reinterpret_cast<char *>(&is_na), args + i);
 
