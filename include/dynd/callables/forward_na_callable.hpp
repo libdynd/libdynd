@@ -30,7 +30,7 @@ namespace nd {
 
         kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
 
-        for (intptr_t i : {I...}) {
+        for (intptr_t i : std::array<index_t, sizeof...(I)>({I...})) {
           size_t is_na_offset = kb.size() - self_offset;
           kb(kernel_request_single, nullptr, 1, src_arrmeta + i);
           kb.get_at<forward_na_kernel<I...>>(self_offset)->is_na_offset[i] = is_na_offset;
@@ -45,7 +45,7 @@ namespace nd {
       for (intptr_t i = 0; i < 2; ++i) {
         src_value_tp[i] = src_tp[i];
       }
-      for (intptr_t i : {I...}) {
+      for (intptr_t i : std::array<index_t, sizeof...(I)>({I...})) {
         src_value_tp[i] = src_value_tp[i].extended<ndt::option_type>()->get_value_type();
       }
 
@@ -60,7 +60,7 @@ namespace nd {
           child->resolve(this, nullptr, cg, dst_tp.is_symbolic() ? child->get_return_type() : dst_tp, 2, src_value_tp,
                          nkwd, kwds, tp_vars);
 
-      for (index_t i : {I...}) {
+      for (index_t i : std::array<index_t, sizeof...(I)>({I...})) {
         is_na->resolve(this, nullptr, cg, ndt::make_type<bool>(), 1, src_tp + i, 0, nullptr, tp_vars);
       }
 
