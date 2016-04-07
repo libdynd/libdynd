@@ -122,6 +122,7 @@ matrix:
     - python -c "import dynd; dynd.test(verbosity=2, exit=True)"
     after_script:
     - cd .
+    
   - compiler: gcc
     env: DYND_FFTW=ON DYND_COVERAGE=ON
     addons:
@@ -171,7 +172,10 @@ after_script:
 
 before_deploy:
   - "echo 'ready?'"
-  - cd ../..
+  - cd ../../..
+  - mkdir deploy
+  - cd deploy
+  - tar -xjf /home/travis/miniconda2/conda-bld/linux-64/libdynd-0.7.2-4576.tar.bz2
   - ls
   - pwd
 
