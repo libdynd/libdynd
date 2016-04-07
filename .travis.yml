@@ -159,12 +159,12 @@ before_script:
   - export SHORT_COMMIT="$(git rev-parse --short $TRAVIS_COMMIT)"
   - mkdir deploy
   - cd deploy
-  - mkdir libdynd-$SHORT_COMMIT
+  - mkdir libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME
   - ls
   - cd ..
   - mkdir build
   - pushd build
-  - cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-$SHORT_COMMIT ..
+  - cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME ..
 script:
 - make -j4 || exit 1
 - ./tests/test_libdynd
