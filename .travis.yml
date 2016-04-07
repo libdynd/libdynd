@@ -167,7 +167,6 @@ after_script:
 
 before_deploy:
   - "echo 'ready?'"
-  - cd ../../..
   - pwd
   - echo $TRAVIS_BUILD_DIR
   - mkdir deploy
