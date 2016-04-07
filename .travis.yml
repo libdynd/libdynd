@@ -39,21 +39,21 @@ matrix:
     - cmake -DDYND_BUILD_DOCS=ON -DDYND_FFTW=${DYND_FFTW} ..
     - make -j3 || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
-    after_success:
-    - cd ~
-    - git clone https://github.com/libdynd/libdynd.github.io
-    - cd libdynd.github.io
-    - git config user.name "izaid"
-    - git add .
-    - git commit -m "Automated documentation build"
-    - git push origin master
-    deploy:
-      - echo "success"
+#    after_success:
+#   - cd ~
+#    - git clone https://github.com/libdynd/libdynd.github.io
+#    - cd libdynd.github.io
+#    - git config user.name "izaid"
+#    - git add .
+#    - git commit -m "Automated documentation build"
+#    - git push origin master
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
     - make -j4 || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
+    deploy:
+      - echo "success"
   - compiler: gcc
     env: CONDA=true
     before_install:
