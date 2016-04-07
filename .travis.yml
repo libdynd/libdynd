@@ -156,12 +156,12 @@ before_install:
 before_script:
 - mkdir deploy
 - cd deploy
-- mkdir libdynd-$TRAVIS-COMMIT
+- mkdir libdynd-${TRAVIS-COMMIT}
 - ls
 - cd ..
 - mkdir build
 - pushd build
-- cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-$TRAVIS-COMMIT ..
+- cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-${TRAVIS-COMMIT} ..
 script:
 - make -j4 || exit 1
 - ./tests/test_libdynd
