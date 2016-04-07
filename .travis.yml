@@ -4,7 +4,7 @@ addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
-    - kalakris-cmake 
+    - kalakris-cmake
     packages:
     - gcc-4.9
     - g++-4.9
@@ -14,7 +14,6 @@ addons:
 cache:
   directories:
   - $HOME/libdynd/build
-
 matrix:
   include:
   - compiler: gcc
@@ -39,14 +38,6 @@ matrix:
     - cmake -DDYND_BUILD_DOCS=ON -DDYND_FFTW=${DYND_FFTW} ..
     - make -j3 || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
-#    after_success:
-#   - cd ~
-#    - git clone https://github.com/libdynd/libdynd.github.io
-#    - cd libdynd.github.io
-#    - git config user.name "izaid"
-#    - git add .
-#    - git commit -m "Automated documentation build"
-#    - git push origin master
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
@@ -59,7 +50,8 @@ matrix:
     - bash Miniconda-latest-Linux-x86_64.sh -b
     - export PATH=$HOME/miniconda2/bin:$PATH
     - conda install --yes conda-build jinja2
-    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+      conda install --yes anaconda-client; fi
     before_script:
     - export CC="gcc-4.9"
     - export CXX="g++-4.9"
@@ -77,7 +69,8 @@ matrix:
     - bash Miniconda-latest-MacOSX-x86_64.sh -b
     - export PATH=$HOME/miniconda2/bin:$PATH
     - conda install --yes conda-build jinja2
-    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+      conda install --yes anaconda-client; fi
     script:
     - conda build conda.recipe
   - language: python
@@ -110,13 +103,11 @@ matrix:
     - mv libdynd dynd-python/libraries/libdynd
     - cd dynd-python
     script:
-#    - python -c "import numpy; print numpy.__version__"
     - python setup.py install
     - cd ..
     - python -c "import dynd; dynd.test(verbosity=2, exit=True)"
     after_script:
     - cd .
-
   - compiler: gcc
     env: DYND_FFTW=ON DYND_COVERAGE=ON
     addons:
@@ -128,8 +119,6 @@ matrix:
         - gcc-5
         - g++-5
         - cmake
-        # Install lcov for its Perl dependencies, even though we'll
-        # be locally installing a newer version below
         - lcov
         - libfftw3-dev
     before_install:
@@ -148,12 +137,8 @@ matrix:
     - make -j2 || exit 1
     - make coverage
     after_script:
-    # Must upload coverage results from the root of the project so
-    # paths are translated correctly.
     - popd
     - coveralls-lcov build/coverage.info.cleaned
-
-
 language: cpp
 before_install:
 before_script:
@@ -165,15 +150,16 @@ script:
 - ./tests/test_libdynd
 after_script:
 - popd
-- if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false} == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
-
+- if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false}
+  == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output
+  conda.recipe) --user dynd --channel dev; fi
 deploy:
   skip_cleanup: true
   provider: s3
-  access_key_id: "YOUR AWS ACCESS KEY"
-  secret_access_key: "YOUR AWS SECRET KEY"
-  bucket: "S3 Bucket"
-
+  access_key_id: AKIAJEH6A3L3S4BYA5VA
+  secret_access_key:
+    secure: EmyhQ2+CtsIumNEskhjZOC/ZWYYOoPC1bQLijwuFXU8WwyEpoaB1CqLRHdiJGzVSRRr3SW3p6p8z5wxsLTBZtKQrGnP0Z4J9L7bZ5HsGRSshlqT0Zm1/AYSCjbFgNFKe1kIjaCamhk2/cNt1WKgx/cZ/tdxMKjhc8reavYBfCnU=
+  bucket: S3 Bucket
 notifications:
   email: false
   flowdock: b08b3ba4fb86fa48121e90b5f67ccb75
@@ -181,5 +167,5 @@ notifications:
   on_failure: always
 env:
   global:
-    - secure: KJZ5DWK3iAmthDnPaXz/S8aQFa6zVlD+CWCPXM+vgkiJQG5qgJfn5t2yy5n3mVyS0qZFd/LrFJ6ZqjUr/BKFDqGPBxESYIAOOgN+cXIEWxkeGFEHxOEK9QBS6aq6GBhyQlteWcqozYsG93oSVh+Xiv9tHl4m1mHXOHk2llQXy4g=
-    - secure: Qt/St9copUdPo4kej+9DtLDCzIAkDo/PDP0Ac244yF+8dRac3KhskRVVURNcCMonUeuqS5Dm5qcQl9b/L4P9Gkpn1aDKPHMp7pgTZHZLJ7VIHgFrSWo545mqV0fcYN+GLpaSqd8NwdUi5+1aHGWTtrw4BoIO4DSgV4eiIVEdRbA=
+  - secure: KJZ5DWK3iAmthDnPaXz/S8aQFa6zVlD+CWCPXM+vgkiJQG5qgJfn5t2yy5n3mVyS0qZFd/LrFJ6ZqjUr/BKFDqGPBxESYIAOOgN+cXIEWxkeGFEHxOEK9QBS6aq6GBhyQlteWcqozYsG93oSVh+Xiv9tHl4m1mHXOHk2llQXy4g=
+  - secure: Qt/St9copUdPo4kej+9DtLDCzIAkDo/PDP0Ac244yF+8dRac3KhskRVVURNcCMonUeuqS5Dm5qcQl9b/L4P9Gkpn1aDKPHMp7pgTZHZLJ7VIHgFrSWo545mqV0fcYN+GLpaSqd8NwdUi5+1aHGWTtrw4BoIO4DSgV4eiIVEdRbA=
