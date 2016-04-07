@@ -154,6 +154,11 @@ matrix:
 language: cpp
 before_install:
 before_script:
+- mkdir deploy
+- cd deploy
+- mkdir libdynd-$TRAVIS-COMMIT
+- ls
+- cd ..
 - mkdir build
 - pushd build
 - cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-$TRAVIS-COMMIT ..
