@@ -166,6 +166,9 @@ after_script:
   conda.recipe) --user dynd --channel dev; fi
 
 before_deploy:
+  - ls $HOME/miniconda2
+  - ls $HOME/miniconda2/conda-bld
+  - ls $HOME/miniconda2/conda-bld/work
   - "echo 'ready?'"
   - pwd
   - echo $TRAVIS_BUILD_DIR
