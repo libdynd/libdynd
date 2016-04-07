@@ -41,12 +41,12 @@ matrix:
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
+    - echo $TRAVIS_COMMIT
     - make -j4 install || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
     before_deploy:
       - "echo 'ready?'"
-      - ls ..
-      - ls
+      - cd ../..
     deploy:
       skip_cleanup: true
       provider: s3
