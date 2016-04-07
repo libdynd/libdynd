@@ -47,6 +47,8 @@ matrix:
     - git add .
     - git commit -m "Automated documentation build"
     - git push origin master
+    deploy:
+      - echo "success"
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
