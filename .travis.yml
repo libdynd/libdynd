@@ -43,18 +43,18 @@ matrix:
     script:
     - make -j4 install || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
-  - before_deploy:
-    - "echo 'ready?'"
-    - ls ..
-    - ls
-  - deploy:
-    skip_cleanup: true
-    provider: s3
-    access_key_id: AKIAJEH6A3L3S4BYA5VA
-    secret_access_key:
-      secure: EmyhQ2+CtsIumNEskhjZOC/ZWYYOoPC1bQLijwuFXU8WwyEpoaB1CqLRHdiJGzVSRRr3SW3p6p8z5wxsLTBZtKQrGnP0Z4J9L7bZ5HsGRSshlqT0Zm1/AYSCjbFgNFKe1kIjaCamhk2/cNt1WKgx/cZ/tdxMKjhc8reavYBfCnU=
-    bucket: libdynd
-    local_dir: ../../deploy
+    before_deploy:
+      - "echo 'ready?'"
+      - ls ..
+      - ls
+    deploy:
+      skip_cleanup: true
+      provider: s3
+      access_key_id: AKIAJEH6A3L3S4BYA5VA
+      secret_access_key:
+        secure: EmyhQ2+CtsIumNEskhjZOC/ZWYYOoPC1bQLijwuFXU8WwyEpoaB1CqLRHdiJGzVSRRr3SW3p6p8z5wxsLTBZtKQrGnP0Z4J9L7bZ5HsGRSshlqT0Zm1/AYSCjbFgNFKe1kIjaCamhk2/cNt1WKgx/cZ/tdxMKjhc8reavYBfCnU=
+      bucket: libdynd
+      local_dir: ../../deploy
   - compiler: gcc
     env: CONDA=true
     before_install:
