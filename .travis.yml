@@ -180,7 +180,8 @@ before_deploy:
   - ls /home/travis/miniconda2/lib
   - ls /home/travis/miniconda2/bin  
   - ls /home/travis/miniconda2/envs
-  - ls /home/travis/miniconda2/pkgs  
+  - ls /home/travis/miniconda2/pkgs 
+  - ls /home/travis/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER
   - tar -cJf libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME.tar.xz -C /home/travis/miniconda2 lib/libdynd.so
   - ls
   - pwd
