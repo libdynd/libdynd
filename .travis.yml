@@ -182,7 +182,7 @@ before_deploy:
   - tar -cJf $TRAVIS_BUILD_DIR/deploy/libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME.tar.xz lib/libdynd.*
   - popd
   - pwd
-  - cd ..
+ # - cd ..
 
 deploy:
   skip_cleanup: true
