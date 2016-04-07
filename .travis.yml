@@ -157,7 +157,7 @@ language: cpp
 before_install:
 before_script:
   - echo $TRAVIS_COMMIT
-  - export $SHORT_COMMIT="$(git rev-parse --short $TRAVIS_COMMIT)"
+  - export SHORT_COMMIT="$(git rev-parse --short $TRAVIS_COMMIT)"
   - echo $SHORT_COMMIT
   - mkdir deploy
   - cd deploy
