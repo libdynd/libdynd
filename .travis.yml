@@ -153,7 +153,11 @@ after_script:
 - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false}
   == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output
   conda.recipe) --user dynd --channel dev; fi
-before_deploy: "echo 'ready?'"
+before_deploy:
+  - "echo 'ready?'"
+  - make install DESTDIR=..
+  - ls ..
+  - ls
 deploy:
   skip_cleanup: true
   provider: s3
