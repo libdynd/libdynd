@@ -11,7 +11,7 @@ addons:
     - cmake
     - valgrind
     - libfftw3-dev
-    - s3cmd
+    - s3cmd ls -tp | grep -v '/$' | tail -n +2 | xargs -I {} rm -- {}
 cache:
   directories:
   - $HOME/libdynd/build
