@@ -37,7 +37,7 @@ matrix:
     script:
     - cmake -DDYND_BUILD_DOCS=ON -DDYND_FFTW=${DYND_FFTW} ..
     - make -j3 || exit 1
-    - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
+    - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdyndm
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
@@ -54,8 +54,7 @@ matrix:
       secret_access_key:
         secure: EmyhQ2+CtsIumNEskhjZOC/ZWYYOoPC1bQLijwuFXU8WwyEpoaB1CqLRHdiJGzVSRRr3SW3p6p8z5wxsLTBZtKQrGnP0Z4J9L7bZ5HsGRSshlqT0Zm1/AYSCjbFgNFKe1kIjaCamhk2/cNt1WKgx/cZ/tdxMKjhc8reavYBfCnU=
       bucket: libdynd
-      local_dir: ../../deploy
-      upload-dir: libdyndtest
+      local_dir: ../../deploy/libdynd-$TRAVIS-COMMIT
   - compiler: gcc
     env: CONDA=true
     before_install:
@@ -157,7 +156,7 @@ before_install:
 before_script:
 - mkdir build
 - pushd build
-- cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy ..
+- cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-$TRAVIS-COMMIT ..
 script:
 - make -j4 || exit 1
 - ./tests/test_libdynd
