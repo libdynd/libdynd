@@ -46,6 +46,8 @@ matrix:
     before_deploy:
       - "echo 'ready?'"
       - cd ../..
+      - ls
+      - pwd
     deploy:
       skip_cleanup: true
       provider: s3
