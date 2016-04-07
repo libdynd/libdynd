@@ -53,17 +53,10 @@ matrix:
     - conda install --yes conda-build jinja2
     - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
       conda install --yes anaconda-client; fi
-    - ls /home/travis/miniconda2
     before_script:
       - export CC="gcc-4.9"
       - export CXX="g++-4.9"
       - export SHORT_COMMIT="$(git rev-parse --short $TRAVIS_COMMIT)"
-      - mkdir deploy
-      - cd deploy
-      - mkdir libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME
-      - ls
-      - pwd
-      - cd ..
     script:
     - conda build conda.recipe
   - language: objective-c
@@ -74,11 +67,6 @@ matrix:
     addons:
     before_script:
       - export SHORT_COMMIT="$(git rev-parse --short $TRAVIS_COMMIT)"
-      - mkdir deploy
-      - cd deploy
-      - mkdir libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME
-      - ls
-      - cd ..
     before_install:
     - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
     - bash Miniconda-latest-MacOSX-x86_64.sh -b
@@ -184,7 +172,7 @@ before_deploy:
   - ls /home/travis/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER
   - ls /home/travis/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER/lib
   - ls /home/travis/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER/bin
-  - tar -cJf libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME.tar.xz -C /home/travis/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER lib/libdynd.so
+  - tar -cJf libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME.tar.xz -C /home/travis/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER lib/libdynd.*
   - ls
   - pwd
   - cd ..
