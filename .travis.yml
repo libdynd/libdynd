@@ -156,17 +156,15 @@ matrix:
 language: cpp
 before_install:
 before_script:
-  - echo $TRAVIS_COMMIT
   - export SHORT_COMMIT="$(git rev-parse --short $TRAVIS_COMMIT)"
-  - echo $SHORT_COMMIT
   - mkdir deploy
   - cd deploy
-  - mkdir libdynd-$TRAVIS_COMMIT
+  - mkdir libdynd-$SHORT_COMMIT
   - ls
   - cd ..
   - mkdir build
   - pushd build
-  - cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-$TRAVIS_COMMIT ..
+  - cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-$SHORT_COMMIT ..
 script:
 - make -j4 || exit 1
 - ./tests/test_libdynd
