@@ -53,7 +53,7 @@ matrix:
       secret_access_key:
         secure: EmyhQ2+CtsIumNEskhjZOC/ZWYYOoPC1bQLijwuFXU8WwyEpoaB1CqLRHdiJGzVSRRr3SW3p6p8z5wxsLTBZtKQrGnP0Z4J9L7bZ5HsGRSshlqT0Zm1/AYSCjbFgNFKe1kIjaCamhk2/cNt1WKgx/cZ/tdxMKjhc8reavYBfCnU=
       bucket: libdynd
-      local_dir: ../../deploy/libdynd-$TRAVIS-COMMIT
+      local_dir: ../../deploy/libdynd-$TRAVIS_COMMIT
   - compiler: gcc
     env: CONDA=true
     before_install:
