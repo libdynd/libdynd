@@ -61,6 +61,7 @@ matrix:
       - cd deploy
       - mkdir libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME
       - ls
+      - cd ..
     script:
     - conda build conda.recipe
   - language: objective-c
@@ -75,6 +76,7 @@ matrix:
       - cd deploy
       - mkdir libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME
       - ls
+      - cd ..
     before_install:
     - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
     - bash Miniconda-latest-MacOSX-x86_64.sh -b
