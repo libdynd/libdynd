@@ -23,7 +23,7 @@ matrix:
     addons:
       apt:
         sources:
-        - ubuntu-toolchain-r-test
+        - ubuntu-toolchain-r-testm
         - kalakris-cmake
         packages:
         - gcc-5
@@ -135,6 +135,7 @@ matrix:
     - cp /usr/bin/gcov-5 ${PWD}/lcov-1.12/bin/gcov
     before_script:
     - mkdir build
+    - pwd
     - pushd build
     - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_COVERAGE=${DYND_COVERAGE} ..
     script:
