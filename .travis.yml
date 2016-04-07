@@ -53,6 +53,7 @@ matrix:
     - conda install --yes conda-build jinja2
     - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
       conda install --yes anaconda-client; fi
+    - ls /home/travis/miniconda2
     before_script:
       - export CC="gcc-4.9"
       - export CXX="g++-4.9"
