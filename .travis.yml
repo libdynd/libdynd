@@ -174,7 +174,7 @@ before_deploy:
   - ls $HOME/miniconda2/bin/
   - mkdir deploy
   - pushd build
-  - source activate _build
+  - source activate $HOME/miniconda2/envs/_build
   - make install DESTDIR=../deploy
   - popd
   - ls deploy/
