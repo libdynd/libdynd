@@ -170,6 +170,8 @@ before_deploy:
   - ls $HOME/build/libdynd/libdynd
   - ls $HOME/build/libdynd/libdynd/build
   - pwd
+  - env | grep PATH
+  - ls $HOME/miniconda2/bin/
   - mkdir deploy
   - pushd build
   - make install DESTDIR=../deploy
