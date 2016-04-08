@@ -166,19 +166,16 @@ after_script:
   conda.recipe) --user dynd --channel dev; fi
 
 before_deploy:
+  - "echo 'ready?'"
   - ls $HOME/build/libdynd/libdynd
   - ls $HOME/build/libdynd/libdynd/build
-  - ls $HOME/miniconda2
-  - ls $HOME/miniconda2/conda-bld
-  - ls $HOME/miniconda2/conda-bld/work
-  - ls $HOME/miniconda2/conda-bld/test-tmp_dir
-  - ls $HOME/miniconda2/conda-bld/noarch
-  - ls $HOME/miniconda2/conda-bld/linux-64
-  - ls $HOME/miniconda2/envs/_build
-  - "echo 'ready?'"
   - pwd
-  - echo $TRAVIS_BUILD_DIR
   - mkdir deploy
+  - pushd build
+  - make install DESTDIR=../deploy
+  - popd
+  - ls deploy/
+  - echo $TRAVIS_BUILD_DIR
   - ls $HOME/miniconda2/lib
   - ls $HOME/miniconda2/bin  
   - ls $HOME/miniconda2/envs
@@ -187,7 +184,7 @@ before_deploy:
   - ls $HOME/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER/lib
   - ls $HOME/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER/bin
   - pushd $HOME/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER
-  - tar -cJf $TRAVIS_BUILD_DIR/deploy/libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME.tar.xz lib/libdynd.*
+#  - tar -cJf $TRAVIS_BUILD_DIR/deploy/libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME.tar.xz lib/libdynd.*
   - popd
   - pwd
  # - cd ..
