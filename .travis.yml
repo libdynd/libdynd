@@ -172,6 +172,7 @@ before_deploy:
   - ls $HOME/miniconda2/conda-bld/test-tmp_dir
   - ls $HOME/miniconda2/conda-bld/noarch
   - ls $HOME/miniconda2/conda-bld/linux-64
+  - ls $HOME/miniconda2/envs/_build
   - "echo 'ready?'"
   - pwd
   - echo $TRAVIS_BUILD_DIR
