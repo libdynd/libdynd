@@ -165,46 +165,46 @@ after_script:
   == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output
   conda.recipe) --user dynd --channel dev; fi
 
-before_deploy:
-  - "echo 'ready?'"
-  - ls $HOME/build/libdynd/libdynd
-  - ls $HOME/build/libdynd/libdynd/build
-  - pwd
-  - env | grep PATH
-  - ls $HOME/miniconda2/bin/
-  - mkdir deploy
-  - pushd build
-  - ls $HOME/miniconda2/envs
-  - ls $HOME/miniconda2/envs/_build
-  - source activate $HOME/miniconda2/envs/_build
-  - make install DESTDIR=../deploy
-  - popd
-  - ls deploy/
-  - echo $TRAVIS_BUILD_DIR
-  - ls $HOME/miniconda2/lib
-  - ls $HOME/miniconda2/bin  
-  - ls $HOME/miniconda2/envs
-  - ls $HOME/miniconda2/pkgs 
-  - ls $HOME/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER
-  - ls $HOME/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER/lib
-  - ls $HOME/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER/bin
-  - pushd $HOME/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER
+#before_deploy:
+#  - "echo 'ready?'"
+#  - ls $HOME/build/libdynd/libdynd
+#  - ls $HOME/build/libdynd/libdynd/build
+#  - pwd
+#  - env | grep PATH
+#  - ls $HOME/miniconda2/bin/
+#  - mkdir deploy
+#  - pushd build
+#  - ls $HOME/miniconda2/envs
+#  - ls $HOME/miniconda2/envs/_build
+#  - source activate $HOME/miniconda2/envs/_build
+#  - make install DESTDIR=../deploy
+#  - popd
+#  - ls deploy/
+#  - echo $TRAVIS_BUILD_DIR
+#  - ls $HOME/miniconda2/lib
+#  - ls $HOME/miniconda2/bin  
+#  - ls $HOME/miniconda2/envs
+#  - ls $HOME/miniconda2/pkgs 
+#  - ls $HOME/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER
+#  - ls $HOME/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER/lib
+#  - ls $HOME/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER/bin
+#  - pushd $HOME/miniconda2/pkgs/libdynd-0.7.2-$TRAVIS_BUILD_NUMBER
 #  - tar -cJf $TRAVIS_BUILD_DIR/deploy/libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME.tar.xz lib/libdynd.*
-  - popd
-  - pwd
+#  - popd
+#  - pwd
  # - cd ..
 
-deploy:
-  skip_cleanup: true
-  provider: s3
-  access_key_id: AKIAJEH6A3L3S4BYA5VA
-  secret_access_key:
-    secure: EmyhQ2+CtsIumNEskhjZOC/ZWYYOoPC1bQLijwuFXU8WwyEpoaB1CqLRHdiJGzVSRRr3SW3p6p8z5wxsLTBZtKQrGnP0Z4J9L7bZ5HsGRSshlqT0Zm1/AYSCjbFgNFKe1kIjaCamhk2/cNt1WKgx/cZ/tdxMKjhc8reavYBfCnU=
-  bucket: libdynd
-  local_dir: deploy
-  on:
-  branch: release
-  condition: $CONDA = true
+#deploy:
+#  skip_cleanup: true
+#  provider: s3
+#  access_key_id: AKIAJEH6A3L3S4BYA5VA
+#  secret_access_key:
+#    secure: EmyhQ2+CtsIumNEskhjZOC/ZWYYOoPC1bQLijwuFXU8WwyEpoaB1CqLRHdiJGzVSRRr3SW3p6p8z5wxsLTBZtKQrGnP0Z4J9L7bZ5HsGRSshlqT0Zm1/AYSCjbFgNFKe1kIjaCamhk2/cNt1WKgx/cZ/tdxMKjhc8reavYBfCnU=
+#  bucket: libdynd
+#  local_dir: deploy
+#  on:
+#  branch: release
+#  condition: $CONDA = true
 
 notifications:
   email: false
