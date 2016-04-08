@@ -5,6 +5,7 @@ package:
 requirements:
   build:
     - cmake
+    - python
 
 build:
   number: {{environ.get('TRAVIS_BUILD_NUMBER', 0)}}    # [unix]
