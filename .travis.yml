@@ -151,6 +151,7 @@ matrix:
 language: cpp
 before_install:
 before_script:
+  - ls
   - cd ..
   - pwd
   - mkdir build
