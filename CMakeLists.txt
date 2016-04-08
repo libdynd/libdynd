@@ -5,6 +5,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 project(libdynd)
+
 include(CheckTypeSize)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
@@ -561,35 +562,29 @@ if(DYND_BUILD_DOCS)
     install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs DESTINATION docs)
 endif()
 
-# If requested, install the .lib/.so/.dll file and headers to the install prefix
-if (DYND_INSTALL_LIB)
-    # Install the libdyndt binary
-    install(TARGETS libdyndt
-        RUNTIME DESTINATION lib${LIB_SUFFIX}
-        LIBRARY DESTINATION lib${LIB_SUFFIX}
-        ARCHIVE DESTINATION lib${LIB_SUFFIX}${DYND_STATIC_LIB_DIR})
-    # Install the libdynd binary
-    install(TARGETS libdynd
-        RUNTIME DESTINATION lib${LIB_SUFFIX}
-        LIBRARY DESTINATION lib${LIB_SUFFIX}
-        ARCHIVE DESTINATION lib${LIB_SUFFIX}${DYND_STATIC_LIB_DIR})
-    # Install the libdynd headers
-    install(DIRECTORY "include/dynd"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
-    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/dynd"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
-    # Install the libdynd-config script
-    if(WIN32)
-        install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config.bat"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-        if(DYND_SHARED_LIB)
-            install(FILES "$<TARGET_FILE_DIR:libdynd>/libdynd.dll"
-                    DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-            install(FILES "$<TARGET_FILE_DIR:libdyndt>/libdyndt.dll"
-                    DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-        endif()
-    else()
-        install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-    endif()
+# Install the libdyndt binary
+install(TARGETS libdyndt DESTINATION lib${LIB_SUFFIX} COMPONENT ndt)
+
+# Install the libdynd binary
+install(TARGETS libdynd DESTINATION lib${LIB_SUFFIX} COMPONENT nd)
+
+# Install the libdynd headers
+install(DIRECTORY "include/dynd" DESTINATION "include" COMPONENT headers)
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/dynd" DESTINATION "include" COMPONENT include)
+
+# Install the libdynd-config script
+if(WIN32)
+  install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config.bat" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+  if(DYND_SHARED_LIB)
+    install(FILES "$<TARGET_FILE_DIR:libdynd>/libdynd.dll" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+    install(FILES "$<TARGET_FILE_DIR:libdyndt>/libdyndt.dll" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+  endif()
+  else()
+    install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 endif()
+
+set(CPACK_GENERATOR "TGZ")
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+set(CPACK_COMPONENTS_ALL nd ndt include)
+set(CPACK_PACKAGE_VERSION "0.7.2")
+include(CPack)
