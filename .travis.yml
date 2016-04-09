@@ -157,10 +157,10 @@ before_script:
 script:
 - make -j4 || exit 1
 - ./tests/test_libdynd
-after_script:
-- if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false}
-  == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output
-  conda.recipe) --user dynd --channel dev; fi
+#after_script:
+#- if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false}
+#  == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output
+#  conda.recipe) --user dynd --channel dev; fi
 
 before_deploy:
   - pwd
@@ -195,17 +195,17 @@ before_deploy:
 #  - pwd
  # - cd ..
 
-#deploy:
-#  skip_cleanup: true
-#  provider: s3
-#  access_key_id: AKIAJEH6A3L3S4BYA5VA
-#  secret_access_key:
-#    secure: EmyhQ2+CtsIumNEskhjZOC/ZWYYOoPC1bQLijwuFXU8WwyEpoaB1CqLRHdiJGzVSRRr3SW3p6p8z5wxsLTBZtKQrGnP0Z4J9L7bZ5HsGRSshlqT0Zm1/AYSCjbFgNFKe1kIjaCamhk2/cNt1WKgx/cZ/tdxMKjhc8reavYBfCnU=
-#  bucket: libdynd
-#  local_dir: deploy
-#  on:
-#  branch: release
-#  condition: $CONDA = true
+deploy:
+  skip_cleanup: true
+  provider: s3
+  access_key_id: AKIAJEH6A3L3S4BYA5VA
+  secret_access_key:
+    secure: EmyhQ2+CtsIumNEskhjZOC/ZWYYOoPC1bQLijwuFXU8WwyEpoaB1CqLRHdiJGzVSRRr3SW3p6p8z5wxsLTBZtKQrGnP0Z4J9L7bZ5HsGRSshlqT0Zm1/AYSCjbFgNFKe1kIjaCamhk2/cNt1WKgx/cZ/tdxMKjhc8reavYBfCnU=
+  bucket: libdynd
+  local_dir: deploy
+  on:
+  branch: release
+  condition: $CONDA = true
 
 notifications:
   email: false
