@@ -163,7 +163,11 @@ after_script:
   == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output
   conda.recipe) --user dynd --channel dev; fi
 
-#before_deploy:
+before_deploy:
+  - pwd
+  - ls
+  - pushd build
+  - ls
 #  - "echo 'ready?'"
 #  - ls $HOME/build/libdynd/libdynd
 #  - ls $HOME/build/libdynd/libdynd/build
