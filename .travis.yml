@@ -153,10 +153,11 @@ before_install:
 before_script:
   - mkdir build
   - pushd build
-  - cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME ..
+  - cmake -DDYND_FFTW=${DYND_FFTW} ..
 script:
 - make -j4 || exit 1
 - ./tests/test_libdynd
+# -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME
 #after_script:
 #- if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false}
 #  == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output
