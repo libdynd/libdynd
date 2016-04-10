@@ -166,6 +166,7 @@ script:
 before_deploy:
   - mkdir deploy
   - cp build/*.tar.gz deploy/
+  - anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev
 
 deploy:
   skip_cleanup: true
