@@ -166,6 +166,7 @@ script:
 before_deploy:
   - pwd
   - ls
+  - mkdir deploy
   - cp build/*.tar.gz deploy/
   - pushd deploy
   - ls
