@@ -325,6 +325,7 @@ set(libdynd_SRC
     src/dynd/parse.cpp
     src/dynd/pointer.cpp
     src/dynd/random.cpp
+    src/dynd/range.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp
     src/dynd/statistics.cpp
@@ -361,6 +362,7 @@ set(libdynd_SRC
     include/dynd/logic.hpp
     include/dynd/math.hpp
     include/dynd/random.hpp
+    include/dynd/range.hpp
     include/dynd/sort.hpp
     include/dynd/statistics.hpp
     include/dynd/string.hpp

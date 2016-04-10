@@ -139,7 +139,7 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
     m_category_tp = m_categories.get_type().at(0);
 
     category_count = categories.get_dim_size();
-    m_value_to_category_index = nd::range(category_count);
+    m_value_to_category_index = nd::old_range(category_count);
     m_value_to_category_index.flag_as_immutable();
     m_category_index_to_value = m_value_to_category_index;
   } else {

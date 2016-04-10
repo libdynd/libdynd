@@ -11,6 +11,7 @@
 #include <dynd/option.hpp>
 #include <dynd/pointer.hpp>
 #include <dynd/random.hpp>
+#include <dynd/range.hpp>
 #include <dynd/statistics.hpp>
 
 using namespace std;
@@ -60,6 +61,7 @@ std::map<std::string, nd::callable> &nd::detail::get_regfunctions() {
                                              {"assign_na", assign_na},
                                              {"is_na", is_na},
                                              {"dereference", dereference},
+                                             {"range", range},
                                              {"uniform", random::uniform}};
 
   return registry;
