@@ -55,8 +55,8 @@ matrix:
     - bash Miniconda-latest-Linux-x86_64.sh -b
     - export PATH=$HOME/miniconda2/bin:$PATH
     - conda install --yes conda-build jinja2 cmake
-    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
-      conda install --yes anaconda-client; fi
+#    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+#      conda install --yes anaconda-client; fi
     before_script:
       - export CC="gcc-4.9"
       - export CXX="g++-4.9"
@@ -76,8 +76,8 @@ matrix:
     - bash Miniconda-latest-MacOSX-x86_64.sh -b
     - export PATH=$HOME/miniconda2/bin:$PATH
     - conda install --yes conda-build jinja2
-    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
-      conda install --yes anaconda-client; fi
+#    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+#      conda install --yes anaconda-client; fi
     script:
     - conda build conda.recipe
   - language: python
@@ -166,6 +166,7 @@ script:
 before_deploy:
   - mkdir deploy
   - mv build/*.tar.gz deploy/
+  - conda install --yes anaconda-client
   - anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev
 
 deploy:
