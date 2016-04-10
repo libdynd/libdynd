@@ -21,147 +21,140 @@ cache:
 
 matrix:
   include:
-  - compiler: gcc
-    sudo: required
-    env: VALGRIND DYND_FFTW=ON
-    addons:
+    - compiler: gcc
+      sudo: required
+      env: VALGRIND DYND_FFTW=ON
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - kalakris-cmake
+          packages:
+            - gcc-5
+            - g++-5
+            - cmake
+            - doxygen
+            - valgrind
+            - libfftw3-dev
+      before_install:
+        - export CC="gcc-5"
+        - export CXX="g++-5"
+      script:
+        - cmake -DDYND_BUILD_DOCS=ON -DDYND_FFTW=${DYND_FFTW} ..
+        - make -j3 || exit 1
+        - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
+    - compiler: clang
+      env: VALGRIND DYND_FFTW=OFF
+      script:
+        - make -j4 || exit 1
+        - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
+    - compiler: gcc
+      env: CONDA=true
+      before_install:
+        - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
+        - bash Miniconda-latest-Linux-x86_64.sh -b
+        - export PATH=$HOME/miniconda2/bin:$PATH
+        - conda install --yes conda-build jinja2 cmake
+      before_script:
+        - export CC="gcc-4.9"
+        - export CXX="g++-4.9"
+        - export SHORT_COMMIT="$(git rev-parse --short $TRAVIS_COMMIT)"
+      script:
+        - conda build conda.recipe
+    - language: objective-c
+      os: osx
+      osx_image: xcode6.4
+      compiler: clang
+      env: CONDA=true
+      addons:
+      before_script:
+        - export SHORT_COMMIT="$(git rev-parse --short $TRAVIS_COMMIT)"
+      before_install:
+        - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
+        - bash Miniconda-latest-MacOSX-x86_64.sh -b
+        - export PATH=$HOME/miniconda2/bin:$PATH
+        - conda install --yes conda-build jinja2
+      script:
+        - conda build conda.recipe
+    - language: python
+      env: DYND_FFTW=OFF VERBOSE=1
+      compiler: clang
+      python: 3.5
+      addons:
       apt:
         sources:
-        - ubuntu-toolchain-r-test
-        - kalakris-cmake
+          - ubuntu-toolchain-r-test
+          - kalakris-cmake
+          - llvm-toolchain-precise-3.5
         packages:
-        - gcc-5
-        - g++-5
-        - cmake
-        - doxygen
-        - valgrind
-        - libfftw3-dev
-    before_install:
-    - export CC="gcc-5"
-    - export CXX="g++-5"
-    script:
-    - cmake -DDYND_BUILD_DOCS=ON -DDYND_FFTW=${DYND_FFTW} ..
-    - make -j3 || exit 1
-    - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
-  - compiler: clang
-    env: VALGRIND DYND_FFTW=OFF
-    script:
-    - make -j4 || exit 1
-    - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
-  - compiler: gcc
-    env: CONDA=true
-    before_install:
-    - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
-    - bash Miniconda-latest-Linux-x86_64.sh -b
-    - export PATH=$HOME/miniconda2/bin:$PATH
-    - conda install --yes conda-build jinja2 cmake
-#    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
-#      conda install --yes anaconda-client; fi
-    before_script:
-      - export CC="gcc-4.9"
-      - export CXX="g++-4.9"
-      - export SHORT_COMMIT="$(git rev-parse --short $TRAVIS_COMMIT)"
-    script:
-    - conda build conda.recipe
-  - language: objective-c
-    os: osx
-    osx_image: xcode6.4
-    compiler: clang
-    env: OSX CONDA=true
-    addons:
-    before_script:
-      - export SHORT_COMMIT="$(git rev-parse --short $TRAVIS_COMMIT)"
-    before_install:
-    - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
-    - bash Miniconda-latest-MacOSX-x86_64.sh -b
-    - export PATH=$HOME/miniconda2/bin:$PATH
-    - conda install --yes conda-build jinja2
-#    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
-#      conda install --yes anaconda-client; fi
-    script:
-    - conda build conda.recipe
-  - language: python
-    env: DYND_FFTW=OFF VERBOSE=1
-    compiler: clang
-    python: 3.5
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - kalakris-cmake
-        - llvm-toolchain-precise-3.5
-        packages:
-        - gcc-4.9
-        - g++-4.9
-        - clang-3.5
-        - cmake
-    cache:
+          - gcc-4.9
+          - g++-4.9
+          - clang-3.5
+          - cmake
+      cache:
       directories:
-      - $HOME/.cache/pip
-      - $HOME/dynd-python/build
-    before_install:
-    - export CC=clang-3.5
-    - export CXX=clang++-3.5
-    - travis_retry pip install --install-option="--no-cython-compile" Cython==0.23
-    before_script:
-    - cd ..
-    - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
-    - mkdir dynd-python/libraries
-    - mv libdynd dynd-python/libraries/libdynd
-    - cd dynd-python
-    script:
-    - python setup.py install
-    - cd ..
-    - python -c "import dynd; dynd.test(verbosity=2, exit=True)"
-    after_script:
-    - cd .
-    
-  - compiler: gcc
-    env: DYND_FFTW=ON DYND_COVERAGE=ON
-    addons:
+        - $HOME/.cache/pip
+        - $HOME/dynd-python/build
+      before_install:
+        - export CC=clang-3.5
+        - export CXX=clang++-3.5
+        - travis_retry pip install --install-option="--no-cython-compile" Cython==0.23
+      before_script:
+        - cd ..
+        - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
+        - mkdir dynd-python/libraries
+        - mv libdynd dynd-python/libraries/libdynd
+        - cd dynd-python
+      script:
+        - python setup.py install
+        - cd ..
+        - python -c "import dynd; dynd.test(verbosity=2, exit=True)"
+      after_script:
+        - cd .
+    - compiler: gcc
+      env: DYND_FFTW=ON DYND_COVERAGE=ON
+      addons:
       apt:
         sources:
-        - ubuntu-toolchain-r-test
-        - kalakris-cmake
+          - ubuntu-toolchain-r-test
+          - kalakris-cmake
         packages:
-        - gcc-5
-        - g++-5
-        - cmake
-        - lcov
-        - libfftw3-dev
-    before_install:
-    - export CC="gcc-5"
-    - export CXX="g++-5"
-    - gem install coveralls-lcov
-    - wget https://github.com/linux-test-project/lcov/archive/v1.12.zip
-    - unzip v1.12.zip
-    - export PATH=${PWD}/lcov-1.12/bin:$PATH
-    - cp /usr/bin/gcov-5 ${PWD}/lcov-1.12/bin/gcov
-    before_script:
-    - mkdir build
-    - pwd
-    - pushd build
-    - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_COVERAGE=${DYND_COVERAGE} ..
-    script:
-    - make -j2 || exit 1
-    - make coverage
-    after_script:
-    - popd
-    - coveralls-lcov build/coverage.info.cleaned
+          - gcc-5
+          - g++-5
+          - cmake
+          - lcov
+          - libfftw3-dev
+      before_install:
+        - export CC="gcc-5"
+        - export CXX="g++-5"
+        - gem install coveralls-lcov
+        - wget https://github.com/linux-test-project/lcov/archive/v1.12.zip
+        - unzip v1.12.zip
+        - export PATH=${PWD}/lcov-1.12/bin:$PATH
+        - cp /usr/bin/gcov-5 ${PWD}/lcov-1.12/bin/gcov
+      before_script:
+        - mkdir build
+        - pushd build
+        - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_COVERAGE=${DYND_COVERAGE} ..
+      script:
+        - make -j2 || exit 1
+        - make coverage
+        after_script:
+        - popd
+        - coveralls-lcov build/coverage.info.cleaned
+    
 language: cpp
+
 before_install:
+
 before_script:
   - mkdir build
   - pushd build
   - cmake -DDYND_FFTW=${DYND_FFTW} ..
+
 script:
-- make -j4 || exit 1
-- ./tests/test_libdynd
-# -DCMAKE_INSTALL_PREFIX=../../deploy/libdynd-$SHORT_COMMIT-$TRAVIS_OS_NAME
-#after_script:
-#- if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false}
-#  == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output
-#  conda.recipe) --user dynd --channel dev; fi
+  - make -j4 || exit 1
+  - ./tests/test_libdynd
 
 before_deploy:
   - mkdir deploy
@@ -179,13 +172,14 @@ deploy:
   local_dir: deploy
   on:
     condition: ${CONDA:-false} == "true"
-
+    
 notifications:
   email: false
   flowdock: b08b3ba4fb86fa48121e90b5f67ccb75
   on_success: change
   on_failure: always
+
 env:
   global:
-  - secure: KJZ5DWK3iAmthDnPaXz/S8aQFa6zVlD+CWCPXM+vgkiJQG5qgJfn5t2yy5n3mVyS0qZFd/LrFJ6ZqjUr/BKFDqGPBxESYIAOOgN+cXIEWxkeGFEHxOEK9QBS6aq6GBhyQlteWcqozYsG93oSVh+Xiv9tHl4m1mHXOHk2llQXy4g=
-  - secure: Qt/St9copUdPo4kej+9DtLDCzIAkDo/PDP0Ac244yF+8dRac3KhskRVVURNcCMonUeuqS5Dm5qcQl9b/L4P9Gkpn1aDKPHMp7pgTZHZLJ7VIHgFrSWo545mqV0fcYN+GLpaSqd8NwdUi5+1aHGWTtrw4BoIO4DSgV4eiIVEdRbA=
+    - secure: KJZ5DWK3iAmthDnPaXz/S8aQFa6zVlD+CWCPXM+vgkiJQG5qgJfn5t2yy5n3mVyS0qZFd/LrFJ6ZqjUr/BKFDqGPBxESYIAOOgN+cXIEWxkeGFEHxOEK9QBS6aq6GBhyQlteWcqozYsG93oSVh+Xiv9tHl4m1mHXOHk2llQXy4g=
+    - secure: Qt/St9copUdPo4kej+9DtLDCzIAkDo/PDP0Ac244yF+8dRac3KhskRVVURNcCMonUeuqS5Dm5qcQl9b/L4P9Gkpn1aDKPHMp7pgTZHZLJ7VIHgFrSWo545mqV0fcYN+GLpaSqd8NwdUi5+1aHGWTtrw4BoIO4DSgV4eiIVEdRbA=
