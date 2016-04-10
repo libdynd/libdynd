@@ -164,8 +164,6 @@ script:
 #  conda.recipe) --user dynd --channel dev; fi
 
 before_deploy:
-  - pwd
-  - ls
   - mkdir deploy
   - cp build/*.tar.gz deploy/
 
@@ -179,7 +177,7 @@ deploy:
   local_dir: deploy
   on:
   branch: release
-  condition: $CONDA = true
+  condition: ${CONDA:-false} == "true"
 
 notifications:
   email: false
