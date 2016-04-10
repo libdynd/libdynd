@@ -176,8 +176,7 @@ deploy:
   bucket: libdynd
   local_dir: deploy
   on:
-  branch: release
-  condition: ${CONDA:-false} == "true"
+    condition: ${CONDA:-false} == "true"
 
 notifications:
   email: false
