@@ -44,7 +44,7 @@ namespace nd {
         kb.emplace_back<range_kernel<RetElementID>>(kernreq, start, stop, step);
       });
 
-      return ndt::make_type<ndt::fixed_dim_type>(stop - start, RetElementID);
+      return ndt::make_type<ndt::fixed_dim_type>(static_cast<size_t>(stop - start), RetElementID);
     }
   };
 
