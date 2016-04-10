@@ -27,7 +27,7 @@ namespace nd {
 
     void single(char *ret, char *const *DYND_UNUSED(args)) {
       for (size_t i = 0; i < size; ++i) {
-        *reinterpret_cast<type *>(ret) = start + i * step;
+        *reinterpret_cast<type *>(ret) = start + static_cast<type>(i) * step;
         ret += stride;
       }
     }
