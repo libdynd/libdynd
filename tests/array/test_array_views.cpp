@@ -276,30 +276,30 @@ TEST(ArrayViews, NDimPermute_BadPerms)
 #ifndef DYND_NESTED_INIT_LIST_BUG
 TEST(ArrayViews, Reshape)
 {
-  EXPECT_ARRAY_EQ(nd::array({{0, 1}, {2, 3}}), nd::reshape(nd::range(4), {2, 2}));
-  EXPECT_ARRAY_EQ(nd::range(4), nd::reshape({{0, 1}, {2, 3}}, {4}));
+  EXPECT_ARRAY_EQ(nd::array({{0, 1}, {2, 3}}), nd::reshape(nd::old_range(4), {2, 2}));
+  EXPECT_ARRAY_EQ(nd::old_range(4), nd::reshape({{0, 1}, {2, 3}}, {4}));
 
   EXPECT_ARRAY_EQ(nd::array({{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}),
-                nd::reshape(nd::range(10), {5, 2}));
-  EXPECT_ARRAY_EQ(nd::range(10),
+                nd::reshape(nd::old_range(10), {5, 2}));
+  EXPECT_ARRAY_EQ(nd::old_range(10),
                 nd::reshape({{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}, {10}));
 
   EXPECT_ARRAY_EQ(nd::array({{0, 1, 2, 3, 4}, {5, 6, 7, 8, 9}}),
-                nd::reshape(nd::range(10), {2, 5}));
-  EXPECT_ARRAY_EQ(nd::range(10),
+                nd::reshape(nd::old_range(10), {2, 5}));
+  EXPECT_ARRAY_EQ(nd::old_range(10),
                 nd::reshape({{0, 1, 2, 3, 4}, {5, 6, 7, 8, 9}}, {10}));
 
   EXPECT_ARRAY_EQ(nd::array({{{0, 1}, {2, 3}}, {{4, 5}, {6, 7}}}),
-                nd::reshape(nd::range(8), {2, 2, 2}));
-  EXPECT_ARRAY_EQ(nd::range(8),
+                nd::reshape(nd::old_range(8), {2, 2, 2}));
+  EXPECT_ARRAY_EQ(nd::old_range(8),
                 nd::reshape({{{0, 1}, {2, 3}}, {{4, 5}, {6, 7}}}, {8}));
 
   EXPECT_ARRAY_EQ(
       nd::array({{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}},
                  {{12, 13, 14, 15}, {16, 17, 18, 19}, {20, 21, 22, 23}}}),
-      nd::reshape(nd::range(24), {2, 3, 4}));
+      nd::reshape(nd::old_range(24), {2, 3, 4}));
   EXPECT_ARRAY_EQ(
-      nd::range(24),
+      nd::old_range(24),
       nd::reshape({{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}},
                    {{12, 13, 14, 15}, {16, 17, 18, 19}, {20, 21, 22, 23}}},
                   {24}));
@@ -308,8 +308,8 @@ TEST(ArrayViews, Reshape)
                            {{6, 7}, {8, 9}, {10, 11}},
                            {{12, 13}, {14, 15}, {16, 17}},
                            {{18, 19}, {20, 21}, {22, 23}}}),
-                nd::reshape(nd::range(24), {4, 3, 2}));
-  EXPECT_ARRAY_EQ(nd::range(24), nd::reshape({{{0, 1}, {2, 3}, {4, 5}},
+                nd::reshape(nd::old_range(24), {4, 3, 2}));
+  EXPECT_ARRAY_EQ(nd::old_range(24), nd::reshape({{{0, 1}, {2, 3}, {4, 5}},
                                             {{6, 7}, {8, 9}, {10, 11}},
                                             {{12, 13}, {14, 15}, {16, 17}},
                                             {{18, 19}, {20, 21}, {22, 23}}},

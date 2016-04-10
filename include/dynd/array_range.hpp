@@ -16,15 +16,15 @@ namespace nd {
    * beginval + (k-1) * stepval} where the next value in the sequence would hit
    * or cross endval.
    */
-  DYND_API nd::array range(const ndt::type &scalar_tp, const void *beginval, const void *endval, const void *stepval);
+  DYND_API nd::array old_range(const ndt::type &scalar_tp, const void *beginval, const void *endval,
+                               const void *stepval);
 
   /**
    * Version of range templated for C++ scalar types.
    */
   template <class T>
-  typename std::enable_if<is_dynd_scalar<T>::value, nd::array>::type range(T beginval, T endval, T stepval = T(1))
-  {
-    return range(ndt::make_type<T>(), &beginval, &endval, &stepval);
+  typename std::enable_if<is_dynd_scalar<T>::value, nd::array>::type old_range(T beginval, T endval, T stepval = T(1)) {
+    return old_range(ndt::make_type<T>(), &beginval, &endval, &stepval);
   }
 
   /**
@@ -32,18 +32,16 @@ namespace nd {
    * parameter.
    */
   template <class T>
-  typename std::enable_if<is_dynd_scalar<T>::value, nd::array>::type range(T endval)
-  {
+  typename std::enable_if<is_dynd_scalar<T>::value, nd::array>::type old_range(T endval) {
     T beginval = T(0), stepval = T(1);
-    return range(ndt::make_type<T>(), &beginval, &endval, &stepval);
+    return old_range(ndt::make_type<T>(), &beginval, &endval, &stepval);
   }
 
   /**
    * Version of range based on an irange object.
    */
-  inline nd::array range(const irange &i)
-  {
-    return range(ndt::make_type<intptr_t>(), &i.start(), &i.finish(), &i.step());
+  inline nd::array old_range(const irange &i) {
+    return old_range(ndt::make_type<intptr_t>(), &i.start(), &i.finish(), &i.step());
   }
 
   /**
@@ -56,7 +54,7 @@ namespace nd {
    * \param count  The size of the result's first dimension.
    * \param tp  The required dtype of the output.
    */
-  DYND_API nd::array linspace(const nd::array &start, const nd::array &stop, intptr_t count, const ndt::type &tp);
+  DYND_API nd::array old_linspace(const nd::array &start, const nd::array &stop, intptr_t count, const ndt::type &tp);
 
   /**
    * Most general linspace function, creates an array of length 'count',
@@ -68,7 +66,7 @@ namespace nd {
    * \param stop  The value placed at index count-1 of the result.
    * \param count  The size of the result's first dimension.
    */
-  DYND_API nd::array linspace(const nd::array &start, const nd::array &stop, intptr_t count);
+  DYND_API nd::array old_linspace(const nd::array &start, const nd::array &stop, intptr_t count);
 
   /**
    * Creates a one-dimensional array of 'count' values, evenly spaced
@@ -76,25 +74,22 @@ namespace nd {
    *
    * The only built-in types supported are float and double.
    */
-  DYND_API nd::array linspace(const ndt::type &dt, const void *startval, const void *stopval, intptr_t count);
+  DYND_API nd::array old_linspace(const ndt::type &dt, const void *startval, const void *stopval, intptr_t count);
 
-  inline nd::array linspace(float start, float stop, intptr_t count = 50)
-  {
-    return linspace(ndt::type(float32_id), &start, &stop, count);
+  inline nd::array old_linspace(float start, float stop, intptr_t count = 50) {
+    return old_linspace(ndt::type(float32_id), &start, &stop, count);
   }
 
-  inline nd::array linspace(double start, double stop, intptr_t count = 50)
-  {
-    return linspace(ndt::type(float64_id), &start, &stop, count);
+  inline nd::array old_linspace(double start, double stop, intptr_t count = 50) {
+    return old_linspace(ndt::type(float64_id), &start, &stop, count);
   }
 
   template <class T>
   typename std::enable_if<base_id_of<type_id_of<T>::value>::value == int_kind_id ||
                               base_id_of<type_id_of<T>::value>::value == uint_kind_id,
                           nd::array>::type
-  linspace(T start, T stop, intptr_t count = 50)
-  {
-    return linspace((double)start, (double)stop, count);
+  old_linspace(T start, T stop, intptr_t count = 50) {
+    return old_linspace((double)start, (double)stop, count);
   }
 }
 } // namespace dynd::nd

@@ -101,6 +101,7 @@ set(tests_SRC
     test_integer_sequence.cpp
     test_io.cpp
     test_iterator.cpp
+    test_range.cpp
     test_shape_tools.cpp
     test_type_sequence.cpp
 #    test_parse.cpp
