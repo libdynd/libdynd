@@ -166,8 +166,10 @@ script:
 before_deploy:
   - pwd
   - ls
-  - pushd build
+  - cp build/*.tar.gz deploy/
+  - pushd deploy
   - ls
+  - popd
 #  - "echo 'ready?'"
 #  - ls $HOME/build/libdynd/libdynd
 #  - ls $HOME/build/libdynd/libdynd/build
