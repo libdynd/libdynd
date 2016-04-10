@@ -139,7 +139,7 @@ matrix:
       script:
         - make -j2 || exit 1
         - make coverage
-        after_script:
+      after_script:
         - popd
         - coveralls-lcov build/coverage.info.cleaned
     
