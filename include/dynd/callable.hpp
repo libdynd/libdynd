@@ -142,6 +142,10 @@ namespace nd {
 
     array operator()() const { return call(0, nullptr, 0, nullptr); }
 
+    array operator()(std::initializer_list<std::pair<const char *, array>> kwds) const {
+      return call(0, nullptr, kwds.size(), kwds.begin());
+    }
+
     array operator()(const std::initializer_list<array> &args,
                      const std::initializer_list<std::pair<const char *, array>> &kwds) const {
       return call(args.size(), args.begin(), kwds.size(), kwds.begin());
