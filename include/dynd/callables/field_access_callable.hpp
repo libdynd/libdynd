@@ -44,8 +44,8 @@ namespace nd {
 
   public:
     get_array_field_callable(intptr_t i)
-        : base_callable(
-              ndt::callable_type::make(ndt::type("Any"), ndt::tuple_type::make(), ndt::struct_type::make("self"))),
+        : base_callable(ndt::callable_type::make(ndt::type("Any"), ndt::make_type<ndt::tuple_type>(),
+                                                 ndt::struct_type::make("self"))),
           m_i(i) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,

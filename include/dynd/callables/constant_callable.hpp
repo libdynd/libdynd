@@ -18,8 +18,8 @@ namespace nd {
 
     public:
       constant_callable(const nd::array &val)
-          : base_callable(
-                ndt::callable_type::make(val.get_type(), ndt::tuple_type::make(true), ndt::struct_type::make(true))),
+          : base_callable(ndt::callable_type::make(val.get_type(), ndt::make_type<ndt::tuple_type>(true),
+                                                   ndt::struct_type::make(true))),
             m_val(val) {}
 
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,

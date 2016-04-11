@@ -17,25 +17,23 @@ using namespace std;
 using namespace dynd;
 
 TEST(Range, Range) {
-  EXPECT_ARRAY_EQ(nd::array({0, 1, 2, 3, 4}), nd::range({{"stop", 5}}));
-  EXPECT_ARRAY_EQ(nd::array({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), nd::range({{"stop", 10}}));
+  EXPECT_ARRAY_EQ(nd::array({0, 1, 2, 3, 4}), nd::range(5));
+  EXPECT_ARRAY_EQ(nd::array({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), nd::range(10));
 
-  EXPECT_ARRAY_EQ(nd::array({1, 2, 3, 4, 5, 6, 7, 8, 9}), nd::range({{"start", 1}, {"stop", 10}}));
-  EXPECT_ARRAY_EQ(nd::array({5, 6, 7, 8, 9}), nd::range({{"start", 5}, {"stop", 10}}));
-  EXPECT_ARRAY_EQ(nd::array({3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}),
-                  nd::range({{"start", 3}, {"stop", 20}}));
-  EXPECT_ARRAY_NEAR(nd::array({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0}),
-                    nd::range({{"start", 1.0}, {"stop", 10.0}}));
+  EXPECT_ARRAY_EQ(nd::array({1, 2, 3, 4, 5, 6, 7, 8, 9}), nd::range(1, 10));
+
+  EXPECT_ARRAY_EQ(nd::array({5, 6, 7, 8, 9}), nd::range(5, 10));
+  EXPECT_ARRAY_EQ(nd::array({3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}), nd::range(3, 20));
+  EXPECT_ARRAY_NEAR(nd::array({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0}), nd::range(1.0, 10.0));
 
   EXPECT_ARRAY_EQ(nd::array({0, 2, 4, 6, 8}), nd::range({{"stop", 10}, {"step", 2}}));
 
-  EXPECT_ARRAY_EQ(nd::array({5, 8}), nd::range({{"start", 5}, {"stop", 10}, {"step", 3}}));
-  EXPECT_ARRAY_EQ(nd::array({10, 9, 8, 7, 6}), nd::range({{"start", 10}, {"stop", 5}, {"step", -1}}));
+  EXPECT_ARRAY_EQ(nd::array({5, 8}), nd::range(5, 10, 3));
+  EXPECT_ARRAY_EQ(nd::array({10, 9, 8, 7, 6}), nd::range(10, 5, -1));
   EXPECT_ARRAY_NEAR(
       nd::array({1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5}),
-      nd::range({{"start", 1.0}, {"stop", 10.0}, {"step", 0.5}}));
-  EXPECT_ARRAY_NEAR(nd::array({0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9}),
-                    nd::range({{"start", 0.0}, {"stop", 1.0}, {"step", 0.1}}));
+      nd::range(1.0, 10.0, 0.5));
+  EXPECT_ARRAY_NEAR(nd::array({0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9}), nd::range(0.0, 1.0, 0.1));
   EXPECT_ARRAY_NEAR(
       nd::array({0.00f, 0.01f, 0.02f, 0.03f, 0.04f, 0.05f, 0.06f, 0.07f, 0.08f, 0.09f, 0.1f, 0.11f, 0.12f, 0.13f, 0.14f,
                  0.15f, 0.16f, 0.17f, 0.18f, 0.19f, 0.2f, 0.21f, 0.22f, 0.23f, 0.24f, 0.25f, 0.26f, 0.27f, 0.28f, 0.29f,
@@ -44,7 +42,24 @@ TEST(Range, Range) {
                  0.6f, 0.61f, 0.62f, 0.63f, 0.64f, 0.65f, 0.66f, 0.67f, 0.68f, 0.69f, 0.7f, 0.71f, 0.72f, 0.73f, 0.74f,
                  0.75f, 0.76f, 0.77f, 0.78f, 0.79f, 0.8f, 0.81f, 0.82f, 0.83f, 0.84f, 0.85f, 0.86f, 0.87f, 0.88f, 0.89f,
                  .9f, 0.91f, 0.92f, 0.93f, 0.94f, 0.95f, 0.96f, 0.97f, 0.98f, 0.99f}),
-      nd::range({{"start", 0.0f}, {"stop", 1.0f}, {"step", 0.01f}}));
+      nd::range(0.0f, 1.0f, 0.01f));
+
+  // Should return the correct size for a step of 1.0 / i
+  for (size_t n = 1; n < 32; ++n) {
+    const nd::array &a = nd::range({{"stop", 1.0}, {"step", 1.0 / n}});
+    EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(n, ndt::make_type<double>()), a.get_type());
+    EXPECT_EQ(0.0, a(0));
+  }
+
+  // Should return exact values for powers of 2
+  for (size_t i = 1; i < 5; ++i) {
+    size_t n = 1 << i;
+    const nd::array &a = nd::range({{"stop", 1.0}, {"step", 1.0 / n}});
+    EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(n, ndt::make_type<double>()), a.get_type());
+    for (size_t j = 0; j < n; ++j) {
+      EXPECT_EQ(a(j), j / n);
+    }
+  }
 }
 
 TEST(Range, Linspace) {

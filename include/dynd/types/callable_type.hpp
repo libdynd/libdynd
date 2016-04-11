@@ -43,13 +43,11 @@ namespace ndt {
 
     const std::vector<type> &get_kwd_types() const { return m_kwd_struct.extended<struct_type>()->get_field_types(); }
 
-    const std::vector<std::string> &get_kwd_names() const
-    {
+    const std::vector<std::string> &get_kwd_names() const {
       return m_kwd_struct.extended<struct_type>()->get_field_names();
     }
 
-    const type &get_pos_type(intptr_t i) const
-    {
+    const type &get_pos_type(intptr_t i) const {
       if (i == -1) {
         return get_return_type();
       }
@@ -61,8 +59,7 @@ namespace ndt {
 
     std::string get_kwd_name(intptr_t i) const { return m_kwd_struct.extended<struct_type>()->get_field_name(i); }
 
-    intptr_t get_kwd_index(const std::string &arg_name) const
-    {
+    intptr_t get_kwd_index(const std::string &arg_name) const {
       return m_kwd_struct.extended<struct_type>()->get_field_index(arg_name);
     }
 
@@ -118,36 +115,32 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
     /** Makes an callable type with both positional and keyword arguments */
-    static type make(const type &ret_tp, const type &tuple_tp, const type &struct_tp)
-    {
+    static type make(const type &ret_tp, const type &tuple_tp, const type &struct_tp) {
       return type(new callable_type(ret_tp, tuple_tp, struct_tp), false);
     }
 
     /** Makes an callable type with both positional and keyword arguments */
     static type make(const type &ret_tp, const std::vector<type> &pos_tp, const std::vector<std::string> &kwd_names,
-                     const std::vector<type> &kwd_tp)
-    {
-      return make(ret_tp, tuple_type::make(pos_tp), struct_type::make(kwd_names, kwd_tp));
+                     const std::vector<type> &kwd_tp) {
+      return make(ret_tp, make_type<tuple_type>(pos_tp), struct_type::make(kwd_names, kwd_tp));
     }
 
     /** Makes an callable type with just positional arguments */
-    static type make(const type &ret_tp, const type &tuple_tp)
-    {
+    static type make(const type &ret_tp, const type &tuple_tp) {
       if (tuple_tp.get_id() != tuple_id) {
-        return make(ret_tp, tuple_type::make({tuple_tp}), struct_type::make());
+        return make(ret_tp, make_type<tuple_type>({tuple_tp}), struct_type::make());
       }
 
       return make(ret_tp, tuple_tp, struct_type::make(tuple_tp.extended<tuple_type>()->is_variadic()));
     }
 
     /** Makes an callable type with just positional arguments */
-    static type make(const type &ret_tp, const std::vector<type> &pos_tp)
-    {
-      return make(ret_tp, tuple_type::make(pos_tp), struct_type::make());
+    static type make(const type &ret_tp, const std::vector<type> &pos_tp) {
+      return make(ret_tp, make_type<tuple_type>(pos_tp), struct_type::make());
     }
 
     /** Makes an callable type with no arguments */
-    static type make(const type &ret_tp) { return make(ret_tp, tuple_type::make(), struct_type::make()); }
+    static type make(const type &ret_tp) { return make(ret_tp, make_type<tuple_type>(), struct_type::make()); }
   };
 
   template <typename R>
@@ -160,8 +153,7 @@ namespace ndt {
     static type equivalent() { return callable_type::make(make_type<R>(), {make_type<A0>(), make_type<A>()...}); }
 
     template <typename... T>
-    static type equivalent(const T &... names)
-    {
+    static type equivalent(const T &... names) {
       size_t num_pos = 1 + sizeof...(A) - sizeof...(T);
       const std::vector<type> tp{make_type<A0>(), make_type<A>()...};
       const std::vector<type> pos(tp.begin(), tp.begin() + num_pos);
