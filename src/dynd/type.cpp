@@ -573,7 +573,7 @@ DYNDT_API map<type_id_t, ndt::reg_info_t> &ndt::detail::infos() {
       {char_id, {make_type<char_type>()}},
       {string_id, {make_type<string_type>()}},
       {tuple_id, {make_type<tuple_type>(true)}},
-      {struct_id, {struct_type::make(true)}},
+      {struct_id, {make_type<struct_type>(true)}},
       {fixed_dim_kind_id, {type()}},
       {fixed_dim_id, {base_fixed_dim_type::make(any_kind_type::make())}},
       {var_dim_id, {var_dim_type::make(any_kind_type::make())}},

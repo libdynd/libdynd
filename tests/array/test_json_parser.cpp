@@ -17,7 +17,6 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/struct_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/parse.hpp>
@@ -25,8 +24,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(JSONParser, UnsignedIntegerLimits)
-{
+TEST(JSONParser, UnsignedIntegerLimits) {
   nd::array n;
 
   n = parse_json(ndt::make_type<uint8_t>(), "0");
@@ -73,8 +71,7 @@ TEST(JSONParser, UnsignedIntegerLimits)
   EXPECT_THROW(parse_json(ndt::make_type<uint128>(), "340282366920938463463374607431768211456"), exception);
 }
 
-TEST(JSONParser, IntFromString)
-{
+TEST(JSONParser, IntFromString) {
   nd::array a;
 
   a = parse_json(ndt::make_type<int>(), "\"123456\"");
@@ -89,8 +86,7 @@ TEST(JSONParser, IntFromString)
   EXPECT_EQ(-12356, a.as<int>());
 }
 
-TEST(JSONParser, BuiltinsFromFloat)
-{
+TEST(JSONParser, BuiltinsFromFloat) {
   nd::array n;
 
   n = parse_json(ndt::make_type<float>(), "123");
@@ -114,12 +110,12 @@ TEST(JSONParser, BuiltinsFromFloat)
   EXPECT_EQ(1.5e2, n.as<double>());
 }
 
-TEST(JSONParser, Struct)
-{
+TEST(JSONParser, Struct) {
   nd::array n;
-  ndt::type sdt = ndt::struct_type::make({"id", "amount", "name", "when"},
-                                         {ndt::make_type<int>(), ndt::make_type<double>(),
-                                          ndt::make_type<ndt::string_type>(), ndt::make_type<ndt::string_type>()});
+  ndt::type sdt = ndt::make_type<ndt::struct_type>({{ndt::make_type<int>(), "id"},
+                                                    {ndt::make_type<double>(), "amount"},
+                                                    {ndt::make_type<ndt::string_type>(), "name"},
+                                                    {ndt::make_type<ndt::string_type>(), "when"}});
 
   // A straightforward struct
   n = parse_json(sdt, "{\"amount\":3.75,\"id\":24601,"
@@ -145,13 +141,14 @@ TEST(JSONParser, Struct)
                invalid_argument);
 }
 
-TEST(JSONParser, NestedStruct)
-{
+TEST(JSONParser, NestedStruct) {
   nd::array n;
-  ndt::type sdt = ndt::struct_type::make(
-      {"position", "amount", "data"}, {ndt::make_fixed_dim(3, ndt::make_type<float>()), ndt::make_type<double>(),
-                                       ndt::struct_type::make({"name", "when"}, {ndt::make_type<ndt::string_type>(),
-                                                                                 ndt::make_type<ndt::string_type>()})});
+  ndt::type sdt = ndt::make_type<ndt::struct_type>(
+      {{ndt::make_fixed_dim(3, ndt::make_type<float>()), "position"},
+       {ndt::make_type<double>(), "amount"},
+       {ndt::make_type<ndt::struct_type>(
+            {{ndt::make_type<ndt::string_type>(), "name"}, {ndt::make_type<ndt::string_type>(), "when"}}),
+        "data"}});
 
   n = parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, "
                       "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] }");
@@ -179,14 +176,14 @@ TEST(JSONParser, NestedStruct)
                invalid_argument);
 }
 
-TEST(JSONParser, ListOfStruct)
-{
+TEST(JSONParser, ListOfStruct) {
   nd::array n;
-  ndt::type sdt = ndt::var_dim_type::make(
-      ndt::struct_type::make({"position", "amount", "data"},
-                             {ndt::make_fixed_dim(3, ndt::make_type<float>()), ndt::make_type<double>(),
-                              ndt::struct_type::make({"name", "when"}, {ndt::make_type<ndt::string_type>(),
-                                                                        ndt::make_type<ndt::string_type>()})}));
+  ndt::type sdt = ndt::make_type<ndt::var_dim_type>(ndt::make_type<ndt::struct_type>(
+      {{ndt::make_fixed_dim(3, ndt::make_type<float>()), "position"},
+       {ndt::make_type<double>(), "amount"},
+       {ndt::make_type<ndt::struct_type>(
+            {{ndt::make_type<ndt::string_type>(), "name"}, {ndt::make_type<ndt::string_type>(), "when"}}),
+        "data"}}));
 
   n = parse_json(sdt, "[{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, \n"
                       "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] },\n"
@@ -213,8 +210,7 @@ TEST(JSONParser, ListOfStruct)
                invalid_argument);
 }
 
-TEST(JSON, ParserWithMissingValue)
-{
+TEST(JSON, ParserWithMissingValue) {
   nd::array a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{\"x\": 7}");
   EXPECT_ARRAY_VALS_EQ(a.p("x"), 7);
   EXPECT_TRUE(a.p("y").is_na());

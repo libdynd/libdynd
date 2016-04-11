@@ -795,6 +795,30 @@ namespace ndt {
     return type(new T(field_tp, variadic), false);
   }
 
+  template <typename T>
+  std::enable_if_t<std::is_base_of<base_type, T>::value, type> make_type(std::initializer_list<std::string> field_names,
+                                                                         std::initializer_list<type> field_tp) {
+    return type(new T(field_names, field_tp), false);
+  }
+
+  template <typename T>
+  std::enable_if_t<std::is_base_of<base_type, T>::value, type>
+  make_type(std::initializer_list<std::pair<type, std::string>> fields) {
+    return type(new T(fields), false);
+  }
+
+  template <typename T>
+  std::enable_if_t<std::is_base_of<base_type, T>::value, type>
+  make_type(std::initializer_list<std::pair<type, std::string>> fields, bool variadic) {
+    return type(new T(fields, variadic), false);
+  }
+
+  template <typename T>
+  std::enable_if_t<std::is_base_of<base_type, T>::value, type>
+  make_type(std::initializer_list<std::string> field_names, std::initializer_list<type> field_tp, bool variadic) {
+    return type(new T(field_names, field_tp, variadic), false);
+  }
+
   /*
   #define DYND_BOOL_NA (2)
   #define DYND_INT8_NA (std::numeric_limits<int8_t>::min())

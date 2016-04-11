@@ -905,7 +905,7 @@ nd::array nd::as_struct(size_t size, const pair<const char *, array> *pairs) {
     types[i] = pairs[i].second.get_type();
   }
 
-  array res = empty(ndt::struct_type::make(names, types));
+  array res = empty(ndt::make_type<ndt::struct_type>(names, types));
   for (size_t i = 0; i < size; ++i) {
     res(i).assign(pairs[i].second);
   }
