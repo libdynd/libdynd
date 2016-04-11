@@ -38,8 +38,7 @@ namespace detail {
 
     scalar_wrapper(const char *metadata, char *data) : m_metadata(metadata), m_data(data) {}
 
-    data_type &operator()(const char *DYND_UNUSED(metadata), char *data)
-    {
+    data_type &operator()(const char *DYND_UNUSED(metadata), char *data) {
       return *reinterpret_cast<data_type *>(data);
     }
   };
@@ -73,8 +72,7 @@ using as_t = typename conditional_make<!std::is_fundamental<typename std::remove
  * Increments the offset value so that it is aligned to the requested alignment
  * NOTE: The alignment must be a power of two.
  */
-inline size_t inc_to_alignment(size_t offset, size_t alignment)
-{
+inline size_t inc_to_alignment(size_t offset, size_t alignment) {
   return (offset + alignment - 1) & (std::size_t)(-(std::ptrdiff_t)alignment);
 }
 
@@ -82,8 +80,7 @@ inline size_t inc_to_alignment(size_t offset, size_t alignment)
  * Increments the pointer value so that it is aligned to the requested alignment
  * NOTE: The alignment must be a power of two.
  */
-inline char *inc_to_alignment(char *ptr, size_t alignment)
-{
+inline char *inc_to_alignment(char *ptr, size_t alignment) {
   return reinterpret_cast<char *>((reinterpret_cast<std::size_t>(ptr) + alignment - 1) &
                                   (std::size_t)(-(std::ptrdiff_t)alignment));
 }
@@ -92,8 +89,7 @@ inline char *inc_to_alignment(char *ptr, size_t alignment)
  * Increments the pointer value so that it is aligned to the requested alignment
  * NOTE: The alignment must be a power of two.
  */
-inline void *inc_to_alignment(void *ptr, size_t alignment)
-{
+inline void *inc_to_alignment(void *ptr, size_t alignment) {
   return reinterpret_cast<char *>((reinterpret_cast<std::size_t>(ptr) + alignment - 1) &
                                   (size_t)(-(std::ptrdiff_t)alignment));
 }
@@ -159,8 +155,7 @@ namespace ndt {
      * or a vector of any of these.
      */
     template <typename T, typename C = typename T::value_type>
-    std::enable_if_t<is_vector<T>::value, const T> &property(const char *name) const
-    {
+    std::enable_if_t<is_vector<T>::value, const T> &property(const char *name) const {
       const std::pair<ndt::type, const char *> pair = get_properties()[name];
       const ndt::type &dt = pair.first.get_dtype();
 
@@ -176,8 +171,7 @@ namespace ndt {
     }
 
     template <typename T>
-    std::enable_if_t<!is_vector<T>::value, const T> &property(const char *name) const
-    {
+    std::enable_if_t<!is_vector<T>::value, const T> &property(const char *name) const {
       const std::pair<ndt::type, const char *> pair = get_properties()[name];
 
       if (pair.first.get_id() == property_type_id_of<T>::value) {
@@ -204,8 +198,7 @@ namespace ndt {
     /** Construct from a string representation */
     type(const char *rep_begin, const char *rep_end);
 
-    bool operator==(const type &rhs) const
-    {
+    bool operator==(const type &rhs) const {
       return m_ptr == rhs.m_ptr || (!is_builtin() && !rhs.is_builtin() && *m_ptr == *rhs.m_ptr);
     }
 
@@ -249,12 +242,10 @@ namespace ndt {
      *
      * \returns  The type that results from the indexing operation.
      */
-    type at_single(intptr_t i0, const char **inout_arrmeta = NULL, const char **inout_data = NULL) const
-    {
+    type at_single(intptr_t i0, const char **inout_arrmeta = NULL, const char **inout_data = NULL) const {
       if (!is_builtin()) {
         return m_ptr->at_single(i0, inout_arrmeta, inout_data);
-      }
-      else {
+      } else {
         throw too_many_indices(*this, 1, 0);
       }
     }
@@ -271,21 +262,18 @@ namespace ndt {
     type at(const irange &i0) const { return at_array(1, &i0); }
 
     /** Indexing with two index values */
-    type at(const irange &i0, const irange &i1) const
-    {
+    type at(const irange &i0, const irange &i1) const {
       irange i[2] = {i0, i1};
       return at_array(2, i);
     }
 
     /** Indexing with three index values */
-    type at(const irange &i0, const irange &i1, const irange &i2) const
-    {
+    type at(const irange &i0, const irange &i1, const irange &i2) const {
       irange i[3] = {i0, i1, i2};
       return at_array(3, i);
     }
     /** Indexing with four index values */
-    type at(const irange &i0, const irange &i1, const irange &i2, const irange &i3) const
-    {
+    type at(const irange &i0, const irange &i1, const irange &i2, const irange &i3) const {
       irange i[4] = {i0, i1, i2, i3};
       return at_array(4, i);
     }
@@ -309,8 +297,7 @@ namespace ndt {
      */
     bool match(const ndt::type &candidate_tp, std::map<std::string, ndt::type> &tp_vars) const;
 
-    bool match(const type &other) const
-    {
+    bool match(const type &other) const {
       std::map<std::string, type> tp_vars;
       return match(other, tp_vars);
     }
@@ -321,13 +308,11 @@ namespace ndt {
      * \param name  The property to access.
      */
     template <typename T>
-    const T &p(const char *name) const
-    {
+    const T &p(const char *name) const {
       return property<T>(name);
     }
     template <typename T>
-    const T &p(const std::string &name) const
-    {
+    const T &p(const std::string &name) const {
       return property<T>(name.c_str());
     }
 
@@ -357,12 +342,10 @@ namespace ndt {
      * inspired by the approach in NumPy, and the intention is
      * to have the default
      */
-    type_id_t get_id() const
-    {
+    type_id_t get_id() const {
       if (is_builtin()) {
         return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr));
-      }
-      else {
+      } else {
         return m_ptr->get_id();
       }
     }
@@ -386,12 +369,10 @@ namespace ndt {
     /** The element size of the type when default-constructed */
     size_t get_default_data_size() const;
 
-    size_t get_arrmeta_size() const
-    {
+    size_t get_arrmeta_size() const {
       if (is_builtin()) {
         return 0;
-      }
-      else {
+      } else {
         return m_ptr->get_arrmeta_size();
       }
     }
@@ -411,12 +392,10 @@ namespace ndt {
      *
      * \param subarray_tp  Testing if it is a subarray of 'this'.
      */
-    bool is_type_subarray(const ndt::type &subarray_tp) const
-    {
+    bool is_type_subarray(const ndt::type &subarray_tp) const {
       if (is_builtin()) {
         return *this == subarray_tp;
-      }
-      else {
+      } else {
         return m_ptr->is_type_subarray(subarray_tp);
       }
     }
@@ -425,18 +404,15 @@ namespace ndt {
      * Returns true if the type represents a chunk of
      * consecutive memory of raw data.
      */
-    bool is_pod() const
-    {
+    bool is_pod() const {
       if (is_builtin()) {
         return true;
-      }
-      else {
+      } else {
         return m_ptr->get_data_size() > 0 && (m_ptr->get_flags() & (type_flag_blockref | type_flag_destructor)) == 0;
       }
     }
 
-    bool is_c_contiguous(const char *arrmeta) const
-    {
+    bool is_c_contiguous(const char *arrmeta) const {
       if (is_builtin()) {
         return true;
       }
@@ -452,12 +428,10 @@ namespace ndt {
      * Returns true if the type contains any expression
      * type within it somewhere.
      */
-    bool is_expression() const
-    {
+    bool is_expression() const {
       if (is_builtin()) {
         return false;
-      }
-      else {
+      } else {
         return m_ptr->is_expression();
       }
     }
@@ -509,22 +483,18 @@ namespace ndt {
      * whereever appropriate. For example, an offset-based uniform array
      * would be replaced by a strided uniform array.
      */
-    type get_canonical_type() const
-    {
+    type get_canonical_type() const {
       if (is_builtin()) {
         return *this;
-      }
-      else {
+      } else {
         return m_ptr->get_canonical_type();
       }
     }
 
-    uint32_t get_flags() const
-    {
+    uint32_t get_flags() const {
       if (is_builtin()) {
         return type_flag_none;
-      }
-      else {
+      } else {
         return m_ptr->get_flags();
       }
     }
@@ -532,12 +502,10 @@ namespace ndt {
     /**
      * Gets the number of array dimensions in the type.
      */
-    intptr_t get_ndim() const
-    {
+    intptr_t get_ndim() const {
       if (is_builtin()) {
         return 0;
-      }
-      else {
+      } else {
         return m_ptr->get_ndim();
       }
     }
@@ -547,12 +515,10 @@ namespace ndt {
      * The initial arrmeta for this type begins with this many
      * strided_dim_type_arrmeta instances.
      */
-    intptr_t get_strided_ndim() const
-    {
+    intptr_t get_strided_ndim() const {
       if (is_builtin()) {
         return 0;
-      }
-      else {
+      } else {
         return m_ptr->get_strided_ndim();
       }
     }
@@ -564,16 +530,13 @@ namespace ndt {
      * \param inout_arrmeta  If non-NULL, is a pointer to arrmeta to advance
      *                       in place.
      */
-    type get_dtype(size_t include_ndim = 0, char **inout_arrmeta = NULL) const
-    {
+    type get_dtype(size_t include_ndim = 0, char **inout_arrmeta = NULL) const {
       size_t ndim = get_ndim();
       if (ndim == include_ndim) {
         return *this;
-      }
-      else if (ndim > include_ndim) {
+      } else if (ndim > include_ndim) {
         return m_ptr->get_type_at_dimension(inout_arrmeta, ndim - include_ndim);
-      }
-      else {
+      } else {
         std::stringstream ss;
         ss << "Cannot use " << include_ndim << " array ";
         ss << "dimensions from dynd type " << *this;
@@ -582,8 +545,7 @@ namespace ndt {
       }
     }
 
-    type get_dtype(size_t include_ndim, const char **inout_arrmeta) const
-    {
+    type get_dtype(size_t include_ndim, const char **inout_arrmeta) const {
       return get_dtype(include_ndim, const_cast<char **>(inout_arrmeta));
     }
 
@@ -591,28 +553,23 @@ namespace ndt {
 
     intptr_t get_size(const char *arrmeta) const;
 
-    type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const
-    {
+    type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const {
       if (!is_builtin()) {
         return m_ptr->get_type_at_dimension(inout_arrmeta, i, total_ndim);
-      }
-      else if (i == 0) {
+      } else if (i == 0) {
         return *this;
-      }
-      else {
+      } else {
         throw too_many_indices(*this, total_ndim + i, total_ndim);
       }
     }
 
-    void get_vars(std::unordered_set<std::string> &vars) const
-    {
+    void get_vars(std::unordered_set<std::string> &vars) const {
       if (!is_builtin()) {
         m_ptr->get_vars(vars);
       }
     }
 
-    std::unordered_set<std::string> get_vars() const
-    {
+    std::unordered_set<std::string> get_vars() const {
       std::unordered_set<std::string> vars;
       get_vars(vars);
 
@@ -635,8 +592,7 @@ namespace ndt {
      * a valid cast, the caller MUST check this itself.
      */
     template <class T>
-    const T *extended() const
-    {
+    const T *extended() const {
       // TODO: In debug mode, assert the type id
       return static_cast<const T *>(m_ptr);
     }
@@ -673,12 +629,10 @@ namespace ndt {
                         const char **out_el_arrmeta) const;
 
     /** The size of the data required for uniform iteration */
-    size_t get_iterdata_size(intptr_t ndim) const
-    {
+    size_t get_iterdata_size(intptr_t ndim) const {
       if (is_builtin()) {
         return 0;
-      }
-      else {
+      } else {
         return m_ptr->get_iterdata_size(ndim);
       }
     }
@@ -696,27 +650,23 @@ namespace ndt {
      *                          element
      */
     void iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim, const intptr_t *shape,
-                            type &out_uniform_type) const
-    {
+                            type &out_uniform_type) const {
       if (!is_builtin()) {
         m_ptr->iterdata_construct(iterdata, inout_arrmeta, ndim, shape, out_uniform_type);
       }
     }
 
     /** Destructs any references or other state contained in the iterdata */
-    void iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const
-    {
+    void iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const {
       if (!is_builtin()) {
         m_ptr->iterdata_destruct(iterdata, ndim);
       }
     }
 
-    size_t get_broadcasted_iterdata_size(intptr_t ndim) const
-    {
+    size_t get_broadcasted_iterdata_size(intptr_t ndim) const {
       if (is_builtin()) {
         return sizeof(iterdata_broadcasting_terminator);
-      }
-      else {
+      } else {
         return m_ptr->get_iterdata_size(ndim) + sizeof(iterdata_broadcasting_terminator);
       }
     }
@@ -735,13 +685,11 @@ namespace ndt {
      *                        element
      */
     void broadcasted_iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim,
-                                        const intptr_t *shape, type &out_uniform_tp) const
-    {
+                                        const intptr_t *shape, type &out_uniform_tp) const {
       size_t size;
       if (is_builtin()) {
         size = 0;
-      }
-      else {
+      } else {
         size = m_ptr->iterdata_construct(iterdata, inout_arrmeta, ndim, shape, out_uniform_tp);
       }
       iterdata_broadcasting_terminator *id =
@@ -760,8 +708,7 @@ namespace ndt {
      */
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
-    std::string str() const
-    {
+    std::string str() const {
       std::stringstream ss;
       ss << *this;
       return ss.str();
@@ -787,8 +734,7 @@ namespace ndt {
      * Returns the equivalent type.
      */
     template <typename T, typename... ArgTypes>
-    auto _make_type(int, ArgTypes &&... args) -> decltype(traits<T>::equivalent(std::forward<ArgTypes>(args)...))
-    {
+    auto _make_type(int, ArgTypes &&... args) -> decltype(traits<T>::equivalent(std::forward<ArgTypes>(args)...)) {
       return traits<T>::equivalent(std::forward<ArgTypes>(args)...);
     }
 
@@ -796,8 +742,7 @@ namespace ndt {
      * Returns the equivalent type.
      */
     template <typename T, typename... ArgTypes>
-    auto _make_type(char, ArgTypes &&... DYND_UNUSED(args)) -> decltype(traits<T>::equivalent())
-    {
+    auto _make_type(char, ArgTypes &&... DYND_UNUSED(args)) -> decltype(traits<T>::equivalent()) {
       return traits<T>::equivalent();
     }
 
@@ -807,32 +752,27 @@ namespace ndt {
    * Returns the equivalent type.
    */
   template <typename T, typename... ArgTypes>
-  auto make_type(ArgTypes &&... args) -> decltype(detail::_make_type<T>(0, std::forward<ArgTypes>(args)...))
-  {
+  auto make_type(ArgTypes &&... args) -> decltype(detail::_make_type<T>(0, std::forward<ArgTypes>(args)...)) {
     return detail::_make_type<T>(0, std::forward<ArgTypes>(args)...);
   }
 
   template <typename ValueType>
-  type type_for(const ValueType &value)
-  {
+  type type_for(const ValueType &value) {
     return make_type<ValueType>(value);
   }
 
   template <typename ValueType>
-  type type_for(const std::initializer_list<ValueType> &values)
-  {
+  type type_for(const std::initializer_list<ValueType> &values) {
     return make_type<std::initializer_list<ValueType>>(values);
   }
 
   template <typename ValueType>
-  type type_for(const std::initializer_list<std::initializer_list<ValueType>> &values)
-  {
+  type type_for(const std::initializer_list<std::initializer_list<ValueType>> &values) {
     return make_type<std::initializer_list<std::initializer_list<ValueType>>>(values);
   }
 
   template <typename ValueType>
-  type type_for(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
-  {
+  type type_for(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values) {
     return make_type<std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>>>(values);
   }
 
@@ -840,9 +780,19 @@ namespace ndt {
    * Allocates and constructs a type with a use count of 1.
    */
   template <typename T, typename... ArgTypes>
-  std::enable_if_t<std::is_base_of<base_type, T>::value, type> make_type(ArgTypes &&... args)
-  {
+  std::enable_if_t<std::is_base_of<base_type, T>::value, type> make_type(ArgTypes &&... args) {
     return type(new T(std::forward<ArgTypes>(args)...), false);
+  }
+
+  template <typename T>
+  std::enable_if_t<std::is_base_of<base_type, T>::value, type> make_type(std::initializer_list<type> field_tp) {
+    return type(new T(field_tp), false);
+  }
+
+  template <typename T>
+  std::enable_if_t<std::is_base_of<base_type, T>::value, type> make_type(std::initializer_list<type> field_tp,
+                                                                         bool variadic) {
+    return type(new T(field_tp, variadic), false);
   }
 
   /*
@@ -1134,8 +1084,7 @@ namespace ndt {
 
     static type equivalent() { return make_type<typename std::underlying_type<assign_error_mode>::type>(); }
 
-    static assign_error_mode na()
-    {
+    static assign_error_mode na() {
       return static_cast<assign_error_mode>(traits<typename std::underlying_type<assign_error_mode>::type>::na());
     }
   };
@@ -1156,8 +1105,7 @@ namespace ndt {
 
     static const bool is_same_layout = false;
 
-    static type equivalent(const ContainerType &values)
-    {
+    static type equivalent(const ContainerType &values) {
       intptr_t shape[ndim];
       container_traits::shape(shape, values);
 
@@ -1165,8 +1113,7 @@ namespace ndt {
       for (intptr_t i = ndim - 1; i >= 0; --i) {
         if (shape[i] == -1) {
           tp = make_var_dim(tp);
-        }
-        else {
+        } else {
           tp = make_fixed_dim(shape[i], tp);
         }
       }
@@ -1174,8 +1121,7 @@ namespace ndt {
       return tp;
     }
 
-    static void shape(intptr_t *res, const ContainerType &values)
-    {
+    static void shape(intptr_t *res, const ContainerType &values) {
       res[0] = values.size();
 
       auto iter = values.begin();
@@ -1202,8 +1148,7 @@ namespace ndt {
 
     static const bool is_same_layout = false;
 
-    static type equivalent(const ContainerType &values)
-    {
+    static type equivalent(const ContainerType &values) {
       intptr_t size;
       shape(&size, values);
 
@@ -1217,12 +1162,10 @@ namespace ndt {
 
   template <typename ValueType>
   struct traits<std::initializer_list<ValueType>>
-      : container_traits<std::initializer_list<ValueType>, traits<ValueType>::ndim + 1> {
-  };
+      : container_traits<std::initializer_list<ValueType>, traits<ValueType>::ndim + 1> {};
 
   template <typename ValueType>
-  struct traits<std::vector<ValueType>> : container_traits<std::vector<ValueType>, traits<ValueType>::ndim + 1> {
-  };
+  struct traits<std::vector<ValueType>> : container_traits<std::vector<ValueType>, traits<ValueType>::ndim + 1> {};
 
   /**
     * Returns the common type of two types. For built-in types, this is analogous to
@@ -1264,8 +1207,7 @@ namespace ndt {
    * \param dtype  The data type of each array element.
    */
   template <int N>
-  inline type make_type(intptr_t ndim, const intptr_t *shape, const char(&dtype)[N])
-  {
+  inline type make_type(intptr_t ndim, const intptr_t *shape, const char(&dtype)[N]) {
     return make_type(ndim, shape, ndt::type(dtype));
   }
 

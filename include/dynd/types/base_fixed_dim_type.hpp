@@ -62,16 +62,14 @@ namespace ndt {
 
     static type make(const type &element_tp) { return type(new base_fixed_dim_type(element_tp), false); }
 
-    static type make(const type &element_tp, intptr_t ndim)
-    {
+    static type make(const type &element_tp, intptr_t ndim) {
       if (ndim > 0) {
         type result = make(element_tp);
         for (intptr_t i = 1; i < ndim; ++i) {
           result = make(result);
         }
         return result;
-      }
-      else {
+      } else {
         return element_tp;
       }
     }
@@ -79,8 +77,7 @@ namespace ndt {
 
   DYNDT_API type make_fixed_dim_kind(const type &element_tp);
 
-  inline type make_fixed_dim_kind(const type &uniform_tp, intptr_t ndim)
-  {
+  inline type make_fixed_dim_kind(const type &uniform_tp, intptr_t ndim) {
     return base_fixed_dim_type::make(uniform_tp, ndim);
   }
 
@@ -94,6 +91,8 @@ namespace ndt {
   struct traits<const T[]> {
     static type equivalent() { return make_type<T[]>(); }
   };
+
+  typedef base_fixed_dim_type fixed_dim_kind_type;
 
 } // namespace dynd::ndt
 } // namespace dynd

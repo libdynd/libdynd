@@ -22,8 +22,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(SymbolicTypes, CreateFuncProto)
-{
+TEST(SymbolicTypes, CreateFuncProto) {
   ndt::type tp;
   const ndt::callable_type *fpt;
 
@@ -76,8 +75,7 @@ TEST(SymbolicTypes, CreateFuncProto)
   EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_pos_type(1));
 }
 
-TEST(SymbolicTypes, CreateTypeVar)
-{
+TEST(SymbolicTypes, CreateTypeVar) {
   ndt::type tp;
   const ndt::typevar_type *tvt;
 
@@ -107,8 +105,7 @@ TEST(SymbolicTypes, CreateTypeVar)
   EXPECT_THROW(ndt::typevar_type::make("Two+"), type_error);
 }
 
-TEST(SymbolicTypes, CreateTypeVarDim)
-{
+TEST(SymbolicTypes, CreateTypeVarDim) {
   ndt::type tp;
   const ndt::typevar_dim_type *tvt;
 
@@ -139,8 +136,7 @@ TEST(SymbolicTypes, CreateTypeVarDim)
   EXPECT_THROW(ndt::typevar_dim_type::make("Two+", ndt::make_type<int>()), type_error);
 }
 
-TEST(SymbolicTypes, CreateEllipsisDim)
-{
+TEST(SymbolicTypes, CreateEllipsisDim) {
   ndt::type tp;
   const ndt::ellipsis_dim_type *et;
 
@@ -192,8 +188,7 @@ TEST(SymbolicTypes, CreateEllipsisDim)
   EXPECT_THROW(ndt::make_ellipsis_dim("Two+", ndt::make_type<int>()), type_error);
 }
 
-TEST(SymbolicTypes, AnySym)
-{
+TEST(SymbolicTypes, AnySym) {
   ndt::type tp;
 
   tp = ndt::any_kind_type::make();
@@ -242,8 +237,7 @@ TEST(SymbolicTypes, AnySym)
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }
 
-TEST(SymbolicTypes, TypeTypeWithPattern)
-{
+TEST(SymbolicTypes, TypeTypeWithPattern) {
   ndt::type tp;
 
   tp = ndt::make_type<ndt::type_type>(ndt::type("N * int32"));
@@ -255,11 +249,10 @@ TEST(SymbolicTypes, TypeTypeWithPattern)
   EXPECT_THROW(ndt::type("type | 4 * int32"), type_error);
 }
 
-TEST(SymbolicTypes, VariadicTuple)
-{
+TEST(SymbolicTypes, VariadicTuple) {
   ndt::type tp;
 
-  tp = ndt::tuple_type::make({ndt::make_type<int>(), ndt::make_type<float>()}, true);
+  tp = ndt::make_type<ndt::tuple_type>({ndt::make_type<int>(), ndt::make_type<float>()}, true);
   EXPECT_EQ(tuple_id, tp.get_id());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.extended<ndt::tuple_type>()->is_variadic());
@@ -273,8 +266,7 @@ TEST(SymbolicTypes, VariadicTuple)
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }
 
-TEST(SymbolicTypes, VariadicStruct)
-{
+TEST(SymbolicTypes, VariadicStruct) {
   ndt::type tp;
 
   tp = ndt::struct_type::make({"x", "y"}, {ndt::make_type<int>(), ndt::make_type<float>()}, true);
@@ -292,8 +284,7 @@ TEST(SymbolicTypes, VariadicStruct)
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }
 
-TEST(SymbolicTypes, VariadicCallable)
-{
+TEST(SymbolicTypes, VariadicCallable) {
   ndt::type tp;
 
   tp = ndt::type("(int32, ...) -> float32");
