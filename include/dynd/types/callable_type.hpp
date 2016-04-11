@@ -76,10 +76,10 @@ namespace ndt {
     intptr_t get_narg() const { return get_npos() + get_nkwd(); }
 
     /** Returns the number of positional arguments. */
-    intptr_t get_npos() const { return m_pos_tuple.extended<tuple_type>()->get_field_count(); }
+    size_t get_npos() const { return m_pos_tuple.extended<tuple_type>()->get_field_count(); }
 
     /** Returns the number of keyword arguments. */
-    intptr_t get_nkwd() const { return m_kwd_struct.extended<tuple_type>()->get_field_count(); }
+    size_t get_nkwd() const { return m_kwd_struct.extended<tuple_type>()->get_field_count(); }
 
     /** Returns the number of optional arguments. */
     intptr_t get_nopt() const { return m_opt_kwd_indices.size(); }

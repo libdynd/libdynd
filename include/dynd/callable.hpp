@@ -42,7 +42,7 @@ namespace nd {
       return false;
     }
 
-    DYND_API void check_narg(const ndt::callable_type *af_tp, intptr_t narg);
+    DYND_API void check_narg(const ndt::callable_type *af_tp, size_t narg);
 
     DYND_API void check_arg(const ndt::callable_type *af_tp, intptr_t i, const ndt::type &actual_tp,
                             const char *actual_arrmeta, std::map<std::string, ndt::type> &tp_vars);
@@ -57,9 +57,6 @@ namespace nd {
     struct make_all_if;
 
   } // namespace dynd::nd::detail
-
-  typedef array callable_arg_t;
-  typedef std::pair<const char *, array> callable_kwd_t;
 
   /**
    * Holds a single instance of a callable in an nd::array,
@@ -131,8 +128,7 @@ namespace nd {
       return specialize(ret_tp, arg_tp.size(), arg_tp.begin());
     }
 
-    array call(size_t args_size, const array *args_values, size_t kwds_size,
-               const std::pair<const char *, array> *kwds_values) const;
+    array call(size_t narg, const array *args, size_t nkwd, const std::pair<const char *, array> *unordered_kwds) const;
 
     template <typename... ArgTypes>
     array operator()(ArgTypes &&... args) const {
