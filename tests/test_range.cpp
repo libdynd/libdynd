@@ -52,11 +52,11 @@ TEST(Range, Range) {
   }
 
   // Should return exact values for powers of 2
-  for (size_t i = 1; i < 5; ++i) {
-    size_t n = 1 << i;
+  for (int i = 1; i < 5; ++i) {
+    int n = 1 << i;
     const nd::array &a = nd::range({{"stop", 1.0}, {"step", 1.0 / n}});
     EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(n, ndt::make_type<double>()), a.get_type());
-    for (size_t j = 0; j < n; ++j) {
+    for (int j = 0; j < n; ++j) {
       EXPECT_EQ(a(j), j / n);
     }
   }

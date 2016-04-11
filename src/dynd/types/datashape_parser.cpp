@@ -871,7 +871,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end, map<std::str
   if (parse_token_ds(begin, end, '}')) {
     // Empty struct
     rbegin = begin;
-    return ndt::struct_type::make();
+    return ndt::make_type<ndt::struct_type>();
   }
   for (;;) {
     if (parse_token_ds(begin, end, "...")) {
@@ -903,7 +903,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end, map<std::str
   }
 
   rbegin = begin;
-  return ndt::struct_type::make(field_name_list, field_type_list, variadic);
+  return ndt::make_type<ndt::struct_type>(field_name_list, field_type_list, variadic);
 }
 
 // funcproto_kwds : record_item, record_item*
@@ -946,7 +946,7 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end, map<
   }
 
   rbegin = begin;
-  return ndt::struct_type::make(field_name_list, field_type_list, variadic);
+  return ndt::make_type<ndt::struct_type>(field_name_list, field_type_list, variadic);
 }
 
 // tuple : LPAREN tuple_item tuple_item* RPAREN

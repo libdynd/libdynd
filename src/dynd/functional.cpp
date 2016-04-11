@@ -210,7 +210,8 @@ nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const
 
   return make_callable<neighborhood_callable<1>>(
       ndt::callable_type::make(funcproto_tp->get_pos_type(0).with_replaced_dtype(funcproto_tp->get_return_type()),
-                               funcproto_tp->get_pos_tuple(), ndt::struct_type::make({"shape", "offset"}, arg_tp)),
+                               funcproto_tp->get_pos_tuple(),
+                               ndt::make_type<ndt::struct_type>(std::vector<std::string>{"shape", "offset"}, arg_tp)),
       neighborhood_op, boundary_child);
 }
 

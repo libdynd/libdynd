@@ -269,7 +269,7 @@ TEST(SymbolicTypes, VariadicTuple) {
 TEST(SymbolicTypes, VariadicStruct) {
   ndt::type tp;
 
-  tp = ndt::struct_type::make({"x", "y"}, {ndt::make_type<int>(), ndt::make_type<float>()}, true);
+  tp = ndt::make_type<ndt::struct_type>({{ndt::make_type<int>(), "x"}, {ndt::make_type<float>(), "y"}}, true);
   EXPECT_EQ(struct_id, tp.get_id());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.extended<ndt::struct_type>()->is_variadic());

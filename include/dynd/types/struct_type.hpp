@@ -27,6 +27,10 @@ namespace ndt {
     struct_type(const std::vector<std::string> &field_names, const std::vector<type> &field_types,
                 bool variadic = false);
 
+    struct_type(const std::vector<std::pair<type, std::string>> &fields, bool variadic = false);
+
+    struct_type(bool variadic = false) : struct_type({}, variadic) {}
+
     /** The array of the field names */
     const std::vector<std::string> &get_field_names() const { return m_field_names; }
     const std::string &get_field_name(intptr_t i) const { return m_field_names[i]; }
@@ -53,8 +57,7 @@ namespace ndt {
     const type &get_field_type(const std::string &field_name) const;
     const type &get_field_type(intptr_t i) const;
 
-    inline const uintptr_t *get_data_offsets(const char *arrmeta) const
-    {
+    inline const uintptr_t *get_data_offsets(const char *arrmeta) const {
       return reinterpret_cast<const uintptr_t *>(arrmeta);
     }
 
@@ -84,16 +87,6 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
     virtual bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
-
-    /** Makes a struct type with the specified fields */
-    static type make(const std::vector<std::string> &field_names, const std::vector<type> &field_types,
-                     bool variadic = false)
-    {
-      return type(new struct_type(field_names, field_types, variadic), false);
-    }
-
-    /** Makes an empty struct type */
-    static type make(bool variadic = false) { return make(std::vector<std::string>(), std::vector<type>(), variadic); }
   };
 
 } // namespace dynd::ndt
