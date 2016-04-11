@@ -17,8 +17,7 @@
 #include <dynd/functional.hpp>
 #include <dynd/option.hpp>
 
-inline std::string ShapeFormatter(const std::vector<intptr_t> &shape)
-{
+inline std::string ShapeFormatter(const std::vector<intptr_t> &shape) {
   std::stringstream ss;
   ss << "(";
   for (size_t i = 0, i_end = shape.size(); i != i_end; ++i) {
@@ -32,8 +31,7 @@ inline std::string ShapeFormatter(const std::vector<intptr_t> &shape)
 }
 
 inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const char *expr2, const dynd::nd::array &val1,
-                                                    const dynd::nd::array &val2)
-{
+                                                    const dynd::nd::array &val2) {
   using namespace dynd;
 
   if (val1.get_type().get_id() == cuda_device_id && val2.get_type().get_id() == cuda_device_id) {
@@ -42,19 +40,16 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
 
   if (val1.equals_exact(val2)) {
     return ::testing::AssertionSuccess();
-  }
-  else {
+  } else {
     if (val1.get_type() != val2.get_type()) {
       return ::testing::AssertionFailure() << "The types of " << expr1 << " and " << expr2 << " do not match\n" << expr1
                                            << " has type " << val1.get_type() << ",\n" << expr2 << " has type "
                                            << val2.get_type() << ".";
-    }
-    else if (val1.get_shape() != val2.get_shape()) {
+    } else if (val1.get_shape() != val2.get_shape()) {
       return ::testing::AssertionFailure() << "The shapes of " << expr1 << " and " << expr2 << " do not match\n"
                                            << expr1 << " has shape " << ShapeFormatter(val1.get_shape()) << ",\n"
                                            << expr2 << " has shape " << ShapeFormatter(val2.get_shape()) << ".";
-    }
-    else if (val1.get_type().get_id() == struct_id) {
+    } else if (val1.get_type().get_id() == struct_id) {
       const ndt::struct_type *bsd = val1.get_type().extended<ndt::struct_type>();
       intptr_t field_count = bsd->get_field_count();
       for (intptr_t i = 0; i < field_count; ++i) {
@@ -68,8 +63,7 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
       }
       return ::testing::AssertionFailure() << "DYND ASSERTION INTERNAL ERROR: One of the struct fields "
                                               "should have compared unequal";
-    }
-    else if (val1.get_type().get_id() == tuple_id) {
+    } else if (val1.get_type().get_id() == tuple_id) {
       const ndt::tuple_type *bsd = val1.get_type().extended<ndt::tuple_type>();
       intptr_t field_count = bsd->get_field_count();
       for (intptr_t i = 0; i < field_count; ++i) {
@@ -82,8 +76,7 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
       }
       return ::testing::AssertionFailure() << "DYND ASSERTION INTERNAL ERROR: One of the tuple fields "
                                               "should have compared unequal";
-    }
-    else if (val1.get_ndim() > 0) {
+    } else if (val1.get_ndim() > 0) {
       intptr_t dim_size = val1.get_dim_size();
       for (intptr_t i = 0; i < dim_size; ++i) {
         nd::array sub1 = val1(i), sub2 = val2(i);
@@ -97,8 +90,7 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
                                               "should have compared unequal\n"
                                            << expr1 << " has value " << val1 << ",\n" << expr2 << " has value " << val2
                                            << ".";
-    }
-    else {
+    } else {
       return ::testing::AssertionFailure() << "The values of " << expr1 << " and " << expr2 << " do not match\n"
                                            << expr1 << " has value " << val1 << ",\n" << expr2 << " has value " << val2
                                            << ".";
@@ -107,14 +99,12 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
 }
 
 inline ::testing::AssertionResult CompareDyNDArrayValues(const char *expr1, const char *expr2,
-                                                         const dynd::nd::array &val1, const dynd::nd::array &val2)
-{
+                                                         const dynd::nd::array &val1, const dynd::nd::array &val2) {
   using namespace dynd;
   ndt::type common_tp;
   try {
     common_tp = promote_types_arithmetic(val1.get_type(), val2.get_type());
-  }
-  catch (const type_error &) {
+  } catch (const type_error &) {
     return ::testing::AssertionFailure() << "The types of " << expr1 << " and " << expr2
                                          << " do not have mutually promotable types\n" << expr1 << " has type "
                                          << val1.get_type() << ",\n" << expr2 << " has type " << val2.get_type() << ".";
@@ -126,8 +116,7 @@ inline ::testing::AssertionResult CompareDyNDArrayValues(const char *expr1, cons
 }
 
 inline ::testing::AssertionResult CompareDyNDArrayToJSON(const char *expr1, const char *expr2, const char *json,
-                                                         const dynd::nd::array &b)
-{
+                                                         const dynd::nd::array &b) {
   using namespace dynd;
   nd::array a(nd::empty(b.get_type()));
   parse_json(a, json);
@@ -135,12 +124,10 @@ inline ::testing::AssertionResult CompareDyNDArrayToJSON(const char *expr1, cons
 }
 
 inline ::testing::AssertionResult MatchNdtTypes(const char *expr1, const char *expr2, const dynd::ndt::type &pattern,
-                                                const dynd::ndt::type &candidate)
-{
+                                                const dynd::ndt::type &candidate) {
   if (pattern.match(candidate)) {
     return ::testing::AssertionSuccess();
-  }
-  else {
+  } else {
     return ::testing::AssertionFailure() << "The type of candidate " << expr2 << " does not match pattern " << expr1
                                          << "\n" << expr1 << " has value " << pattern << ",\n" << expr2 << " has value "
                                          << candidate << ".";
@@ -148,40 +135,36 @@ inline ::testing::AssertionResult MatchNdtTypes(const char *expr1, const char *e
 }
 
 inline ::testing::AssertionResult MatchNdtTypes(const char *expr1, const char *expr2, const char *pattern,
-                                                const dynd::ndt::type &candidate)
-{
+                                                const dynd::ndt::type &candidate) {
   return MatchNdtTypes(expr1, expr2, dynd::ndt::type(pattern), candidate);
 }
 
 inline ::testing::AssertionResult MatchNdtTypes(const char *expr1, const char *expr2, const dynd::ndt::type &pattern,
-                                                const char *candidate)
-{
+                                                const char *candidate) {
   return MatchNdtTypes(expr1, expr2, pattern, dynd::ndt::type(candidate));
 }
 
 inline ::testing::AssertionResult MatchNdtTypes(const char *expr1, const char *expr2, const char *pattern,
-                                                const char *candidate)
-{
+                                                const char *candidate) {
   return MatchNdtTypes(expr1, expr2, dynd::ndt::type(pattern), dynd::ndt::type(candidate));
 }
 
 inline ::testing::AssertionResult CompareNdtTypeToString(const char *DYND_UNUSED(expr1), const char *DYND_UNUSED(expr2),
-                                                         const char *repr, const dynd::ndt::type &t)
-{
+                                                         const char *repr, const dynd::ndt::type &t) {
   std::stringstream ss;
 
   ss << t;
   if (repr == ss.str()) {
     return ::testing::AssertionSuccess();
-  }
-  else {
-    return ::testing::AssertionFailure() << "expected repr: " << "\"" << repr << "\" "
-                                         << "actual repr: " << "\"" << t << "\"";
+  } else {
+    return ::testing::AssertionFailure() << "expected repr: "
+                                         << "\"" << repr << "\" "
+                                         << "actual repr: "
+                                         << "\"" << t << "\"";
   }
 }
 
-inline ::testing::AssertionResult ExpectAllTrue(const char *DYND_UNUSED(expr1), const dynd::nd::array actual)
-{
+inline ::testing::AssertionResult ExpectAllTrue(const char *DYND_UNUSED(expr1), const dynd::nd::array actual) {
   if (actual.as<bool>()) {
     return ::testing::AssertionSuccess();
   }
@@ -189,8 +172,7 @@ inline ::testing::AssertionResult ExpectAllTrue(const char *DYND_UNUSED(expr1), 
   return ::testing::AssertionFailure();
 }
 
-inline ::testing::AssertionResult ExpectAllFalse(const char *DYND_UNUSED(expr1), const dynd::nd::array actual)
-{
+inline ::testing::AssertionResult ExpectAllFalse(const char *DYND_UNUSED(expr1), const dynd::nd::array actual) {
   if (!actual.as<bool>()) {
     return ::testing::AssertionSuccess();
   }
@@ -239,8 +221,7 @@ inline ::testing::AssertionResult ExpectAllFalse(const char *DYND_UNUSED(expr1),
  */
 #define EXPECT_TYPE_REPR_EQ(expected, actual) EXPECT_PRED_FORMAT2(CompareNdtTypeToString, expected, actual)
 
-inline float rel_error(float expected, float actual)
-{
+inline float rel_error(float expected, float actual) {
   if ((expected == 0.0f) && (actual == 0.0f)) {
     return 0.0f;
   }
@@ -248,13 +229,11 @@ inline float rel_error(float expected, float actual)
   return fabs(1.0f - actual / expected);
 }
 
-inline float rel_error(dynd::complex<float> expected, dynd::complex<float> actual)
-{
+inline float rel_error(dynd::complex<float> expected, dynd::complex<float> actual) {
   if (expected == 0.0f) {
     if (actual == 0.0f) {
       return 0.0f;
-    }
-    else {
+    } else {
       return fabs(abs(expected - actual));
     }
   }
@@ -262,8 +241,7 @@ inline float rel_error(dynd::complex<float> expected, dynd::complex<float> actua
   return fabs(abs(expected - actual) / abs(expected));
 }
 
-inline double rel_error(double expected, double actual)
-{
+inline double rel_error(double expected, double actual) {
   if ((expected == 0.0) && (actual == 0.0)) {
     return 0.0;
   }
@@ -271,13 +249,11 @@ inline double rel_error(double expected, double actual)
   return fabs(1.0 - actual / expected);
 }
 
-inline double rel_error(dynd::complex<double> expected, dynd::complex<double> actual)
-{
+inline double rel_error(dynd::complex<double> expected, dynd::complex<double> actual) {
   if (expected == 0.0) {
     if (actual == 0.0) {
       return 0.0;
-    }
-    else {
+    } else {
       return fabs(abs(expected - actual));
     }
   }
@@ -288,8 +264,7 @@ inline double rel_error(dynd::complex<double> expected, dynd::complex<double> ac
 template <typename T>
 ::testing::AssertionResult
 AssertRelErrorLE(const char *DYND_UNUSED(expected_expr), const char *DYND_UNUSED(actual_expr),
-                 const char *DYND_UNUSED(rel_error_max_expr), T expected, T actual, float rel_error_max)
-{
+                 const char *DYND_UNUSED(rel_error_max_expr), T expected, T actual, float rel_error_max) {
   float rel_error_val = rel_error(expected, actual);
 
   if (rel_error_val <= rel_error_max) {
@@ -304,8 +279,7 @@ AssertRelErrorLE(const char *DYND_UNUSED(expected_expr), const char *DYND_UNUSED
 template <typename T>
 ::testing::AssertionResult
 AssertRelErrorLE(const char *DYND_UNUSED(expected_expr), const char *DYND_UNUSED(actual_expr),
-                 const char *DYND_UNUSED(rel_error_max_expr), T expected, T actual, double rel_error_max)
-{
+                 const char *DYND_UNUSED(rel_error_max_expr), T expected, T actual, double rel_error_max) {
   double rel_error_val = rel_error(expected, actual);
 
   if (rel_error_val <= rel_error_max) {
@@ -319,16 +293,14 @@ AssertRelErrorLE(const char *DYND_UNUSED(expected_expr), const char *DYND_UNUSED
 
 inline ::testing::AssertionResult AssertRelErrorLE(const char *expected_expr, const char *actual_expr,
                                                    const char *rel_error_max_expr, float expected,
-                                                   dynd::complex<float> actual, float rel_error_max)
-{
+                                                   dynd::complex<float> actual, float rel_error_max) {
   return AssertRelErrorLE(expected_expr, actual_expr, rel_error_max_expr, dynd::complex<float>(expected), actual,
                           rel_error_max);
 }
 
 inline ::testing::AssertionResult AssertRelErrorLE(const char *expected_expr, const char *actual_expr,
                                                    const char *rel_error_max_expr, double expected,
-                                                   dynd::complex<double> actual, double rel_error_max)
-{
+                                                   dynd::complex<double> actual, double rel_error_max) {
   return AssertRelErrorLE(expected_expr, actual_expr, rel_error_max_expr, dynd::complex<double>(expected), actual,
                           rel_error_max);
 }
@@ -339,42 +311,48 @@ inline ::testing::AssertionResult AssertRelErrorLE(const char *expected_expr, co
 template <typename T>
 struct test_class {
   double rel_error_max;
-  bool flag;
+  bool &flag;
 
-  test_class(double rel_error_max) : rel_error_max(rel_error_max) { flag = true; }
+  test_class(double rel_error_max, bool &flag) : rel_error_max(rel_error_max), flag(flag) { this->flag = true; }
 
-  void operator()(T a, T b)
-  {
+  void operator()(T a, T b) {
     if (rel_error(a, b) > rel_error_max) {
       flag = false;
     }
   }
 };
 
-inline ::testing::AssertionResult AssertArrayNear(const char *expected_expr, const char *actual_expr,
-                                                  const char *rel_error_max_expr, const dynd::nd::array &expected,
-                                                  const dynd::nd::array &actual, double rel_error_max)
-{
-  const dynd::ndt::type &expected_tp = expected.get_type();
-  const dynd::ndt::type &actual_tp = actual.get_type();
-  if (expected_tp.get_id() == dynd::cuda_device_id && actual_tp.get_id() == dynd::cuda_device_id) {
-    return AssertArrayNear(expected_expr, actual_expr, rel_error_max_expr, expected.to_host(), actual.to_host(),
-                           rel_error_max);
+inline ::testing::AssertionResult AssertArrayNear(const char *DYND_UNUSED(expected_expr),
+                                                  const char *DYND_UNUSED(actual_expr),
+                                                  const char *DYND_UNUSED(rel_error_max_expr),
+                                                  const dynd::nd::array &expected, const dynd::nd::array &actual,
+                                                  double rel_error_max) {
+  //  const dynd::ndt::type &expected_tp = expected.get_type();
+  const dynd::ndt::type &actual_tp = actual.get_dtype();
+
+  bool flag;
+  dynd::nd::callable f;
+  switch (actual_tp.get_id()) {
+  case dynd::float32_id:
+    f = dynd::nd::functional::elwise(test_class<float>(rel_error_max, flag));
+    break;
+  case dynd::float64_id:
+    f = dynd::nd::functional::elwise(test_class<double>(rel_error_max, flag));
+    break;
+  case dynd::complex_float64_id:
+    f = dynd::nd::functional::elwise(test_class<dynd::complex<double>>(rel_error_max, flag));
+    break;
+  default:
+    throw std::runtime_error("unsupported type for near comparision");
   }
 
-  std::unique_ptr<test_class<dynd::complex<double>>> c(new test_class<dynd::complex<double>>(rel_error_max));
+  f(expected, actual);
 
-  dynd::nd::callable af = dynd::nd::functional::elwise(dynd::nd::functional::apply(c.get()));
-  af(expected, actual);
-
-  bool res = c->flag;
-
-  if (res) {
+  if (flag) {
     return ::testing::AssertionSuccess();
   }
 
   return ::testing::AssertionFailure() << "the values do not match";
 }
 
-#define EXPECT_ARRAY_NEAR(EXPECTED, ACTUAL, REL_ERROR_MAX)                                                             \
-  ASSERT_PRED_FORMAT3(AssertArrayNear, EXPECTED, ACTUAL, REL_ERROR_MAX)
+#define EXPECT_ARRAY_NEAR(EXPECTED, ACTUAL) ASSERT_PRED_FORMAT3(AssertArrayNear, EXPECTED, ACTUAL, 0.01)

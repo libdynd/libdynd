@@ -19,13 +19,15 @@ namespace nd {
     type start;
     type stop;
     type step;
+    size_t size;
     stride_t stride;
 
-    range_kernel(type start, type stop, type step) : start(start), stop(stop), step(step), stride(sizeof(type)) {}
+    range_kernel(type start, type stop, type step, size_t size, stride_t stride)
+        : start(start), stop(stop), step(step), size(size), stride(stride) {}
 
     void single(char *ret, char *const *DYND_UNUSED(args)) {
-      for (type i = start; i < stop; i += step) {
-        *reinterpret_cast<type *>(ret) = i;
+      for (size_t i = 0; i < size; ++i) {
+        *reinterpret_cast<type *>(ret) = start + static_cast<type>(i) * step;
         ret += stride;
       }
     }
