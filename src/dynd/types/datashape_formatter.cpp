@@ -17,8 +17,7 @@ static void format_datashape(std::ostream &o, const ndt::type &tp, const char *a
                              const std::string &indent, bool multiline);
 
 static void format_struct_datashape(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
-                                    const std::string &indent, bool multiline)
-{
+                                    const std::string &indent, bool multiline) {
   // The data requires arrmeta
   if (arrmeta == NULL) {
     data = NULL;
@@ -28,7 +27,7 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &tp, const 
   const std::vector<uintptr_t> &arrmeta_offsets = bsd->get_arrmeta_offsets();
   const uintptr_t *data_offsets = NULL;
   if (data != NULL) {
-    data_offsets = bsd->get_data_offsets(arrmeta);
+    data_offsets = reinterpret_cast<const uintptr_t *>(arrmeta);
   }
   o << (multiline ? "{\n" : "{");
   for (size_t i = 0; i < field_count; ++i) {
@@ -40,8 +39,7 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &tp, const 
                      data ? (data + data_offsets[i]) : NULL, multiline ? (indent + "  ") : indent, multiline);
     if (multiline) {
       o << ",\n";
-    }
-    else if (i != field_count - 1) {
+    } else if (i != field_count - 1) {
       o << ", ";
     }
   }
@@ -49,8 +47,7 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &tp, const 
 }
 
 static void format_dim_datashape(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
-                                 const std::string &indent, bool multiline)
-{
+                                 const std::string &indent, bool multiline) {
   switch (tp.get_id()) {
   case fixed_dim_id: {
     if (tp.is_symbolic()) {
@@ -75,13 +72,11 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp, const cha
     const char *child_data = NULL;
     if (data == NULL || arrmeta == NULL) {
       o << "var * ";
-    }
-    else {
+    } else {
       const ndt::var_dim_type::data_type *d = reinterpret_cast<const ndt::var_dim_type::data_type *>(data);
       if (d->begin == NULL) {
         o << "var * ";
-      }
-      else {
+      } else {
         o << d->size << " * ";
         if (d->size == 1) {
           const ndt::var_dim_type::metadata_type *md =
@@ -102,8 +97,7 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp, const cha
   }
 }
 
-static void format_string_datashape(std::ostream &o, const ndt::type &tp)
-{
+static void format_string_datashape(std::ostream &o, const ndt::type &tp) {
   switch (tp.get_id()) {
   case string_id:
   case fixed_string_id:
@@ -118,8 +112,7 @@ static void format_string_datashape(std::ostream &o, const ndt::type &tp)
   }
 }
 
-static void format_complex_datashape(std::ostream &o, const ndt::type &tp)
-{
+static void format_complex_datashape(std::ostream &o, const ndt::type &tp) {
   switch (tp.get_id()) {
   case complex_float32_id:
     o << "complex[float32]";
@@ -136,8 +129,7 @@ static void format_complex_datashape(std::ostream &o, const ndt::type &tp)
 }
 
 static void format_datashape(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
-                             const std::string &indent, bool multiline)
-{
+                             const std::string &indent, bool multiline) {
   switch (tp.get_id()) {
   case struct_id:
     format_struct_datashape(o, tp, arrmeta, data, indent, multiline);
@@ -160,13 +152,12 @@ static void format_datashape(std::ostream &o, const ndt::type &tp, const char *a
   }
 }
 
-void dynd::format_datashape(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data, bool multiline)
-{
+void dynd::format_datashape(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
+                            bool multiline) {
   ::format_datashape(o, tp, arrmeta, data, "", multiline);
 }
 
-std::string dynd::format_datashape(const ndt::type &tp, const std::string &prefix, bool multiline)
-{
+std::string dynd::format_datashape(const ndt::type &tp, const std::string &prefix, bool multiline) {
   stringstream ss;
   ss << prefix;
   ::format_datashape(ss, tp, NULL, NULL, "", multiline);

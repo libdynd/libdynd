@@ -330,11 +330,12 @@ TEST(StructType, SingleCompareDifferentArrmeta) {
 
   // Confirm that the arrmeta is different
   EXPECT_EQ(a.get_type(), b.get_type());
-  const ndt::struct_type *a_sdt = static_cast<const ndt::struct_type *>(a.get_type().extended());
-  const ndt::struct_type *b_sdt = static_cast<const ndt::struct_type *>(b.get_type().extended());
-  EXPECT_NE(a_sdt->get_data_offsets(a.get()->metadata())[0], b_sdt->get_data_offsets(b.get()->metadata())[0]);
-  EXPECT_NE(a_sdt->get_data_offsets(a.get()->metadata())[1], b_sdt->get_data_offsets(b.get()->metadata())[1]);
-  EXPECT_NE(a_sdt->get_data_offsets(a.get()->metadata())[2], b_sdt->get_data_offsets(b.get()->metadata())[2]);
+  EXPECT_NE(reinterpret_cast<const uintptr_t *>(a->metadata())[0],
+            reinterpret_cast<const uintptr_t *>(b->metadata())[0]);
+  EXPECT_NE(reinterpret_cast<const uintptr_t *>(a->metadata())[1],
+            reinterpret_cast<const uintptr_t *>(b->metadata())[1]);
+  EXPECT_NE(reinterpret_cast<const uintptr_t *>(a->metadata())[2],
+            reinterpret_cast<const uintptr_t *>(b->metadata())[2]);
 
   // Test lexicographic sorting
 
@@ -430,9 +431,7 @@ TEST(StructType, SingleCompareDifferentArrmeta) {
 TEST(StructType, InvalidFieldName) {
   const nd::array s = nd::as_struct({{"x", 100}, {"y", 1729.22}});
   const ndt::type dt = s.get_type();
-  const char *arrmeta = s.get()->metadata();
 
   EXPECT_THROW(dt.extended<ndt::struct_type>()->get_field_type("z"), invalid_argument);
-  EXPECT_THROW(dt.extended<ndt::struct_type>()->get_data_offset(arrmeta, "z"), invalid_argument);
   EXPECT_THROW(s.p("z"), invalid_argument);
 }

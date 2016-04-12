@@ -108,7 +108,8 @@ ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp) {
   ndt::type ret_tp = child_tp->get_return_type();
   ret_tp = ndt::make_ellipsis_dim(dimsname, ret_tp);
 
-  return ndt::callable_type::make(ret_tp, ndt::make_type<ndt::tuple_type>(out_param_types), kwd_tp);
+  return ndt::callable_type::make(
+      ret_tp, ndt::make_type<ndt::tuple_type>(out_param_types.size(), out_param_types.data()), kwd_tp);
 }
 
 nd::callable nd::functional::elwise(const ndt::type &self_tp, const callable &child) {
@@ -197,7 +198,8 @@ ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp) {
   ndt::type ret_tp = child_tp->get_return_type();
   ret_tp = ndt::make_ellipsis_dim("Dims", child_tp->get_return_type());
 
-  return ndt::callable_type::make(ret_tp, ndt::make_type<ndt::tuple_type>(out_param_types), kwd_tp);
+  return ndt::callable_type::make(
+      ret_tp, ndt::make_type<ndt::tuple_type>(out_param_types.size(), out_param_types.data()), kwd_tp);
 }
 
 nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const callable &boundary_child) {

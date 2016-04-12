@@ -980,7 +980,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
           if (!funcproto_kwd.is_null()) {
             if (!parse_token_ds(begin, end, "->")) {
               rbegin = begin;
-              return ndt::make_type<ndt::tuple_type>(field_type_list);
+              return ndt::make_type<ndt::tuple_type>(field_type_list.size(), field_type_list.data());
             }
 
             ndt::type return_type = parse_datashape(begin, end, symtable);
@@ -988,8 +988,9 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
               throw datashape_parse_error(begin, "expected function prototype return type");
             }
             rbegin = begin;
-            return ndt::callable_type::make(return_type, ndt::make_type<ndt::tuple_type>(field_type_list, variadic),
-                                            funcproto_kwd);
+            return ndt::callable_type::make(
+                return_type, ndt::make_type<ndt::tuple_type>(field_type_list.size(), field_type_list.data(), variadic),
+                funcproto_kwd);
           } else {
             throw datashape_parse_error(begin, "expected funcproto keyword arguments");
           }
@@ -1030,7 +1031,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
   // It might be a function prototype, check for the "->" token
   if (!parse_token_ds(begin, end, "->")) {
     rbegin = begin;
-    return ndt::make_type<ndt::tuple_type>(field_type_list, variadic);
+    return ndt::make_type<ndt::tuple_type>(field_type_list.size(), field_type_list.data(), variadic);
   }
 
   ndt::type return_type = parse_datashape(begin, end, symtable);
@@ -1043,7 +1044,8 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
   //       the requirement that arrays into callable constructors are
   //       immutable, that too
   //       many copies may be occurring.
-  return ndt::callable_type::make(return_type, ndt::make_type<ndt::tuple_type>(field_type_list, variadic));
+  return ndt::callable_type::make(
+      return_type, ndt::make_type<ndt::tuple_type>(field_type_list.size(), field_type_list.data(), variadic));
 }
 
 //    datashape_nooption : dim ASTERISK datashape

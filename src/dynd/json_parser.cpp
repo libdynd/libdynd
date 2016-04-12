@@ -239,7 +239,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrme
 
   const ndt::struct_type *fsd = tp.extended<ndt::struct_type>();
   intptr_t field_count = fsd->get_field_count();
-  const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
+  const uintptr_t *data_offsets = reinterpret_cast<const uintptr_t *>(arrmeta);
   const std::vector<uintptr_t> &arrmeta_offsets = fsd->get_arrmeta_offsets();
 
   // Keep track of which fields we've seen
@@ -314,7 +314,7 @@ static bool parse_tuple_json_from_list(const ndt::type &tp, const char *arrmeta,
 
   auto fsd = tp.extended<ndt::tuple_type>();
   intptr_t field_count = fsd->get_field_count();
-  const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
+  const uintptr_t *data_offsets = reinterpret_cast<const uintptr_t *>(arrmeta);
   const std::vector<uintptr_t> &arrmeta_offsets = fsd->get_arrmeta_offsets();
 
   // Loop through all the fields
