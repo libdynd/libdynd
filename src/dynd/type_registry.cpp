@@ -19,8 +19,7 @@
 using namespace std;
 using namespace dynd;
 
-DYNDT_API vector<id_info> &detail::infos()
-{
+DYNDT_API vector<id_info> &detail::infos() {
   static vector<id_info> infos{{},
                                {"Any", any_kind_id, base_ids<any_kind_id>()},
                                {"Scalar", scalar_kind_id, base_ids<scalar_kind_id>()},
@@ -79,13 +78,13 @@ DYNDT_API vector<id_info> &detail::infos()
                                {"", typevar_constructed_id, {any_kind_id}},
                                {"", pow_dimsym_id, {any_kind_id}},
                                {"", ellipsis_dim_id, {any_kind_id}},
-                               {"", dim_fragment_id, {any_kind_id}}};
+                               {"", dim_fragment_id, {any_kind_id}},
+                               {"Iteration", iteration_id, {any_kind_id}}};
 
   return infos;
 }
 
-DYNDT_API type_id_t dynd::new_id(const char *name, type_id_t base_id)
-{
+DYNDT_API type_id_t dynd::new_id(const char *name, type_id_t base_id) {
   vector<id_info> &infos = detail::infos();
 
   type_id_t id = static_cast<type_id_t>(infos.size());

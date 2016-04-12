@@ -110,6 +110,9 @@ enum type_id_t {
   // A special type which holds a fragment of canonical dimensions
   // for the purpose of broadcasting together named ellipsis type vars.
   dim_fragment_id,
+
+  // A type for an iteration in a functional
+  iteration_id
 };
 
 template <type_id_t Value>

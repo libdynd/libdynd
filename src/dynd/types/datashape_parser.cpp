@@ -10,6 +10,7 @@
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/parse_util.hpp>
 #include <dynd/types/array_type.hpp>
+#include <dynd/types/iteration_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -1166,6 +1167,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       result = parse_option_parameters(begin, end, symtable);
     } else if (compare_range_to_literal(nbegin, nend, "Any")) {
       result = ndt::any_kind_type::make();
+    } else if (compare_range_to_literal(nbegin, nend, "Iteration")) {
+      result = ndt::make_type<ndt::iteration_type>();
     } else if (compare_range_to_literal(nbegin, nend, "Scalar")) {
       result = ndt::scalar_kind_type::make();
     } else if (compare_range_to_literal(nbegin, nend, "Categorical")) {
