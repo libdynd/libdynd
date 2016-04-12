@@ -20,9 +20,6 @@ namespace ndt {
   class DYNDT_API struct_type : public tuple_type {
     const std::vector<std::string> m_field_names;
 
-  protected:
-    uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const { return reinterpret_cast<uintptr_t *>(arrmeta); }
-
   public:
     struct_type(const std::vector<std::string> &field_names, const std::vector<type> &field_types,
                 bool variadic = false);
@@ -56,12 +53,6 @@ namespace ndt {
      */
     const type &get_field_type(const std::string &field_name) const;
     const type &get_field_type(intptr_t i) const;
-
-    inline const uintptr_t *get_data_offsets(const char *arrmeta) const {
-      return reinterpret_cast<const uintptr_t *>(arrmeta);
-    }
-
-    uintptr_t get_data_offset(const char *arrmeta, const std::string &field_name) const;
 
     void print_type(std::ostream &o) const;
 

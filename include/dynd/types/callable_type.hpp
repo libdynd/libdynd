@@ -122,7 +122,8 @@ namespace ndt {
     /** Makes an callable type with both positional and keyword arguments */
     static type make(const type &ret_tp, const std::vector<type> &pos_tp, const std::vector<std::string> &kwd_names,
                      const std::vector<type> &kwd_tp) {
-      return make(ret_tp, make_type<tuple_type>(pos_tp), make_type<struct_type>(kwd_names, kwd_tp));
+      return make(ret_tp, make_type<tuple_type>(pos_tp.size(), pos_tp.data()),
+                  make_type<struct_type>(kwd_names, kwd_tp));
     }
 
     /** Makes an callable type with just positional arguments */
@@ -136,7 +137,7 @@ namespace ndt {
 
     /** Makes an callable type with just positional arguments */
     static type make(const type &ret_tp, const std::vector<type> &pos_tp) {
-      return make(ret_tp, make_type<tuple_type>(pos_tp), make_type<struct_type>());
+      return make(ret_tp, make_type<tuple_type>(pos_tp.size(), pos_tp.data()), make_type<struct_type>());
     }
 
     /** Makes an callable type with no arguments */

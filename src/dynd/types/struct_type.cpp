@@ -36,7 +36,8 @@ std::vector<ndt::type> types_from_fields(const std::vector<std::pair<ndt::type, 
 
 ndt::struct_type::struct_type(const std::vector<std::string> &field_names, const std::vector<type> &field_types,
                               bool variadic)
-    : tuple_type(struct_id, field_types, type_flag_none, true, variadic), m_field_names(field_names) {
+    : tuple_type(struct_id, field_types.size(), field_types.data(), variadic, type_flag_none, true),
+      m_field_names(field_names) {
   /*
     if (!nd::ensure_immutable_contig<std::string>(m_field_names)) {
       stringstream ss;
@@ -77,15 +78,6 @@ const ndt::type &ndt::struct_type::get_field_type(const std::string &name) const
   }
 
   return get_field_type(i);
-}
-
-uintptr_t ndt::struct_type::get_data_offset(const char *arrmeta, const std::string &name) const {
-  intptr_t i = get_field_index(name);
-  if (i < 0) {
-    throw std::invalid_argument("no field named'" + name + "'");
-  }
-
-  return get_data_offsets(arrmeta)[i];
 }
 
 void ndt::struct_type::print_type(std::ostream &o) const {
@@ -153,7 +145,7 @@ ndt::type ndt::struct_type::at_single(intptr_t i0, const char **inout_arrmeta, c
     *inout_arrmeta += m_arrmeta_offsets[i0];
     // If requested, modify the data
     if (inout_data) {
-      *inout_data += get_arrmeta_data_offsets(arrmeta)[i0];
+      *inout_data += reinterpret_cast<const uintptr_t *>(arrmeta)[i0];
     }
   }
   return get_field_type(i0);
@@ -248,7 +240,7 @@ intptr_t ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *i
     arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
     return 0;
   } else {
-    const uintptr_t *offsets = get_data_offsets(arrmeta);
+    const uintptr_t *offsets = reinterpret_cast<const uintptr_t *>(arrmeta);
     bool remove_dimension;
     intptr_t start_index, index_stride, dimension_size;
     apply_single_linear_index(*indices, m_field_count, current_i, &root_tp, remove_dimension, start_index, index_stride,

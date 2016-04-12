@@ -20,8 +20,7 @@ struct output_data {
   char *out_begin, *out_end, *out_capacity_end;
   bool struct_as_list;
 
-  void ensure_capacity(intptr_t added_capacity)
-  {
+  void ensure_capacity(intptr_t added_capacity) {
     // If there's not enough space, double the capacity
     if (out_capacity_end - out_end < added_capacity) {
       intptr_t current_size = out_end - out_begin;
@@ -37,32 +36,28 @@ struct output_data {
     }
   }
 
-  inline void write(char c)
-  {
+  inline void write(char c) {
     ensure_capacity(1);
     *out_end++ = c;
   }
 
   // Write a literal string
   template <int N>
-  inline void write(const char(&str)[N])
-  {
+  inline void write(const char(&str)[N]) {
     ensure_capacity(N - 1);
     memcpy(out_end, str, N - 1);
     out_end += N - 1;
   }
 
   // Write a std::string
-  inline void write(const std::string &s)
-  {
+  inline void write(const std::string &s) {
     ensure_capacity(s.size());
     memcpy(out_end, s.data(), s.size());
     out_end += s.size();
   }
 
   // Write a string-range
-  inline void write(const char *begin, const char *end)
-  {
+  inline void write(const char *begin, const char *end) {
     ensure_capacity(end - begin);
     memcpy(out_end, begin, end - begin);
     out_end += (end - begin);
@@ -71,32 +66,28 @@ struct output_data {
 
 static void format_json(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data);
 
-static void format_json_bool(output_data &out, const ndt::type &dt, const char *DYND_UNUSED(arrmeta), const char *data)
-{
+static void format_json_bool(output_data &out, const ndt::type &dt, const char *DYND_UNUSED(arrmeta),
+                             const char *data) {
   bool1 value(false);
   if (dt.get_id() == bool_id) {
     value = (*data != 0);
-  }
-  else {
+  } else {
     throw std::runtime_error("cannot format bool JSON");
   }
   if (value) {
     out.write("true");
-  }
-  else {
+  } else {
     out.write("false");
   }
 }
 
-static void format_json_number(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
-{
+static void format_json_number(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data) {
   stringstream ss;
   dt.print_data(ss, arrmeta, data);
   out.write(ss.str());
 }
 
-static void print_escaped_unicode_codepoint(output_data &out, uint32_t cp, append_unicode_codepoint_t append_fn)
-{
+static void print_escaped_unicode_codepoint(output_data &out, uint32_t cp, append_unicode_codepoint_t append_fn) {
   if (cp < 0x80) {
     switch (cp) {
     case '\b':
@@ -129,14 +120,12 @@ static void print_escaped_unicode_codepoint(output_data &out, uint32_t cp, appen
         ss << "\\u";
         hexadecimal_print(ss, static_cast<uint16_t>(cp));
         out.write(ss.str());
-      }
-      else {
+      } else {
         out.write(static_cast<char>(cp));
       }
       break;
     }
-  }
-  else {
+  } else {
     out.ensure_capacity(16);
     append_fn(cp, out.out_end, out.out_capacity_end);
   }
@@ -156,8 +145,8 @@ static void print_escaped_unicode_codepoint(output_data &out, uint32_t cp, appen
   */
 }
 
-static void format_json_encoded_string(output_data &out, const char *begin, const char *end, string_encoding_t encoding)
-{
+static void format_json_encoded_string(output_data &out, const char *begin, const char *end,
+                                       string_encoding_t encoding) {
   uint32_t cp;
   next_unicode_codepoint_t next_fn;
   append_unicode_codepoint_t append_fn;
@@ -171,8 +160,7 @@ static void format_json_encoded_string(output_data &out, const char *begin, cons
   out.write('\"');
 }
 
-static void format_json_string(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
-{
+static void format_json_string(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data) {
   const ndt::base_string_type *bsd = dt.extended<ndt::base_string_type>();
   string_encoding_t encoding = bsd->get_encoding();
   const char *begin = NULL, *end = NULL;
@@ -180,19 +168,16 @@ static void format_json_string(output_data &out, const ndt::type &dt, const char
   format_json_encoded_string(out, begin, end, encoding);
 }
 
-static void format_json_option(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
-{
+static void format_json_option(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data) {
   const ndt::option_type *ot = dt.extended<ndt::option_type>();
   if (nd::old_is_avail(dt, arrmeta, data)) {
     format_json(out, ot->get_value_type(), arrmeta, data);
-  }
-  else {
+  } else {
     out.write("null");
   }
 }
 
-static void format_json_type(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
-{
+static void format_json_type(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data) {
   switch (dt.get_id()) {
   case type_id: {
     stringstream ss;
@@ -209,11 +194,10 @@ static void format_json_type(output_data &out, const ndt::type &dt, const char *
   }
 }
 
-static void format_json_struct(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
-{
+static void format_json_struct(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data) {
   const ndt::struct_type *bsd = dt.extended<ndt::struct_type>();
   intptr_t field_count = bsd->get_field_count();
-  const size_t *data_offsets = bsd->get_data_offsets(arrmeta);
+  const uintptr_t *data_offsets = reinterpret_cast<const uintptr_t *>(arrmeta);
   const std::vector<uintptr_t> &arrmeta_offsets = bsd->get_arrmeta_offsets();
 
   if (out.struct_as_list) {
@@ -225,8 +209,7 @@ static void format_json_struct(output_data &out, const ndt::type &dt, const char
       }
     }
     out.write(']');
-  }
-  else {
+  } else {
     out.write('{');
     for (intptr_t i = 0; i < field_count; ++i) {
       const std::string &name = bsd->get_field_name(i);
@@ -241,8 +224,7 @@ static void format_json_struct(output_data &out, const ndt::type &dt, const char
   }
 }
 
-static void format_json_dim(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
-{
+static void format_json_dim(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data) {
   out.write('[');
   switch (dt.get_id()) {
   case fixed_dim_id: {
@@ -284,8 +266,7 @@ static void format_json_dim(output_data &out, const ndt::type &dt, const char *a
   out.write(']');
 }
 
-static void format_json(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
-{
+static void format_json(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data) {
   switch (dt.get_id()) {
   case bool_id:
     format_json_bool(out, dt, arrmeta, data);
@@ -333,8 +314,7 @@ static void format_json(output_data &out, const ndt::type &dt, const char *arrme
   }
 }
 
-nd::array dynd::format_json(const nd::array &n, bool struct_as_list)
-{
+nd::array dynd::format_json(const nd::array &n, bool struct_as_list) {
   // Create a UTF-8 string
   nd::array result = nd::empty(ndt::make_type<ndt::string_type>());
 
@@ -348,8 +328,7 @@ nd::array dynd::format_json(const nd::array &n, bool struct_as_list)
 
   if (!n.get_type().is_expression()) {
     ::format_json(out, n.get_type(), n.get()->metadata(), n.cdata());
-  }
-  else {
+  } else {
     nd::array tmp = n.eval();
     ::format_json(out, tmp.get_type(), tmp.get()->metadata(), tmp.cdata());
   }

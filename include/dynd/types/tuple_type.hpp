@@ -22,12 +22,12 @@ namespace ndt {
     intptr_t m_field_count;
 
     /**
-     * Immutable vector of field types. Always has type "N * type".
+     * Immutable vector of field types.
      */
-    const std::vector<type> m_field_types;
+    std::vector<type> m_field_types;
 
     /**
-     * Immutable vector of arrmeta offsets. Always has type "N * uintptr".
+     * Immutable vector of arrmeta offsets.
      */
     std::vector<uintptr_t> m_arrmeta_offsets;
 
@@ -37,33 +37,22 @@ namespace ndt {
      */
     bool m_variadic;
 
-    tuple_type(type_id_t type_id, const std::vector<type> &field_types, uint32_t flags, bool layout_in_arrmeta,
-               bool variadic);
-
-    uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const { return reinterpret_cast<uintptr_t *>(arrmeta); }
+    tuple_type(type_id_t id, size_t size, const type *element_tp, bool variadic, uint32_t flags,
+               bool layout_in_arrmeta);
 
   public:
-    tuple_type(const std::vector<type> &field_types, bool variadic = false);
+    tuple_type(size_t size, const type *element_tp, bool variadic = false)
+        : tuple_type(tuple_id, size, element_tp, variadic, type_flag_none, true) {}
 
-    tuple_type(bool variadic = false);
+    tuple_type(std::initializer_list<type> element_tp, bool variadic = false)
+        : tuple_type(tuple_id, element_tp.size(), element_tp.begin(), variadic, type_flag_none, true) {}
 
-    /** The array of the field data offsets */
-    inline const uintptr_t *get_data_offsets(const char *arrmeta) const {
-      return reinterpret_cast<const uintptr_t *>(arrmeta);
-    }
+    tuple_type(bool variadic = false) : tuple_type(tuple_id, 0, nullptr, variadic, type_flag_none, true) {}
 
-    /** The number of fields in the struct. This is the size of the other
-     * arrays.
-     */
     intptr_t get_field_count() const { return m_field_count; }
-    /** The type of the tuple */
     const ndt::type get_type() const { return ndt::type_for(m_field_types); }
-
-    /** The field types */
     const std::vector<type> &get_field_types() const { return m_field_types; }
-
     const type *get_field_types_raw() const { return m_field_types.data(); }
-    /** The field arrmeta offsets */
     const std::vector<uintptr_t> &get_arrmeta_offsets() const { return m_arrmeta_offsets; }
     const uintptr_t *get_arrmeta_offsets_raw() const { return m_arrmeta_offsets.data(); }
 
