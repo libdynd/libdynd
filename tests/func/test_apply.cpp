@@ -31,8 +31,7 @@ struct cuda_decltype_workaround {
 #endif
 
 template <typename T>
-class Apply : public Memory<T> {
-};
+class Apply : public Memory<T> {};
 
 TYPED_TEST_CASE_P(Apply);
 
@@ -100,8 +99,7 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
 
 #define GET_HOST_FUNC(NAME)                                                                                            \
   template <kernel_request_t kernreq>                                                                                  \
-  typename std::enable_if<kernreq == kernel_request_host, CUDA_DECLTYPE_WORKAROUND(&NAME)>::type get_##NAME()          \
-  {                                                                                                                    \
+  typename std::enable_if<kernreq == kernel_request_host, CUDA_DECLTYPE_WORKAROUND(&NAME)>::type get_##NAME() {        \
     return &NAME;                                                                                                      \
   }
 
@@ -113,9 +111,7 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
   struct NAME##_as_callable<kernel_request_host>                                                                       \
       : func_wrapper<kernel_request_host, CUDA_DECLTYPE_WORKAROUND(&NAME)> {                                           \
     NAME##_as_callable()                                                                                               \
-        : func_wrapper<kernel_request_host, CUDA_DECLTYPE_WORKAROUND(&NAME)>(get_##NAME<kernel_request_host>())        \
-    {                                                                                                                  \
-    }                                                                                                                  \
+        : func_wrapper<kernel_request_host, CUDA_DECLTYPE_WORKAROUND(&NAME)>(get_##NAME<kernel_request_host>()) {}     \
   }
 
 #ifdef __CUDA_ARCH__
@@ -135,14 +131,12 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
 #ifdef __CUDACC__
 
 #define GET_CUDA_DEVICE_FUNC(NAME)                                                                                     \
-  __global__ void get_cuda_device_##NAME(void *res)                                                                    \
-  {                                                                                                                    \
+  __global__ void get_cuda_device_##NAME(void *res) {                                                                  \
     *reinterpret_cast<CUDA_DECLTYPE_WORKAROUND(&NAME) *>(res) = &NAME;                                                 \
   }                                                                                                                    \
                                                                                                                        \
   template <kernel_request_t kernreq>                                                                                  \
-  typename std::enable_if<kernreq == kernel_request_cuda_device, CUDA_DECLTYPE_WORKAROUND(&NAME)>::type get_##NAME()   \
-  {                                                                                                                    \
+  typename std::enable_if<kernreq == kernel_request_cuda_device, CUDA_DECLTYPE_WORKAROUND(&NAME)>::type get_##NAME() { \
     GET_CUDA_DEVICE_FUNC_BODY(NAME)                                                                                    \
   }
 
@@ -155,9 +149,7 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
       : func_wrapper<kernel_request_cuda_device, CUDA_DECLTYPE_WORKAROUND(&NAME)> {                                    \
     NAME##_as_callable()                                                                                               \
         : func_wrapper<kernel_request_cuda_device, CUDA_DECLTYPE_WORKAROUND(&NAME)>(                                   \
-              get_##NAME<kernel_request_cuda_device>())                                                                \
-    {                                                                                                                  \
-    }                                                                                                                  \
+              get_##NAME<kernel_request_cuda_device>()) {}                                                             \
   }
 
 #endif
@@ -255,20 +247,15 @@ public:
 #undef GET_CUDA_HOST_DEVICE_FUNC
 #undef CUDA_HOST_DEVICE_FUNC_AS_CALLABLE
 
-TEST(Apply, Function)
-{
-  typedef Apply<HostKernelRequest> TestFixture;
+TEST(Apply, Function) {
+  nd::callable f = nd::functional::apply<decltype(&func0), &func0>();
+  EXPECT_ARRAY_EQ(4, f(5, 3));
 
-  nd::callable af;
+  f = nd::functional::apply<decltype(&func2), &func2>();
+  EXPECT_ARRAY_EQ(13.6f, f(nd::array{3.9f, -7.0f, 16.7f}));
 
-  af = nd::functional::apply<decltype(&func0), &func0>();
-  EXPECT_ARRAY_EQ(TestFixture::To(4), af(TestFixture::To(5), TestFixture::To(3)));
-
-  af = nd::functional::apply<decltype(&func2), &func2>();
-  EXPECT_ARRAY_EQ(TestFixture::To(13.6f), af(TestFixture::To({3.9f, -7.0f, 16.7f})));
-
-  af = nd::functional::apply<decltype(&func3), &func3>();
-  EXPECT_ARRAY_EQ(TestFixture::To(12U), af());
+  f = nd::functional::apply<decltype(&func3), &func3>();
+  EXPECT_ARRAY_EQ(12U, f());
 
   /*
   af = nd::functional::apply<kernel_request_host, decltype(&func4), &func4>();
@@ -282,15 +269,14 @@ TEST(Apply, Function)
     {925L, -836L, -14L}})));
     */
 
-  af = nd::functional::apply<decltype(&func6), &func6>();
-  EXPECT_ARRAY_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
+  f = nd::functional::apply<decltype(&func6), &func6>();
+  EXPECT_ARRAY_EQ(8, f(3, 5, 7));
 
-  af = nd::functional::apply<decltype(&func7), &func7>();
-  EXPECT_ARRAY_EQ(36.3, af(38, 5, 12.1));
+  f = nd::functional::apply<decltype(&func7), &func7>();
+  EXPECT_ARRAY_EQ(36.3, f(38, 5, 12.1));
 }
 
-TEST(Apply, FunctionWithKeywords)
-{
+TEST(Apply, FunctionWithKeywords) {
   typedef Apply<HostKernelRequest> TestFixture;
 
   nd::callable af;
@@ -327,8 +313,7 @@ struct struct0 {
   int func0(int x, int y, int z) { return x + y * z; }
 };
 
-TEST(Apply, MemberFunction)
-{
+TEST(Apply, MemberFunction) {
   struct0 *s0 = new struct0;
 
   nd::callable af = nd::functional::apply(s0, &struct0::func0);
@@ -337,80 +322,78 @@ TEST(Apply, MemberFunction)
   delete s0;
 }
 
-TYPED_TEST_P(Apply, Callable)
-{
-  nd::callable af = nd::functional::apply(get_func0<kernel_request_host>());
-  EXPECT_ARRAY_EQ(4, af(5, 3));
+TYPED_TEST_P(Apply, Callable) {
+  nd::callable f = nd::functional::apply(func0);
+  EXPECT_ARRAY_EQ(4, f(5, 3));
 
-  af = nd::functional::apply(func0_as_callable<kernel_request_host>());
-  EXPECT_ARRAY_EQ(4, af(5, 3));
+  f = nd::functional::apply(func0_as_callable<kernel_request_host>());
+  EXPECT_ARRAY_EQ(4, f(5, 3));
 
-  af = nd::functional::apply<func0_as_callable<kernel_request_host>>();
-  EXPECT_ARRAY_EQ(4, af(5, 3));
+  f = nd::functional::apply<func0_as_callable<kernel_request_host>>();
+  EXPECT_ARRAY_EQ(4, f(5, 3));
 
-  af = nd::functional::apply(get_func2<TestFixture::KernelRequest>());
-  EXPECT_ARRAY_EQ(TestFixture::To(13.6f), af(TestFixture::To({3.9f, -7.0f, 16.7f})));
+  f = nd::functional::apply(get_func2<TestFixture::KernelRequest>());
+  EXPECT_ARRAY_EQ(TestFixture::To(13.6f), f(TestFixture::To({3.9f, -7.0f, 16.7f})));
 
-  af = nd::functional::apply(func2_as_callable<TestFixture::KernelRequest>());
-  EXPECT_ARRAY_EQ(TestFixture::To(13.6f), af(TestFixture::To({3.9f, -7.0f, 16.7f})));
+  f = nd::functional::apply(func2_as_callable<TestFixture::KernelRequest>());
+  EXPECT_ARRAY_EQ(TestFixture::To(13.6f), f(TestFixture::To({3.9f, -7.0f, 16.7f})));
 
-  af = nd::functional::apply<func2_as_callable<TestFixture::KernelRequest>>();
-  EXPECT_ARRAY_EQ(TestFixture::To(13.6f), af(TestFixture::To({3.9f, -7.0f, 16.7f})));
+  f = nd::functional::apply<func2_as_callable<TestFixture::KernelRequest>>();
+  EXPECT_ARRAY_EQ(TestFixture::To(13.6f), f(TestFixture::To({3.9f, -7.0f, 16.7f})));
 
-  af = nd::functional::apply(get_func3<TestFixture::KernelRequest>());
-  EXPECT_ARRAY_EQ(TestFixture::To(12U), af());
+  f = nd::functional::apply(get_func3<TestFixture::KernelRequest>());
+  EXPECT_ARRAY_EQ(TestFixture::To(12U), f());
 
-  af = nd::functional::apply(func3_as_callable<TestFixture::KernelRequest>());
-  EXPECT_ARRAY_EQ(TestFixture::To(12U), af());
+  f = nd::functional::apply(func3_as_callable<TestFixture::KernelRequest>());
+  EXPECT_ARRAY_EQ(TestFixture::To(12U), f());
 
-  af = nd::functional::apply<func3_as_callable<TestFixture::KernelRequest>>();
-  EXPECT_ARRAY_EQ(TestFixture::To(12U), af());
+  f = nd::functional::apply<func3_as_callable<TestFixture::KernelRequest>>();
+  EXPECT_ARRAY_EQ(TestFixture::To(12U), f());
 
-  af = nd::functional::apply(get_func4<TestFixture::KernelRequest>());
+  f = nd::functional::apply(get_func4<TestFixture::KernelRequest>());
   EXPECT_ARRAY_EQ(TestFixture::To(167.451),
-                  af(TestFixture::To({9.25, -2.7, 15.375}), TestFixture::To({0.0, 0.62, 11.0})));
+                  f(TestFixture::To({9.25, -2.7, 15.375}), TestFixture::To({0.0, 0.62, 11.0})));
 
-  af = nd::functional::apply(func4_as_callable<TestFixture::KernelRequest>());
+  f = nd::functional::apply(func4_as_callable<TestFixture::KernelRequest>());
   EXPECT_ARRAY_EQ(TestFixture::To(167.451),
-                  af(TestFixture::To({9.25, -2.7, 15.375}), TestFixture::To({0.0, 0.62, 11.0})));
+                  f(TestFixture::To({9.25, -2.7, 15.375}), TestFixture::To({0.0, 0.62, 11.0})));
 
-  af = nd::functional::apply<func4_as_callable<TestFixture::KernelRequest>>();
+  f = nd::functional::apply<func4_as_callable<TestFixture::KernelRequest>>();
   EXPECT_ARRAY_EQ(TestFixture::To(167.451),
-                  af(TestFixture::To({9.25, -2.7, 15.375}), TestFixture::To({0.0, 0.62, 11.0})));
+                  f(TestFixture::To({9.25, -2.7, 15.375}), TestFixture::To({0.0, 0.62, 11.0})));
 
-  af = nd::functional::apply(get_func6<TestFixture::KernelRequest>());
-  EXPECT_ARRAY_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
+  f = nd::functional::apply(get_func6<TestFixture::KernelRequest>());
+  EXPECT_ARRAY_EQ(TestFixture::To(8), f(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
-  af = nd::functional::apply(func6_as_callable<TestFixture::KernelRequest>());
-  EXPECT_ARRAY_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
+  f = nd::functional::apply(func6_as_callable<TestFixture::KernelRequest>());
+  EXPECT_ARRAY_EQ(TestFixture::To(8), f(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
-  af = nd::functional::apply<func6_as_callable<TestFixture::KernelRequest>>();
-  EXPECT_ARRAY_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
+  f = nd::functional::apply<func6_as_callable<TestFixture::KernelRequest>>();
+  EXPECT_ARRAY_EQ(TestFixture::To(8), f(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
-  af = nd::functional::apply(get_func7<TestFixture::KernelRequest>());
-  EXPECT_ARRAY_EQ(TestFixture::To(36.3), af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
+  f = nd::functional::apply(get_func7<TestFixture::KernelRequest>());
+  EXPECT_ARRAY_EQ(TestFixture::To(36.3), f(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
 
-  af = nd::functional::apply(func7_as_callable<TestFixture::KernelRequest>());
-  EXPECT_ARRAY_EQ(TestFixture::To(36.3), af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
+  f = nd::functional::apply(func7_as_callable<TestFixture::KernelRequest>());
+  EXPECT_ARRAY_EQ(TestFixture::To(36.3), f(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
 
-  af = nd::functional::apply<func7_as_callable<TestFixture::KernelRequest>>();
-  EXPECT_ARRAY_EQ(TestFixture::To(36.3), af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
+  f = nd::functional::apply<func7_as_callable<TestFixture::KernelRequest>>();
+  EXPECT_ARRAY_EQ(TestFixture::To(36.3), f(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
 
-  af = nd::functional::apply(callable0<TestFixture::KernelRequest>());
-  EXPECT_ARRAY_EQ(TestFixture::To(475.0), af(TestFixture::To(47.5)));
+  f = nd::functional::apply(callable0<TestFixture::KernelRequest>());
+  EXPECT_ARRAY_EQ(TestFixture::To(475.0), f(TestFixture::To(47.5)));
 
-  af = nd::functional::apply<callable0<TestFixture::KernelRequest>>();
-  EXPECT_ARRAY_EQ(TestFixture::To(475.0), af(TestFixture::To(47.5)));
+  f = nd::functional::apply<callable0<TestFixture::KernelRequest>>();
+  EXPECT_ARRAY_EQ(TestFixture::To(475.0), f(TestFixture::To(47.5)));
 
-  af = nd::functional::apply(callable2<TestFixture::KernelRequest>());
-  EXPECT_ARRAY_EQ(TestFixture::To(11), af(TestFixture::To(5), TestFixture::To(3)));
+  f = nd::functional::apply(callable2<TestFixture::KernelRequest>());
+  EXPECT_ARRAY_EQ(TestFixture::To(11), f(TestFixture::To(5), TestFixture::To(3)));
 
-  af = nd::functional::apply<callable2<TestFixture::KernelRequest>>();
-  EXPECT_ARRAY_EQ(TestFixture::To(11), af(TestFixture::To(5), TestFixture::To(3)));
+  f = nd::functional::apply<callable2<TestFixture::KernelRequest>>();
+  EXPECT_ARRAY_EQ(TestFixture::To(11), f(TestFixture::To(5), TestFixture::To(3)));
 }
 
-TYPED_TEST_P(Apply, CallableWithKeywords)
-{
+TYPED_TEST_P(Apply, CallableWithKeywords) {
   nd::callable af = nd::functional::apply(get_func0<kernel_request_host>(), "y");
   EXPECT_ARRAY_EQ(TestFixture::To(4), af({TestFixture::To(5)}, {{"y", TestFixture::To(3)}}));
 
