@@ -188,7 +188,7 @@ set(libdyndt_SRC
     src/dynd/types/fixed_string_kind_type.cpp
     src/dynd/types/fixed_string_type.cpp
     src/dynd/types/int_kind_sym_type.cpp
-#    src/dynd/types/iteration_type.cpp
+    src/dynd/types/iteration_type.cpp
     src/dynd/types/option_type.cpp
     src/dynd/types/pointer_type.cpp
     src/dynd/types/pow_dimsym_type.cpp
@@ -214,7 +214,7 @@ set(libdyndt_SRC
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
     include/dynd/types/fixed_dim_type.hpp
-#    include/dynd/types/iteration_type.hpp
+    include/dynd/types/iteration_type.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/type_type.hpp
     # MemBlock
