@@ -88,8 +88,8 @@ ostream &dynd::operator<<(ostream &o, type_id_t id)
     return o << "option";
   case adapt_id:
     return o << "adapt";
-  case kind_sym_id:
-    return o << "kind_sym";
+  case iteration_id:
+    return o << "Iteration";
   case int_sym_id:
     return o << "int_sym";
   case expr_id:
@@ -106,8 +106,6 @@ ostream &dynd::operator<<(ostream &o, type_id_t id)
     return o << "typevar_dim";
   case ellipsis_dim_id:
     return o << "ellipsis_dim";
-  case iteration_id:
-    return o << "Iteration";
   default:
     return o << static_cast<underlying_type_t<type_id_t>>(id);
   }
