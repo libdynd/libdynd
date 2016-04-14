@@ -9,17 +9,28 @@
 #include <dynd/kernels/base_strided_kernel.hpp>
 
 namespace dynd {
-
-DYND_HAS_MEMBER(begin);
-
 namespace nd {
   namespace functional {
     namespace detail {
 
+      template <typename ArgTypes>
+      struct has_state {
+        static const bool value = false;
+      };
+
+      template <typename... A, size_t I0, size_t... I>
+      struct has_state<apply_args<type_sequence<state, A...>, index_sequence<I0, I...>>> {
+        static const bool value = true;
+      };
+
+      template <typename A0, typename... A, size_t I0, size_t... I>
+      struct has_state<apply_args<type_sequence<A0, A...>, index_sequence<I0, I...>>> {
+        static const bool value = has_state<apply_args<type_sequence<A...>, index_sequence<I...>>>::value;
+      };
+
       template <typename SelfType, typename ArgsType, size_t NArg>
       struct base_apply_kernel : base_strided_kernel<SelfType, NArg>, ArgsType {
-        using std::conditional_t<has_member_begin<ArgsType>::value, ArgsType,
-                                 base_strided_kernel<SelfType, NArg>>::begin;
+        using std::conditional_t<has_state<ArgsType>::value, ArgsType, base_strided_kernel<SelfType, NArg>>::begin;
 
         base_apply_kernel(ArgsType args) : ArgsType(args) {}
       };
