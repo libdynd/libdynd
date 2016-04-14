@@ -112,7 +112,7 @@ enum type_id_t {
   dim_fragment_id,
 
   // A type for an iteration in a functional
-  iteration_id
+//  iteration_id
 };
 
 template <type_id_t Value>

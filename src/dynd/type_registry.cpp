@@ -78,8 +78,8 @@ DYNDT_API vector<id_info> &detail::infos() {
                                {"", typevar_constructed_id, {any_kind_id}},
                                {"", pow_dimsym_id, {any_kind_id}},
                                {"", ellipsis_dim_id, {any_kind_id}},
-                               {"", dim_fragment_id, {any_kind_id}},
-                               {"Iteration", iteration_id, {any_kind_id}}};
+                               {"", dim_fragment_id, {any_kind_id}}};
+  //                               {"Iteration", iteration_id, {any_kind_id}}};
 
   return infos;
 }
