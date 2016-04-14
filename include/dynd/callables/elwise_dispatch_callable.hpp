@@ -58,7 +58,7 @@ namespace nd {
 
         if (all_same) {
           return reinterpret_cast<data_type *>(data)->child->resolve(
-              this, nullptr, cg,
+              this, reinterpret_cast<char *>(&data), cg,
               dst_tp.is_symbolic() ? reinterpret_cast<data_type *>(data)->child->get_return_type() : dst_tp, nsrc,
               src_tp, nkwd, kwds, tp_vars);
         }

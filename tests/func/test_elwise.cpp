@@ -113,7 +113,7 @@ TEST(Elwise, State) {
       });
 
   EXPECT_EQ(ndt::type("(Dims... * float64, Dims... * float64) -> Dims... * int32"), f->get_type());
-  EXPECT_ARRAY_EQ(0, f(0.0, 3.0));
+  EXPECT_ARRAY_EQ(nd::array({0, 0, 0}), f(nd::array{0.0, 1.0, 2.0}, nd::array{0.0, 1.0, 2.0}));
 
   //  f(nd::array{0.0, 1.0, 2.0}, nd::array{0.0, 1.0, 2.0});
   // std::exit(-1);
