@@ -52,7 +52,7 @@ namespace nd {
       reinterpret_cast<SelfType *>(this)->single(const_cast<char *>(dst->cdata()), src_data);
     }
 
-    constexpr size_t begin() { return 0; }
+    size_t begin() { return 0; }
 
     void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t end) {
       char *src_copy[N];
@@ -73,7 +73,7 @@ namespace nd {
       reinterpret_cast<SelfType *>(this)->single(const_cast<char *>(dst->cdata()), nullptr);
     }
 
-    constexpr size_t begin() { return 0; }
+    size_t begin() { return 0; }
 
     void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src), const intptr_t *DYND_UNUSED(src_stride),
                  size_t end) {
