@@ -37,8 +37,12 @@ namespace nd {
     template <size_t I>
     struct apply_arg<iteration_t, I> {
       iteration_t it;
+      size_t index[10];
 
-      apply_arg(char *data, const char *DYND_UNUSED(arrmeta)) { it.ndim = reinterpret_cast<iteration_t *>(data)->ndim; }
+      apply_arg(char *data, const char *DYND_UNUSED(arrmeta)) {
+        it.ndim = reinterpret_cast<iteration_t *>(data)->ndim;
+        it.index = index;
+      }
 
       iteration_t &get(char *DYND_UNUSED(data)) { return it; }
     };
