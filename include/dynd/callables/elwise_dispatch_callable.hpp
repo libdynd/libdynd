@@ -22,6 +22,7 @@ namespace nd {
     public:
       struct data_type {
         base_callable *child;
+        size_t ndim;
       };
 
       callable m_child;
@@ -38,6 +39,7 @@ namespace nd {
           } else {
             child_data.child = m_child.get();
           }
+          child_data.ndim = 0;
           data = reinterpret_cast<char *>(&child_data);
         }
 
@@ -61,6 +63,8 @@ namespace nd {
               this, reinterpret_cast<char *>(&data), cg,
               dst_tp.is_symbolic() ? reinterpret_cast<data_type *>(data)->child->get_return_type() : dst_tp, nsrc,
               src_tp, nkwd, kwds, tp_vars);
+        } else {
+          reinterpret_cast<data_type *>(data)->ndim += 1;
         }
 
         // Do a pass through the src types to classify them

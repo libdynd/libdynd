@@ -38,7 +38,7 @@ namespace nd {
     struct apply_arg<iteration_t, I> {
       iteration_t it;
 
-      apply_arg(char *DYND_UNUSED(data), const char *DYND_UNUSED(arrmeta)) {}
+      apply_arg(char *data, const char *DYND_UNUSED(arrmeta)) { it.ndim = reinterpret_cast<iteration_t *>(data)->ndim; }
 
       iteration_t &get(char *DYND_UNUSED(data)) { return it; }
     };
