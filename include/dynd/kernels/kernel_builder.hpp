@@ -20,7 +20,7 @@ namespace nd {
    *
    * The data placed in the kernel's data must
    * be relocatable with a memcpy, it must not rely on its
-   * own address.
+   * own address. 
    */
   class kernel_builder : public storagebuf<kernel_prefix, kernel_builder> {
     call_node *m_call;
