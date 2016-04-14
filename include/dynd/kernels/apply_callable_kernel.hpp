@@ -30,7 +30,9 @@ namespace nd {
 
       template <typename SelfType, typename ArgsType, size_t NArg>
       struct base_apply_kernel : base_strided_kernel<SelfType, NArg>, ArgsType {
-        using std::conditional_t<has_state<ArgsType>::value, ArgsType, base_strided_kernel<SelfType, NArg>>::begin;
+        typedef typename std::conditional<has_state<ArgsType>::value, ArgsType,
+                                          base_strided_kernel<SelfType, NArg>>::type T;
+        using T::begin;
 
         base_apply_kernel(ArgsType args) : ArgsType(args) {}
       };
