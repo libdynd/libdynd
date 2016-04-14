@@ -76,7 +76,10 @@ ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp) {
   std::string dimsname("Dims");
 
   for (const ndt::type &t : param_types) {
-    out_param_types.push_back(ndt::make_ellipsis_dim(dimsname, t));
+    if (t.get_id() == iteration_id) {
+    } else {
+      out_param_types.push_back(ndt::make_ellipsis_dim(dimsname, t));
+    }
   }
 
   ndt::type kwd_tp = child_tp->get_kwd_struct();

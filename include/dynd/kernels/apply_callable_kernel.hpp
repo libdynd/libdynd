@@ -13,30 +13,56 @@ namespace nd {
   namespace functional {
     namespace detail {
 
+      template <typename ArgTypes>
+      struct has_state {
+        static const bool value = false;
+      };
+
+      template <typename... A, size_t I0, size_t... I>
+      struct has_state<apply_args<type_sequence<state, A...>, index_sequence<I0, I...>>> {
+        static const bool value = true;
+      };
+
+      template <typename A0, typename... A, size_t I0, size_t... I>
+      struct has_state<apply_args<type_sequence<A0, A...>, index_sequence<I0, I...>>> {
+        static const bool value = has_state<apply_args<type_sequence<A...>, index_sequence<I...>>>::value;
+      };
+
+      template <typename SelfType, typename ArgsType, size_t NArg>
+      struct base_apply_kernel : base_strided_kernel<SelfType, NArg>, ArgsType {
+        typedef typename std::conditional<has_state<ArgsType>::value, ArgsType,
+                                          base_strided_kernel<SelfType, NArg>>::type T;
+        using T::begin;
+
+        base_apply_kernel(ArgsType args) : ArgsType(args) {}
+      };
+
       template <typename func_type, typename R, typename A, typename I, typename K, typename J>
       struct apply_callable_kernel;
 
       template <typename func_type, typename R, typename... A, size_t... I, typename... K, size_t... J>
       struct apply_callable_kernel<func_type, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>,
                                    index_sequence<J...>>
-          : base_strided_kernel<apply_callable_kernel<func_type, R, type_sequence<A...>, index_sequence<I...>,
-                                                      type_sequence<K...>, index_sequence<J...>>,
-                                sizeof...(A)>,
-            apply_args<type_sequence<A...>, index_sequence<I...>>,
+          : base_apply_kernel<apply_callable_kernel<func_type, R, type_sequence<A...>, index_sequence<I...>,
+                                                    type_sequence<K...>, index_sequence<J...>>,
+                              apply_args<type_sequence<A...>, index_sequence<I...>>, sizeof...(A)>,
             apply_kwds<type_sequence<K...>, index_sequence<J...>> {
+
+        typedef base_apply_kernel<apply_callable_kernel<func_type, R, type_sequence<A...>, index_sequence<I...>,
+                                                        type_sequence<K...>, index_sequence<J...>>,
+                                  apply_args<type_sequence<A...>, index_sequence<I...>>, sizeof...(A)> base_type;
+
         typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;
         typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;
 
         func_type func;
 
         apply_callable_kernel(func_type func, args_type args, kwds_type kwds)
-            : args_type(args), kwds_type(kwds), func(func)
-        {
-        }
+            : base_type(args), kwds_type(kwds), func(func) {}
 
-        void single(char *dst, char *const *DYND_IGNORE_UNUSED(src))
-        {
-          *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
+        void single(char *dst, char *const *DYND_IGNORE_UNUSED(src)) {
+          *reinterpret_cast<R *>(dst) =
+              func(apply_arg<A, I>::get(apply_arg<A, I>::at(src))..., apply_kwd<K, J>::get()...);
         }
       };
 
@@ -54,12 +80,9 @@ namespace nd {
         func_type func;
 
         apply_callable_kernel(func_type func, args_type args, kwds_type kwds)
-            : args_type(args), kwds_type(kwds), func(func)
-        {
-        }
+            : args_type(args), kwds_type(kwds), func(func) {}
 
-        void single(char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))
-        {
+        void single(char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src)) {
           func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
         }
       };
@@ -78,12 +101,9 @@ namespace nd {
         func_type *func;
 
         apply_callable_kernel(func_type *func, args_type args, kwds_type kwds)
-            : args_type(args), kwds_type(kwds), func(func)
-        {
-        }
+            : args_type(args), kwds_type(kwds), func(func) {}
 
-        void single(char *dst, char *const *DYND_IGNORE_UNUSED(src))
-        {
+        void single(char *dst, char *const *DYND_IGNORE_UNUSED(src)) {
           *reinterpret_cast<R *>(dst) = (*func)(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
         }
       };
@@ -102,12 +122,9 @@ namespace nd {
         func_type *func;
 
         apply_callable_kernel(func_type *func, args_type args, kwds_type kwds)
-            : args_type(args), kwds_type(kwds), func(func)
-        {
-        }
+            : args_type(args), kwds_type(kwds), func(func) {}
 
-        void single(char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))
-        {
+        void single(char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src)) {
           (*func)(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
         }
       };

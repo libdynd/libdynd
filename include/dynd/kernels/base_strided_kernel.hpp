@@ -16,14 +16,12 @@ namespace nd {
   template <typename SelfType>
   struct base_strided_kernel<SelfType> : base_kernel<SelfType> {
     static void strided_wrapper(kernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
-                                const intptr_t *src_stride, size_t count)
-    {
+                                const intptr_t *src_stride, size_t count) {
       reinterpret_cast<SelfType *>(self)->strided(dst, dst_stride, src, src_stride, count);
     }
 
     template <typename... ArgTypes>
-    static void init(SelfType *self, kernel_request_t kernreq, ArgTypes &&... args)
-    {
+    static void init(SelfType *self, kernel_request_t kernreq, ArgTypes &&... args) {
       new (self) SelfType(std::forward<ArgTypes>(args)...);
 
       self->destructor = SelfType::destruct;
@@ -46,8 +44,7 @@ namespace nd {
 
   template <typename SelfType, size_t N>
   struct base_strided_kernel<SelfType, N> : base_strided_kernel<SelfType> {
-    void call(array *dst, const array *src)
-    {
+    void call(array *dst, const array *src) {
       char *src_data[N];
       for (size_t i = 0; i < N; ++i) {
         src_data[i] = const_cast<char *>(src[i].cdata());
@@ -55,11 +52,12 @@ namespace nd {
       reinterpret_cast<SelfType *>(this)->single(const_cast<char *>(dst->cdata()), src_data);
     }
 
-    void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-    {
+    size_t begin() { return 0; }
+
+    void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t end) {
       char *src_copy[N];
       memcpy(src_copy, src, sizeof(src_copy));
-      for (size_t i = 0; i != count; ++i) {
+      for (auto &&it = reinterpret_cast<SelfType *>(this)->begin(); it != end; ++it) {
         reinterpret_cast<SelfType *>(this)->single(dst, src_copy);
         dst += dst_stride;
         for (size_t j = 0; j < N; ++j) {
@@ -71,15 +69,15 @@ namespace nd {
 
   template <typename SelfType>
   struct base_strided_kernel<SelfType, 0> : base_strided_kernel<SelfType> {
-    void call(array *dst, const array *DYND_UNUSED(src))
-    {
+    void call(array *dst, const array *DYND_UNUSED(src)) {
       reinterpret_cast<SelfType *>(this)->single(const_cast<char *>(dst->cdata()), nullptr);
     }
 
+    size_t begin() { return 0; }
+
     void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src), const intptr_t *DYND_UNUSED(src_stride),
-                 size_t count)
-    {
-      for (size_t i = 0; i != count; ++i) {
+                 size_t end) {
+      for (auto &&it = reinterpret_cast<SelfType *>(this)->begin(); it != end; ++it) {
         reinterpret_cast<SelfType *>(this)->single(dst, NULL);
         dst += dst_stride;
       }

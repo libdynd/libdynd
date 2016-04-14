@@ -8,8 +8,14 @@
 #include <dynd/types/base_type.hpp>
 
 namespace dynd {
+namespace nd {
 
-struct iteration_t {};
+  struct state {
+    size_t ndim;
+    size_t *index;
+  };
+
+} // namespace dynd::nd
 
 namespace ndt {
 
@@ -23,7 +29,7 @@ namespace ndt {
   };
 
   template <>
-  struct traits<iteration_t> {
+  struct traits<nd::state> {
     static type equivalent() { return make_type<iteration_type>(); }
   };
 

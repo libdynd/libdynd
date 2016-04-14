@@ -20,12 +20,14 @@ namespace nd {
     protected:
       struct codata_type {
         base_callable *child;
+        size_t ndim;
       };
 
       struct data_type {
         std::array<bool, N> arg_broadcast;
         std::array<bool, N> arg_var;
         intptr_t res_alignment;
+        size_t ndim;
       };
 
     public:
@@ -39,6 +41,7 @@ namespace nd {
                         size_t DYND_UNUSED(narg), const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         data_type data;
+        data.ndim = reinterpret_cast<codata_type *>(codata)->ndim;
 
         base_callable *child = reinterpret_cast<codata_type *>(codata)->child;
         const ndt::type &child_ret_tp = child->get_return_type();

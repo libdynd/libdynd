@@ -7,6 +7,7 @@
 
 #include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/kernels/base_kernel.hpp>
+#include <dynd/types/iteration_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -16,22 +17,59 @@ namespace nd {
     struct apply_arg {
       typedef typename std::remove_cv<typename std::remove_reference<A>::type>::type D;
 
-      apply_arg(const char *DYND_UNUSED(arrmeta), const nd::array *DYND_UNUSED(kwds)) {}
+      apply_arg(char *DYND_UNUSED(data), const char *DYND_UNUSED(arrmeta)) {}
 
       D &get(char *data) { return *reinterpret_cast<D *>(data); }
+
+      static char *at(char *const *args) { return args[I]; }
+      static const char *at(const char *const *args) { return args[I]; }
     };
 
     template <typename ElementType, size_t I>
     struct apply_arg<fixed_dim<ElementType>, I> {
       fixed_dim<ElementType> value;
 
-      apply_arg(const char *arrmeta, const nd::array *DYND_UNUSED(kwds)) : value(arrmeta, NULL) {}
+      apply_arg(char *DYND_UNUSED(data), const char *arrmeta) : value(arrmeta, NULL) {}
 
-      fixed_dim<ElementType> &get(char *data)
-      {
+      fixed_dim<ElementType> &get(char *data) {
         value.set_data(data);
         return value;
       }
+
+      static char *at(char *const *args) { return args[I]; }
+      static const char *at(const char *const *args) { return args[I]; }
+    };
+
+    template <size_t I>
+    struct apply_arg<state, I> {
+      state st;
+      size_t index[10];
+
+      apply_arg(char *data, const char *DYND_UNUSED(arrmeta)) {
+        st.ndim = reinterpret_cast<state *>(data)->ndim;
+        st.index = index;
+        for (size_t i = 0; i < st.ndim; ++i) {
+          st.index[i] = 0;
+        }
+      }
+
+      apply_arg(const apply_arg &other) {
+        st.ndim = other.st.ndim;
+        st.index = index;
+        for (size_t i = 0; i < st.ndim; ++i) {
+          st.index[i] = 0;
+        }
+      }
+
+      state &get(char *DYND_UNUSED(data)) { return st; }
+
+      size_t &begin() {
+        st.index[st.ndim - 1] = 0;
+        return st.index[st.ndim - 1];
+      }
+
+      static char *at(char *const *DYND_UNUSED(args)) { return nullptr; }
+      static const char *at(const char *const *DYND_UNUSED(args)) { return nullptr; }
     };
 
     template <typename func_type, int N = args_of<typename funcproto_of<func_type>::type>::type::size>
@@ -42,10 +80,10 @@ namespace nd {
 
     template <typename... A, size_t... I>
     struct apply_args<type_sequence<A...>, index_sequence<I...>> : apply_arg<A, I>... {
-      apply_args(const char *const *DYND_IGNORE_UNUSED(src_arrmeta), const nd::array *DYND_IGNORE_UNUSED(kwds))
-          : apply_arg<A, I>(src_arrmeta[I], kwds)...
-      {
-      }
+      apply_args(char *DYND_IGNORE_UNUSED(data), const char *const *DYND_IGNORE_UNUSED(src_arrmeta))
+          : apply_arg<A, I>(data, apply_arg<A, I>::at(src_arrmeta))... {}
+
+      apply_args(const apply_args &) = default;
     };
 
     template <typename T, size_t I>

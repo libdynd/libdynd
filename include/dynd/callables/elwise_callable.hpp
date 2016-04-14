@@ -27,9 +27,13 @@ namespace nd {
     public:
       void resolve(call_graph &cg, const char *data) {
         const std::array<bool, N> &arg_broadcast = reinterpret_cast<const data_type *>(data)->arg_broadcast;
-        cg.emplace_back([arg_broadcast](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
-                                        const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
-                                        const char *const *src_arrmeta) {
+        size_t ndim = reinterpret_cast<const data_type *>(data)->ndim;
+        cg.emplace_back([arg_broadcast, ndim](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                                              const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
+                                              const char *const *src_arrmeta) {
+          state it;
+          it.ndim = ndim;
+
           intptr_t size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
           intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
 
@@ -47,7 +51,8 @@ namespace nd {
 
           kb.emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
 
-          kb(kernel_request_strided, nullptr, dst_arrmeta + sizeof(size_stride_t), N, child_src_arrmeta.data());
+          kb(kernel_request_strided, reinterpret_cast<char *>(&it), dst_arrmeta + sizeof(size_stride_t), N,
+             child_src_arrmeta.data());
         });
       }
 
@@ -127,6 +132,7 @@ namespace nd {
         cg.emplace_back([arg_broadcast, arg_var, res_alignment](
             kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
             size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+
           const ndt::var_dim_type::metadata_type *dst_md =
               reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta);
 
