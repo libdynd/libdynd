@@ -53,6 +53,14 @@ namespace nd {
         }
       }
 
+      apply_arg(const apply_arg &other) {
+        st.ndim = other.st.ndim;
+        st.index = index;
+        for (size_t i = 0; i < st.ndim; ++i) {
+          st.index[i] = 0;
+        }
+      }
+
       state &get(char *DYND_UNUSED(data)) { return st; }
 
       size_t &begin() {
@@ -74,6 +82,8 @@ namespace nd {
     struct apply_args<type_sequence<A...>, index_sequence<I...>> : apply_arg<A, I>... {
       apply_args(char *DYND_IGNORE_UNUSED(data), const char *const *DYND_IGNORE_UNUSED(src_arrmeta))
           : apply_arg<A, I>(data, apply_arg<A, I>::at(src_arrmeta))... {}
+
+      apply_args(const apply_args &) = default;
     };
 
     template <typename T, size_t I>
