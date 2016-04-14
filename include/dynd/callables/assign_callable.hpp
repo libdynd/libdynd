@@ -29,29 +29,33 @@ namespace nd {
       switch (error_mode) {
       case assign_error_default:
       case assign_error_nocheck:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                           const char *const *DYND_UNUSED(src_arrmeta)) {
           kb.emplace_back<detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
                                                     assign_error_nocheck>>(kernreq);
         });
         break;
       case assign_error_overflow:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                           const char *const *DYND_UNUSED(src_arrmeta)) {
           kb.emplace_back<detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
                                                     assign_error_overflow>>(kernreq);
         });
         break;
       case assign_error_fractional:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                           const char *const *DYND_UNUSED(src_arrmeta)) {
           kb.emplace_back<detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
                                                     assign_error_fractional>>(kernreq);
         });
         break;
       case assign_error_inexact:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                           const char *const *DYND_UNUSED(src_arrmeta)) {
           kb.emplace_back<detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
                                                     assign_error_inexact>>(kernreq);
         });
@@ -80,32 +84,36 @@ namespace nd {
       switch (error_mode) {
       case assign_error_default:
       case assign_error_nocheck:
-        cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                            size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+        cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                            const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                            const char *const *src_arrmeta) {
           kb.emplace_back<
               detail::assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
               kernreq, src_tp[0], src_arrmeta[0]);
         });
         break;
       case assign_error_overflow:
-        cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                            size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+        cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                            const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                            const char *const *src_arrmeta) {
           kb.emplace_back<
               detail::assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_overflow>>(
               kernreq, src_tp[0], src_arrmeta[0]);
         });
         break;
       case assign_error_fractional:
-        cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                            size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+        cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                            const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                            const char *const *src_arrmeta) {
           kb.emplace_back<
               detail::assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_fractional>>(
               kernreq, src_tp[0], src_arrmeta[0]);
         });
         break;
       case assign_error_inexact:
-        cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                            size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+        cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                            const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                            const char *const *src_arrmeta) {
           kb.emplace_back<
               detail::assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_inexact>>(
               kernreq, src_tp[0], src_arrmeta[0]);
@@ -159,9 +167,9 @@ namespace nd {
         src0_encoding = src_tp[0].extended<ndt::fixed_string_type>()->get_encoding();
       }
 
-      cg.emplace_back([src0_id, src0_size, src0_encoding,
-                       error_mode](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                                   size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+      cg.emplace_back([src0_id, src0_size, src0_encoding, error_mode](
+          kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *DYND_UNUSED(dst_arrmeta),
+          size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
         ndt::type string_type = src0_id == fixed_string_id
                                     ? ndt::make_type<ndt::fixed_string_type>(src0_size, src0_encoding)
                                     : ndt::make_type<ndt::string_type>();
@@ -194,9 +202,9 @@ namespace nd {
         string_encoding = dst_tp.extended<ndt::fixed_string_type>()->get_encoding();
       }
 
-      cg.emplace_back([dst_id, string_size, string_encoding](kernel_builder &kb, kernel_request_t kernreq,
-                                                             const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
-                                                             const char *const *DYND_UNUSED(src_arrmeta)) {
+      cg.emplace_back([dst_id, string_size, string_encoding](
+          kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
+          size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
 
         ndt::type string_tp = dst_id == fixed_string_id
                                   ? ndt::make_type<ndt::fixed_string_type>(string_size, string_encoding)
@@ -224,8 +232,9 @@ namespace nd {
       assign_error_mode error_mode =
           (kwds == NULL || kwds[0].is_na()) ? assign_error_default : kwds[0].as<assign_error_mode>();
 
-      cg.emplace_back([error_mode](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                                   size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+      cg.emplace_back([error_mode](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                                   const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                                   const char *const *src_arrmeta) {
         kb.emplace_back<
             detail::assignment_kernel<float64_id, float_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
             kernreq, ndt::type(string_id), src_arrmeta[0], error_mode);
@@ -253,9 +262,9 @@ namespace nd {
       size_t dst_data_size = dst_tp.get_data_size();
       string_encoding_t dst_encoding = dst_tp.extended<ndt::fixed_string_type>()->get_encoding();
       string_encoding_t src0_encoding = src_fs->get_encoding();
-      cg.emplace_back([dst_data_size, dst_encoding, src0_encoding,
-                       error_mode](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                                   size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+      cg.emplace_back([dst_data_size, dst_encoding, src0_encoding, error_mode](
+          kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *DYND_UNUSED(dst_arrmeta),
+          size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
         kb.emplace_back<detail::assignment_kernel<fixed_string_id, string_kind_id, string_id, string_kind_id,
                                                   assign_error_nocheck>>(
             kernreq, get_next_unicode_codepoint_function(src0_encoding, error_mode),
@@ -281,8 +290,9 @@ namespace nd {
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
 
-      cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                          size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+      cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                          const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                          const char *const *DYND_UNUSED(src_arrmeta)) {
         const ndt::fixed_string_type *src_fs = src_tp[0].extended<ndt::fixed_string_type>();
         kb.emplace_back<detail::assignment_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id,
                                                   assign_error_nocheck>>(
@@ -308,8 +318,9 @@ namespace nd {
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta,
-                          size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+      cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                          const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
+                          const char *const *DYND_UNUSED(src_arrmeta)) {
         kb.emplace_back<
             detail::assignment_kernel<string_id, string_kind_id, int8_id, int_kind_id, assign_error_nocheck>>(
             kernreq, dst_tp, src_tp[0].get_id(), dst_arrmeta);
@@ -335,9 +346,9 @@ namespace nd {
       string_encoding_t src0_encoding = src_tp[0].extended<ndt::char_type>()->get_encoding();
       size_t src0_data_size = src_tp[0].get_data_size();
       assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
-      cg.emplace_back([dst_encoding, src0_data_size, src0_encoding,
-                       error_mode](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                                   size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+      cg.emplace_back([dst_encoding, src0_data_size, src0_encoding, error_mode](
+          kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *DYND_UNUSED(dst_arrmeta),
+          size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
         kb.emplace_back<detail::assignment_kernel<string_id, string_kind_id, fixed_string_id, string_kind_id,
                                                   assign_error_nocheck>>(
             kernreq, dst_encoding, src0_encoding, src0_data_size,
@@ -361,8 +372,9 @@ namespace nd {
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                         size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                         const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                         const char *const *src_arrmeta) {
         kb.emplace_back<
             detail::assignment_kernel<type_id, scalar_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
             kernreq, ndt::type(string_id), src_arrmeta[0]);
@@ -390,8 +402,8 @@ namespace nd {
       string_encoding_t src0_encoding = src_tp[0].extended<ndt::base_string_type>()->get_encoding();
 
       cg.emplace_back([error_mode, dst_encoding, src0_data_size, src0_encoding](
-          kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
-          const char *const *DYND_UNUSED(src_arrmeta)) {
+          kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *DYND_UNUSED(dst_arrmeta),
+          size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
         kb.emplace_back<detail::assignment_kernel<string_id, string_kind_id, fixed_string_id, string_kind_id,
                                                   assign_error_nocheck>>(
             kernreq, dst_encoding, src0_encoding, src0_data_size,
@@ -417,8 +429,9 @@ namespace nd {
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       assign_error_mode error_mode = kwds[0].is_na() ? assign_error_default : kwds[0].as<assign_error_mode>();
 
-      cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                          size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+      cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                          const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                          const char *const *src_arrmeta) {
         kb.emplace_back<
             detail::assignment_kernel<float32_id, float_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
             kernreq, src_tp[0], src_arrmeta[0], error_mode);
@@ -440,7 +453,7 @@ namespace nd {
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta,
+      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
                          size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
         kb.emplace_back<
             detail::assignment_kernel<string_id, string_kind_id, type_id, scalar_kind_id, assign_error_nocheck>>(
@@ -469,8 +482,8 @@ namespace nd {
       string_encoding_t dst_encoding = dst_tp.extended<ndt::char_type>()->get_encoding();
       string_encoding_t src0_encoding = src_fs->get_encoding();
       cg.emplace_back([error_mode, dst_data_size, dst_encoding, src0_encoding](
-          kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
-          const char *const *DYND_UNUSED(src_arrmeta)) {
+          kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *DYND_UNUSED(dst_arrmeta),
+          size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
         kb.emplace_back<detail::assignment_kernel<fixed_string_id, string_kind_id, string_id, string_kind_id,
                                                   assign_error_nocheck>>(
             kernreq, get_next_unicode_codepoint_function(src0_encoding, error_mode),
@@ -494,12 +507,12 @@ namespace nd {
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta,
+      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
                          size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
         kb.emplace_back<assignment_kernel<pointer_id, pointer_id>>(kernreq);
 
         const char *child_src_arrmeta = src_arrmeta[0] + sizeof(pointer_type_arrmeta);
-        kb(kernel_request_single, dst_arrmeta, 1, &child_src_arrmeta);
+        kb(kernel_request_single, nullptr, dst_arrmeta, 1, &child_src_arrmeta);
       });
 
       return dst_tp;
@@ -517,8 +530,8 @@ namespace nd {
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
                       const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
-                         const char *const *src_arrmeta) {
+      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
+                         size_t nsrc, const char *const *src_arrmeta) {
         intptr_t ckb_offset = kb.size();
         intptr_t root_ckb_offset = ckb_offset;
         typedef detail::assignment_kernel<option_id, any_kind_id, option_id, any_kind_id, assign_error_nocheck>
@@ -527,21 +540,21 @@ namespace nd {
         kb.emplace_back<self_type>(kernreq);
         ckb_offset = kb.size();
         // instantiate src_is_avail
-        kb(kernreq | kernel_request_data_only, nullptr, nsrc, src_arrmeta);
+        kb(kernreq | kernel_request_data_only, nullptr, nullptr, nsrc, src_arrmeta);
 
         ckb_offset = kb.size();
         // instantiate dst_assign_na
         kb.reserve(ckb_offset + sizeof(kernel_prefix));
         self_type *self = kb.get_at<self_type>(root_ckb_offset);
         self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
-        kb(kernreq | kernel_request_data_only, dst_arrmeta, nsrc, nullptr);
+        kb(kernreq | kernel_request_data_only, nullptr, dst_arrmeta, nsrc, nullptr);
 
         ckb_offset = kb.size();
         // instantiate value_assign
         kb.reserve(ckb_offset + sizeof(kernel_prefix));
         self = kb.get_at<self_type>(root_ckb_offset);
         self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-        kb(kernreq | kernel_request_data_only, dst_arrmeta, 1, src_arrmeta);
+        kb(kernreq | kernel_request_data_only, nullptr, dst_arrmeta, 1, src_arrmeta);
       });
 
       is_na->resolve(this, nullptr, cg, ndt::make_type<bool1>(), 1, src_tp, nkwd, kwds, tp_vars);
@@ -608,8 +621,9 @@ namespace nd {
       type_id_t tid = dst_tp.get_dtype().extended<ndt::option_type>()->get_value_type().get_id();
       switch (tid) {
       case bool_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                           const char *const *DYND_UNUSED(src_arrmeta)) {
           kb.emplace_back<detail::string_to_option_bool_ck>(kernreq);
         });
         break;
@@ -621,19 +635,20 @@ namespace nd {
       case float16_id:
       case float32_id:
       case float64_id:
-        cg.emplace_back([tid, error_mode](kernel_builder &kb, kernel_request_t kernreq,
+        cg.emplace_back([tid, error_mode](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                           const char *const *DYND_UNUSED(src_arrmeta)) {
           kb.emplace_back<detail::string_to_option_number_ck>(kernreq, tid, error_mode);
         });
         break;
       case string_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
-                           const char *const *src_arrmeta) { kb(kernreq, dst_arrmeta, nsrc, src_arrmeta); });
+        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                           const char *dst_arrmeta, size_t nsrc,
+                           const char *const *src_arrmeta) { kb(kernreq, nullptr, dst_arrmeta, nsrc, src_arrmeta); });
         break;
       default:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
-                           const char *const *src_arrmeta) {
+        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                           const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta) {
           // Fall back to an adaptor that checks for a few standard
           // missing value tokens, then uses the standard value assignment
           intptr_t ckb_offset = kb.size();
@@ -642,13 +657,13 @@ namespace nd {
 
           ckb_offset = kb.size();
           // First child ckernel is the value assignment
-          kb(kernreq | kernel_request_data_only, dst_arrmeta, nsrc, src_arrmeta);
+          kb(kernreq | kernel_request_data_only, nullptr, dst_arrmeta, nsrc, src_arrmeta);
           ckb_offset = kb.size();
           // Re-acquire self because the address may have changed
           detail::string_to_option_tp_ck *self = kb.get_at<detail::string_to_option_tp_ck>(root_ckb_offset);
           // Second child ckernel is the NA assignment
           self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
-          kb(kernreq | kernel_request_data_only, dst_arrmeta, nsrc, src_arrmeta);
+          kb(kernreq | kernel_request_data_only, nullptr, dst_arrmeta, nsrc, src_arrmeta);
           ckb_offset = kb.size();
         });
         break;
@@ -691,9 +706,9 @@ namespace nd {
         dst_arrmeta_offsets[i] = dst_sd->get_arrmeta_offsets()[i];
       }
 
-      cg.emplace_back([field_count, dst_arrmeta_offsets,
-                       src_arrmeta_offsets](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta,
-                                            size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+      cg.emplace_back([field_count, dst_arrmeta_offsets, src_arrmeta_offsets](
+          kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
+          size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
         shortvector<const char *> src_fields_arrmeta(field_count);
         for (intptr_t i = 0; i != field_count; ++i) {
           src_fields_arrmeta[i] = src_arrmeta[0] + src_arrmeta_offsets[i];
@@ -717,7 +732,7 @@ namespace nd {
           field.child_kernel_offset = kb.size() - self_offset;
           field.dst_data_offset = dst_data_offsets[i];
           field.src_data_offset = src_data_offsets[i];
-          kb(kernel_request_single, dst_fields_arrmeta[i], 1, &src_fields_arrmeta[i]);
+          kb(kernel_request_single, nullptr, dst_fields_arrmeta[i], 1, &src_fields_arrmeta[i]);
         }
       });
 
@@ -782,9 +797,9 @@ namespace nd {
         dst_arrmeta_offsets[i] = dst_arrmeta_offsets_vec[i];
       }
 
-      cg.emplace_back([field_count, src_permutation, src_fields_arrmeta_offsets,
-                       dst_arrmeta_offsets](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta,
-                                            size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+      cg.emplace_back([field_count, src_permutation, src_fields_arrmeta_offsets, dst_arrmeta_offsets](
+          kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
+          size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
         const uintptr_t *src_data_offsets_orig = reinterpret_cast<const uintptr_t *>(src_arrmeta[0]);
         shortvector<uintptr_t> src_data_offsets(field_count);
         shortvector<const char *> src_fields_arrmeta(field_count);
@@ -813,7 +828,7 @@ namespace nd {
           field.child_kernel_offset = kb.size() - self_offset;
           field.dst_data_offset = dst_offsets[i];
           field.src_data_offset = src_data_offsets[i];
-          kb(kernel_request_single, dst_fields_arrmeta[i], 1, &src_fields_arrmeta[i]);
+          kb(kernel_request_single, nullptr, dst_fields_arrmeta[i], 1, &src_fields_arrmeta[i]);
         }
       });
 
@@ -832,13 +847,13 @@ namespace nd {
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
                       const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
-                         const char *const *src_arrmeta) {
+      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
+                         size_t nsrc, const char *const *src_arrmeta) {
         intptr_t ckb_offset = kb.size();
         intptr_t root_ckb_offset = ckb_offset;
         kb.emplace_back<option_to_value_ck>(kernreq);
 
-        kb(kernreq | kernel_request_data_only, nullptr, nsrc, src_arrmeta);
+        kb(kernreq | kernel_request_data_only, nullptr, nullptr, nsrc, src_arrmeta);
 
         ckb_offset = kb.size();
         // instantiate value_assign
@@ -846,7 +861,7 @@ namespace nd {
         option_to_value_ck *self = kb.get_at<option_to_value_ck>(root_ckb_offset);
         self->m_value_assign_offset = ckb_offset - root_ckb_offset;
 
-        kb(kernreq | kernel_request_data_only, dst_arrmeta, 1, src_arrmeta);
+        kb(kernreq | kernel_request_data_only, nullptr, dst_arrmeta, 1, src_arrmeta);
       });
 
       is_na->resolve(this, nullptr, cg, ndt::make_type<bool1>(), 1, src_tp, nkwd, kwds, tp_vars);

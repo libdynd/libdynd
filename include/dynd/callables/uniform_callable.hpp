@@ -48,8 +48,9 @@ namespace nd {
             b = kwds[1].as<R>();
           }
 
-          cg.emplace_back([g, a, b](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                                    size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+          cg.emplace_back([g, a, b](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                                    const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                                    const char *const *DYND_UNUSED(src_arrmeta)) {
             kb.emplace_back<uniform_kernel<ResID, int_kind_id, GeneratorType>>(kernreq, g.get(), a, b);
           });
 
@@ -91,8 +92,9 @@ namespace nd {
             b = kwds[1].as<R>();
           }
 
-          cg.emplace_back([g, a, b](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                                    size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+          cg.emplace_back([g, a, b](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                                    const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                                    const char *const *DYND_UNUSED(src_arrmeta)) {
             kb.emplace_back<uniform_kernel<ResID, float_kind_id, GeneratorType>>(kernreq, g.get(), a, b);
           });
 
@@ -130,7 +132,7 @@ namespace nd {
             b = kwds[1].as<R>();
           }
 
-          cg.emplace_back([g, a, b](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
+          cg.emplace_back([g, a, b](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),const char *DYND_UNUSED(dst_arrmeta),
                                     size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
             kb.emplace_back<uniform_kernel<ResID, complex_kind_id, GeneratorType>>(kernreq, g.get(), a, b);
           });

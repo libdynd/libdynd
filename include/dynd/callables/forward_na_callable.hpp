@@ -23,21 +23,21 @@ namespace nd {
     ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &dst_tp,
                       size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd, const array *kwds,
                       const std::map<std::string, ndt::type> &tp_vars) {
-      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
-                         const char *const *src_arrmeta) {
+      cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
+                         size_t nsrc, const char *const *src_arrmeta) {
         size_t self_offset = kb.size();
         kb.emplace_back<forward_na_kernel<I...>>(kernreq);
 
-        kb(kernel_request_single, dst_arrmeta, nsrc, src_arrmeta);
+        kb(kernel_request_single, nullptr, dst_arrmeta, nsrc, src_arrmeta);
 
         for (intptr_t i : std::array<index_t, sizeof...(I)>({I...})) {
           size_t is_na_offset = kb.size() - self_offset;
-          kb(kernel_request_single, nullptr, 1, src_arrmeta + i);
+          kb(kernel_request_single, nullptr, nullptr, 1, src_arrmeta + i);
           kb.get_at<forward_na_kernel<I...>>(self_offset)->is_na_offset[i] = is_na_offset;
         }
 
         size_t assign_na_offset = kb.size() - self_offset;
-        kb(kernel_request_single, nullptr, 0, nullptr);
+        kb(kernel_request_single, nullptr, nullptr, 0, nullptr);
         kb.get_at<forward_na_kernel<I...>>(self_offset)->assign_na_offset = assign_na_offset;
       });
 

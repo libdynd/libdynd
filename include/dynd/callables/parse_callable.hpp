@@ -29,14 +29,14 @@ namespace nd {
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                         const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta, size_t nsrc,
-                           const char *const *src_arrmeta) {
+        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                           const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta) {
           intptr_t self_offset = kb.size();
           kb.emplace_back<parse_kernel<option_id>>(kernreq);
 
-          kb(kernreq | kernel_request_data_only, dst_arrmeta, 0, nullptr);
+          kb(kernreq | kernel_request_data_only, nullptr, dst_arrmeta, 0, nullptr);
           kb.get_at<parse_kernel<option_id>>(self_offset)->parse_offset = kb.size() - self_offset;
-          kb(kernreq | kernel_request_data_only, dst_arrmeta, nsrc, src_arrmeta);
+          kb(kernreq | kernel_request_data_only, nullptr, dst_arrmeta, nsrc, src_arrmeta);
         });
 
         assign_na->resolve(this, nullptr, cg, dst_tp, 0, nullptr, nkwd, kwds, tp_vars);

@@ -32,62 +32,64 @@ namespace nd {
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       switch (src_tp[0].get_dtype().get_id()) {
       case bool_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<is_na_kernel<bool_id>>(kernreq);
-        });
+        cg.emplace_back(
+            [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+               const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<is_na_kernel<bool_id>>(kernreq); });
         break;
       case int8_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<is_na_kernel<int8_id>>(kernreq);
-        });
+        cg.emplace_back(
+            [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+               const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<is_na_kernel<int8_id>>(kernreq); });
         break;
       case int16_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<is_na_kernel<int16_id>>(kernreq);
-        });
+        cg.emplace_back(
+            [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+               const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<is_na_kernel<int16_id>>(kernreq); });
         break;
       case int32_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<is_na_kernel<int32_id>>(kernreq);
-        });
+        cg.emplace_back(
+            [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+               const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<is_na_kernel<int32_id>>(kernreq); });
         break;
       case int64_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<is_na_kernel<int64_id>>(kernreq);
-        });
+        cg.emplace_back(
+            [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+               const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<is_na_kernel<int64_id>>(kernreq); });
         break;
       case int128_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<is_na_kernel<int128_id>>(kernreq);
-        });
+        cg.emplace_back(
+            [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+               const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<is_na_kernel<int128_id>>(kernreq); });
         break;
       case float32_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<is_na_kernel<float32_id>>(kernreq);
-        });
+        cg.emplace_back(
+            [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+               const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<is_na_kernel<float32_id>>(kernreq); });
         break;
       case float64_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<is_na_kernel<float64_id>>(kernreq);
-        });
+        cg.emplace_back(
+            [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+               const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<is_na_kernel<float64_id>>(kernreq); });
         break;
       case complex_float32_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                           const char *const *DYND_UNUSED(src_arrmeta)) {
           kb.emplace_back<is_na_kernel<complex_float32_id>>(kernreq);
         });
         break;
       case complex_float64_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                           const char *const *DYND_UNUSED(src_arrmeta)) {
           kb.emplace_back<is_na_kernel<complex_float64_id>>(kernreq);
         });
         break;

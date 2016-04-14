@@ -39,7 +39,7 @@ namespace nd {
       }
 
       cg.emplace_back([field_count, arrmeta_offsets](kernel_builder &kb, kernel_request_t kernreq,
-                                                     const char *dst_arrmeta, size_t nsrc,
+                                                     char *DYND_UNUSED(data), const char *dst_arrmeta, size_t nsrc,
                                                      const char *const *src_arrmeta) {
         intptr_t self_offset = kb.size();
 
@@ -60,7 +60,7 @@ namespace nd {
           field_kernel_offsets[i] = kb.size() - self_offset;
           const char *field_arrmeta = src_arrmeta[0] + arrmeta_offsets[i];
           const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
-          kb(kernreq | kernel_request_data_only, dst_arrmeta, nsrc, child_src_arrmeta);
+          kb(kernreq | kernel_request_data_only, nullptr, dst_arrmeta, nsrc, child_src_arrmeta);
         }
       });
 
