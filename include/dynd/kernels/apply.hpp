@@ -22,6 +22,7 @@ namespace nd {
       D &get(char *data) { return *reinterpret_cast<D *>(data); }
 
       static char *at(char *const *args) { return args[I]; }
+      static const char *at(const char *const *args) { return args[I]; }
     };
 
     template <typename ElementType, size_t I>
@@ -36,6 +37,7 @@ namespace nd {
       }
 
       static char *at(char *const *args) { return args[I]; }
+      static const char *at(const char *const *args) { return args[I]; }
     };
 
     template <size_t I>
@@ -59,6 +61,7 @@ namespace nd {
       }
 
       static char *at(char *const *DYND_UNUSED(args)) { return nullptr; }
+      static const char *at(const char *const *DYND_UNUSED(args)) { return nullptr; }
     };
 
     template <typename func_type, int N = args_of<typename funcproto_of<func_type>::type>::type::size>
@@ -70,7 +73,7 @@ namespace nd {
     template <typename... A, size_t... I>
     struct apply_args<type_sequence<A...>, index_sequence<I...>> : apply_arg<A, I>... {
       apply_args(char *DYND_IGNORE_UNUSED(data), const char *const *DYND_IGNORE_UNUSED(src_arrmeta))
-          : apply_arg<A, I>(data, src_arrmeta[I])... {}
+          : apply_arg<A, I>(data, apply_arg<A, I>::at(src_arrmeta))... {}
     };
 
     template <typename T, size_t I>
