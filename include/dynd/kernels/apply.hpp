@@ -20,6 +20,8 @@ namespace nd {
       apply_arg(char *DYND_UNUSED(data), const char *DYND_UNUSED(arrmeta)) {}
 
       D &get(char *data) { return *reinterpret_cast<D *>(data); }
+
+      static char *at(char *const *args) { return args[I]; }
     };
 
     template <typename ElementType, size_t I>
@@ -32,24 +34,31 @@ namespace nd {
         value.set_data(data);
         return value;
       }
+
+      static char *at(char *const *args) { return args[I]; }
     };
 
     template <size_t I>
-    struct apply_arg<iteration_t, I> {
-      iteration_t st;
+    struct apply_arg<state, I> {
+      state st;
       size_t index[10];
 
       apply_arg(char *data, const char *DYND_UNUSED(arrmeta)) {
-        st.ndim = reinterpret_cast<iteration_t *>(data)->ndim;
+        st.ndim = reinterpret_cast<state *>(data)->ndim;
         st.index = index;
         for (size_t i = 0; i < st.ndim; ++i) {
           st.index[i] = 0;
         }
       }
 
-      iteration_t &get(char *DYND_UNUSED(data)) { return st; }
+      state &get(char *DYND_UNUSED(data)) { return st; }
 
-      size_t &begin() { return st.index[st.ndim - 1]; }
+      size_t &begin() {
+        st.index[st.ndim - 1] = 0;
+        return st.index[st.ndim - 1];
+      }
+
+      static char *at(char *const *DYND_UNUSED(args)) { return nullptr; }
     };
 
     template <typename func_type, int N = args_of<typename funcproto_of<func_type>::type>::type::size>

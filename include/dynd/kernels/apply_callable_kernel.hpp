@@ -48,7 +48,8 @@ namespace nd {
             : base_type(args), kwds_type(kwds), func(func) {}
 
         void single(char *dst, char *const *DYND_IGNORE_UNUSED(src)) {
-          *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
+          *reinterpret_cast<R *>(dst) =
+              func(apply_arg<A, I>::get(apply_arg<A, I>::at(src))..., apply_kwd<K, J>::get()...);
         }
       };
 
