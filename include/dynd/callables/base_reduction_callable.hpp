@@ -110,8 +110,8 @@ namespace nd {
         bool keepdim = reinterpret_cast<node_type *>(data)->keepdim;
         bool identity = reinterpret_cast<node_type *>(data)->identity;
         cg.emplace_back([inner, broadcast, keepdim, identity](kernel_builder &kb, kernel_request_t kernreq,
-                                                              const char *dst_arrmeta, size_t nsrc,
-                                                              const char *const *src_arrmeta) {
+                                                              char *DYND_UNUSED(data), const char *dst_arrmeta,
+                                                              size_t nsrc, const char *const *src_arrmeta) {
           if (inner) {
             if (!broadcast) {
               intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
@@ -134,10 +134,10 @@ namespace nd {
 
               const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
 
-              kb(kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), nsrc, &src0_element_arrmeta);
+              kb(kernel_request_strided, nullptr, dst_arrmeta + sizeof(size_stride_t), nsrc, &src0_element_arrmeta);
 
               intptr_t init_offset = kb.size();
-              kb(kernel_request_single, dst_arrmeta + sizeof(size_stride_t), nsrc, &src0_element_arrmeta);
+              kb(kernel_request_single, nullptr, dst_arrmeta + sizeof(size_stride_t), nsrc, &src0_element_arrmeta);
 
               e = kb.get_at<self_type>(root_ckb_offset);
               e->init_offset = init_offset - root_ckb_offset;
@@ -169,10 +169,10 @@ namespace nd {
                 self_k->src_stride_first = 0;
               }
 
-              kb(kernel_request_strided, dst_element_arrmeta, nsrc, &src0_element_arrmeta);
+              kb(kernel_request_strided, nullptr, dst_element_arrmeta, nsrc, &src0_element_arrmeta);
 
               intptr_t init_offset = kb.size();
-              kb(kernel_request_strided, dst_element_arrmeta, nsrc, &src0_element_arrmeta);
+              kb(kernel_request_strided, nullptr, dst_element_arrmeta, nsrc, &src0_element_arrmeta);
 
               self_k = kb.get_at<self_type>(root_ckb_offset);
               self_k->dst_init_kernel_offset = init_offset - root_ckb_offset;
@@ -192,7 +192,8 @@ namespace nd {
               kernreq = kernel_request_single;
             }
 
-            kb(kernreq, keepdim ? (dst_arrmeta + sizeof(size_stride_t)) : dst_arrmeta, nsrc, &src0_element_arrmeta);
+            kb(kernreq, nullptr, keepdim ? (dst_arrmeta + sizeof(size_stride_t)) : dst_arrmeta, nsrc,
+               &src0_element_arrmeta);
           }
         });
       }
@@ -206,8 +207,8 @@ namespace nd {
         bool keepdim = reinterpret_cast<node_type *>(data)->keepdim;
         bool identity = reinterpret_cast<node_type *>(data)->identity;
         cg.emplace_back([inner, broadcast, keepdim, identity](kernel_builder &kb, kernel_request_t kernreq,
-                                                              const char *dst_arrmeta, size_t nsrc,
-                                                              const char *const *src_arrmeta) {
+                                                              char *DYND_UNUSED(data), const char *dst_arrmeta,
+                                                              size_t nsrc, const char *const *src_arrmeta) {
           typedef reduction_kernel<var_dim_id, false, true> self_type;
           intptr_t root_ckb_offset = kb.size();
           kb.emplace_back<self_type>(
@@ -216,10 +217,10 @@ namespace nd {
           self_type *e = kb.get_at<self_type>(root_ckb_offset);
           const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(ndt::var_dim_type::metadata_type);
 
-          kb(kernel_request_strided, dst_arrmeta, nsrc, &src0_element_arrmeta);
+          kb(kernel_request_strided, nullptr, dst_arrmeta, nsrc, &src0_element_arrmeta);
 
           intptr_t init_offset = kb.size();
-          kb(kernel_request_single, dst_arrmeta, nsrc, &src0_element_arrmeta);
+          kb(kernel_request_single, nullptr, dst_arrmeta, nsrc, &src0_element_arrmeta);
 
           e = kb.get_at<self_type>(root_ckb_offset);
           e->init_offset = init_offset - root_ckb_offset;

@@ -46,8 +46,9 @@ namespace nd {
         }
       }
 
-      cg.emplace_back([start, stop, step](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta,
-                                          size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+      cg.emplace_back([start, stop, step](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                                          const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
+                                          const char *const *DYND_UNUSED(src_arrmeta)) {
         kb.emplace_back<range_kernel<RetElementID>>(
             kernreq, start, stop, step,
             reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(dst_arrmeta)->dim_size,
@@ -109,7 +110,7 @@ namespace nd {
         }
       }
 
-      cg.emplace_back([start, stop, step](kernel_builder &kb, kernel_request_t kernreq, const char *ret_metadata,
+      cg.emplace_back([start, stop, step](kernel_builder &kb, kernel_request_t kernreq,char *DYND_UNUSED(data), const char *ret_metadata,
                                           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
         kb.emplace_back<range_kernel<RetElementID>>(
             kernreq, start, stop, step,

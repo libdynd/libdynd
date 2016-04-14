@@ -41,8 +41,9 @@ namespace nd {
 
     void emplace_back(size_t size) { storagebuf<kernel_prefix, kernel_builder>::emplace_back(size); }
 
-    void operator()(kernel_request_t kr, const char *res_metadata, size_t narg, const char *const *arg_metadata) {
-      m_call->instantiate(m_call, this, kr, res_metadata, narg, arg_metadata);
+    void operator()(kernel_request_t kr, char *data, const char *res_metadata, size_t narg,
+                    const char *const *arg_metadata) {
+      m_call->instantiate(m_call, this, kr, data, res_metadata, narg, arg_metadata);
     }
   };
 

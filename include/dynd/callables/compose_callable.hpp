@@ -25,8 +25,8 @@ namespace nd {
                         const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
                         const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
         cg.emplace_back([buffer_tp = m_buffer_tp](kernel_builder & kb, kernel_request_t kernreq,
-                                                  const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
-                                                  const char *const *src_arrmeta) {
+                                                  char *DYND_UNUSED(data), const char *dst_arrmeta,
+                                                  size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
           intptr_t kb_offset = kb.size();
 
           intptr_t root_kb_offset = kb_offset;
@@ -34,13 +34,13 @@ namespace nd {
 
           kb_offset = kb.size();
           compose_kernel *self = kb.get_at<compose_kernel>(root_kb_offset);
-          kb(kernreq | kernel_request_data_only, self->buffer_arrmeta.get(), 1, src_arrmeta);
+          kb(kernreq | kernel_request_data_only, nullptr, self->buffer_arrmeta.get(), 1, src_arrmeta);
 
           kb_offset = kb.size();
           self = kb.get_at<compose_kernel>(root_kb_offset);
           self->second_offset = kb_offset - root_kb_offset;
           const char *buffer_arrmeta = self->buffer_arrmeta.get();
-          kb(kernreq | kernel_request_data_only, dst_arrmeta, 1, &buffer_arrmeta);
+          kb(kernreq | kernel_request_data_only, nullptr, dst_arrmeta, 1, &buffer_arrmeta);
           kb_offset = kb.size();
         });
 

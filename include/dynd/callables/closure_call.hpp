@@ -24,9 +24,9 @@ namespace nd {
 
     static void destructor_wrapper(call_node *self) { reinterpret_cast<closure_call *>(self)->~closure_call(); }
 
-    static void instantiate_wrapper(call_node *self, kernel_builder *kb, kernel_request_t kernreq,
+    static void instantiate_wrapper(call_node *self, kernel_builder *kb, kernel_request_t kernreq, char *data,
                                     const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta) {
-      reinterpret_cast<closure_call *>(self)->closure(*kb, kernreq, dst_arrmeta, nsrc, src_arrmeta);
+      reinterpret_cast<closure_call *>(self)->closure(*kb, kernreq, data, dst_arrmeta, nsrc, src_arrmeta);
     }
   };
 

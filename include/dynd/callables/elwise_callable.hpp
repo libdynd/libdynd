@@ -27,8 +27,9 @@ namespace nd {
     public:
       void resolve(call_graph &cg, const char *data) {
         const std::array<bool, N> &arg_broadcast = reinterpret_cast<const data_type *>(data)->arg_broadcast;
-        cg.emplace_back([arg_broadcast](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta,
-                                        size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+        cg.emplace_back([arg_broadcast](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                                        const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
+                                        const char *const *src_arrmeta) {
           intptr_t size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
           intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
 
@@ -46,7 +47,7 @@ namespace nd {
 
           kb.emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
 
-          kb(kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N, child_src_arrmeta.data());
+          kb(kernel_request_strided, nullptr, dst_arrmeta + sizeof(size_stride_t), N, child_src_arrmeta.data());
         });
       }
 
@@ -65,8 +66,9 @@ namespace nd {
         std::array<bool, N> arg_broadcast = reinterpret_cast<const data_type *>(data)->arg_broadcast;
         std::array<bool, N> arg_var = reinterpret_cast<const data_type *>(data)->arg_var;
 
-        cg.emplace_back([arg_broadcast, arg_var](kernel_builder &kb, kernel_request_t kernreq, const char *dst_arrmeta,
-                                                 size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+        cg.emplace_back([arg_broadcast, arg_var](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                                                 const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
+                                                 const char *const *src_arrmeta) {
           intptr_t dst_size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
           intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
 
@@ -95,7 +97,7 @@ namespace nd {
           kb.emplace_back<elwise_kernel<fixed_dim_id, var_dim_id, N>>(kernreq, dst_size, dst_stride, src_stride.data(),
                                                                       src_offset.data(), arg_var.data());
 
-          kb(kernel_request_strided, dst_arrmeta + sizeof(size_stride_t), N, child_src_arrmeta.data());
+          kb(kernel_request_strided, nullptr, dst_arrmeta + sizeof(size_stride_t), N, child_src_arrmeta.data());
         });
       }
 
@@ -122,9 +124,9 @@ namespace nd {
         std::array<bool, N> arg_var = reinterpret_cast<const node_type *>(data)->arg_var;
         intptr_t res_alignment = reinterpret_cast<const node_type *>(data)->res_alignment;
 
-        cg.emplace_back([arg_broadcast, arg_var, res_alignment](kernel_builder &kb, kernel_request_t kernreq,
-                                                                const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
-                                                                const char *const *src_arrmeta) {
+        cg.emplace_back([arg_broadcast, arg_var, res_alignment](
+            kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
+            size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
           const ndt::var_dim_type::metadata_type *dst_md =
               reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta);
 
@@ -158,8 +160,8 @@ namespace nd {
               kernreq, dst_md->blockref.get(), res_alignment, dst_md->stride, dst_md->offset, src_stride.data(),
               src_offset.data(), src_size.data(), arg_var.data());
 
-          kb(kernel_request_strided, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), N,
-                         child_src_arrmeta.data());
+          kb(kernel_request_strided, nullptr, dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), N,
+             child_src_arrmeta.data());
         });
       }
     };

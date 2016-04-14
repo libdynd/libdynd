@@ -31,8 +31,9 @@ namespace nd {
                       size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       size_t src0_size = src_tp[0].extended<ndt::fixed_string_type>()->get_size();
-      cg.emplace_back([src0_size](kernel_builder &kb, kernel_request_t kernreq, const char *DYND_UNUSED(dst_arrmeta),
-                                  size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
+      cg.emplace_back([src0_size](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                                  const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+                                  const char *const *DYND_UNUSED(src_arrmeta)) {
         kb.emplace_back<total_order_kernel<fixed_string_id, fixed_string_id>>(kernreq, src0_size);
       });
 
