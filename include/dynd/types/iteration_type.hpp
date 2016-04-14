@@ -9,7 +9,10 @@
 
 namespace dynd {
 
-struct iteration_t {};
+struct iteration_t {
+  size_t ndim;
+  size_t *index;
+};
 
 namespace ndt {
 
