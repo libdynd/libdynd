@@ -95,9 +95,10 @@ enum type_id_t {
   // A CUDA device (global) memory type
   cuda_device_id,
 
+  // A type for an iteration in a functional
+  iteration_id,
+
   // Named symbolic types
-  // Types matching a single type_kind_t, like Bool, UInt, SInt, Real, etc.
-  kind_sym_id,
   // "Int", matching both UInt and SInt
   int_sym_id,
 
@@ -110,9 +111,6 @@ enum type_id_t {
   // A special type which holds a fragment of canonical dimensions
   // for the purpose of broadcasting together named ellipsis type vars.
   dim_fragment_id,
-
-  // A type for an iteration in a functional
-//  iteration_id
 };
 
 template <type_id_t Value>
