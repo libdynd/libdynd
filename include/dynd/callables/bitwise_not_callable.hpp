@@ -12,8 +12,9 @@ namespace dynd {
 namespace nd {
 
   template <type_id_t Arg0ID>
-  using bitwise_not_callable = functional::apply_function_callable<decltype(&detail::inline_bitwise_not<Arg0ID>::f),
-                                                                   &detail::inline_bitwise_not<Arg0ID>::f>;
+  using bitwise_not_callable =
+      functional::apply_function_callable<decltype(&dynd::detail::inline_bitwise_not<Arg0ID>::f),
+                                          &dynd::detail::inline_bitwise_not<Arg0ID>::f>;
 
 } // namespace dynd::nd
 } // namespace dynd
