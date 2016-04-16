@@ -19,8 +19,8 @@
 #include <dynd/callables/logical_not_callable.hpp>
 #include <dynd/callables/logical_or_callable.hpp>
 #include <dynd/callables/logical_xor_callable.hpp>
-#include <dynd/callables/mod_callable.hpp>
 #include <dynd/callables/minus_callable.hpp>
+#include <dynd/callables/mod_callable.hpp>
 #include <dynd/callables/multiply_callable.hpp>
 #include <dynd/callables/plus_callable.hpp>
 #include <dynd/callables/right_shift_callable.hpp>
@@ -39,10 +39,6 @@ namespace {
 typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int16_id, int32_id, int64_id, float32_id,
                          float64_id, complex_float32_id, complex_float64_id>
     binop_ids;
-
-typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int16_id, int32_id, int64_id, float32_id,
-                         float64_id>
-    binop_real_ids;
 
 template <template <type_id_t> class CallableType, template <type_id_t> class Condition, typename TypeIDSequence>
 nd::callable make_unary_arithmetic() {
@@ -110,9 +106,9 @@ DYND_API nd::callable nd::multiply =
     make_binary_arithmetic<nd::multiply_callable, dynd::detail::isdef_multiply, binop_ids>();
 DYND_API nd::callable nd::divide = make_binary_arithmetic<nd::divide_callable, dynd::detail::isdef_divide, binop_ids>();
 DYND_API nd::callable nd::logical_and =
-    make_binary_arithmetic<nd::logical_and_callable, dynd::detail::isdef_logical_and, binop_real_ids>();
+    make_binary_arithmetic<nd::logical_and_callable, dynd::detail::isdef_logical_and, arithmetic_ids>();
 DYND_API nd::callable nd::logical_or =
-    make_binary_arithmetic<nd::logical_or_callable, dynd::detail::isdef_logical_or, binop_real_ids>();
+    make_binary_arithmetic<nd::logical_or_callable, dynd::detail::isdef_logical_or, arithmetic_ids>();
 
 DYND_API nd::callable nd::compound_add = make_compound_arithmetic<nd::compound_add_callable, binop_ids>();
 DYND_API nd::callable nd::compound_div = make_compound_arithmetic<nd::compound_div_callable, binop_ids>();

@@ -12,8 +12,9 @@ namespace dynd {
 namespace nd {
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  using add_callable = functional::apply_function_callable<decltype(&detail::inline_add<Src0TypeID, Src1TypeID>::f),
-                                                           &detail::inline_add<Src0TypeID, Src1TypeID>::f>;
+  using add_callable =
+      functional::apply_function_callable<decltype(&dynd::detail::inline_add<Src0TypeID, Src1TypeID>::f),
+                                          &dynd::detail::inline_add<Src0TypeID, Src1TypeID>::f>;
 
 } // namespace dynd::nd
 } // namespace dynd

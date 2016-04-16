@@ -137,12 +137,12 @@ matrix:
         - pushd build
         - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_COVERAGE=${DYND_COVERAGE} ..
       script:
-        - make -j2 || exit 1
+        - make || exit 1
         - make coverage
       after_script:
         - popd
         - coveralls-lcov build/coverage.info.cleaned
-    
+
 language: cpp
 
 before_install:
@@ -172,7 +172,7 @@ deploy:
   local_dir: deploy
   on:
     condition: ${CONDA:-false} == "true"
-    
+
 notifications:
   email: false
   flowdock: b08b3ba4fb86fa48121e90b5f67ccb75
