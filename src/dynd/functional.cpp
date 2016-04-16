@@ -167,7 +167,7 @@ nd::callable nd::functional::elwise(const callable &child) {
   std::vector<ndt::type> arg_tp;
   for (size_t j = 0; j < f_tp.extended<ndt::callable_type>()->get_npos(); ++j) {
     const auto &tp = f_tp.extended<ndt::callable_type>()->get_pos_type(j);
-    if (tp.get_dtype().get_id() == iteration_id) {
+    if (tp.get_dtype().get_id() == state_id) {
       i = j;
       state = true;
     } else {

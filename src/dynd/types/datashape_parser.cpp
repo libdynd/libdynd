@@ -7,37 +7,37 @@
 #include <set>
 #include <stdexcept>
 
-#include <dynd/types/datashape_parser.hpp>
 #include <dynd/parse_util.hpp>
+#include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/array_type.hpp>
-#include <dynd/types/iteration_type.hpp>
-#include <dynd/types/option_type.hpp>
+#include <dynd/types/bytes_type.hpp>
 #include <dynd/types/callable_type.hpp>
-#include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/struct_type.hpp>
-#include <dynd/types/tuple_type.hpp>
-#include <dynd/types/string_type.hpp>
-#include <dynd/types/fixed_string_kind_type.hpp>
-#include <dynd/types/fixed_string_type.hpp>
+#include <dynd/types/categorical_kind_type.hpp>
+#include <dynd/types/char_type.hpp>
+#include <dynd/types/cuda_device_type.hpp>
+#include <dynd/types/cuda_host_type.hpp>
+#include <dynd/types/datashape_parser.hpp>
+#include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
-#include <dynd/types/bytes_type.hpp>
-#include <dynd/types/type_type.hpp>
-#include <dynd/types/pointer_type.hpp>
-#include <dynd/types/char_type.hpp>
-#include <dynd/types/cuda_host_type.hpp>
-#include <dynd/types/cuda_device_type.hpp>
-#include <dynd/types/typevar_type.hpp>
-#include <dynd/types/typevar_dim_type.hpp>
-#include <dynd/types/pow_dimsym_type.hpp>
-#include <dynd/types/ellipsis_dim_type.hpp>
-#include <dynd/types/option_type.hpp>
-#include <dynd/types/categorical_kind_type.hpp>
-#include <dynd/types/any_kind_type.hpp>
-#include <dynd/types/scalar_kind_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/fixed_string_kind_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/int_kind_sym_type.hpp>
+#include <dynd/types/option_type.hpp>
+#include <dynd/types/option_type.hpp>
+#include <dynd/types/pointer_type.hpp>
+#include <dynd/types/pow_dimsym_type.hpp>
+#include <dynd/types/scalar_kind_type.hpp>
+#include <dynd/types/state_type.hpp>
+#include <dynd/types/string_type.hpp>
+#include <dynd/types/struct_type.hpp>
+#include <dynd/types/tuple_type.hpp>
+#include <dynd/types/type_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
+#include <dynd/types/typevar_dim_type.hpp>
+#include <dynd/types/typevar_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
@@ -100,7 +100,7 @@ static const map<std::string, ndt::type> &builtin_types() {
  * definition of whitespace + comments.
  */
 template <int N>
-inline bool parse_token_ds(const char *&rbegin, const char *end, const char(&token)[N]) {
+inline bool parse_token_ds(const char *&rbegin, const char *end, const char (&token)[N]) {
   const char *begin = rbegin;
   skip_whitespace_and_pound_comments(begin, end);
   if (parse_token_no_ws(begin, end, token)) {
@@ -1167,8 +1167,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       result = parse_option_parameters(begin, end, symtable);
     } else if (compare_range_to_literal(nbegin, nend, "Any")) {
       result = ndt::any_kind_type::make();
-    } else if (compare_range_to_literal(nbegin, nend, "Iteration")) {
-      result = ndt::make_type<ndt::iteration_type>();
+    } else if (compare_range_to_literal(nbegin, nend, "State")) {
+      result = ndt::make_type<ndt::state_type>();
     } else if (compare_range_to_literal(nbegin, nend, "Scalar")) {
       result = ndt::scalar_kind_type::make();
     } else if (compare_range_to_literal(nbegin, nend, "Categorical")) {

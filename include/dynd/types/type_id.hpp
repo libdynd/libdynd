@@ -95,8 +95,8 @@ enum type_id_t {
   // A CUDA device (global) memory type
   cuda_device_id,
 
-  // A type for an iteration in a functional
-  iteration_id,
+  // A type for state in a functional
+  state_id,
 
   // Named symbolic types
   // "Int", matching both UInt and SInt

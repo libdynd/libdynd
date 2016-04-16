@@ -7,7 +7,7 @@
 
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
-#include <dynd/types/iteration_type.hpp>
+#include <dynd/types/state_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -15,11 +15,9 @@ namespace nd {
 
     template <typename A, size_t I>
     struct apply_arg {
-      typedef typename std::remove_cv<typename std::remove_reference<A>::type>::type D;
-
       apply_arg(char *DYND_UNUSED(data), const char *DYND_UNUSED(arrmeta)) {}
 
-      D &get(char *data) { return *reinterpret_cast<D *>(data); }
+      A &get(char *data) { return *reinterpret_cast<A *>(data); }
     };
 
     template <typename ElementType, size_t I>
@@ -46,6 +44,11 @@ namespace nd {
         it = 0;
         return it;
       }
+    };
+
+    template <typename T, size_t I>
+    struct apply_arg<T &, I> : apply_arg<T, I> {
+      using apply_arg<T, I>::apply_arg;
     };
 
     template <typename func_type, int N = args_of<typename funcproto_of<func_type>::type>::type::size>

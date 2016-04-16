@@ -19,9 +19,9 @@ namespace nd {
 
 namespace ndt {
 
-  class DYNDT_API iteration_type : public base_type {
+  class DYNDT_API state_type : public base_type {
   public:
-    iteration_type();
+    state_type();
 
     void print_type(std::ostream &o) const;
 
@@ -30,7 +30,7 @@ namespace ndt {
 
   template <>
   struct traits<nd::state> {
-    static type equivalent() { return make_type<iteration_type>(); }
+    static type equivalent() { return make_type<state_type>(); }
   };
 
 } // namespace dynd::ndt

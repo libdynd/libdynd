@@ -7,7 +7,7 @@
 
 #include <dynd/callables/base_callable.hpp>
 #include <dynd/kernels/state_kernel.hpp>
-#include <dynd/types/iteration_type.hpp>
+#include <dynd/types/state_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -46,7 +46,7 @@ namespace nd {
       for (size_t j = 0; j < m_i; ++j) {
         child_tp[j] = src_tp[j];
       }
-      child_tp[m_i] = ndt::make_type<ndt::iteration_type>();
+      child_tp[m_i] = ndt::make_type<ndt::state_type>();
       for (size_t j = m_i; j < NArg; ++j) {
         child_tp[j + 1] = src_tp[j];
       }

@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/kernels/base_strided_kernel.hpp>
-#include <dynd/types/iteration_type.hpp>
+#include <dynd/types/state_type.hpp>
 
 namespace dynd {
 namespace nd {
