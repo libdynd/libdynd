@@ -271,9 +271,11 @@ namespace nd {
     template <template <type_id_t...> class KernelType>
     struct insert_callable_if<false, KernelType> {
       template <type_id_t TypeID, typename... A>
-      static void insert(std::vector<std::pair<std::vector<type_id_t>, callable>> &callables, A &&... a) {}
+      static void insert(std::vector<std::pair<std::vector<type_id_t>, callable>> &DYND_UNUSED(callables),
+                         A &&... DYND_UNUSED(a)) {}
       template <typename TypeIDSequence, typename... A>
-      static void insert(std::vector<std::pair<std::vector<type_id_t>, callable>> &callables, A &&... a) {}
+      static void insert(std::vector<std::pair<std::vector<type_id_t>, callable>> &DYND_UNUSED(callables),
+                         A &&... DYND_UNUSED(a)) {}
     };
 
     template <template <type_id_t...> class KernelType>
