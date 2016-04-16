@@ -96,7 +96,7 @@ namespace detail {
 
   template <typename VertexIterator, typename EdgeIterator, typename MarkerIterator, typename Iterator>
   void topological_sort_visit(size_t i, VertexIterator vertices, EdgeIterator edges, MarkerIterator markers,
-                              Iterator &res)
+                              Iterator &res, Iterator &res_begin)
   {
     if (markers[i].is_temporarily_marked()) {
       throw std::runtime_error("not a dag");
@@ -105,11 +105,13 @@ namespace detail {
     if (!markers[i].is_marked()) {
       markers[i].temporarily_mark();
       for (auto j : edges[i]) {
-        topological_sort_visit(j, vertices, edges, markers, res);
+        topological_sort_visit(j, vertices, edges, markers, res, res_begin);
       }
       markers[i].mark();
       *res = vertices[i];
-      --res;
+      if (res != res_begin) {
+        --res;
+      }
     }
   }
 
@@ -119,12 +121,13 @@ template <typename VertexIterator, typename EdgeIterator, typename Iterator>
 void topological_sort(VertexIterator begin, VertexIterator end, EdgeIterator edges, Iterator res)
 {
   size_t size = end - begin;
+  Iterator res_begin = res;
   res += size - 1;
 
   std::unique_ptr<detail::topological_sort_marker[]> markers =
       std::make_unique<detail::topological_sort_marker[]>(size);
   for (size_t i = 0; i < size; ++i) {
-    detail::topological_sort_visit(i, begin, edges, markers.get(), res);
+    detail::topological_sort_visit(i, begin, edges, markers.get(), res, res_begin);
   }
 }
 
@@ -302,7 +305,6 @@ public:
         return true;
       }
     }
-
     return false;
   }
 
