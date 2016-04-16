@@ -41,7 +41,7 @@ matrix:
         - export CXX="g++-5"
       script:
         - cmake -DDYND_BUILD_DOCS=ON -DDYND_FFTW=${DYND_FFTW} ..
-        - make -j3 || exit 1
+        - make -j4 || exit 1
         - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
     - compiler: clang
       env: VALGRIND DYND_FFTW=OFF
