@@ -300,14 +300,14 @@ namespace nd {
     struct make_all_if {
       template <type_id_t TypeID, typename... A>
       void on_each(std::vector<std::pair<std::vector<type_id_t>, callable>> &callables, A &&... a) const {
-        insert_callable_if<Condition<TypeID>::value, KernelType>::insert<TypeID, A...>(callables,
-                                                                                       std::forward<A>(a)...);
+        insert_callable_if<Condition<TypeID>::value, KernelType>::template insert<TypeID, A...>(callables,
+                                                                                                std::forward<A>(a)...);
       }
 
       template <typename TypeIDSequence, typename... A>
       void on_each(std::vector<std::pair<std::vector<type_id_t>, callable>> &callables, A &&... a) const {
-        insert_callable_if<apply<Condition, TypeIDSequence>::type::value, KernelType>::insert<TypeIDSequence, A...>(
-            callables, std::forward<A>(a)...);
+        insert_callable_if<apply<Condition, TypeIDSequence>::type::value,
+                           KernelType>::template insert<TypeIDSequence, A...>(callables, std::forward<A>(a)...);
       }
     };
 
