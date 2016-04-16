@@ -13,8 +13,8 @@ namespace nd {
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   using bitwise_xor_callable =
-      functional::apply_function_callable<decltype(&detail::inline_bitwise_xor<Src0TypeID, Src1TypeID>::f),
-                                          &detail::inline_bitwise_xor<Src0TypeID, Src1TypeID>::f>;
+      functional::apply_function_callable<decltype(&dynd::detail::inline_bitwise_xor<Src0TypeID, Src1TypeID>::f),
+                                          &dynd::detail::inline_bitwise_xor<Src0TypeID, Src1TypeID>::f>;
 
 } // namespace dynd::nd
 } // namespace dynd
