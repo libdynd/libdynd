@@ -30,8 +30,9 @@ namespace nd {
 
       template <typename SelfType, typename ArgsType, size_t NArg>
       struct base_apply_kernel : base_strided_kernel<SelfType, NArg>, ArgsType {
-        typedef typename std::conditional<has_state<ArgsType>::value, ArgsType,
-                                          base_strided_kernel<SelfType, NArg>>::type T;
+        typedef
+            typename std::conditional<has_state<ArgsType>::value, ArgsType, base_strided_kernel<SelfType, NArg>>::type
+                T;
         using T::begin;
 
         base_apply_kernel(ArgsType args) : ArgsType(args) {}
@@ -50,7 +51,8 @@ namespace nd {
 
         typedef base_apply_kernel<apply_callable_kernel<func_type, R, type_sequence<A...>, index_sequence<I...>,
                                                         type_sequence<K...>, index_sequence<J...>>,
-                                  apply_args<type_sequence<A...>, index_sequence<I...>>, sizeof...(A)> base_type;
+                                  apply_args<type_sequence<A...>, index_sequence<I...>>, sizeof...(A)>
+            base_type;
 
         typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;
         typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;
@@ -61,8 +63,7 @@ namespace nd {
             : base_type(args), kwds_type(kwds), func(func) {}
 
         void single(char *dst, char *const *DYND_IGNORE_UNUSED(src)) {
-          *reinterpret_cast<R *>(dst) =
-              func(apply_arg<A, I>::get(apply_arg<A, I>::at(src))..., apply_kwd<K, J>::get()...);
+          *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
         }
       };
 
