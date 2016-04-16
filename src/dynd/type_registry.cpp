@@ -10,8 +10,8 @@
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -71,7 +71,7 @@ DYNDT_API vector<id_info> &detail::infos() {
                                {"expr", expr_id, base_ids<expr_id>()},
                                {"cuda_host", cuda_host_id, {any_kind_id}},
                                {"cuda_device", cuda_device_id, {any_kind_id}},
-                               {"Iteration", iteration_id, {any_kind_id}},
+                               {"State", state_id, {any_kind_id}},
                                {"", int_sym_id, {any_kind_id}},
                                {"", typevar_id, base_ids<typevar_id>()},
                                {"", typevar_dim_id, {any_kind_id}},

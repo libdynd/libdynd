@@ -10,7 +10,7 @@
 #include <dynd/callables/apply_member_function_callable.hpp>
 #include <dynd/callables/construct_then_apply_callable_callable.hpp>
 #include <dynd/callables/forward_na_callable.hpp>
-#include <dynd/types/iteration_type.hpp>
+#include <dynd/types/state_type.hpp>
 
 namespace dynd {
 namespace nd {

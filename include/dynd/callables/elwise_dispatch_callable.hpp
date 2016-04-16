@@ -35,7 +35,9 @@ namespace nd {
                         const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
         data_type child_data;
+        bool first;
         if (data == nullptr) {
+          first = true;
           if (m_child.is_null()) {
             child_data.child = caller;
           } else {
@@ -61,9 +63,11 @@ namespace nd {
               st.ndim = ndim;
               st.index = new size_t[ndim];
 
-              kb(kernreq, nullptr, dst_arrmeta, nsrc, src_arrmeta);
+              kb(kernreq, reinterpret_cast<char *>(st.index), dst_arrmeta, nsrc, src_arrmeta);
             });
           }
+        } else {
+          first = false;
         }
 
         const ndt::callable_type *child_tp =
@@ -116,13 +120,18 @@ namespace nd {
         }
 
         if ((dst_variadic || dst_tp.get_id() == fixed_dim_id) && src_all_strided) {
-          static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, N>>();
-          return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, no_traits, N>>();
+          static callable g = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, state_traits, N>>();
+          if (!first && m_state) {
+            return g->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          } else {
+            return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          }
         } else if (((dst_variadic) || dst_tp.get_id() == var_dim_id) && (var_broadcast || src_all_strided)) {
-          static callable f = make_callable<elwise_callable<var_dim_id, fixed_dim_id, N>>();
+          static callable f = make_callable<elwise_callable<var_dim_id, fixed_dim_id, no_traits, N>>();
           return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else if (src_all_strided_or_var) {
-          static callable f = make_callable<elwise_callable<fixed_dim_id, var_dim_id, N>>();
+          static callable f = make_callable<elwise_callable<fixed_dim_id, var_dim_id, no_traits, N>>();
           return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         }
 

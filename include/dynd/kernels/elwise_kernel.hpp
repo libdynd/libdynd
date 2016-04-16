@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/callable.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -18,78 +18,55 @@ namespace nd {
      * This requires that the child kernel be created with the
      * kernel_request_strided type of kernel.
      */
-    template <type_id_t DstTypeID, type_id_t SrcTypeID, size_t N>
+    template <type_id_t DstTypeID, type_id_t SrcTypeID, typename TraitsType, size_t N>
     struct elwise_kernel;
 
-    template <size_t N>
-    struct elwise_kernel<fixed_dim_id, fixed_dim_id, N>
-        : base_strided_kernel<elwise_kernel<fixed_dim_id, fixed_dim_id, N>, N> {
+    template <typename TraitsType, size_t N>
+    struct elwise_kernel<fixed_dim_id, fixed_dim_id, TraitsType, N>
+        : base_strided_kernel<elwise_kernel<fixed_dim_id, fixed_dim_id, TraitsType, N>, N>, TraitsType {
+      using TraitsType::begin;
+
       typedef elwise_kernel self_type;
 
       intptr_t m_size;
       intptr_t m_dst_stride, m_src_stride[N];
 
-      elwise_kernel(intptr_t size, intptr_t dst_stride, const intptr_t *src_stride)
-          : m_size(size), m_dst_stride(dst_stride)
-      {
+      elwise_kernel(char *data, intptr_t size, intptr_t dst_stride, const intptr_t *src_stride)
+          : TraitsType(data), m_size(size), m_dst_stride(dst_stride) {
         memcpy(m_src_stride, src_stride, sizeof(m_src_stride));
       }
 
       ~elwise_kernel() { this->get_child()->destroy(); }
 
-      void single(char *dst, char *const *src)
-      {
+      void single(char *dst, char *const *src) {
         kernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
         opchild(child, dst, m_dst_stride, src, m_src_stride, m_size);
       }
-
-      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-      {
-        kernel_prefix *child = this->get_child();
-        kernel_strided_t opchild = child->get_function<kernel_strided_t>();
-
-        char *src_loop[N];
-        for (int j = 0; j != N; ++j) {
-          src_loop[j] = src[j];
-        }
-
-        for (size_t i = 0; i < count; i += 1) {
-          opchild(child, dst, m_dst_stride, src_loop, m_src_stride, m_size);
-          dst += dst_stride;
-          for (int j = 0; j != N; ++j) {
-            src_loop[j] += src_stride[j];
-          }
-        }
-      }
     };
 
-    template <>
-    struct elwise_kernel<fixed_dim_id, fixed_dim_id, 0>
-        : base_strided_kernel<elwise_kernel<fixed_dim_id, fixed_dim_id, 0>, 0> {
+    template <typename TraitsType>
+    struct elwise_kernel<fixed_dim_id, fixed_dim_id, TraitsType, 0>
+        : base_strided_kernel<elwise_kernel<fixed_dim_id, fixed_dim_id, TraitsType, 0>, 0>, TraitsType {
       typedef elwise_kernel self_type;
 
       intptr_t m_size;
       intptr_t m_dst_stride;
 
-      elwise_kernel(intptr_t size, intptr_t dst_stride, const intptr_t *DYND_UNUSED(src_stride))
-          : m_size(size), m_dst_stride(dst_stride)
-      {
-      }
+      elwise_kernel(char *data, intptr_t size, intptr_t dst_stride, const intptr_t *DYND_UNUSED(src_stride))
+          : TraitsType(data), m_size(size), m_dst_stride(dst_stride) {}
 
       ~elwise_kernel() { this->get_child()->destroy(); }
 
-      void single(char *dst, char *const *src)
-      {
+      void single(char *dst, char *const *src) {
         kernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
         opchild(child, dst, m_dst_stride, src, NULL, m_size);
       }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
-                   const intptr_t *DYND_UNUSED(src_stride), size_t count)
-      {
+                   const intptr_t *DYND_UNUSED(src_stride), size_t count) {
         kernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
@@ -106,9 +83,9 @@ namespace nd {
      * This requires that the child kernel be created with the
      * kernel_request_strided type of kernel.
      */
-    template <size_t N>
-    struct elwise_kernel<fixed_dim_id, var_dim_id, N>
-        : base_strided_kernel<elwise_kernel<fixed_dim_id, var_dim_id, N>, N> {
+    template <typename TraitsType, size_t N>
+    struct elwise_kernel<fixed_dim_id, var_dim_id, TraitsType, N>
+        : base_strided_kernel<elwise_kernel<fixed_dim_id, var_dim_id, TraitsType, N>, N> {
       typedef elwise_kernel self_type;
 
       intptr_t m_size;
@@ -117,8 +94,7 @@ namespace nd {
 
       elwise_kernel(intptr_t size, intptr_t dst_stride, const intptr_t *src_stride, const intptr_t *src_offset,
                     const bool *is_src_var)
-          : m_size(size), m_dst_stride(dst_stride)
-      {
+          : m_size(size), m_dst_stride(dst_stride) {
         memcpy(m_src_stride, src_stride, sizeof(m_src_stride));
         memcpy(m_src_offset, src_offset, sizeof(m_src_offset));
         memcpy(m_is_src_var, is_src_var, sizeof(m_is_src_var));
@@ -126,8 +102,7 @@ namespace nd {
 
       ~elwise_kernel() { this->get_child()->destroy(); }
 
-      void single(char *dst, char *const *src)
-      {
+      void single(char *dst, char *const *src) {
         kernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
@@ -141,15 +116,12 @@ namespace nd {
             modified_src[i] = vddd->begin + m_src_offset[i];
             if (vddd->size == 1) {
               modified_src_stride[i] = 0;
-            }
-            else if (vddd->size == static_cast<size_t>(dim_size)) {
+            } else if (vddd->size == static_cast<size_t>(dim_size)) {
               modified_src_stride[i] = m_src_stride[i];
-            }
-            else {
+            } else {
               throw broadcast_error(dim_size, vddd->size, "strided", "var");
             }
-          }
-          else {
+          } else {
             // strided dimensions were fully broadcast in the kernel factory
             modified_src[i] = src[i];
             modified_src_stride[i] = m_src_stride[i];
@@ -158,8 +130,7 @@ namespace nd {
         opchild(child, dst, m_dst_stride, modified_src, modified_src_stride, dim_size);
       }
 
-      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-      {
+      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count) {
         char *src_loop[N];
         memcpy(src_loop, src, sizeof(src_loop));
         for (size_t i = 0; i != count; ++i) {
@@ -172,9 +143,9 @@ namespace nd {
       }
     };
 
-    template <>
-    struct elwise_kernel<fixed_dim_id, var_dim_id, 0>
-        : base_strided_kernel<elwise_kernel<fixed_dim_id, var_dim_id, 0>, 0> {
+    template <typename TraitsType>
+    struct elwise_kernel<fixed_dim_id, var_dim_id, TraitsType, 0>
+        : base_strided_kernel<elwise_kernel<fixed_dim_id, var_dim_id, TraitsType, 0>, 0> {
       typedef elwise_kernel self_type;
 
       intptr_t m_size;
@@ -182,14 +153,11 @@ namespace nd {
 
       elwise_kernel(intptr_t size, intptr_t dst_stride, const intptr_t *DYND_UNUSED(src_stride),
                     const intptr_t *DYND_UNUSED(src_offset), const bool *DYND_UNUSED(is_src_var))
-          : m_size(size), m_dst_stride(dst_stride)
-      {
-      }
+          : m_size(size), m_dst_stride(dst_stride) {}
 
       ~elwise_kernel() { this->get_child()->destroy(); }
 
-      void single(char *dst, char *const *DYND_UNUSED(src))
-      {
+      void single(char *dst, char *const *DYND_UNUSED(src)) {
         kernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
@@ -199,8 +167,7 @@ namespace nd {
       }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
-                   const intptr_t *DYND_UNUSED(src_stride), size_t count)
-      {
+                   const intptr_t *DYND_UNUSED(src_stride), size_t count) {
         for (size_t i = 0; i != count; ++i) {
           single(dst, NULL);
           dst += dst_stride;
@@ -214,9 +181,9 @@ namespace nd {
      * This requires that the child kernel be created with the
      * kernel_request_strided type of kernel.
      */
-    template <size_t N>
-    struct elwise_kernel<var_dim_id, fixed_dim_id, N>
-        : base_strided_kernel<elwise_kernel<var_dim_id, fixed_dim_id, N>, N> {
+    template <typename TraitsType, size_t N>
+    struct elwise_kernel<var_dim_id, fixed_dim_id, TraitsType, N>
+        : base_strided_kernel<elwise_kernel<var_dim_id, fixed_dim_id, TraitsType, N>, N> {
       typedef elwise_kernel self_type;
 
       memory_block_data *m_dst_memblock;
@@ -228,8 +195,7 @@ namespace nd {
                     intptr_t dst_offset, const intptr_t *src_stride, const intptr_t *src_offset,
                     const intptr_t *src_size, const bool *is_src_var)
           : m_dst_memblock(dst_memblock), m_dst_target_alignment(dst_target_alignment), m_dst_stride(dst_stride),
-            m_dst_offset(dst_offset)
-      {
+            m_dst_offset(dst_offset) {
         memcpy(m_src_stride, src_stride, sizeof(m_src_stride));
         memcpy(m_src_offset, src_offset, sizeof(m_src_offset));
         memcpy(m_src_size, src_size, sizeof(m_src_size));
@@ -238,8 +204,7 @@ namespace nd {
 
       ~elwise_kernel() { this->get_child()->destroy(); }
 
-      void single(char *dst, char *const *src)
-      {
+      void single(char *dst, char *const *src) {
         kernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
@@ -261,29 +226,23 @@ namespace nd {
               modified_src[i] = vddd->begin + m_src_offset[i];
               if (vddd->size == 1) {
                 modified_src_stride[i] = 0;
-              }
-              else if (vddd->size == static_cast<size_t>(dim_size)) {
+              } else if (vddd->size == static_cast<size_t>(dim_size)) {
                 modified_src_stride[i] = m_src_stride[i];
-              }
-              else {
+              } else {
                 throw broadcast_error(dim_size, vddd->size, "var", "var");
               }
-            }
-            else {
+            } else {
               modified_src[i] = src[i];
               if (m_src_size[i] == 1) {
                 modified_src_stride[i] = 0;
-              }
-              else if (m_src_size[i] == dim_size) {
+              } else if (m_src_size[i] == dim_size) {
                 modified_src_stride[i] = m_src_stride[i];
-              }
-              else {
+              } else {
                 throw broadcast_error(dim_size, m_src_size[i], "var", "strided");
               }
             }
           }
-        }
-        else {
+        } else {
           if (m_dst_offset != 0) {
             throw std::runtime_error("Cannot assign to an uninitialized dynd var_dim "
                                      "which has a non-zero offset");
@@ -296,31 +255,24 @@ namespace nd {
               modified_src[i] = vddd->begin + m_src_offset[i];
               if (vddd->size == 1) {
                 modified_src_stride[i] = 0;
-              }
-              else if (dim_size == 1) {
+              } else if (dim_size == 1) {
                 dim_size = vddd->size;
                 modified_src_stride[i] = m_src_stride[i];
-              }
-              else if (vddd->size == static_cast<size_t>(dim_size)) {
+              } else if (vddd->size == static_cast<size_t>(dim_size)) {
                 modified_src_stride[i] = m_src_stride[i];
-              }
-              else {
+              } else {
                 throw broadcast_error(dim_size, vddd->size, "var", "var");
               }
-            }
-            else {
+            } else {
               modified_src[i] = src[i];
               if (m_src_size[i] == 1) {
                 modified_src_stride[i] = 0;
-              }
-              else if (m_src_size[i] == dim_size) {
+              } else if (m_src_size[i] == dim_size) {
                 modified_src_stride[i] = m_src_stride[i];
-              }
-              else if (dim_size == 1) {
+              } else if (dim_size == 1) {
                 dim_size = m_src_size[i];
                 modified_src_stride[i] = m_src_stride[i];
-              }
-              else {
+              } else {
                 throw broadcast_error(dim_size, m_src_size[i], "var", "strided");
               }
             }
@@ -332,15 +284,13 @@ namespace nd {
         }
         if (dim_size <= 1) {
           modified_dst_stride = 0;
-        }
-        else {
+        } else {
           modified_dst_stride = m_dst_stride;
         }
         opchild(child, modified_dst, modified_dst_stride, modified_src, modified_src_stride, dim_size);
       }
 
-      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-      {
+      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count) {
         char *src_loop[N];
         memcpy(src_loop, src, sizeof(src_loop));
         for (size_t i = 0; i != count; ++i) {
@@ -353,9 +303,9 @@ namespace nd {
       }
     };
 
-    template <>
-    struct elwise_kernel<var_dim_id, fixed_dim_id, 0>
-        : base_strided_kernel<elwise_kernel<var_dim_id, fixed_dim_id, 0>, 0> {
+    template <typename TraitsType>
+    struct elwise_kernel<var_dim_id, fixed_dim_id, TraitsType, 0>
+        : base_strided_kernel<elwise_kernel<var_dim_id, fixed_dim_id, TraitsType, 0>, 0> {
       typedef elwise_kernel self_type;
 
       memory_block_data *m_dst_memblock;
@@ -367,14 +317,11 @@ namespace nd {
                     const intptr_t *DYND_UNUSED(src_offset), const intptr_t *DYND_UNUSED(src_size),
                     const bool *DYND_UNUSED(is_src_var))
           : m_dst_memblock(dst_memblock), m_dst_target_alignment(dst_target_alignment), m_dst_stride(dst_stride),
-            m_dst_offset(dst_offset)
-      {
-      }
+            m_dst_offset(dst_offset) {}
 
       ~elwise_kernel() { this->get_child()->destroy(); }
 
-      void single(char *dst, char *const *DYND_UNUSED(src))
-      {
+      void single(char *dst, char *const *DYND_UNUSED(src)) {
         kernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
@@ -388,8 +335,7 @@ namespace nd {
           modified_dst = dst_vddd->begin + m_dst_offset;
           // Broadcast all the inputs to the existing destination dimension size
           dim_size = dst_vddd->size;
-        }
-        else {
+        } else {
           if (m_dst_offset != 0) {
             throw std::runtime_error("Cannot assign to an uninitialized dynd var_dim "
                                      "which has a non-zero offset");
@@ -403,17 +349,16 @@ namespace nd {
         }
         if (dim_size <= 1) {
           modified_dst_stride = 0;
-        }
-        else {
+        } else {
           modified_dst_stride = m_dst_stride;
         }
         opchild(child, modified_dst, modified_dst_stride, NULL, NULL, dim_size);
       }
     };
 
-    template <size_t N>
-    struct elwise_kernel<var_dim_id, var_dim_id, N> : elwise_kernel<var_dim_id, fixed_dim_id, N> {
-    };
+    template <typename TraitsType, size_t N>
+    struct elwise_kernel<var_dim_id, var_dim_id, TraitsType, N>
+        : elwise_kernel<var_dim_id, fixed_dim_id, TraitsType, N> {};
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

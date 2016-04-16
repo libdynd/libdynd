@@ -162,10 +162,13 @@ nd::callable nd::functional::elwise(const ndt::type &tp) {
 nd::callable nd::functional::elwise(const callable &child) {
   ndt::type f_tp = elwise_make_type(child.get_type());
 
+  size_t i;
   bool state = false;
   std::vector<ndt::type> arg_tp;
-  for (const auto &tp : f_tp.extended<ndt::callable_type>()->get_pos_types()) {
-    if (tp.get_dtype().get_id() == iteration_id) {
+  for (size_t j = 0; j < f_tp.extended<ndt::callable_type>()->get_npos(); ++j) {
+    const auto &tp = f_tp.extended<ndt::callable_type>()->get_pos_type(j);
+    if (tp.get_dtype().get_id() == state_id) {
+      i = j;
       state = true;
     } else {
       arg_tp.push_back(tp);
@@ -178,21 +181,21 @@ nd::callable nd::functional::elwise(const callable &child) {
     ndt::type tp = ndt::callable_type::make(f.get_ret_type(), arg_tp);
     switch (tp.extended<ndt::callable_type>()->get_npos()) {
     case 0:
-      return make_callable<state_callable<0>>(tp, f);
+      return make_callable<state_callable<0>>(tp, f, i);
     case 1:
-      return make_callable<state_callable<1>>(tp, f);
+      return make_callable<state_callable<1>>(tp, f, i);
     case 2:
-      return make_callable<state_callable<2>>(tp, f);
+      return make_callable<state_callable<2>>(tp, f, i);
     case 3:
-      return make_callable<state_callable<3>>(tp, f);
+      return make_callable<state_callable<3>>(tp, f, i);
     case 4:
-      return make_callable<state_callable<4>>(tp, f);
+      return make_callable<state_callable<4>>(tp, f, i);
     case 5:
-      return make_callable<state_callable<5>>(tp, f);
+      return make_callable<state_callable<5>>(tp, f, i);
     case 6:
-      return make_callable<state_callable<6>>(tp, f);
+      return make_callable<state_callable<6>>(tp, f, i);
     case 7:
-      return make_callable<state_callable<7>>(tp, f);
+      return make_callable<state_callable<7>>(tp, f, i);
     default:
       throw std::runtime_error("callable with nsrc > 7 not implemented yet");
     }
