@@ -261,28 +261,55 @@ namespace nd {
       }
     };
 
+    // insert_callable_if is an internal helper template for make_all_if that reorganizes
+    // its template parameters so that when a set of types does not pass the conditional
+    // test for whether or not it should be added to a callable, the kernel template used
+    // is never instantiated.
+    template <bool Enable, template <type_id_t...> class KernelType>
+    struct insert_callable_if;
+
+    template <template <type_id_t...> class KernelType>
+    struct insert_callable_if<false, KernelType> {
+      template <type_id_t TypeID, typename... A>
+      static void insert(std::vector<std::pair<std::vector<type_id_t>, callable>> &DYND_UNUSED(callables),
+                         A &&... DYND_UNUSED(a)) {}
+      template <typename TypeIDSequence, typename... A>
+      static void insert(std::vector<std::pair<std::vector<type_id_t>, callable>> &DYND_UNUSED(callables),
+                         A &&... DYND_UNUSED(a)) {}
+    };
+
+    template <template <type_id_t...> class KernelType>
+    struct insert_callable_if<true, KernelType> {
+      template <type_id_t TypeID, typename... A>
+      static void insert(std::vector<std::pair<std::vector<type_id_t>, callable>> &callables, A &&... a) {
+        callables.push_back({{TypeID}, make_callable<KernelType<TypeID>>(std::forward<A>(a)...)});
+      }
+      template <typename TypeIDSequence, typename... A>
+      static void insert(std::vector<std::pair<std::vector<type_id_t>, callable>> &callables, A &&... a) {
+        auto arr = i2a<TypeIDSequence>();
+        std::vector<type_id_t> v;
+        for (size_t i = 0; i < arr.size(); ++i) {
+
+          v.push_back(arr[i]);
+        }
+
+        callables.push_back(
+            {{v}, make_callable<typename apply<KernelType, TypeIDSequence>::type>(std::forward<A>(a)...)});
+      }
+    };
+
     template <template <type_id_t...> class KernelType, template <type_id_t...> class Condition>
     struct make_all_if {
       template <type_id_t TypeID, typename... A>
       void on_each(std::vector<std::pair<std::vector<type_id_t>, callable>> &callables, A &&... a) const {
-        if (Condition<TypeID>::value) {
-          callables.push_back({{TypeID}, make_callable<KernelType<TypeID>>(std::forward<A>(a)...)});
-        }
+        insert_callable_if<Condition<TypeID>::value, KernelType>::template insert<TypeID, A...>(callables,
+                                                                                                std::forward<A>(a)...);
       }
 
       template <typename TypeIDSequence, typename... A>
       void on_each(std::vector<std::pair<std::vector<type_id_t>, callable>> &callables, A &&... a) const {
-        if (apply<Condition, TypeIDSequence>::type::value) {
-          auto arr = i2a<TypeIDSequence>();
-          std::vector<type_id_t> v;
-          for (size_t i = 0; i < arr.size(); ++i) {
-
-            v.push_back(arr[i]);
-          }
-
-          callables.push_back(
-              {{v}, make_callable<typename apply<KernelType, TypeIDSequence>::type>(std::forward<A>(a)...)});
-        }
+        insert_callable_if<apply<Condition, TypeIDSequence>::type::value,
+                           KernelType>::template insert<TypeIDSequence, A...>(callables, std::forward<A>(a)...);
       }
     };
 

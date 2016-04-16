@@ -311,32 +311,44 @@ set(libdynd_SRC
     include/dynd/kernels/uniform_kernel.hpp
     include/dynd/kernels/view_kernel.hpp
     # Main
-    src/dynd/arithmetic.cpp
+    src/dynd/add.cpp
     src/dynd/array.cpp
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
     src/dynd/assignment.cpp
+    src/dynd/bitwise_not.cpp
     src/dynd/callable.cpp
     src/dynd/comparison.cpp
+    src/dynd/compound_add.cpp
+    src/dynd/compound_div.cpp
     src/dynd/convert.cpp
+    src/dynd/divide.cpp
     src/dynd/fft.cpp
     src/dynd/functional.cpp
+    src/dynd/index.cpp
     src/dynd/io.cpp
+    src/dynd/json_formatter.cpp
+    src/dynd/json_parser.cpp
+    src/dynd/logic.cpp
+    src/dynd/logical_and.cpp
+    src/dynd/logical_not.cpp
+    src/dynd/logical_or.cpp
     src/dynd/math.cpp
+    src/dynd/minus.cpp
+    src/dynd/multiply.cpp
     src/dynd/option.cpp
     src/dynd/parse.cpp
+    src/dynd/plus.cpp
     src/dynd/pointer.cpp
     src/dynd/random.cpp
     src/dynd/range.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp
     src/dynd/statistics.cpp
-    src/dynd/struct.cpp
-    src/dynd/index.cpp
-    src/dynd/json_formatter.cpp
-    src/dynd/json_parser.cpp
-    src/dynd/logic.cpp
     src/dynd/string.cpp
+    src/dynd/struct.cpp
+    src/dynd/subtract.cpp
+    src/dynd/sum.cpp
     src/dynd/view.cpp
     include/dynd/arithmetic.hpp
     include/dynd/array.hpp
