@@ -99,11 +99,11 @@ DYND_API nd::callable nd::logical_not =
 DYND_API nd::callable nd::bitwise_not =
     make_unary_arithmetic<nd::bitwise_not_callable, dynd::detail::isdef_bitwise_not, integral_ids>();
 
-DYND_API nd::callable nd::add = make_binary_arithmetic<nd::add_callable, dynd::detail::isdef_add, binop_ids>();
+DYND_API nd::callable nd::add = make_binary_arithmetic<nd::add_callable, dynd::detail::isdef_add, arithmetic_ids>();
 DYND_API nd::callable nd::subtract =
-    make_binary_arithmetic<nd::subtract_callable, dynd::detail::isdef_subtract, binop_ids>();
+    make_binary_arithmetic<nd::subtract_callable, dynd::detail::isdef_subtract, arithmetic_ids>();
 DYND_API nd::callable nd::multiply =
-    make_binary_arithmetic<nd::multiply_callable, dynd::detail::isdef_multiply, binop_ids>();
+    make_binary_arithmetic<nd::multiply_callable, dynd::detail::isdef_multiply, arithmetic_ids>();
 DYND_API nd::callable nd::divide = make_binary_arithmetic<nd::divide_callable, dynd::detail::isdef_divide, binop_ids>();
 DYND_API nd::callable nd::logical_and =
     make_binary_arithmetic<nd::logical_and_callable, dynd::detail::isdef_logical_and, arithmetic_ids>();
