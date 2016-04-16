@@ -37,6 +37,6 @@ cmake \
     -DCMAKE_INSTALL_PREFIX=$PREFIX .. || exit 1
 echo Building with make...
 # We should use the CPU_COUNT environment variable set by conda-build, but Travis CI has issues with that.
-make -j3 package || exit 1
+make -j2 package || exit 1
 echo Installing the build...
 make install || exit 1
