@@ -3,21 +3,21 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
 #include "inc_gtest.hpp"
 
-#include <dynd/types/fixed_string_type.hpp>
+#include "../dynd_assertions.hpp"
+#include <dynd/array.hpp>
+#include <dynd/assignment.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/index.hpp>
-#include <dynd/assignment.hpp>
-#include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>
-#include "../dynd_assertions.hpp"
+#include <dynd/types/fixed_string_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -112,8 +112,9 @@ TEST(Elwise, State) {
   });
 
   EXPECT_EQ(ndt::type("(Dims... * float64, Dims... * float64) -> Dims... * int32"), f->get_type());
+
   EXPECT_ARRAY_EQ(nd::array({1, 1, 1}), f(nd::array{0.0, 1.0, 2.0}, nd::array{0.0, 1.0, 2.0}));
-  //  EXPECT_ARRAY_EQ(nd::array({{2, 2}, {2, 2}}), f(nd::array{{0.0, 1.0}, {2.0, 3.0}}, 4.0));
+  EXPECT_ARRAY_EQ(nd::array({{2, 2}, {2, 2}}), f(nd::array{{0.0, 1.0}, {2.0, 3.0}}, 4.0));
 }
 
 TEST(Elwise, UnaryFixedDim) {

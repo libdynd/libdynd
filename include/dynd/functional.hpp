@@ -106,7 +106,7 @@ namespace nd {
 
     DYND_API callable elwise(const ndt::type &tp);
 
-    DYND_API callable elwise(const ndt::type &self_tp, const callable &child);
+    DYND_API callable elwise(const ndt::type &self_tp, const callable &child, bool state = false);
 
     DYND_API ndt::type elwise_make_type(const ndt::callable_type *child_tp);
 

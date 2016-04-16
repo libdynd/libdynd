@@ -26,8 +26,10 @@ namespace nd {
       };
 
       callable m_child;
+      bool m_state;
 
-      elwise_dispatch_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
+      elwise_dispatch_callable(const ndt::type &tp, const callable &child, bool state = false)
+          : base_callable(tp), m_child(child), m_state(state) {}
 
       ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
                         const ndt::type *src_tp, size_t nkwd, const array *kwds,
@@ -41,6 +43,26 @@ namespace nd {
           }
           child_data.ndim = 0;
           data = reinterpret_cast<char *>(&child_data);
+
+          if (m_state) {
+            for (size_t i = 0; i < nsrc; ++i) {
+              size_t ndim = src_tp[i].get_ndim() - child_data.child->get_argument_types()[i].get_ndim();
+              if (ndim > child_data.ndim) {
+                child_data.ndim = ndim;
+              }
+            }
+
+            cg.emplace_back([ndim = child_data.ndim](kernel_builder & kb, kernel_request_t kernreq, char *data,
+                                                     const char *dst_arrmeta, size_t nsrc,
+                                                     const char *const *src_arrmeta) {
+              kb.pass();
+
+              state &st = *reinterpret_cast<state *>(data);
+              st.ndim = ndim;
+
+              kb(kernreq, nullptr, dst_arrmeta, nsrc, src_arrmeta);
+            });
+          }
         }
 
         const ndt::callable_type *child_tp =
@@ -63,8 +85,6 @@ namespace nd {
               this, reinterpret_cast<char *>(&data), cg,
               dst_tp.is_symbolic() ? reinterpret_cast<data_type *>(data)->child->get_return_type() : dst_tp, nsrc,
               src_tp, nkwd, kwds, tp_vars);
-        } else {
-          reinterpret_cast<data_type *>(data)->ndim += 1;
         }
 
         // Do a pass through the src types to classify them
