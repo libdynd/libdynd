@@ -13,7 +13,10 @@ namespace nd {
 
   template <size_t NArg>
   struct state_kernel : base_strided_kernel<state_kernel<NArg>, NArg> {
+    size_t i;
     state st;
+
+    state_kernel(size_t i) : i(i) {}
 
     ~state_kernel() {
       delete[] st.index;
@@ -22,10 +25,13 @@ namespace nd {
 
     void single(char *dst, char *const *src) {
       char *child_src[NArg + 1];
-      for (size_t i = 0; i < NArg; ++i) {
-        child_src[i] = src[i];
+      for (size_t j = 0; j < i; ++j) {
+        child_src[j] = src[j];
       }
-      child_src[NArg] = reinterpret_cast<char *>(&st);
+      child_src[i] = reinterpret_cast<char *>(&st);
+      for (size_t j = i; j < NArg; ++j) {
+        child_src[j + 1] = src[j];
+      }
 
       this->get_child()->single(dst, child_src);
     }
