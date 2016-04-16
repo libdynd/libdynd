@@ -15,6 +15,11 @@ namespace nd {
   struct state_kernel : base_strided_kernel<state_kernel<NArg>, NArg> {
     state st;
 
+    ~state_kernel() {
+      delete[] st.index;
+      this->get_child()->destroy();
+    }
+
     void single(char *dst, char *const *src) {
       char *child_src[NArg + 1];
       for (size_t i = 0; i < NArg; ++i) {

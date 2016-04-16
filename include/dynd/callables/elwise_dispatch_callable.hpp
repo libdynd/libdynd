@@ -59,6 +59,7 @@ namespace nd {
 
               state &st = *reinterpret_cast<state *>(data);
               st.ndim = ndim;
+              st.index = new size_t[ndim];
 
               kb(kernreq, nullptr, dst_arrmeta, nsrc, src_arrmeta);
             });
