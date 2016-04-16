@@ -13,27 +13,48 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
+    struct no_traits {
+      no_traits(char *DYND_UNUSED(data)) {}
+
+      size_t begin() { return 0; }
+
+      static char *child_data(char *data) { return data; }
+    };
+
+    struct state_traits {
+      size_t &it;
+
+      state_traits(char *data) : it(*reinterpret_cast<size_t *>(data)) {}
+
+      size_t &begin() {
+        it = 0;
+        return it;
+      }
+
+      static char *child_data(char *data) { return reinterpret_cast<char *>(reinterpret_cast<size_t *>(data) + 1); }
+    };
+
     /**
      * This defines the type and keyword argument resolution for
      * an elwise callable.
      */
-    template <type_id_t DstTypeID, type_id_t SrcTypeID, size_t N>
+    template <type_id_t DstTypeID, type_id_t SrcTypeID, typename TraitsType, size_t N>
     class elwise_callable;
 
-    template <size_t N>
-    class elwise_callable<fixed_dim_id, fixed_dim_id, N> : public base_elwise_callable<N> {
+    template <typename TraitsType, size_t N>
+    class elwise_callable<fixed_dim_id, fixed_dim_id, TraitsType, N> : public base_elwise_callable<N> {
       typedef typename base_elwise_callable<N>::data_type data_type;
 
     public:
       void resolve(call_graph &cg, const char *data) {
-        const std::array<bool, N> &arg_broadcast = reinterpret_cast<const data_type *>(data)->arg_broadcast;
-        size_t ndim = reinterpret_cast<const data_type *>(data)->ndim;
-        cg.emplace_back([arg_broadcast, ndim](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
-                                              const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
-                                              const char *const *src_arrmeta) {
-          state it;
-          it.ndim = ndim;
+        // outermost -- stores index, doesn't increment it
+        // otherwise -- stores index, increments it
+        // normal -- nothing
 
+        const std::array<bool, N> &arg_broadcast = reinterpret_cast<const data_type *>(data)->arg_broadcast;
+        cg.emplace_back([arg_broadcast](kernel_builder &kb, kernel_request_t kernreq, char *data,
+                                        const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
+                                        const char *const *src_arrmeta) {
           intptr_t size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
           intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
 
@@ -49,9 +70,10 @@ namespace nd {
             }
           }
 
-          kb.emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, N>>(kernreq, size, dst_stride, src_stride.data());
+          kb.emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, TraitsType, N>>(kernreq, data, size, dst_stride,
+                                                                                    src_stride.data());
 
-          kb(kernel_request_strided, reinterpret_cast<char *>(&it), dst_arrmeta + sizeof(size_stride_t), N,
+          kb(kernel_request_strided, TraitsType::child_data(data), dst_arrmeta + sizeof(size_stride_t), N,
              child_src_arrmeta.data());
         });
       }
@@ -62,8 +84,8 @@ namespace nd {
     };
 
     // src is either fixed or var
-    template <size_t N>
-    class elwise_callable<fixed_dim_id, var_dim_id, N> : public base_elwise_callable<N> {
+    template <typename TraitsType, size_t N>
+    class elwise_callable<fixed_dim_id, var_dim_id, TraitsType, N> : public base_elwise_callable<N> {
       typedef typename base_elwise_callable<N>::data_type data_type;
 
     public:
@@ -99,8 +121,8 @@ namespace nd {
             }
           }
 
-          kb.emplace_back<elwise_kernel<fixed_dim_id, var_dim_id, N>>(kernreq, dst_size, dst_stride, src_stride.data(),
-                                                                      src_offset.data(), arg_var.data());
+          kb.emplace_back<elwise_kernel<fixed_dim_id, var_dim_id, TraitsType, N>>(
+              kernreq, dst_size, dst_stride, src_stride.data(), src_offset.data(), arg_var.data());
 
           kb(kernel_request_strided, nullptr, dst_arrmeta + sizeof(size_stride_t), N, child_src_arrmeta.data());
         });
@@ -115,8 +137,8 @@ namespace nd {
       }
     };
 
-    template <size_t N>
-    class elwise_callable<var_dim_id, fixed_dim_id, N> : public base_elwise_callable<N> {
+    template <typename TraitsType, size_t N>
+    class elwise_callable<var_dim_id, fixed_dim_id, TraitsType, N> : public base_elwise_callable<N> {
       typedef typename base_elwise_callable<N>::data_type node_type;
 
     public:
@@ -162,7 +184,7 @@ namespace nd {
             }
           }
 
-          kb.emplace_back<elwise_kernel<var_dim_id, fixed_dim_id, N>>(
+          kb.emplace_back<elwise_kernel<var_dim_id, fixed_dim_id, TraitsType, N>>(
               kernreq, dst_md->blockref.get(), res_alignment, dst_md->stride, dst_md->offset, src_stride.data(),
               src_offset.data(), src_size.data(), arg_var.data());
 

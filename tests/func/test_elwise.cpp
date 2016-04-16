@@ -101,20 +101,18 @@ TEST(Elwise, BinaryResolve) {
 }
 
 TEST(Elwise, State) {
-  nd::callable f = nd::functional::elwise([](double DYND_UNUSED(x), double DYND_UNUSED(y), nd::state st) {
-    //  std::cout << "x, y = " << x << ", " << y << std::endl;
-    // std::cout << "it.ndim = " << it.ndim << std::endl;
-    //    for (size_t i = 0; i < it.ndim; ++i) {
-    //      std::cout << "it.index[" << i << "] = " << it.index[i] << std::endl;
-    //    }
+  nd::callable f = nd::functional::elwise([](int DYND_UNUSED(a0), int DYND_UNUSED(a1), nd::state st) {
+    int res = 0;
+    for (size_t i = 0; i < st.ndim; ++i) {
+      res += st.index[i];
+    }
 
-    return static_cast<int>(st.ndim);
+    return res;
   });
 
-  EXPECT_EQ(ndt::type("(Dims... * float64, Dims... * float64) -> Dims... * int32"), f->get_type());
-
-  EXPECT_ARRAY_EQ(nd::array({1, 1, 1}), f(nd::array{0.0, 1.0, 2.0}, nd::array{0.0, 1.0, 2.0}));
-  EXPECT_ARRAY_EQ(nd::array({{2, 2}, {2, 2}}), f(nd::array{{0.0, 1.0}, {2.0, 3.0}}, 4.0));
+  EXPECT_EQ(ndt::type("(Dims... * int32, Dims... * int32) -> Dims... * int32"), f->get_type());
+  EXPECT_ARRAY_EQ(nd::array({0, 1, 2}), f(nd::array{0, 1, 2}, nd::array{0, 1, 2}));
+  EXPECT_ARRAY_EQ(nd::array({{0, 1}, {1, 2}}), f(nd::array{{0, 1}, {2, 3}}, 4));
 }
 
 TEST(Elwise, UnaryFixedDim) {

@@ -36,11 +36,16 @@ namespace nd {
 
     template <size_t I>
     struct apply_arg<state, I> {
-      apply_arg(char *DYND_UNUSED(data), const char *DYND_UNUSED(arrmeta)) {}
+      size_t &it;
+
+      apply_arg(char *data, const char *DYND_UNUSED(arrmeta)) : it(*reinterpret_cast<size_t *>(data)) {}
 
       state &get(char *data) { return *reinterpret_cast<state *>(data); }
 
-      size_t begin() { return 0; }
+      size_t &begin() {
+        it = 0;
+        return it;
+      }
     };
 
     template <typename func_type, int N = args_of<typename funcproto_of<func_type>::type>::type::size>
