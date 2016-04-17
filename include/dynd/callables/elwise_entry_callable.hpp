@@ -42,10 +42,14 @@ namespace nd {
             data.ndim = ndim;
           }
         }
+
+        const ndt::type &child_ret_tp = data.child->get_return_type();
         if (!dst_tp.is_variadic()) {
-          size_t ndim = dst_tp.get_ndim() - data.child->get_return_type().get_ndim();
+          size_t ndim = dst_tp.get_ndim() - child_ret_tp.get_ndim();
           if (ndim > data.ndim) {
             data.ndim = ndim;
+          } else if (ndim < data.ndim) {
+            throw std::runtime_error("broadcast error 0");
           }
         }
 
@@ -63,9 +67,8 @@ namespace nd {
         }
 
         if (data.ndim == 0) {
-          return data.child->resolve(this, reinterpret_cast<char *>(&data), cg,
-                                     dst_tp.is_symbolic() ? data.child->get_return_type() : dst_tp, nsrc, src_tp, nkwd,
-                                     kwds, tp_vars);
+          return data.child->resolve(this, nullptr, cg, dst_tp.is_variadic() ? child_ret_tp : dst_tp, nsrc, src_tp,
+                                     nkwd, kwds, tp_vars);
         }
 
         static callable table[8] = {
