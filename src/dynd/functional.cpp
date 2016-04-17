@@ -117,7 +117,7 @@ nd::callable nd::functional::elwise(const callable &child, bool res_ignore) {
     }
   }
 
-  nd::callable f = make_callable<elwise_entry_callable>(f_tp, child, state, res_ignore);
+  nd::callable f = make_callable<elwise_entry_callable>(f_tp, child, res_ignore);
 
   if (state) {
     ndt::type tp = ndt::callable_type::make(f.get_ret_type(), arg_tp);

@@ -20,27 +20,30 @@ namespace nd {
 
       callable m_child;
       bool m_res_ignore;
-      bool m_state;
 
-      elwise_entry_callable(bool res_ignore)
-          : base_callable(ndt::type("(...) -> Any")), m_res_ignore(res_ignore), m_state(false) {}
+      elwise_entry_callable(bool res_ignore) : base_callable(ndt::type("(...) -> Any")), m_res_ignore(res_ignore) {}
 
-      elwise_entry_callable(const ndt::type &tp, const callable &child, bool state, bool res_ignore)
-          : base_callable(tp), m_child(child), m_res_ignore(res_ignore), m_state(state) {}
+      elwise_entry_callable(const ndt::type &tp, const callable &child, bool res_ignore)
+          : base_callable(tp), m_child(child), m_res_ignore(res_ignore) {}
 
       ndt::type resolve(base_callable *caller, char *DYND_UNUSED(data), call_graph &cg, const ndt::type &dst_tp,
                         size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
-        data_type data{m_child ? m_child.get() : caller, m_res_ignore, m_state, 0, true};
+        data_type data{m_child ? m_child.get() : caller, m_res_ignore, false, 0, true};
 
-        if (m_state) {
-          for (size_t i = 0; i < nsrc; ++i) {
-            size_t ndim = src_tp[i].get_ndim() - data.child->get_argument_types()[i].get_ndim();
-            if (ndim > data.ndim) {
-              data.ndim = ndim;
-            }
+        const std::vector<ndt::type> &child_arg_tp = data.child->get_argument_types();
+        for (size_t i = 0; i < nsrc; ++i) {
+          if (child_arg_tp[i].get_dtype().get_id() == state_id) {
+            data.state = true;
           }
 
+          size_t ndim = src_tp[i].get_ndim() - child_arg_tp[i].get_ndim();
+          if (ndim > data.ndim) {
+            data.ndim = ndim;
+          }
+        }
+
+        if (data.state) {
           cg.emplace_back([ndim = data.ndim](kernel_builder & kb, kernel_request_t kernreq, char *data,
                                              const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta) {
             kb.pass();
