@@ -40,23 +40,6 @@ namespace nd {
         bool state = reinterpret_cast<data_type *>(data)->state;
 
         bool dst_variadic = dst_tp.is_variadic();
-        bool all_same = true;
-        if (!dst_tp.is_symbolic()) {
-          all_same = dst_tp.get_ndim() == child_tp->get_return_type().get_ndim();
-        }
-        for (size_t i = 0; i < nsrc; ++i) {
-          if (src_tp[i].get_ndim() != child_tp->get_pos_type(i).get_ndim()) {
-            all_same = false;
-            break;
-          }
-        }
-
-        if (all_same) {
-          return reinterpret_cast<data_type *>(data)->child->resolve(
-              this, reinterpret_cast<char *>(&data), cg,
-              dst_tp.is_symbolic() ? reinterpret_cast<data_type *>(data)->child->get_return_type() : dst_tp, nsrc,
-              src_tp, nkwd, kwds, tp_vars);
-        }
 
         // Do a pass through the src types to classify them
         bool src_all_strided = true, src_all_strided_or_var = true;

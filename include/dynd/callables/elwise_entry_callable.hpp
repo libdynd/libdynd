@@ -42,6 +42,12 @@ namespace nd {
             data.ndim = ndim;
           }
         }
+        if (!dst_tp.is_variadic()) {
+          size_t ndim = dst_tp.get_ndim() - data.child->get_return_type().get_ndim();
+          if (ndim > data.ndim) {
+            data.ndim = ndim;
+          }
+        }
 
         if (data.state) {
           cg.emplace_back([ndim = data.ndim](kernel_builder & kb, kernel_request_t kernreq, char *data,
@@ -54,6 +60,12 @@ namespace nd {
 
             kb(kernreq, reinterpret_cast<char *>(st.index), dst_arrmeta, nsrc, src_arrmeta);
           });
+        }
+
+        if (data.ndim == 0) {
+          return data.child->resolve(this, reinterpret_cast<char *>(&data), cg,
+                                     dst_tp.is_symbolic() ? data.child->get_return_type() : dst_tp, nsrc, src_tp, nkwd,
+                                     kwds, tp_vars);
         }
 
         static callable table[8] = {
