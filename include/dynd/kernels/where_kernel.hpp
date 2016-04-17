@@ -10,18 +10,44 @@
 namespace dynd {
 namespace nd {
 
-  struct where_kernel : base_strided_kernel<where_kernel, 1> {
+  struct where_kernel : base_strided_kernel<where_kernel, 2> {
+    size_t &it;
+    intptr_t ret_stride;
     intrusive_ptr<memory_block_data> dst_memory_block;
+    size_t ret_element_size;
+    size_t capacity;
 
-    where_kernel(const intrusive_ptr<memory_block_data> &dst_memory_block) : dst_memory_block(dst_memory_block) {}
+    where_kernel(char *data, intptr_t ret_stride, const intrusive_ptr<memory_block_data> &dst_memory_block)
+        : it(*reinterpret_cast<size_t *>(data)), ret_stride(ret_stride), dst_memory_block(dst_memory_block),
+          ret_element_size(sizeof(intptr_t)), capacity(0) {}
 
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {
-/*
-      if (reinterpret_cast<ndt::var_dim_type::data_type *>(dst)->size == 0) {
-        reinterpret_cast<ndt::var_dim_type::data_type *>(dst)->begin = dst_memory_block->alloc(10);
-        reinterpret_cast<ndt::var_dim_type::data_type *>(dst)->size = 10;
+    void single(char *ret, char *const *src) {
+      bool child_ret;
+      get_child()->single(reinterpret_cast<char *>(&child_ret), src);
+
+      if (child_ret) {
+        const state &src1 = *reinterpret_cast<state *>(src[1]);
+
+        size_t &size = reinterpret_cast<ndt::var_dim_type::data_type *>(ret)->size;
+        if (size == 0) {
+          capacity = 1;
+          reinterpret_cast<ndt::var_dim_type::data_type *>(ret)->begin = dst_memory_block->alloc(capacity);
+        } else if (size == capacity) {
+          capacity = size + 1;
+          reinterpret_cast<ndt::var_dim_type::data_type *>(ret)->begin =
+              dst_memory_block->resize(reinterpret_cast<ndt::var_dim_type::data_type *>(ret)->begin, capacity);
+        }
+        ++size;
+
+        intptr_t *index = reinterpret_cast<intptr_t *>(reinterpret_cast<ndt::var_dim_type::data_type *>(ret)->begin +
+                                                       (size - 1) * ret_stride);
+        *index = src1.index[0];
       }
-*/
+    }
+
+    size_t &begin() {
+      it = 0;
+      return it;
     }
   };
 
