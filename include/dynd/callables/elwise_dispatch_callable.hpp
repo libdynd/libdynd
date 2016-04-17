@@ -23,13 +23,15 @@ namespace nd {
       struct data_type {
         base_callable *child;
         size_t ndim;
+        bool res_ignore;
       };
 
       callable m_child;
       bool m_state;
+      bool m_res_ignore;
 
-      elwise_dispatch_callable(const ndt::type &tp, const callable &child, bool state = false)
-          : base_callable(tp), m_child(child), m_state(state) {}
+      elwise_dispatch_callable(const ndt::type &tp, const callable &child, bool state, bool res_ignore)
+          : base_callable(tp), m_child(child), m_state(state), m_res_ignore(res_ignore) {}
 
       ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
                         const ndt::type *src_tp, size_t nkwd, const array *kwds,
@@ -44,6 +46,7 @@ namespace nd {
             child_data.child = m_child.get();
           }
           child_data.ndim = 0;
+          child_data.res_ignore = m_res_ignore;
           data = reinterpret_cast<char *>(&child_data);
 
           if (m_state) {
@@ -119,7 +122,7 @@ namespace nd {
                             src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size() == 1);
         }
 
-        if ((dst_variadic || dst_tp.get_id() == fixed_dim_id) && src_all_strided) {
+        if ((dst_variadic || (dst_tp.get_id() == fixed_dim_id || m_res_ignore)) && src_all_strided) {
           static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, no_traits, N>>();
           static callable g = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, state_traits, N>>();
           if (!first && m_state) {

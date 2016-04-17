@@ -102,13 +102,13 @@ namespace nd {
      *
      * \param child  The callable being lifted
      */
-    DYND_API callable elwise(const callable &child);
+    DYND_API callable elwise(const callable &child, bool res_ignore = false);
 
     DYND_API callable elwise(const ndt::type &tp);
 
-    DYND_API callable elwise(const ndt::type &self_tp, const callable &child, bool state = false);
+    DYND_API callable elwise(const ndt::type &self_tp, const callable &child);
 
-    DYND_API ndt::type elwise_make_type(const ndt::callable_type *child_tp);
+    DYND_API ndt::type elwise_make_type(const ndt::callable_type *child_tp, bool ret_variadic);
 
     template <int... I>
     callable forward_na(const ndt::type &ret_tp) {
@@ -149,6 +149,8 @@ namespace nd {
 
     DYND_API callable reduction(const callable &child,
                                 const std::initializer_list<std::pair<const char *, array>> &kwds);
+
+    DYND_API callable where(const callable &child);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

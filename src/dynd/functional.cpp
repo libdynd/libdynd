@@ -12,6 +12,7 @@
 #include <dynd/callables/outer_callable.hpp>
 #include <dynd/callables/reduction_callable.hpp>
 #include <dynd/callables/state_callable.hpp>
+#include <dynd/callables/where_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 
@@ -71,7 +72,7 @@ nd::callable nd::functional::right_compound(const callable &child) {
                                                 child);
 }
 
-ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp) {
+ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp, bool ret_variadic) {
   const std::vector<ndt::type> &param_types = child_tp->get_pos_types();
   std::vector<ndt::type> out_param_types;
   std::string dimsname("Dims");
@@ -81,86 +82,25 @@ ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp) {
   }
 
   ndt::type kwd_tp = child_tp->get_kwd_struct();
-  /*
-    if (true) {
-      intptr_t old_field_count =
-          kwd_tp.extended<base_struct_type>()->get_field_count();
-      nd::array names =
-          nd::empty(ndt::make_fixed_dim(old_field_count + 2,
-    ndt::make_string()));
-      nd::array fields =
-          nd::empty(ndt::make_fixed_dim(old_field_count + 2, ndt::make_type()));
-      for (intptr_t i = 0; i < old_field_count; ++i) {
-        names(i)
-            .val_assign(kwd_tp.extended<base_struct_type>()->get_field_name(i));
-        fields(i)
-            .val_assign(kwd_tp.extended<base_struct_type>()->get_field_type(i));
-      }
-      names(old_field_count).val_assign("threads");
-      fields(old_field_count)
-          .val_assign(ndt::make_option(ndt::make_type<int>()));
-      names(old_field_count + 1).val_assign("blocks");
-      fields(old_field_count + 1)
-          .val_assign(ndt::make_option(ndt::make_type<int>()));
-      kwd_tp = ndt::struct_type::make(names, fields);
-    }
-  */
 
-  ndt::type ret_tp = child_tp->get_return_type();
-  ret_tp = ndt::make_ellipsis_dim(dimsname, ret_tp);
+  const ndt::type &ret_tp = child_tp->get_return_type();
+  if (ret_variadic) {
+    return ndt::callable_type::make(ndt::make_ellipsis_dim(dimsname, ret_tp),
+                                    ndt::make_type<ndt::tuple_type>(out_param_types.size(), out_param_types.data()),
+                                    kwd_tp);
+  }
 
   return ndt::callable_type::make(
       ret_tp, ndt::make_type<ndt::tuple_type>(out_param_types.size(), out_param_types.data()), kwd_tp);
 }
 
-nd::callable nd::functional::elwise(const ndt::type &self_tp, const callable &child, bool state) {
-  switch (self_tp.extended<ndt::callable_type>()->get_npos()) {
-  case 0:
-    return make_callable<elwise_dispatch_callable<0>>(self_tp, child, state);
-  case 1:
-    return make_callable<elwise_dispatch_callable<1>>(self_tp, child, state);
-  case 2:
-    return make_callable<elwise_dispatch_callable<2>>(self_tp, child, state);
-  case 3:
-    return make_callable<elwise_dispatch_callable<3>>(self_tp, child, state);
-  case 4:
-    return make_callable<elwise_dispatch_callable<4>>(self_tp, child, state);
-  case 5:
-    return make_callable<elwise_dispatch_callable<5>>(self_tp, child, state);
-  case 6:
-    return make_callable<elwise_dispatch_callable<6>>(self_tp, child, state);
-  case 7:
-    return make_callable<elwise_dispatch_callable<7>>(self_tp, child, state);
-  default:
-    throw std::runtime_error("callable with nsrc > 7 not implemented yet");
-  }
-}
-
 nd::callable nd::functional::elwise(const ndt::type &tp) {
-  switch (tp.extended<ndt::callable_type>()->get_npos()) {
-  case 0:
-    return make_callable<elwise_dispatch_callable<0>>(tp, callable());
-  case 1:
-    return make_callable<elwise_dispatch_callable<1>>(tp, callable());
-  case 2:
-    return make_callable<elwise_dispatch_callable<2>>(tp, callable());
-  case 3:
-    return make_callable<elwise_dispatch_callable<3>>(tp, callable());
-  case 4:
-    return make_callable<elwise_dispatch_callable<4>>(tp, callable());
-  case 5:
-    return make_callable<elwise_dispatch_callable<5>>(tp, callable());
-  case 6:
-    return make_callable<elwise_dispatch_callable<6>>(tp, callable());
-  case 7:
-    return make_callable<elwise_dispatch_callable<7>>(tp, callable());
-  default:
-    throw std::runtime_error("callable with nsrc > 7 not implemented yet");
-  }
+  return make_callable<elwise_dispatch_callable>(tp.extended<ndt::callable_type>()->get_npos(), tp, callable(), false,
+                                                 false);
 }
 
-nd::callable nd::functional::elwise(const callable &child) {
-  ndt::type f_tp = elwise_make_type(child.get_type());
+nd::callable nd::functional::elwise(const callable &child, bool res_ignore) {
+  ndt::type f_tp = elwise_make_type(child.get_type(), !res_ignore);
 
   size_t i;
   bool state = false;
@@ -175,30 +115,12 @@ nd::callable nd::functional::elwise(const callable &child) {
     }
   }
 
-  nd::callable f = elwise(f_tp, child, state);
+  nd::callable f = make_callable<elwise_dispatch_callable>(f_tp.extended<ndt::callable_type>()->get_npos(), f_tp, child,
+                                                           state, res_ignore);
 
   if (state) {
     ndt::type tp = ndt::callable_type::make(f.get_ret_type(), arg_tp);
-    switch (tp.extended<ndt::callable_type>()->get_npos()) {
-    case 0:
-      return make_callable<state_callable<0>>(tp, f, i);
-    case 1:
-      return make_callable<state_callable<1>>(tp, f, i);
-    case 2:
-      return make_callable<state_callable<2>>(tp, f, i);
-    case 3:
-      return make_callable<state_callable<3>>(tp, f, i);
-    case 4:
-      return make_callable<state_callable<4>>(tp, f, i);
-    case 5:
-      return make_callable<state_callable<5>>(tp, f, i);
-    case 6:
-      return make_callable<state_callable<6>>(tp, f, i);
-    case 7:
-      return make_callable<state_callable<7>>(tp, f, i);
-    default:
-      throw std::runtime_error("callable with nsrc > 7 not implemented yet");
-    }
+    return make_callable<state_callable>(tp.extended<ndt::callable_type>()->get_npos(), tp, f, i);
   }
 
   return f;
@@ -287,3 +209,5 @@ nd::callable nd::functional::reduction(const callable &child) {
                                 ndt::make_type<ndt::option_type>(ndt::make_type<bool1>())}),
       child);
 }
+
+nd::callable nd::functional::where(const callable &child) { return elwise(make_callable<where_callable>(child), true); }

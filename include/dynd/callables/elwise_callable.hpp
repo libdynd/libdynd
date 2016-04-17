@@ -46,7 +46,7 @@ namespace nd {
       typedef typename base_elwise_callable<N>::data_type data_type;
 
     public:
-      void resolve(call_graph &cg, const char *data) {
+      void subresolve(call_graph &cg, const char *data) {
         // outermost -- stores index, doesn't increment it
         // otherwise -- stores index, increments it
         // normal -- nothing
@@ -89,7 +89,7 @@ namespace nd {
       typedef typename base_elwise_callable<N>::data_type data_type;
 
     public:
-      void resolve(call_graph &cg, const char *data) {
+      void subresolve(call_graph &cg, const char *data) {
         std::array<bool, N> arg_broadcast = reinterpret_cast<const data_type *>(data)->arg_broadcast;
         std::array<bool, N> arg_var = reinterpret_cast<const data_type *>(data)->arg_var;
 
@@ -146,7 +146,7 @@ namespace nd {
         return ndt::make_type<ndt::var_dim_type>(ret_element_tp);
       }
 
-      void resolve(call_graph &cg, const char *data) {
+      void subresolve(call_graph &cg, const char *data) {
         std::array<bool, N> arg_broadcast = reinterpret_cast<const node_type *>(data)->arg_broadcast;
         std::array<bool, N> arg_var = reinterpret_cast<const node_type *>(data)->arg_var;
         intptr_t res_alignment = reinterpret_cast<const node_type *>(data)->res_alignment;

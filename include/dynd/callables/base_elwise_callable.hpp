@@ -8,8 +8,8 @@
 #include <array>
 
 #include <dynd/callables/base_callable.hpp>
-#include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -21,6 +21,7 @@ namespace nd {
       struct codata_type {
         base_callable *child;
         size_t ndim;
+        bool res_ignore;
       };
 
       struct data_type {
@@ -33,7 +34,7 @@ namespace nd {
     public:
       base_elwise_callable() : base_callable(ndt::type()) {}
 
-      virtual void resolve(call_graph &cg, const char *data) = 0;
+      virtual void subresolve(call_graph &cg, const char *data) = 0;
 
       virtual ndt::type with_return_type(intptr_t ret_size, const ndt::type &ret_element_tp) = 0;
 
@@ -42,6 +43,7 @@ namespace nd {
                         const std::map<std::string, ndt::type> &tp_vars) {
         data_type data;
         data.ndim = reinterpret_cast<codata_type *>(codata)->ndim;
+        //        bool res_ignore = reinterpret_cast<codata_type *>(codata)->res_ignore;
 
         base_callable *child = reinterpret_cast<codata_type *>(codata)->child;
         const ndt::type &child_ret_tp = child->get_return_type();
@@ -82,7 +84,7 @@ namespace nd {
           if (ret_ndim > max_ndim) {
             max_ndim = ret_ndim;
           } else if (res_tp.get_ndim() - child_ret_tp.get_ndim() < max_ndim) {
-            throw std::runtime_error("broadcast error");
+            throw std::runtime_error("broadcast error 0");
           }
           res_size = res_tp.extended<ndt::base_dim_type>()->get_dim_size();
           res_element_tp = res_tp.extended<ndt::base_dim_type>()->get_element_type();
@@ -94,7 +96,7 @@ namespace nd {
           if (arg_ndim[i] == max_ndim) {
             data.arg_broadcast[i] = false;
             if (arg_size[i] != -1 && res_size != -1 && res_size != arg_size[i] && arg_size[i] != 1) {
-              throw std::runtime_error("broadcast error");
+              throw std::runtime_error("broadcast error 1");
             }
             arg_element_tp[i] = arg_tp[i].extended<ndt::base_dim_type>()->get_element_type();
           } else {
@@ -106,7 +108,7 @@ namespace nd {
           }
         }
 
-        resolve(cg, reinterpret_cast<char *>(&data));
+        subresolve(cg, reinterpret_cast<char *>(&data));
 
         ndt::type resolved_ret_tp;
         if (callback) {
