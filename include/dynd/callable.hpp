@@ -213,6 +213,30 @@ namespace nd {
     return make_callable<default_instantiable_callable<KernelType>>(tp);
   }
 
+  template <template <size_t NArg> class CallableType, typename... ArgTypes>
+  callable make_callable(size_t narg, ArgTypes &&... args) {
+    switch (narg) {
+    case 0:
+      return make_callable<CallableType<0>>(std::forward<ArgTypes>(args)...);
+    case 1:
+      return make_callable<CallableType<1>>(std::forward<ArgTypes>(args)...);
+    case 2:
+      return make_callable<CallableType<2>>(std::forward<ArgTypes>(args)...);
+    case 3:
+      return make_callable<CallableType<3>>(std::forward<ArgTypes>(args)...);
+    case 4:
+      return make_callable<CallableType<4>>(std::forward<ArgTypes>(args)...);
+    case 5:
+      return make_callable<CallableType<5>>(std::forward<ArgTypes>(args)...);
+    case 6:
+      return make_callable<CallableType<6>>(std::forward<ArgTypes>(args)...);
+    case 7:
+      return make_callable<CallableType<7>>(std::forward<ArgTypes>(args)...);
+    default:
+      throw std::runtime_error("callable with nsrc > 7 not implemented yet");
+    }
+  }
+
   inline std::ostream &operator<<(std::ostream &o, const callable &rhs) {
     return o << "<callable <" << rhs->get_type() << "> at " << reinterpret_cast<const void *>(rhs.get()) << ">";
   }

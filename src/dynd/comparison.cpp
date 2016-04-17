@@ -3,8 +3,6 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/comparison.hpp>
-#include <dynd/functional.hpp>
 #include <dynd/callables/comparison_dispatch_callable.hpp>
 #include <dynd/callables/equal_callable.hpp>
 #include <dynd/callables/greater_callable.hpp>
@@ -13,6 +11,8 @@
 #include <dynd/callables/less_equal_callable.hpp>
 #include <dynd/callables/not_equal_callable.hpp>
 #include <dynd/callables/total_order_callable.hpp>
+#include <dynd/comparison.hpp>
+#include <dynd/functional.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -22,14 +22,14 @@ namespace {
 template <template <type_id_t...> class KernelType>
 dispatcher<nd::callable> make_comparison_children() {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, uint8_id, uint16_id, uint32_id, uint64_id,
-                           float32_id, float64_id> numeric_ids;
+                           float32_id, float64_id>
+      numeric_ids;
 
   dispatcher<nd::callable> dispatcher = nd::callable::new_make_all<KernelType, numeric_ids, numeric_ids>();
 
   for (type_id_t i0 : i2a<numeric_ids>()) {
     for (type_id_t i1 : i2a<dim_ids>()) {
-      const ndt::type child_tp = ndt::callable_type::make(ndt::type("Any"), {ndt::type(i0), ndt::type(i1)});
-      dispatcher.insert({{i0, i1}, nd::functional::elwise(child_tp)});
+      dispatcher.insert({{i0, i1}, nd::get_elwise()});
     }
   }
 
@@ -40,15 +40,14 @@ dispatcher<nd::callable> make_comparison_children() {
   dispatcher.insert({{option_id, option_id}, nd::functional::forward_na<0, 1>(ndt::type("Any"))});
 
   for (type_id_t dim_tp_id : i2a<dim_ids>()) {
-    dispatcher.insert({{dim_tp_id, option_id}, nd::functional::elwise(ndt::type("(Any, Any) -> Any"))});
-    dispatcher.insert({{option_id, dim_tp_id}, nd::functional::elwise(ndt::type("(Any, Any) -> Any"))});
+    dispatcher.insert({{dim_tp_id, option_id}, nd::get_elwise()});
+    dispatcher.insert({{option_id, dim_tp_id}, nd::get_elwise()});
   }
 
   for (type_id_t i0 : i2a<dim_ids>()) {
     typedef join<numeric_ids, dim_ids>::type type_ids;
     for (type_id_t i1 : i2a<type_ids>()) {
-      const ndt::type child_tp = ndt::callable_type::make(ndt::type("Any"), {ndt::type(i0), ndt::type(i1)});
-      dispatcher.insert({{i0, i1}, nd::functional::elwise(child_tp)});
+      dispatcher.insert({{i0, i1}, nd::get_elwise()});
     }
   }
 

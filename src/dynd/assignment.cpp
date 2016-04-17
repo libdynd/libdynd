@@ -24,8 +24,8 @@ struct DYND_API _bind {
 
 nd::callable make_assign() {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint8_id, uint16_id, uint32_id,
-                           uint64_id, uint128_id, float32_id, float64_id, complex_float32_id,
-                           complex_float64_id> numeric_ids;
+                           uint64_id, uint128_id, float32_id, float64_id, complex_float32_id, complex_float64_id>
+      numeric_ids;
 
   ndt::type self_tp = ndt::callable_type::make(ndt::any_kind_type::make(), {ndt::any_kind_type::make()}, {"error_mode"},
                                                {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())});
@@ -86,9 +86,9 @@ nd::callable make_assign() {
   dispatcher.insert({{tuple_id, tuple_id}, nd::make_callable<nd::assign_callable<tuple_id, tuple_id>>()});
   dispatcher.insert({{struct_id, int32_id}, nd::make_callable<nd::assign_callable<struct_id, struct_id>>()});
   dispatcher.insert({{struct_id, struct_id}, nd::make_callable<nd::assign_callable<struct_id, struct_id>>()});
-  dispatcher.insert({{scalar_kind_id, dim_kind_id}, nd::functional::elwise(ndt::type("(Any) -> Any"))});
-  dispatcher.insert({{dim_kind_id, scalar_kind_id}, nd::functional::elwise(ndt::type("(Any) -> Any"))});
-  dispatcher.insert({{dim_kind_id, dim_kind_id}, nd::functional::elwise(ndt::type("(Any) -> Any"))});
+  dispatcher.insert({{scalar_kind_id, dim_kind_id}, nd::get_elwise()});
+  dispatcher.insert({{dim_kind_id, scalar_kind_id}, nd::get_elwise()});
+  dispatcher.insert({{dim_kind_id, dim_kind_id}, nd::get_elwise()});
 
   return nd::make_callable<nd::assign_dispatch_callable>(self_tp, dispatcher);
 }

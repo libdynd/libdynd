@@ -24,14 +24,14 @@ nd::callable make_compound_arithmetic() {
 
   for (type_id_t i0 : i2a<TypeIDSequence>()) {
     for (type_id_t i1 : i2a<dim_ids>()) {
-      dispatcher.insert({{i0, i1}, nd::functional::elwise(tp)});
+      dispatcher.insert({{i0, i1}, nd::get_elwise()});
     }
   }
 
   for (type_id_t i0 : i2a<dim_ids>()) {
     typedef typename join<TypeIDSequence, dim_ids>::type broadcast_ids;
     for (type_id_t i1 : i2a<broadcast_ids>()) {
-      dispatcher.insert({{i0, i1}, nd::functional::elwise(tp)});
+      dispatcher.insert({{i0, i1}, nd::get_elwise()});
     }
   }
 

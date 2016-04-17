@@ -27,9 +27,9 @@ nd::callable make_binary_arithmetic() {
   dispatcher.insert({{{option_id, any_kind_id}, nd::functional::forward_na<0>(ndt::type("Any"))},
                      {{any_kind_id, option_id}, nd::functional::forward_na<1>(ndt::type("Any"))},
                      {{option_id, option_id}, nd::functional::forward_na<0, 1>(ndt::type("Any"))},
-                     {{dim_kind_id, scalar_kind_id}, nd::functional::elwise(tp)},
-                     {{scalar_kind_id, dim_kind_id}, nd::functional::elwise(tp)},
-                     {{dim_kind_id, dim_kind_id}, nd::functional::elwise(tp)}});
+                     {{dim_kind_id, scalar_kind_id}, nd::get_elwise()},
+                     {{scalar_kind_id, dim_kind_id}, nd::get_elwise()},
+                     {{dim_kind_id, dim_kind_id}, nd::get_elwise()}});
 
   return nd::make_callable<nd::arithmetic_dispatch_callable<2>>(tp, dispatcher);
 }

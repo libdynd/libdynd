@@ -9,11 +9,11 @@
 #include <map>
 #include <typeinfo>
 
-#include <dynd/kernels/kernel_prefix.hpp>
 #include <dynd/array.hpp>
-#include <dynd/types/substitute_typevars.hpp>
-#include <dynd/types/callable_type.hpp>
 #include <dynd/callables/call_graph.hpp>
+#include <dynd/kernels/kernel_prefix.hpp>
+#include <dynd/types/callable_type.hpp>
+#include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
 namespace nd {
@@ -76,6 +76,7 @@ namespace nd {
       return m_tp.extended<ndt::callable_type>()->get_pos_types();
     }
 
+
     /**
      * Function prototype for instantiating a kernel from an
      * callable. To use this function, the
@@ -98,6 +99,8 @@ namespace nd {
     virtual ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &res_tp, size_t narg,
                               const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                               const std::map<std::string, ndt::type> &tp_vars) = 0;
+
+//    virtual void resolve() {}
 
     virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
 

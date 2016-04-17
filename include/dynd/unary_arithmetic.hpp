@@ -24,7 +24,7 @@ nd::callable make_unary_arithmetic() {
 
   const ndt::type &tp = ndt::type("(Any) -> Any");
   for (type_id_t i0 : i2a<dim_ids>()) {
-    dispatcher.insert({{i0}, nd::functional::elwise(tp)});
+    dispatcher.insert({{i0}, nd::get_elwise()});
   }
 
   return nd::make_callable<nd::arithmetic_dispatch_callable<1>>(tp, dispatcher);

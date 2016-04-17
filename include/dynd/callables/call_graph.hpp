@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/storagebuf.hpp>
 #include <dynd/callables/call.hpp>
 #include <dynd/callables/closure_call.hpp>
 

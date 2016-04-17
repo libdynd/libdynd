@@ -8,8 +8,8 @@
 #include <array>
 
 #include <dynd/callables/base_callable.hpp>
-#include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -20,7 +20,10 @@ namespace nd {
     protected:
       struct codata_type {
         base_callable *child;
+        bool res_ignore;
+        bool state;
         size_t ndim;
+        bool first;
       };
 
       struct data_type {
@@ -28,12 +31,13 @@ namespace nd {
         std::array<bool, N> arg_var;
         intptr_t res_alignment;
         size_t ndim;
+        bool res_ignore;
       };
 
     public:
       base_elwise_callable() : base_callable(ndt::type()) {}
 
-      virtual void resolve(call_graph &cg, const char *data) = 0;
+      virtual void subresolve(call_graph &cg, const char *data) = 0;
 
       virtual ndt::type with_return_type(intptr_t ret_size, const ndt::type &ret_element_tp) = 0;
 
@@ -42,23 +46,24 @@ namespace nd {
                         const std::map<std::string, ndt::type> &tp_vars) {
         data_type data;
         data.ndim = reinterpret_cast<codata_type *>(codata)->ndim;
+        bool res_ignore = reinterpret_cast<codata_type *>(codata)->res_ignore;
+        data.res_ignore = reinterpret_cast<codata_type *>(codata)->res_ignore;
 
         base_callable *child = reinterpret_cast<codata_type *>(codata)->child;
         const ndt::type &child_ret_tp = child->get_return_type();
         const std::vector<ndt::type> &child_arg_tp = child->get_argument_types();
 
         std::array<intptr_t, N> arg_size;
-        std::array<intptr_t, N> arg_ndim;
-        intptr_t max_ndim = 0;
+        std::array<ndt::type, N> arg_element_tp;
+        intptr_t max_ndim = reinterpret_cast<codata_type *>(codata)->ndim;
         for (size_t i = 0; i < N; ++i) {
-          arg_ndim[i] = arg_tp[i].get_ndim() - child_arg_tp[i].get_ndim();
-          if (arg_ndim[i] == 0) {
+          data.arg_broadcast[i] = (arg_tp[i].get_ndim() - child_arg_tp[i].get_ndim()) < max_ndim;
+          if (data.arg_broadcast[i]) {
             arg_size[i] = 1;
+            arg_element_tp[i] = arg_tp[i];
           } else {
             arg_size[i] = arg_tp[i].extended<ndt::base_dim_type>()->get_dim_size();
-            if (arg_ndim[i] > max_ndim) {
-              max_ndim = arg_ndim[i];
-            }
+            arg_element_tp[i] = arg_tp[i].extended<ndt::base_dim_type>()->get_element_type();
           }
         }
 
@@ -66,63 +71,50 @@ namespace nd {
           data.arg_var[i] = arg_tp[i].get_id() == var_dim_id;
         }
 
-        bool res_variadic = res_tp.is_variadic();
         intptr_t res_size;
         ndt::type res_element_tp;
-        intptr_t ret_ndim = res_tp.get_ndim() - child_ret_tp.get_ndim();
-        if (res_variadic) {
+        if (res_ignore) {
+          res_size = 1;
+          res_element_tp = res_tp;
+        } else if (res_tp.is_variadic()) {
           res_size = 1;
           for (size_t i = 0; i < N && res_size == 1; ++i) {
-            if (arg_ndim[i] == max_ndim && arg_size[i] != -1) {
+            if (!data.arg_broadcast[i] && arg_size[i] != -1) {
               res_size = arg_size[i];
             }
           }
           res_element_tp = res_tp;
         } else {
-          if (ret_ndim > max_ndim) {
-            max_ndim = ret_ndim;
-          } else if (res_tp.get_ndim() - child_ret_tp.get_ndim() < max_ndim) {
-            throw std::runtime_error("broadcast error");
-          }
           res_size = res_tp.extended<ndt::base_dim_type>()->get_dim_size();
           res_element_tp = res_tp.extended<ndt::base_dim_type>()->get_element_type();
         }
 
-        std::array<ndt::type, N> arg_element_tp;
-        bool callback = ret_ndim > 1;
-        for (size_t i = 0; i < N; ++i) {
-          if (arg_ndim[i] == max_ndim) {
-            data.arg_broadcast[i] = false;
-            if (arg_size[i] != -1 && res_size != -1 && res_size != arg_size[i] && arg_size[i] != 1) {
-              throw std::runtime_error("broadcast error");
+        // if not ignore res
+        if (!res_ignore) {
+          for (size_t i = 0; i < N; ++i) {
+            if (!data.arg_broadcast[i]) {
+              if (arg_size[i] != -1 && res_size != -1 && res_size != arg_size[i] && arg_size[i] != 1) {
+                throw std::runtime_error("broadcast error 1");
+              }
             }
-            arg_element_tp[i] = arg_tp[i].extended<ndt::base_dim_type>()->get_element_type();
-          } else {
-            data.arg_broadcast[i] = true;
-            arg_element_tp[i] = arg_tp[i];
-          }
-          if (arg_element_tp[i].get_ndim() != child_arg_tp[i].get_ndim()) {
-            callback = true;
           }
         }
 
-        resolve(cg, reinterpret_cast<char *>(&data));
+        subresolve(cg, reinterpret_cast<char *>(&data));
 
-        ndt::type resolved_ret_tp;
-        if (callback) {
-          resolved_ret_tp = with_return_type(res_size, caller->resolve(this, codata, cg, res_element_tp, N,
-                                                                       arg_element_tp.data(), nkwd, kwds, tp_vars));
+        if (--reinterpret_cast<codata_type *>(codata)->ndim > 0) {
+          res_element_tp =
+              caller->resolve(this, codata, cg, res_element_tp, N, arg_element_tp.data(), nkwd, kwds, tp_vars);
         } else {
-          resolved_ret_tp = with_return_type(
-              res_size, child->resolve(this, nullptr, cg, res_variadic ? child->get_return_type() : res_element_tp, N,
-                                       arg_element_tp.data(), nkwd, kwds, tp_vars));
+          res_element_tp = child->resolve(this, nullptr, cg, res_tp.is_variadic() ? child_ret_tp : res_element_tp, N,
+                                          arg_element_tp.data(), nkwd, kwds, tp_vars);
         }
 
-        if (resolved_ret_tp.get_id() == var_dim_id) {
-          data.res_alignment = resolved_ret_tp.extended<ndt::var_dim_type>()->get_target_alignment();
+        if (res_ignore) {
+          return res_element_tp;
         }
 
-        return resolved_ret_tp;
+        return with_return_type(res_size, res_element_tp);
       }
     };
 

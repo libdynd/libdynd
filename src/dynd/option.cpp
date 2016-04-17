@@ -3,11 +3,11 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/functional.hpp>
-#include <dynd/callables/assign_na_dispatch_callable.hpp>
-#include <dynd/callables/is_na_dispatch_callable.hpp>
 #include <dynd/callables/assign_na_callable.hpp>
+#include <dynd/callables/assign_na_dispatch_callable.hpp>
 #include <dynd/callables/is_na_callable.hpp>
+#include <dynd/callables/is_na_dispatch_callable.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/option.hpp>
 
 using namespace std;
@@ -17,7 +17,8 @@ namespace {
 
 nd::callable make_assign_na() {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, float32_id, float64_id,
-                           complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id> type_ids;
+                           complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id>
+      type_ids;
 
   dispatcher<nd::callable> dispatcher = nd::callable::new_make_all<nd::assign_na_callable, type_ids>();
   dispatcher.insert({{uint32_id}, nd::make_callable<nd::assign_na_callable<uint32_id>>()});
@@ -26,7 +27,7 @@ nd::callable make_assign_na() {
   auto t = ndt::type("() -> ?Any");
 
   for (auto tp_id : {fixed_dim_id, var_dim_id}) {
-    dim_dispatcher.insert({{tp_id}, nd::functional::elwise(t)});
+    dim_dispatcher.insert({{tp_id}, nd::get_elwise()});
   }
 
   return nd::make_callable<nd::assign_na_dispatch_callable>(t, dispatcher, dim_dispatcher);
@@ -34,13 +35,14 @@ nd::callable make_assign_na() {
 
 nd::callable make_is_na() {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint32_id, float32_id, float64_id,
-                           complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id> type_ids;
+                           complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id>
+      type_ids;
 
   dispatcher<nd::callable> dispatcher = nd::callable::new_make_all<nd::is_na_callable, type_ids>();
   dynd::dispatcher<nd::callable> dim_dispatcher;
 
   for (auto tp_id : {fixed_dim_id, var_dim_id}) {
-    dim_dispatcher.insert({{tp_id}, nd::functional::elwise(ndt::type("(Any) -> Any"))});
+    dim_dispatcher.insert({{tp_id}, nd::get_elwise()});
   }
 
   return nd::make_callable<nd::is_na_dispatch_callable>(ndt::type("(Any) -> Any"), dispatcher, dim_dispatcher);
