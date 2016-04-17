@@ -44,7 +44,7 @@ namespace nd {
         }
 
         const ndt::type &child_ret_tp = data.child->get_return_type();
-        if (!dst_tp.is_variadic()) {
+        if (!m_res_ignore && !dst_tp.is_variadic()) {
           size_t ndim = dst_tp.get_ndim() - child_ret_tp.get_ndim();
           if (ndim > data.ndim) {
             data.ndim = ndim;

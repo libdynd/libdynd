@@ -15,13 +15,13 @@ namespace nd {
 
     where_kernel(const intrusive_ptr<memory_block_data> &dst_memory_block) : dst_memory_block(dst_memory_block) {}
 
-    void single(char *dst, char *const *DYND_UNUSED(src)) {
-      std::cout << "where_kernel::single" << std::endl;
-
+    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {
+/*
       if (reinterpret_cast<ndt::var_dim_type::data_type *>(dst)->size == 0) {
         reinterpret_cast<ndt::var_dim_type::data_type *>(dst)->begin = dst_memory_block->alloc(10);
         reinterpret_cast<ndt::var_dim_type::data_type *>(dst)->size = 10;
       }
+*/
     }
   };
 

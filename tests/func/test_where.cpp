@@ -16,14 +16,7 @@
 using namespace std;
 using namespace dynd;
 
-/*
 TEST(Where, Untitled) {
   nd::callable f = nd::functional::where([](int DYND_UNUSED(x)) { return false; });
-
-  std::cout << f << std::endl;
-  nd::array res = f(nd::array{0, 1, 2, 3, 4});
-  std::cout << res << std::endl;
-
-  std::exit(-1);
+  f(nd::array{0, 1, 2, 3, 4});
 }
-*/

@@ -38,6 +38,7 @@ namespace nd {
         bool first = reinterpret_cast<data_type *>(data)->first;
         reinterpret_cast<data_type *>(data)->first = false;
         bool state = reinterpret_cast<data_type *>(data)->state;
+        bool res_ignore = reinterpret_cast<data_type *>(data)->res_ignore;
 
         bool dst_variadic = dst_tp.is_variadic();
 
@@ -68,7 +69,7 @@ namespace nd {
                             src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size() == 1);
         }
 
-        if ((dst_variadic || (dst_tp.get_id() == fixed_dim_id)) && src_all_strided) {
+        if ((dst_variadic || (dst_tp.get_id() == fixed_dim_id || res_ignore)) && src_all_strided) {
           static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, no_traits, N>>();
           static callable g = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, state_traits, N>>();
           if (!first && state) {

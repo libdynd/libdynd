@@ -47,19 +47,31 @@ namespace nd {
 
     public:
       void subresolve(call_graph &cg, const char *data) {
-        // outermost -- stores index, doesn't increment it
-        // otherwise -- stores index, increments it
-        // normal -- nothing
-
+        bool res_broadcast = reinterpret_cast<const data_type *>(data)->res_ignore;
         const std::array<bool, N> &arg_broadcast = reinterpret_cast<const data_type *>(data)->arg_broadcast;
-        cg.emplace_back([arg_broadcast](kernel_builder &kb, kernel_request_t kernreq, char *data,
-                                        const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
-                                        const char *const *src_arrmeta) {
-          intptr_t size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
-          intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
 
-          std::array<const char *, N> child_src_arrmeta;
+        cg.emplace_back([res_broadcast, arg_broadcast](kernel_builder &kb, kernel_request_t kernreq, char *data,
+                                                       const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
+                                                       const char *const *src_arrmeta) {
+          size_t size;
+          if (res_broadcast) {
+            size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
+          } else {
+            size = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->dim_size;
+          }
+
+          intptr_t dst_stride;
+          const char *child_dst_arrmeta;
+          if (res_broadcast) {
+            dst_stride = 0;
+            child_dst_arrmeta = dst_arrmeta;
+          } else {
+            dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
+            child_dst_arrmeta = dst_arrmeta + sizeof(size_stride_t);
+          }
+
           std::array<intptr_t, N> src_stride;
+          std::array<const char *, N> child_src_arrmeta;
           for (size_t i = 0; i < N; ++i) {
             if (arg_broadcast[i]) {
               src_stride[i] = 0;
@@ -73,8 +85,7 @@ namespace nd {
           kb.emplace_back<elwise_kernel<fixed_dim_id, fixed_dim_id, TraitsType, N>>(kernreq, data, size, dst_stride,
                                                                                     src_stride.data());
 
-          kb(kernel_request_strided, TraitsType::child_data(data), dst_arrmeta + sizeof(size_stride_t), N,
-             child_src_arrmeta.data());
+          kb(kernel_request_strided, TraitsType::child_data(data), child_dst_arrmeta, N, child_src_arrmeta.data());
         });
       }
 
