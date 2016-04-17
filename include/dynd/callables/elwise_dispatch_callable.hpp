@@ -22,59 +22,22 @@ namespace nd {
     public:
       struct data_type {
         base_callable *child;
-        size_t ndim;
         bool res_ignore;
+        bool state;
+        size_t ndim;
+        bool first;
       };
 
-      callable m_child;
-      bool m_state;
-      bool m_res_ignore;
+      elwise_dispatch_callable() : base_callable(ndt::type()) {}
 
-      elwise_dispatch_callable(const ndt::type &tp, const callable &child, bool state, bool res_ignore)
-          : base_callable(tp), m_child(child), m_state(state), m_res_ignore(res_ignore) {}
-
-      ndt::type resolve(base_callable *caller, char *data, call_graph &cg, const ndt::type &dst_tp, size_t nsrc,
-                        const ndt::type *src_tp, size_t nkwd, const array *kwds,
+      ndt::type resolve(base_callable *DYND_UNUSED(caller), char *data, call_graph &cg, const ndt::type &dst_tp,
+                        size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &tp_vars) {
-        data_type child_data;
-        bool first;
-        if (data == nullptr) {
-          first = true;
-          if (m_child.is_null()) {
-            child_data.child = caller;
-          } else {
-            child_data.child = m_child.get();
-          }
-          child_data.ndim = 0;
-          child_data.res_ignore = m_res_ignore;
-          data = reinterpret_cast<char *>(&child_data);
-
-          if (m_state) {
-            for (size_t i = 0; i < nsrc; ++i) {
-              size_t ndim = src_tp[i].get_ndim() - child_data.child->get_argument_types()[i].get_ndim();
-              if (ndim > child_data.ndim) {
-                child_data.ndim = ndim;
-              }
-            }
-
-            cg.emplace_back([ndim = child_data.ndim](kernel_builder & kb, kernel_request_t kernreq, char *data,
-                                                     const char *dst_arrmeta, size_t nsrc,
-                                                     const char *const *src_arrmeta) {
-              kb.pass();
-
-              state &st = *reinterpret_cast<state *>(data);
-              st.ndim = ndim;
-              st.index = new size_t[ndim];
-
-              kb(kernreq, reinterpret_cast<char *>(st.index), dst_arrmeta, nsrc, src_arrmeta);
-            });
-          }
-        } else {
-          first = false;
-        }
-
         const ndt::callable_type *child_tp =
             reinterpret_cast<data_type *>(data)->child->get_type().template extended<ndt::callable_type>();
+        bool first = reinterpret_cast<data_type *>(data)->first;
+        reinterpret_cast<data_type *>(data)->first = false;
+        bool state = reinterpret_cast<data_type *>(data)->state;
 
         bool dst_variadic = dst_tp.is_variadic();
         bool all_same = true;
@@ -116,16 +79,16 @@ namespace nd {
         }
 
         bool var_broadcast = !src_all_strided;
-        for (size_t i = 0; i < N; ++i) {
+        for (size_t i = 0; i < nsrc; ++i) {
           var_broadcast &= src_tp[i].get_id() == var_dim_id ||
                            (src_tp[i].get_id() == fixed_dim_id &&
                             src_tp[i].extended<ndt::fixed_dim_type>()->get_fixed_dim_size() == 1);
         }
 
-        if ((dst_variadic || (dst_tp.get_id() == fixed_dim_id || m_res_ignore)) && src_all_strided) {
+        if ((dst_variadic || (dst_tp.get_id() == fixed_dim_id)) && src_all_strided) {
           static callable f = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, no_traits, N>>();
           static callable g = make_callable<elwise_callable<fixed_dim_id, fixed_dim_id, state_traits, N>>();
-          if (!first && m_state) {
+          if (!first && state) {
             return g->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
           } else {
             return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);

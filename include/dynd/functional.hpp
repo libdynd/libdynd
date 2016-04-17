@@ -14,6 +14,10 @@
 
 namespace dynd {
 namespace nd {
+
+  const callable &get_elwise();
+  extern DYND_API callable elwise;
+
   namespace functional {
 
     DYND_API callable adapt(const ndt::type &value_tp, const callable &forward);
@@ -103,10 +107,6 @@ namespace nd {
      * \param child  The callable being lifted
      */
     DYND_API callable elwise(const callable &child, bool res_ignore = false);
-
-    DYND_API callable elwise(const ndt::type &tp);
-
-    DYND_API callable elwise(const ndt::type &self_tp, const callable &child);
 
     DYND_API ndt::type elwise_make_type(const ndt::callable_type *child_tp, bool ret_variadic);
 

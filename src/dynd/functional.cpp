@@ -7,7 +7,7 @@
 #include <dynd/callables/compose_callable.hpp>
 #include <dynd/callables/compound_callable.hpp>
 #include <dynd/callables/constant_callable.hpp>
-#include <dynd/callables/elwise_dispatch_callable.hpp>
+#include <dynd/callables/elwise_entry_callable.hpp>
 #include <dynd/callables/neighborhood_callable.hpp>
 #include <dynd/callables/outer_callable.hpp>
 #include <dynd/callables/reduction_callable.hpp>
@@ -18,6 +18,13 @@
 
 using namespace std;
 using namespace dynd;
+
+const nd::callable &nd::get_elwise() {
+  static callable elwise = make_callable<functional::elwise_entry_callable>(false);
+  return elwise;
+}
+
+DYND_API nd::callable nd::elwise = nd::get_elwise();
 
 nd::callable nd::functional::adapt(const ndt::type &value_tp, const callable &forward) {
   return make_callable<adapt_callable>(value_tp, forward);
@@ -94,11 +101,6 @@ ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp, b
       ret_tp, ndt::make_type<ndt::tuple_type>(out_param_types.size(), out_param_types.data()), kwd_tp);
 }
 
-nd::callable nd::functional::elwise(const ndt::type &tp) {
-  return make_callable<elwise_dispatch_callable>(tp.extended<ndt::callable_type>()->get_npos(), tp, callable(), false,
-                                                 false);
-}
-
 nd::callable nd::functional::elwise(const callable &child, bool res_ignore) {
   ndt::type f_tp = elwise_make_type(child.get_type(), !res_ignore);
 
@@ -115,8 +117,7 @@ nd::callable nd::functional::elwise(const callable &child, bool res_ignore) {
     }
   }
 
-  nd::callable f = make_callable<elwise_dispatch_callable>(f_tp.extended<ndt::callable_type>()->get_npos(), f_tp, child,
-                                                           state, res_ignore);
+  nd::callable f = make_callable<elwise_entry_callable>(f_tp, child, state, res_ignore);
 
   if (state) {
     ndt::type tp = ndt::callable_type::make(f.get_ret_type(), arg_tp);
