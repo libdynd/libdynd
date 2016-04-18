@@ -57,19 +57,26 @@ the development of this library, subscribe to the
 History Of DyND
 =======================
 
-DyND was started in the autumn of 2011 by [Mark Wiebe](https://github.com/mwiebe),
-as a private project to begin dabbling in ideas for how a dynamic multidimensional array
-library could be structured in C++. During the early formation of [Continuum Analytics](http://continuum.io/about-continuum),
-DyND was open sourced and brought into the company as a part of the [Blaze project](http://blaze.pydata.org/).
+DyND was started as a personal project of [Mark Wiebe](https://github.com/mwiebe)
+in September 2011 as a private project to begin dabbling in ideas for how a dynamic,
+multidimensional array library could be structured in C++. See [here](https://github.com/libdynd/libdynd/commit/768ac9a30cdb4619d09f4656bfd895ab2b91185d)
+for the very first commit. Mark was at the University of British Columbia, then joined
+Continuum part-time when it was founded in January 2012, and later became full-time
+in the spring of 2012. During the early formation of [Continuum Analytics](http://continuum.io/about-continuum),
+DyND was open-sourced and brought into the company as a part of the [Blaze project](http://blaze.pydata.org/).
 
-Continuum secured funding for the Blaze project through DARPA's
-[XDATA program](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx),
-giving the project space and time to develop as it needed and providing
-real data sets and challenge problems to tackle and measure against.
+Continuum secured funding for the Blaze project through DARPA's [XDATA program](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx),
+giving the project space and time to develop as it needed and providing real data sets
+and challenge problems to tackle and measure against.
 
 [Irwin Zaid](https://github.com/izaid) joined the project in the winter of 2014, as
-its first major outside contributor. He initially added early [CUDA](https://developer.nvidia.com/about-cuda)
+its first major outside contributor, while he was a research fellow at [Christ Church](http://www.chch.ox.ac.uk/),
+[University of Oxford](http://www.ox.ac.uk/). He initially added early [CUDA](https://developer.nvidia.com/about-cuda)
 support to the library, but played a gradually increasing role in the design and goals of the project.
+He led the development of DyND from the sprint of 2015 onwards, and was funded by Continuum
+from June 2015 until April 2016.
+
+[Ian Henriksen]() was became working on DyND through [Google Summer of Code](https://developers.google.com/open-source/gsoc/)
 
 DyND is still in an experimental mode, with some mature components and
 others severely lacking. Current focus is on the completion of the
