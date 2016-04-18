@@ -19,7 +19,9 @@ At a high level, the cornerstones of DyND are its type system, array container, 
 (function) objects. These represent the description, storage, and manipulation of dynamic,
 reinterpretable bytes across languages. At a low level, DyND defines an primitive execution
 kernel that brings together computation and data into a compact form able to execute rapidly
-across array elements.
+across array elements. Where DyND begins to shine is in its support for functional composition.
+For example, NumPy-like broadcasting is not built into every callable, but rather a functional
+transformation applied to a scalar callable.
 
 DyND was created by [Irwin Zaid](https://github.com/izaid) and [Mark Wiebe](https://github.com/mwiebe).
 The core team consists of [Irwin Zaid](https://github.com/izaid), [Mark Wiebe](https://github.com/mwiebe),
@@ -33,7 +35,7 @@ part of [XDATA](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx). We
 We pronounce DyND as "dined", though others refer to it as "dy-n-d". It's not something we're picky about it.
 
 Getting Started
-================
+===============
 
 This library is actively developed together with its Python
 bindings. The Python bindings provide a good way to become familiar
@@ -55,7 +57,7 @@ the development of this library, subscribe to the
 [LibDyND Development List](https://groups.google.com/forum/#!forum/libdynd-dev).
 
 History Of DyND
-=======================
+===============
 
 DyND was started as a personal project of [Mark Wiebe](https://github.com/mwiebe)
 in September 2011 to begin dabbling in ideas for how a dynamic, multidimensional
