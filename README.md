@@ -70,8 +70,9 @@ During the early formation of Continuum, DyND was open-sourced and brought into 
 company as a part of the [Blaze project](http://blaze.pydata.org). Continuum secured
 funding for the Blaze project through DARPA's [XDATA program](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx),
 giving the project space and time to develop as it needed and providing real data sets
-and challenge problems to tackle and measure against. Travis Oliphant has told the story
-of Continuum, and its support for DyND, on the NumPy mailing list -- see [here](https://mail.scipy.org/pipermail/numpy-discussion/2015-August/073412.html)
+and challenge problems to tackle and measure against. [Travis Oliphant](https://en.wikipedia.org/wiki/Travis_Oliphant)
+has told the story of Continuum, and its support for DyND, on the NumPy mailing list
+- see [here](https://mail.scipy.org/pipermail/numpy-discussion/2015-August/073412.html)
 
 [Irwin Zaid](https://github.com/izaid) joined the project in the winter of 2014, as
 its first major outside contributor, while he was a research fellow at [Christ Church](http://www.chch.ox.ac.uk),
@@ -81,8 +82,8 @@ He took over development of DyND in the spring of 2015, and was funded by Contin
 until April 2016.
 
 [Ian Henriksen](https://github.com/insertinterestingnamehere) began working on DyND through
-[Google Summer of Code](https://developers.google.com/open-source/gsoc/) -- under the umbrella
-of [NumFocus](http://www.numfocus.org/) -- in the summer of 2015. He remained active in the
+[Google Summer of Code](https://developers.google.com/open-source/gsoc/) - under the umbrella
+of [NumFocus](http://www.numfocus.org) - in the summer of 2015. He remained active in the
 project from then onwards.
 
 DyND is still in an experimental mode, with some mature components and others severely lacking.
