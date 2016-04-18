@@ -71,7 +71,8 @@ company as a part of the [Blaze project](http://blaze.pydata.org). Continuum sec
 funding for the Blaze project through DARPA's [XDATA program](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx),
 giving the project space and time to develop as it needed and providing real data sets
 and challenge problems to tackle and measure against. [Travis Oliphant](https://en.wikipedia.org/wiki/Travis_Oliphant)
-has told the story of Continuum, and its support for DyND, on the NumPy mailing list - see [here](https://mail.scipy.org/pipermail/numpy-discussion/2015-August/073412.html)
+has told the story of the early days at Continuum, and why it supports DyND, on the
+NumPy mailing list - see [here](https://mail.scipy.org/pipermail/numpy-discussion/2015-August/073412.html)
 
 [Irwin Zaid](https://github.com/izaid) joined the project in the winter of 2014, as
 its first major outside contributor, while he was a research fellow at [Christ Church](http://www.chch.ox.ac.uk),
