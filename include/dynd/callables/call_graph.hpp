@@ -5,16 +5,16 @@
 
 #pragma once
 
-#include <dynd/storagebuf.hpp>
 #include <dynd/callables/call.hpp>
 #include <dynd/callables/closure_call.hpp>
+#include <dynd/storagebuf.hpp>
 
 namespace dynd {
 namespace nd {
 
   class call_graph : public storagebuf<call_node, call_graph> {
   public:
-    DYND_API void destroy() {}
+    void destroy() {}
 
     ~call_graph() {
       intptr_t offset = 0;
