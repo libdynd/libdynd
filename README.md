@@ -9,11 +9,11 @@ Gitter: [![Join the chat at https://gitter.im/libdynd/libdynd](https://badges.gi
 DyND is a dynamic array library for structured and semi-structured data, written with
 C++ as a first-class target and extended to Python with a lightweight binding. It aims
 to be a cross-language platform for data analysis, by bringing the popularity and flexibility
-of the Python data science stack to other languages. It is inspired by NumPy, the Python
-array programming library at the core of the scientific Python stack, but tries to address
-a number of obstacles encountered by some of NumPy’s users. Examples of these are support
-for variable-sized strings, missing values, variable-sized (ragged) array dimensions, and
-versatile tools for creating functions that apply generic patterns across arrays.
+of the Python data science stack to other languages. It is inspired by [NumPy](http://www.numpy.org/),
+the Python array programming library at the core of the scientific Python stack, but tries
+to address a number of obstacles encountered by some of NumPy’s users. Examples of these are
+support for variable-sized strings, missing values, variable-sized (ragged) array dimensions,
+and versatile tools for creating functions that apply generic patterns across arrays.
 
 At a high level, the cornerstones of DyND are its type system, array container, and callable
 (function) objects. These represent the description, storage, and manipulation of dynamic,
@@ -27,7 +27,7 @@ DyND was created by [Irwin Zaid](https://github.com/izaid) and [Mark Wiebe](http
 The core team consists of [Irwin Zaid](https://github.com/izaid), [Mark Wiebe](https://github.com/mwiebe),
 and [Ian Henriksen](https://github.com/insertinterestingnamehere). Others who made important
 contributions are [Phillip Cloud](https://github.com/cpcloud), [Michael Droettboom](https://github.com/mdboom),
-[Stefan Krah](), [Travis Oliphant](https://en.wikipedia.org/wiki/Travis_Oliphant), and
+[Stefan Krah](https://github.com/skrah), [Travis Oliphant](https://en.wikipedia.org/wiki/Travis_Oliphant), and
 [Andy Terrel](http://andy.terrel.us/). Much of the funding that made this project possible came through [Continuum Analytics](http://continuum.io/)
 and [DARPA-BAA-12-38](https://www.fbo.gov/index?s=opportunity&mode=form&id=7a77846c73ffc5cb22f9295ffe6cdd55&tab=core&_cview=0),
 part of [XDATA](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx). We
@@ -65,18 +65,19 @@ array library could be structured in C++. See [here](https://github.com/libdynd/
 for the very first commit. Mark was at the [University of British Columbia](https://www.ubc.ca/),
 then joined [Continuum Analytics](http://continuum.io/about-continuum) part-time when
 it was founded in January 2012, and later became full-time in the spring of 2012.
-During the early formation of Continuum, DyND was open-sourced and brought into the
-company as a part of the [Blaze project](http://blaze.pydata.org/).
 
-Continuum secured funding for the Blaze project through DARPA's [XDATA program](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx),
+During the early formation of Continuum, DyND was open-sourced and brought into the
+company as a part of the [Blaze project](http://blaze.pydata.org). Continuum secured
+funding for the Blaze project through DARPA's [XDATA program](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx),
 giving the project space and time to develop as it needed and providing real data sets
-and challenge problems to tackle and measure against.
+and challenge problems to tackle and measure against. Travis Oliphant has told the story
+of Continuum, and its support for DyND, on the NumPy mailing list -- see [here](https://mail.scipy.org/pipermail/numpy-discussion/2015-August/073412.html)
 
 [Irwin Zaid](https://github.com/izaid) joined the project in the winter of 2014, as
-its first major outside contributor, while he was a research fellow at [Christ Church](http://www.chch.ox.ac.uk/),
-[University of Oxford](http://www.ox.ac.uk/). He initially added early [CUDA](https://developer.nvidia.com/about-cuda)
+its first major outside contributor, while he was a research fellow at [Christ Church](http://www.chch.ox.ac.uk),
+[University of Oxford](http://www.ox.ac.uk). He initially added early [CUDA](https://developer.nvidia.com/about-cuda)
 support to the library, but played a gradually increasing role in the design and goals of the project.
-He led the development of DyND from the spring of 2015, and was funded by Continuum from June 2015
+He took over development of DyND in the spring of 2015, and was funded by Continuum from June 2015
 until April 2016.
 
 [Ian Henriksen](https://github.com/insertinterestingnamehere) began working on DyND through
