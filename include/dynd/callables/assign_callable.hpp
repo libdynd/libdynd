@@ -16,7 +16,7 @@ namespace nd {
   class assign_callable : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(ResID), {ndt::type(Arg0ID)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -72,7 +72,7 @@ namespace nd {
   class assign_callable<bool_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(bool_id), {ndt::type(string_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -131,7 +131,7 @@ namespace nd {
   class assign_callable<fixed_bytes_id, fixed_bytes_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(fixed_bytes_id), {ndt::type(fixed_bytes_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -149,7 +149,7 @@ namespace nd {
   class int_to_string_assign_callable : public base_callable {
   public:
     int_to_string_assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(IntID), {ndt::type(string_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -186,7 +186,7 @@ namespace nd {
   class string_to_int_assign_callable : public base_callable {
   public:
     string_to_int_assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(string_id), {ndt::type(IntID)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -221,7 +221,7 @@ namespace nd {
   class assign_callable<float64_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(float64_id), {ndt::type(string_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -248,7 +248,7 @@ namespace nd {
   class assign_callable<fixed_string_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(fixed_string_id), {ndt::type(string_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -280,7 +280,7 @@ namespace nd {
   class assign_callable<fixed_string_id, fixed_string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(fixed_string_id), {ndt::type(fixed_string_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -310,7 +310,7 @@ namespace nd {
   class assign_callable<string_id, int_kind_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(string_id), {ndt::type(int_kind_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -334,7 +334,7 @@ namespace nd {
   class assign_callable<string_id, char_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(string_id), {ndt::type(char_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -364,7 +364,7 @@ namespace nd {
   class assign_callable<type_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(type_id), {ndt::type(string_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -388,7 +388,7 @@ namespace nd {
   class assign_callable<string_id, fixed_string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(string_id), {ndt::type(fixed_string_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -419,7 +419,7 @@ namespace nd {
   class assign_callable<float32_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(float32_id), {ndt::type(string_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -445,7 +445,7 @@ namespace nd {
   class assign_callable<string_id, type_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(string_id), {ndt::type(type_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -468,7 +468,7 @@ namespace nd {
   class assign_callable<char_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(char_id), {ndt::type(string_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -499,7 +499,7 @@ namespace nd {
   class assign_callable<pointer_id, pointer_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(pointer_id), {ndt::type(pointer_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -523,7 +523,7 @@ namespace nd {
   class assign_callable<option_id, option_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(option_id), {ndt::type(option_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -572,7 +572,7 @@ namespace nd {
   class assign_callable<option_id, float_kind_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(option_id), {ndt::type(float_kind_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -609,7 +609,7 @@ namespace nd {
   class assign_callable<option_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(option_id), {ndt::type(string_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -681,7 +681,7 @@ namespace nd {
   class assign_callable<tuple_id, tuple_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(tuple_id), {ndt::type(tuple_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
@@ -750,7 +750,7 @@ namespace nd {
   class assign_callable<struct_id, struct_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(ndt::callable_type::make(
+        : base_callable(ndt::make_type<ndt::callable_type>(
               ndt::type(struct_id), {ndt::type(struct_id)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 

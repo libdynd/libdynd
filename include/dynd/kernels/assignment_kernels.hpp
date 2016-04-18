@@ -1554,7 +1554,7 @@ namespace ndt {
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
   struct traits<nd::assignment_kernel<DstTypeID, Src0TypeID>> {
     static type equivalent() {
-      return callable_type::make(
+      return make_type<callable_type>(
           type(DstTypeID), {type(Src0TypeID)},
           {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}});
     }
