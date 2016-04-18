@@ -72,12 +72,12 @@ funding for the Blaze project through DARPA's [XDATA program](http://www.darpa.m
 giving the project space and time to develop as it needed and providing real data sets
 and challenge problems to tackle and measure against. [Travis Oliphant](https://en.wikipedia.org/wiki/Travis_Oliphant)
 has told the story of the early days at Continuum, and why it supports DyND, on the
-NumPy mailing list - see [here](https://mail.scipy.org/pipermail/numpy-discussion/2015-August/073412.html)
+NumPy mailing list - see [here](https://mail.scipy.org/pipermail/numpy-discussion/2015-August/073412.html).
 
 [Irwin Zaid](https://github.com/izaid) joined the project in the winter of 2014, as
 its first major outside contributor, while he was a research fellow at [Christ Church](http://www.chch.ox.ac.uk),
 [University of Oxford](http://www.ox.ac.uk). He initially added early [CUDA](https://developer.nvidia.com/about-cuda)
-support to the library, but played a gradually increasing role in the design and goals of the project.
+support to the library, then played a gradually increasing role in the design and goals of the project.
 He took over development of DyND in the spring of 2015, and was funded by Continuum from June 2015
 until April 2016.
 
@@ -103,7 +103,7 @@ An example improvement C++14 brings is a roughly factor of two compile time
 improvement and increased generality by using variadic templates instead of
 preprocessor metaprogramming. Many excellent projects such as [LLVM](http://llvm.org/)
 and [libelemental](http://libelemental.org/) have already adopted the newer
-standard, it makes a lot of sense for dynd to embrace it as it matures.
+standard, it makes a lot of sense for DyND to embrace it as it matures.
 
 Documentation
 =============
@@ -114,4 +114,4 @@ Running The Tests
 =================
 
 The tests are built using Google Test. To execute the test suite,
-run the `test_dynd` program.
+run the `test_libdynd` program.
