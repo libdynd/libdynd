@@ -8,11 +8,11 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <dynd/types/base_type.hpp>
+#include <dynd/exceptions.hpp>
 #include <dynd/types/base_expr_type.hpp>
 #include <dynd/types/base_string_type.hpp>
+#include <dynd/types/base_type.hpp>
 #include <dynd/types/type_id.hpp>
-#include <dynd/exceptions.hpp>
 
 namespace dynd {
 namespace detail {
@@ -819,6 +819,19 @@ namespace ndt {
     return type(new T(field_names, field_tp, variadic), false);
   }
 
+  template <typename T>
+  std::enable_if_t<std::is_base_of<base_type, T>::value, type> make_type(const type &ret_tp,
+                                                                         std::initializer_list<type> arg_tp) {
+    return type(new T(ret_tp, arg_tp), false);
+  }
+
+  template <typename T>
+  std::enable_if_t<std::is_base_of<base_type, T>::value, type>
+  make_type(const type &ret_tp, std::initializer_list<type> arg_tp,
+            std::initializer_list<std::pair<type, std::string>> kwd_tp) {
+    return type(new T(ret_tp, arg_tp, kwd_tp), false);
+  }
+
   /*
   #define DYND_BOOL_NA (2)
   #define DYND_INT8_NA (std::numeric_limits<int8_t>::min())
@@ -1231,7 +1244,7 @@ namespace ndt {
    * \param dtype  The data type of each array element.
    */
   template <int N>
-  inline type make_type(intptr_t ndim, const intptr_t *shape, const char(&dtype)[N]) {
+  inline type make_type(intptr_t ndim, const intptr_t *shape, const char (&dtype)[N]) {
     return make_type(ndim, shape, ndt::type(dtype));
   }
 

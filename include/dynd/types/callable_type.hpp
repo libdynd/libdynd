@@ -27,6 +27,13 @@ namespace ndt {
 
     callable_type(const type &ret_type, const type &pos_types, const type &kwd_types);
 
+    callable_type(const type &ret, size_t narg, const type *args, const std::vector<std::pair<type, std::string>> &kwds)
+        : callable_type(ret, make_type<tuple_type>(narg, args), make_type<struct_type>(kwds)) {}
+
+    callable_type(const type &ret, std::initializer_list<type> args,
+                  const std::vector<std::pair<type, std::string>> &kwds)
+        : callable_type(ret, args.size(), args.begin(), kwds) {}
+
     const type &get_return_type() const { return m_return_type; }
 
     const type &get_pos_tuple() const { return m_pos_tuple; }
@@ -117,19 +124,14 @@ namespace ndt {
       return type(new callable_type(ret_tp, tuple_tp, struct_tp), false);
     }
 
-    /** Makes an callable type with both positional and keyword arguments */
-    static type make(const type &ret_tp, const std::vector<type> &pos_tp,
-                     const std::vector<std::pair<type, std::string>> &kwds) {
-      return make(ret_tp, make_type<tuple_type>(pos_tp.size(), pos_tp.data()), make_type<struct_type>(kwds));
-    }
-
     /** Makes an callable type with just positional arguments */
     static type make(const type &ret_tp, const type &tuple_tp) {
       if (tuple_tp.get_id() != tuple_id) {
-        return make(ret_tp, make_type<tuple_type>({tuple_tp}), make_type<struct_type>());
+        return make_type<callable_type>(ret_tp, make_type<tuple_type>({tuple_tp}), make_type<struct_type>());
       }
 
-      return make(ret_tp, tuple_tp, make_type<struct_type>(tuple_tp.extended<tuple_type>()->is_variadic()));
+      return make_type<callable_type>(ret_tp, tuple_tp,
+                                      make_type<struct_type>(tuple_tp.extended<tuple_type>()->is_variadic()));
     }
 
     /** Makes an callable type with just positional arguments */
@@ -163,7 +165,7 @@ namespace ndt {
         kwds.emplace_back(kwargs[i], kwdnames[i]);
       }
 
-      return callable_type::make(make_type<R>(), pos, kwds);
+      return make_type<callable_type>(make_type<R>(), pos.size(), pos.data(), kwds);
     }
   };
 

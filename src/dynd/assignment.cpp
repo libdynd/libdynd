@@ -27,9 +27,9 @@ nd::callable make_assign() {
                            uint64_id, uint128_id, float32_id, float64_id, complex_float32_id, complex_float64_id>
       numeric_ids;
 
-  ndt::type self_tp =
-      ndt::callable_type::make(ndt::any_kind_type::make(), {ndt::any_kind_type::make()},
-                               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}});
+  ndt::type self_tp = ndt::make_type<ndt::callable_type>(
+      ndt::any_kind_type::make(), {ndt::any_kind_type::make()},
+      {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}});
 
   auto dispatcher =
       nd::callable::new_make_all<_bind<assign_error_mode, nd::assign_callable>::type, numeric_ids, numeric_ids>();

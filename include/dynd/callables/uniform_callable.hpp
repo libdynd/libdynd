@@ -24,7 +24,8 @@ namespace nd {
 
       public:
         uniform_callable()
-            : base_callable(ndt::callable_type::make(ResID, {}, {{ndt::make_type<ndt::option_type>(ResID), "a"},
+            : base_callable(
+                  ndt::make_type<ndt::callable_type>(ResID, {}, {{ndt::make_type<ndt::option_type>(ResID), "a"},
                                                                  {ndt::make_type<ndt::option_type>(ResID), "b"}})) {}
 
         ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
@@ -67,7 +68,8 @@ namespace nd {
 
       public:
         uniform_callable()
-            : base_callable(ndt::callable_type::make(ResID, {}, {{ndt::make_type<ndt::option_type>(ResID), "a"},
+            : base_callable(
+                  ndt::make_type<ndt::callable_type>(ResID, {}, {{ndt::make_type<ndt::option_type>(ResID), "a"},
                                                                  {ndt::make_type<ndt::option_type>(ResID), "b"}})) {}
 
         ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
@@ -106,7 +108,8 @@ namespace nd {
 
       public:
         uniform_callable()
-            : base_callable(ndt::callable_type::make(ResID, {}, {{ndt::make_type<ndt::option_type>(ResID), "a"},
+            : base_callable(
+                  ndt::make_type<ndt::callable_type>(ResID, {}, {{ndt::make_type<ndt::option_type>(ResID), "a"},
                                                                  {ndt::make_type<ndt::option_type>(ResID), "b"}})) {}
 
         ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
