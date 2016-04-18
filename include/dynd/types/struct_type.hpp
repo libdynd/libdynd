@@ -19,6 +19,7 @@ namespace ndt {
 
   class DYNDT_API struct_type : public tuple_type {
     const std::vector<std::string> m_field_names;
+    std::vector<std::pair<type, std::string>> m_field_tp;
 
   public:
     struct_type(const std::vector<std::string> &field_names, const std::vector<type> &field_types,
@@ -53,6 +54,8 @@ namespace ndt {
      */
     const type &get_field_type(const std::string &field_name) const;
     const type &get_field_type(intptr_t i) const;
+
+    const std::vector<std::pair<type, std::string>> &get_named_field_types() const { return m_field_tp; }
 
     void print_type(std::ostream &o) const;
 

@@ -3,12 +3,12 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <stdexcept>
 #include <algorithm>
+#include <stdexcept>
 
 #include <dynd/type_promotion.hpp>
-#include <dynd/types/string_type.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/types/string_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
@@ -34,8 +34,7 @@ specified kind");
 }
 */
 
-ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &tp1)
-{
+ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &tp1) {
   // Use the value types
   const ndt::type &tp0_val = tp0.value_type();
   const ndt::type &tp1_val = tp1.value_type();
@@ -76,15 +75,13 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
       case int_kind_id:
         if (tp0_val.get_data_size() < int_size && tp1_val.get_data_size() < int_size) {
           return ndt::make_type<int>();
-        }
-        else {
+        } else {
           return (tp0_val.get_data_size() >= tp1_val.get_data_size()) ? tp0_val : tp1_val;
         }
       case uint_kind_id:
         if (tp0_val.get_data_size() < int_size && tp1_val.get_data_size() < int_size) {
           return ndt::make_type<int>();
-        }
-        else {
+        } else {
           // When the element_sizes are equal, the uint kind wins
           return (tp0_val.get_data_size() > tp1_val.get_data_size()) ? tp0_val : tp1_val;
         }
@@ -109,16 +106,14 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
       case int_kind_id:
         if (tp0_val.get_data_size() < int_size && tp1_val.get_data_size() < int_size) {
           return ndt::make_type<int>();
-        }
-        else {
+        } else {
           // When the element_sizes are equal, the uint kind wins
           return (tp0_val.get_data_size() >= tp1_val.get_data_size()) ? tp0_val : tp1_val;
         }
       case uint_kind_id:
         if (tp0_val.get_data_size() < int_size && tp1_val.get_data_size() < int_size) {
           return ndt::make_type<int>();
-        }
-        else {
+        } else {
           return (tp0_val.get_data_size() >= tp1_val.get_data_size()) ? tp0_val : tp1_val;
         }
       case float_kind_id:
@@ -147,8 +142,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
       case complex_kind_id:
         if (tp0_val.get_id() == float64_id && tp1_val.get_id() == complex_float32_id) {
           return ndt::type(complex_float64_id);
-        }
-        else {
+        } else {
           return tp1_val;
         }
       default:
@@ -168,8 +162,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
         if (tp0_val.unchecked_get_builtin_id() == complex_float32_id &&
             tp1_val.unchecked_get_builtin_id() == float64_id) {
           return ndt::type(complex_float64_id);
-        }
-        else {
+        } else {
           return tp0_val;
         }
       case complex_kind_id:
@@ -202,13 +195,11 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
       return ndt::make_type<ndt::option_type>(
           promote_types_arithmetic(tp0_val.extended<ndt::option_type>()->get_value_type(),
                                    tp1_val.extended<ndt::option_type>()->get_value_type()));
-    }
-    else {
+    } else {
       return ndt::make_type<ndt::option_type>(
           promote_types_arithmetic(tp0_val.extended<ndt::option_type>()->get_value_type(), tp1_val));
     }
-  }
-  else if (tp1_val.get_id() == option_id) {
+  } else if (tp1_val.get_id() == option_id) {
     return ndt::make_type<ndt::option_type>(
         promote_types_arithmetic(tp0_val, tp1_val.extended<ndt::option_type>()->get_value_type()));
   }
@@ -225,15 +216,14 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
   // In general, if one type is void, just return the other type
   if (tp0_val.get_id() == void_id) {
     return tp1_val;
-  }
-  else if (tp1_val.get_id() == void_id) {
+  } else if (tp1_val.get_id() == void_id) {
     return tp0_val;
   }
 
   // Promote some dimension types
   if ((tp0_val.get_id() == var_dim_id && tp1_val.get_base_id() == dim_kind_id) ||
       (tp1_val.get_id() == var_dim_id && tp0_val.get_base_id() == dim_kind_id)) {
-    return ndt::var_dim_type::make(
+    return ndt::make_type<ndt::var_dim_type>(
         promote_types_arithmetic(tp0_val.extended<ndt::base_dim_type>()->get_element_type(),
                                  tp1_val.extended<ndt::base_dim_type>()->get_element_type()));
   }

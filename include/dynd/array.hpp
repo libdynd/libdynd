@@ -82,12 +82,9 @@ namespace nd {
 
       init_from_c_array(const ndt::type &tp, const char *metadata)
           : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
-            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride)
-      {
-      }
+            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride) {}
 
-      void single(char *data, const ValueType (&values)[Size]) const
-      {
+      void single(char *data, const ValueType (&values)[Size]) const {
         for (const ValueType &value : values) {
           child.single(data, value);
           data += stride;
@@ -102,12 +99,9 @@ namespace nd {
 
       init_from_c_array(const ndt::type &tp, const char *metadata)
           : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
-            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride)
-      {
-      }
+            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride) {}
 
-      void single(char *data, const ValueType (&values)[Size]) const
-      {
+      void single(char *data, const ValueType (&values)[Size]) const {
         for (const ValueType &value : values) {
           child.single(data, value);
           data += stride;
@@ -132,8 +126,7 @@ namespace nd {
 
   template <>
   struct as<std::string> {
-    void single(std::string &value, char *data) const
-    {
+    void single(std::string &value, char *data) const {
       value.assign(reinterpret_cast<string *>(data)->data(), reinterpret_cast<string *>(data)->size());
     }
   };
@@ -143,8 +136,7 @@ namespace nd {
    */
   class DYND_API array : public intrusive_ptr<array_preamble> {
     template <typename T>
-    void init(T &&value)
-    {
+    void init(T &&value) {
       nd::init<typename remove_reference_then_cv<T>::type> init(get()->tp, get()->metadata());
       init.single(get()->data, std::forward<T>(value));
 
@@ -153,8 +145,7 @@ namespace nd {
     }
 
     template <typename ValueType>
-    void init(const ValueType *values, size_t size)
-    {
+    void init(const ValueType *values, size_t size) {
       nd::init<ValueType> init(get()->tp, get()->metadata());
       init.contiguous(get()->data, values, size);
 
@@ -175,31 +166,28 @@ namespace nd {
       */
     template <typename T,
               typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
-    array(T &&value) : intrusive_ptr<array_preamble>(empty(ndt::type_for(value)))
-    {
+    array(T &&value) : intrusive_ptr<array_preamble>(empty(ndt::type_for(value))) {
       init(std::forward<T>(value));
     }
 
     /** Constructs an array from a 1D initializer list */
     template <typename ValueType>
-    array(const std::initializer_list<ValueType> &values) : intrusive_ptr<array_preamble>(empty(ndt::type_for(values)))
-    {
+    array(const std::initializer_list<ValueType> &values)
+        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values))) {
       init(values);
     }
 
     /** Constructs an array from a 2D initializer list */
     template <typename ValueType>
     array(const std::initializer_list<std::initializer_list<ValueType>> &values)
-        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values)))
-    {
+        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values))) {
       init(values);
     }
 
     /** Constructs an array from a 3D initializer list */
     template <typename ValueType>
     array(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
-        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values)))
-    {
+        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values))) {
       init(values);
     }
 
@@ -208,16 +196,14 @@ namespace nd {
      */
     template <typename ValueType>
     array(const ValueType *values, size_t size)
-        : intrusive_ptr<array_preamble>(empty(ndt::make_fixed_dim(size, ndt::make_type<ValueType>())))
-    {
+        : intrusive_ptr<array_preamble>(empty(ndt::make_fixed_dim(size, ndt::make_type<ValueType>()))) {
       init(values, size);
     }
 
     /** Returns true if the array is NULL */
     inline bool is_null() const { return intrusive_ptr<array_preamble>::get() == NULL; }
 
-    char *data() const
-    {
+    char *data() const {
       if (get()->flags & write_access_flag) {
         return get()->data;
       }
@@ -227,8 +213,7 @@ namespace nd {
 
     const char *cdata() const { return get()->data; }
 
-    inline uint32_t get_access_flags() const
-    {
+    inline uint32_t get_access_flags() const {
       return get()->flags & (immutable_access_flag | read_access_flag | write_access_flag);
     }
 
@@ -240,12 +225,10 @@ namespace nd {
     /** The type */
     const ndt::type &get_type() const { return *reinterpret_cast<const ndt::type *>(&get()->tp); }
 
-    inline intptr_t get_ndim() const
-    {
+    inline intptr_t get_ndim() const {
       if (get()->tp.is_builtin()) {
         return 0;
-      }
-      else {
+      } else {
         return get()->tp->get_ndim();
       }
     }
@@ -254,8 +237,7 @@ namespace nd {
      * The data type of the array. This is similar to numpy's
      * ndarray.dtype property
      */
-    inline ndt::type get_dtype() const
-    {
+    inline ndt::type get_dtype() const {
       size_t ndim = get()->tp.get_ndim();
       if (ndim == 0) {
         return get()->tp;
@@ -272,15 +254,13 @@ namespace nd {
      * \param include_ndim  The number of array dimensions to include
      *                   in the data type.
      */
-    inline ndt::type get_dtype(size_t include_ndim) const
-    {
+    inline ndt::type get_dtype(size_t include_ndim) const {
       if (get()->tp.is_builtin()) {
         if (include_ndim > 0) {
           throw too_many_indices(get_type(), include_ndim, 0);
         }
         return ndt::type(get()->tp.get_id());
-      }
-      else {
+      } else {
         size_t ndim = get()->tp->get_ndim();
         if (ndim < include_ndim) {
           throw too_many_indices(get_type(), include_ndim, ndim);
@@ -288,8 +268,7 @@ namespace nd {
         ndim -= include_ndim;
         if (ndim == 0) {
           return get()->tp;
-        }
-        else {
+        } else {
           return get()->tp->get_type_at_dimension(NULL, ndim);
         }
       }
@@ -304,14 +283,12 @@ namespace nd {
     /** The flags, including access permissions. */
     inline uint64_t get_flags() const { return get()->flags; }
 
-    inline std::vector<intptr_t> get_shape() const
-    {
+    inline std::vector<intptr_t> get_shape() const {
       std::vector<intptr_t> result(get_ndim());
       get_shape(&result[0]);
       return result;
     }
-    inline void get_shape(intptr_t *out_shape) const
-    {
+    inline void get_shape(intptr_t *out_shape) const {
       if (!get()->tp.is_builtin() && get()->tp->get_ndim() > 0) {
         get()->tp->get_shape(get()->tp->get_ndim(), 0, out_shape, get()->metadata(), get()->data);
       }
@@ -325,43 +302,36 @@ namespace nd {
     /**
      * Returns the size of the requested dimension.
      */
-    inline intptr_t get_dim_size(intptr_t i) const
-    {
+    inline intptr_t get_dim_size(intptr_t i) const {
       if (0 <= i && i < get_type().get_strided_ndim()) {
         const size_stride_t *ss = reinterpret_cast<const size_stride_t *>(get()->metadata());
         return ss[i].dim_size;
-      }
-      else if (0 <= i && i < get_ndim()) {
+      } else if (0 <= i && i < get_ndim()) {
         dimvector shape(i + 1);
         get()->tp->get_shape(i + 1, 0, shape.get(), get()->metadata(), get()->data);
         return shape[i];
-      }
-      else {
+      } else {
         std::stringstream ss;
         ss << "Not enough dimensions in array, tried to access axis " << i << " for type " << get_type();
         throw std::invalid_argument(ss.str());
       }
     }
 
-    std::vector<intptr_t> get_strides() const
-    {
+    std::vector<intptr_t> get_strides() const {
       std::vector<intptr_t> result(get_ndim());
       get_strides(&result[0]);
       return result;
     }
-    inline void get_strides(intptr_t *out_strides) const
-    {
+    inline void get_strides(intptr_t *out_strides) const {
       if (!get()->tp.is_builtin()) {
         get()->tp->get_strides(0, out_strides, get()->metadata());
       }
     }
 
-    inline intrusive_ptr<memory_block_data> get_data_memblock() const
-    {
+    inline intrusive_ptr<memory_block_data> get_data_memblock() const {
       if (get()->owner) {
         return get()->owner;
-      }
-      else {
+      } else {
         return intrusive_ptr<memory_block_data>(get(), true);
       }
     }
@@ -384,8 +354,7 @@ namespace nd {
      * Calls the dynamic function.
      */
     template <typename... ArgTypes>
-    array f(const char *name, ArgTypes &&... args) const
-    {
+    array f(const char *name, ArgTypes &&... args) const {
       callable &f = reg(name);
       return f(*this, std::forward<ArgTypes>(args)...);
     }
@@ -475,27 +444,23 @@ namespace nd {
     array operator()(const irange &i0) const { return at_array(1, &i0); }
 
     /** Indexing with two index values */
-    array operator()(const irange &i0, const irange &i1) const
-    {
+    array operator()(const irange &i0, const irange &i1) const {
       irange i[2] = {i0, i1};
       return at_array(2, i);
     }
 
     /** Indexing with three index values */
-    array operator()(const irange &i0, const irange &i1, const irange &i2) const
-    {
+    array operator()(const irange &i0, const irange &i1, const irange &i2) const {
       irange i[3] = {i0, i1, i2};
       return at_array(3, i);
     }
     /** Indexing with four index values */
-    array operator()(const irange &i0, const irange &i1, const irange &i2, const irange &i3) const
-    {
+    array operator()(const irange &i0, const irange &i1, const irange &i2, const irange &i3) const {
       irange i[4] = {i0, i1, i2, i3};
       return at_array(4, i);
     }
     /** Indexing with five index values */
-    array operator()(const irange &i0, const irange &i1, const irange &i2, const irange &i3, const irange &i4) const
-    {
+    array operator()(const irange &i0, const irange &i1, const irange &i2, const irange &i3, const irange &i4) const {
       irange i[5] = {i0, i1, i2, i3, i4};
       return at_array(5, i);
     }
@@ -539,8 +504,7 @@ namespace nd {
      * as the template parameter.
      */
     template <class T>
-    inline array ucast(intptr_t replace_ndim = 0) const
-    {
+    inline array ucast(intptr_t replace_ndim = 0) const {
       return ucast(ndt::make_type<T>(), replace_ndim);
     }
 
@@ -553,20 +517,17 @@ namespace nd {
     array view(const ndt::type &tp) const;
 
     template <int N>
-    inline array view(const char (&rhs)[N])
-    {
+    inline array view(const char (&rhs)[N]) {
       return view(ndt::type(rhs));
     }
 
     template <typename T>
-    typename std::enable_if<ndt::traits<T>::is_same_layout, T>::type view() const
-    {
+    typename std::enable_if<ndt::traits<T>::is_same_layout, T>::type view() const {
       return *reinterpret_cast<const T *>(cdata());
     }
 
     template <typename T>
-    typename std::enable_if<!ndt::traits<T>::is_same_layout, T>::type view()
-    {
+    typename std::enable_if<!ndt::traits<T>::is_same_layout, T>::type view() {
       return T(get()->metadata(), data());
     }
 
@@ -639,8 +600,7 @@ namespace nd {
      * makes sense. This is analogous to reinterpret_case<>.
      */
     template <class T>
-    array view_scalars() const
-    {
+    array view_scalars() const {
       return view_scalars(ndt::make_type<T>());
     }
 
@@ -650,16 +610,14 @@ namespace nd {
      * 1D vectors (as<std::vector<T>>), matrices, etc.
      */
     template <typename ValueType>
-    ValueType as(assign_error_mode error_mode = assign_error_fractional) const
-    {
+    ValueType as(assign_error_mode error_mode = assign_error_fractional) const {
       ValueType value;
       nd::as<ValueType> as;
 
       ndt::type tp = ndt::make_type<ValueType>();
       if (tp == get()->tp) {
         as.single(value, get()->data);
-      }
-      else {
+      } else {
         array a = empty(tp);
         a.assign(*this, error_mode);
 
@@ -697,8 +655,7 @@ namespace nd {
 
   DYND_API array as_struct(size_t size, const std::pair<const char *, array> *pairs);
 
-  inline array as_struct(const std::initializer_list<std::pair<const char *, array>> &pairs)
-  {
+  inline array as_struct(const std::initializer_list<std::pair<const char *, array>> &pairs) {
     return as_struct(pairs.size(), pairs.begin());
   }
 
@@ -744,16 +701,14 @@ namespace nd {
      * Assigns values from an array to the internally referenced array.
      * this does a val_assign with the default assignment error mode.
      */
-    array_vals &operator=(const array &rhs)
-    {
+    array_vals &operator=(const array &rhs) {
       m_arr.assign(rhs);
       return *this;
     }
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template <class T>
-    typename std::enable_if<is_dynd_scalar<T>::value, array_vals &>::type operator=(const T &rhs)
-    {
+    typename std::enable_if<is_dynd_scalar<T>::value, array_vals &>::type operator=(const T &rhs) {
       m_arr.assign(rhs);
       return *this;
     }
@@ -784,16 +739,14 @@ namespace nd {
      * Assigns values from an array to the internally referenced array.
      * this does a val_assign with the default assignment error mode.
      */
-    array_vals_at &operator=(const array &rhs)
-    {
+    array_vals_at &operator=(const array &rhs) {
       m_arr.assign(rhs);
       return *this;
     }
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template <class T>
-    typename std::enable_if<is_dynd_scalar<T>::value, array_vals_at &>::type operator=(const T &rhs)
-    {
+    typename std::enable_if<is_dynd_scalar<T>::value, array_vals_at &>::type operator=(const T &rhs) {
       m_arr.assign(rhs);
       return *this;
     }
@@ -834,20 +787,17 @@ namespace nd {
 
   inline array_vals_at array::vals_at(const irange &i0) const { return array_vals_at(at_array(1, &i0, false)); }
 
-  inline array_vals_at array::vals_at(const irange &i0, const irange &i1) const
-  {
+  inline array_vals_at array::vals_at(const irange &i0, const irange &i1) const {
     irange i[2] = {i0, i1};
     return array_vals_at(at_array(2, i, false));
   }
 
-  inline array_vals_at array::vals_at(const irange &i0, const irange &i1, const irange &i2) const
-  {
+  inline array_vals_at array::vals_at(const irange &i0, const irange &i1, const irange &i2) const {
     irange i[3] = {i0, i1, i2};
     return array_vals_at(at_array(3, i, false));
   }
 
-  inline array_vals_at array::vals_at(const irange &i0, const irange &i1, const irange &i2, const irange &i3) const
-  {
+  inline array_vals_at array::vals_at(const irange &i0, const irange &i1, const irange &i2, const irange &i3) const {
     irange i[4] = {i0, i1, i2, i3};
     return array_vals_at(at_array(4, i, false));
   }
@@ -867,17 +817,15 @@ namespace nd {
    * type) and (intptr_t, const intptr_t *, type) can sometimes result in
    * unexpected overloads.
    */
-  inline array dtyped_empty(intptr_t ndim, const intptr_t *shape, const ndt::type &tp)
-  {
+  inline array dtyped_empty(intptr_t ndim, const intptr_t *shape, const ndt::type &tp) {
     if (ndim > 0) {
       intptr_t i = ndim - 1;
-      ndt::type rtp = shape[i] >= 0 ? ndt::make_fixed_dim(shape[i], tp) : ndt::var_dim_type::make(tp);
+      ndt::type rtp = shape[i] >= 0 ? ndt::make_fixed_dim(shape[i], tp) : ndt::make_type<ndt::var_dim_type>(tp);
       while (i-- > 0) {
-        rtp = shape[i] >= 0 ? ndt::make_fixed_dim(shape[i], rtp) : ndt::var_dim_type::make(rtp);
+        rtp = shape[i] >= 0 ? ndt::make_fixed_dim(shape[i], rtp) : ndt::make_type<ndt::var_dim_type>(rtp);
       }
       return empty(rtp);
-    }
-    else {
+    } else {
       return empty(tp);
     }
   }
@@ -885,8 +833,7 @@ namespace nd {
   /**
    * A version of dtyped_empty that accepts a std::vector as the shape.
    */
-  inline array dtyped_empty(const std::vector<intptr_t> &shape, const ndt::type &tp)
-  {
+  inline array dtyped_empty(const std::vector<intptr_t> &shape, const ndt::type &tp) {
     return dtyped_empty(shape.size(), shape.empty() ? NULL : &shape[0], tp);
   }
 
@@ -898,8 +845,7 @@ namespace nd {
    * nd::array a = nd::empty("10 * int32");
    */
   template <int N>
-  inline array empty(const char (&dshape)[N])
-  {
+  inline array empty(const char (&dshape)[N]) {
     return nd::empty(ndt::type(dshape, dshape + N - 1));
   }
 
@@ -907,9 +853,8 @@ namespace nd {
    * Constructs a writable uninitialized array of the specified shape
    * and dtype. Prefixes the dtype with ``strided`` or ``var`` dimensions.
    */
-  inline array empty(intptr_t dim0, const ndt::type &tp)
-  {
-    return nd::empty(dim0 >= 0 ? ndt::make_fixed_dim(dim0, tp) : ndt::var_dim_type::make(tp));
+  inline array empty(intptr_t dim0, const ndt::type &tp) {
+    return nd::empty(dim0 >= 0 ? ndt::make_fixed_dim(dim0, tp) : ndt::make_type<ndt::var_dim_type>(tp));
   }
 
   /**
@@ -920,8 +865,7 @@ namespace nd {
    *      array a = nd::empty(10, "int32");
    */
   template <int N>
-  inline array empty(intptr_t dim0, const char (&dshape)[N])
-  {
+  inline array empty(intptr_t dim0, const char (&dshape)[N]) {
     return empty(dim0, ndt::type(dshape, dshape + N - 1));
   }
 
@@ -929,10 +873,9 @@ namespace nd {
    * Constructs a writable uninitialized array of the specified shape
    * and dtype. Prefixes the dtype with ``strided`` or ``var`` dimensions.
    */
-  inline array empty(intptr_t dim0, intptr_t dim1, const ndt::type &tp)
-  {
-    ndt::type rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, tp) : ndt::var_dim_type::make(tp);
-    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::var_dim_type::make(rtp);
+  inline array empty(intptr_t dim0, intptr_t dim1, const ndt::type &tp) {
+    ndt::type rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, tp) : ndt::make_type<ndt::var_dim_type>(tp);
+    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::make_type<ndt::var_dim_type>(rtp);
     return nd::empty(rtp);
   }
 
@@ -944,8 +887,7 @@ namespace nd {
    *      array a = nd::empty(10, 10, "int32");
    */
   template <int N>
-  inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N])
-  {
+  inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N]) {
     return empty(dim0, dim1, ndt::type(dshape, dshape + N - 1));
   }
 
@@ -954,11 +896,10 @@ namespace nd {
    * This type should be at least three dimensional, and is initialized
    * using the specified dimension sizes.
    */
-  inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type &tp)
-  {
-    ndt::type rtp = (dim2 >= 0) ? ndt::make_fixed_dim(dim2, tp) : ndt::var_dim_type::make(tp);
-    rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, rtp) : ndt::var_dim_type::make(rtp);
-    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::var_dim_type::make(rtp);
+  inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type &tp) {
+    ndt::type rtp = (dim2 >= 0) ? ndt::make_fixed_dim(dim2, tp) : ndt::make_type<ndt::var_dim_type>(tp);
+    rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, rtp) : ndt::make_type<ndt::var_dim_type>(rtp);
+    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::make_type<ndt::var_dim_type>(rtp);
     return empty(rtp);
   }
 
@@ -970,8 +911,7 @@ namespace nd {
    *      array a = nd::empty(10, 10, 10, "int32");
    */
   template <int N>
-  inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N])
-  {
+  inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N]) {
     return empty(dim0, dim1, dim2, ndt::type(dshape, dshape + N - 1));
   }
 
@@ -996,22 +936,19 @@ namespace nd {
    * dtype,
    * with ndim/shape pointer.
    */
-  inline array dtyped_zeros(intptr_t ndim, const intptr_t *shape, const ndt::type &tp)
-  {
+  inline array dtyped_zeros(intptr_t ndim, const intptr_t *shape, const ndt::type &tp) {
     nd::array res = dtyped_empty(ndim, shape, tp);
     res.assign(0);
 
     return res;
   }
 
-  inline array zeros(intptr_t dim0, const ndt::type &tp)
-  {
+  inline array zeros(intptr_t dim0, const ndt::type &tp) {
     intptr_t shape[1] = {dim0};
 
     return dtyped_zeros(1, shape, tp);
   }
-  inline array zeros(intptr_t dim0, intptr_t dim1, const ndt::type &tp)
-  {
+  inline array zeros(intptr_t dim0, intptr_t dim1, const ndt::type &tp) {
     intptr_t shape[2] = {dim0, dim1};
 
     return dtyped_zeros(2, shape, tp);
@@ -1028,8 +965,7 @@ namespace nd {
   /**
    * A version of typed_ones that accepts a std::vector as the shape.
    */
-  inline array ones(const std::vector<intptr_t> &shape, const ndt::type &tp)
-  {
+  inline array ones(const std::vector<intptr_t> &shape, const ndt::type &tp) {
     return typed_ones(shape.size(), shape.empty() ? NULL : &shape[0], tp);
   }
 
@@ -1038,22 +974,19 @@ namespace nd {
    * dtype,
    * with ndim/shape pointer.
    */
-  inline array dtyped_ones(intptr_t ndim, const intptr_t *shape, const ndt::type &tp)
-  {
+  inline array dtyped_ones(intptr_t ndim, const intptr_t *shape, const ndt::type &tp) {
     nd::array res = dtyped_empty(ndim, shape, tp);
     res.assign(1);
 
     return res;
   }
 
-  inline array ones(intptr_t dim0, const ndt::type &tp)
-  {
+  inline array ones(intptr_t dim0, const ndt::type &tp) {
     intptr_t shape[1] = {dim0};
 
     return dtyped_ones(1, shape, tp);
   }
-  inline array ones(intptr_t dim0, intptr_t dim1, const ndt::type &tp)
-  {
+  inline array ones(intptr_t dim0, intptr_t dim1, const ndt::type &tp) {
     intptr_t shape[2] = {dim0, dim1};
 
     return dtyped_ones(2, shape, tp);
@@ -1080,8 +1013,7 @@ namespace nd {
    * should only be used
    * with contiguous arrays of built-in dtypes.
    */
-  inline array reshape(const array &a, intptr_t ndim, const intptr_t *shape)
-  {
+  inline array reshape(const array &a, intptr_t ndim, const intptr_t *shape) {
     return reshape(a, nd::array(shape, ndim));
   }
 
@@ -1117,8 +1049,7 @@ namespace ndt {
    * required type. Use only when these checks have been done externally.
    */
   template <typename T>
-  inline const T &unchecked_fixed_dim_get(const nd::array &a, intptr_t i)
-  {
+  inline const T &unchecked_fixed_dim_get(const nd::array &a, intptr_t i) {
     const size_stride_t *md = reinterpret_cast<const size_stride_t *>(a.get()->metadata());
     return *reinterpret_cast<const T *>(a.cdata() + i * md->stride);
   }
@@ -1129,8 +1060,7 @@ namespace ndt {
    * required type. Use only when these checks have been done externally.
    */
   template <typename T>
-  inline T &unchecked_fixed_dim_get_rw(const nd::array &a, intptr_t i)
-  {
+  inline T &unchecked_fixed_dim_get_rw(const nd::array &a, intptr_t i) {
     const size_stride_t *md = reinterpret_cast<const size_stride_t *>(a.get()->metadata());
     return *reinterpret_cast<T *>(a.data() + i * md->stride);
   }

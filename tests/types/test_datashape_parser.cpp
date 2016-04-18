@@ -3,21 +3,21 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "dynd_assertions.hpp"
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
 
 #include <dynd/callable.hpp>
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/struct_type.hpp>
-#include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/types/string_type.hpp>
+#include <dynd/types/struct_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -129,8 +129,8 @@ TEST(DataShapeParser, FixedDim) {
 }
 
 TEST(DataShapeParser, VarDim) {
-  EXPECT_EQ(ndt::var_dim_type::make(ndt::make_type<bool1>()), ndt::type("var * bool"));
-  EXPECT_EQ(ndt::var_dim_type::make(ndt::var_dim_type::make(ndt::make_type<float>())),
+  EXPECT_EQ(ndt::make_type<ndt::var_dim_type>(ndt::make_type<bool1>()), ndt::type("var * bool"));
+  EXPECT_EQ(ndt::make_type<ndt::var_dim_type>(ndt::make_type<ndt::var_dim_type>(ndt::make_type<float>())),
             ndt::type("var * var * float32"));
   EXPECT_EQ(ndt::type("var * var * var * var * var * float32"), ndt::type("var**5 * float32"));
 }
@@ -143,8 +143,9 @@ TEST(DataShapeParser, StridedFixedDim) {
 }
 
 TEST(DataShapeParser, StridedVarFixedDim) {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::var_dim_type::make(ndt::make_fixed_dim(3, ndt::make_type<float>()))),
-            ndt::type("Fixed * var * 3 * float32"));
+  EXPECT_EQ(
+      ndt::make_fixed_dim_kind(ndt::make_type<ndt::var_dim_type>(ndt::make_fixed_dim(3, ndt::make_type<float>()))),
+      ndt::type("Fixed * var * 3 * float32"));
 }
 
 TEST(DataShapeParser, TypeVarConstructed) {

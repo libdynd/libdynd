@@ -77,13 +77,13 @@ namespace nd {
 
       ndt::type resolved_dst_tp;
       if (src_tp[1].get_id() == var_dim_id) {
-        resolved_dst_tp = ndt::var_dim_type::make(src0_element_tp);
+        resolved_dst_tp = ndt::make_type<ndt::var_dim_type>(src0_element_tp);
       } else {
         resolved_dst_tp = ndt::make_fixed_dim(src_tp[1].get_dim_size(NULL, NULL), src0_element_tp);
       }
 
-      cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),const char *dst_arrmeta,
-                          size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
+      cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                          const char *dst_arrmeta, size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
         intptr_t self_offset = kb.size();
         kb.emplace_back<indexed_take_ck>(kernreq);
 

@@ -12,16 +12,12 @@
 using namespace std;
 using namespace dynd;
 
-ndt::tuple_type::tuple_type(type_id_t type_id, size_t size, const type *element_tp, bool variadic, uint32_t flags,
-                            bool layout_in_arrmeta)
+ndt::tuple_type::tuple_type(type_id_t type_id, size_t size, const type *element_tp, bool variadic, uint32_t flags)
     : base_type(type_id, 0, 1, flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
       m_field_count(size), m_field_types(size), m_arrmeta_offsets(size), m_variadic(variadic) {
 
   // Calculate the needed element alignment and arrmeta offsets
-  size_t arrmeta_offset = 0;
-  if (layout_in_arrmeta) {
-    arrmeta_offset = get_field_count() * sizeof(size_t);
-  }
+  size_t arrmeta_offset = get_field_count() * sizeof(size_t);
 
   this->m_data_alignment = 1;
 

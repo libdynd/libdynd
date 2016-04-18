@@ -37,17 +37,16 @@ namespace ndt {
      */
     bool m_variadic;
 
-    tuple_type(type_id_t id, size_t size, const type *element_tp, bool variadic, uint32_t flags,
-               bool layout_in_arrmeta);
+    tuple_type(type_id_t id, size_t size, const type *element_tp, bool variadic, uint32_t flags);
 
   public:
     tuple_type(size_t size, const type *element_tp, bool variadic = false)
-        : tuple_type(tuple_id, size, element_tp, variadic, type_flag_none, true) {}
+        : tuple_type(tuple_id, size, element_tp, variadic, type_flag_none) {}
 
     tuple_type(std::initializer_list<type> element_tp, bool variadic = false)
-        : tuple_type(tuple_id, element_tp.size(), element_tp.begin(), variadic, type_flag_none, true) {}
+        : tuple_type(tuple_id, element_tp.size(), element_tp.begin(), variadic, type_flag_none) {}
 
-    tuple_type(bool variadic = false) : tuple_type(tuple_id, 0, nullptr, variadic, type_flag_none, true) {}
+    tuple_type(bool variadic = false) : tuple_type(tuple_id, 0, nullptr, variadic, type_flag_none) {}
 
     intptr_t get_field_count() const { return m_field_count; }
     const ndt::type get_type() const { return ndt::type_for(m_field_types); }

@@ -22,8 +22,6 @@ namespace ndt {
     // Indices of the optional args
     std::vector<intptr_t> m_opt_kwd_indices;
 
-    struct get_pos_types_kernel;
-
   public:
     typedef nd::callable data_type;
 
@@ -120,10 +118,9 @@ namespace ndt {
     }
 
     /** Makes an callable type with both positional and keyword arguments */
-    static type make(const type &ret_tp, const std::vector<type> &pos_tp, const std::vector<std::string> &kwd_names,
-                     const std::vector<type> &kwd_tp) {
-      return make(ret_tp, make_type<tuple_type>(pos_tp.size(), pos_tp.data()),
-                  make_type<struct_type>(kwd_names, kwd_tp));
+    static type make(const type &ret_tp, const std::vector<type> &pos_tp,
+                     const std::vector<std::pair<type, std::string>> &kwds) {
+      return make(ret_tp, make_type<tuple_type>(pos_tp.size(), pos_tp.data()), make_type<struct_type>(kwds));
     }
 
     /** Makes an callable type with just positional arguments */
@@ -159,8 +156,14 @@ namespace ndt {
       const std::vector<type> tp{make_type<A0>(), make_type<A>()...};
       const std::vector<type> pos(tp.begin(), tp.begin() + num_pos);
       const std::vector<type> kwargs(tp.begin() + num_pos, tp.end());
+      std::vector<std::string> kwdnames{names...};
 
-      return callable_type::make(make_type<R>(), pos, {names...}, kwargs);
+      std::vector<std::pair<type, std::string>> kwds;
+      for (size_t i = 0; i < kwdnames.size(); ++i) {
+        kwds.emplace_back(kwargs[i], kwdnames[i]);
+      }
+
+      return callable_type::make(make_type<R>(), pos, kwds);
     }
   };
 

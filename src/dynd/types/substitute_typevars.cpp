@@ -3,22 +3,22 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/substitute_typevars.hpp>
 #include <dynd/callable.hpp>
-#include <dynd/types/pointer_type.hpp>
-#include <dynd/types/option_type.hpp>
 #include <dynd/types/base_memory_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/typevar_type.hpp>
-#include <dynd/types/typevar_dim_type.hpp>
-#include <dynd/types/pow_dimsym_type.hpp>
-#include <dynd/types/ellipsis_dim_type.hpp>
+#include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
-#include <dynd/types/var_dim_type.hpp>
+#include <dynd/types/ellipsis_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/option_type.hpp>
+#include <dynd/types/pointer_type.hpp>
+#include <dynd/types/pow_dimsym_type.hpp>
 #include <dynd/types/struct_type.hpp>
+#include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
-#include <dynd/types/cuda_device_type.hpp>
+#include <dynd/types/typevar_dim_type.hpp>
+#include <dynd/types/typevar_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -67,7 +67,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
           ndt::substitute(pattern.extended<fixed_dim_type>()->get_element_type(), typevars, concrete));
     }
   case var_dim_id:
-    return ndt::var_dim_type::make(
+    return ndt::make_type<ndt::var_dim_type>(
         ndt::substitute(pattern.extended<var_dim_type>()->get_element_type(), typevars, concrete));
   case struct_id:
     return ndt::make_type<ndt::struct_type>(
@@ -146,7 +146,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
                 ndt::substitute(pattern.extended<typevar_dim_type>()->get_element_type(), typevars, concrete));
           }
         case var_dim_id:
-          return ndt::var_dim_type::make(
+          return ndt::make_type<ndt::var_dim_type>(
               ndt::substitute(pattern.extended<typevar_dim_type>()->get_element_type(), typevars, concrete));
         default: {
           stringstream ss;
@@ -252,7 +252,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
       }
       case var_dim_id:
         for (intptr_t i = 0; i < exponent; ++i) {
-          result = ndt::var_dim_type::make(result);
+          result = ndt::make_type<ndt::var_dim_type>(result);
         }
         return result;
       case typevar_dim_id: {

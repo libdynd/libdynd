@@ -26,6 +26,9 @@ namespace ndt {
 
     var_dim_type(const type &element_tp);
 
+    var_dim_type(size_t ndim, const type &element_tp)
+        : var_dim_type(ndim == 1 ? element_tp : make_type<var_dim_type>(ndim - 1, element_tp)) {}
+
     size_t get_default_data_size() const { return sizeof(data_type); }
 
     /** Alignment of the data being pointed to. */
@@ -84,21 +87,9 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
     virtual type with_element_type(const type &element_tp) const;
-
-    static type make(const type &element_tp) { return type(new var_dim_type(element_tp), false); }
-
-    static type make(const type &element_tp, intptr_t ndim)
-    {
-      type result = element_tp;
-      for (intptr_t i = 0; i < ndim; ++i) {
-        result = make(result);
-      }
-
-      return result;
-    }
   };
 
-  inline type make_var_dim(const type &element_tp) { return var_dim_type::make(element_tp); }
+  inline type make_var_dim(const type &element_tp) { return make_type<var_dim_type>(element_tp); }
 
 } // namespace dynd::ndt
 } // namespace dynd
