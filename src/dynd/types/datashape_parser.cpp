@@ -1073,7 +1073,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
             intptr_t dim_size = parse<intptr_t>(bbegin, bend);
             result = ndt::make_fixed_dim(dim_size, element_tp, exponent);
           } else if (compare_range_to_literal(bbegin, bend, "var")) {
-            result = ndt::var_dim_type::make(element_tp, exponent);
+            result = ndt::make_type<ndt::var_dim_type>(exponent, element_tp);
           } else if (compare_range_to_literal(bbegin, bend, "Fixed")) {
             result = make_fixed_dim_kind(element_tp, exponent);
           } else if (isupper(*bbegin)) {
@@ -1089,7 +1089,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
               result = ndt::make_pow_dimsym(ndt::make_fixed_dim(dim_size, ndt::make_type<void>()), exponent_name,
                                             parse_datashape(begin, end, symtable));
             } else if (compare_range_to_literal(bbegin, bend, "var")) {
-              result = ndt::make_pow_dimsym(ndt::var_dim_type::make(ndt::make_type<void>()), exponent_name,
+              result = ndt::make_pow_dimsym(ndt::make_type<ndt::var_dim_type>(ndt::make_type<void>()), exponent_name,
                                             parse_datashape(begin, end, symtable));
             } else if (compare_range_to_literal(bbegin, bend, "Fixed")) {
               result = ndt::make_pow_dimsym(ndt::make_fixed_dim_kind(ndt::make_type<void>()), exponent_name,
@@ -1118,7 +1118,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
         intptr_t size = parse<intptr_t>(nbegin, nend);
         result = ndt::make_fixed_dim(size, element_tp);
       } else if (compare_range_to_literal(nbegin, nend, "var")) {
-        result = ndt::var_dim_type::make(element_tp);
+        result = ndt::make_type<ndt::var_dim_type>(element_tp);
       } else if (compare_range_to_literal(nbegin, nend, "Fixed")) {
         result = ndt::make_fixed_dim_kind(element_tp);
       } else if (isupper(*nbegin)) {

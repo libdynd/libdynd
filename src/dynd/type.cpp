@@ -3,32 +3,32 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/exceptions.hpp>
 #include <dynd/type.hpp>
 #include <dynd/type_registry.hpp>
+#include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/base_dim_type.hpp>
 #include <dynd/types/base_memory_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/var_dim_type.hpp>
-#include <dynd/exceptions.hpp>
-#include <dynd/types/struct_type.hpp>
-#include <dynd/types/option_type.hpp>
-#include <dynd/types/datashape_parser.hpp>
-#include <dynd/types/any_kind_type.hpp>
-#include <dynd/types/scalar_kind_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/char_type.hpp>
+#include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
+#include <dynd/types/option_type.hpp>
+#include <dynd/types/scalar_kind_type.hpp>
+#include <dynd/types/struct_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
-#include <sstream>
-#include <cstring>
-#include <vector>
 #include <algorithm>
+#include <cstring>
 #include <functional>
-#include <iterator>
 #include <iomanip>
+#include <iterator>
+#include <sstream>
+#include <vector>
 
 using namespace std;
 using namespace dynd;
@@ -504,12 +504,12 @@ std::ostream &dynd::ndt::operator<<(std::ostream &o, const ndt::type &rhs) {
 ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtp) {
   if (ndim > 0) {
     ndt::type result_tp =
-        shape[ndim - 1] >= 0 ? ndt::make_fixed_dim(shape[ndim - 1], dtp) : ndt::var_dim_type::make(dtp);
+        shape[ndim - 1] >= 0 ? ndt::make_fixed_dim(shape[ndim - 1], dtp) : ndt::make_type<ndt::var_dim_type>(dtp);
     for (intptr_t i = ndim - 2; i >= 0; --i) {
       if (shape[i] >= 0) {
         result_tp = ndt::make_fixed_dim(shape[i], result_tp);
       } else {
-        result_tp = ndt::var_dim_type::make(result_tp);
+        result_tp = ndt::make_type<ndt::var_dim_type>(result_tp);
       }
     }
     return result_tp;
@@ -525,7 +525,7 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &
       if (shape[i] >= 0) {
         result_tp = ndt::make_fixed_dim(shape[i], result_tp);
       } else {
-        result_tp = ndt::var_dim_type::make(result_tp);
+        result_tp = ndt::make_type<ndt::var_dim_type>(result_tp);
         out_any_var = true;
       }
     }
@@ -576,7 +576,7 @@ DYNDT_API map<type_id_t, ndt::reg_info_t> &ndt::detail::infos() {
       {struct_id, {make_type<struct_type>(true)}},
       {fixed_dim_kind_id, {type()}},
       {fixed_dim_id, {base_fixed_dim_type::make(any_kind_type::make())}},
-      {var_dim_id, {var_dim_type::make(any_kind_type::make())}},
+      {var_dim_id, {ndt::make_type<ndt::var_dim_type>(any_kind_type::make())}},
       {categorical_id, {categorical_kind_type::make()}},
       {option_id, {make_type<option_type>(any_kind_type::make())}},
       {pointer_id, {pointer_type::make(any_kind_type::make())}},
@@ -920,16 +920,16 @@ ndt::common_type::common_type() {
   }
   children[{{fixed_dim_id, fixed_dim_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
     if (tp0.extended<fixed_dim_type>()->get_fixed_dim_size() != tp1.extended<fixed_dim_type>()->get_fixed_dim_size()) {
-      return ndt::var_dim_type::make(ndt::common_type(tp0.extended<fixed_dim_type>()->get_element_type(),
-                                                      tp1.extended<fixed_dim_type>()->get_element_type()));
+      return ndt::make_type<ndt::var_dim_type>(ndt::common_type(tp0.extended<fixed_dim_type>()->get_element_type(),
+                                                                tp1.extended<fixed_dim_type>()->get_element_type()));
     }
     return ndt::make_fixed_dim(tp0.extended<fixed_dim_type>()->get_fixed_dim_size(),
                                ndt::common_type(tp0.extended<fixed_dim_type>()->get_element_type(),
                                                 tp1.extended<fixed_dim_type>()->get_element_type()));
   };
   children[{{fixed_dim_id, var_dim_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
-    return ndt::var_dim_type::make(ndt::common_type(tp0.extended<fixed_dim_type>()->get_element_type(),
-                                                    tp1.extended<fixed_dim_type>()->get_element_type()));
+    return ndt::make_type<ndt::var_dim_type>(ndt::common_type(tp0.extended<fixed_dim_type>()->get_element_type(),
+                                                              tp1.extended<fixed_dim_type>()->get_element_type()));
   };
   children[{{var_dim_id, fixed_dim_id}}] = children[{{fixed_dim_id, var_dim_id}}];
 }

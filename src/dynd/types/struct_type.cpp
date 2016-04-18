@@ -3,11 +3,11 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/any_kind_type.hpp>
-#include <dynd/types/struct_type.hpp>
-#include <dynd/types/str_util.hpp>
-#include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/shape_tools.hpp>
+#include <dynd/types/any_kind_type.hpp>
+#include <dynd/types/str_util.hpp>
+#include <dynd/types/struct_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -36,17 +36,8 @@ std::vector<ndt::type> types_from_fields(const std::vector<std::pair<ndt::type, 
 
 ndt::struct_type::struct_type(const std::vector<std::string> &field_names, const std::vector<type> &field_types,
                               bool variadic)
-    : tuple_type(struct_id, field_types.size(), field_types.data(), variadic, type_flag_none, true),
+    : tuple_type(struct_id, field_types.size(), field_types.data(), variadic, type_flag_none),
       m_field_names(field_names) {
-  /*
-    if (!nd::ensure_immutable_contig<std::string>(m_field_names)) {
-      stringstream ss;
-      ss << "dynd struct field names requires an array of strings, got an "
-            "array with type " << m_field_names.get_type();
-      throw invalid_argument(ss.str());
-    }
-  */
-
   // Make sure that the number of names matches
   uintptr_t name_count = field_names.size();
   if (name_count != (uintptr_t)m_field_count) {
@@ -54,6 +45,10 @@ ndt::struct_type::struct_type(const std::vector<std::string> &field_names, const
     ss << "dynd struct type requires that the number of names, " << name_count << " matches the number of types, "
        << m_field_count;
     throw invalid_argument(ss.str());
+  }
+
+  for (intptr_t i = 0; i < m_field_count; ++i) {
+    m_field_tp.emplace_back(field_types[i], field_names[i]);
   }
 }
 

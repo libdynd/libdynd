@@ -3,17 +3,17 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
 
 #include <dynd/types/datashape_formatter.hpp>
-#include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/struct_type.hpp>
-#include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
+#include <dynd/types/string_type.hpp>
+#include <dynd/types/struct_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -54,9 +54,11 @@ TEST(DataShapeFormatter, DTypeUniformArrays) {
             format_datashape(ndt::make_fixed_dim_kind(ndt::make_type<int32_t>(), 3), "", false));
   EXPECT_EQ("var * int32", format_datashape(ndt::make_type<ndt::var_dim_type>(ndt::make_type<int32_t>()), "", false));
   EXPECT_EQ("var * 3 * int32",
-            format_datashape(ndt::var_dim_type::make(ndt::make_fixed_dim(3, ndt::make_type<int32_t>())), "", false));
+            format_datashape(ndt::make_type<ndt::var_dim_type>(ndt::make_fixed_dim(3, ndt::make_type<int32_t>())), "",
+                             false));
   EXPECT_EQ("var * Fixed * int32",
-            format_datashape(ndt::var_dim_type::make(ndt::make_fixed_dim_kind(ndt::make_type<int32_t>())), "", false));
+            format_datashape(ndt::make_type<ndt::var_dim_type>(ndt::make_fixed_dim_kind(ndt::make_type<int32_t>())), "",
+                             false));
 }
 
 TEST(DataShapeFormatter, DTypeStructs) {

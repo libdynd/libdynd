@@ -6,8 +6,8 @@
 #pragma once
 
 #include <dynd/callables/base_callable.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/functional.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
 
 namespace dynd {
 namespace nd {
@@ -16,9 +16,9 @@ namespace nd {
   class assign_callable : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(ResID), {ndt::type(Arg0ID)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(ResID), {ndt::type(Arg0ID)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -72,9 +72,9 @@ namespace nd {
   class assign_callable<bool_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(bool_id), {ndt::type(string_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(bool_id), {ndt::type(string_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -131,9 +131,9 @@ namespace nd {
   class assign_callable<fixed_bytes_id, fixed_bytes_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(fixed_bytes_id), {ndt::type(fixed_bytes_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(fixed_bytes_id), {ndt::type(fixed_bytes_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -149,9 +149,9 @@ namespace nd {
   class int_to_string_assign_callable : public base_callable {
   public:
     int_to_string_assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(IntID), {ndt::type(string_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(IntID), {ndt::type(string_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -186,9 +186,9 @@ namespace nd {
   class string_to_int_assign_callable : public base_callable {
   public:
     string_to_int_assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(string_id), {ndt::type(IntID)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(string_id), {ndt::type(IntID)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -221,9 +221,9 @@ namespace nd {
   class assign_callable<float64_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(float64_id), {ndt::type(string_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(float64_id), {ndt::type(string_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -248,9 +248,9 @@ namespace nd {
   class assign_callable<fixed_string_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(fixed_string_id), {ndt::type(string_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(fixed_string_id), {ndt::type(string_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -280,9 +280,9 @@ namespace nd {
   class assign_callable<fixed_string_id, fixed_string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(fixed_string_id), {ndt::type(fixed_string_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(fixed_string_id), {ndt::type(fixed_string_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -310,9 +310,9 @@ namespace nd {
   class assign_callable<string_id, int_kind_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(string_id), {ndt::type(int_kind_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(string_id), {ndt::type(int_kind_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -334,9 +334,9 @@ namespace nd {
   class assign_callable<string_id, char_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(string_id), {ndt::type(char_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(string_id), {ndt::type(char_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -364,9 +364,9 @@ namespace nd {
   class assign_callable<type_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(type_id), {ndt::type(string_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(type_id), {ndt::type(string_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -388,9 +388,9 @@ namespace nd {
   class assign_callable<string_id, fixed_string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(string_id), {ndt::type(fixed_string_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(string_id), {ndt::type(fixed_string_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -419,9 +419,9 @@ namespace nd {
   class assign_callable<float32_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(float32_id), {ndt::type(string_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(float32_id), {ndt::type(string_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -445,9 +445,9 @@ namespace nd {
   class assign_callable<string_id, type_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(string_id), {ndt::type(type_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(string_id), {ndt::type(type_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -468,9 +468,9 @@ namespace nd {
   class assign_callable<char_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(char_id), {ndt::type(string_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(char_id), {ndt::type(string_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -499,9 +499,9 @@ namespace nd {
   class assign_callable<pointer_id, pointer_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(pointer_id), {ndt::type(pointer_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(pointer_id), {ndt::type(pointer_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -523,9 +523,9 @@ namespace nd {
   class assign_callable<option_id, option_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(option_id), {ndt::type(option_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(option_id), {ndt::type(option_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
@@ -572,9 +572,9 @@ namespace nd {
   class assign_callable<option_id, float_kind_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(option_id), {ndt::type(float_kind_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(option_id), {ndt::type(float_kind_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
@@ -609,9 +609,9 @@ namespace nd {
   class assign_callable<option_id, string_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(option_id), {ndt::type(string_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(option_id), {ndt::type(string_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
@@ -681,9 +681,9 @@ namespace nd {
   class assign_callable<tuple_id, tuple_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(tuple_id), {ndt::type(tuple_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(tuple_id), {ndt::type(tuple_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
@@ -750,9 +750,9 @@ namespace nd {
   class assign_callable<struct_id, struct_id> : public base_callable {
   public:
     assign_callable()
-        : base_callable(
-              ndt::callable_type::make(ndt::type(struct_id), {ndt::type(struct_id)}, {"error_mode"},
-                                       {ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>())})) {}
+        : base_callable(ndt::callable_type::make(
+              ndt::type(struct_id), {ndt::type(struct_id)},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,

@@ -3,20 +3,20 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/substitute_shape.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/shape_tools.hpp>
-#include <dynd/types/pointer_type.hpp>
-#include <dynd/types/option_type.hpp>
 #include <dynd/types/base_memory_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/typevar_type.hpp>
-#include <dynd/types/typevar_dim_type.hpp>
-#include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
-#include <dynd/types/var_dim_type.hpp>
+#include <dynd/types/ellipsis_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/option_type.hpp>
+#include <dynd/types/pointer_type.hpp>
 #include <dynd/types/struct_type.hpp>
+#include <dynd/types/substitute_shape.hpp>
 #include <dynd/types/tuple_type.hpp>
+#include <dynd/types/typevar_dim_type.hpp>
+#include <dynd/types/typevar_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -27,8 +27,7 @@ struct substitute_shape_data {
   const intptr_t *shape;
   const ndt::type *fulltype;
 
-  void throw_error()
-  {
+  void throw_error() {
     stringstream ss;
     ss << "Cannot substitute shape ";
     print_shape(ss, ndim, shape);
@@ -38,8 +37,7 @@ struct substitute_shape_data {
 };
 
 static void substitute_shape_visitor(const ndt::type &tp, intptr_t DYND_UNUSED(arrmeta_offset), void *extra,
-                                     ndt::type &out_transformed_tp, bool &out_was_transformed)
-{
+                                     ndt::type &out_transformed_tp, bool &out_was_transformed) {
   substitute_shape_data *ssd = reinterpret_cast<substitute_shape_data *>(extra);
   intptr_t ndim = ssd->ndim, i = ssd->i;
   if (!tp.is_scalar()) {
@@ -55,21 +53,17 @@ static void substitute_shape_visitor(const ndt::type &tp, intptr_t DYND_UNUSED(a
         if (dim_size >= 0) {
           out_transformed_tp = ndt::make_fixed_dim(dim_size, subtp);
           out_was_transformed = true;
-        }
-        else {
+        } else {
           ssd->throw_error();
         }
-      }
-      else {
+      } else {
         if (dim_size < 0 || dim_size == tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size()) {
           if (!out_was_transformed) {
             out_transformed_tp = tp;
-          }
-          else {
+          } else {
             out_transformed_tp = ndt::make_fixed_dim(tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size(), subtp);
           }
-        }
-        else {
+        } else {
           ssd->throw_error();
         }
       }
@@ -77,9 +71,8 @@ static void substitute_shape_visitor(const ndt::type &tp, intptr_t DYND_UNUSED(a
     case var_dim_id:
       if (!out_was_transformed) {
         out_transformed_tp = tp;
-      }
-      else {
-        out_transformed_tp = ndt::var_dim_type::make(subtp);
+      } else {
+        out_transformed_tp = ndt::make_type<ndt::var_dim_type>(subtp);
       }
       break;
     default:
@@ -89,15 +82,13 @@ static void substitute_shape_visitor(const ndt::type &tp, intptr_t DYND_UNUSED(a
   // In non-dimension case, preserve everything
   else if (i < ndim) {
     tp.extended()->transform_child_types(&substitute_shape_visitor, 0, extra, out_transformed_tp, out_was_transformed);
-  }
-  else {
+  } else {
     out_transformed_tp = tp;
   }
 }
 } // anonymous namespace
 
-ndt::type ndt::substitute_shape(const ndt::type &pattern, intptr_t ndim, const intptr_t *shape)
-{
+ndt::type ndt::substitute_shape(const ndt::type &pattern, intptr_t ndim, const intptr_t *shape) {
   substitute_shape_data ssd;
   ssd.ndim = ndim;
   ssd.i = 0;
