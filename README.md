@@ -30,7 +30,7 @@ contributions are [Phillip Cloud](https://github.com/cpcloud), [Michael Droettbo
 [Stefan Krah](https://github.com/skrah), [Travis Oliphant](https://en.wikipedia.org/wiki/Travis_Oliphant), and
 [Andy Terrel](http://andy.terrel.us/). Much of the funding that made this project possible came through [Continuum Analytics](http://continuum.io/)
 and [DARPA-BAA-12-38](https://www.fbo.gov/index?s=opportunity&mode=form&id=7a77846c73ffc5cb22f9295ffe6cdd55&tab=core&_cview=0),
-part of [XDATA](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx). We
+part of [XDATA](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx).
 
 We pronounce DyND as "dined", though others refer to it as "dy-n-d". It's not something we're picky about it.
 
@@ -71,8 +71,7 @@ company as a part of the [Blaze project](http://blaze.pydata.org). Continuum sec
 funding for the Blaze project through DARPA's [XDATA program](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx),
 giving the project space and time to develop as it needed and providing real data sets
 and challenge problems to tackle and measure against. [Travis Oliphant](https://en.wikipedia.org/wiki/Travis_Oliphant)
-has told the story of Continuum, and its support for DyND, on the NumPy mailing list
-- see [here](https://mail.scipy.org/pipermail/numpy-discussion/2015-August/073412.html)
+has told the story of Continuum, and its support for DyND, on the NumPy mailing list - see [here](https://mail.scipy.org/pipermail/numpy-discussion/2015-August/073412.html)
 
 [Irwin Zaid](https://github.com/izaid) joined the project in the winter of 2014, as
 its first major outside contributor, while he was a research fellow at [Christ Church](http://www.chch.ox.ac.uk),
