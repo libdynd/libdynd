@@ -74,22 +74,17 @@ and challenge problems to tackle and measure against.
 its first major outside contributor, while he was a research fellow at [Christ Church](http://www.chch.ox.ac.uk/),
 [University of Oxford](http://www.ox.ac.uk/). He initially added early [CUDA](https://developer.nvidia.com/about-cuda)
 support to the library, but played a gradually increasing role in the design and goals of the project.
-He led the development of DyND from the spring of 2015 onwards, and was funded by Continuum
-from June 2015 until April 2016.
+He led the development of DyND from the spring of 2015, and was funded by Continuum from June 2015
+until April 2016.
 
 [Ian Henriksen](https://github.com/insertinterestingnamehere) began working on DyND through
 [Google Summer of Code](https://developers.google.com/open-source/gsoc/) -- under the umbrella
 of [NumFocus](http://www.numfocus.org/) -- in the summer of 2015. He remained active in the
 project from then onwards.
 
-DyND is still in an experimental mode, with some mature components and
-others severely lacking. Current focus is on the completion of the
-[ArrFunc object](docs/arrfuncs.md) to represent array functions and to
-flesh out a basic set of functionality modeled after
-[NumPy](http://www.numpy.org/). New contributors are welcome, so if you
-have the patience to collaborate on a maturing code base, and enjoy C++,
-array-oriented, and numeric programming, DyND might be the the open source
-project you're looking for.
+DyND is still in an experimental mode, with some mature components and others severely lacking.
+New contributors are welcome, so if you have the patience to collaborate on a maturing code base, and enjoy C++,
+array-oriented, and numeric programming, DyND might be the the open source project you're looking for.
 
 Building
 ========
