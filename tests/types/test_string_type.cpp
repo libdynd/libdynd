@@ -28,41 +28,11 @@ TEST(StringType, Create)
   d = ndt::make_type<ndt::string_type>();
   EXPECT_EQ(string_id, d.get_id());
   EXPECT_EQ(string_kind_id, d.get_base_id());
+  EXPECT_LE(sizeof(void *), d.get_data_alignment());
   EXPECT_EQ(alignof(dynd::string), d.get_data_alignment());
+  EXPECT_EQ(16u, sizeof(dynd::string));
   EXPECT_EQ(sizeof(dynd::string), d.get_data_size());
   EXPECT_FALSE(d.is_expression());
-  // Roundtripping through a string
-  EXPECT_EQ(d, ndt::type(d.str()));
-
-  d = ndt::make_type<ndt::string_type>();
-  EXPECT_EQ(string_id, d.get_id());
-  EXPECT_EQ(string_kind_id, d.get_base_id());
-  EXPECT_EQ(alignof(dynd::string), d.get_data_alignment());
-  EXPECT_EQ(sizeof(dynd::string), d.get_data_size());
-  // Roundtripping through a string
-  EXPECT_EQ(d, ndt::type(d.str()));
-
-  d = ndt::make_type<ndt::string_type>();
-  EXPECT_EQ(string_id, d.get_id());
-  EXPECT_EQ(string_kind_id, d.get_base_id());
-  EXPECT_EQ(alignof(dynd::string), d.get_data_alignment());
-  EXPECT_EQ(sizeof(dynd::string), d.get_data_size());
-  // Roundtripping through a string
-  EXPECT_EQ(d, ndt::type(d.str()));
-
-  d = ndt::make_type<ndt::string_type>();
-  EXPECT_EQ(string_id, d.get_id());
-  EXPECT_EQ(string_kind_id, d.get_base_id());
-  EXPECT_EQ(sizeof(void *), d.get_data_alignment());
-  EXPECT_EQ(sizeof(dynd::string), d.get_data_size());
-  // Roundtripping through a string
-  EXPECT_EQ(d, ndt::type(d.str()));
-
-  d = ndt::make_type<ndt::string_type>();
-  EXPECT_EQ(string_id, d.get_id());
-  EXPECT_EQ(string_kind_id, d.get_base_id());
-  EXPECT_EQ(alignof(dynd::string), d.get_data_alignment());
-  EXPECT_EQ(sizeof(dynd::string), d.get_data_size());
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 }

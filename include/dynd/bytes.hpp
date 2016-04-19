@@ -8,125 +8,59 @@
 #include <algorithm>
 
 #include <dynd/config.hpp>
+#include <dynd/types/sso_bytestring.hpp>
 
 namespace dynd {
 
-class DYNDT_API bytes {
-protected:
-  char *m_data;
-  size_t m_size;
-
+class DYNDT_API bytes : public sso_bytestring<0> {
 public:
-  bytes() : m_data(NULL), m_size(0) {}
+  bytes() {}
 
-  bytes(const char *data, size_t size) : m_data(new char[size]), m_size(size) { memcpy(m_data, data, size); }
+  bytes(const bytes &rhs) : sso_bytestring(rhs) {}
+
+  bytes(const bytes &&rhs) : sso_bytestring(std::move(rhs)) {}
+
+  bytes(const char *bytestr, size_t size) : sso_bytestring(bytestr, size) {}
 
   template <size_t N>
-  bytes(const char (&data)[N]) : bytes(data, N - 1)
+  bytes(const char (&data)[N]) : sso_bytestring(data, N - 1) {}
+
+  bytes &append(const char *bytestr, size_t size)
   {
-  }
-
-  bytes(const bytes &other) : m_data(new char[other.m_size]), m_size(other.m_size)
-  {
-    memcpy(m_data, other.m_data, other.m_size);
-  }
-
-  ~bytes() { delete[] m_data; }
-
-  bool empty() const { return m_size == 0; }
-
-  char *data() { return m_data; }
-
-  const char *data() const { return m_data; }
-
-  size_t size() const { return m_size; }
-
-  bytes &append(const char *data, size_t size)
-  {
-    char *old_data = m_data;
-    size_t old_size = m_size;
-
-    m_data = new char[m_size + size];
-    m_size += size;
-
-    memcpy(m_data, old_data, old_size);
-    memcpy(m_data + old_size, data, size);
-
-    delete[] old_data;
-
+    sso_bytestring::append(bytestr, size);
     return *this;
   }
 
-  bytes &assign(const char *data, size_t size)
+  bytes &assign(const char *bytestr, size_t size)
   {
-    if (size != m_size) {
-      delete[] m_data;
-      m_data = new char[size];
-      m_size = size;
-    }
-
-    memcpy(m_data, data, m_size);
-
+    sso_bytestring::assign(bytestr, size);
     return *this;
   }
 
-  void clear()
-  {
-    if (m_size != 0) {
-      delete[] m_data;
-      m_data = nullptr;
-      m_size = 0;
-    }
+  bytes &operator=(const bytes &rhs) {
+    sso_bytestring::assign(rhs.data(), rhs.size());
+    return *this;
   }
 
-  void resize(size_t size)
-  {
-    if (size != m_size) {
-      char *data = new char[size];
-      memcpy(data, m_data, std::min(size, m_size));
-      delete[] m_data;
-
-      m_data = data;
-      m_size = size;
-    }
+  bytes &operator=(bytes &&rhs) {
+    sso_bytestring::operator=(std::move(rhs));
+    return *this;
   }
 
-  char *begin() { return m_data; }
+  bool operator==(const bytes &rhs) const { return sso_bytestring::operator==(rhs); }
 
-  const char *begin() const { return m_data; }
+  bool operator!=(const bytes &rhs) const { return sso_bytestring::operator!=(rhs); }
 
-  char *end() { return m_data + m_size; }
-
-  const char *end() const { return m_data + m_size; }
-
-  bytes &operator=(const bytes &rhs) { return assign(rhs.m_data, rhs.m_size); }
-  bool operator==(const bytes &rhs) const
-  {
-    return m_size == rhs.m_size && std::memcmp(m_data, rhs.m_data, m_size) == 0;
-  }
-
-  bool operator!=(const bytes &rhs) const
-  {
-    return m_size != rhs.m_size || std::memcmp(m_data, rhs.m_data, m_size) != 0;
-  }
-
-  const bytes operator+(const bytes &rhs)
-  {
+  bytes operator+(const bytes &rhs) {
     bytes result;
-
     result.resize(size() + rhs.size());
-
-    DYND_MEMCPY(result.begin(), begin(), size());
-    DYND_MEMCPY(result.begin() + size(), rhs.begin(), rhs.size());
-
+    DYND_MEMCPY(result.data(), data(), size());
+    DYND_MEMCPY(result.data() + size(), rhs.data(), rhs.size());
     return result;
   }
 
-  bytes &operator+=(const bytes &rhs)
-  {
-    size_t orig_size = size();
-    resize(size() + rhs.size());
-    DYND_MEMCPY(begin() + orig_size, rhs.begin(), rhs.size());
+  bytes &operator+=(const bytes &rhs) {
+    sso_bytestring::append(rhs.data(), rhs.size());
     return *this;
   }
 };

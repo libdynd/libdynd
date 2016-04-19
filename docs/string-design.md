@@ -116,6 +116,12 @@ memory, or right in the structure.
 
 * [Small String Optimization Implementation SSO-23](https://github.com/elliotgoodrich/SSO-23)
 
+A disadvantage of the SSO-23 storage in relation to how some parts of DyND
+work currently, is that initializing all bytes to 0 does not produce a
+zero-sized string. It's instead a string of size 23, filled with all zero
+bytes. I think for DyND it's better to keep the zero-initialized state
+being an empty string.
+
 ## Implementation details
 
 The design choices made still give quite a bit of latitude in the actual
@@ -148,33 +154,31 @@ The result of this design is that the memory storage of a DyND string on
 a little-endian architecture is
 
 ```cpp
-// TODO: Improve this using SSO-23 ideas
 struct string_memory_layout {
     // Two 64-bit integers on all platforms, the data size is 16 bytes on
     // both 32-bit and 64-bit platforms.
     int64_t m_pointer;
     int64_t m_size;
 
-    bool is_inline() const {
+    bool is_sso() const {
         // If the highest bit is set
         return m_size < 0;
     }
 
-    size_t inline_size() const {
+    size_t sso_size() const {
         return static_cast<size_t>((static_cast<uint64_t>(m_size) >> 56) & 0x7f);
     }
 
     size_t size() const {
-        return is_inline() ? inline_size() : static_cast<size_t>(m_size);
+        return is_sso() ? sso_size() : static_cast<size_t>(m_size);
     }
 
     size_t capacity() const {
-        return is_inline() ? 15u
-                           : *reinterpret_cast<const size_t *>(m_pointer);
+        return is_sso() ? 14u : *reinterpret_cast<const size_t *>(m_pointer);
     }
 
     const char *data() const {
-        return is_inline() ? reinterpret_cast<const char *>(this)
+        return is_sso() ? reinterpret_cast<const char *>(this)
                            : (reinterpret_cast<const char *>(m_pointer) + sizeof(size_t));
     }
 
@@ -188,7 +192,7 @@ struct string_memory_layout {
             *reinterpret_cast<size_t *>(new_data) = new_capacity;
             memcpy(new_data + sizeof(size_t), data(), current_size);
             // Free the old memory
-            if (!is_inline()) {
+            if (!is_sso()) {
                 delete[] reinterpret_cast<const char *>(m_pointer);
             }
             // Overwrite the current data
@@ -206,7 +210,7 @@ struct string_memory_layout {
     // Change the size of the string
     void resize(size_t new_size) {
         reserve(new_size + 1);
-        if (is_inline()) {
+        if (is_sso()) {
             m_size = (static_cast<uint64_t>(m_size) | 0x80) << 56;
         } else {
             m_size = new_size;
@@ -217,7 +221,7 @@ struct string_memory_layout {
     // Change the size of the string, growing the buffer exponentially
     void resize_grow(size_t new_size) {
         reserve_grow(new_size + 1);
-        if (is_inline()) {
+        if (is_sso()) {
             m_size = (static_cast<uint64_t>(m_size) | 0x80) << 56;
         } else {
             m_size = new_size;

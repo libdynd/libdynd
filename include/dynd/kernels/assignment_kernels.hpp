@@ -1083,11 +1083,6 @@ namespace nd {
       void single(char *dst, char *const *src) {
         dynd::string *dst_d = reinterpret_cast<dynd::string *>(dst);
         intptr_t src_charsize = string_encoding_char_size_table[m_src_encoding];
-        intptr_t dst_charsize = string_encoding_char_size_table[m_dst_encoding];
-
-        if (dst_d->begin() != NULL) {
-          throw std::runtime_error("Cannot assign to an already initialized dynd string");
-        }
 
         char *dst_current;
         const char *src_begin = src[0];
@@ -1096,13 +1091,10 @@ namespace nd {
         append_unicode_codepoint_t append_fn = m_append_fn;
         uint32_t cp;
 
-        // Allocate the initial output as the src number of characters + some
-        // padding
-        // TODO: Don't add padding if the output is not a multi-character encoding
-        dynd::string tmp;
-        tmp.resize(((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024);
-        char *dst_begin = tmp.begin();
-        char *dst_end = tmp.end();
+        // Allocate the initial output as the src number of characters + some padding
+        dst_d->resize(((src_end - src_begin) / src_charsize + 16) * 1124 / 1024);
+        char *dst_begin = dst_d->begin();
+        char *dst_end = dst_d->end();
 
         dst_current = dst_begin;
         while (src_begin < src_end) {
@@ -1113,9 +1105,9 @@ namespace nd {
               append_fn(cp, dst_current, dst_end);
             } else {
               char *dst_begin_saved = dst_begin;
-              tmp.resize(2 * (dst_end - dst_begin));
-              dst_begin = tmp.begin();
-              dst_end = tmp.end();
+              dst_d->resize(2 * (dst_end - dst_begin));
+              dst_begin = dst_d->begin();
+              dst_end = dst_d->end();
               dst_current = dst_begin + (dst_current - dst_begin_saved);
 
               append_fn(cp, dst_current, dst_end);
@@ -1126,7 +1118,7 @@ namespace nd {
         }
 
         // Shrink-wrap the memory to just fit the string
-        dst_d->assign(dst_begin, dst_current - dst_begin);
+        dst_d->resize(dst_current - dst_begin);
       }
     };
 
