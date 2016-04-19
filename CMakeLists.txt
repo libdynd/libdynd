@@ -214,7 +214,9 @@ set(libdyndt_SRC
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
     include/dynd/types/fixed_dim_type.hpp
+    include/dynd/types/sso_bytestring.hpp
     include/dynd/types/state_type.hpp
+    include/dynd/types/string_type.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/type_type.hpp
     # MemBlock

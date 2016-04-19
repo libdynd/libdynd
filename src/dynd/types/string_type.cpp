@@ -120,6 +120,9 @@ bool ndt::string_type::operator==(const base_type &rhs) const
   }
 }
 
+void ndt::string_type::arrmeta_debug_print(const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
+                                           const std::string &DYND_UNUSED(indent)) const {}
+
 void ndt::string_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
 {
   reinterpret_cast<string *>(data)->~string();

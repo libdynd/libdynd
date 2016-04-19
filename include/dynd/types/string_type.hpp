@@ -2,8 +2,7 @@
 // Copyright (C) 2011-16 DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The string type uses memory_block references to store
-// arbitrarily sized strings.
+// The string type uses a 16-byte SSO representation
 //
 
 #pragma once
@@ -11,24 +10,42 @@
 #include <dynd/bytes.hpp>
 #include <dynd/type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/types/sso_bytestring.hpp>
 
 namespace dynd {
 
-class DYNDT_API string : public bytes {
+class DYNDT_API string : public sso_bytestring<1> {
 public:
+  /** Default-constructs to an empty string */
   string() {}
 
-  string(const char *data, size_t size) : bytes(data, size) {}
+  string(const string &rhs) : sso_bytestring(rhs) {}
 
-  string(const std::string &other) : string(other.data(), other.size()) {}
+  string(const string &&rhs) : sso_bytestring(std::move(rhs)) {}
 
-  bool operator<(const string &rhs) const
-  {
+  string(const char *data, size_t size) : sso_bytestring(data, size) {}
+
+  /** Construct from a std::string, assumed to be UTF-8 */
+  string(const std::string &other) : sso_bytestring(other.data(), other.size()) {}
+
+  /** Construct from a C string, assumed to be UTF-8 */
+  string(const char *cstr) : sso_bytestring(cstr, strlen(cstr)) {}
+
+  string &operator=(const string &rhs) {
+    sso_bytestring::assign(rhs.data(), rhs.size());
+    return *this;
+  }
+
+  string &operator=(string &&rhs) {
+    sso_bytestring::operator=(std::move(rhs));
+    return *this;
+  }
+
+  bool operator<(const string &rhs) const {
     return std::lexicographical_compare(begin(), end(), rhs.begin(), rhs.end());
   }
 
-  bool operator<=(const string &rhs) const
-  {
+  bool operator<=(const string &rhs) const {
     return !std::lexicographical_compare(rhs.begin(), rhs.end(), begin(), end());
   }
 
@@ -42,16 +59,17 @@ public:
     return std::lexicographical_compare(rhs.begin(), rhs.end(), begin(), end());
   }
 
-  const string operator+(const string &rhs)
-  {
+  string operator+(const string &rhs) {
     string result;
-
     result.resize(size() + rhs.size());
-
-    DYND_MEMCPY(result.begin(), begin(), size());
-    DYND_MEMCPY(result.begin() + size(), rhs.begin(), rhs.size());
-
+    DYND_MEMCPY(result.data(), data(), size());
+    DYND_MEMCPY(result.data() + size(), rhs.data(), rhs.size());
     return result;
+  }
+
+  string &operator+=(const string &rhs) {
+    sso_bytestring::append(rhs.data(), rhs.size());
+    return *this;
   }
 };
 
@@ -90,6 +108,8 @@ namespace ndt {
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
     bool operator==(const base_type &rhs) const;
+
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
     void data_destruct(const char *arrmeta, char *data) const;
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
