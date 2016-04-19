@@ -73,7 +73,7 @@ and challenge problems to tackle and measure against. [Travis Oliphant](https://
 has told the story of the early days at Continuum, and why it supports DyND, on the
 NumPy mailing list - see [here](https://mail.scipy.org/pipermail/numpy-discussion/2015-August/073412.html).
 
-[Irwin Zaid](https://github.com/izaid) joined the project in the winter of 2014, as
+[Irwin Zaid](https://github.com/izaid) joined the project in the winter of 2013, as
 its first major outside contributor, while he was a research fellow at [Christ Church](http://www.chch.ox.ac.uk),
 [University of Oxford](http://www.ox.ac.uk). He initially added [CUDA](https://developer.nvidia.com/about-cuda)
 support to the library, then played a gradually increasing role in the design and goals of the project.
