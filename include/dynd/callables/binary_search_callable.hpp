@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <dynd/comparison.hpp>
 #include <dynd/callables/base_callable.hpp>
+#include <dynd/comparison.hpp>
 #include <dynd/kernels/binary_search_kernel.hpp>
 
 namespace dynd {
@@ -15,8 +15,8 @@ namespace nd {
   class binary_search_callable : public base_callable {
   public:
     binary_search_callable()
-        : base_callable(ndt::callable_type::make(ndt::make_type<intptr_t>(),
-                                                 {ndt::type("Fixed * Scalar"), ndt::type("Scalar")})) {}
+        : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<intptr_t>(),
+                                                           {ndt::type("Fixed * Scalar"), ndt::type("Scalar")})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,

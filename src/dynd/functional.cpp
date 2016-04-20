@@ -55,8 +55,8 @@ nd::callable nd::functional::compose(const nd::callable &first, const nd::callab
   */
 
   return make_callable<compose_callable>(
-      ndt::callable_type::make(second.get_type()->get_return_type(), first.get_type()->get_pos_tuple()), first, second,
-      buf_tp);
+      ndt::make_type<ndt::callable_type>(second.get_type()->get_return_type(), first.get_type()->get_pos_types()),
+      first, second, buf_tp);
 }
 
 nd::callable nd::functional::constant(const array &val) { return make_callable<constant_callable>(val); }
@@ -66,7 +66,7 @@ nd::callable nd::functional::left_compound(const callable &child) {
   pos_types.resize(1);
 
   return make_callable<left_compound_callable>(
-      ndt::callable_type::make(child.get_type()->get_return_type(), pos_types), // head element or empty
+      ndt::make_type<ndt::callable_type>(child.get_type()->get_return_type(), pos_types), // head element or empty
       child);
 }
 
@@ -74,8 +74,8 @@ nd::callable nd::functional::right_compound(const callable &child) {
   vector<ndt::type> pos_types = child.get_type()->get_pos_types();
   pos_types.erase(pos_types.begin());
 
-  return make_callable<right_compound_callable>(ndt::callable_type::make(child.get_type()->get_return_type(),
-                                                                         pos_types), // tail elements or empty
+  return make_callable<right_compound_callable>(ndt::make_type<ndt::callable_type>(child.get_type()->get_return_type(),
+                                                                                   pos_types), // tail elements or empty
                                                 child);
 }
 
@@ -92,12 +92,12 @@ ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp, b
 
   const ndt::type &ret_tp = child_tp->get_return_type();
   if (ret_variadic) {
-    return ndt::callable_type::make(ndt::make_ellipsis_dim(dimsname, ret_tp),
-                                    ndt::make_type<ndt::tuple_type>(out_param_types.size(), out_param_types.data()),
-                                    kwd_tp);
+    return ndt::make_type<ndt::callable_type>(
+        ndt::make_ellipsis_dim(dimsname, ret_tp),
+        ndt::make_type<ndt::tuple_type>(out_param_types.size(), out_param_types.data()), kwd_tp);
   }
 
-  return ndt::callable_type::make(
+  return ndt::make_type<ndt::callable_type>(
       ret_tp, ndt::make_type<ndt::tuple_type>(out_param_types.size(), out_param_types.data()), kwd_tp);
 }
 
@@ -120,7 +120,7 @@ nd::callable nd::functional::elwise(const callable &child, bool res_ignore) {
   nd::callable f = make_callable<elwise_entry_callable>(f_tp, child, res_ignore);
 
   if (state) {
-    ndt::type tp = ndt::callable_type::make(f.get_ret_type(), arg_tp);
+    ndt::type tp = ndt::make_type<ndt::callable_type>(f.get_ret_type(), arg_tp);
     return make_callable<state_callable>(tp.extended<ndt::callable_type>()->get_npos(), tp, f, i);
   }
 
@@ -165,7 +165,7 @@ ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp) {
   ndt::type ret_tp = child_tp->get_return_type();
   ret_tp = ndt::make_ellipsis_dim("Dims", child_tp->get_return_type());
 
-  return ndt::callable_type::make(
+  return ndt::make_type<ndt::callable_type>(
       ret_tp, ndt::make_type<ndt::tuple_type>(out_param_types.size(), out_param_types.data()), kwd_tp);
 }
 
@@ -178,9 +178,10 @@ nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const
   arg_tp[1] = ndt::type("?" + std::to_string(nh_ndim) + " * int");
 
   return make_callable<neighborhood_callable<1>>(
-      ndt::callable_type::make(funcproto_tp->get_pos_type(0).with_replaced_dtype(funcproto_tp->get_return_type()),
-                               funcproto_tp->get_pos_tuple(),
-                               ndt::make_type<ndt::struct_type>(std::vector<std::string>{"shape", "offset"}, arg_tp)),
+      ndt::make_type<ndt::callable_type>(
+          funcproto_tp->get_pos_type(0).with_replaced_dtype(funcproto_tp->get_return_type()),
+          funcproto_tp->get_pos_tuple(),
+          ndt::make_type<ndt::struct_type>(std::vector<std::string>{"shape", "offset"}, arg_tp)),
       neighborhood_op, boundary_child);
 }
 

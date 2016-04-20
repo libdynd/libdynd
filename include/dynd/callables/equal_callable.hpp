@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <dynd/comparison.hpp>
 #include <dynd/callables/default_instantiable_callable.hpp>
+#include <dynd/comparison.hpp>
 #include <dynd/kernels/equal_kernel.hpp>
 
 namespace dynd {
@@ -17,15 +17,15 @@ namespace nd {
   public:
     equal_callable()
         : default_instantiable_callable<equal_kernel<Arg0ID, Arg1ID>>(
-              ndt::callable_type::make(ndt::make_type<bool1>(), {ndt::type(Arg0ID), ndt::type(Arg1ID)})) {}
+              ndt::make_type<ndt::callable_type>(ndt::make_type<bool1>(), {ndt::type(Arg0ID), ndt::type(Arg1ID)})) {}
   };
 
   template <>
   class equal_callable<tuple_id, tuple_id> : public base_callable {
   public:
     equal_callable()
-        : base_callable(ndt::callable_type::make(ndt::make_type<bool1>(), {ndt::type(tuple_id), ndt::type(tuple_id)})) {
-    }
+        : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<bool1>(),
+                                                           {ndt::type(tuple_id), ndt::type(tuple_id)})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,

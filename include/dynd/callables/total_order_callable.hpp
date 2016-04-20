@@ -16,15 +16,15 @@ namespace nd {
   public:
     total_order_callable()
         : default_instantiable_callable<total_order_kernel<Arg0ID, Arg1ID>>(
-              ndt::callable_type::make(ndt::make_type<int>(), {ndt::type(Arg0ID), ndt::type(Arg1ID)})) {}
+              ndt::make_type<ndt::callable_type>(ndt::make_type<int>(), {ndt::type(Arg0ID), ndt::type(Arg1ID)})) {}
   };
 
   template <>
   class total_order_callable<fixed_string_id, fixed_string_id> : public base_callable {
   public:
     total_order_callable()
-        : base_callable(ndt::callable_type::make(ndt::make_type<int>(),
-                                                 {ndt::type(fixed_string_id), ndt::type(fixed_string_id)})) {}
+        : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<int>(),
+                                                           {ndt::type(fixed_string_id), ndt::type(fixed_string_id)})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
