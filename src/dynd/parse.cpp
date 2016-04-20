@@ -6,22 +6,21 @@
 #include <climits>
 #include <string>
 
+#include <dynd/callables/parse_callable.hpp>
+#include <dynd/callables/parse_dispatch_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/kernels/parse_kernel.hpp>
 #include <dynd/parse.hpp>
 #include <dynd/string_encodings.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/callables/parse_dispatch_callable.hpp>
-#include <dynd/callables/parse_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
 namespace {
 
-nd::callable make_dynamic_parse()
-{
+nd::callable make_dynamic_parse() {
   dispatcher<nd::callable> dispatcher;
   dispatcher.insert({{bool_id}, nd::make_callable<nd::json::parse_callable<bool_id>>()});
   dispatcher.insert({{int8_id}, nd::make_callable<nd::json::parse_callable<int8_id>>()});
@@ -39,7 +38,8 @@ nd::callable make_dynamic_parse()
   dispatcher.insert({{var_dim_id}, nd::make_callable<nd::json::parse_callable<var_dim_id>>()});
 
   return nd::make_callable<nd::parse_dispatch_callable>(
-      ndt::callable_type::make(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<dynd::string>()}), dispatcher);
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<dynd::string>()}),
+      dispatcher);
 }
 
 } // unnamed namespace

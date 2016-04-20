@@ -16,9 +16,7 @@ namespace nd {
   public:
     less_equal_callable()
         : default_instantiable_callable<less_equal_kernel<Arg0ID, Arg1ID>>(
-              ndt::callable_type::make(ndt::make_type<bool1>(), {ndt::type(Arg0ID), ndt::type(Arg1ID)}))
-    {
-    }
+              ndt::make_type<ndt::callable_type>(ndt::make_type<bool1>(), {ndt::type(Arg0ID), ndt::type(Arg1ID)})) {}
   };
 
 } // namespace dynd::nd

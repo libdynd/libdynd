@@ -15,7 +15,7 @@ namespace ndt {
     std::vector<type> arg_tp = child->get_argument_types();
     arg_tp.push_back(make_type<nd::state>());
 
-    return ndt::callable_type::make(
+    return ndt::make_type<ndt::callable_type>(
         ndt::make_type<ndt::var_dim_type>(ndt::make_type<ndt::fixed_dim_type>(1, ndt::make_type<nd::index_t>())),
         arg_tp);
   }

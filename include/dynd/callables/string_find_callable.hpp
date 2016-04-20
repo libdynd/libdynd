@@ -14,10 +14,8 @@ namespace nd {
   class string_find_callable : public default_instantiable_callable<string_find_kernel> {
   public:
     string_find_callable()
-        : default_instantiable_callable<string_find_kernel>(
-              ndt::callable_type::make(ndt::make_type<intptr_t>(), {ndt::type(string_id), ndt::type(string_id)}))
-    {
-    }
+        : default_instantiable_callable<string_find_kernel>(ndt::make_type<ndt::callable_type>(
+              ndt::make_type<intptr_t>(), {ndt::type(string_id), ndt::type(string_id)})) {}
   };
 
 } // namespace dynd::nd

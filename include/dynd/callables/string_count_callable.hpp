@@ -14,10 +14,8 @@ namespace nd {
   class string_count_callable : public default_instantiable_callable<string_count_kernel> {
   public:
     string_count_callable()
-        : default_instantiable_callable<string_count_kernel>(
-              ndt::callable_type::make(ndt::make_type<intptr_t>(), {ndt::type(string_id), ndt::type(string_id)}))
-    {
-    }
+        : default_instantiable_callable<string_count_kernel>(ndt::make_type<ndt::callable_type>(
+              ndt::make_type<intptr_t>(), {ndt::type(string_id), ndt::type(string_id)})) {}
   };
 
 } // namespace dynd::nd

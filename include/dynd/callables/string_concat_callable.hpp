@@ -15,9 +15,7 @@ namespace nd {
   public:
     string_concat_callable()
         : default_instantiable_callable<string_concatenation_kernel>(
-              ndt::callable_type::make(ndt::type(string_id), {ndt::type(string_id), ndt::type(string_id)}))
-    {
-    }
+              ndt::make_type<ndt::callable_type>(ndt::type(string_id), {ndt::type(string_id), ndt::type(string_id)})) {}
   };
 
 } // namespace dynd::nd

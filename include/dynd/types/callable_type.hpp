@@ -30,9 +30,16 @@ namespace ndt {
     callable_type(const type &ret, size_t narg, const type *args, const std::vector<std::pair<type, std::string>> &kwds)
         : callable_type(ret, make_type<tuple_type>(narg, args), make_type<struct_type>(kwds)) {}
 
+    callable_type(const type &ret, size_t narg, const type *args)
+        : callable_type(ret, make_type<tuple_type>(narg, args), make_type<struct_type>()) {}
+
+    callable_type(const type &ret, const std::vector<type> &args) : callable_type(ret, args.size(), args.data()) {}
+
     callable_type(const type &ret, std::initializer_list<type> args,
                   const std::vector<std::pair<type, std::string>> &kwds)
         : callable_type(ret, args.size(), args.begin(), kwds) {}
+
+    callable_type(const type &ret_tp) : callable_type(ret_tp, 0, nullptr) {}
 
     const type &get_return_type() const { return m_return_type; }
 
@@ -133,24 +140,16 @@ namespace ndt {
       return make_type<callable_type>(ret_tp, tuple_tp,
                                       make_type<struct_type>(tuple_tp.extended<tuple_type>()->is_variadic()));
     }
-
-    /** Makes an callable type with just positional arguments */
-    static type make(const type &ret_tp, const std::vector<type> &pos_tp) {
-      return make(ret_tp, make_type<tuple_type>(pos_tp.size(), pos_tp.data()), make_type<struct_type>());
-    }
-
-    /** Makes an callable type with no arguments */
-    static type make(const type &ret_tp) { return make(ret_tp, make_type<tuple_type>(), make_type<struct_type>()); }
   };
 
   template <typename R>
   struct traits<R()> {
-    static type equivalent() { return callable_type::make(make_type<R>()); }
+    static type equivalent() { return make_type<callable_type>(make_type<R>()); }
   };
 
   template <typename R, typename A0, typename... A>
   struct traits<R(A0, A...)> {
-    static type equivalent() { return callable_type::make(make_type<R>(), {make_type<A0>(), make_type<A>()...}); }
+    static type equivalent() { return make_type<callable_type>(make_type<R>(), {make_type<A0>(), make_type<A>()...}); }
 
     template <typename... T>
     static type equivalent(const T &... names) {

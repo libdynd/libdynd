@@ -17,14 +17,15 @@ namespace nd {
     public:
       parse_callable()
           : default_instantiable_callable<parse_kernel<ResID>>(
-                ndt::callable_type::make(ResID, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
+                ndt::make_type<ndt::callable_type>(ResID, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
     };
 
     template <>
     class parse_callable<option_id> : public base_callable {
     public:
       parse_callable()
-          : base_callable(ndt::callable_type::make(option_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
+          : base_callable(
+                ndt::make_type<ndt::callable_type>(option_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                         const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
@@ -75,7 +76,8 @@ namespace nd {
     class parse_callable<struct_id> : public base_callable {
     public:
       parse_callable()
-          : base_callable(ndt::callable_type::make(struct_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
+          : base_callable(
+                ndt::make_type<ndt::callable_type>(struct_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),
                         const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -118,8 +120,8 @@ namespace nd {
     class parse_callable<fixed_dim_id> : public base_callable {
     public:
       parse_callable()
-          : base_callable(
-                ndt::callable_type::make(fixed_dim_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
+          : base_callable(ndt::make_type<ndt::callable_type>(fixed_dim_id,
+                                                             {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),
                         const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -154,7 +156,8 @@ namespace nd {
     class parse_callable<var_dim_id> : public base_callable {
     public:
       parse_callable()
-          : base_callable(ndt::callable_type::make(var_dim_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
+          : base_callable(
+                ndt::make_type<ndt::callable_type>(var_dim_id, {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),
                         const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
