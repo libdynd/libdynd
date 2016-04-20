@@ -16,11 +16,10 @@ namespace nd {
   public:
     real_callable()
         : default_instantiable_callable<real_kernel<Arg0ID>>(
-              ndt::callable_type::make(ndt::make_type<typename nd::real_kernel<Arg0ID>::real_type>(),
-                                       {ndt::make_type<typename nd::real_kernel<Arg0ID>::complex_type>()}))
+              ndt::make_type<ndt::callable_type>(ndt::make_type<typename nd::real_kernel<Arg0ID>::real_type>(),
+                                                 {ndt::make_type<typename nd::real_kernel<Arg0ID>::complex_type>()}))
 
-    {
-    }
+    {}
   };
 
 } // namespace dynd::nd

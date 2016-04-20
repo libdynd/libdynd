@@ -82,7 +82,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
     return ndt::make_type<ndt::option_type>(
         ndt::substitute(pattern.extended<option_type>()->get_value_type(), typevars, concrete));
   case callable_id:
-    return ndt::callable_type::make(
+    return ndt::make_type<ndt::callable_type>(
         substitute(pattern.extended<callable_type>()->get_return_type(), typevars, concrete),
         substitute(pattern.extended<callable_type>()->get_pos_tuple(), typevars, concrete),
         substitute(pattern.extended<callable_type>()->get_kwd_struct(), typevars, concrete));

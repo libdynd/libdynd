@@ -16,10 +16,8 @@ namespace nd {
   public:
     imag_callable()
         : default_instantiable_callable<imag_kernel<Arg0ID>>(
-              ndt::callable_type::make(ndt::make_type<typename nd::imag_kernel<Arg0ID>::real_type>(),
-                                       {ndt::make_type<typename nd::imag_kernel<Arg0ID>::complex_type>()}))
-    {
-    }
+              ndt::make_type<ndt::callable_type>(ndt::make_type<typename nd::imag_kernel<Arg0ID>::real_type>(),
+                                                 {ndt::make_type<typename nd::imag_kernel<Arg0ID>::complex_type>()})) {}
   };
 
 } // namespace dynd::nd

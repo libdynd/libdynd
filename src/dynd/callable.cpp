@@ -69,7 +69,7 @@ std::map<std::string, nd::callable> &nd::detail::get_regfunctions() {
 
 nd::callable dynd::make_callable_from_assignment(const ndt::type &dst_tp, const ndt::type &src_tp,
                                                  assign_error_mode errmode) {
-  return nd::make_callable<unary_assignment_callable>(ndt::callable_type::make(dst_tp, src_tp), errmode);
+  return nd::make_callable<unary_assignment_callable>(ndt::make_type<ndt::callable_type>(dst_tp, {src_tp}), errmode);
 }
 
 void nd::detail::check_narg(const ndt::callable_type *af_tp, size_t narg) {

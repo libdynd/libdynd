@@ -15,10 +15,8 @@ namespace nd {
   class sum_callable : public default_instantiable_callable<sum_kernel<Arg0ID>> {
   public:
     sum_callable()
-        : default_instantiable_callable<sum_kernel<Arg0ID>>(
-              ndt::callable_type::make(ndt::make_type<typename nd::sum_kernel<Arg0ID>::dst_type>(), ndt::type(Arg0ID)))
-    {
-    }
+        : default_instantiable_callable<sum_kernel<Arg0ID>>(ndt::make_type<ndt::callable_type>(
+              ndt::make_type<typename nd::sum_kernel<Arg0ID>::dst_type>(), {ndt::type(Arg0ID)})) {}
   };
 
 } // namespace dynd::nd

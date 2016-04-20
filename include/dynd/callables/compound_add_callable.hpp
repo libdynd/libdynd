@@ -16,9 +16,7 @@ namespace nd {
   public:
     compound_add_callable()
         : default_instantiable_callable<compound_add_kernel_t<DstTypeID, Src0TypeID>>(
-              ndt::callable_type::make(ndt::type(DstTypeID), ndt::type(Src0TypeID)))
-    {
-    }
+              ndt::make_type<ndt::callable_type>(ndt::type(DstTypeID), {ndt::type(Src0TypeID)})) {}
   };
 
 } // namespace dynd::nd
