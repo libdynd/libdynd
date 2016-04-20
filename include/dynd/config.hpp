@@ -13,12 +13,12 @@
 #include <cstdint>
 #include <cstdlib>
 #include <initializer_list>
+#include <iostream>
 #include <limits>
 #include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <iostream>
 
 #include <dynd/git_version.hpp>
 #include <dynd/visibility.hpp>
@@ -119,8 +119,7 @@ public:
 #ifdef DYND_CLING
 // Don't use the memcpy function (it has inline assembly).
 
-inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
-{
+inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count) {
   char *cdst = (char *)dst;
   const char *csrc = (const char *)src;
   while (count--) {
@@ -139,8 +138,7 @@ namespace dynd {
 
 template <typename T, typename U, typename V>
 struct is_common_type_of : std::conditional<std::is_same<T, typename std::common_type<U, V>::type>::value,
-                                            std::true_type, std::false_type>::type {
-};
+                                            std::true_type, std::false_type>::type {};
 
 template <bool Value, template <typename...> class T, template <typename...> class U, typename... As>
 struct conditional_make;
@@ -162,12 +160,10 @@ struct is_function_pointer {
 };
 
 template <typename T>
-struct is_vector : std::false_type {
-};
+struct is_vector : std::false_type {};
 
 template <typename T>
-struct is_vector<std::vector<T>> : std::true_type {
-};
+struct is_vector<std::vector<T>> : std::true_type {};
 
 template <typename T>
 long intrusive_ptr_use_count(T *ptr);
@@ -191,16 +187,14 @@ public:
   intrusive_ptr() : m_ptr(0) {}
 
   /** Constructor from a raw pointer */
-  explicit intrusive_ptr(T *ptr, bool add_ref = true) : m_ptr(ptr)
-  {
+  explicit intrusive_ptr(T *ptr, bool add_ref = true) : m_ptr(ptr) {
     if (m_ptr != 0 && add_ref) {
       intrusive_ptr_retain(m_ptr);
     }
   }
 
   /** Copy constructor */
-  intrusive_ptr(const intrusive_ptr &other) : m_ptr(other.m_ptr)
-  {
+  intrusive_ptr(const intrusive_ptr &other) : m_ptr(other.m_ptr) {
     if (m_ptr != 0) {
       intrusive_ptr_retain(m_ptr);
     }
@@ -210,8 +204,7 @@ public:
   intrusive_ptr(intrusive_ptr &&other) : m_ptr(other.m_ptr) { other.m_ptr = 0; }
 
   /** Destructor */
-  ~intrusive_ptr()
-  {
+  ~intrusive_ptr() {
     if (m_ptr != 0) {
       intrusive_ptr_release(m_ptr);
     }
@@ -224,24 +217,21 @@ public:
   T *operator->() const { return m_ptr; }
 
   /** Assignment */
-  intrusive_ptr &operator=(const intrusive_ptr &rhs)
-  {
+  intrusive_ptr &operator=(const intrusive_ptr &rhs) {
     if (m_ptr != 0) {
       intrusive_ptr_release(m_ptr);
     }
     if (rhs.m_ptr != 0) {
       m_ptr = rhs.m_ptr;
       intrusive_ptr_retain(m_ptr);
-    }
-    else {
+    } else {
       m_ptr = 0;
     }
     return *this;
   }
 
   /** Move assignment */
-  intrusive_ptr &operator=(intrusive_ptr &&rhs)
-  {
+  intrusive_ptr &operator=(intrusive_ptr &&rhs) {
     if (m_ptr != 0) {
       intrusive_ptr_release(m_ptr);
     }
@@ -251,8 +241,7 @@ public:
   }
 
   /** Assignment from raw memory_block pointer */
-  intrusive_ptr &operator=(T *rhs)
-  {
+  intrusive_ptr &operator=(T *rhs) {
     if (m_ptr != nullptr) {
       intrusive_ptr_release(m_ptr);
     }
@@ -272,15 +261,13 @@ public:
   T *get() const { return m_ptr; }
 
   /** Gives away ownership of the reference count */
-  T *release()
-  {
+  T *release() {
     T *result = m_ptr;
     m_ptr = 0;
     return result;
   }
 
-  void swap(intrusive_ptr &rhs)
-  {
+  void swap(intrusive_ptr &rhs) {
     T *tmp = m_ptr;
     m_ptr = rhs.m_ptr;
     rhs.m_ptr = tmp;
@@ -288,14 +275,12 @@ public:
 };
 
 template <typename T>
-bool operator==(const intrusive_ptr<T> &lhs, const intrusive_ptr<T> &rhs)
-{
+bool operator==(const intrusive_ptr<T> &lhs, const intrusive_ptr<T> &rhs) {
   return lhs.get() == rhs.get();
 }
 
 template <typename T>
-bool operator!=(const intrusive_ptr<T> &lhs, const intrusive_ptr<T> &rhs)
-{
+bool operator!=(const intrusive_ptr<T> &lhs, const intrusive_ptr<T> &rhs) {
   return lhs.get() == rhs.get();
 }
 
@@ -310,8 +295,7 @@ struct is_instance<T, T<A...>> {
 };
 
 template <typename T, typename U>
-T alias_cast(U value)
-{
+T alias_cast(U value) {
   union {
     U tmp;
     T res;
@@ -337,7 +321,7 @@ struct is_char_string_param<char *> {
   static const bool value = true;
 };
 template <int N>
-struct is_char_string_param<const char(&)[N]> {
+struct is_char_string_param<const char (&)[N]> {
   static const bool value = true;
 };
 template <int N>
@@ -570,20 +554,17 @@ struct arg_at {
 
 #define DYND_GET(NAME, TYPE, DEFAULT_VALUE)                                                                            \
   template <typename T, bool ReturnDefaultValue>                                                                       \
-  typename std::enable_if<ReturnDefaultValue, TYPE>::type get_##NAME()                                                 \
-  {                                                                                                                    \
+  typename std::enable_if<ReturnDefaultValue, TYPE>::type get_##NAME() {                                               \
     return DEFAULT_VALUE;                                                                                              \
   }                                                                                                                    \
                                                                                                                        \
   template <typename T, bool ReturnDefaultValue>                                                                       \
-  typename std::enable_if<!ReturnDefaultValue, TYPE>::type get_##NAME()                                                \
-  {                                                                                                                    \
+  typename std::enable_if<!ReturnDefaultValue, TYPE>::type get_##NAME() {                                              \
     return T::NAME;                                                                                                    \
   }                                                                                                                    \
                                                                                                                        \
   template <typename T>                                                                                                \
-  TYPE get_##NAME()                                                                                                    \
-  {                                                                                                                    \
+  TYPE get_##NAME() {                                                                                                  \
     return get_##NAME<T, !has_##NAME<T>::value>();                                                                     \
   }
 
@@ -650,32 +631,25 @@ struct is_boolean<bool1> {
 };
 
 template <typename T>
-struct is_integral : std::is_integral<T> {
-};
+struct is_integral : std::is_integral<T> {};
 
 template <typename T>
-struct is_floating_point : std::is_floating_point<T> {
-};
+struct is_floating_point : std::is_floating_point<T> {};
 
 template <typename T>
-struct is_complex : std::false_type {
-};
+struct is_complex : std::false_type {};
 
 template <typename T>
-struct is_arithmetic : std::integral_constant<bool, is_integral<T>::value || is_floating_point<T>::value> {
-};
+struct is_arithmetic : std::integral_constant<bool, is_integral<T>::value || is_floating_point<T>::value> {};
 
 template <typename T>
-struct is_numeric : std::integral_constant<bool, is_arithmetic<T>::value || is_complex<T>::value> {
-};
+struct is_numeric : std::integral_constant<bool, is_arithmetic<T>::value || is_complex<T>::value> {};
 
 template <typename T, typename U>
-struct is_mixed_arithmetic : std::integral_constant<bool, is_arithmetic<T>::value && is_arithmetic<U>::value> {
-};
+struct is_mixed_arithmetic : std::integral_constant<bool, is_arithmetic<T>::value && is_arithmetic<U>::value> {};
 
 template <typename T>
-struct is_mixed_arithmetic<T, T> : std::false_type {
-};
+struct is_mixed_arithmetic<T, T> : std::false_type {};
 
 template <typename... Ts>
 using true_t = std::true_type;
@@ -689,14 +663,12 @@ using not_t = std::integral_constant<bool, !T::value>;
 // Checks whether T is not the common type of T and U
 template <typename T, typename U>
 struct is_lcast_arithmetic : not_t<typename conditional_make<is_arithmetic<T>::value && is_arithmetic<U>::value,
-                                                             is_common_type_of, true_t, T, T, U>::type> {
-};
+                                                             is_common_type_of, true_t, T, T, U>::type> {};
 
 // Checks whether U is not the common type of T and U
 template <typename T, typename U>
 struct is_rcast_arithmetic : not_t<typename conditional_make<is_arithmetic<T>::value && is_arithmetic<U>::value,
-                                                             is_common_type_of, true_t, U, T, U>::type> {
-};
+                                                             is_common_type_of, true_t, U, T, U>::type> {};
 
 template <typename T>
 struct is_signed {
@@ -712,20 +684,17 @@ template <typename T>
 T strto(const char *begin, char **end);
 
 template <>
-inline float strto(const char *begin, char **end)
-{
+inline float strto(const char *begin, char **end) {
   return std::strtof(begin, end);
 }
 
 template <>
-inline double strto(const char *begin, char **end)
-{
+inline double strto(const char *begin, char **end) {
   return std::strtod(begin, end);
 }
 
 template <typename T>
-T floor(T value)
-{
+T floor(T value) {
   return std::floor(value);
 }
 
@@ -746,11 +715,9 @@ enum assign_error_mode {
   assign_error_default
 };
 
-struct overflow_check_t {
-};
+struct overflow_check_t {};
 
-inline std::ostream &operator<<(std::ostream &o, assign_error_mode errmode)
-{
+inline std::ostream &operator<<(std::ostream &o, assign_error_mode errmode) {
   switch (errmode) {
   case assign_error_nocheck:
     o << "nocheck";
@@ -779,18 +746,15 @@ namespace detail {
   // Use these declarations before includeing bool1, int128, uint128, etc. so they are usable there.
   // Helper to use for determining if a type is in a given list of unique types.
   template <typename T, typename... Types>
-  struct TypeSetCheckInternal : std::is_same<T, Types>... {
-  };
+  struct TypeSetCheckInternal : std::is_same<T, Types>... {};
 
   // Determine if a type is in a given list of unique types.
   template <typename T, typename... Types>
-  struct TypeSetCheck : std::is_base_of<std::true_type, TypeSetCheckInternal<T, Types...>>::type {
-  };
+  struct TypeSetCheck : std::is_base_of<std::true_type, TypeSetCheckInternal<T, Types...>>::type {};
 
   // Enable a given template only for a given list of unique types.
   template <typename T, typename... Types>
-  struct enable_for : std::enable_if<TypeSetCheck<T, Types...>::value, int> {
-  };
+  struct enable_for : std::enable_if<TypeSetCheck<T, Types...>::value, int> {};
 } // namespace dynd::detail
 
 } // namespace dynd
@@ -815,15 +779,13 @@ template <typename T, typename U>
 struct operator_if_only_lcast_arithmetic
     : std::enable_if<!std::is_same<T, U>::value && !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
                          is_lcast_arithmetic<T, U>::value && !is_rcast_arithmetic<T, U>::value,
-                     U> {
-};
+                     U> {};
 
 template <typename T, typename U>
 struct operator_if_only_rcast_arithmetic
     : std::enable_if<!std::is_same<T, U>::value && !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
                          !is_lcast_arithmetic<T, U>::value && is_rcast_arithmetic<T, U>::value,
-                     T> {
-};
+                     T> {};
 
 template <typename... T>
 struct make_void {
@@ -835,68 +797,61 @@ struct operator_if_lrcast_arithmetic
     : std::enable_if<!std::is_same<T, U>::value && !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
                          is_lcast_arithmetic<T, U>::value && is_rcast_arithmetic<T, U>::value,
                      typename conditional_make<is_arithmetic<T>::value && is_arithmetic<U>::value, std::common_type,
-                                               make_void, T, U>::type::type> {
-};
+                                               make_void, T, U>::type::type> {};
 
 template <typename T, typename U>
-typename operator_if_only_rcast_arithmetic<T, U>::type operator+(T lhs, U rhs)
-{
+typename operator_if_only_rcast_arithmetic<T, U>::type operator+(T lhs, U rhs) {
   return lhs + static_cast<T>(rhs);
 }
 
 template <typename T, typename U>
-typename operator_if_only_lcast_arithmetic<T, U>::type operator+(T lhs, U rhs)
-{
+typename operator_if_only_lcast_arithmetic<T, U>::type operator+(T lhs, U rhs) {
   return static_cast<U>(lhs) + rhs;
 }
 
 template <typename T, typename U>
-typename operator_if_lrcast_arithmetic<T, U>::type operator+(T lhs, U rhs)
-{
+typename operator_if_lrcast_arithmetic<T, U>::type operator+(T lhs, U rhs) {
   return static_cast<typename std::common_type<T, U>::type>(lhs) +
          static_cast<typename std::common_type<T, U>::type>(rhs);
 }
 
 template <typename T, typename U>
-typename operator_if_only_rcast_arithmetic<T, U>::type operator/(T lhs, U rhs)
-{
+typename operator_if_only_rcast_arithmetic<T, U>::type operator/(T lhs, U rhs) {
   return lhs / static_cast<T>(rhs);
 }
 
 template <typename T, typename U>
-typename operator_if_only_lcast_arithmetic<T, U>::type operator/(T lhs, U rhs)
-{
+typename operator_if_only_lcast_arithmetic<T, U>::type operator/(T lhs, U rhs) {
   return static_cast<U>(lhs) / rhs;
 }
 
 template <typename T, typename U>
-typename operator_if_lrcast_arithmetic<T, U>::type operator/(T lhs, U rhs)
-{
+typename operator_if_lrcast_arithmetic<T, U>::type operator/(T lhs, U rhs) {
   return static_cast<typename std::common_type<T, U>::type>(lhs) /
          static_cast<typename std::common_type<T, U>::type>(rhs);
 }
 
 template <typename T, typename U>
-
-typename std::enable_if<is_mixed_arithmetic<T, U>::value, complex<typename std::common_type<T, U>::type>>::type
-operator/(complex<T> lhs, U rhs)
-{
+typename std::enable_if<is_mixed_arithmetic<T, U>::value &&
+                            !std::is_same<float128, typename std::common_type<T, U>::type>::value,
+                        complex<typename std::common_type<T, U>::type>>::type
+operator/(complex<T> lhs, U rhs) {
   return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) /
          static_cast<typename std::common_type<T, U>::type>(rhs);
 }
 
 template <typename T, typename U>
-
-typename std::enable_if<is_mixed_arithmetic<T, U>::value, complex<typename std::common_type<T, U>::type>>::type
-operator/(T lhs, complex<U> rhs)
-{
+typename std::enable_if<is_mixed_arithmetic<T, U>::value &&
+                            !std::is_same<float128, typename std::common_type<T, U>::type>::value,
+                        complex<typename std::common_type<T, U>::type>>::type
+operator/(T lhs, complex<U> rhs) {
   return static_cast<typename std::common_type<T, U>::type>(lhs) /
          static_cast<complex<typename std::common_type<T, U>::type>>(rhs);
 }
 
 template <typename T, typename U>
-typename std::enable_if<std::is_floating_point<T>::value && is_integral<U>::value, T &>::type operator/=(T &lhs, U rhs)
-{
+typename std::enable_if<std::is_floating_point<T>::value && is_integral<U>::value, T &>::type operator/=(T &lhs,
+                                                                                                         U rhs) {
   return lhs /= static_cast<T>(rhs);
 }
 
