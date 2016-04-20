@@ -832,16 +832,18 @@ typename operator_if_lrcast_arithmetic<T, U>::type operator/(T lhs, U rhs) {
 }
 
 template <typename T, typename U>
-
-typename std::enable_if<is_mixed_arithmetic<T, U>::value, complex<typename std::common_type<T, U>::type>>::type
+typename std::enable_if<is_mixed_arithmetic<T, U>::value &&
+                            !std::is_same<float128, typename std::common_type<T, U>::type>::value,
+                        complex<typename std::common_type<T, U>::type>>::type
 operator/(complex<T> lhs, U rhs) {
   return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) /
          static_cast<typename std::common_type<T, U>::type>(rhs);
 }
 
 template <typename T, typename U>
-
-typename std::enable_if<is_mixed_arithmetic<T, U>::value, complex<typename std::common_type<T, U>::type>>::type
+typename std::enable_if<is_mixed_arithmetic<T, U>::value &&
+                            !std::is_same<float128, typename std::common_type<T, U>::type>::value,
+                        complex<typename std::common_type<T, U>::type>>::type
 operator/(T lhs, complex<U> rhs) {
   return static_cast<typename std::common_type<T, U>::type>(lhs) /
          static_cast<complex<typename std::common_type<T, U>::type>>(rhs);
