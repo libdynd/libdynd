@@ -106,7 +106,7 @@ void ndt::callable_type::transform_child_types(type_transform_fn_t transform_fn,
   transform_fn(m_pos_tuple, arrmeta_offset, extra, tmp_pos_types, was_transformed);
   transform_fn(m_kwd_struct, arrmeta_offset, extra, tmp_kwd_types, was_transformed);
   if (was_transformed) {
-    out_transformed_tp = make(tmp_return_type, tmp_pos_types, tmp_kwd_types);
+    out_transformed_tp = make_type<callable_type>(tmp_return_type, tmp_pos_types, tmp_kwd_types);
     out_was_transformed = true;
   } else {
     out_transformed_tp = type(this, true);
@@ -119,7 +119,7 @@ ndt::type ndt::callable_type::get_canonical_type() const {
   tmp_return_type = m_return_type.get_canonical_type();
   tmp_pos_types = m_pos_tuple.get_canonical_type();
   tmp_kwd_types = m_kwd_struct.get_canonical_type();
-  return make(tmp_return_type, tmp_pos_types, tmp_kwd_types);
+  return make_type<callable_type>(tmp_return_type, tmp_pos_types, tmp_kwd_types);
 }
 
 void ndt::callable_type::get_vars(std::unordered_set<std::string> &vars) const {

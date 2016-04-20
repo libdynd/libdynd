@@ -17,11 +17,10 @@ namespace nd {
   public:
     conj_callable()
         : default_instantiable_callable<conj_kernel<Arg0ID>>(
-              ndt::callable_type::make(ndt::make_type<typename nd::conj_kernel<Arg0ID>::complex_type>(),
-                                       {ndt::make_type<typename nd::conj_kernel<Arg0ID>::complex_type>()}))
+              ndt::make_type<ndt::callable_type>(ndt::make_type<typename nd::conj_kernel<Arg0ID>::complex_type>(),
+                                                 {ndt::make_type<typename nd::conj_kernel<Arg0ID>::complex_type>()}))
 
-    {
-    }
+    {}
   };
 
 } // namespace dynd::nd

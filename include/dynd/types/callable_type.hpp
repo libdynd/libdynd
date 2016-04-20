@@ -30,8 +30,8 @@ namespace ndt {
     callable_type(const type &ret, size_t narg, const type *args, const std::vector<std::pair<type, std::string>> &kwds)
         : callable_type(ret, make_type<tuple_type>(narg, args), make_type<struct_type>(kwds)) {}
 
-    callable_type(const type &ret, size_t narg, const type *args)
-        : callable_type(ret, make_type<tuple_type>(narg, args), make_type<struct_type>()) {}
+    callable_type(const type &ret, size_t narg, const type *args, bool variadic = false)
+        : callable_type(ret, make_type<tuple_type>(narg, args, variadic), make_type<struct_type>()) {}
 
     callable_type(const type &ret, const std::vector<type> &args) : callable_type(ret, args.size(), args.data()) {}
 
@@ -125,21 +125,6 @@ namespace ndt {
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
-
-    /** Makes an callable type with both positional and keyword arguments */
-    static type make(const type &ret_tp, const type &tuple_tp, const type &struct_tp) {
-      return type(new callable_type(ret_tp, tuple_tp, struct_tp), false);
-    }
-
-    /** Makes an callable type with just positional arguments */
-    static type make(const type &ret_tp, const type &tuple_tp) {
-      if (tuple_tp.get_id() != tuple_id) {
-        return make_type<callable_type>(ret_tp, make_type<tuple_type>({tuple_tp}), make_type<struct_type>());
-      }
-
-      return make_type<callable_type>(ret_tp, tuple_tp,
-                                      make_type<struct_type>(tuple_tp.extended<tuple_type>()->is_variadic()));
-    }
   };
 
   template <typename R>

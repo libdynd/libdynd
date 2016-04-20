@@ -15,7 +15,7 @@ namespace nd {
   template <type_id_t Arg0ID>
   class serialize_callable : public base_callable {
   public:
-    serialize_callable() : base_callable(ndt::callable_type::make(ndt::type("bytes"), {ndt::type(Arg0ID)})) {}
+    serialize_callable() : base_callable(ndt::make_type<ndt::callable_type>(ndt::type("bytes"), {ndt::type(Arg0ID)})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
