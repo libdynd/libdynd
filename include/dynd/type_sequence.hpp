@@ -395,4 +395,7 @@ typename std::enable_if<(S::size2() > 1), void>::type for_each(A &&... a) {
   for_each<typename pop_front<S>::type>(std::forward<A>(a)...);
 }
 
+template <typename... A>
+using outer_t = typename outer<A...>::type;
+
 } // namespace dynd
