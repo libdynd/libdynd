@@ -90,93 +90,88 @@ TEST(Config, Outer) {
   struct type8;
   struct type9;
 
-  EXPECT_TRUE((is_same<typename outer<type_sequence<type0>, type_sequence<type1, type2>>::type,
+  EXPECT_TRUE((is_same<outer_t<type_sequence<type0>, type_sequence<type1, type2>>,
                        type_sequence<type_sequence<type0, type1>, type_sequence<type0, type2>>>::value));
 
-  EXPECT_TRUE((is_same<typename outer<type_sequence<type0, type1>, type_sequence<type2>>::type,
+  EXPECT_TRUE((is_same<outer_t<type_sequence<type0, type1>, type_sequence<type2>>,
                        type_sequence<type_sequence<type0, type2>, type_sequence<type1, type2>>>::value));
 
-  EXPECT_TRUE((is_same<typename outer<type_sequence<type0, type1>, type_sequence<type2, type3>>::type,
+  EXPECT_TRUE((is_same<outer_t<type_sequence<type0, type1>, type_sequence<type2, type3>>,
                        type_sequence<type_sequence<type0, type2>, type_sequence<type0, type3>,
                                      type_sequence<type1, type2>, type_sequence<type1, type3>>>::value));
 
-  EXPECT_TRUE((is_same<typename outer<type_sequence<type0, type1>, type_sequence<type2, type3, type4>>::type,
+  EXPECT_TRUE((is_same<outer_t<type_sequence<type0, type1>, type_sequence<type2, type3, type4>>,
                        type_sequence<type_sequence<type0, type2>, type_sequence<type0, type3>,
                                      type_sequence<type0, type4>, type_sequence<type1, type2>,
                                      type_sequence<type1, type3>, type_sequence<type1, type4>>>::value));
 
-  EXPECT_TRUE((is_same<typename outer<type_sequence<type0, type1, type2>, type_sequence<type3, type4>>::type,
+  EXPECT_TRUE((is_same<outer_t<type_sequence<type0, type1, type2>, type_sequence<type3, type4>>,
                        type_sequence<type_sequence<type0, type3>, type_sequence<type0, type4>,
                                      type_sequence<type1, type3>, type_sequence<type1, type4>,
                                      type_sequence<type2, type3>, type_sequence<type2, type4>>>::value));
 
   EXPECT_TRUE(
-      (is_same<typename outer<type_sequence<type0, type1, type2, type3, type4>,
-                              type_sequence<type5, type6, type7, type8, type9>>::type,
-               type_sequence<type_sequence<type0, type5>, type_sequence<type0, type6>, type_sequence<type0, type7>,
-                             type_sequence<type0, type8>, type_sequence<type0, type9>, type_sequence<type1, type5>,
-                             type_sequence<type1, type6>, type_sequence<type1, type7>, type_sequence<type1, type8>,
-                             type_sequence<type1, type9>, type_sequence<type2, type5>, type_sequence<type2, type6>,
-                             type_sequence<type2, type7>, type_sequence<type2, type8>, type_sequence<type2, type9>,
-                             type_sequence<type3, type5>, type_sequence<type3, type6>, type_sequence<type3, type7>,
-                             type_sequence<type3, type8>, type_sequence<type3, type9>, type_sequence<type4, type5>,
-                             type_sequence<type4, type6>, type_sequence<type4, type7>, type_sequence<type4, type8>,
-                             type_sequence<type4, type9>>>::value));
-
-  EXPECT_TRUE(
-      (is_same<typename outer<type_sequence<type0>, type_sequence<type1, type2>, type_sequence<type3, type4>>::type,
-               type_sequence<type_sequence<type0, type1, type3>, type_sequence<type0, type1, type4>,
-                             type_sequence<type0, type2, type3>, type_sequence<type0, type2, type4>>>::value));
-
-  EXPECT_TRUE(
-      (is_same<typename outer<type_sequence<type0, type1>, type_sequence<type2>, type_sequence<type3, type4>>::type,
-               type_sequence<type_sequence<type0, type2, type3>, type_sequence<type0, type2, type4>,
-                             type_sequence<type1, type2, type3>, type_sequence<type1, type2, type4>>>::value));
-
-  EXPECT_TRUE(
-      (is_same<typename outer<type_sequence<type0, type1>, type_sequence<type2, type3>, type_sequence<type4>>::type,
-               type_sequence<type_sequence<type0, type2, type4>, type_sequence<type0, type3, type4>,
-                             type_sequence<type1, type2, type4>, type_sequence<type1, type3, type4>>>::value));
-
-  EXPECT_TRUE(
       (is_same<
-          typename outer<type_sequence<type0, type1>, type_sequence<type2, type3>, type_sequence<type4, type5>>::type,
-          type_sequence<type_sequence<type0, type2, type4>, type_sequence<type0, type2, type5>,
-                        type_sequence<type0, type3, type4>, type_sequence<type0, type3, type5>,
-                        type_sequence<type1, type2, type4>, type_sequence<type1, type2, type5>,
-                        type_sequence<type1, type3, type4>, type_sequence<type1, type3, type5>>>::value));
+          outer_t<type_sequence<type0, type1, type2, type3, type4>, type_sequence<type5, type6, type7, type8, type9>>,
+          type_sequence<type_sequence<type0, type5>, type_sequence<type0, type6>, type_sequence<type0, type7>,
+                        type_sequence<type0, type8>, type_sequence<type0, type9>, type_sequence<type1, type5>,
+                        type_sequence<type1, type6>, type_sequence<type1, type7>, type_sequence<type1, type8>,
+                        type_sequence<type1, type9>, type_sequence<type2, type5>, type_sequence<type2, type6>,
+                        type_sequence<type2, type7>, type_sequence<type2, type8>, type_sequence<type2, type9>,
+                        type_sequence<type3, type5>, type_sequence<type3, type6>, type_sequence<type3, type7>,
+                        type_sequence<type3, type8>, type_sequence<type3, type9>, type_sequence<type4, type5>,
+                        type_sequence<type4, type6>, type_sequence<type4, type7>, type_sequence<type4, type8>,
+                        type_sequence<type4, type9>>>::value));
 
-  EXPECT_TRUE((is_same<typename outer<type_sequence<type0, type1, type2>, type_sequence<type3, type4>,
-                                      type_sequence<type5, type6>>::type,
-                       type_sequence<type_sequence<type0, type3, type5>, type_sequence<type0, type3, type6>,
-                                     type_sequence<type0, type4, type5>, type_sequence<type0, type4, type6>,
-                                     type_sequence<type1, type3, type5>, type_sequence<type1, type3, type6>,
-                                     type_sequence<type1, type4, type5>, type_sequence<type1, type4, type6>,
-                                     type_sequence<type2, type3, type5>, type_sequence<type2, type3, type6>,
-                                     type_sequence<type2, type4, type5>, type_sequence<type2, type4, type6>>>::value));
+  EXPECT_TRUE((is_same<outer_t<type_sequence<type0>, type_sequence<type1, type2>, type_sequence<type3, type4>>,
+                       type_sequence<type_sequence<type0, type1, type3>, type_sequence<type0, type1, type4>,
+                                     type_sequence<type0, type2, type3>, type_sequence<type0, type2, type4>>>::value));
 
-  EXPECT_TRUE((is_same<typename outer<type_sequence<type0, type1>, type_sequence<type2, type3, type4>,
-                                      type_sequence<type5, type6>>::type,
-                       type_sequence<type_sequence<type0, type2, type5>, type_sequence<type0, type2, type6>,
-                                     type_sequence<type0, type3, type5>, type_sequence<type0, type3, type6>,
-                                     type_sequence<type0, type4, type5>, type_sequence<type0, type4, type6>,
-                                     type_sequence<type1, type2, type5>, type_sequence<type1, type2, type6>,
-                                     type_sequence<type1, type3, type5>, type_sequence<type1, type3, type6>,
-                                     type_sequence<type1, type4, type5>, type_sequence<type1, type4, type6>>>::value));
+  EXPECT_TRUE((is_same<outer_t<type_sequence<type0, type1>, type_sequence<type2>, type_sequence<type3, type4>>,
+                       type_sequence<type_sequence<type0, type2, type3>, type_sequence<type0, type2, type4>,
+                                     type_sequence<type1, type2, type3>, type_sequence<type1, type2, type4>>>::value));
 
-  EXPECT_TRUE((is_same<typename outer<type_sequence<type0, type1>, type_sequence<type2, type3>,
-                                      type_sequence<type4, type5, type6>>::type,
+  EXPECT_TRUE((is_same<outer_t<type_sequence<type0, type1>, type_sequence<type2, type3>, type_sequence<type4>>,
+                       type_sequence<type_sequence<type0, type2, type4>, type_sequence<type0, type3, type4>,
+                                     type_sequence<type1, type2, type4>, type_sequence<type1, type3, type4>>>::value));
+
+  EXPECT_TRUE((is_same<outer_t<type_sequence<type0, type1>, type_sequence<type2, type3>, type_sequence<type4, type5>>,
                        type_sequence<type_sequence<type0, type2, type4>, type_sequence<type0, type2, type5>,
-                                     type_sequence<type0, type2, type6>, type_sequence<type0, type3, type4>,
-                                     type_sequence<type0, type3, type5>, type_sequence<type0, type3, type6>,
+                                     type_sequence<type0, type3, type4>, type_sequence<type0, type3, type5>,
                                      type_sequence<type1, type2, type4>, type_sequence<type1, type2, type5>,
-                                     type_sequence<type1, type2, type6>, type_sequence<type1, type3, type4>,
-                                     type_sequence<type1, type3, type5>, type_sequence<type1, type3, type6>>>::value));
+                                     type_sequence<type1, type3, type4>, type_sequence<type1, type3, type5>>>::value));
+
+  EXPECT_TRUE(
+      (is_same<outer_t<type_sequence<type0, type1, type2>, type_sequence<type3, type4>, type_sequence<type5, type6>>,
+               type_sequence<type_sequence<type0, type3, type5>, type_sequence<type0, type3, type6>,
+                             type_sequence<type0, type4, type5>, type_sequence<type0, type4, type6>,
+                             type_sequence<type1, type3, type5>, type_sequence<type1, type3, type6>,
+                             type_sequence<type1, type4, type5>, type_sequence<type1, type4, type6>,
+                             type_sequence<type2, type3, type5>, type_sequence<type2, type3, type6>,
+                             type_sequence<type2, type4, type5>, type_sequence<type2, type4, type6>>>::value));
+
+  EXPECT_TRUE(
+      (is_same<outer_t<type_sequence<type0, type1>, type_sequence<type2, type3, type4>, type_sequence<type5, type6>>,
+               type_sequence<type_sequence<type0, type2, type5>, type_sequence<type0, type2, type6>,
+                             type_sequence<type0, type3, type5>, type_sequence<type0, type3, type6>,
+                             type_sequence<type0, type4, type5>, type_sequence<type0, type4, type6>,
+                             type_sequence<type1, type2, type5>, type_sequence<type1, type2, type6>,
+                             type_sequence<type1, type3, type5>, type_sequence<type1, type3, type6>,
+                             type_sequence<type1, type4, type5>, type_sequence<type1, type4, type6>>>::value));
+
+  EXPECT_TRUE(
+      (is_same<outer_t<type_sequence<type0, type1>, type_sequence<type2, type3>, type_sequence<type4, type5, type6>>,
+               type_sequence<type_sequence<type0, type2, type4>, type_sequence<type0, type2, type5>,
+                             type_sequence<type0, type2, type6>, type_sequence<type0, type3, type4>,
+                             type_sequence<type0, type3, type5>, type_sequence<type0, type3, type6>,
+                             type_sequence<type1, type2, type4>, type_sequence<type1, type2, type5>,
+                             type_sequence<type1, type2, type6>, type_sequence<type1, type3, type4>,
+                             type_sequence<type1, type3, type5>, type_sequence<type1, type3, type6>>>::value));
 
   EXPECT_TRUE(
       (is_same<
-          typename outer<type_sequence<type0, type1>, type_sequence<type2, type3>, type_sequence<type4, type5>,
-                         type_sequence<type6, type7>>::type,
+          outer_t<type_sequence<type0, type1>, type_sequence<type2, type3>, type_sequence<type4, type5>,
+                  type_sequence<type6, type7>>,
           type_sequence<type_sequence<type0, type2, type4, type6>, type_sequence<type0, type2, type4, type7>,
                         type_sequence<type0, type2, type5, type6>, type_sequence<type0, type2, type5, type7>,
                         type_sequence<type0, type3, type4, type6>, type_sequence<type0, type3, type4, type7>,
@@ -187,8 +182,8 @@ TEST(Config, Outer) {
                         type_sequence<type1, type3, type5, type6>, type_sequence<type1, type3, type5, type7>>>::value));
 
   EXPECT_TRUE(
-      (is_same<typename outer<type_sequence<type0, type1>, type_sequence<type2, type3>, type_sequence<type4, type5>,
-                              type_sequence<type6, type7>, type_sequence<type8, type9>>::type,
+      (is_same<outer_t<type_sequence<type0, type1>, type_sequence<type2, type3>, type_sequence<type4, type5>,
+                       type_sequence<type6, type7>, type_sequence<type8, type9>>,
                type_sequence<
                    type_sequence<type0, type2, type4, type6, type8>, type_sequence<type0, type2, type4, type6, type9>,
                    type_sequence<type0, type2, type4, type7, type8>, type_sequence<type0, type2, type4, type7, type9>,
