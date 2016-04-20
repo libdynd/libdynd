@@ -21,7 +21,7 @@ using namespace dynd;
 namespace {
 
 nd::callable make_dynamic_parse() {
-  dispatcher<nd::callable> dispatcher;
+  dispatcher<1, nd::callable> dispatcher;
   dispatcher.insert({{bool_id}, nd::make_callable<nd::json::parse_callable<bool_id>>()});
   dispatcher.insert({{int8_id}, nd::make_callable<nd::json::parse_callable<int8_id>>()});
   dispatcher.insert({{int16_id}, nd::make_callable<nd::json::parse_callable<int16_id>>()});

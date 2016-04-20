@@ -20,7 +20,7 @@ typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int
 
 template <template <type_id_t> class CallableType, template <type_id_t> class Condition, typename TypeIDSequence>
 nd::callable make_unary_arithmetic() {
-  dispatcher<nd::callable> dispatcher = nd::callable::make_all_if<CallableType, Condition, TypeIDSequence>();
+  dispatcher<1, nd::callable> dispatcher = nd::callable::make_all_if<CallableType, Condition, TypeIDSequence>();
 
   const ndt::type &tp = ndt::type("(Any) -> Any");
   for (type_id_t i0 : i2a<dim_ids>()) {
