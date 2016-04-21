@@ -4,7 +4,6 @@
 //
 
 #include <dynd/callables/assign_na_callable.hpp>
-#include <dynd/callables/assign_na_dispatch_callable.hpp>
 #include <dynd/callables/is_na_callable.hpp>
 #include <dynd/callables/is_na_dispatch_callable.hpp>
 #include <dynd/functional.hpp>
@@ -16,21 +15,29 @@ using namespace dynd;
 namespace {
 
 nd::callable make_assign_na() {
-  typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, float32_id, float64_id,
-                           complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id>
-      type_ids;
+  class dispatch_callable : public nd::base_dispatch_callable {
+    dispatcher<1, nd::callable> m_dispatcher;
 
-  dispatcher<1, nd::callable> dispatcher = nd::callable::new_make_all<nd::assign_na_callable, type_ids>();
-  dispatcher.insert({{uint32_id}, nd::make_callable<nd::assign_na_callable<uint32_id>>()});
-  dynd::dispatcher<1, nd::callable> dim_dispatcher;
+  public:
+    dispatch_callable()
+        : base_dispatch_callable(ndt::type("() -> ?Any")),
+          m_dispatcher(nd::callable::make_all<nd::assign_na_callable,
+                                              type_sequence<bool, int8_t, int16_t, int32_t, int64_t, int128, uint32_t,
+                                                            float, double, dynd::complex<float>, dynd::complex<double>,
+                                                            void, dynd::bytes, dynd::string, ndt::fixed_dim_type>>()) {}
 
-  auto t = ndt::type("() -> ?Any");
+    const nd::callable &specialize(const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                                   const ndt::type *DYND_UNUSED(src_tp)) {
+      if (dst_tp.get_id() == option_id) {
+        const ndt::type &dst_value_tp = dst_tp.extended<ndt::option_type>()->get_value_type();
+        return m_dispatcher(dst_value_tp.get_id());
+      }
 
-  for (auto tp_id : {fixed_dim_id, var_dim_id}) {
-    dim_dispatcher.insert({{tp_id}, nd::get_elwise()});
-  }
+      return nd::elwise;
+    }
+  };
 
-  return nd::make_callable<nd::assign_na_dispatch_callable>(t, dispatcher, dim_dispatcher);
+  return nd::make_callable<dispatch_callable>();
 }
 
 nd::callable make_is_na() {

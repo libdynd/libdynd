@@ -11,16 +11,16 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t ResValueID>
-  class assign_na_callable : public default_instantiable_callable<assign_na_kernel<ResValueID>> {
+  template <typename ResValueType>
+  class assign_na_callable : public default_instantiable_callable<assign_na_kernel<ResValueType>> {
   public:
     assign_na_callable()
-        : default_instantiable_callable<assign_na_kernel<ResValueID>>(
-              ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::option_type>(ResValueID))) {}
+        : default_instantiable_callable<assign_na_kernel<ResValueType>>(
+              ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::option_type>(ndt::make_type<ResValueType>()))) {}
   };
 
   template <>
-  class assign_na_callable<fixed_dim_id> : public base_callable {
+  class assign_na_callable<ndt::fixed_dim_type> : public base_callable {
   public:
     assign_na_callable()
         : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::option_type>(fixed_dim_id))) {}
@@ -34,64 +34,62 @@ namespace nd {
         cg.emplace_back(
             [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
-               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<bool_id>>(kernreq); });
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<bool>>(kernreq); });
         break;
       case int8_id:
         cg.emplace_back(
             [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
-               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<int8_id>>(kernreq); });
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<int8_t>>(kernreq); });
         break;
       case int16_id:
         cg.emplace_back(
             [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
-               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<int16_id>>(kernreq); });
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<int16_t>>(kernreq); });
         break;
       case int32_id:
         cg.emplace_back(
             [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
-               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<int32_id>>(kernreq); });
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<int32_t>>(kernreq); });
         break;
       case int64_id:
         cg.emplace_back(
             [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
-               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<int64_id>>(kernreq); });
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<int64_t>>(kernreq); });
         break;
       case int128_id:
         cg.emplace_back(
             [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
-               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<int128_id>>(kernreq); });
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<int128>>(kernreq); });
         break;
       case float32_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
-                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
-                           const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<assign_na_kernel<float32_id>>(kernreq);
-        });
+        cg.emplace_back(
+            [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+               const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<float>>(kernreq); });
         break;
       case float64_id:
-        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
-                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
-                           const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<assign_na_kernel<float64_id>>(kernreq);
-        });
+        cg.emplace_back(
+            [](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+               const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+               const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<assign_na_kernel<double>>(kernreq); });
         break;
       case complex_float32_id:
         cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                            const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                            const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<assign_na_kernel<complex_float32_id>>(kernreq);
+          kb.emplace_back<assign_na_kernel<complex<float>>>(kernreq);
         });
         break;
       case complex_float64_id:
         cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                            const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                            const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<assign_na_kernel<complex_float64_id>>(kernreq);
+          kb.emplace_back<assign_na_kernel<complex<double>>>(kernreq);
         });
         break;
       default:
