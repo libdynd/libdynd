@@ -1405,6 +1405,8 @@ nd::array nd::operator/(const array &a0, const array &a1) { return nd::divide(a0
 
 nd::array nd::operator&(const array &a0, const array &a1) { return nd::bitwise_and(a0, a1); }
 
+nd::array nd::operator|(const array &a0, const array &a1) { return nd::bitwise_or(a0, a1); }
+
 nd::array nd::operator&&(const array &a0, const array &a1) { return nd::logical_and(a0, a1); }
 
 nd::array nd::operator||(const array &a0, const array &a1) { return nd::logical_or(a0, a1); }
