@@ -20,12 +20,12 @@ using namespace dynd;
 namespace {
 
 template <template <type_id_t...> class KernelType>
-dispatcher<nd::callable> make_comparison_children() {
+dispatcher<2, nd::callable> make_comparison_children() {
   typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, uint8_id, uint16_id, uint32_id, uint64_id,
                            float32_id, float64_id>
       numeric_ids;
 
-  dispatcher<nd::callable> dispatcher = nd::callable::new_make_all<KernelType, numeric_ids, numeric_ids>();
+  dispatcher<2, nd::callable> dispatcher = nd::callable::new_make_all<KernelType, numeric_ids, numeric_ids>();
 
   for (type_id_t i0 : i2a<numeric_ids>()) {
     for (type_id_t i1 : i2a<dim_ids>()) {
@@ -67,7 +67,7 @@ nd::callable make_less() { return make_comparison_callable<nd::less_callable>();
 nd::callable make_less_equal() { return make_comparison_callable<nd::less_equal_callable>(); }
 
 nd::callable make_equal() {
-  dispatcher<nd::callable> dispatcher = make_comparison_children<nd::equal_callable>();
+  dispatcher<2, nd::callable> dispatcher = make_comparison_children<nd::equal_callable>();
   dispatcher.insert({{complex_float32_id, complex_float32_id},
                      nd::make_callable<nd::equal_callable<complex_float32_id, complex_float32_id>>()});
   dispatcher.insert({{complex_float64_id, complex_float64_id},
@@ -81,7 +81,7 @@ nd::callable make_equal() {
 }
 
 nd::callable make_not_equal() {
-  dispatcher<nd::callable> dispatcher = make_comparison_children<nd::not_equal_callable>();
+  dispatcher<2, nd::callable> dispatcher = make_comparison_children<nd::not_equal_callable>();
   dispatcher.insert({{complex_float32_id, complex_float32_id},
                      nd::make_callable<nd::not_equal_callable<complex_float32_id, complex_float32_id>>()});
   dispatcher.insert({{complex_float64_id, complex_float64_id},
@@ -101,7 +101,7 @@ nd::callable make_greater() { return make_comparison_callable<nd::greater_callab
 nd::callable make_total_order() {
   return nd::make_callable<nd::comparison_dispatch_callable>(
       ndt::type("(Any, Any) -> Any"),
-      dispatcher<nd::callable>{
+      dispatcher<2, nd::callable>{
           {{fixed_string_id, fixed_string_id},
            nd::make_callable<nd::total_order_callable<fixed_string_id, fixed_string_id>>()},
           {{string_id, string_id}, nd::make_callable<nd::total_order_callable<string_id, string_id>>()},

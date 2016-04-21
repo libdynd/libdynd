@@ -20,9 +20,9 @@ nd::callable make_assign_na() {
                            complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id>
       type_ids;
 
-  dispatcher<nd::callable> dispatcher = nd::callable::new_make_all<nd::assign_na_callable, type_ids>();
+  dispatcher<1, nd::callable> dispatcher = nd::callable::new_make_all<nd::assign_na_callable, type_ids>();
   dispatcher.insert({{uint32_id}, nd::make_callable<nd::assign_na_callable<uint32_id>>()});
-  dynd::dispatcher<nd::callable> dim_dispatcher;
+  dynd::dispatcher<1, nd::callable> dim_dispatcher;
 
   auto t = ndt::type("() -> ?Any");
 
@@ -38,8 +38,8 @@ nd::callable make_is_na() {
                            complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id>
       type_ids;
 
-  dispatcher<nd::callable> dispatcher = nd::callable::new_make_all<nd::is_na_callable, type_ids>();
-  dynd::dispatcher<nd::callable> dim_dispatcher;
+  dispatcher<1, nd::callable> dispatcher = nd::callable::new_make_all<nd::is_na_callable, type_ids>();
+  dynd::dispatcher<1, nd::callable> dim_dispatcher;
 
   for (auto tp_id : {fixed_dim_id, var_dim_id}) {
     dim_dispatcher.insert({{tp_id}, nd::get_elwise()});

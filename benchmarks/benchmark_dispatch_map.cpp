@@ -3,19 +3,19 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <random>
+#include <stdexcept>
 
 #include <benchmark/benchmark.h>
 
 #include <dispatcher.hpp>
 
+#include <dynd/dispatcher.hpp>
 #include <dynd/type.hpp>
 #include <dynd/type_registry.hpp>
-#include <dynd/dispatcher.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -25,8 +25,7 @@ class DispatchFixture : public ::benchmark::Fixture {
 public:
   vector<type_id_t[N]> ids;
 
-  void SetUp(const benchmark::State &state)
-  {
+  void SetUp(const benchmark::State &state) {
     ids.resize(state.range_x());
 
     default_random_engine generator;
@@ -45,8 +44,7 @@ class DispatchFixture<1> : public ::benchmark::Fixture {
 public:
   vector<pair<type_id_t, type_id_t>> pairs;
 
-  void SetUp(const benchmark::State &state)
-  {
+  void SetUp(const benchmark::State &state) {
     pairs.resize(state.range_x());
 
     default_random_engine generator;
@@ -101,12 +99,11 @@ BENCHMARK_DEFINE_F(BinaryDispatchFixture, BM_Supercedes)(benchmark::State &state
 
 // BENCHMARK_REGISTER_F(BinaryDispatchFixture, BM_Supercedes)->Arg(10)->Arg(100)->Arg(1000);
 
-BENCHMARK_DEFINE_F(UnaryDispatchFixture, BM_UnaryDispatch)(benchmark::State &state)
-{
-  dispatcher<int> dispatcher{{{any_kind_id}, 0}, {{scalar_kind_id}, 1}, {{bool_id}, 2},    {{int8_id}, 3},
-                             {{int16_id}, 4},    {{int32_id}, 5},       {{int64_id}, 6},   {{int128_id}, 7},
-                             {{uint8_id}, 8},    {{uint16_id}, 9},      {{uint32_id}, 10}, {{uint64_id}, 11},
-                             {{uint128_id}, 12}, {{float32_id}, 13},    {{float64_id}, 14}};
+BENCHMARK_DEFINE_F(UnaryDispatchFixture, BM_UnaryDispatch)(benchmark::State &state) {
+  dispatcher<1, int> dispatcher{{{any_kind_id}, 0}, {{scalar_kind_id}, 1}, {{bool_id}, 2},    {{int8_id}, 3},
+                                {{int16_id}, 4},    {{int32_id}, 5},       {{int64_id}, 6},   {{int128_id}, 7},
+                                {{uint8_id}, 8},    {{uint16_id}, 9},      {{uint32_id}, 10}, {{uint64_id}, 11},
+                                {{uint128_id}, 12}, {{float32_id}, 13},    {{float64_id}, 14}};
   while (state.KeepRunning()) {
     for (const auto &pair : pairs) {
       benchmark::DoNotOptimize(dispatcher(pair.first));
@@ -128,13 +125,12 @@ static void BM_VirtualDispatch(benchmark::State &state)
 BENCHMARK(BM_VirtualDispatch);
 */
 
-BENCHMARK_DEFINE_F(UnaryDispatchFixture, BM_BinaryDispatch)(benchmark::State &state)
-{
-  dispatcher<int> dispatcher{{{any_kind_id, int64_id}, 0},
-                             {{scalar_kind_id, int64_id}, 1},
-                             {{int32_id, int64_id}, 2},
-                             {{float32_id, int64_id}, 3},
-                             {{any_kind_id, any_kind_id}, 4}};
+BENCHMARK_DEFINE_F(UnaryDispatchFixture, BM_BinaryDispatch)(benchmark::State &state) {
+  dispatcher<2, int> dispatcher{{{any_kind_id, int64_id}, 0},
+                                {{scalar_kind_id, int64_id}, 1},
+                                {{int32_id, int64_id}, 2},
+                                {{float32_id, int64_id}, 3},
+                                {{any_kind_id, any_kind_id}, 4}};
   while (state.KeepRunning()) {
     for (const auto &pair : pairs) {
       benchmark::DoNotOptimize(dispatcher(pair.first, pair.second));

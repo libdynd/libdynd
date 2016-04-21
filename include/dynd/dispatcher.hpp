@@ -13,12 +13,8 @@
 
 namespace dynd {
 
-inline bool consistent(const std::vector<type_id_t> &lhs, const std::vector<type_id_t> &rhs)
-{
-  if (lhs.size() != rhs.size()) {
-    return false;
-  }
-
+template <size_t N>
+bool consistent(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs) {
   for (size_t i = 0; i < lhs.size(); ++i) {
     if (!is_base_id_of(lhs[i], rhs[i]) && !is_base_id_of(rhs[i], lhs[i])) {
       return false;
@@ -28,12 +24,8 @@ inline bool consistent(const std::vector<type_id_t> &lhs, const std::vector<type
   return true;
 }
 
-inline bool supercedes(const std::vector<type_id_t> &lhs, const std::vector<type_id_t> &rhs)
-{
-  if (lhs.size() != rhs.size()) {
-    return false;
-  }
-
+template <size_t N>
+bool supercedes(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs) {
   for (size_t i = 0; i < lhs.size(); ++i) {
     if (!is_base_id_of(rhs[i], lhs[i])) {
       return false;
@@ -43,14 +35,14 @@ inline bool supercedes(const std::vector<type_id_t> &lhs, const std::vector<type
   return true;
 }
 
-inline bool ambiguous(const std::vector<type_id_t> &lhs, const std::vector<type_id_t> &rhs)
-{
+template <size_t N>
+bool ambiguous(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs) {
   return consistent(lhs, rhs) && !(supercedes(lhs, rhs) || supercedes(rhs, lhs));
 }
 
+/*
 template <size_t N>
-bool supercedes(const type_id_t (&lhs)[N], const std::vector<type_id_t> &rhs)
-{
+bool supercedes(const type_id_t (&lhs)[N], const std::vector<type_id_t> &rhs) {
   if (rhs.size() != N) {
     return false;
   }
@@ -64,8 +56,7 @@ bool supercedes(const type_id_t (&lhs)[N], const std::vector<type_id_t> &rhs)
   return true;
 }
 
-inline bool supercedes(size_t N, const type_id_t *lhs, const std::vector<type_id_t> &rhs)
-{
+inline bool supercedes(size_t N, const type_id_t *lhs, const std::vector<type_id_t> &rhs) {
   if (rhs.size() != N) {
     return false;
   }
@@ -78,6 +69,7 @@ inline bool supercedes(size_t N, const type_id_t *lhs, const std::vector<type_id
 
   return true;
 }
+*/
 
 namespace detail {
 
@@ -96,8 +88,7 @@ namespace detail {
 
   template <typename VertexIterator, typename EdgeIterator, typename MarkerIterator, typename Iterator>
   void topological_sort_visit(size_t i, VertexIterator vertices, EdgeIterator edges, MarkerIterator markers,
-                              Iterator &res, Iterator &res_begin)
-  {
+                              Iterator &res, Iterator &res_begin) {
     if (markers[i].is_temporarily_marked()) {
       throw std::runtime_error("not a dag");
     }
@@ -118,8 +109,7 @@ namespace detail {
 } // namespace dynd::detail
 
 template <typename VertexIterator, typename EdgeIterator, typename Iterator>
-void topological_sort(VertexIterator begin, VertexIterator end, EdgeIterator edges, Iterator res)
-{
+void topological_sort(VertexIterator begin, VertexIterator end, EdgeIterator edges, Iterator res) {
   size_t size = end - begin;
   Iterator res_begin = res;
   res += size - 1;
@@ -133,13 +123,11 @@ void topological_sort(VertexIterator begin, VertexIterator end, EdgeIterator edg
 
 template <typename VertexType, typename Iterator>
 void topological_sort(std::initializer_list<VertexType> vertices,
-                      std::initializer_list<std::initializer_list<size_t>> edges, Iterator res)
-{
+                      std::initializer_list<std::initializer_list<size_t>> edges, Iterator res) {
   topological_sort(vertices.begin(), vertices.end(), edges.begin(), res);
 }
 
-inline std::ostream &print_ids(std::ostream &o, size_t nids, const type_id_t *ids)
-{
+inline std::ostream &print_ids(std::ostream &o, size_t nids, const type_id_t *ids) {
   o << "(" << ids[0];
   for (size_t i = 1; i < nids; ++i) {
     o << ", " << ids[i];
@@ -148,12 +136,12 @@ inline std::ostream &print_ids(std::ostream &o, size_t nids, const type_id_t *id
   return o;
 }
 
-template <typename T, typename Map = std::map<size_t, T>>
+template <size_t N, typename T, typename Map = std::map<size_t, T>>
 class dispatcher {
 public:
   typedef T value_type;
 
-  typedef std::pair<std::vector<type_id_t>, value_type> pair_type;
+  typedef std::pair<std::array<type_id_t, N>, value_type> pair_type;
   typedef Map map_type;
   //  typedef google::dense_hash_map<size_t, value_type> map_type;
 
@@ -167,8 +155,7 @@ private:
   static size_t hash_combine(size_t seed, type_id_t id) { return seed ^ (id + (seed << 6) + (seed >> 2)); }
 
   template <typename... IDTypes>
-  static size_t hash_combine(size_t seed, type_id_t id0, IDTypes... ids)
-  {
+  static size_t hash_combine(size_t seed, type_id_t id0, IDTypes... ids) {
     return hash_combine(hash_combine(seed, id0), ids...);
   }
 
@@ -178,21 +165,17 @@ public:
   dispatcher(const dispatcher &other) : m_pairs(other.m_pairs), m_map(other.m_map) {}
 
   template <typename Iterator>
-  dispatcher(Iterator begin, Iterator end, const map_type &map = map_type()) : m_map(map)
-  {
+  dispatcher(Iterator begin, Iterator end, const map_type &map = map_type()) : m_map(map) {
     //    m_map.set_empty_key(uninitialized_id);
 
     assign(begin, end);
   }
 
   dispatcher(std::initializer_list<pair_type> pairs, const map_type &map = map_type())
-      : dispatcher(pairs.begin(), pairs.end(), map)
-  {
-  }
+      : dispatcher(pairs.begin(), pairs.end(), map) {}
 
   template <typename Iterator>
-  void assign(Iterator begin, Iterator end)
-  {
+  void assign(Iterator begin, Iterator end) {
     m_pairs.resize(end - begin);
 
     std::vector<std::vector<size_t>> edges(m_pairs.size());
@@ -218,8 +201,7 @@ public:
 
         if (edge(begin[i].first, begin[j].first)) {
           edges[i].push_back(j);
-        }
-        else if (edge(begin[j].first, begin[i].first)) {
+        } else if (edge(begin[j].first, begin[i].first)) {
           edges[j].push_back(i);
         }
       }
@@ -233,8 +215,7 @@ public:
   void assign(std::initializer_list<pair_type> pairs) { assign(pairs.begin(), pairs.end()); }
 
   template <typename Iterator>
-  void insert(Iterator begin, Iterator end)
-  {
+  void insert(Iterator begin, Iterator end) {
     std::vector<pair_type> vertices = m_pairs;
     vertices.insert(vertices.end(), begin, end);
 
@@ -254,8 +235,7 @@ public:
   const_iterator cend() const { return m_pairs.cend(); }
 
   template <typename... IDTypes>
-  const value_type &operator()(IDTypes... ids)
-  {
+  const value_type &operator()(IDTypes... ids) {
     size_t key = hash(ids...);
 
     const auto &it = m_map.find(key);
@@ -272,8 +252,7 @@ public:
     throw std::out_of_range("signature not found");
   }
 
-  const value_type &operator()(size_t nids, const type_id_t *ids)
-  {
+  const value_type &operator()(size_t nids, const type_id_t *ids) {
     size_t key = static_cast<size_t>(ids[0]);
     for (size_t i = 1; i < nids; ++i) {
       key = hash_combine(key, ids[i]);
@@ -295,13 +274,11 @@ public:
 
   const value_type &operator()(std::initializer_list<type_id_t> ids) { return operator()(ids.size(), ids.begin()); }
 
-  static bool edge(const std::vector<type_id_t> &u, const std::vector<type_id_t> &v)
-  {
+  static bool edge(const std::array<type_id_t, N> &u, const std::array<type_id_t, N> &v) {
     if (supercedes(u, v)) {
       if (supercedes(v, u)) {
         return false;
-      }
-      else {
+      } else {
         return true;
       }
     }
@@ -311,8 +288,7 @@ public:
   static size_t hash(type_id_t id) { return static_cast<size_t>(id); }
 
   template <typename... IDTypes>
-  static size_t hash(type_id_t id0, IDTypes... ids)
-  {
+  static size_t hash(type_id_t id0, IDTypes... ids) {
     return hash_combine(hash(id0), ids...);
   }
 };

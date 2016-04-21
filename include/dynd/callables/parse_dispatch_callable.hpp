@@ -11,23 +11,19 @@ namespace dynd {
 namespace nd {
 
   class parse_dispatch_callable : public base_dispatch_callable {
-    dispatcher<callable> m_dispatcher;
+    dispatcher<1, callable> m_dispatcher;
 
   public:
-    parse_dispatch_callable(const ndt::type &tp, const dispatcher<callable> &dispatcher)
-        : base_dispatch_callable(tp), m_dispatcher(dispatcher)
-    {
-    }
+    parse_dispatch_callable(const ndt::type &tp, const dispatcher<1, callable> &dispatcher)
+        : base_dispatch_callable(tp), m_dispatcher(dispatcher) {}
 
     void overload(const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                  const callable &value)
-    {
+                  const callable &value) {
       m_dispatcher.insert({{dst_tp.get_id()}, value});
     }
 
     const callable &specialize(const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                               const ndt::type *DYND_UNUSED(src_tp))
-    {
+                               const ndt::type *DYND_UNUSED(src_tp)) {
       return m_dispatcher(dst_tp.get_id());
     }
   };
