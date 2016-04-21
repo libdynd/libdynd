@@ -337,6 +337,7 @@ set(libdynd_SRC
     src/dynd/logical_or.cpp
     src/dynd/math.cpp
     src/dynd/minus.cpp
+    src/dynd/mod.cpp
     src/dynd/multiply.cpp
     src/dynd/option.cpp
     src/dynd/parse.cpp

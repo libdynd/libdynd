@@ -133,7 +133,9 @@ namespace detail {
   using inline_##NAME = inline_##NAME##_base<Src0TypeID, Src1TypeID, needs_zero_check<Src0TypeID, Src1TypeID>()>;
 
   DYND_DEF_BINARY_OP_CALLABLE_ZEROCHECK_INT(/, divide)
+  DYND_ALLOW_INT_BOOL_OPS
   DYND_DEF_BINARY_OP_CALLABLE_ZEROCHECK_INT(%, mod)
+  DYND_END_ALLOW_INT_BOOL_OPS
 
 #undef DYND_DEF_BINARY_OP_CALLABLE_ZEROCHECK_INT
 

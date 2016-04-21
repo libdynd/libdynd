@@ -19,6 +19,7 @@ namespace nd {
   extern DYND_API callable divide;
   extern DYND_API callable logical_and;
   extern DYND_API callable logical_or;
+  extern DYND_API callable mod;
   extern DYND_API callable multiply;
   extern DYND_API callable subtract;
 
