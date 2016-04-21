@@ -346,6 +346,7 @@ set(libdynd_SRC
     src/dynd/pointer.cpp
     src/dynd/random.cpp
     src/dynd/range.cpp
+    src/dynd/right_shift.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp
     src/dynd/statistics.cpp

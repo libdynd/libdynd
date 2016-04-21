@@ -1411,6 +1411,8 @@ nd::array nd::operator|(const array &a0, const array &a1) { return nd::bitwise_o
 
 nd::array nd::operator<<(const array &a0, const array &a1) { return nd::left_shift(a0, a1); }
 
+nd::array nd::operator>>(const array &a0, const array &a1) { return nd::right_shift(a0, a1); }
+
 nd::array nd::operator&&(const array &a0, const array &a1) { return nd::logical_and(a0, a1); }
 
 nd::array nd::operator||(const array &a0, const array &a1) { return nd::logical_or(a0, a1); }
