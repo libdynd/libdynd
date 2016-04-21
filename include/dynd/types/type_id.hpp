@@ -14,6 +14,12 @@ namespace dynd {
 class bytes;
 class string;
 
+namespace ndt {
+
+  class fixed_dim_type;
+
+} // namespace dynd::ndt
+
 enum type_id_t {
   // The value zero is reserved for an uninitialized type.
   uninitialized_id,
@@ -185,8 +191,7 @@ namespace ndt {
   class base_type;
 } // namespace dynd::nd
 
-inline bool is_builtin_type(const ndt::base_type *dt)
-{
+inline bool is_builtin_type(const ndt::base_type *dt) {
   switch (reinterpret_cast<uintptr_t>(dt)) {
   case uninitialized_id:
   case bool_id:
@@ -247,6 +252,11 @@ struct type_id_of<const T> {
 // Can't use bool, because it doesn't have a guaranteed sizeof
 template <>
 struct type_id_of<bool1> {
+  static const type_id_t value = bool_id;
+};
+
+template <>
+struct type_id_of<bool> {
   static const type_id_t value = bool_id;
 };
 
@@ -351,8 +361,23 @@ struct type_id_of<void> {
 };
 
 template <>
+struct type_id_of<dynd::bytes> {
+  static const type_id_t value = bytes_id;
+};
+
+template <>
+struct type_id_of<dynd::string> {
+  static const type_id_t value = string_id;
+};
+
+template <>
 struct type_id_of<ndt::type> {
   static const type_id_t value = type_id;
+};
+
+template <>
+struct type_id_of<ndt::fixed_dim_type> {
+  static const type_id_t value = fixed_dim_id;
 };
 
 // Also allow type_id_of<std::complex<>> as synonyms for
@@ -454,200 +479,159 @@ struct type_of<type_id> {
   typedef ndt::type type;
 };
 
+namespace ndt {
+
+  template <typename Type>
+  struct base_of;
+
+} // namespace dynd::ndt
+
 template <type_id_t ID>
 struct base_id_of;
 
 template <>
-struct base_id_of<scalar_kind_id> : id_constant<any_kind_id> {
-};
+struct base_id_of<scalar_kind_id> : id_constant<any_kind_id> {};
 
 template <>
-struct base_id_of<bool_kind_id> : id_constant<scalar_kind_id> {
-};
+struct base_id_of<bool_kind_id> : id_constant<scalar_kind_id> {};
 
 template <>
-struct base_id_of<bool_id> : id_constant<bool_kind_id> {
-};
+struct base_id_of<bool_id> : id_constant<bool_kind_id> {};
 
 template <>
-struct base_id_of<int_kind_id> : id_constant<scalar_kind_id> {
-};
+struct base_id_of<int_kind_id> : id_constant<scalar_kind_id> {};
 
 template <>
-struct base_id_of<int8_id> : id_constant<int_kind_id> {
-};
+struct base_id_of<int8_id> : id_constant<int_kind_id> {};
 
 template <>
-struct base_id_of<int16_id> : id_constant<int_kind_id> {
-};
+struct base_id_of<int16_id> : id_constant<int_kind_id> {};
 
 template <>
-struct base_id_of<int32_id> : id_constant<int_kind_id> {
-};
+struct base_id_of<int32_id> : id_constant<int_kind_id> {};
 
 template <>
-struct base_id_of<int64_id> : id_constant<int_kind_id> {
-};
+struct base_id_of<int64_id> : id_constant<int_kind_id> {};
 
 template <>
-struct base_id_of<int128_id> : id_constant<int_kind_id> {
-};
+struct base_id_of<int128_id> : id_constant<int_kind_id> {};
 
 template <>
-struct base_id_of<uint_kind_id> : id_constant<scalar_kind_id> {
-};
+struct base_id_of<uint_kind_id> : id_constant<scalar_kind_id> {};
 
 template <>
-struct base_id_of<uint8_id> : id_constant<uint_kind_id> {
-};
+struct base_id_of<uint8_id> : id_constant<uint_kind_id> {};
 
 template <>
-struct base_id_of<uint16_id> : id_constant<uint_kind_id> {
-};
+struct base_id_of<uint16_id> : id_constant<uint_kind_id> {};
 
 template <>
-struct base_id_of<uint32_id> : id_constant<uint_kind_id> {
-};
+struct base_id_of<uint32_id> : id_constant<uint_kind_id> {};
 
 template <>
-struct base_id_of<uint64_id> : id_constant<uint_kind_id> {
-};
+struct base_id_of<uint64_id> : id_constant<uint_kind_id> {};
 
 template <>
-struct base_id_of<uint128_id> : id_constant<uint_kind_id> {
-};
+struct base_id_of<uint128_id> : id_constant<uint_kind_id> {};
 
 template <>
-struct base_id_of<float_kind_id> : id_constant<scalar_kind_id> {
-};
+struct base_id_of<float_kind_id> : id_constant<scalar_kind_id> {};
 
 template <>
-struct base_id_of<float16_id> : id_constant<float_kind_id> {
-};
+struct base_id_of<float16_id> : id_constant<float_kind_id> {};
 
 template <>
-struct base_id_of<float32_id> : id_constant<float_kind_id> {
-};
+struct base_id_of<float32_id> : id_constant<float_kind_id> {};
 
 template <>
-struct base_id_of<float64_id> : id_constant<float_kind_id> {
-};
+struct base_id_of<float64_id> : id_constant<float_kind_id> {};
 
 template <>
-struct base_id_of<float128_id> : id_constant<float_kind_id> {
-};
+struct base_id_of<float128_id> : id_constant<float_kind_id> {};
 
 template <>
-struct base_id_of<complex_kind_id> : id_constant<scalar_kind_id> {
-};
+struct base_id_of<complex_kind_id> : id_constant<scalar_kind_id> {};
 
 template <>
-struct base_id_of<complex_float32_id> : id_constant<complex_kind_id> {
-};
+struct base_id_of<complex_float32_id> : id_constant<complex_kind_id> {};
 
 template <>
-struct base_id_of<complex_float64_id> : id_constant<complex_kind_id> {
-};
+struct base_id_of<complex_float64_id> : id_constant<complex_kind_id> {};
 
 template <>
-struct base_id_of<void_id> : id_constant<any_kind_id> {
-};
+struct base_id_of<void_id> : id_constant<any_kind_id> {};
 
 template <>
-struct base_id_of<bytes_kind_id> : id_constant<scalar_kind_id> {
-};
+struct base_id_of<bytes_kind_id> : id_constant<scalar_kind_id> {};
 
 template <>
-struct base_id_of<fixed_bytes_id> : id_constant<bytes_kind_id> {
-};
+struct base_id_of<fixed_bytes_id> : id_constant<bytes_kind_id> {};
 
 template <>
-struct base_id_of<bytes_id> : id_constant<bytes_kind_id> {
-};
+struct base_id_of<bytes_id> : id_constant<bytes_kind_id> {};
 
 template <>
-struct base_id_of<string_kind_id> : id_constant<scalar_kind_id> {
-};
+struct base_id_of<string_kind_id> : id_constant<scalar_kind_id> {};
 
 template <>
-struct base_id_of<char_id> : id_constant<string_kind_id> {
-};
+struct base_id_of<char_id> : id_constant<string_kind_id> {};
 
 template <>
-struct base_id_of<fixed_string_id> : id_constant<string_kind_id> {
-};
+struct base_id_of<fixed_string_id> : id_constant<string_kind_id> {};
 
 template <>
-struct base_id_of<string_id> : id_constant<string_kind_id> {
-};
+struct base_id_of<string_id> : id_constant<string_kind_id> {};
 
 template <>
-struct base_id_of<fixed_dim_kind_id> : id_constant<dim_kind_id> {
-};
+struct base_id_of<fixed_dim_kind_id> : id_constant<dim_kind_id> {};
 
 template <>
-struct base_id_of<fixed_dim_id> : id_constant<fixed_dim_kind_id> {
-};
+struct base_id_of<fixed_dim_id> : id_constant<fixed_dim_kind_id> {};
 
 template <>
-struct base_id_of<var_dim_id> : id_constant<dim_kind_id> {
-};
+struct base_id_of<var_dim_id> : id_constant<dim_kind_id> {};
 
 template <>
-struct base_id_of<pointer_id> : id_constant<any_kind_id> {
-};
+struct base_id_of<pointer_id> : id_constant<any_kind_id> {};
 
 template <>
-struct base_id_of<memory_id> : id_constant<any_kind_id> {
-};
+struct base_id_of<memory_id> : id_constant<any_kind_id> {};
 
 template <>
-struct base_id_of<expr_kind_id> : id_constant<any_kind_id> {
-};
+struct base_id_of<expr_kind_id> : id_constant<any_kind_id> {};
 
 template <>
-struct base_id_of<adapt_id> : id_constant<expr_kind_id> {
-};
+struct base_id_of<adapt_id> : id_constant<expr_kind_id> {};
 
 template <>
-struct base_id_of<tuple_id> : id_constant<scalar_kind_id> {
-};
+struct base_id_of<tuple_id> : id_constant<scalar_kind_id> {};
 
 template <>
-struct base_id_of<struct_id> : id_constant<tuple_id> {
-};
+struct base_id_of<struct_id> : id_constant<tuple_id> {};
 
 template <>
-struct base_id_of<option_id> : id_constant<any_kind_id> {
-};
+struct base_id_of<option_id> : id_constant<any_kind_id> {};
 
 template <>
-struct base_id_of<categorical_id> : id_constant<any_kind_id> {
-};
+struct base_id_of<categorical_id> : id_constant<any_kind_id> {};
 
 template <>
-struct base_id_of<expr_id> : id_constant<any_kind_id> {
-};
+struct base_id_of<expr_id> : id_constant<any_kind_id> {};
 
 template <>
-struct base_id_of<type_id> : id_constant<scalar_kind_id> {
-};
+struct base_id_of<type_id> : id_constant<scalar_kind_id> {};
 
 template <>
-struct base_id_of<callable_id> : id_constant<scalar_kind_id> {
-};
+struct base_id_of<callable_id> : id_constant<scalar_kind_id> {};
 
 template <>
-struct base_id_of<array_id> : id_constant<scalar_kind_id> {
-};
+struct base_id_of<array_id> : id_constant<scalar_kind_id> {};
 
 template <>
-struct base_id_of<dim_kind_id> : id_constant<any_kind_id> {
-};
+struct base_id_of<dim_kind_id> : id_constant<any_kind_id> {};
 
 template <>
-struct base_id_of<typevar_id> : id_constant<scalar_kind_id> {
-};
+struct base_id_of<typevar_id> : id_constant<scalar_kind_id> {};
 
 namespace detail {
 
@@ -696,8 +680,7 @@ namespace detail {
 
 template <type_id_t DstTypeID, type_id_t Src0TypeID>
 struct is_lossless_assignable : detail::is_lossless_assignable<DstTypeID, base_id_of<DstTypeID>::value, Src0TypeID,
-                                                               base_id_of<Src0TypeID>::value> {
-};
+                                                               base_id_of<Src0TypeID>::value> {};
 
 // Metaprogram for determining if a type is a valid C++ scalar
 // of a particular type.

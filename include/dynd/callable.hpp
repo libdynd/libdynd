@@ -53,6 +53,9 @@ namespace nd {
     template <template <type_id_t...> class KernelType>
     struct new_make_all;
 
+    template <template <typename...> class KernelType>
+    struct new_make_all_on_types;
+
     template <template <type_id_t...> class KernelType, template <type_id_t...> class Condition>
     struct make_all_if;
 
@@ -151,6 +154,14 @@ namespace nd {
     static dispatcher<1, callable> new_make_all(A &&... a) {
       std::vector<std::pair<std::array<type_id_t, 1>, callable>> callables;
       for_each<I0>(detail::new_make_all<KernelType>(), callables, std::forward<A>(a)...);
+
+      return dispatcher<1, callable>(callables.begin(), callables.end());
+    }
+
+    template <template <typename> class KernelType, typename I0, typename... A>
+    static dispatcher<1, callable> make_all(A &&... a) {
+      std::vector<std::pair<std::array<type_id_t, 1>, callable>> callables;
+      for_each<I0>(detail::new_make_all_on_types<KernelType>(), callables, std::forward<A>(a)...);
 
       return dispatcher<1, callable>(callables.begin(), callables.end());
     }
@@ -277,6 +288,14 @@ namespace nd {
                    A &&... a) const {
         callables.push_back({{i2a<TypeIDSequence>()},
                              make_callable<typename apply<KernelType, TypeIDSequence>::type>(std::forward<A>(a)...)});
+      }
+    };
+
+    template <template <typename...> class KernelType>
+    struct new_make_all_on_types {
+      template <typename Type, typename... A>
+      void on_each(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &callables, A &&... a) const {
+        callables.push_back({{type_id_of<Type>::value}, make_callable<KernelType<Type>>(std::forward<A>(a)...)});
       }
     };
 

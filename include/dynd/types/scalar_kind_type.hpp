@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/type.hpp>
+#include <dynd/types/any_kind_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -21,6 +22,11 @@ namespace ndt {
     void print_type(std::ostream &o) const;
 
     static type make() { return type(new scalar_kind_type(), false); }
+  };
+
+  template <>
+  struct base_of<scalar_kind_type> {
+    typedef any_kind_type type;
   };
 
 } // namespace dynd::ndt
