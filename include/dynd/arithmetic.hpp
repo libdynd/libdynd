@@ -14,11 +14,12 @@ namespace nd {
   extern DYND_API callable bitwise_not;
 
   extern DYND_API callable add;
-  extern DYND_API callable subtract;
-  extern DYND_API callable multiply;
+  extern DYND_API callable bitwise_and;
   extern DYND_API callable divide;
   extern DYND_API callable logical_and;
   extern DYND_API callable logical_or;
+  extern DYND_API callable multiply;
+  extern DYND_API callable subtract;
 
   extern DYND_API callable compound_add;
   extern DYND_API callable compound_div;

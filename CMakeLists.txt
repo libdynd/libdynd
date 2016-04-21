@@ -316,6 +316,7 @@ set(libdynd_SRC
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
     src/dynd/assignment.cpp
+    src/dynd/bitwise_and.cpp
     src/dynd/bitwise_not.cpp
     src/dynd/callable.cpp
     src/dynd/comparison.cpp

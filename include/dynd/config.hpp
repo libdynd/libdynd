@@ -44,6 +44,9 @@
 #define DYND_ALLOW_UNSIGNED_UNARY_MINUS
 #define DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
 
+#define DYND_ALLOW_INT_BOOL_OPS
+#define DYND_END_ALLOW_INT_BOOL_OPS
+
 #elif defined(__GNUC__)
 
 // Hack trying to work around gcc isfinite problems
@@ -68,6 +71,9 @@
 #define DYND_ALLOW_UNSIGNED_UNARY_MINUS
 #define DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
 
+#define DYND_ALLOW_INT_BOOL_OPS
+#define DYND_END_ALLOW_INT_BOOL_OPS
+
 #elif defined(_MSC_VER)
 
 #define DYND_ISSPACE isspace
@@ -76,8 +82,10 @@
 #define DYND_EMIT_LLVM(NAME) NAME
 
 #define DYND_ALLOW_UNSIGNED_UNARY_MINUS __pragma(warning(push)) __pragma(warning(disable : 4146))
-
 #define DYND_END_ALLOW_UNSIGNED_UNARY_MINUS __pragma(warning(pop))
+
+#define DYND_ALLOW_INT_BOOL_OPS __pragma(warning(push)) __pragma(warning(disable : 4805))
+#define DYND_END_ALLOW_INT_BOOL_OPS __pragma(warning(pop))
 
 #include <float.h>
 
