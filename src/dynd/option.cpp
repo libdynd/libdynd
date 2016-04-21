@@ -4,7 +4,6 @@
 //
 
 #include <dynd/callables/assign_na_callable.hpp>
-#include <dynd/callables/assign_na_dispatch_callable.hpp>
 #include <dynd/callables/is_na_callable.hpp>
 #include <dynd/callables/is_na_dispatch_callable.hpp>
 #include <dynd/functional.hpp>
