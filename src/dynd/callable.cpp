@@ -5,6 +5,7 @@
 
 #include <dynd/arithmetic.hpp>
 #include <dynd/assignment.hpp>
+#include <dynd/comparison.hpp>
 #include <dynd/index.hpp>
 #include <dynd/io.hpp>
 #include <dynd/math.hpp>
@@ -41,27 +42,48 @@ public:
 } // anonymous namespace
 
 std::map<std::string, nd::callable> &nd::detail::get_regfunctions() {
-  static map<std::string, callable> registry{{"take", take},
-                                             {"min", min},
-                                             {"max", max},
-                                             {"add", add},
-                                             {"subtract", subtract},
-                                             {"multiply", multiply},
-                                             {"divide", divide},
-                                             {"sum", sum},
-                                             {"real", real},
-                                             {"imag", imag},
-                                             {"conj", conj},
+  static map<std::string, callable> registry{{"add", add},
                                              {"assign", assign},
+                                             {"assign_na", assign_na},
+                                             {"bitwise_and", bitwise_and},
+                                             {"bitwise_not", bitwise_not},
+                                             {"bitwise_or", bitwise_or},
+                                             {"bitwise_xor", bitwise_xor},
+                                             {"compound_add", compound_add},
+                                             {"compound_div", compound_div},
+                                             {"conj", conj},
+                                             {"cos", cos},
+                                             {"dereference", dereference},
+                                             {"divide", divide},
+                                             {"equal", equal},
+                                             {"exp", exp},
+                                             {"greater", greater},
+                                             {"greater_equal", greater_equal},
+                                             {"imag", imag},
+                                             {"is_na", is_na},
+                                             {"left_shift", left_shift},
+                                             {"less", less},
+                                             {"less_equal", less_equal},
+                                             {"logical_and", logical_and},
+                                             {"logical_not", logical_not},
+                                             {"logical_or", logical_or},
+                                             {"max", max},
+                                             {"min", min},
+                                             {"minus", minus},
+                                             {"mod", mod},
+                                             {"multiply", multiply},
+                                             {"not_equal", not_equal},
+                                             {"plus", plus},
+                                             {"range", range},
+                                             {"real", real},
+                                             {"right_shift", right_shift},
                                              {"serialize", serialize},
                                              {"sin", sin},
-                                             {"cos", cos},
+                                             {"subtract", subtract},
+                                             {"sum", sum},
+                                             {"take", take},
                                              {"tan", tan},
-                                             {"exp", exp},
-                                             {"assign_na", assign_na},
-                                             {"is_na", is_na},
-                                             {"dereference", dereference},
-                                             {"range", range},
+                                             {"total_order", total_order},
                                              {"uniform", random::uniform}};
 
   return registry;
