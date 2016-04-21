@@ -102,8 +102,7 @@ matrix:
       before_script:
         - cd ..
         - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
-        - mkdir dynd-python/libraries
-        - mv libdynd dynd-python/libraries/libdynd
+        - mv libdynd dynd-python/libdynd
         - cd dynd-python
       script:
         - python setup.py install
