@@ -319,6 +319,7 @@ set(libdynd_SRC
     src/dynd/bitwise_and.cpp
     src/dynd/bitwise_not.cpp
     src/dynd/bitwise_or.cpp
+    src/dynd/bitwise_xor.cpp
     src/dynd/callable.cpp
     src/dynd/comparison.cpp
     src/dynd/compound_add.cpp
