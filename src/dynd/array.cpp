@@ -8,28 +8,28 @@
 #include <dynd/comparison.hpp>
 
 #include <dynd/array_iter.hpp>
-#include <dynd/types/datashape_formatter.hpp>
-#include <dynd/math.hpp>
 #include <dynd/assignment.hpp>
-#include <dynd/option.hpp>
-#include <dynd/struct.hpp>
-#include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/tuple_type.hpp>
-#include <dynd/types/string_type.hpp>
-#include <dynd/types/bytes_type.hpp>
-#include <dynd/types/fixed_bytes_type.hpp>
-#include <dynd/types/type_type.hpp>
-#include <dynd/types/datashape_formatter.hpp>
-#include <dynd/types/base_memory_type.hpp>
-#include <dynd/types/cuda_host_type.hpp>
-#include <dynd/types/cuda_device_type.hpp>
-#include <dynd/types/option_type.hpp>
+#include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/field_access_kernel.hpp>
-#include <dynd/exceptions.hpp>
-#include <dynd/types/categorical_type.hpp>
+#include <dynd/math.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
+#include <dynd/option.hpp>
+#include <dynd/struct.hpp>
+#include <dynd/types/base_memory_type.hpp>
+#include <dynd/types/bytes_type.hpp>
+#include <dynd/types/categorical_type.hpp>
+#include <dynd/types/cuda_device_type.hpp>
+#include <dynd/types/cuda_host_type.hpp>
+#include <dynd/types/datashape_formatter.hpp>
+#include <dynd/types/datashape_formatter.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/option_type.hpp>
+#include <dynd/types/string_type.hpp>
+#include <dynd/types/tuple_type.hpp>
+#include <dynd/types/type_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 #include <dynd/view.hpp>
 
 using namespace std;
@@ -397,8 +397,9 @@ bool nd::array::equals_exact(const array &rhs) const {
           ndt::type tp[2] = {iter.get_uniform_dtype<0>(), iter.get_uniform_dtype<1>()};
           const char *arrmeta[2] = {iter.arrmeta<0>(), iter.arrmeta<1>()};
           ndt::type dst_tp = ndt::make_type<bool1>();
-          if (not_equal->call(dst_tp, 2, tp, arrmeta, const_cast<char *const *>(src), 0, NULL,
-                              std::map<std::string, ndt::type>())
+          if (not_equal
+                  ->call(dst_tp, 2, tp, arrmeta, const_cast<char *const *>(src), 0, NULL,
+                         std::map<std::string, ndt::type>())
                   .as<bool>()) {
             return false;
           }
@@ -1401,6 +1402,18 @@ nd::array nd::operator-(const array &a0, const array &a1) { return nd::subtract(
 nd::array nd::operator*(const array &a0, const array &a1) { return nd::multiply(a0, a1); }
 
 nd::array nd::operator/(const array &a0, const array &a1) { return nd::divide(a0, a1); }
+
+nd::array nd::operator%(const array &a0, const array &a1) { return nd::mod(a0, a1); }
+
+nd::array nd::operator&(const array &a0, const array &a1) { return nd::bitwise_and(a0, a1); }
+
+nd::array nd::operator|(const array &a0, const array &a1) { return nd::bitwise_or(a0, a1); }
+
+nd::array nd::operator^(const array &a0, const array &a1) { return nd::bitwise_xor(a0, a1); }
+
+nd::array nd::operator<<(const array &a0, const array &a1) { return nd::left_shift(a0, a1); }
+
+nd::array nd::operator>>(const array &a0, const array &a1) { return nd::right_shift(a0, a1); }
 
 nd::array nd::operator&&(const array &a0, const array &a1) { return nd::logical_and(a0, a1); }
 

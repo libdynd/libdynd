@@ -668,6 +668,13 @@ namespace nd {
   DYND_API array operator-(const array &op0, const array &op1);
   DYND_API array operator/(const array &op0, const array &op1);
   DYND_API array operator*(const array &op0, const array &op1);
+  DYND_API array operator%(const array &op0, const array &op1);
+
+  DYND_API array operator&(const array &op0, const array &op1);
+  DYND_API array operator|(const array &op0, const array &op1);
+  DYND_API array operator^(const array &op0, const array &op1);
+  DYND_API array operator<<(const array &op0, const array &op1);
+  DYND_API array operator>>(const array &op0, const array &op1);
 
   DYND_API array operator&&(const array &a0, const array &a1);
   DYND_API array operator||(const array &a0, const array &a1);

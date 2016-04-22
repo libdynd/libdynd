@@ -318,7 +318,10 @@ set(libdynd_SRC
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
     src/dynd/assignment.cpp
+    src/dynd/bitwise_and.cpp
     src/dynd/bitwise_not.cpp
+    src/dynd/bitwise_or.cpp
+    src/dynd/bitwise_xor.cpp
     src/dynd/callable.cpp
     src/dynd/comparison.cpp
     src/dynd/compound_add.cpp
@@ -331,12 +334,15 @@ set(libdynd_SRC
     src/dynd/io.cpp
     src/dynd/json_formatter.cpp
     src/dynd/json_parser.cpp
+    src/dynd/left_shift.cpp
     src/dynd/logic.cpp
     src/dynd/logical_and.cpp
     src/dynd/logical_not.cpp
     src/dynd/logical_or.cpp
+    src/dynd/logical_xor.cpp
     src/dynd/math.cpp
     src/dynd/minus.cpp
+    src/dynd/mod.cpp
     src/dynd/multiply.cpp
     src/dynd/option.cpp
     src/dynd/parse.cpp
@@ -344,6 +350,7 @@ set(libdynd_SRC
     src/dynd/pointer.cpp
     src/dynd/random.cpp
     src/dynd/range.cpp
+    src/dynd/right_shift.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp
     src/dynd/statistics.cpp
