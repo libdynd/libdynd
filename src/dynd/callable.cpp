@@ -67,6 +67,7 @@ std::map<std::string, nd::callable> &nd::detail::get_regfunctions() {
                                              {"logical_and", logical_and},
                                              {"logical_not", logical_not},
                                              {"logical_or", logical_or},
+                                             {"logical_xor", logical_xor},
                                              {"max", max},
                                              {"min", min},
                                              {"minus", minus},
