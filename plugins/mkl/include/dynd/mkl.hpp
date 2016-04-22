@@ -12,6 +12,7 @@ namespace nd {
   namespace mkl {
 
     extern callable fft;
+    extern callable ifft;
 
   } // namespace dynd::nd::mkl
 } // namespace dynd::nd

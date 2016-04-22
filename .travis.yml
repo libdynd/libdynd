@@ -23,7 +23,7 @@ matrix:
   include:
     - compiler: gcc
       sudo: required
-      env: VALGRIND DYND_BUILD_PLUGINS=ON
+      env: VALGRIND
       addons:
         apt:
           sources:
@@ -39,6 +39,8 @@ matrix:
       before_install:
         - export CC="gcc-5"
         - export CXX="g++-5"
+        - wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh
+        - bash install-icc.sh
       script:
         - cmake -DDYND_BUILD_DOCS=ON -DDYND_BUILD_PLUGINS=OFF ..
         - make -j4 || exit 1
@@ -182,3 +184,4 @@ env:
   global:
     - secure: KJZ5DWK3iAmthDnPaXz/S8aQFa6zVlD+CWCPXM+vgkiJQG5qgJfn5t2yy5n3mVyS0qZFd/LrFJ6ZqjUr/BKFDqGPBxESYIAOOgN+cXIEWxkeGFEHxOEK9QBS6aq6GBhyQlteWcqozYsG93oSVh+Xiv9tHl4m1mHXOHk2llQXy4g=
     - secure: Qt/St9copUdPo4kej+9DtLDCzIAkDo/PDP0Ac244yF+8dRac3KhskRVVURNcCMonUeuqS5Dm5qcQl9b/L4P9Gkpn1aDKPHMp7pgTZHZLJ7VIHgFrSWo545mqV0fcYN+GLpaSqd8NwdUi5+1aHGWTtrw4BoIO4DSgV4eiIVEdRbA=
+    - secure: Mp4NuMMuUpWWyc0R4M2/mOE57WOqMwCEkl2GZug7cgAFzHslrxKBnXK5RB3EKAY/wwC60siYRvQrMBKGJB5NE5/ym2GqVy/OGiUh/RZh9llSFHEHDM9y0Zdxx/EqWQbMIiXGG4Yj2LkfpGzOFks9hr/drCHr40mVekQ6GdfnNIc=
