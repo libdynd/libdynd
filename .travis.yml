@@ -39,10 +39,8 @@ matrix:
       before_install:
         - export CC="gcc-5"
         - export CXX="g++-5"
-        - wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh
-        - bash install-icc.sh
       script:
-        - cmake -DDYND_BUILD_DOCS=ON -DDYND_BUILD_PLUGINS=${DYND_BUILD_PLUGINS} ..
+        - cmake -DDYND_BUILD_DOCS=ON -DDYND_BUILD_PLUGINS=OFF ..
         - make -j4 || exit 1
         - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
     - compiler: clang
