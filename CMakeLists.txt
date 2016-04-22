@@ -61,6 +61,10 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(DYND_BUILD_BENCHMARKS
            "Build the Google benchmarks for libdynd."
            ON)
+# -DDYND_BUILD_PLUGINS=ON/OFF, whether to build the DyND plugins
+    option(DYND_BUILD_PLUGINS
+           "Build the plugins for libdynd."
+           OFF)
 # -DDYND_BUILD_DOCS=ON/OFF, whether or not to build the documentation.
     option(DYND_BUILD_DOCS
            "Use Doxygen to generate the documentation."
@@ -525,7 +529,9 @@ if(DYND_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
 
-add_subdirectory(plugins/mkl)
+if(DYND_BUILD_PLUGINS)
+    add_subdirectory(plugins/mkl)
+endif()
 
 add_subdirectory(examples)
 
