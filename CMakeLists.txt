@@ -279,7 +279,7 @@ set(libdynd_SRC
     include/dynd/callables/base_dispatch_callable.hpp
     # Kernels
     src/dynd/kernels/byteswap_kernels.cpp
-    src/dynd/kernels/fft_kernel.cpp
+    src/dynd/kernels/old_fft_kernel.cpp
     src/dynd/kernels/kernel_builder.cpp
     include/dynd/kernels/apply.hpp
     include/dynd/kernels/arithmetic.hpp
@@ -293,7 +293,7 @@ set(libdynd_SRC
     include/dynd/kernels/cuda_launch.hpp
     include/dynd/kernels/dereference_kernel.hpp
     include/dynd/kernels/elwise_kernel.hpp
-    include/dynd/kernels/fft_kernel.hpp
+    include/dynd/kernels/old_fft_kernel.hpp
     include/dynd/kernels/index_kernel.hpp
     include/dynd/kernels/is_na_kernel.hpp
     include/dynd/kernels/kernel_builder.hpp
@@ -325,7 +325,7 @@ set(libdynd_SRC
     src/dynd/compound_div.cpp
     src/dynd/convert.cpp
     src/dynd/divide.cpp
-    src/dynd/fft.cpp
+    src/dynd/old_fft.cpp
     src/dynd/functional.cpp
     src/dynd/index.cpp
     src/dynd/io.cpp
@@ -369,7 +369,7 @@ set(libdynd_SRC
     include/dynd/convert.hpp
     include/dynd/diagnostics.hpp
     include/dynd/ensure_immutable_contig.hpp
-    include/dynd/fft.hpp
+    include/dynd/old_fft.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/reduction.hpp
     include/dynd/functional.hpp
@@ -524,6 +524,8 @@ endif()
 if(DYND_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
+
+add_subdirectory(plugins/mkl)
 
 add_subdirectory(examples)
 

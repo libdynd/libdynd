@@ -99,6 +99,7 @@ set(tests_SRC
     test_bool1.cpp
     test_config.cpp
     test_dispatch_map.cpp
+    test_fft.cpp
     test_float16.cpp
     test_integer_sequence.cpp
     test_io.cpp
@@ -118,6 +119,7 @@ set(tests_SRC
 include_directories(
     ../thirdparty
     .
+    ../plugins/mkl/include
     )
 
 source_group("Other Tests" REGULAR_EXPRESSION "\\/test_[^\\/]*\\.cpp$")
@@ -126,7 +128,7 @@ source_group("Types Tests" REGULAR_EXPRESSION "\\/types\\/test_[^\\/]*\\.cpp$")
 source_group("Func Tests" REGULAR_EXPRESSION "\\/func\\/test_[^\\/]*\\.cpp$")
 
 add_executable(test_libdynd ${tests_SRC})
-set(LINK_LIBS ${LINK_LIBS} libdynd)
+set(LINK_LIBS ${LINK_LIBS} libdynd dynd-mkl)
 
 if(WIN32)
     target_link_libraries(test_libdynd
