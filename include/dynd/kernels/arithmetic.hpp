@@ -87,6 +87,21 @@ namespace detail {
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   using isdef_logical_xor = all<isdef_bool_cast, Src0TypeID, Src1TypeID>;
 
+  // Check if std::pow is available for given input types.
+  // This should be replaced with something better that can handle complex inputs
+  // and doesn't always upcast to double for integer/float inputs, but this is
+  // good enough for the time being.
+  template <typename T, typename U>
+  static auto pow_isdef_test(int DYND_UNUSED(a))
+      -> sfinae_true<decltype(std::pow(std::declval<T>(), std::declval<U>()))>;
+
+  template <typename, typename>
+  static auto pow_isdef_test(long) -> std::false_type;
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct isdef_pow
+      : decltype(pow_isdef_test<typename type_of<Src0TypeID>::type, typename type_of<Src1TypeID>::type>(0)) {};
+
 #define DYND_DEF_UNARY_OP_CALLABLE(OP, NAME)                                                                           \
   template <type_id_t Src0TypeID>                                                                                      \
   struct inline_##NAME {                                                                                               \
@@ -134,6 +149,11 @@ namespace detail {
       return static_cast<bool>(a) ^ static_cast<bool>(b);
       DYND_END_ALLOW_INT_BOOL_CAST
     }
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct inline_pow {
+    static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return std::pow(a, b); }
   };
 
   // Arithmetic operators that need zero checking.
