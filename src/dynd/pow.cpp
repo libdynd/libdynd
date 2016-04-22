@@ -6,8 +6,12 @@
 #include <dynd/binary_arithmetic.hpp>
 #include <dynd/callables/pow_callable.hpp>
 
-// Use arithmetic_ids here since this should eventually be made to work
-// for complex inputs as well. Those cases will currently be filtered
-// out by the isdef_pow test for whether or not the needed operation
-// is defined.
-DYND_API nd::callable nd::pow = make_binary_arithmetic<nd::pow_callable, dynd::detail::isdef_pow, arithmetic_ids>();
+// This should eventually be made to work for complex inputs as well.
+// The expression SFINAE check fails to detect that pow can be used
+// with int128 and uint128 on OSX, so provide an empty conditional
+// and only use real-valued inputs for this callable.
+typedef join<integral_ids, float_ids>::type real_ids;
+template <type_id_t, type_id_t>
+using isdef_pow = std::true_type;
+
+DYND_API nd::callable nd::pow = make_binary_arithmetic<nd::pow_callable, isdef_pow, real_ids>();
