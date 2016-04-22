@@ -153,7 +153,9 @@ namespace detail {
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct inline_pow {
+    DYND_ALLOW_INT_FLOAT_CAST
     static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return std::pow(a, b); }
+    DYND_END_ALLOW_INT_FLOAT_CAST
   };
 
   // Arithmetic operators that need zero checking.

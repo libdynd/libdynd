@@ -50,6 +50,9 @@
 #define DYND_ALLOW_INT_BOOL_CAST
 #define DYND_END_ALLOW_INT_BOOL_CAST
 
+#define DYND_ALLOW_INT_FLOAT_CAST
+#define DYND_END_ALLOW_INT_FLOAT_CAST
+
 #elif defined(__GNUC__)
 
 // Hack trying to work around gcc isfinite problems
@@ -80,6 +83,9 @@
 #define DYND_ALLOW_INT_BOOL_CAST
 #define DYND_END_ALLOW_INT_BOOL_CAST
 
+#define DYND_ALLOW_INT_FLOAT_CAST
+#define DYND_END_ALLOW_INT_FLOAT_CAST
+
 #elif defined(_MSC_VER)
 
 #define DYND_ISSPACE isspace
@@ -96,6 +102,9 @@
 
 #define DYND_ALLOW_INT_BOOL_CAST __pragma(warning(push)) __pragma(warning(disable : 4800))
 #define DYND_END_ALLOW_INT_BOOL_CAST __pragma(warning(pop))
+
+#define DYND_ALLOW_INT_FLOAT_CAST __pragma(warning(push)) __pragma(warning(disable : 4244))
+#define DYND_END_ALLOW_INT_FLOAT_CAST __pragma(warning(pop))
 
 #include <float.h>
 
