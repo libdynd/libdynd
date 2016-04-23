@@ -13,23 +13,27 @@ namespace dynd {
 namespace nd {
   namespace mkl {
 
-    struct fft_kernel : base_strided_kernel<fft_kernel, 1> {
+    template <typename ComplexType>
+    struct fft_kernel : base_strided_kernel<fft_kernel<ComplexType>, 1> {
+      typedef ComplexType complex_type;
+
       DFTI_DESCRIPTOR_HANDLE descriptor;
 
-      fft_kernel(size_t ndim, const char *src0_metadata) {
+      fft_kernel(size_t ndim, const size_stride_t *src0_size_stride) {
         MKL_LONG status;
-
-        if (ndim == 1) {
-          status = DftiCreateDescriptor(&descriptor, DFTI_DOUBLE, DFTI_COMPLEX, 1,
-                                        reinterpret_cast<const size_stride_t *>(src0_metadata)->dim_size);
-        } else {
-          MKL_LONG src0_size[3];
-          for (size_t i = 0; i < ndim; ++i) {
-            src0_size[i] = reinterpret_cast<const size_stride_t *>(src0_metadata)->dim_size;
-            src0_metadata += sizeof(size_stride_t);
-          }
-
-          status = DftiCreateDescriptor(&descriptor, DFTI_DOUBLE, DFTI_COMPLEX, ndim, src0_size);
+        switch (ndim) {
+        case 1: {
+          MKL_LONG src0_size = src0_size_stride[0].dim_size;
+          status = DftiCreateDescriptor(&descriptor, DFTI_DOUBLE, DFTI_COMPLEX, 1, src0_size);
+          break;
+        }
+        case 2: {
+          MKL_LONG src0_size[2] = {src0_size_stride[0].dim_size, src0_size_stride[1].dim_size};
+          status = DftiCreateDescriptor(&descriptor, DFTI_DOUBLE, DFTI_COMPLEX, 2, src0_size);
+          break;
+        }
+        default:
+          break;
         }
 
         status = DftiSetValue(descriptor, DFTI_PLACEMENT, DFTI_NOT_INPLACE);
@@ -45,3 +49,5 @@ namespace nd {
   } // namespace dynd::nd::mkl
 } // namespace dynd::nd
 } // namespace dynd
+
+#undef DftiCreateDescriptor
