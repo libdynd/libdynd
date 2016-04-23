@@ -5,6 +5,11 @@
 namespace dynd {
 
 namespace detail {
+
+  // The check macros and the related templates are used to
+  // define expression SFINAE based checks for whether or not
+  // a given operator overload exists for specific input types.
+
   template <typename>
   struct sfinae_true : std::true_type {};
 
