@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/fft.hpp>
+#include <dynd/old_fft.hpp>
 #include <dynd/index.hpp>
 #include <dynd/functional.hpp>
-#include <dynd/callables/fft_callable.hpp>
+#include <dynd/callables/old_fft_callable.hpp>
 
 using namespace std;
 using namespace dynd;

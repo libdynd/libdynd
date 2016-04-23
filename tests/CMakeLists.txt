@@ -103,6 +103,7 @@ set(tests_SRC
     test_integer_sequence.cpp
     test_io.cpp
     test_iterator.cpp
+#    test_mkl.cpp
     test_range.cpp
     test_shape_tools.cpp
     test_type_sequence.cpp
@@ -113,12 +114,17 @@ set(tests_SRC
     ../thirdparty/gtest/gtest_main.cc
     )
 
-# memap, array/test_view.cpp, array/test_pointer.cpp
-
 include_directories(
     ../thirdparty
     .
     )
+
+if(DYND_BUILD_PLUGINS)
+    include_directories(../plugins/mkl/include)
+
+    set(tests_SRC ${tests_SRC}
+        test_mkl.cpp)
+endif()
 
 source_group("Other Tests" REGULAR_EXPRESSION "\\/test_[^\\/]*\\.cpp$")
 source_group("Array Tests" REGULAR_EXPRESSION "\\/array\\/test_[^\\/]*\\.cpp$")
@@ -127,6 +133,10 @@ source_group("Func Tests" REGULAR_EXPRESSION "\\/func\\/test_[^\\/]*\\.cpp$")
 
 add_executable(test_libdynd ${tests_SRC})
 set(LINK_LIBS ${LINK_LIBS} libdynd)
+
+if(DYND_BUILD_PLUGINS)
+    set(LINK_LIBS ${LINK_LIBS} dynd-mkl)
+endif()
 
 if(WIN32)
     target_link_libraries(test_libdynd
