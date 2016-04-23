@@ -257,3 +257,8 @@ nd::callable &nd::reg(const std::string &name) {
   ss << " has been registered";
   throw invalid_argument(ss.str());
 }
+
+void nd::reg(const std::string &name, const nd::callable &f) {
+  std::map<std::string, callable> &registry = detail::get_regfunctions();
+  registry[name] = f;
+}
