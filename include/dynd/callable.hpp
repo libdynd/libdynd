@@ -351,6 +351,8 @@ namespace nd {
 
   DYND_API std::map<std::string, callable> &callables();
 
+  DYND_API void reg(const std::string &name, const callable &f);
+
 } // namespace dynd::nd
 
 /**
