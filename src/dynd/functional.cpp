@@ -10,6 +10,7 @@
 #include <dynd/callables/elwise_entry_callable.hpp>
 #include <dynd/callables/neighborhood_callable.hpp>
 #include <dynd/callables/outer_callable.hpp>
+#include <dynd/callables/outer_entry_callable.hpp>
 #include <dynd/callables/reduction_callable.hpp>
 #include <dynd/callables/state_callable.hpp>
 #include <dynd/callables/where_callable.hpp>
@@ -127,28 +128,10 @@ nd::callable nd::functional::elwise(const callable &child, bool res_ignore) {
   return f;
 }
 
+nd::callable nd::functional::outer_entry_callable::dispatch_child = nd::make_callable<dispatch_callable>();
+
 nd::callable nd::functional::outer(const callable &child) {
-  const ndt::type &self_tp = outer_make_type(child.get_type());
-  switch (self_tp.extended<ndt::callable_type>()->get_npos()) {
-  case 0:
-    return make_callable<outer_callable<0>>(self_tp, child);
-  case 1:
-    return make_callable<outer_callable<1>>(self_tp, child);
-  case 2:
-    return make_callable<outer_callable<2>>(self_tp, child);
-  case 3:
-    return make_callable<outer_callable<3>>(self_tp, child);
-  case 4:
-    return make_callable<outer_callable<4>>(self_tp, child);
-  case 5:
-    return make_callable<outer_callable<5>>(self_tp, child);
-  case 6:
-    return make_callable<outer_callable<6>>(self_tp, child);
-  case 7:
-    return make_callable<outer_callable<7>>(self_tp, child);
-  default:
-    throw std::runtime_error("callable with nsrc > 7 not implemented yet");
-  }
+  return make_callable<outer_entry_callable>(outer_make_type(child.get_type()), child);
 }
 
 ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp) {
