@@ -24,47 +24,20 @@ TEST(Outer, 1D) {
 TEST(Outer, 2D) {
   nd::callable f = nd::functional::outer([](int x, int y) { return x + y; });
   EXPECT_ARRAY_EQ(nd::array({{1, 3}, {3, 5}}), f(nd::array{0, 2}, nd::array{1, 3}));
+  EXPECT_ARRAY_EQ(nd::array({{1, 3, 5}, {3, 5, 7}, {5, 7, 9}}), f(nd::array{0, 2, 4}, nd::array{1, 3, 5}));
+  EXPECT_ARRAY_EQ(nd::array({1, 3}), f(nd::array{0, 2}, 1));
+  EXPECT_ARRAY_EQ(nd::array({2, 4}), f(1, nd::array{1, 3}));
+  EXPECT_ARRAY_EQ(1, f(0, 1));
+
+  f = nd::functional::outer([](int x, int y) { return x - y; });
+  EXPECT_ARRAY_EQ(nd::array({{-1, -3}, {1, -1}}), f(nd::array{0, 2}, nd::array{1, 3}));
+  EXPECT_ARRAY_EQ(nd::array({{-1, -3, -5}, {1, -1, -3}, {3, 1, -1}}), f(nd::array{0, 2, 4}, nd::array{1, 3, 5}));
 }
 
 TEST(Outer, 3D) {
   nd::callable f = nd::functional::outer([](int x, int y, int z) { return x + y + z; });
   EXPECT_ARRAY_EQ(nd::array({{{3, 6}, {6, 9}}, {{6, 9}, {9, 12}}}),
                   f(nd::array{0, 3}, nd::array{1, 4}, nd::array{2, 5}));
+  EXPECT_ARRAY_EQ(nd::array({3, 4}), f(0, 1, nd::array{2, 3}));
+  EXPECT_ARRAY_EQ(3, f(0, 1, 2));
 }
-
-/*
-static double func0(double x, double y, double z) { return x + y + z; }
-
-TEST(Outer, 1D)
-{
-  nd::array x, y, z, res;
-
-  nd::callable af = nd::functional::outer(nd::functional::apply(&func0));
-
-  x = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(10, ndt::make_type<double>())}});
-  y = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(10, ndt::make_type<double>())}});
-  z = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(10, ndt::make_type<double>())}});
-
-  res = af(x, y, z);
-  for (intptr_t i = 0; i < x.get_dim_size(); ++i) {
-    for (intptr_t j = 0; j < y.get_dim_size(); ++j) {
-      for (intptr_t k = 0; k < z.get_dim_size(); ++k) {
-        EXPECT_EQ(x(i).as<double>() + y(j).as<double>() + z(k).as<double>(), res(i, j, k).as<double>());
-      }
-    }
-  }
-
-  x = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(4, ndt::make_type<double>())}});
-  y = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(16, ndt::make_type<double>())}});
-  z = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(8, ndt::make_type<double>())}});
-
-  res = af(x, y, z);
-  for (intptr_t i = 0; i < x.get_dim_size(); ++i) {
-    for (intptr_t j = 0; j < y.get_dim_size(); ++j) {
-      for (intptr_t k = 0; k < z.get_dim_size(); ++k) {
-        EXPECT_EQ(x(i).as<double>() + y(j).as<double>() + z(k).as<double>(), res(i, j, k).as<double>());
-      }
-    }
-  }
-}
-*/
