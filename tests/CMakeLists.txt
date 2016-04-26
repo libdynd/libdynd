@@ -72,8 +72,8 @@ set(tests_SRC
     func/test_multidispatch.cpp
 #    func/test_neighborhood.cpp
     func/test_option.cpp
-#    func/test_outer.cpp
     func/test_random.cpp
+    func/test_outer.cpp
     func/test_reduction.cpp
     func/test_registry.cpp
     func/test_search.cpp
