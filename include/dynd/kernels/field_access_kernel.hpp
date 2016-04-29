@@ -40,18 +40,12 @@ namespace nd {
       // Get the nd::array 'self' parameter
       intptr_t undim = n.get_ndim();
       ndt::type udt = n.get_dtype();
-      if (udt.is_expression()) {
-        std::string field_name = udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
-        return n.replace_dtype(ndt::make_type<ndt::adapt_type>(
-            udt.value_type().extended<ndt::struct_type>()->get_field_type(i), udt, nd::callable(), nd::callable()));
+      if (undim == 0) {
+        return n(i);
       } else {
-        if (undim == 0) {
-          return n(i);
-        } else {
-          shortvector<irange> idx(undim + 1);
-          idx[undim] = irange(i);
-          return n.at_array(undim + 1, idx.get());
-        }
+        shortvector<irange> idx(undim + 1);
+        idx[undim] = irange(i);
+        return n.at_array(undim + 1, idx.get());
       }
     }
   };

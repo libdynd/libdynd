@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/callables/base_callable.hpp>
+#include <dynd/callables/base_access_callable.hpp>
 #include <dynd/kernels/field_access_kernel.hpp>
 
 namespace dynd {
@@ -40,11 +40,13 @@ namespace nd {
     }
   };
 
-  class get_array_field_callable : public base_callable {
+  class get_array_field_callable : public base_access_callable {
   public:
-    get_array_field_callable()
-        : base_callable(ndt::make_type<ndt::callable_type>(ndt::type("Any"), {ndt::type("Any")},
-                                                           {{ndt::make_type<std::string>(), "name"}})) {}
+    get_array_field_callable() : base_access_callable(ndt::type("Any"), ndt::type("Any")) {}
+
+    const std::vector<std::string> &get_names(const ndt::type &arg0_tp) const {
+      return arg0_tp.get_dtype().extended<ndt::struct_type>()->get_field_names();
+    }
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &DYND_UNUSED(res_tp), size_t DYND_UNUSED(narg), const ndt::type *arg_tp,
