@@ -43,17 +43,15 @@ namespace nd {
   class get_array_field_callable : public base_callable {
   public:
     get_array_field_callable()
-        : base_callable(ndt::make_type<ndt::callable_type>(
-              ndt::type("Any"), ndt::make_type<ndt::tuple_type>(),
-              ndt::make_type<ndt::struct_type>(
-                  {{ndt::type("Any"), "self"}, {ndt::make_type<std::string>(), "name"}}))) {}
+        : base_callable(ndt::make_type<ndt::callable_type>(ndt::type("Any"), {ndt::type("Any")},
+                                                           {{ndt::make_type<std::string>(), "name"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
-                      const ndt::type &DYND_UNUSED(res_tp), size_t DYND_UNUSED(narg),
-                      const ndt::type *DYND_UNUSED(arg_tp), size_t DYND_UNUSED(nkwd), const array *kwds,
+                      const ndt::type &DYND_UNUSED(res_tp), size_t DYND_UNUSED(narg), const ndt::type *arg_tp,
+                      size_t DYND_UNUSED(nkwd), const array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      ndt::type dt = kwds[0].get_dtype();
-      std::string name = kwds[1].as<std::string>();
+      ndt::type dt = arg_tp[0].get_dtype();
+      std::string name = kwds[0].as<std::string>();
 
       if (dt.get_id() != struct_id) {
         throw std::invalid_argument(std::string("no property named '") + name + "'");
@@ -64,13 +62,12 @@ namespace nd {
         throw std::invalid_argument("no field named '" + name + "'");
       }
 
-      cg.emplace_back([kwds, i](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
-                                const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
-                                const char *const *DYND_UNUSED(src_arrmeta)) {
-        kb.emplace_back<get_array_field_kernel>(kernreq, kwds[0], i);
-      });
+      cg.emplace_back(
+          [i](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+              const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+              const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<get_array_field_kernel>(kernreq, i); });
 
-      return get_array_field_kernel::helper(kwds[0], i).get_type();
+      return arg_tp[0].with_replaced_dtype(dt);
     }
   };
 
