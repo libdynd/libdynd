@@ -317,6 +317,7 @@ set(libdynd_SRC
     include/dynd/kernels/uniform_kernel.hpp
     include/dynd/kernels/view_kernel.hpp
     # Main
+    src/dynd/access.cpp
     src/dynd/add.cpp
     src/dynd/array.cpp
     src/dynd/array_range.cpp
@@ -359,10 +360,10 @@ set(libdynd_SRC
     src/dynd/sort.cpp
     src/dynd/statistics.cpp
     src/dynd/string.cpp
-    src/dynd/struct.cpp
     src/dynd/subtract.cpp
     src/dynd/sum.cpp
     src/dynd/view.cpp
+    include/dynd/access.hpp
     include/dynd/arithmetic.hpp
     include/dynd/array.hpp
     include/dynd/array_range.hpp
@@ -394,7 +395,6 @@ set(libdynd_SRC
     include/dynd/statistics.hpp
     include/dynd/string.hpp
     include/dynd/string_search.hpp
-    include/dynd/struct.hpp
     include/dynd/type_sequence.hpp
     include/dynd/type_promotion.hpp
     include/dynd/exceptions.hpp

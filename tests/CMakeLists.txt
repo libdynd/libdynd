@@ -78,7 +78,6 @@ set(tests_SRC
     func/test_registry.cpp
     func/test_search.cpp
     func/test_sort.cpp
-    func/test_struct.cpp
     func/test_sum.cpp
     func/test_take.cpp
     func/test_view.cpp
@@ -96,6 +95,7 @@ set(tests_SRC
     array/test_memmap.cpp
     array/test_view.cpp
     array/test_with.cpp
+    test_access.cpp
     test_bool1.cpp
     test_config.cpp
     test_dispatch_map.cpp
