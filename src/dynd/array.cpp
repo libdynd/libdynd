@@ -7,6 +7,7 @@
 #include <dynd/array.hpp>
 #include <dynd/comparison.hpp>
 
+#include <dynd/access.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/assignment.hpp>
 #include <dynd/exceptions.hpp>
@@ -15,7 +16,6 @@
 #include <dynd/math.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
 #include <dynd/option.hpp>
-#include <dynd/struct.hpp>
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/categorical_type.hpp>
@@ -207,7 +207,7 @@ void nd::array::flag_as_immutable() {
   }
 }
 
-nd::array nd::array::p(const char *name) const { return nd::make_field_access_kernel(get_dtype(), name)(eval()); }
+nd::array nd::array::p(const char *name) const { return access(*this, name); }
 
 nd::array nd::array::p(const std::string &name) const { return p(name.c_str()); }
 

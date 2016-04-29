@@ -8,9 +8,9 @@
 #include <cmath>
 #include <inc_gtest.hpp>
 
-#include "../dynd_assertions.hpp"
+#include "dynd_assertions.hpp"
 
-#include <dynd/struct.hpp>
+#include <dynd/access.hpp>
 
 using namespace std;
 using namespace dynd;

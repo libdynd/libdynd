@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/callables/base_callable.hpp>
+#include <dynd/callables/base_access_callable.hpp>
 #include <dynd/kernels/field_access_kernel.hpp>
 
 namespace dynd {
@@ -40,27 +40,36 @@ namespace nd {
     }
   };
 
-  class get_array_field_callable : public base_callable {
-    intptr_t m_i;
-
+  class get_array_field_callable : public base_access_callable {
   public:
-    get_array_field_callable(intptr_t i)
-        : base_callable(
-              ndt::make_type<ndt::callable_type>(ndt::type("Any"), ndt::make_type<ndt::tuple_type>(),
-                                                 ndt::make_type<ndt::struct_type>({{ndt::type("Any"), "self"}}))),
-          m_i(i) {}
+    get_array_field_callable() : base_access_callable(ndt::type("Any"), ndt::type("Any")) {}
+
+    const std::vector<std::string> &get_names(const ndt::type &arg0_tp) const {
+      return arg0_tp.get_dtype().extended<ndt::struct_type>()->get_field_names();
+    }
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
-                      const ndt::type &DYND_UNUSED(res_tp), size_t DYND_UNUSED(narg),
-                      const ndt::type *DYND_UNUSED(arg_tp), size_t DYND_UNUSED(nkwd), const array *kwds,
+                      const ndt::type &DYND_UNUSED(res_tp), size_t DYND_UNUSED(narg), const ndt::type *arg_tp,
+                      size_t DYND_UNUSED(nkwd), const array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      cg.emplace_back([ kwds, m_i = m_i ](kernel_builder & kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
-                                          const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
-                                          const char *const *DYND_UNUSED(src_arrmeta)) {
-        kb.emplace_back<get_array_field_kernel>(kernreq, kwds[0], m_i);
-      });
+      ndt::type dt = arg_tp[0].get_dtype();
+      std::string name = kwds[0].as<std::string>();
 
-      return get_array_field_kernel::helper(kwds[0], m_i).get_type();
+      if (dt.get_id() != struct_id) {
+        throw std::invalid_argument(std::string("no property named '") + name + "'");
+      }
+
+      intptr_t i = dt.extended<ndt::struct_type>()->get_field_index(name);
+      if (i < 0) {
+        throw std::invalid_argument("no field named '" + name + "'");
+      }
+
+      cg.emplace_back(
+          [i](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+              const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
+              const char *const *DYND_UNUSED(src_arrmeta)) { kb.emplace_back<get_array_field_kernel>(kernreq, i); });
+
+      return arg_tp[0].with_replaced_dtype(dt);
     }
   };
 
