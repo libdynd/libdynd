@@ -28,7 +28,7 @@ namespace nd {
         if (data == nullptr) {
           new_data.child = m_child;
           if (kwds[0].is_na()) {
-            new_data.naxis = src_tp[0].get_ndim() - m_child.get_type()->get_return_type().get_ndim();
+            new_data.naxis = src_tp[0].get_ndim() - m_child->get_ret_type().get_ndim();
             new_data.axes = NULL;
           } else {
             new_data.naxis = kwds[0].get_dim_size();

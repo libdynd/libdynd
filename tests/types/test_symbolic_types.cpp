@@ -289,7 +289,7 @@ TEST(SymbolicTypes, VariadicCallable) {
 
   tp = ndt::type("(int32, ...) -> float32");
   EXPECT_JSON_EQ_ARR("[\"int32\"]", tp.p<std::vector<ndt::type>>("pos_types"));
-  EXPECT_TRUE(tp.extended<ndt::callable_type>()->has_variadic_arguments());
+  EXPECT_TRUE(tp.extended<ndt::callable_type>()->is_arg_variadic());
   EXPECT_EQ(ndt::type("(int32, ...)"), tp.extended<ndt::callable_type>()->get_pos_tuple());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 

@@ -29,8 +29,7 @@ namespace nd {
      * output type, and the "dst" keyword argument always provides an
      * output array.
      */
-    inline bool is_special_kwd(const ndt::callable_type *DYND_UNUSED(self_tp), array &dst, const std::string &name,
-                               const nd::array &value) {
+    inline bool is_special_kwd(array &dst, const std::string &name, const nd::array &value) {
       if (name == "dst_tp") {
         dst = nd::empty(value.as<ndt::type>());
         return true;
@@ -42,9 +41,9 @@ namespace nd {
       return false;
     }
 
-    DYND_API void check_narg(const ndt::callable_type *af_tp, size_t narg);
+    DYND_API void check_narg(const base_callable *self, size_t narg);
 
-    DYND_API void check_arg(const ndt::callable_type *af_tp, intptr_t i, const ndt::type &actual_tp,
+    DYND_API void check_arg(const base_callable *self, intptr_t i, const ndt::type &actual_tp,
                             const char *actual_arrmeta, std::map<std::string, ndt::type> &tp_vars);
 
     template <template <type_id_t...> class KernelType>
@@ -81,14 +80,6 @@ namespace nd {
 
     callable_property get_flags() const { return right_associative; }
 
-    const ndt::callable_type *get_type() const {
-      if (get() == NULL) {
-        return NULL;
-      }
-
-      return m_ptr->get_type().extended<ndt::callable_type>();
-    }
-
     ndt::type resolve(const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds) {
       std::map<std::string, ndt::type> tp_vars;
 
@@ -102,7 +93,7 @@ namespace nd {
     }
 
     ndt::type resolve(std::initializer_list<ndt::type> src_tp, std::initializer_list<array> kwds) {
-      return resolve(get_type()->get_return_type(), src_tp.size(), src_tp.begin(), kwds.size(), kwds.begin());
+      return resolve(m_ptr->get_ret_type(), src_tp.size(), src_tp.begin(), kwds.size(), kwds.begin());
     }
 
     void overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp, const callable &value) {

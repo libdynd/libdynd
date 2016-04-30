@@ -32,11 +32,11 @@ nd::callable nd::functional::adapt(const ndt::type &value_tp, const callable &fo
 }
 
 nd::callable nd::functional::compose(const nd::callable &first, const nd::callable &second, const ndt::type &buf_tp) {
-  if (first.get_type()->get_npos() != 1) {
+  if (first->get_narg() != 1) {
     throw runtime_error("Multi-parameter callable chaining is not implemented");
   }
 
-  if (second.get_type()->get_npos() != 1) {
+  if (second->get_narg() != 1) {
     stringstream ss;
     ss << "Cannot chain functions " << first << " and " << second << ", because the second function is not unary";
     throw invalid_argument(ss.str());
@@ -56,26 +56,25 @@ nd::callable nd::functional::compose(const nd::callable &first, const nd::callab
   */
 
   return make_callable<compose_callable>(
-      ndt::make_type<ndt::callable_type>(second.get_type()->get_return_type(), first.get_type()->get_argument_types()),
-      first, second, buf_tp);
+      ndt::make_type<ndt::callable_type>(second->get_ret_type(), first->get_arg_types()), first, second, buf_tp);
 }
 
 nd::callable nd::functional::constant(const array &val) { return make_callable<constant_callable>(val); }
 
 nd::callable nd::functional::left_compound(const callable &child) {
-  vector<ndt::type> pos_types = child.get_type()->get_argument_types();
+  vector<ndt::type> pos_types = child->get_arg_types();
   pos_types.resize(1);
 
   return make_callable<left_compound_callable>(
-      ndt::make_type<ndt::callable_type>(child.get_type()->get_return_type(), pos_types), // head element or empty
+      ndt::make_type<ndt::callable_type>(child->get_ret_type(), pos_types), // head element or empty
       child);
 }
 
 nd::callable nd::functional::right_compound(const callable &child) {
-  vector<ndt::type> pos_types = child.get_type()->get_argument_types();
+  vector<ndt::type> pos_types = child->get_arg_types();
   pos_types.erase(pos_types.begin());
 
-  return make_callable<right_compound_callable>(ndt::make_type<ndt::callable_type>(child.get_type()->get_return_type(),
+  return make_callable<right_compound_callable>(ndt::make_type<ndt::callable_type>(child->get_ret_type(),
                                                                                    pos_types), // tail elements or empty
                                                 child);
 }
@@ -103,7 +102,7 @@ ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp, b
 }
 
 nd::callable nd::functional::elwise(const callable &child, bool res_ignore) {
-  ndt::type f_tp = elwise_make_type(child.get_type(), !res_ignore);
+  ndt::type f_tp = elwise_make_type(child->get_type().extended<ndt::callable_type>(), !res_ignore);
 
   size_t i;
   bool state = false;
@@ -131,7 +130,7 @@ nd::callable nd::functional::elwise(const callable &child, bool res_ignore) {
 nd::callable nd::functional::outer_entry_callable::dispatch_child = nd::make_callable<dispatch_callable>();
 
 nd::callable nd::functional::outer(const callable &child) {
-  return make_callable<outer_entry_callable>(outer_make_type(child.get_type()), child);
+  return make_callable<outer_entry_callable>(outer_make_type(child->get_type().extended<ndt::callable_type>()), child);
 }
 
 ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp) {
