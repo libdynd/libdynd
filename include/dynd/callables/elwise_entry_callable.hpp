@@ -31,7 +31,7 @@ namespace nd {
                         const std::map<std::string, ndt::type> &tp_vars) {
         data_type data{m_child ? m_child.get() : caller, m_res_ignore, false, 0, true};
 
-        const std::vector<ndt::type> &child_arg_tp = data.child->get_argument_types();
+        const std::vector<ndt::type> &child_arg_tp = data.child->get_arg_types();
         for (size_t i = 0; i < nsrc; ++i) {
           if (child_arg_tp[i].get_dtype().get_id() == state_id) {
             data.state = true;
@@ -43,7 +43,7 @@ namespace nd {
           }
         }
 
-        const ndt::type &child_ret_tp = data.child->get_return_type();
+        const ndt::type &child_ret_tp = data.child->get_ret_type();
         if (!m_res_ignore && !dst_tp.is_variadic()) {
           size_t ndim = dst_tp.get_ndim() - child_ret_tp.get_ndim();
           if (ndim > data.ndim) {

@@ -64,16 +64,11 @@ namespace nd {
 
     const ndt::type &get_type() const { return m_tp; }
 
-    const ndt::type &get_return_type() const { return m_tp.extended<ndt::callable_type>()->get_return_type(); }
+    const ndt::type &get_ret_type() const { return m_tp.extended<ndt::callable_type>()->get_return_type(); }
 
-    std::intptr_t get_narg() const { return m_tp.extended<ndt::callable_type>()->get_npos(); }
+    size_t get_narg() const { return m_tp.extended<ndt::callable_type>()->get_npos(); }
 
-    const ndt::type &get_arg_type(std::intptr_t i) const {
-      const std::vector<ndt::type> arg_tp = m_tp.extended<ndt::callable_type>()->get_argument_types();
-      return arg_tp[i];
-    }
-
-    const std::vector<ndt::type> &get_argument_types() const {
+    const std::vector<ndt::type> &get_arg_types() const {
       return m_tp.extended<ndt::callable_type>()->get_argument_types();
     }
 

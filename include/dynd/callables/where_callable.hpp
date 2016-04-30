@@ -12,7 +12,7 @@ namespace dynd {
 namespace ndt {
 
   inline type make_where(const nd::callable &child) {
-    std::vector<type> arg_tp = child->get_argument_types();
+    std::vector<type> arg_tp = child->get_arg_types();
     arg_tp.push_back(make_type<nd::state>());
 
     return ndt::make_type<ndt::callable_type>(

@@ -45,7 +45,7 @@ namespace nd {
         node_type node;
 
         callable &child = reinterpret_cast<data_type *>(data)->child;
-        const ndt::type &child_ret_tp = child.get_ret_type();
+        const ndt::type &child_ret_tp = child->get_ret_type();
 
         bool reduce = reinterpret_cast<data_type *>(data)->axes == NULL;
         for (size_t i = 0; i < reinterpret_cast<data_type *>(data)->naxis && !reduce; ++i) {

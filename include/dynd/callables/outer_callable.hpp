@@ -63,7 +63,7 @@ namespace nd {
           ret_element_tp = caller->resolve(this, data, cg, dst_tp, NArg, arg_element_tp, nkwd, kwds, tp_vars);
         } else {
           ret_element_tp =
-              child->resolve(this, nullptr, cg, child->get_return_type(), NArg, arg_element_tp, nkwd, kwds, tp_vars);
+              child->resolve(this, nullptr, cg, child->get_ret_type(), NArg, arg_element_tp, nkwd, kwds, tp_vars);
         }
 
         return src_tp[j].extended<ndt::base_dim_type>()->with_element_type(ret_element_tp);

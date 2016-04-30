@@ -119,7 +119,7 @@ namespace nd {
 
     template <int... I>
     callable forward_na(const callable &child) {
-      ndt::type tp = ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::option_type>(child.get_ret_type()),
+      ndt::type tp = ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::option_type>(child->get_ret_type()),
                                                         {ndt::type("Any"), ndt::type("Any")});
       return make_callable<forward_na_callable<I...>>(tp, child);
     }
