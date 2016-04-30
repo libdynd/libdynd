@@ -96,7 +96,7 @@ nd::callable dynd::make_callable_from_assignment(const ndt::type &dst_tp, const 
 }
 
 void nd::detail::check_narg(const ndt::callable_type *af_tp, size_t narg) {
-  if (!af_tp->is_pos_variadic() && narg != af_tp->get_npos()) {
+  if (!af_tp->has_variadic_arguments() && narg != af_tp->get_npos()) {
     std::stringstream ss;
     ss << "callable expected " << af_tp->get_npos() << " positional arguments, but received " << narg;
     throw std::invalid_argument(ss.str());
@@ -105,11 +105,11 @@ void nd::detail::check_narg(const ndt::callable_type *af_tp, size_t narg) {
 
 void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i, const ndt::type &actual_tp,
                            const char *DYND_UNUSED(actual_arrmeta), std::map<std::string, ndt::type> &tp_vars) {
-  if (af_tp->is_pos_variadic()) {
+  if (af_tp->has_variadic_arguments()) {
     return;
   }
 
-  ndt::type expected_tp = af_tp->get_pos_type(i);
+  ndt::type expected_tp = af_tp->get_argument_types()[i];
   ndt::type candidate_tp = actual_tp;
 
   if (!expected_tp.match(candidate_tp, tp_vars)) {
@@ -125,7 +125,7 @@ nd::array nd::callable::call(size_t narg, const array *args, size_t nkwd,
   std::map<std::string, ndt::type> tp_vars;
   const ndt::callable_type *self_tp = get_type();
 
-  if (!self_tp->is_pos_variadic() && (narg < self_tp->get_npos())) {
+  if (!self_tp->has_variadic_arguments() && (narg < self_tp->get_npos())) {
     std::stringstream ss;
     ss << "callable expected " << self_tp->get_npos() << " positional arguments, but received " << narg;
     throw std::invalid_argument(ss.str());
@@ -136,7 +136,7 @@ nd::array nd::callable::call(size_t narg, const array *args, size_t nkwd,
   unique_ptr<array[]> kwds(new array[narg + self_tp->get_nkwd()]);
 
   size_t j = 0;
-  if (self_tp->is_pos_variadic()) {
+  if (self_tp->has_variadic_arguments()) {
     for (size_t i = 0; i < narg; ++i) {
       detail::check_arg(self_tp, i, args[i]->tp, args[i]->metadata(), tp_vars);
 

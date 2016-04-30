@@ -12,41 +12,32 @@ ndt::adapt_type::adapt_type(const ndt::type &value_tp, const ndt::type &storage_
                             const nd::callable &inverse)
     : base_expr_type(adapt_id, storage_tp.get_data_size(), storage_tp.get_data_alignment(), type_flag_none,
                      storage_tp.get_arrmeta_size(), storage_tp.get_ndim()),
-      m_value_tp(value_tp), m_storage_tp(storage_tp), m_forward(forward), m_inverse(inverse)
-{
-}
+      m_value_tp(value_tp), m_storage_tp(storage_tp), m_forward(forward), m_inverse(inverse) {}
 
 ndt::adapt_type::adapt_type(const nd::callable &forward, const nd::callable &inverse)
-    : adapt_type(forward.get_type()->get_return_type(), forward.get_type()->get_pos_type(0), forward, inverse)
-{
-}
+    : adapt_type(forward.get_type()->get_return_type(), forward.get_arg_types()[0], forward, inverse) {}
 
-void ndt::adapt_type::print_type(ostream &o) const
-{
+void ndt::adapt_type::print_type(ostream &o) const {
   o << "adapt[";
   if (m_forward.is_null()) {
     o << "null";
-  }
-  else {
+  } else {
     o << m_forward;
   }
   o << ", ";
   if (m_inverse.is_null()) {
     o << "null";
-  }
-  else {
+  } else {
     o << m_inverse;
   }
   o << "]";
 }
 
-void ndt::adapt_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const
-{
+void ndt::adapt_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const {
   m_storage_tp.print_data(o, arrmeta, data);
 }
 
-bool ndt::adapt_type::operator==(const base_type &rhs) const
-{
+bool ndt::adapt_type::operator==(const base_type &rhs) const {
   if (this == &rhs) {
     return true;
   }

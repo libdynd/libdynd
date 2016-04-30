@@ -7,20 +7,20 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "inc_gtest.hpp"
 #include "../dynd_assertions.hpp"
+#include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/kernels/byteswap_kernels.hpp>
 #include <dynd/callable.hpp>
-#include <dynd/types/adapt_type.hpp>
-#include <dynd/types/struct_type.hpp>
-#include <dynd/types/fixed_string_type.hpp>
-#include <dynd/types/fixed_bytes_type.hpp>
-#include <dynd/types/string_type.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/types/pointer_type.hpp>
+#include <dynd/kernels/byteswap_kernels.hpp>
 #include <dynd/type.hpp>
+#include <dynd/types/adapt_type.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
+#include <dynd/types/pointer_type.hpp>
+#include <dynd/types/string_type.hpp>
+#include <dynd/types/struct_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -432,6 +432,6 @@ TEST(StructType, InvalidFieldName) {
   const nd::array s = nd::as_struct({{"x", 100}, {"y", 1729.22}});
   const ndt::type dt = s.get_type();
 
-  EXPECT_THROW(dt.extended<ndt::struct_type>()->get_field_type("z"), invalid_argument);
+  EXPECT_EQ(-1, dt.extended<ndt::struct_type>()->get_field_index("z"));
   EXPECT_THROW(s.p("z"), invalid_argument);
 }

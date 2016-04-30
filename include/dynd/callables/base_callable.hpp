@@ -69,13 +69,15 @@ namespace nd {
     std::intptr_t get_narg() const { return m_tp.extended<ndt::callable_type>()->get_npos(); }
 
     const ndt::type &get_arg_type(std::intptr_t i) const {
-      return m_tp.extended<ndt::callable_type>()->get_pos_type(i);
+      const std::vector<ndt::type> arg_tp = m_tp.extended<ndt::callable_type>()->get_argument_types();
+      return arg_tp[i];
     }
 
     const std::vector<ndt::type> &get_argument_types() const {
-      return m_tp.extended<ndt::callable_type>()->get_pos_types();
+      return m_tp.extended<ndt::callable_type>()->get_argument_types();
     }
 
+    bool has_variadic_args() const { return m_tp.extended<ndt::callable_type>()->has_variadic_arguments(); }
 
     /**
      * Function prototype for instantiating a kernel from an
@@ -100,7 +102,7 @@ namespace nd {
                               const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                               const std::map<std::string, ndt::type> &tp_vars) = 0;
 
-//    virtual void resolve() {}
+    //    virtual void resolve() {}
 
     virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
 

@@ -45,9 +45,11 @@ namespace ndt {
 
     const type &get_pos_tuple() const { return m_pos_tuple; }
 
-    const std::vector<type> &get_pos_types() const { return m_pos_tuple.extended<tuple_type>()->get_field_types(); }
+    const std::vector<type> &get_argument_types() const {
+      return m_pos_tuple.extended<tuple_type>()->get_field_types();
+    }
 
-    bool is_pos_variadic() const { return m_pos_tuple.extended<tuple_type>()->is_variadic(); }
+    bool has_variadic_arguments() const { return m_pos_tuple.extended<tuple_type>()->is_variadic(); }
 
     bool is_kwd_variadic() const { return m_kwd_struct.extended<struct_type>()->is_variadic(); }
 
@@ -57,14 +59,6 @@ namespace ndt {
 
     const std::vector<std::string> &get_kwd_names() const {
       return m_kwd_struct.extended<struct_type>()->get_field_names();
-    }
-
-    const type &get_pos_type(intptr_t i) const {
-      if (i == -1) {
-        return get_return_type();
-      }
-
-      return m_pos_tuple.extended<tuple_type>()->get_field_type(i);
     }
 
     const type &get_kwd_type(intptr_t i) const { return m_kwd_struct.extended<struct_type>()->get_field_type(i); }

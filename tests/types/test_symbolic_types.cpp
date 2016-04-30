@@ -3,21 +3,21 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "dynd_assertions.hpp"
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/callable.hpp>
-#include <dynd/types/callable_type.hpp>
-#include <dynd/types/typevar_type.hpp>
-#include <dynd/types/typevar_dim_type.hpp>
-#include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/any_kind_type.hpp>
-#include <dynd/types/type_type.hpp>
+#include <dynd/types/callable_type.hpp>
+#include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/int_kind_sym_type.hpp>
+#include <dynd/types/type_type.hpp>
+#include <dynd/types/typevar_dim_type.hpp>
+#include <dynd/types/typevar_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -38,9 +38,9 @@ TEST(SymbolicTypes, CreateFuncProto) {
   EXPECT_FALSE(tp.is_variadic());
   fpt = tp.extended<ndt::callable_type>();
   ASSERT_EQ(3, fpt->get_narg());
-  EXPECT_EQ(ndt::make_type<float>(), fpt->get_pos_type(0));
-  EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_pos_type(1));
-  EXPECT_EQ(ndt::make_type<double>(), fpt->get_pos_type(2));
+  EXPECT_EQ(ndt::make_type<float>(), fpt->get_argument_types()[0]);
+  EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_argument_types()[1]);
+  EXPECT_EQ(ndt::make_type<double>(), fpt->get_argument_types()[2]);
   EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_return_type());
   // Roundtripping through a string
   EXPECT_EQ(tp, ndt::type(tp.str()));
@@ -65,14 +65,14 @@ TEST(SymbolicTypes, CreateFuncProto) {
   fpt = tp.extended<ndt::callable_type>();
   ASSERT_EQ(1, fpt->get_narg());
   EXPECT_EQ(ndt::make_type<int16_t>(), fpt->get_return_type());
-  EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_pos_type(0));
+  EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_argument_types()[0]);
 
   tp = ndt::make_type<int16_t(int32_t, int64_t)>();
   fpt = tp.extended<ndt::callable_type>();
   ASSERT_EQ(2, fpt->get_narg());
   EXPECT_EQ(ndt::make_type<int16_t>(), fpt->get_return_type());
-  EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_pos_type(0));
-  EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_pos_type(1));
+  EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_argument_types()[0]);
+  EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_argument_types()[1]);
 }
 
 TEST(SymbolicTypes, CreateTypeVar) {
@@ -289,7 +289,7 @@ TEST(SymbolicTypes, VariadicCallable) {
 
   tp = ndt::type("(int32, ...) -> float32");
   EXPECT_JSON_EQ_ARR("[\"int32\"]", tp.p<std::vector<ndt::type>>("pos_types"));
-  EXPECT_TRUE(tp.extended<ndt::callable_type>()->is_pos_variadic());
+  EXPECT_TRUE(tp.extended<ndt::callable_type>()->has_variadic_arguments());
   EXPECT_EQ(ndt::type("(int32, ...)"), tp.extended<ndt::callable_type>()->get_pos_tuple());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 

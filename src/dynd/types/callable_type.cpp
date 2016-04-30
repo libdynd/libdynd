@@ -61,12 +61,14 @@ void ndt::callable_type::print_type(std::ostream &o) const {
 
   o << "(";
 
+  const std::vector<type> &arg_tp = get_argument_types();
+
   for (intptr_t i = 0; i < npos; ++i) {
     if (i > 0) {
       o << ", ";
     }
 
-    o << get_pos_type(i);
+    o << arg_tp[i];
   }
   if (pos_variadic) {
     if (npos > 0) {

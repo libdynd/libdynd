@@ -56,14 +56,14 @@ nd::callable nd::functional::compose(const nd::callable &first, const nd::callab
   */
 
   return make_callable<compose_callable>(
-      ndt::make_type<ndt::callable_type>(second.get_type()->get_return_type(), first.get_type()->get_pos_types()),
+      ndt::make_type<ndt::callable_type>(second.get_type()->get_return_type(), first.get_type()->get_argument_types()),
       first, second, buf_tp);
 }
 
 nd::callable nd::functional::constant(const array &val) { return make_callable<constant_callable>(val); }
 
 nd::callable nd::functional::left_compound(const callable &child) {
-  vector<ndt::type> pos_types = child.get_type()->get_pos_types();
+  vector<ndt::type> pos_types = child.get_type()->get_argument_types();
   pos_types.resize(1);
 
   return make_callable<left_compound_callable>(
@@ -72,7 +72,7 @@ nd::callable nd::functional::left_compound(const callable &child) {
 }
 
 nd::callable nd::functional::right_compound(const callable &child) {
-  vector<ndt::type> pos_types = child.get_type()->get_pos_types();
+  vector<ndt::type> pos_types = child.get_type()->get_argument_types();
   pos_types.erase(pos_types.begin());
 
   return make_callable<right_compound_callable>(ndt::make_type<ndt::callable_type>(child.get_type()->get_return_type(),
@@ -81,7 +81,7 @@ nd::callable nd::functional::right_compound(const callable &child) {
 }
 
 ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp, bool ret_variadic) {
-  const std::vector<ndt::type> &param_types = child_tp->get_pos_types();
+  const std::vector<ndt::type> &param_types = child_tp->get_argument_types();
   std::vector<ndt::type> out_param_types;
   std::string dimsname("Dims");
 
@@ -109,7 +109,7 @@ nd::callable nd::functional::elwise(const callable &child, bool res_ignore) {
   bool state = false;
   std::vector<ndt::type> arg_tp;
   for (size_t j = 0; j < f_tp.extended<ndt::callable_type>()->get_npos(); ++j) {
-    const auto &tp = f_tp.extended<ndt::callable_type>()->get_pos_type(j);
+    const auto &tp = f_tp.extended<ndt::callable_type>()->get_argument_types()[j];
     if (tp.get_dtype().get_id() == state_id) {
       i = j;
       state = true;
@@ -135,7 +135,7 @@ nd::callable nd::functional::outer(const callable &child) {
 }
 
 ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp) {
-  const std::vector<ndt::type> &param_types = child_tp->get_pos_types();
+  const std::vector<ndt::type> &param_types = child_tp->get_argument_types();
   std::vector<ndt::type> out_param_types;
 
   for (intptr_t i = 0, i_end = child_tp->get_npos(); i != i_end; ++i) {
@@ -155,14 +155,14 @@ ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp) {
 nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const callable &boundary_child) {
   const ndt::callable_type *funcproto_tp = neighborhood_op.get_array_type().extended<ndt::callable_type>();
 
-  intptr_t nh_ndim = funcproto_tp->get_pos_type(0).get_ndim();
+  intptr_t nh_ndim = funcproto_tp->get_argument_types()[0].get_ndim();
   std::vector<ndt::type> arg_tp(2);
   arg_tp[0] = ndt::type("?" + std::to_string(nh_ndim) + " * int");
   arg_tp[1] = ndt::type("?" + std::to_string(nh_ndim) + " * int");
 
   return make_callable<neighborhood_callable<1>>(
       ndt::make_type<ndt::callable_type>(
-          funcproto_tp->get_pos_type(0).with_replaced_dtype(funcproto_tp->get_return_type()),
+          funcproto_tp->get_argument_types()[0].with_replaced_dtype(funcproto_tp->get_return_type()),
           funcproto_tp->get_pos_tuple(),
           ndt::make_type<ndt::struct_type>(std::vector<std::string>{"shape", "offset"}, arg_tp)),
       neighborhood_op, boundary_child);
