@@ -111,9 +111,12 @@ namespace nd {
 
     std::intptr_t get_narg() const { return get_type()->get_npos(); }
 
-    const ndt::type &get_arg_type(std::intptr_t i) const { return get_type()->get_pos_type(i); }
+    const ndt::type &get_arg_type(std::intptr_t i) const {
+      const std::vector<ndt::type> &arg_tp = get_type()->get_argument_types();
+      return arg_tp[i];
+    }
 
-    const std::vector<ndt::type> &get_arg_types() const { return get_type()->get_pos_types(); }
+    const std::vector<ndt::type> &get_arg_types() const { return get_type()->get_argument_types(); }
 
     void overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp, const callable &value) {
       get()->overload(ret_tp, narg, arg_tp, value);

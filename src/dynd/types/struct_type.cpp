@@ -34,8 +34,8 @@ std::vector<ndt::type> types_from_fields(const std::vector<std::pair<ndt::type, 
 
 } // unnamed namespace
 
-ndt::struct_type::struct_type(const std::vector<std::string> &field_names, const std::vector<type> &field_types,
-                              bool variadic)
+ndt::struct_type::struct_type(type_id_t DYND_UNUSED(id), const std::vector<std::string> &field_names,
+                              const std::vector<type> &field_types, bool variadic)
     : tuple_type(struct_id, field_types.size(), field_types.data(), variadic, type_flag_none),
       m_field_names(field_names) {
   // Make sure that the number of names matches
@@ -52,7 +52,8 @@ ndt::struct_type::struct_type(const std::vector<std::string> &field_names, const
   }
 }
 
-ndt::struct_type::struct_type(const std::vector<std::pair<type, std::string>> &fields, bool variadic)
+ndt::struct_type::struct_type(type_id_t DYND_UNUSED(id), const std::vector<std::pair<type, std::string>> &fields,
+                              bool variadic)
     : struct_type(names_from_fields(fields), types_from_fields(fields), variadic) {}
 
 intptr_t ndt::struct_type::get_field_index(const std::string &name) const {
@@ -65,15 +66,6 @@ intptr_t ndt::struct_type::get_field_index(const std::string &name) const {
 }
 
 const ndt::type &ndt::struct_type::get_field_type(intptr_t i) const { return m_field_types[i]; }
-
-const ndt::type &ndt::struct_type::get_field_type(const std::string &name) const {
-  intptr_t i = get_field_index(name);
-  if (i < 0) {
-    throw std::invalid_argument("no field named'" + name + "'");
-  }
-
-  return get_field_type(i);
-}
 
 void ndt::struct_type::print_type(std::ostream &o) const {
   // Use the record datashape syntax
