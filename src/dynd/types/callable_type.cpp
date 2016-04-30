@@ -54,7 +54,7 @@ void ndt::callable_type::print_data(std::ostream &o, const char *DYND_UNUSED(arr
 }
 
 void ndt::callable_type::print_type(std::ostream &o) const {
-  intptr_t npos = get_npos();
+  intptr_t npos = get_narg();
   intptr_t nkwd = get_nkwd();
   const bool pos_variadic = m_pos_tuple.extended<tuple_type>()->is_variadic();
   const bool kwd_variadic = m_kwd_struct.extended<struct_type>()->is_variadic();
@@ -77,6 +77,8 @@ void ndt::callable_type::print_type(std::ostream &o) const {
       o << "...";
     }
   }
+
+  const std::vector<std::pair<type, std::string>> &kwd_tp = get_named_kwd_types();
   for (intptr_t i = 0; i < nkwd; ++i) {
     if (i > 0 || npos > 0 || pos_variadic) {
       o << ", ";
@@ -84,13 +86,13 @@ void ndt::callable_type::print_type(std::ostream &o) const {
 
     // TODO: names should be validated on input, not just
     //       printed specially like in struct_type.
-    const std::string &name = get_kwd_name(i);
+    const std::string &name = kwd_tp[i].second;
     if (is_simple_identifier_name(name)) {
       o << name;
     } else {
       print_escaped_utf8_string(o, name, true);
     }
-    o << ": " << get_kwd_type(i);
+    o << ": " << kwd_tp[i].first;
   }
   if (nkwd > 0 && kwd_variadic) {
     o << ", ...";

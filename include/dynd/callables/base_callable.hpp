@@ -66,7 +66,7 @@ namespace nd {
 
     const ndt::type &get_ret_type() const { return m_tp.extended<ndt::callable_type>()->get_return_type(); }
 
-    size_t get_narg() const { return m_tp.extended<ndt::callable_type>()->get_npos(); }
+    size_t get_narg() const { return m_tp.extended<ndt::callable_type>()->get_narg(); }
 
     const std::vector<ndt::type> &get_arg_types() const {
       return m_tp.extended<ndt::callable_type>()->get_argument_types();
