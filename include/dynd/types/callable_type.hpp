@@ -55,17 +55,9 @@ namespace ndt {
 
     const type &get_kwd_struct() const { return m_kwd_struct; }
 
-    const std::vector<type> &get_kwd_types() const { return m_kwd_struct.extended<struct_type>()->get_field_types(); }
-
-    const std::vector<std::pair<type, std::string>> &get_named_kwd_types() const { return m_kwd_struct.extended<struct_type>()->get_named_field_types(); }
-
-    const std::vector<std::string> &get_kwd_names() const {
-      return m_kwd_struct.extended<struct_type>()->get_field_names();
+    const std::vector<std::pair<type, std::string>> &get_named_kwd_types() const {
+      return m_kwd_struct.extended<struct_type>()->get_named_field_types();
     }
-
-    const type &get_kwd_type(intptr_t i) const { return m_kwd_struct.extended<struct_type>()->get_field_type(i); }
-
-    std::string get_kwd_name(intptr_t i) const { return m_kwd_struct.extended<struct_type>()->get_field_name(i); }
 
     intptr_t get_kwd_index(const std::string &arg_name) const {
       return m_kwd_struct.extended<struct_type>()->get_field_index(arg_name);
@@ -73,15 +65,10 @@ namespace ndt {
 
     void get_vars(std::unordered_set<std::string> &vars) const;
 
-    bool has_kwd(const std::string &name) const { return get_kwd_index(name) != -1; }
-
     const std::vector<intptr_t> &get_option_kwd_indices() const { return m_opt_kwd_indices; }
 
-    /** Returns the number of arguments, both positional and keyword. */
-    intptr_t get_narg() const { return get_npos() + get_nkwd(); }
-
     /** Returns the number of positional arguments. */
-    size_t get_npos() const { return m_pos_tuple.extended<tuple_type>()->get_field_count(); }
+    size_t get_narg() const { return m_pos_tuple.extended<tuple_type>()->get_field_count(); }
 
     /** Returns the number of keyword arguments. */
     size_t get_nkwd() const { return m_kwd_struct.extended<tuple_type>()->get_field_count(); }

@@ -107,7 +107,7 @@ nd::callable nd::functional::elwise(const callable &child, bool res_ignore) {
   size_t i;
   bool state = false;
   std::vector<ndt::type> arg_tp;
-  for (size_t j = 0; j < f_tp.extended<ndt::callable_type>()->get_npos(); ++j) {
+  for (size_t j = 0; j < f_tp.extended<ndt::callable_type>()->get_narg(); ++j) {
     const auto &tp = f_tp.extended<ndt::callable_type>()->get_argument_types()[j];
     if (tp.get_dtype().get_id() == state_id) {
       i = j;
@@ -121,7 +121,7 @@ nd::callable nd::functional::elwise(const callable &child, bool res_ignore) {
 
   if (state) {
     ndt::type tp = ndt::make_type<ndt::callable_type>(f->get_ret_type(), arg_tp);
-    return make_callable<state_callable>(tp.extended<ndt::callable_type>()->get_npos(), tp, f, i);
+    return make_callable<state_callable>(tp.extended<ndt::callable_type>()->get_narg(), tp, f, i);
   }
 
   return f;
@@ -137,7 +137,7 @@ ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp) {
   const std::vector<ndt::type> &param_types = child_tp->get_argument_types();
   std::vector<ndt::type> out_param_types;
 
-  for (intptr_t i = 0, i_end = child_tp->get_npos(); i != i_end; ++i) {
+  for (intptr_t i = 0, i_end = child_tp->get_narg(); i != i_end; ++i) {
     std::string dimsname("Dims" + std::to_string(i));
     out_param_types.push_back(ndt::make_ellipsis_dim(dimsname, param_types[i]));
   }
