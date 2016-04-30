@@ -49,6 +49,7 @@ std::map<std::string, nd::callable> &nd::detail::get_regfunctions() {
                                              {"bitwise_not", bitwise_not},
                                              {"bitwise_or", bitwise_or},
                                              {"bitwise_xor", bitwise_xor},
+                                             {"cbrt", cbrt},
                                              {"compound_add", compound_add},
                                              {"compound_div", compound_div},
                                              {"conj", conj},

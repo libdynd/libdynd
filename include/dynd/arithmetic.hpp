@@ -17,6 +17,7 @@ namespace nd {
   extern DYND_API callable bitwise_and;
   extern DYND_API callable bitwise_or;
   extern DYND_API callable bitwise_xor;
+  extern DYND_API callable cbrt;
   extern DYND_API callable divide;
   extern DYND_API callable left_shift;
   extern DYND_API callable logical_and;

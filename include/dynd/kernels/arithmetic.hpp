@@ -155,6 +155,11 @@ namespace detail {
     static auto f(typename type_of<Src0TypeID>::type a) { return std::sqrt(a); }
   };
 
+  template <type_id_t Src0TypeID>
+  struct inline_cbrt {
+    static auto f(typename type_of<Src0TypeID>::type a) { return std::cbrt(a); }
+  };
+
   // Arithmetic operators that need zero checking.
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   constexpr bool needs_zero_check() {
