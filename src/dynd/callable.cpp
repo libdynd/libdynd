@@ -81,6 +81,7 @@ std::map<std::string, nd::callable> &nd::detail::get_regfunctions() {
                                              {"right_shift", right_shift},
                                              {"serialize", serialize},
                                              {"sin", sin},
+                                             {"sqrt", sqrt},
                                              {"subtract", subtract},
                                              {"sum", sum},
                                              {"take", take},

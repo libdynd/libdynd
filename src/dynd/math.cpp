@@ -3,14 +3,14 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/math.hpp>
-#include <dynd/functional.hpp>
-#include <dynd/callables/conj_dispatch_callable.hpp>
-#include <dynd/callables/real_dispatch_callable.hpp>
-#include <dynd/callables/imag_dispatch_callable.hpp>
-#include <dynd/callables/imag_callable.hpp>
-#include <dynd/callables/real_callable.hpp>
 #include <dynd/callables/conj_callable.hpp>
+#include <dynd/callables/conj_dispatch_callable.hpp>
+#include <dynd/callables/imag_callable.hpp>
+#include <dynd/callables/imag_dispatch_callable.hpp>
+#include <dynd/callables/real_callable.hpp>
+#include <dynd/callables/real_dispatch_callable.hpp>
+#include <dynd/functional.hpp>
+#include <dynd/math.hpp>
 
 using namespace std;
 using namespace dynd;

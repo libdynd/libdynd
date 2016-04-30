@@ -26,6 +26,7 @@ namespace nd {
   extern DYND_API callable multiply;
   extern DYND_API callable pow;
   extern DYND_API callable right_shift;
+  extern DYND_API callable sqrt;
   extern DYND_API callable subtract;
 
   extern DYND_API callable compound_add;
