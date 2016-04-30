@@ -75,6 +75,7 @@ std::map<std::string, nd::callable> &nd::detail::get_regfunctions() {
                                              {"multiply", multiply},
                                              {"not_equal", not_equal},
                                              {"plus", plus},
+                                             {"pow", pow},
                                              {"range", range},
                                              {"real", real},
                                              {"right_shift", right_shift},

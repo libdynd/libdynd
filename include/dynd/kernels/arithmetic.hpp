@@ -5,6 +5,11 @@
 namespace dynd {
 
 namespace detail {
+
+  // The check macros and the related templates are used to
+  // define expression SFINAE based checks for whether or not
+  // a given operator overload exists for specific input types.
+
   template <typename>
   struct sfinae_true : std::true_type {};
 
@@ -134,6 +139,15 @@ namespace detail {
       return static_cast<bool>(a) ^ static_cast<bool>(b);
       DYND_END_ALLOW_INT_BOOL_CAST
     }
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct inline_pow {
+    DYND_ALLOW_INT_FLOAT_CAST
+    static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) {
+      return std::pow(static_cast<double>(a), static_cast<double>(b));
+    }
+    DYND_END_ALLOW_INT_FLOAT_CAST
   };
 
   // Arithmetic operators that need zero checking.

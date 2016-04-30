@@ -24,6 +24,7 @@ namespace nd {
   extern DYND_API callable logical_xor;
   extern DYND_API callable mod;
   extern DYND_API callable multiply;
+  extern DYND_API callable pow;
   extern DYND_API callable right_shift;
   extern DYND_API callable subtract;
 

@@ -353,6 +353,7 @@ set(libdynd_SRC
     src/dynd/parse.cpp
     src/dynd/plus.cpp
     src/dynd/pointer.cpp
+    src/dynd/pow.cpp
     src/dynd/random.cpp
     src/dynd/range.cpp
     src/dynd/right_shift.cpp
