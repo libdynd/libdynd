@@ -37,7 +37,7 @@ TEST(SymbolicTypes, CreateFuncProto) {
   EXPECT_FALSE(tp.is_symbolic());
   EXPECT_FALSE(tp.is_variadic());
   fpt = tp.extended<ndt::callable_type>();
-  ASSERT_EQ(3, fpt->get_narg());
+  ASSERT_EQ(3u, fpt->get_npos());
   EXPECT_EQ(ndt::make_type<float>(), fpt->get_argument_types()[0]);
   EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_argument_types()[1]);
   EXPECT_EQ(ndt::make_type<double>(), fpt->get_argument_types()[2]);
@@ -58,18 +58,18 @@ TEST(SymbolicTypes, CreateFuncProto) {
   // Exercise a few different variations
   tp = ndt::make_type<int8_t()>();
   fpt = tp.extended<ndt::callable_type>();
-  ASSERT_EQ(0, fpt->get_narg());
+  ASSERT_EQ(0u, fpt->get_npos());
   EXPECT_EQ(ndt::make_type<int8_t>(), fpt->get_return_type());
 
   tp = ndt::make_type<int16_t(int32_t)>();
   fpt = tp.extended<ndt::callable_type>();
-  ASSERT_EQ(1, fpt->get_narg());
+  ASSERT_EQ(1u, fpt->get_npos());
   EXPECT_EQ(ndt::make_type<int16_t>(), fpt->get_return_type());
   EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_argument_types()[0]);
 
   tp = ndt::make_type<int16_t(int32_t, int64_t)>();
   fpt = tp.extended<ndt::callable_type>();
-  ASSERT_EQ(2, fpt->get_narg());
+  ASSERT_EQ(2u, fpt->get_npos());
   EXPECT_EQ(ndt::make_type<int16_t>(), fpt->get_return_type());
   EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_argument_types()[0]);
   EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_argument_types()[1]);

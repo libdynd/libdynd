@@ -57,7 +57,9 @@ namespace ndt {
 
     const std::vector<type> &get_kwd_types() const { return m_kwd_struct.extended<struct_type>()->get_field_types(); }
 
-    const std::vector<std::pair<type, std::string>> &get_named_kwd_types() const { return m_kwd_struct.extended<struct_type>()->get_named_field_types(); }
+    const std::vector<std::pair<type, std::string>> &get_named_kwd_types() const {
+      return m_kwd_struct.extended<struct_type>()->get_named_field_types();
+    }
 
     const std::vector<std::string> &get_kwd_names() const {
       return m_kwd_struct.extended<struct_type>()->get_field_names();
@@ -76,9 +78,6 @@ namespace ndt {
     bool has_kwd(const std::string &name) const { return get_kwd_index(name) != -1; }
 
     const std::vector<intptr_t> &get_option_kwd_indices() const { return m_opt_kwd_indices; }
-
-    /** Returns the number of arguments, both positional and keyword. */
-    intptr_t get_narg() const { return get_npos() + get_nkwd(); }
 
     /** Returns the number of positional arguments. */
     size_t get_npos() const { return m_pos_tuple.extended<tuple_type>()->get_field_count(); }

@@ -85,8 +85,8 @@ namespace nd {
     }
 
     intptr_t get_kwd_index(const std::string &name) const {
-return m_tp.extended<ndt::callable_type>()->get_kwd_index(name);
- }
+      return m_tp.extended<ndt::callable_type>()->get_kwd_index(name);
+    }
 
     bool is_kwd_variadic() const { return m_tp.extended<ndt::callable_type>()->is_kwd_variadic(); }
 
