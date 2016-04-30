@@ -50,8 +50,8 @@ namespace nd {
         data.res_ignore = reinterpret_cast<codata_type *>(codata)->res_ignore;
 
         base_callable *child = reinterpret_cast<codata_type *>(codata)->child;
-        const ndt::type &child_ret_tp = child->get_return_type();
-        const std::vector<ndt::type> &child_arg_tp = child->get_argument_types();
+        const ndt::type &child_ret_tp = child->get_ret_type();
+        const std::vector<ndt::type> &child_arg_tp = child->get_arg_types();
 
         std::array<intptr_t, N> arg_size;
         std::array<ndt::type, N> arg_element_tp;

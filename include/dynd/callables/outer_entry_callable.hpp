@@ -37,7 +37,7 @@ namespace nd {
             return m_children[nsrc]->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
           }
 
-          return child->resolve(this, data, cg, child->get_return_type(), nsrc, src_tp, nkwd, kwds, tp_vars);
+          return child->resolve(this, data, cg, child->get_ret_type(), nsrc, src_tp, nkwd, kwds, tp_vars);
         }
       };
 

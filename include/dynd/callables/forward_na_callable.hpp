@@ -57,7 +57,7 @@ namespace nd {
       }
 
       ndt::type res_value_tp =
-          child->resolve(this, nullptr, cg, dst_tp.is_symbolic() ? child->get_return_type() : dst_tp, 2, src_value_tp,
+          child->resolve(this, nullptr, cg, dst_tp.is_symbolic() ? child->get_ret_type() : dst_tp, 2, src_value_tp,
                          nkwd, kwds, tp_vars);
 
       for (index_t i : std::array<index_t, sizeof...(I)>({I...})) {

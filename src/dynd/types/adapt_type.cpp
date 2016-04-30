@@ -15,7 +15,7 @@ ndt::adapt_type::adapt_type(const ndt::type &value_tp, const ndt::type &storage_
       m_value_tp(value_tp), m_storage_tp(storage_tp), m_forward(forward), m_inverse(inverse) {}
 
 ndt::adapt_type::adapt_type(const nd::callable &forward, const nd::callable &inverse)
-    : adapt_type(forward.get_type()->get_return_type(), forward.get_arg_types()[0], forward, inverse) {}
+    : adapt_type(forward.get_type()->get_return_type(), forward->get_arg_types()[0], forward, inverse) {}
 
 void ndt::adapt_type::print_type(ostream &o) const {
   o << "adapt[";

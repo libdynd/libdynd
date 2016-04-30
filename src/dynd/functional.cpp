@@ -121,7 +121,7 @@ nd::callable nd::functional::elwise(const callable &child, bool res_ignore) {
   nd::callable f = make_callable<elwise_entry_callable>(f_tp, child, res_ignore);
 
   if (state) {
-    ndt::type tp = ndt::make_type<ndt::callable_type>(f.get_ret_type(), arg_tp);
+    ndt::type tp = ndt::make_type<ndt::callable_type>(f->get_ret_type(), arg_tp);
     return make_callable<state_callable>(tp.extended<ndt::callable_type>()->get_npos(), tp, f, i);
   }
 
@@ -153,7 +153,7 @@ ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp) {
 }
 
 nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const callable &boundary_child) {
-  const ndt::callable_type *funcproto_tp = neighborhood_op.get_array_type().extended<ndt::callable_type>();
+  const ndt::callable_type *funcproto_tp = neighborhood_op->get_type().extended<ndt::callable_type>();
 
   intptr_t nh_ndim = funcproto_tp->get_argument_types()[0].get_ndim();
   std::vector<ndt::type> arg_tp(2);
@@ -173,23 +173,23 @@ nd::callable nd::functional::reduction(const callable &child) {
     throw invalid_argument("'child' cannot be null");
   }
 
-  switch (child.get_narg()) {
+  switch (child->get_narg()) {
   case 1:
     break;
   case 2:
     return reduction((child.get_flags() | right_associative) ? left_compound(child) : right_compound(child));
   default: {
     stringstream ss;
-    ss << "'child' must be a unary callable, but its signature is " << child.get_array_type();
+    ss << "'child' must be a unary callable, but its signature is " << child->get_type();
     throw invalid_argument(ss.str());
   }
   }
 
   return make_callable<reduction_dispatch_callable>(
-      ndt::make_type<ndt::callable_type>(ndt::ellipsis_dim_type::make_if_not_variadic(child.get_ret_type()),
-                                         {ndt::ellipsis_dim_type::make_if_not_variadic(child.get_arg_type(0))},
+      ndt::make_type<ndt::callable_type>(ndt::ellipsis_dim_type::make_if_not_variadic(child->get_ret_type()),
+                                         {ndt::ellipsis_dim_type::make_if_not_variadic(child->get_arg_types()[0])},
                                          {{ndt::make_type<ndt::option_type>(ndt::type("Fixed * int32")), "axes"},
-                                          {ndt::make_type<ndt::option_type>(child.get_ret_type()), "identity"},
+                                          {ndt::make_type<ndt::option_type>(child->get_ret_type()), "identity"},
                                           {ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "keepdims"}}),
       child);
 }

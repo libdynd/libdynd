@@ -105,19 +105,6 @@ namespace nd {
       return resolve(get_type()->get_return_type(), src_tp.size(), src_tp.begin(), kwds.size(), kwds.begin());
     }
 
-    const ndt::type &get_array_type() const { return m_ptr->get_type(); }
-
-    const ndt::type &get_ret_type() const { return get_type()->get_return_type(); }
-
-    std::intptr_t get_narg() const { return get_type()->get_npos(); }
-
-    const ndt::type &get_arg_type(std::intptr_t i) const {
-      const std::vector<ndt::type> &arg_tp = get_type()->get_argument_types();
-      return arg_tp[i];
-    }
-
-    const std::vector<ndt::type> &get_arg_types() const { return get_type()->get_argument_types(); }
-
     void overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp, const callable &value) {
       get()->overload(ret_tp, narg, arg_tp, value);
     }
