@@ -232,6 +232,8 @@ public:
 
   explicit operator bool() const { return m_ptr != NULL; }
 
+  T &operator*() const { return *m_ptr; }
+
   T *operator->() const { return m_ptr; }
 
   /** Assignment */
