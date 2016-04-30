@@ -46,7 +46,5 @@ namespace ndt {
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
   };
 
-  inline type make_int_kind_sym() { return type(new int_kind_sym_type(), false); }
-
 } // namespace dynd::ndt
 } // namespace dynd

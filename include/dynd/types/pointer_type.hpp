@@ -88,8 +88,6 @@ namespace ndt {
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
-
-    static type make(const type &target_tp);
   };
 
   template <typename T>
@@ -98,10 +96,8 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return pointer_type::make(make_type<T>()); }
+    static type equivalent() { return make_type<pointer_type>(make_type<T>()); }
   };
-
-  inline type make_pointer_type(const type &target_tp) { return pointer_type::make(target_tp); }
 
 } // namespace dynd::ndt
 } // namespace dynd

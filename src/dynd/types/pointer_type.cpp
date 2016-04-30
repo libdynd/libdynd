@@ -43,7 +43,7 @@ void ndt::pointer_type::transform_child_types(type_transform_fn_t transform_fn, 
   bool was_transformed = false;
   transform_fn(m_target_tp, arrmeta_offset + sizeof(pointer_type_arrmeta), extra, tmp_tp, was_transformed);
   if (was_transformed) {
-    out_transformed_tp = make(tmp_tp);
+    out_transformed_tp = make_type<pointer_type>(tmp_tp);
     out_was_transformed = true;
   }
   else {
@@ -59,7 +59,7 @@ ndt::type ndt::pointer_type::get_canonical_type() const
 
 const ndt::type &ndt::pointer_type::get_operand_type() const
 {
-  static type vpt = make(make_type<void>());
+  static type vpt = make_type<pointer_type>(make_type<void>());
 
   if (m_target_tp.get_id() == pointer_id) {
     return m_target_tp;
@@ -81,7 +81,7 @@ ndt::type ndt::pointer_type::apply_linear_index(intptr_t nindices, const irange 
       return type(this, true);
     }
     else {
-      return make(dt);
+      return make_type<pointer_type>(dt);
     }
   }
 }
@@ -136,7 +136,7 @@ ndt::type ndt::pointer_type::get_type_at_dimension(char **inout_arrmeta, intptr_
     if (inout_arrmeta != NULL) {
       *inout_arrmeta += sizeof(pointer_type_arrmeta);
     }
-    return make(m_target_tp.get_type_at_dimension(inout_arrmeta, i, total_ndim));
+    return make_type<pointer_type>(m_target_tp.get_type_at_dimension(inout_arrmeta, i, total_ndim));
   }
 }
 
@@ -274,5 +274,3 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::pointer_type::get
 
   return properties;
 }
-
-ndt::type ndt::pointer_type::make(const type &target_tp) { return type(new pointer_type(target_tp), false); }

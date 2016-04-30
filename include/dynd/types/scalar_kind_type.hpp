@@ -20,8 +20,6 @@ namespace ndt {
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
     void print_type(std::ostream &o) const;
-
-    static type make() { return type(new scalar_kind_type(), false); }
   };
 
   template <>

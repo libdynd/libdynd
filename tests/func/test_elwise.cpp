@@ -137,7 +137,7 @@ TEST(Elwise, UnaryFixedDim) {
 TEST(Elwise, UnaryExpr_VarDim) {
   // Create an callable for converting string to int
   nd::callable af_base =
-      make_callable_from_assignment(ndt::make_type<int>(), ndt::fixed_string_type::make(16), assign_error_default);
+      make_callable_from_assignment(ndt::make_type<int>(), ndt::make_type<ndt::fixed_string_type>(16), assign_error_default);
   // Lift the callable
   nd::callable af = nd::functional::elwise(af_base);
 
@@ -164,7 +164,7 @@ TEST(Elwise, UnaryExpr_StridedToVarDim) {
 TEST(Elwise, UnaryExpr_VarToVarDim) {
   // Create an callable for converting string to int
   nd::callable af_base =
-      make_callable_from_assignment(ndt::make_type<int>(), ndt::fixed_string_type::make(16), assign_error_default);
+      make_callable_from_assignment(ndt::make_type<int>(), ndt::make_type<ndt::fixed_string_type>(16), assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
   nd::callable af = nd::functional::elwise(af_base);
@@ -185,7 +185,7 @@ TEST(Elwise, UnaryExpr_VarToVarDim) {
 TEST(Elwise, UnaryExpr_MultiDimVarToVarDim) {
   // Create an callable for converting string to int
   nd::callable af_base =
-      make_callable_from_assignment(ndt::make_type<int>(), ndt::fixed_string_type::make(16), assign_error_default);
+      make_callable_from_assignment(ndt::make_type<int>(), ndt::make_type<ndt::fixed_string_type>(16), assign_error_default);
   // Lift the callable
   nd::callable af = nd::functional::elwise(af_base);
 

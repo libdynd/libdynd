@@ -21,7 +21,7 @@ namespace ndt {
     const std::string m_encoding_repr;
 
   public:
-    fixed_string_type(intptr_t stringsize, string_encoding_t encoding);
+    fixed_string_type(intptr_t stringsize, string_encoding_t encoding = string_encoding_utf_8);
 
     intptr_t get_size() const { return m_stringsize; }
     string_encoding_t get_encoding() const { return m_encoding; }
@@ -42,21 +42,12 @@ namespace ndt {
 
     void arrmeta_default_construct(char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const {}
     void arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-                                const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
-    {
-    }
+                                const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const {}
     void arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
     void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
-                             const std::string &DYND_UNUSED(indent)) const
-    {
-    }
+                             const std::string &DYND_UNUSED(indent)) const {}
 
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
-
-    static type make(intptr_t stringsize, string_encoding_t encoding = string_encoding_utf_8)
-    {
-      return type(new fixed_string_type(stringsize, encoding), false);
-    }
   };
 
 } // namespace dynd::ndt

@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "inc_gtest.hpp"
 #include <complex>
 #include <iostream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/type.hpp>
@@ -18,14 +18,12 @@
 using namespace std;
 using namespace dynd;
 
-TEST(Type, NDTTypeObject)
-{
+TEST(Type, NDTTypeObject) {
   // The ndt::type just contains one ndt::base_type *
   EXPECT_EQ(sizeof(ndt::base_type *), sizeof(ndt::type));
 }
 
-TEST(Type, BasicConstructor)
-{
+TEST(Type, BasicConstructor) {
   ndt::type d;
 
   // Default-constructed type properties
@@ -162,8 +160,7 @@ TEST(Type, BasicConstructor)
   EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(Type, TypeIDConstructor)
-{
+TEST(Type, TypeIDConstructor) {
   EXPECT_EQ(bool_id, ndt::type(bool_id).get_id());
   EXPECT_EQ(int8_id, ndt::type(int8_id).get_id());
   EXPECT_EQ(int16_id, ndt::type(int16_id).get_id());
@@ -184,11 +181,10 @@ TEST(Type, TypeIDConstructor)
   EXPECT_EQ(void_id, ndt::type(void_id).get_id());
   EXPECT_EQ(ndt::bytes_type::make(), ndt::type(bytes_id));
   EXPECT_EQ(ndt::fixed_bytes_kind_type::make(), ndt::type(fixed_bytes_id));
-  EXPECT_EQ(ndt::pointer_type::make(ndt::any_kind_type::make()), ndt::type(pointer_id));
+  EXPECT_EQ(ndt::make_type<ndt::pointer_type>(ndt::make_type<ndt::any_kind_type>()), ndt::type(pointer_id));
 }
 
-TEST(TypeFor, InitializerList)
-{
+TEST(TypeFor, InitializerList) {
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(1, ndt::make_type<int>()), ndt::type_for({0}));
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<int>()), ndt::type_for({10, -2}));
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(7, ndt::make_type<int>()), ndt::type_for({0, 1, 2, 3, 4, 5, 6}));

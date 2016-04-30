@@ -162,7 +162,7 @@ std::vector<ndt::type> ndt::make_typevar_range(const char *name, intptr_t count)
     throw runtime_error("TODO: extend make_typevar_range");
   }
   for (int i = 0; i < count; ++i) {
-    result[i] = typevar_type::make(s);
+    result[i] = make_type<typevar_type>(s);
     s[s.size() - 1]++;
   }
   return result;

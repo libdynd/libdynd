@@ -21,7 +21,7 @@ TEST(FixedstringDType, Create) {
   ndt::type d;
 
   // Strings with various encodings and sizes
-  d = ndt::fixed_string_type::make(3, string_encoding_utf_8);
+  d = ndt::make_type<ndt::fixed_string_type>(3, string_encoding_utf_8);
   EXPECT_EQ(fixed_string_id, d.get_id());
   EXPECT_EQ(string_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
@@ -30,7 +30,7 @@ TEST(FixedstringDType, Create) {
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::fixed_string_type::make(129, string_encoding_utf_8);
+  d = ndt::make_type<ndt::fixed_string_type>(129, string_encoding_utf_8);
   EXPECT_EQ(fixed_string_id, d.get_id());
   EXPECT_EQ(string_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
@@ -38,7 +38,7 @@ TEST(FixedstringDType, Create) {
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::fixed_string_type::make(129, string_encoding_ascii);
+  d = ndt::make_type<ndt::fixed_string_type>(129, string_encoding_ascii);
   EXPECT_EQ(fixed_string_id, d.get_id());
   EXPECT_EQ(string_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
@@ -46,7 +46,7 @@ TEST(FixedstringDType, Create) {
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::fixed_string_type::make(129, string_encoding_utf_16);
+  d = ndt::make_type<ndt::fixed_string_type>(129, string_encoding_utf_16);
   EXPECT_EQ(fixed_string_id, d.get_id());
   EXPECT_EQ(string_kind_id, d.get_base_id());
   EXPECT_EQ(2u, d.get_data_alignment());
@@ -54,7 +54,7 @@ TEST(FixedstringDType, Create) {
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::fixed_string_type::make(129, string_encoding_utf_32);
+  d = ndt::make_type<ndt::fixed_string_type>(129, string_encoding_utf_32);
   EXPECT_EQ(fixed_string_id, d.get_id());
   EXPECT_EQ(string_kind_id, d.get_base_id());
   EXPECT_EQ(4u, d.get_data_alignment());
@@ -66,19 +66,19 @@ TEST(FixedstringDType, Create) {
 TEST(FixedStringDType, Encoding) {
   ndt::type t;
 
-  t = ndt::fixed_string_type::make(10, string_encoding_ascii);
+  t = ndt::make_type<ndt::fixed_string_type>(10, string_encoding_ascii);
   EXPECT_EQ("ascii", t.p<std::string>("encoding"));
 
-  t = ndt::fixed_string_type::make(10, string_encoding_ucs_2);
+  t = ndt::make_type<ndt::fixed_string_type>(10, string_encoding_ucs_2);
   EXPECT_EQ("ucs2", t.p<std::string>("encoding"));
 
-  t = ndt::fixed_string_type::make(10, string_encoding_utf_8);
+  t = ndt::make_type<ndt::fixed_string_type>(10, string_encoding_utf_8);
   EXPECT_EQ("utf8", t.p<std::string>("encoding"));
 
-  t = ndt::fixed_string_type::make(10, string_encoding_utf_16);
+  t = ndt::make_type<ndt::fixed_string_type>(10, string_encoding_utf_16);
   EXPECT_EQ("utf16", t.p<std::string>("encoding"));
 
-  EXPECT_THROW(ndt::fixed_string_type::make(10, string_encoding_invalid), std::runtime_error);
+  EXPECT_THROW(ndt::make_type<ndt::fixed_string_type>(10, string_encoding_invalid), std::runtime_error);
 }
 
 TEST(FixedStringDType, Basic) {
@@ -88,7 +88,7 @@ TEST(FixedStringDType, Basic) {
   a = "abcdefg";
   EXPECT_EQ(ndt::make_type<ndt::string_type>(), a.get_type());
   // Convert to a fixed_string type for testing
-  nd::array b = nd::empty(ndt::fixed_string_type::make(7, string_encoding_utf_8));
+  nd::array b = nd::empty(ndt::make_type<ndt::fixed_string_type>(7, string_encoding_utf_8));
   b.assign(a);
   EXPECT_EQ("abcdefg", b.as<std::string>());
 }
@@ -96,7 +96,7 @@ TEST(FixedStringDType, Basic) {
 TEST(FixedstringDType, Casting) {
   nd::array a;
 
-  a = nd::empty(ndt::fixed_string_type::make(16, string_encoding_utf_16));
+  a = nd::empty(ndt::make_type<ndt::fixed_string_type>(16, string_encoding_utf_16));
   // Fill up the string with values
   a.vals() = "0123456789012345";
   EXPECT_EQ("0123456789012345", a.as<std::string>());
@@ -106,14 +106,14 @@ TEST(FixedstringDType, Casting) {
 }
 
 TEST(FixedstringDType, CanonicalDType) {
-  EXPECT_EQ((ndt::fixed_string_type::make(12, string_encoding_ascii)),
-            (ndt::fixed_string_type::make(12, string_encoding_ascii).get_canonical_type()));
-  EXPECT_EQ((ndt::fixed_string_type::make(14, string_encoding_utf_8)),
-            (ndt::fixed_string_type::make(14, string_encoding_utf_8).get_canonical_type()));
-  EXPECT_EQ((ndt::fixed_string_type::make(17, string_encoding_utf_16)),
-            (ndt::fixed_string_type::make(17, string_encoding_utf_16).get_canonical_type()));
-  EXPECT_EQ((ndt::fixed_string_type::make(21, string_encoding_utf_32)),
-            (ndt::fixed_string_type::make(21, string_encoding_utf_32).get_canonical_type()));
+  EXPECT_EQ((ndt::make_type<ndt::fixed_string_type>(12, string_encoding_ascii)),
+            (ndt::make_type<ndt::fixed_string_type>(12, string_encoding_ascii).get_canonical_type()));
+  EXPECT_EQ((ndt::make_type<ndt::fixed_string_type>(14, string_encoding_utf_8)),
+            (ndt::make_type<ndt::fixed_string_type>(14, string_encoding_utf_8).get_canonical_type()));
+  EXPECT_EQ((ndt::make_type<ndt::fixed_string_type>(17, string_encoding_utf_16)),
+            (ndt::make_type<ndt::fixed_string_type>(17, string_encoding_utf_16).get_canonical_type()));
+  EXPECT_EQ((ndt::make_type<ndt::fixed_string_type>(21, string_encoding_utf_32)),
+            (ndt::make_type<ndt::fixed_string_type>(21, string_encoding_utf_32).get_canonical_type()));
 }
 
 TEST(FixedstringDType, Repr) {

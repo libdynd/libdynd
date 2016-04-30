@@ -18,7 +18,7 @@ TEST(PointerType, PointerToBuiltIn)
 {
   ndt::type d;
 
-  d = ndt::pointer_type::make(ndt::make_type<char>());
+  d = ndt::make_type<ndt::pointer_type>(ndt::make_type<char>());
   EXPECT_EQ(pointer_id, d.get_id());
   EXPECT_EQ(any_kind_id, d.get_base_id());
   EXPECT_EQ(sizeof(void *), d.get_data_size());

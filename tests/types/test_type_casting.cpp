@@ -72,16 +72,16 @@ TEST(TypeCasting, IsLosslessAssignment) {
     // String casting
     // String conversions report false, so that assignments encodings
     // get validated on assignment
-    EXPECT_FALSE(is_lossless_assignment(ndt::fixed_string_type::make(16, string_encoding_utf_16),
-                            ndt::fixed_string_type::make(16, string_encoding_utf_16)));
-    EXPECT_FALSE(is_lossless_assignment(ndt::fixed_string_type::make(16, string_encoding_utf_8),
-                            ndt::fixed_string_type::make(12, string_encoding_utf_8)));
-    EXPECT_FALSE(is_lossless_assignment(ndt::fixed_string_type::make(12, string_encoding_utf_32),
-                            ndt::fixed_string_type::make(16, string_encoding_utf_32)));
-    EXPECT_FALSE(is_lossless_assignment(ndt::fixed_string_type::make(16, string_encoding_utf_16),
-                            ndt::fixed_string_type::make(16, string_encoding_utf_32)));
-    EXPECT_FALSE(is_lossless_assignment(ndt::fixed_string_type::make(16, string_encoding_utf_8),
-                            ndt::fixed_string_type::make(16, string_encoding_utf_16)));
+    EXPECT_FALSE(is_lossless_assignment(ndt::make_type<ndt::fixed_string_type>(16, string_encoding_utf_16),
+                            ndt::make_type<ndt::fixed_string_type>(16, string_encoding_utf_16)));
+    EXPECT_FALSE(is_lossless_assignment(ndt::make_type<ndt::fixed_string_type>(16, string_encoding_utf_8),
+                            ndt::make_type<ndt::fixed_string_type>(12, string_encoding_utf_8)));
+    EXPECT_FALSE(is_lossless_assignment(ndt::make_type<ndt::fixed_string_type>(12, string_encoding_utf_32),
+                            ndt::make_type<ndt::fixed_string_type>(16, string_encoding_utf_32)));
+    EXPECT_FALSE(is_lossless_assignment(ndt::make_type<ndt::fixed_string_type>(16, string_encoding_utf_16),
+                            ndt::make_type<ndt::fixed_string_type>(16, string_encoding_utf_32)));
+    EXPECT_FALSE(is_lossless_assignment(ndt::make_type<ndt::fixed_string_type>(16, string_encoding_utf_8),
+                            ndt::make_type<ndt::fixed_string_type>(16, string_encoding_utf_16)));
 
     // Int -> UInt casting
     EXPECT_FALSE(is_lossless_assignment(ndt::type(uint64_id), ndt::type(int8_id)));

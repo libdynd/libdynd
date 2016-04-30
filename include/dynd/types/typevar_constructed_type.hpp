@@ -51,12 +51,6 @@ namespace ndt {
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
-
-    /** Makes a typevar_constructed type with the specified types */
-    static type make(const std::string &name, const type &arg)
-    {
-      return type(new typevar_constructed_type(name, arg), false);
-    }
   };
 
 } // namespace dynd::ndt

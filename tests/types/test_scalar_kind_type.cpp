@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "dynd_assertions.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "dynd_assertions.hpp"
 
 #include "inc_gtest.hpp"
 
@@ -15,9 +15,8 @@
 using namespace std;
 using namespace dynd;
 
-TEST(ScalarKindType, Basic)
-{
-  ndt::type tp = ndt::scalar_kind_type::make();
+TEST(ScalarKindType, Basic) {
+  ndt::type tp = ndt::make_type<ndt::scalar_kind_type>();
   EXPECT_EQ(scalar_kind_id, tp.get_id());
   EXPECT_TRUE(tp.is_scalar());
   EXPECT_TRUE(tp.is_symbolic());
@@ -26,9 +25,8 @@ TEST(ScalarKindType, Basic)
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }
 
-TEST(ScalarKindType, Match)
-{
-  ndt::type tp = ndt::scalar_kind_type::make();
+TEST(ScalarKindType, Match) {
+  ndt::type tp = ndt::make_type<ndt::scalar_kind_type>();
   EXPECT_TRUE(tp.match(ndt::type("Scalar")));
   EXPECT_TRUE(tp.match(ndt::type("int32")));
   EXPECT_TRUE(tp.match(ndt::type("float64")));
