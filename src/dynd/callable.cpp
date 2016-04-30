@@ -95,21 +95,21 @@ nd::callable dynd::make_callable_from_assignment(const ndt::type &dst_tp, const 
   return nd::make_callable<unary_assignment_callable>(ndt::make_type<ndt::callable_type>(dst_tp, {src_tp}), errmode);
 }
 
-void nd::detail::check_narg(const ndt::callable_type *af_tp, size_t narg) {
-  if (!af_tp->has_variadic_arguments() && narg != af_tp->get_npos()) {
+void nd::detail::check_narg(const base_callable *self, size_t narg) {
+  if (!self->is_arg_variadic() && narg != self->get_narg()) {
     std::stringstream ss;
-    ss << "callable expected " << af_tp->get_npos() << " positional arguments, but received " << narg;
+    ss << "callable expected " << self->get_narg() << " positional arguments, but received " << narg;
     throw std::invalid_argument(ss.str());
   }
 }
 
-void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i, const ndt::type &actual_tp,
+void nd::detail::check_arg(const base_callable *self, intptr_t i, const ndt::type &actual_tp,
                            const char *DYND_UNUSED(actual_arrmeta), std::map<std::string, ndt::type> &tp_vars) {
-  if (af_tp->has_variadic_arguments()) {
+  if (self->is_arg_variadic()) {
     return;
   }
 
-  ndt::type expected_tp = af_tp->get_argument_types()[i];
+  ndt::type expected_tp = self->get_arg_types()[i];
   ndt::type candidate_tp = actual_tp;
 
   if (!expected_tp.match(candidate_tp, tp_vars)) {
@@ -123,52 +123,52 @@ void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i, const nd
 nd::array nd::callable::call(size_t narg, const array *args, size_t nkwd,
                              const pair<const char *, array> *unordered_kwds) const {
   std::map<std::string, ndt::type> tp_vars;
-  const ndt::callable_type *self_tp = get_type();
 
-  if (!self_tp->has_variadic_arguments() && (narg < self_tp->get_npos())) {
+  if (!m_ptr->is_arg_variadic() && (narg < m_ptr->get_narg())) {
     std::stringstream ss;
-    ss << "callable expected " << self_tp->get_npos() << " positional arguments, but received " << narg;
+    ss << "callable expected " << m_ptr->get_narg() << " positional arguments, but received " << narg;
     throw std::invalid_argument(ss.str());
   }
 
   unique_ptr<ndt::type[]> args_tp(new ndt::type[narg]);
   unique_ptr<const char *[]> args_arrmeta(new const char *[narg]);
-  unique_ptr<array[]> kwds(new array[narg + self_tp->get_nkwd()]);
+  unique_ptr<array[]> kwds(new array[narg + m_ptr->get_nkwd()]);
 
   size_t j = 0;
-  if (self_tp->has_variadic_arguments()) {
+  if (m_ptr->is_arg_variadic()) {
     for (size_t i = 0; i < narg; ++i) {
-      detail::check_arg(self_tp, i, args[i]->tp, args[i]->metadata(), tp_vars);
+      detail::check_arg(m_ptr, i, args[i]->tp, args[i]->metadata(), tp_vars);
 
       args_tp[i] = args[i]->tp;
       args_arrmeta[i] = args[i]->metadata();
     }
   } else {
     size_t i = 0;
-    for (; i < self_tp->get_npos(); ++i) {
-      detail::check_arg(self_tp, i, args[i]->tp, args[i]->metadata(), tp_vars);
+    for (; i < m_ptr->get_narg(); ++i) {
+      detail::check_arg(m_ptr, i, args[i]->tp, args[i]->metadata(), tp_vars);
 
       args_tp[i] = args[i]->tp;
       args_arrmeta[i] = args[i]->metadata();
     }
 
     // ...
-    if (!self_tp->is_kwd_variadic() && (narg - self_tp->get_npos()) > self_tp->get_nkwd()) {
+    if (!m_ptr->is_kwd_variadic() && (narg - m_ptr->get_narg()) > m_ptr->get_nkwd()) {
       throw std::invalid_argument("too many extra positional arguments");
     }
 
-    for (; narg > self_tp->get_npos(); ++i, --narg, ++j, ++nkwd) {
+    for (; narg > m_ptr->get_narg(); ++i, --narg, ++j, ++nkwd) {
       kwds[j] = args[i];
     }
   }
 
   array dst;
 
+  const std::vector<std::pair<ndt::type, std::string>> kwd_tp = m_ptr->get_kwd_types();
   for (; j < nkwd; ++j, ++unordered_kwds) {
-    intptr_t k = self_tp->get_kwd_index(unordered_kwds->first);
+    intptr_t k = m_ptr->get_kwd_index(unordered_kwds->first);
 
     if (k == -1) {
-      if (detail::is_special_kwd(self_tp, dst, unordered_kwds->first, unordered_kwds->second)) {
+      if (detail::is_special_kwd(dst, unordered_kwds->first, unordered_kwds->second)) {
       } else {
         std::stringstream ss;
         ss << "passed an unexpected keyword \"" << unordered_kwds->first << "\" to callable with type "
@@ -184,7 +184,7 @@ nd::array nd::callable::call(size_t narg, const array *args, size_t nkwd,
       }
       value = unordered_kwds->second;
 
-      ndt::type expected_tp = self_tp->get_kwd_type(k);
+      ndt::type expected_tp = kwd_tp[k].first;
       if (expected_tp.get_id() == option_id) {
         expected_tp = expected_tp.extended<ndt::option_type>()->get_value_type();
       }
@@ -192,7 +192,7 @@ nd::array nd::callable::call(size_t narg, const array *args, size_t nkwd,
       const ndt::type &actual_tp = value.get_type();
       if (!expected_tp.match(actual_tp.value_type(), tp_vars)) {
         std::stringstream ss;
-        ss << "keyword \"" << self_tp->get_kwd_name(k) << "\" does not match, ";
+        ss << "keyword \"" << kwd_tp[k].second << "\" does not match, ";
         ss << "callable expected " << expected_tp << " but passed " << actual_tp;
         throw std::invalid_argument(ss.str());
       }
@@ -201,17 +201,17 @@ nd::array nd::callable::call(size_t narg, const array *args, size_t nkwd,
 
   // Validate the destination type, if it was provided
   if (!dst.is_null()) {
-    if (!self_tp->get_return_type().match(dst.get_type(), tp_vars)) {
+    if (!m_ptr->get_ret_type().match(dst.get_type(), tp_vars)) {
       std::stringstream ss;
       ss << "provided \"dst\" type " << dst.get_type() << " does not match callable return type "
-         << self_tp->get_return_type();
+         << m_ptr->get_ret_type();
       throw std::invalid_argument(ss.str());
     }
   }
 
-  for (intptr_t j : self_tp->get_option_kwd_indices()) {
+  for (intptr_t j : m_ptr->get_option_kwd_indices()) {
     if (kwds[j].is_null()) {
-      ndt::type actual_tp = ndt::substitute(self_tp->get_kwd_type(j), tp_vars, false);
+      ndt::type actual_tp = ndt::substitute(kwd_tp[j].first, tp_vars, false);
       if (actual_tp.is_symbolic()) {
         actual_tp = ndt::make_type<ndt::option_type>(ndt::make_type<void>());
       }
@@ -220,7 +220,7 @@ nd::array nd::callable::call(size_t narg, const array *args, size_t nkwd,
     }
   }
 
-  if (nkwd < self_tp->get_nkwd()) {
+  if (nkwd < m_ptr->get_nkwd()) {
     std::stringstream ss;
     // TODO: Provide the missing keyword parameter names in this error
     //       message
@@ -232,7 +232,7 @@ nd::array nd::callable::call(size_t narg, const array *args, size_t nkwd,
 
   ndt::type dst_tp;
   if (dst.is_null()) {
-    dst_tp = self_tp->get_return_type();
+    dst_tp = m_ptr->get_ret_type();
     return m_ptr->call(dst_tp, narg, args_tp.get(), args_arrmeta.get(), args, nkwd, kwds.get(), tp_vars);
   }
 

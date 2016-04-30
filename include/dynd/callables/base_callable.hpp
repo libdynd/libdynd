@@ -72,7 +72,23 @@ namespace nd {
       return m_tp.extended<ndt::callable_type>()->get_argument_types();
     }
 
-    bool has_variadic_args() const { return m_tp.extended<ndt::callable_type>()->has_variadic_arguments(); }
+    bool is_arg_variadic() const { return m_tp.extended<ndt::callable_type>()->is_arg_variadic(); }
+
+    size_t get_nkwd() const { return m_tp.extended<ndt::callable_type>()->get_nkwd(); }
+
+    const std::vector<std::pair<ndt::type, std::string>> &get_kwd_types() const {
+      return m_tp.extended<ndt::callable_type>()->get_named_kwd_types();
+    }
+
+    const std::vector<intptr_t> &get_option_kwd_indices() const {
+      return m_tp.extended<ndt::callable_type>()->get_option_kwd_indices();
+    }
+
+    intptr_t get_kwd_index(const std::string &name) const {
+return m_tp.extended<ndt::callable_type>()->get_kwd_index(name);
+ }
+
+    bool is_kwd_variadic() const { return m_tp.extended<ndt::callable_type>()->is_kwd_variadic(); }
 
     /**
      * Function prototype for instantiating a kernel from an
