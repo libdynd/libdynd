@@ -48,8 +48,6 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
   };
 
-  std::vector<ndt::type> make_typevar_range(const char *name, intptr_t count);
-
   /**
    * Checks if the provided string range is a valid typevar name.
    */

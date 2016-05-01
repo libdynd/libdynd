@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <dynd/shortvector.hpp>
 #include <dynd/types/base_dim_type.hpp>
@@ -29,6 +29,8 @@ namespace ndt {
     dimvector m_tagged_dims;
 
   public:
+    dim_fragment_type() : dim_fragment_type(0, nullptr) {}
+
     dim_fragment_type(intptr_t ndim, const intptr_t *tagged_dims);
     dim_fragment_type(intptr_t ndim, const type &tp);
 
@@ -80,28 +82,21 @@ namespace ndt {
     virtual type with_element_type(const type &element_tp) const;
   }; // class dim_fragment_type
 
-  /** Makes an empty dim fragment */
-  DYNDT_API const type &make_dim_fragment();
-
   /** Makes a dim fragment out of the tagged dims provided */
-  inline type make_dim_fragment(intptr_t ndim, const intptr_t *tagged_dims)
-  {
+  inline type make_dim_fragment(intptr_t ndim, const intptr_t *tagged_dims) {
     if (ndim > 0) {
-      return type(new dim_fragment_type(ndim, tagged_dims), false);
-    }
-    else {
-      return make_dim_fragment();
+      return make_type<dim_fragment_type>(ndim, tagged_dims);
+    } else {
+      return make_type<dim_fragment_type>();
     }
   }
 
   /** Make a dim fragment from the provided type */
-  inline type make_dim_fragment(intptr_t ndim, const type &tp)
-  {
+  inline type make_dim_fragment(intptr_t ndim, const type &tp) {
     if (ndim > 0) {
-      return type(new dim_fragment_type(ndim, tp), false);
-    }
-    else {
-      return make_dim_fragment();
+      return make_type<dim_fragment_type>(ndim, tp);
+    } else {
+      return make_type<dim_fragment_type>();
     }
   }
 

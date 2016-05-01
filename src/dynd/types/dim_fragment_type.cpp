@@ -224,12 +224,6 @@ void ndt::dim_fragment_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const 
   throw type_error("Cannot store data of dim_fragment type");
 }
 
-const ndt::type &ndt::make_dim_fragment() {
-  static dim_fragment_type dft(0, NULL);
-  static const type static_instance(&dft, true);
-  return static_instance;
-}
-
 ndt::type ndt::dim_fragment_type::with_element_type(const type &DYND_UNUSED(element_tp)) const {
   throw runtime_error("with_element_type is not implemented for dim_fragment_type");
 }

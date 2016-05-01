@@ -1078,7 +1078,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
           } else if (compare_range_to_literal(bbegin, bend, "Fixed")) {
             result = make_fixed_dim_kind(element_tp, exponent);
           } else if (isupper(*bbegin)) {
-            result = ndt::typevar_dim_type::make(std::string(bbegin, bend), element_tp, exponent);
+            result = ndt::make_type<ndt::typevar_dim_type>(std::string(bbegin, bend), element_tp, exponent);
           } else {
             throw datashape_parse_error(bbegin, "invalid dimension type for base of dimensional power");
           }
@@ -1087,18 +1087,18 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
           if (parse_token_ds(begin, end, '*')) {
             if ('0' <= *bbegin && *bbegin <= '9') {
               intptr_t dim_size = parse<intptr_t>(bbegin, bend);
-              result = ndt::make_pow_dimsym(ndt::make_fixed_dim(dim_size, ndt::make_type<void>()), exponent_name,
-                                            parse_datashape(begin, end, symtable));
+              result = ndt::make_type<ndt::pow_dimsym_type>(ndt::make_fixed_dim(dim_size, ndt::make_type<void>()),
+                                                            exponent_name, parse_datashape(begin, end, symtable));
             } else if (compare_range_to_literal(bbegin, bend, "var")) {
-              result = ndt::make_pow_dimsym(ndt::make_type<ndt::var_dim_type>(ndt::make_type<void>()), exponent_name,
-                                            parse_datashape(begin, end, symtable));
+              result = ndt::make_type<ndt::pow_dimsym_type>(ndt::make_type<ndt::var_dim_type>(ndt::make_type<void>()),
+                                                            exponent_name, parse_datashape(begin, end, symtable));
             } else if (compare_range_to_literal(bbegin, bend, "Fixed")) {
-              result = ndt::make_pow_dimsym(ndt::make_fixed_dim_kind(ndt::make_type<void>()), exponent_name,
-                                            parse_datashape(begin, end, symtable));
+              result = ndt::make_type<ndt::pow_dimsym_type>(ndt::make_fixed_dim_kind(ndt::make_type<void>()),
+                                                            exponent_name, parse_datashape(begin, end, symtable));
             } else if (isupper(*bbegin)) {
-              result =
-                  ndt::make_pow_dimsym(ndt::typevar_dim_type::make(std::string(bbegin, bend), ndt::make_type<void>()),
-                                       exponent_name, parse_datashape(begin, end, symtable));
+              result = ndt::make_type<ndt::pow_dimsym_type>(
+                  ndt::make_type<ndt::typevar_dim_type>(std::string(bbegin, bend), ndt::make_type<void>()),
+                  exponent_name, parse_datashape(begin, end, symtable));
             } else {
               throw datashape_parse_error(bbegin, "invalid dimension type for base of dimensional power");
             }
@@ -1123,7 +1123,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       } else if (compare_range_to_literal(nbegin, nend, "Fixed")) {
         result = ndt::make_fixed_dim_kind(element_tp);
       } else if (isupper(*nbegin)) {
-        result = ndt::typevar_dim_type::make(std::string(nbegin, nend), element_tp);
+        result = ndt::make_type<ndt::typevar_dim_type>(std::string(nbegin, nend), element_tp);
       } else {
         skip_whitespace_and_pound_comments(rbegin, end);
         throw datashape_parse_error(rbegin, "unrecognized dimension type");
