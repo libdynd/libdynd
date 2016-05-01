@@ -329,6 +329,7 @@ set(libdynd_SRC
     src/dynd/bitwise_or.cpp
     src/dynd/bitwise_xor.cpp
     src/dynd/callable.cpp
+    src/dynd/cbrt.cpp
     src/dynd/comparison.cpp
     src/dynd/compound_add.cpp
     src/dynd/compound_div.cpp
@@ -360,6 +361,7 @@ set(libdynd_SRC
     src/dynd/right_shift.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp
+    src/dynd/sqrt.cpp
     src/dynd/statistics.cpp
     src/dynd/string.cpp
     src/dynd/subtract.cpp
