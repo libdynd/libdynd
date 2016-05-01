@@ -88,7 +88,7 @@ static const map<std::string, ndt::type> &builtin_types() {
     bit["complex64"] = ndt::make_type<dynd::complex<float32>>();
     bit["complex128"] = ndt::make_type<dynd::complex<float64>>();
     bit["complex"] = ndt::make_type<dynd::complex<double>>();
-    bit["bytes"] = ndt::bytes_type::make(1);
+    bit["bytes"] = ndt::make_type<ndt::bytes_type>(1);
     bit["type"] = ndt::make_type<ndt::type_type>();
   }
 
@@ -408,11 +408,11 @@ static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end) {
         throw datashape_parse_error(begin, "expected closing ']'");
       }
       rbegin = begin;
-      return ndt::bytes_type::make(atoi(align_val.c_str()));
+      return ndt::make_type<ndt::bytes_type>(atoi(align_val.c_str()));
     }
     throw datashape_parse_error(begin, "expected 'align'");
   } else {
-    return ndt::bytes_type::make(1);
+    return ndt::make_type<ndt::bytes_type>(1);
   }
 }
 
@@ -429,7 +429,7 @@ static ndt::type parse_fixed_bytes_parameters(const char *&rbegin, const char *e
     if (parse_token_ds(begin, end, ']')) {
       // Fixed bytes with just a size parameter
       rbegin = begin;
-      return ndt::make_fixed_bytes(atoi(size_val.c_str()), 1);
+      return ndt::make_type<ndt::fixed_bytes_type>(atoi(size_val.c_str()), 1);
     }
     if (!parse_token_ds(begin, end, ',')) {
       throw datashape_parse_error(begin, "expected closing ']' or another argument");
@@ -448,7 +448,7 @@ static ndt::type parse_fixed_bytes_parameters(const char *&rbegin, const char *e
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::make_fixed_bytes(atoi(size_val.c_str()), atoi(align_val.c_str()));
+    return ndt::make_type<ndt::fixed_bytes_type>(atoi(size_val.c_str()), atoi(align_val.c_str()));
   }
   throw datashape_parse_error(begin, "expected opening '['");
 }
@@ -1173,11 +1173,11 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
     } else if (compare_range_to_literal(nbegin, nend, "Scalar")) {
       result = ndt::make_type<ndt::scalar_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "Categorical")) {
-      result = ndt::categorical_kind_type::make();
+      result = ndt::make_type<ndt::categorical_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "FixedBytes")) {
-      result = ndt::fixed_bytes_kind_type::make();
+      result = ndt::make_type<ndt::fixed_bytes_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "FixedString")) {
-      result = ndt::fixed_string_kind_type::make();
+      result = ndt::make_type<ndt::fixed_string_kind_type>();
     }
     /*
         else if (compare_range_to_literal(nbegin, nend, "Bool")) {

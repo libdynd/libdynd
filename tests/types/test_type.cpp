@@ -179,8 +179,8 @@ TEST(Type, TypeIDConstructor) {
   EXPECT_EQ(complex_float32_id, ndt::type(complex_float32_id).get_id());
   EXPECT_EQ(complex_float64_id, ndt::type(complex_float64_id).get_id());
   EXPECT_EQ(void_id, ndt::type(void_id).get_id());
-  EXPECT_EQ(ndt::bytes_type::make(), ndt::type(bytes_id));
-  EXPECT_EQ(ndt::fixed_bytes_kind_type::make(), ndt::type(fixed_bytes_id));
+  EXPECT_EQ(ndt::make_type<ndt::bytes_type>(), ndt::type(bytes_id));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_bytes_kind_type>(), ndt::type(fixed_bytes_id));
   EXPECT_EQ(ndt::make_type<ndt::pointer_type>(ndt::make_type<ndt::any_kind_type>()), ndt::type(pointer_id));
 }
 

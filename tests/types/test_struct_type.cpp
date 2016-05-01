@@ -156,7 +156,8 @@ TEST(StructType, TypeAt) {
 TEST(StructType, IsExpression) {
   ndt::type d1 = ndt::make_type<float>();
   ndt::type d2 = ndt::make_type<ndt::adapt_type>(
-      ndt::make_type<int32_t>(), ndt::make_fixed_bytes(sizeof(int32_t), alignof(int32_t)), nd::byteswap, nd::byteswap);
+      ndt::make_type<int32_t>(), ndt::make_type<ndt::fixed_bytes_type>(sizeof(int32_t), alignof(int32_t)), nd::byteswap,
+      nd::byteswap);
   ndt::type d3 = ndt::make_type<ndt::fixed_string_type>(5, string_encoding_utf_32);
   ndt::type d = ndt::make_type<ndt::struct_type>({{d1, "x"}, {d2, "y"}, {d3, "z"}});
 

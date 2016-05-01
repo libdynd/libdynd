@@ -36,8 +36,7 @@ const uint32_t ERROR_SUBSTITUTE_CODEPOINT = (uint32_t)'?';
 
 // The next_* functions advance an iterator pair and return
 // the code point that was processed.
-static uint32_t next_ascii(const char *&it, const char *DYND_UNUSED(end))
-{
+static uint32_t next_ascii(const char *&it, const char *DYND_UNUSED(end)) {
   uint32_t result = *reinterpret_cast<const uint8_t *>(it);
   if (result & 0x80) {
     throw string_decode_error(it, it + 1, string_encoding_ascii);
@@ -46,15 +45,13 @@ static uint32_t next_ascii(const char *&it, const char *DYND_UNUSED(end))
   return result;
 }
 
-static uint32_t noerror_next_ascii(const char *&it, const char *DYND_UNUSED(end))
-{
+static uint32_t noerror_next_ascii(const char *&it, const char *DYND_UNUSED(end)) {
   uint32_t result = *reinterpret_cast<const uint8_t *>(it);
   ++it;
   return ((result & 0x80) == 0) ? result : ERROR_SUBSTITUTE_CODEPOINT;
 }
 
-static void append_ascii(uint32_t cp, char *&it, char *DYND_UNUSED(end))
-{
+static void append_ascii(uint32_t cp, char *&it, char *DYND_UNUSED(end)) {
   if ((cp & ~0x7f) != 0) {
     throw string_encode_error(cp, string_encoding_ascii);
   }
@@ -62,8 +59,7 @@ static void append_ascii(uint32_t cp, char *&it, char *DYND_UNUSED(end))
   ++it;
 }
 
-void noerror_append_ascii(uint32_t cp, char *&it, char *DYND_UNUSED(end))
-{
+void noerror_append_ascii(uint32_t cp, char *&it, char *DYND_UNUSED(end)) {
   if ((cp & ~0x7f) != 0) {
     cp = ERROR_SUBSTITUTE_CODEPOINT;
   }
@@ -71,8 +67,7 @@ void noerror_append_ascii(uint32_t cp, char *&it, char *DYND_UNUSED(end))
   ++it;
 }
 
-uint32_t next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw))
-{
+uint32_t next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw)) {
   uint32_t cp = *reinterpret_cast<const uint16_t *>(it_raw);
   if (utf8::internal::is_surrogate(cp)) {
     throw string_decode_error(it_raw, it_raw + 2, string_encoding_ucs_2);
@@ -81,8 +76,7 @@ uint32_t next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw))
   return cp;
 }
 
-uint32_t noerror_next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw))
-{
+uint32_t noerror_next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw)) {
   uint32_t cp = *reinterpret_cast<const uint16_t *>(it_raw);
   it_raw += 2;
   if (utf8::internal::is_surrogate(cp)) {
@@ -91,8 +85,7 @@ uint32_t noerror_next_ucs2(const char *&it_raw, const char *DYND_UNUSED(end_raw)
   return cp;
 }
 
-void append_ucs2(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
-{
+void append_ucs2(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw)) {
   uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
   if ((cp & ~0xffff) != 0 || utf8::internal::is_surrogate(cp)) {
     throw string_encode_error(cp, string_encoding_ucs_2);
@@ -101,8 +94,7 @@ void append_ucs2(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
   ++it;
 }
 
-void noerror_append_ucs2(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
-{
+void noerror_append_ucs2(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw)) {
   uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
   if ((cp & ~0xffff) != 0 || utf8::internal::is_surrogate(cp)) {
     cp = ERROR_SUBSTITUTE_CODEPOINT;
@@ -111,8 +103,7 @@ void noerror_append_ucs2(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
   ++it;
 }
 
-uint32_t next_utf8(const char *&it, const char *end)
-{
+uint32_t next_utf8(const char *&it, const char *end) {
   // const char *saved_it = it;
   uint32_t cp = 0;
   utf8::internal::utf_error err_code = utf8::internal::validate_next(it, end, cp);
@@ -133,8 +124,7 @@ uint32_t next_utf8(const char *&it, const char *end)
   return cp;
 }
 
-uint32_t noerror_next_utf8(const char *&it, const char *end)
-{
+uint32_t noerror_next_utf8(const char *&it, const char *end) {
   uint32_t cp = 0;
   // Determine the sequence length based on the lead octet
   std::size_t length = utf8::internal::sequence_length(it);
@@ -165,55 +155,46 @@ uint32_t noerror_next_utf8(const char *&it, const char *end)
         // Passed! Return here.
         ++it;
         return cp;
-      }
-      else {
+      } else {
         return ERROR_SUBSTITUTE_CODEPOINT;
       }
-    }
-    else {
+    } else {
       return ERROR_SUBSTITUTE_CODEPOINT;
     }
-  }
-  else {
+  } else {
     return ERROR_SUBSTITUTE_CODEPOINT;
   }
 
   return cp;
 }
 
-void append_utf8(uint32_t cp, char *&it, char *end)
-{
+void append_utf8(uint32_t cp, char *&it, char *end) {
   if (end - it >= 6) {
     it = utf8::append(cp, it);
-  }
-  else {
+  } else {
     char tmp[6];
     char *tmp_ptr = tmp;
     tmp_ptr = utf8::append(cp, tmp_ptr);
     if (tmp_ptr - tmp <= end - it) {
       memcpy(it, tmp, tmp_ptr - tmp);
       it += (tmp_ptr - tmp);
-    }
-    else {
+    } else {
       throw std::runtime_error("Input too large to convert to destination string");
     }
   }
 }
 
-void noerror_append_utf8(uint32_t cp, char *&it, char *end)
-{
+void noerror_append_utf8(uint32_t cp, char *&it, char *end) {
   if (end - it >= 6) {
     it = utf8::append(cp, it);
-  }
-  else {
+  } else {
     char tmp[6];
     char *tmp_ptr = tmp;
     tmp_ptr = utf8::append(cp, tmp_ptr);
     if (tmp_ptr - tmp <= end - it) {
       memcpy(it, tmp, tmp_ptr - tmp);
       it += (tmp_ptr - tmp);
-    }
-    else {
+    } else {
       // If it didn't fit, null-terminate
       memset(it, 0, end - it);
       it = end;
@@ -221,8 +202,7 @@ void noerror_append_utf8(uint32_t cp, char *&it, char *end)
   }
 }
 
-inline void string_append_utf8(uint32_t cp, std::string &s)
-{
+inline void string_append_utf8(uint32_t cp, std::string &s) {
   char tmp[6];
   char *tmp_ptr = tmp, *tmp_ptr_end;
   tmp_ptr_end = utf8::append(cp, tmp_ptr);
@@ -230,8 +210,7 @@ inline void string_append_utf8(uint32_t cp, std::string &s)
     s += *tmp_ptr++;
 }
 
-uint32_t next_utf16(const char *&it_raw, const char *end_raw)
-{
+uint32_t next_utf16(const char *&it_raw, const char *end_raw) {
   uint32_t cp = *reinterpret_cast<const uint16_t *>(it_raw);
   // Take care of surrogate pairs first
   if (utf8::internal::is_lead_surrogate(cp)) {
@@ -239,17 +218,14 @@ uint32_t next_utf16(const char *&it_raw, const char *end_raw)
       uint32_t trail_surrogate = *reinterpret_cast<const uint16_t *>(it_raw + 2);
       if (utf8::internal::is_trail_surrogate(trail_surrogate)) {
         cp = (cp << 10) + trail_surrogate + utf8::internal::SURROGATE_OFFSET;
-      }
-      else {
+      } else {
         throw string_decode_error(it_raw, it_raw + 4, string_encoding_utf_16);
       }
       it_raw += 2;
-    }
-    else {
+    } else {
       throw string_decode_error(it_raw, end_raw, string_encoding_utf_16);
     }
-  }
-  else if (utf8::internal::is_trail_surrogate(cp)) {
+  } else if (utf8::internal::is_trail_surrogate(cp)) {
     // Lone trail surrogate
     throw string_decode_error(it_raw, it_raw + 2, string_encoding_utf_16);
   }
@@ -257,8 +233,7 @@ uint32_t next_utf16(const char *&it_raw, const char *end_raw)
   return cp;
 }
 
-uint32_t noerror_next_utf16(const char *&it_raw, const char *end_raw)
-{
+uint32_t noerror_next_utf16(const char *&it_raw, const char *end_raw) {
   uint32_t cp = *reinterpret_cast<const uint16_t *>(it_raw);
   it_raw += 2;
   // Take care of surrogate pairs first
@@ -268,24 +243,20 @@ uint32_t noerror_next_utf16(const char *&it_raw, const char *end_raw)
       it_raw += 2;
       if (utf8::internal::is_trail_surrogate(trail_surrogate)) {
         cp = (cp << 10) + trail_surrogate + utf8::internal::SURROGATE_OFFSET;
-      }
-      else {
+      } else {
         return ERROR_SUBSTITUTE_CODEPOINT;
       }
-    }
-    else {
+    } else {
       return ERROR_SUBSTITUTE_CODEPOINT;
     }
-  }
-  else if (utf8::internal::is_trail_surrogate(cp)) {
+  } else if (utf8::internal::is_trail_surrogate(cp)) {
     // Lone trail surrogate
     return ERROR_SUBSTITUTE_CODEPOINT;
   }
   return cp;
 }
 
-void append_utf16(uint32_t cp, char *&it_raw, char *end_raw)
-{
+void append_utf16(uint32_t cp, char *&it_raw, char *end_raw) {
   uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
   uint16_t *end = reinterpret_cast<uint16_t *>(end_raw);
   if (cp > 0xffff) { // make a surrogate pair
@@ -295,15 +266,13 @@ void append_utf16(uint32_t cp, char *&it_raw, char *end_raw)
     }
     *it = static_cast<uint16_t>((cp & 0x3ff) + utf8::internal::TRAIL_SURROGATE_MIN);
     ++it;
-  }
-  else {
+  } else {
     *it = static_cast<uint16_t>(cp);
     ++it;
   }
 }
 
-void noerror_append_utf16(uint32_t cp, char *&it_raw, char *end_raw)
-{
+void noerror_append_utf16(uint32_t cp, char *&it_raw, char *end_raw) {
   uint16_t *&it = reinterpret_cast<uint16_t *&>(it_raw);
   uint16_t *end = reinterpret_cast<uint16_t *>(end_raw);
   if (cp > 0xffff) { // make a surrogate pair
@@ -312,21 +281,18 @@ void noerror_append_utf16(uint32_t cp, char *&it_raw, char *end_raw)
       ++it;
       *it = static_cast<uint16_t>((cp & 0x3ff) + utf8::internal::TRAIL_SURROGATE_MIN);
       ++it;
-    }
-    else {
+    } else {
       // Null-terminate
       memset(it_raw, 0, end_raw - it_raw);
       it_raw = end_raw;
     }
-  }
-  else {
+  } else {
     *it = static_cast<uint16_t>(cp);
     ++it;
   }
 }
 
-uint32_t next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw))
-{
+uint32_t next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw)) {
   uint32_t result = *reinterpret_cast<const uint32_t *>(it_raw);
   if (!utf8::internal::is_code_point_valid(result)) {
     throw string_decode_error(it_raw, it_raw + 4, string_encoding_utf_32);
@@ -335,8 +301,7 @@ uint32_t next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw))
   return result;
 }
 
-uint32_t noerror_next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw))
-{
+uint32_t noerror_next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw)) {
   uint32_t result = *reinterpret_cast<const uint32_t *>(it_raw);
   it_raw += 4;
   if (!utf8::internal::is_code_point_valid(result)) {
@@ -345,16 +310,14 @@ uint32_t noerror_next_utf32(const char *&it_raw, const char *DYND_UNUSED(end_raw
   return result;
 }
 
-void append_utf32(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
-{
+void append_utf32(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw)) {
   uint32_t *&it = reinterpret_cast<uint32_t *&>(it_raw);
   // uint32_t *end = reinterpret_cast<uint32_t *>(end);
   *it = cp;
   ++it;
 }
 
-void noerror_append_utf32(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw))
-{
+void noerror_append_utf32(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw)) {
   uint32_t *&it = reinterpret_cast<uint32_t *&>(it_raw);
   // uint32_t *end = reinterpret_cast<uint32_t *>(end);
   *it = cp;
@@ -363,8 +326,7 @@ void noerror_append_utf32(uint32_t cp, char *&it_raw, char *DYND_UNUSED(end_raw)
 } // anonymous namespace
 
 next_unicode_codepoint_t dynd::get_next_unicode_codepoint_function(string_encoding_t encoding,
-                                                                   assign_error_mode errmode)
-{
+                                                                   assign_error_mode errmode) {
   switch (encoding) {
   case string_encoding_ascii:
     return (errmode != assign_error_nocheck) ? next_ascii : noerror_next_ascii;
@@ -382,8 +344,7 @@ next_unicode_codepoint_t dynd::get_next_unicode_codepoint_function(string_encodi
 }
 
 append_unicode_codepoint_t dynd::get_append_unicode_codepoint_function(string_encoding_t encoding,
-                                                                       assign_error_mode errmode)
-{
+                                                                       assign_error_mode errmode) {
   switch (encoding) {
   case string_encoding_ascii:
     return (errmode != assign_error_nocheck) ? append_ascii : noerror_append_ascii;
@@ -401,8 +362,7 @@ append_unicode_codepoint_t dynd::get_append_unicode_codepoint_function(string_en
 }
 
 template <next_unicode_codepoint_t next_fn>
-std::string string_range_as_utf8_string_templ(const char *begin, const char *end)
-{
+std::string string_range_as_utf8_string_templ(const char *begin, const char *end) {
   std::string result;
   uint32_t cp = 0;
   while (begin < end) {
@@ -413,8 +373,7 @@ std::string string_range_as_utf8_string_templ(const char *begin, const char *end
 }
 
 std::string dynd::string_range_as_utf8_string(string_encoding_t encoding, const char *begin, const char *end,
-                                              assign_error_mode errmode)
-{
+                                              assign_error_mode errmode) {
   switch (encoding) {
   case string_encoding_ascii:
   case string_encoding_utf_8:
@@ -423,23 +382,20 @@ std::string dynd::string_range_as_utf8_string(string_encoding_t encoding, const 
   case string_encoding_ucs_2:
     if (errmode == assign_error_nocheck) {
       return string_range_as_utf8_string_templ<&noerror_next_ucs2>(begin, end);
-    }
-    else {
+    } else {
       return string_range_as_utf8_string_templ<&next_ucs2>(begin, end);
     }
   case string_encoding_utf_16: {
     if (errmode == assign_error_nocheck) {
       return string_range_as_utf8_string_templ<&noerror_next_utf16>(begin, end);
-    }
-    else {
+    } else {
       return string_range_as_utf8_string_templ<&next_utf16>(begin, end);
     }
   }
   case string_encoding_utf_32: {
     if (errmode == assign_error_nocheck) {
       return string_range_as_utf8_string_templ<&noerror_next_utf32>(begin, end);
-    }
-    else {
+    } else {
       return string_range_as_utf8_string_templ<&next_utf32>(begin, end);
     }
   }
@@ -452,8 +408,7 @@ std::string dynd::string_range_as_utf8_string(string_encoding_t encoding, const 
   }
 }
 
-void dynd::print_escaped_unicode_codepoint(std::ostream &o, uint32_t cp, bool single_quote)
-{
+void dynd::print_escaped_unicode_codepoint(std::ostream &o, uint32_t cp, bool single_quote) {
   if (cp < 0x80) {
     switch (cp) {
     case '\b':
@@ -484,25 +439,21 @@ void dynd::print_escaped_unicode_codepoint(std::ostream &o, uint32_t cp, bool si
       if (cp < 0x20 || cp == 0x7f) {
         o << "\\u";
         hexadecimal_print(o, static_cast<uint16_t>(cp));
-      }
-      else {
+      } else {
         o << static_cast<char>(cp);
       }
       break;
     }
-  }
-  else if (cp < 0x10000) {
+  } else if (cp < 0x10000) {
     o << "\\u";
     hexadecimal_print(o, static_cast<uint16_t>(cp));
-  }
-  else {
+  } else {
     o << "\\U";
     hexadecimal_print(o, static_cast<uint32_t>(cp));
   }
 }
 
-void dynd::print_escaped_utf8_string(std::ostream &o, const char *str_begin, const char *str_end, bool single_quote)
-{
+void dynd::print_escaped_utf8_string(std::ostream &o, const char *str_begin, const char *str_end, bool single_quote) {
   uint32_t cp = 0;
 
   // Print as an escaped string
@@ -516,15 +467,12 @@ void dynd::print_escaped_utf8_string(std::ostream &o, const char *str_begin, con
 
 void dynd::append_utf8_codepoint(uint32_t cp, std::string &out_str) { string_append_utf8(cp, out_str); }
 
-ndt::type dynd::char_type_of_encoding(string_encoding_t encoding)
-{
+ndt::type dynd::char_type_of_encoding(string_encoding_t encoding) {
   if (encoding == string_encoding_utf_8) {
-    return ndt::make_fixed_bytes(1, 1);
-  }
-  else if (encoding == string_encoding_utf_16) {
-    return ndt::make_fixed_bytes(2, 2);
-  }
-  else {
+    return ndt::make_type<ndt::fixed_bytes_type>(1, 1);
+  } else if (encoding == string_encoding_utf_16) {
+    return ndt::make_type<ndt::fixed_bytes_type>(2, 2);
+  } else {
     return ndt::make_type<ndt::char_type>(encoding);
   }
 }

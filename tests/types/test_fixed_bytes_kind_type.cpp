@@ -3,19 +3,18 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
 
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(FixedBytesKindType, Construction)
-{
-  ndt::type tp = ndt::fixed_bytes_kind_type::make();
+TEST(FixedBytesKindType, Construction) {
+  ndt::type tp = ndt::make_type<ndt::fixed_bytes_kind_type>();
   EXPECT_EQ(fixed_bytes_id, tp.get_id());
   EXPECT_EQ(bytes_kind_id, tp.get_base_id());
   EXPECT_EQ(0u, tp.get_data_alignment());

@@ -91,8 +91,6 @@ namespace ndt {
     friend struct assign_to_same_category_type;
     friend struct assign_from_same_category_type;
     friend struct assign_from_commensurate_category_type;
-
-    static type make(const nd::array &values) { return type(new categorical_type(values), false); }
   };
 
   DYND_API type factor_categorical(const nd::array &values);

@@ -95,14 +95,16 @@ static void as_storage_type(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_of
   if (dt.is_scalar() && dt.get_id() != pointer_id) {
     const ndt::type &storage_dt = dt.storage_type();
     if (storage_dt.is_builtin()) {
-      out_transformed_tp = ndt::make_fixed_bytes(storage_dt.get_data_size(), storage_dt.get_data_alignment());
+      out_transformed_tp =
+          ndt::make_type<ndt::fixed_bytes_type>(storage_dt.get_data_size(), storage_dt.get_data_alignment());
       out_was_transformed = true;
     } else if (storage_dt.is_pod() && storage_dt.extended()->get_arrmeta_size() == 0) {
-      out_transformed_tp = ndt::make_fixed_bytes(storage_dt.get_data_size(), storage_dt.get_data_alignment());
+      out_transformed_tp =
+          ndt::make_type<ndt::fixed_bytes_type>(storage_dt.get_data_size(), storage_dt.get_data_alignment());
       out_was_transformed = true;
     } else if (storage_dt.get_id() == string_id) {
-      out_transformed_tp =
-          ndt::bytes_type::make(static_cast<const ndt::string_type *>(storage_dt.extended())->get_target_alignment());
+      out_transformed_tp = ndt::make_type<ndt::bytes_type>(
+          static_cast<const ndt::string_type *>(storage_dt.extended())->get_target_alignment());
       out_was_transformed = true;
     } else {
       if (dt.get_base_id() == expr_kind_id) {
@@ -1085,7 +1087,7 @@ nd::array nd::memmap(const std::string &DYND_UNUSED(filename), intptr_t DYND_UNU
     // Create a memory mapped memblock of the file
     intrusive_ptr<memory_block_data> mm = make_memmap_memory_block(filename, access, &mm_ptr, &mm_size, begin, end);
     // Create a bytes array referring to the data.
-    ndt::type dt = ndt::bytes_type::make(1);
+    ndt::type dt = ndt::make_type<ndt::bytes_type>(1);
     char *data_ptr = 0;
     nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), dt.get_data_size(),
                                              dt.get_data_alignment(), &data_ptr));
