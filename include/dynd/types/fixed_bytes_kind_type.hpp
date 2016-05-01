@@ -43,8 +43,6 @@ namespace ndt {
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
 
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
-
-    static type make() { return type(new fixed_bytes_kind_type(), false); }
   };
 
 } // namespace dynd::ndt

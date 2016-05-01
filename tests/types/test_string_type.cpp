@@ -186,7 +186,7 @@ TEST(StringType, Storage)
   nd::array a;
 
   a = "testing";
-  EXPECT_EQ(ndt::bytes_type::make(1), a.storage().get_type());
+  EXPECT_EQ(ndt::make_type<ndt::bytes_type>(1), a.storage().get_type());
 }
 
 TEST(StringType, Properties)

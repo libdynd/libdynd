@@ -22,7 +22,7 @@ namespace ndt {
   public:
     typedef bytes data_type;
 
-    bytes_type(size_t alignment);
+    bytes_type(size_t alignment = 1);
 
     /** Alignment of the bytes data being pointed to. */
     size_t get_target_alignment() const { return m_alignment; }
@@ -47,14 +47,6 @@ namespace ndt {
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
 
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
-
-    static const type &make()
-    {
-      static const type bytes_tp(new bytes_type(1), false);
-      return *reinterpret_cast<const type *>(&bytes_tp);
-    }
-
-    static type make(size_t alignment) { return type(new bytes_type(alignment), false); }
   };
 
   template <>

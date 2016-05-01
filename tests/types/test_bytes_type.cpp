@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/types/bytes_type.hpp>
@@ -16,12 +16,11 @@
 using namespace std;
 using namespace dynd;
 
-TEST(BytesDType, Create)
-{
+TEST(BytesDType, Create) {
   ndt::type d;
 
   // Strings with various alignments
-  d = ndt::bytes_type::make(1);
+  d = ndt::make_type<ndt::bytes_type>(1);
   EXPECT_EQ(bytes_id, d.get_id());
   EXPECT_EQ(bytes_kind_id, d.get_base_id());
   EXPECT_EQ(alignof(bytes), d.get_data_alignment());
@@ -32,7 +31,7 @@ TEST(BytesDType, Create)
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::bytes_type::make(2);
+  d = ndt::make_type<ndt::bytes_type>(2);
   EXPECT_EQ(bytes_id, d.get_id());
   EXPECT_EQ(bytes_kind_id, d.get_base_id());
   EXPECT_EQ(alignof(bytes), d.get_data_alignment());
@@ -42,7 +41,7 @@ TEST(BytesDType, Create)
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::bytes_type::make(4);
+  d = ndt::make_type<ndt::bytes_type>(4);
   EXPECT_EQ(bytes_id, d.get_id());
   EXPECT_EQ(bytes_kind_id, d.get_base_id());
   EXPECT_EQ(alignof(bytes), d.get_data_alignment());
@@ -52,7 +51,7 @@ TEST(BytesDType, Create)
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::bytes_type::make(8);
+  d = ndt::make_type<ndt::bytes_type>(8);
   EXPECT_EQ(bytes_id, d.get_id());
   EXPECT_EQ(bytes_kind_id, d.get_base_id());
   EXPECT_EQ(alignof(bytes), d.get_data_alignment());
@@ -62,7 +61,7 @@ TEST(BytesDType, Create)
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::bytes_type::make(16);
+  d = ndt::make_type<ndt::bytes_type>(16);
   EXPECT_EQ(bytes_id, d.get_id());
   EXPECT_EQ(bytes_kind_id, d.get_base_id());
   EXPECT_EQ(alignof(bytes), d.get_data_alignment());
@@ -72,14 +71,13 @@ TEST(BytesDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(BytesDType, Assign)
-{
+TEST(BytesDType, Assign) {
   nd::array a, b, c;
 
   // Round-trip a string through a bytes assignment
-  a = nd::array("testing").view_scalars(ndt::bytes_type::make(1));
-  EXPECT_EQ(a.get_type(), ndt::bytes_type::make(1));
-  b = nd::empty(ndt::bytes_type::make(1));
+  a = nd::array("testing").view_scalars(ndt::make_type<ndt::bytes_type>(1));
+  EXPECT_EQ(a.get_type(), ndt::make_type<ndt::bytes_type>(1));
+  b = nd::empty(ndt::make_type<ndt::bytes_type>(1));
   b.vals() = a;
   c = b.view_scalars(ndt::make_type<ndt::string_type>());
   EXPECT_EQ(c.get_type(), ndt::make_type<ndt::string_type>());
@@ -102,8 +100,7 @@ TEST(BytesDType, Alignment)
 }
 */
 
-TEST(Bytes, Summary)
-{
+TEST(Bytes, Summary) {
   stringstream ss;
   char x[100];
   for (size_t i = 0; i < sizeof(x); ++i) {
