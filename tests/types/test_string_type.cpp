@@ -79,8 +79,8 @@ TEST(StringType, AccessFlags)
                   "testing one two three four five six seven");
   //  EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag, (int)a.get_access_flags());
   // Turn it into a fixed_string type for this test
-  a = nd::empty(ndt::fixed_string_type::make(95, string_encoding_utf_8)).assign(a);
-  EXPECT_EQ(ndt::fixed_string_type::make(95, string_encoding_utf_8), a.get_type());
+  a = nd::empty(ndt::make_type<ndt::fixed_string_type>(95, string_encoding_utf_8)).assign(a);
+  EXPECT_EQ(ndt::make_type<ndt::fixed_string_type>(95, string_encoding_utf_8), a.get_type());
 
   // Converting to a blockref string of the same encoding produces a reference
   // into the fixed_string value

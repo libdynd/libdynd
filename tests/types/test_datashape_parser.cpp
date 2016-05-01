@@ -61,12 +61,13 @@ TEST(DataShapeParser, StringAtoms) {
   // Default string
   EXPECT_EQ(ndt::make_type<ndt::string_type>(), ndt::type("string"));
   // String with size
-  EXPECT_EQ(ndt::fixed_string_type::make(1, string_encoding_utf_8), ndt::type("fixed_string[1]"));
-  EXPECT_EQ(ndt::fixed_string_type::make(100, string_encoding_utf_8), ndt::type("fixed_string[100]"));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_string_type>(1, string_encoding_utf_8), ndt::type("fixed_string[1]"));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_string_type>(100, string_encoding_utf_8), ndt::type("fixed_string[100]"));
   // String with size and encoding
-  EXPECT_EQ(ndt::fixed_string_type::make(1, string_encoding_ascii), ndt::type("fixed_string[1, 'A']"));
-  EXPECT_EQ(ndt::fixed_string_type::make(10, string_encoding_utf_8), ndt::type("fixed_string[10, 'U8']"));
-  EXPECT_EQ(ndt::fixed_string_type::make(1000, string_encoding_utf_16), ndt::type("fixed_string[1000,'U16']"));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_string_type>(1, string_encoding_ascii), ndt::type("fixed_string[1, 'A']"));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_string_type>(10, string_encoding_utf_8), ndt::type("fixed_string[10, 'U8']"));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_string_type>(1000, string_encoding_utf_16),
+            ndt::type("fixed_string[1000,'U16']"));
 
   // String with encoding -- change to fixed_string or delete?
   /*
@@ -149,9 +150,10 @@ TEST(DataShapeParser, StridedVarFixedDim) {
 }
 
 TEST(DataShapeParser, TypeVarConstructed) {
-  EXPECT_EQ(ndt::typevar_constructed_type::make("T", ndt::type("int32")), ndt::type("T[int32]"));
-  EXPECT_EQ(ndt::typevar_constructed_type::make("T", ndt::type("10 * A")), ndt::type("T[10 * A]"));
-  EXPECT_EQ(ndt::typevar_constructed_type::make("T", ndt::type("Dims... * int32")), ndt::type("T[Dims... * int32]"));
+  EXPECT_EQ(ndt::make_type<ndt::typevar_constructed_type>("T", ndt::type("int32")), ndt::type("T[int32]"));
+  EXPECT_EQ(ndt::make_type<ndt::typevar_constructed_type>("T", ndt::type("10 * A")), ndt::type("T[10 * A]"));
+  EXPECT_EQ(ndt::make_type<ndt::typevar_constructed_type>("T", ndt::type("Dims... * int32")),
+            ndt::type("T[Dims... * int32]"));
 }
 
 TEST(DataShapeParser, RecordOneField) {

@@ -49,7 +49,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
         ndt::substitute(pattern.extended<base_memory_type>()->get_element_type(), typevars, concrete));
 #endif
   case pointer_id:
-    return ndt::pointer_type::make(
+    return ndt::make_type<ndt::pointer_type>(
         ndt::substitute(pattern.extended<pointer_type>()->get_target_type(), typevars, concrete));
   case fixed_dim_id:
     if (!pattern.extended<base_fixed_dim_type>()->is_sized()) {

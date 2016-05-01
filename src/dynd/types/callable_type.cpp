@@ -243,5 +243,5 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::callable_type::ge
 }
 
 ndt::type ndt::make_generic_funcproto(intptr_t nargs) {
-  return make_type<callable_type>(typevar_type::make("R"), make_typevar_range("T", nargs));
+  return make_type<callable_type>(make_type<typevar_type>("R"), make_typevar_range("T", nargs));
 }

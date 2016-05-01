@@ -1108,7 +1108,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values) 
   // Make the pointer types
   vector<ndt::type> field_types(field_count);
   for (size_t i = 0; i != field_count; ++i) {
-    field_types[i] = ndt::pointer_type::make(field_values[i].get_type());
+    field_types[i] = ndt::make_type<ndt::pointer_type>(field_values[i].get_type());
   }
   // The flags are the intersection of all the input flags
   uint64_t flags = field_values[0].get_flags();

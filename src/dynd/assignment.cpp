@@ -28,7 +28,7 @@ nd::callable make_assign() {
       numeric_ids;
 
   ndt::type self_tp = ndt::make_type<ndt::callable_type>(
-      ndt::any_kind_type::make(), {ndt::any_kind_type::make()},
+      ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<ndt::any_kind_type>()},
       {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}});
 
   auto dispatcher =

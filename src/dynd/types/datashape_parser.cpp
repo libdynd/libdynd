@@ -330,7 +330,7 @@ static ndt::type parse_fixed_string_parameters(const char *&rbegin, const char *
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::fixed_string_type::make(string_size, encoding);
+    return ndt::make_type<ndt::fixed_string_type>(string_size, encoding);
   }
 
   throw datashape_parse_error(begin, "expected opening '['");
@@ -520,7 +520,7 @@ static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end, 
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::pointer_type::make(tp);
+  return ndt::make_type<ndt::pointer_type>(tp);
 }
 
 // datashape_list : datashape COMMA datashape_list RBRACKET
@@ -1151,7 +1151,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
     } else if (compare_range_to_literal(nbegin, nend, "pointer")) {
       result = parse_pointer_parameters(begin, end, symtable);
     } else if (compare_range_to_literal(nbegin, nend, "array")) {
-      result = ndt::array_type::make();
+      result = ndt::make_type<ndt::array_type>();
     } else if (compare_range_to_literal(nbegin, nend, "char")) {
       result = parse_char_parameters(begin, end);
     } else if (compare_range_to_literal(nbegin, nend, "bytes")) {
@@ -1167,11 +1167,11 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
     } else if (compare_range_to_literal(nbegin, nend, "option")) {
       result = parse_option_parameters(begin, end, symtable);
     } else if (compare_range_to_literal(nbegin, nend, "Any")) {
-      result = ndt::any_kind_type::make();
+      result = ndt::make_type<ndt::any_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "State")) {
       result = ndt::make_type<ndt::state_type>();
     } else if (compare_range_to_literal(nbegin, nend, "Scalar")) {
-      result = ndt::scalar_kind_type::make();
+      result = ndt::make_type<ndt::scalar_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "Categorical")) {
       result = ndt::categorical_kind_type::make();
     } else if (compare_range_to_literal(nbegin, nend, "FixedBytes")) {
@@ -1201,7 +1201,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
     */
     else if (isupper(*nbegin)) {
       if (!parse_token_ds(begin, end, '[')) {
-        result = ndt::typevar_type::make(std::string(nbegin, nend));
+        result = ndt::make_type<ndt::typevar_type>(std::string(nbegin, nend));
       } else {
         ndt::type arg_tp = parse_datashape(begin, end, symtable);
         if (arg_tp.is_null()) {
@@ -1210,7 +1210,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
         if (!parse_token_ds(begin, end, ']')) {
           throw datashape_parse_error(begin, "expected closing ']'");
         }
-        result = ndt::typevar_constructed_type::make(std::string(nbegin, nend), arg_tp);
+        result = ndt::make_type<ndt::typevar_constructed_type>(std::string(nbegin, nend), arg_tp);
       }
     } else {
       std::string n(nbegin, nend);

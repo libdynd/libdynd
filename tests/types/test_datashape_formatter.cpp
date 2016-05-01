@@ -41,12 +41,12 @@ TEST(DataShapeFormatter, DTypeStringAtoms) {
   EXPECT_EQ("string", format_datashape(ndt::make_type<ndt::string_type>(), "", false));
   EXPECT_EQ("string", format_datashape(ndt::make_type<ndt::string_type>(), "", false));
   EXPECT_EQ("string", format_datashape(ndt::make_type<ndt::string_type>(), "", false));
-  EXPECT_EQ("string", format_datashape(ndt::fixed_string_type::make(1, string_encoding_utf_8), "", false));
-  EXPECT_EQ("string", format_datashape(ndt::fixed_string_type::make(10, string_encoding_utf_8), "", false));
-  EXPECT_EQ("string", format_datashape(ndt::fixed_string_type::make(10, string_encoding_ascii), "", false));
-  EXPECT_EQ("string", format_datashape(ndt::fixed_string_type::make(10, string_encoding_utf_16), "", false));
-  EXPECT_EQ("string", format_datashape(ndt::fixed_string_type::make(10, string_encoding_utf_32), "", false));
-  EXPECT_EQ("string", format_datashape(ndt::fixed_string_type::make(10, string_encoding_ucs_2), "", false));
+  EXPECT_EQ("string", format_datashape(ndt::make_type<ndt::fixed_string_type>(1, string_encoding_utf_8), "", false));
+  EXPECT_EQ("string", format_datashape(ndt::make_type<ndt::fixed_string_type>(10, string_encoding_utf_8), "", false));
+  EXPECT_EQ("string", format_datashape(ndt::make_type<ndt::fixed_string_type>(10, string_encoding_ascii), "", false));
+  EXPECT_EQ("string", format_datashape(ndt::make_type<ndt::fixed_string_type>(10, string_encoding_utf_16), "", false));
+  EXPECT_EQ("string", format_datashape(ndt::make_type<ndt::fixed_string_type>(10, string_encoding_utf_32), "", false));
+  EXPECT_EQ("string", format_datashape(ndt::make_type<ndt::fixed_string_type>(10, string_encoding_ucs_2), "", false));
 }
 
 TEST(DataShapeFormatter, DTypeUniformArrays) {

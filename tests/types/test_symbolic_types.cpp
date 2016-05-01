@@ -80,7 +80,7 @@ TEST(SymbolicTypes, CreateTypeVar) {
   const ndt::typevar_type *tvt;
 
   // Simple TypeVar
-  tp = ndt::typevar_type::make("Blah");
+  tp = ndt::make_type<ndt::typevar_type>("Blah");
   EXPECT_EQ(typevar_id, tp.get_id());
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_EQ(1u, tp.get_data_alignment());
@@ -98,11 +98,11 @@ TEST(SymbolicTypes, CreateTypeVar) {
 
   // The typevar name must start with a capital
   // and look like an identifier
-  EXPECT_THROW(ndt::typevar_type::make(""), type_error);
-  EXPECT_THROW(ndt::typevar_type::make("blah"), type_error);
-  EXPECT_THROW(ndt::typevar_type::make("T "), type_error);
-  EXPECT_THROW(ndt::typevar_type::make("123"), type_error);
-  EXPECT_THROW(ndt::typevar_type::make("Two+"), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::typevar_type>(""), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::typevar_type>("blah"), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::typevar_type>("T "), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::typevar_type>("123"), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::typevar_type>("Two+"), type_error);
 }
 
 TEST(SymbolicTypes, CreateTypeVarDim) {
@@ -191,7 +191,7 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
 TEST(SymbolicTypes, AnySym) {
   ndt::type tp;
 
-  tp = ndt::any_kind_type::make();
+  tp = ndt::make_type<ndt::any_kind_type>();
   EXPECT_EQ(any_kind_id, tp.get_id());
   EXPECT_EQ("Any", tp.str());
   EXPECT_TRUE(tp.is_symbolic());

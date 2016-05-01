@@ -83,7 +83,7 @@ ndt::type ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange 
       } else {
         // TODO: This is incorrect, but is here as a stopgap to be replaced by a
         // sliced<> type
-        return pointer_type::make(m_element_tp);
+        return make_type<pointer_type>(m_element_tp);
       }
     } else {
       if (indices->is_nop()) {
@@ -103,7 +103,7 @@ ndt::type ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange 
       } else {
         // TODO: This is incorrect, but is here as a stopgap to be replaced by a
         // sliced<> type
-        return pointer_type::make(
+        return make_type<pointer_type>(
             m_element_tp.apply_linear_index(nindices - 1, indices + 1, current_i + 1, root_tp, false));
       }
     } else {
