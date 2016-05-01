@@ -110,7 +110,7 @@ TEST(SymbolicTypes, CreateTypeVarDim) {
   const ndt::typevar_dim_type *tvt;
 
   // Simple Dimension TypeVar
-  tp = ndt::typevar_dim_type::make("Blah", ndt::make_type<int>());
+  tp = ndt::make_type<ndt::typevar_dim_type>("Blah", ndt::make_type<int>());
   EXPECT_EQ(typevar_dim_id, tp.get_id());
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_EQ(1u, tp.get_data_alignment());
@@ -129,11 +129,11 @@ TEST(SymbolicTypes, CreateTypeVarDim) {
 
   // The typevar name must start with a capital
   // and look like an identifier
-  EXPECT_THROW(ndt::typevar_dim_type::make("", ndt::make_type<int>()), type_error);
-  EXPECT_THROW(ndt::typevar_dim_type::make("blah", ndt::make_type<int>()), type_error);
-  EXPECT_THROW(ndt::typevar_dim_type::make("T ", ndt::make_type<int>()), type_error);
-  EXPECT_THROW(ndt::typevar_dim_type::make("123", ndt::make_type<int>()), type_error);
-  EXPECT_THROW(ndt::typevar_dim_type::make("Two+", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::typevar_dim_type>("", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::typevar_dim_type>("blah", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::typevar_dim_type>("T ", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::typevar_dim_type>("123", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::typevar_dim_type>("Two+", ndt::make_type<int>()), type_error);
 }
 
 TEST(SymbolicTypes, CreateEllipsisDim) {

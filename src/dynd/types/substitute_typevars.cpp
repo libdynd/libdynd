@@ -166,7 +166,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
         ss << "No substitution type for dynd typevar " << pattern << " was available";
         throw invalid_argument(ss.str());
       } else {
-        return ndt::typevar_dim_type::make(
+        return ndt::make_type<ndt::typevar_dim_type>(
             pattern.extended<typevar_dim_type>()->get_name(),
             ndt::substitute(pattern.extended<typevar_dim_type>()->get_element_type(), typevars, concrete));
       }
@@ -228,7 +228,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
     if (exponent == 0) {
       return result;
     } else if (exponent < 0) {
-      return ndt::make_pow_dimsym(base_tp, exponent_name, result);
+      return ndt::make_type<ndt::pow_dimsym_type>(base_tp, exponent_name, result);
     } else {
       switch (base_tp.get_id()) {
       case fixed_dim_id: {
@@ -258,7 +258,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
       case typevar_dim_id: {
         const std::string &tvname = base_tp.extended<typevar_dim_type>()->get_name();
         for (intptr_t i = 0; i < exponent; ++i) {
-          result = ndt::typevar_dim_type::make(tvname, result);
+          result = ndt::make_type<ndt::typevar_dim_type>(tvname, result);
         }
         return result;
       }

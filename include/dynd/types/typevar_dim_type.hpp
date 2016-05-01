@@ -19,6 +19,9 @@ namespace ndt {
   public:
     typevar_dim_type(const std::string &name, const type &element_type);
 
+    typevar_dim_type(const std::string &name, const type &element_tp, size_t ndim)
+        : typevar_dim_type(name, ndim == 1 ? element_tp : make_type<typevar_dim_type>(name, element_tp, ndim - 1)) {}
+
     const std::string &get_name() const { return m_name; }
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
@@ -47,22 +50,6 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
     virtual type with_element_type(const type &element_tp) const;
-
-    /** Makes a typevar type with the specified name and element type */
-    static type make(const std::string &name, const type &element_type)
-    {
-      return type(new typevar_dim_type(name, element_type), false);
-    }
-
-    static type make(const std::string &name, const type &element_tp, intptr_t ndim)
-    {
-      type result = element_tp;
-      for (intptr_t i = 0; i < ndim; ++i) {
-        result = make(name, result);
-      }
-
-      return result;
-    }
   };
 
 } // namespace dynd::ndt

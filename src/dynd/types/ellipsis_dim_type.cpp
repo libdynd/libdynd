@@ -139,7 +139,7 @@ bool ndt::ellipsis_dim_type::match(const type &candidate_tp, std::map<std::strin
       if (tv_type.is_null()) {
         // This typevar hasn't been seen yet, make it
         // be an empty dim fragment
-        tv_type = make_dim_fragment();
+        tv_type = make_type<dim_fragment_type>();
       }
       else {
         // Make sure the type matches previous

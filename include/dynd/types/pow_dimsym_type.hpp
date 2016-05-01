@@ -53,13 +53,7 @@ namespace ndt {
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
     virtual type with_element_type(const type &element_tp) const;
-  }; // class pow_dimsym_type
-
-  /** Makes a dimensional power type with the specified base and exponent */
-  inline type make_pow_dimsym(const type &base_tp, const std::string &exponent, const type &element_type)
-  {
-    return type(new pow_dimsym_type(base_tp, exponent, element_type), false);
-  }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

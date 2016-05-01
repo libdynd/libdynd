@@ -11,12 +11,10 @@ using namespace std;
 using namespace dynd;
 
 ndt::typevar_dim_type::typevar_dim_type(const std::string &name, const type &element_type)
-    : base_dim_type(typevar_dim_id, element_type, 0, 1, 0, type_flag_symbolic, false), m_name(name)
-{
+    : base_dim_type(typevar_dim_id, element_type, 0, 1, 0, type_flag_symbolic, false), m_name(name) {
   if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");
-  }
-  else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
+  } else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
     stringstream ss;
     ss << "dynd typevar name ";
     print_escaped_utf8_string(ss, m_name);
@@ -25,36 +23,30 @@ ndt::typevar_dim_type::typevar_dim_type(const std::string &name, const type &ele
   }
 }
 
-void ndt::typevar_dim_type::get_vars(std::unordered_set<std::string> &vars) const
-{
+void ndt::typevar_dim_type::get_vars(std::unordered_set<std::string> &vars) const {
   vars.insert(m_name);
   m_element_tp.get_vars(vars);
 }
 
 void ndt::typevar_dim_type::print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),
-                                       const char *DYND_UNUSED(data)) const
-{
+                                       const char *DYND_UNUSED(data)) const {
   throw type_error("Cannot store data of typevar type");
 }
 
-void ndt::typevar_dim_type::print_type(std::ostream &o) const
-{
+void ndt::typevar_dim_type::print_type(std::ostream &o) const {
   // Type variables are barewords starting with a capital letter
   o << m_name << " * " << get_element_type();
 }
 
-intptr_t ndt::typevar_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
-{
+intptr_t ndt::typevar_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const {
   return -1;
 }
 
-bool ndt::typevar_dim_type::is_lossless_assignment(const type &dst_tp, const type &src_tp) const
-{
+bool ndt::typevar_dim_type::is_lossless_assignment(const type &dst_tp, const type &src_tp) const {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    }
-    else if (src_tp.get_id() == typevar_dim_id) {
+    } else if (src_tp.get_id() == typevar_dim_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -62,58 +54,48 @@ bool ndt::typevar_dim_type::is_lossless_assignment(const type &dst_tp, const typ
   return false;
 }
 
-bool ndt::typevar_dim_type::operator==(const base_type &rhs) const
-{
+bool ndt::typevar_dim_type::operator==(const base_type &rhs) const {
   if (this == &rhs) {
     return true;
-  }
-  else if (rhs.get_id() != typevar_dim_id) {
+  } else if (rhs.get_id() != typevar_dim_id) {
     return false;
-  }
-  else {
+  } else {
     const typevar_dim_type *tvt = static_cast<const typevar_dim_type *>(&rhs);
     return m_name == tvt->m_name && m_element_tp == tvt->m_element_tp;
   }
 }
 
 ndt::type ndt::typevar_dim_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta), intptr_t i,
-                                                       intptr_t total_ndim) const
-{
+                                                       intptr_t total_ndim) const {
   if (i == 0) {
     return type(this, true);
-  }
-  else {
+  } else {
     return m_element_tp.get_type_at_dimension(NULL, i - 1, total_ndim + 1);
   }
 }
 
 void ndt::typevar_dim_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                                                      bool DYND_UNUSED(blockref_alloc)) const
-{
+                                                      bool DYND_UNUSED(blockref_alloc)) const {
   throw type_error("Cannot store data of typevar type");
 }
 
 void ndt::typevar_dim_type::arrmeta_copy_construct(
     char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
-{
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const {
   throw type_error("Cannot store data of typevar type");
 }
 
 size_t ndt::typevar_dim_type::arrmeta_copy_construct_onedim(
     char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
-{
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const {
   throw type_error("Cannot store data of typevar type");
 }
 
-void ndt::typevar_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
-{
+void ndt::typevar_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {
   throw type_error("Cannot store data of typevar type");
 }
 
-bool ndt::typevar_dim_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
-{
+bool ndt::typevar_dim_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const {
   if (candidate_tp.is_scalar()) {
     return false;
   }
@@ -123,8 +105,7 @@ bool ndt::typevar_dim_type::match(const type &candidate_tp, std::map<std::string
     // This typevar hasn't been seen yet
     tv_type = candidate_tp;
     return m_element_tp.match(candidate_tp.get_type_at_dimension(NULL, 1), tp_vars);
-  }
-  else {
+  } else {
     // Make sure the type matches previous
     // instances of the type var
     if (candidate_tp.get_id() != tv_type.get_id()) {
@@ -144,8 +125,7 @@ bool ndt::typevar_dim_type::match(const type &candidate_tp, std::map<std::string
   }
 }
 
-std::map<std::string, std::pair<ndt::type, const char *>> ndt::typevar_dim_type::get_dynamic_type_properties() const
-{
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::typevar_dim_type::get_dynamic_type_properties() const {
   std::map<std::string, std::pair<ndt::type, const char *>> properties;
   properties["name"] = {ndt::type("string"), reinterpret_cast<const char *>(&m_name)};
   properties["element_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_element_tp)};
@@ -153,4 +133,6 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::typevar_dim_type:
   return properties;
 }
 
-ndt::type ndt::typevar_dim_type::with_element_type(const type &element_tp) const { return make(m_name, element_tp); }
+ndt::type ndt::typevar_dim_type::with_element_type(const type &element_tp) const {
+  return make_type<typevar_dim_type>(m_name, element_tp);
+}

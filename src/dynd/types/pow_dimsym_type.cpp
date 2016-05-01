@@ -142,7 +142,7 @@ bool ndt::pow_dimsym_type::match(const type &candidate_tp, std::map<std::string,
       type &tv_type = tp_vars[candidate_tp.extended<pow_dimsym_type>()->get_exponent()];
       if (tv_type.is_null()) {
         // This typevar hasn't been seen yet
-        tv_type = typevar_dim_type::make(candidate_tp.extended<pow_dimsym_type>()->get_exponent(), make_type<void>());
+        tv_type = make_type<typevar_dim_type>(candidate_tp.extended<pow_dimsym_type>()->get_exponent(), make_type<void>());
         return true;
       }
       else {
@@ -281,5 +281,5 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::pow_dimsym_type::
 
 ndt::type ndt::pow_dimsym_type::with_element_type(const type &element_tp) const
 {
-  return make_pow_dimsym(m_base_tp, m_exponent, element_tp);
+  return make_type<pow_dimsym_type>(m_base_tp, m_exponent, element_tp);
 }
