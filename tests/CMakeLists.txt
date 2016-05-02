@@ -121,6 +121,7 @@ include_directories(
 
 if(DYND_BUILD_PLUGINS)
     include_directories(../plugins/mkl/include)
+    include_directories(/opt/intel/compilers_and_libraries_2016.3.210/linux/mkl/include)
 
     set(tests_SRC ${tests_SRC}
         test_mkl.cpp)
