@@ -8,10 +8,11 @@ project(libdynd-mkl)
 
 set(CMAKE_MACOSX_RPATH 1)
 
-include_directories(include)
-include_directories(/opt/intel/mkl/include)
+# There is no FindMKL, but this will find Intel's MKL
+set(BLA_VENDOR Intel10_64lp)
+find_package(BLAS REQUIRED)
 
-link_directories(/opt/intel/mkl/lib)
+include_directories(include)
 
 set(mkl_SRC
     src/dynd/mkl.cpp
@@ -19,4 +20,6 @@ set(mkl_SRC
 
 add_library(dynd-mkl SHARED ${mkl_SRC})
 
-target_link_libraries(dynd-mkl libdynd mkl_rt pthread m dl)
+target_link_libraries(dynd-mkl libdynd ${BLAS_LIBRARIES})
+
+install(DIRECTORY "include/dynd" DESTINATION "include" COMPONENT headers)
