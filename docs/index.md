@@ -1,19 +1,15 @@
-﻿Documentation Index
+Documentation Index
 ===================
 
-This is the documentation for DyND. It's being updated
+This is the documentation for the DyND library. It's being updated
 piecemeal, in concert with active DyND development, so may
 be out of date in places. Please email <izaid@continuum.io>
 for any queries regarding the library.
 
- * [Developer Guide](developer-guide.md)
+This documentation is focused on usage of DyND, for documentation on DyND's internals, see [The DyND Developer Documentation](../devdocs/index.md).
+
+ * [DyND Array Architecture](http://nbviewer.jupyter.org/github/libdynd/libdynd/blob/master/docs/intro-01/HowDyNDViewsMemory.ipynb)
  * [ND::Array](ndarray.md)
- * [ND::Array Low Level Details](ndarray_lowlevel.md)
- * ArrFuncs and CKernels
-   * [ArrFuncs](arrfuncs.md)
-   * [CKernels](ckernels.md)
-   * [Multi-dimensional Kernels](multidim_kernels.md)
- * Design Documents
-   * [String](string-design.md)
-   * [Serialization](serialization-design.md)
-   * [Merkle DAG Features](merkledag-design.md)
+ * Callables and Kernels
+   * [Callables](callables.md)
+   * [Kernels](kernels.md)

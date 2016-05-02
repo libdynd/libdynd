@@ -21,8 +21,13 @@ The Build System
 To dig into the code, you probably want to start by getting
 it building and the tests running on your system. While you can
 work with just the pure C++ DyND library, we recommend you get
-the Python bindings and build and run both simultaneously. The
-instructions to get the source code and build it is available in the
+the Python bindings and build and run both simultaneously with
+`python setup.py develop`. On Mac/Linux, this creates a single
+directory which builds both together and loads in the target
+Python with no additional steps, and on Windows, this creates
+a Visual Studio solution that has the same effect.
+
+The instructions to get the source code and build it is available in the
 [build/install guide for dynd-python](https://github.com/libdynd/dynd-python/blob/master/BUILD_INSTALL.md).
 
 Running The Tests
@@ -34,13 +39,13 @@ the Python test suites should be passing 100% on OS X, Windows,
 and Linux.
 
 The C++ tests are using the google test framework, and to
-run them you simply run the program 'test_dynd' which is built
+run them you simply run the program 'test_libdynd' which is built
 from the libdynd/tests subdirectory. On Windows MSVC, right
-click on the test_dynd project and choose "Set as StartUp
+click on the test_libdynd project and choose "Set as StartUp
 Project", so when you hit play, the tests will run.
 
-If you're building the Python bindings as well, the Python
-tests can be run with a command like
+When you're building the Python bindings as well as is recommended,
+the Python tests can be run with a command like
 
     python -c "import dynd;dynd.test()"
 
@@ -49,9 +54,8 @@ Background Introductory Material
 
 To get some insight into some of the design choices made in DyND,
 there are some introductory slides created in
-[Jupyter notebook](http://ipython.org/notebook.html) form, and
-presentable using the
-[Live Reveal](https://github.com/damianavila/live_reveal) 
+[Jupyter notebook](http://jupyter.org/) form, and
+presentable using the [RISE](https://github.com/damianavila/RISE)
 Jupyter extension.
 
 The first set of such slides is about
@@ -74,17 +78,17 @@ DyND was also mentioned in a Blaze talk at
 Source Code Directory Layout
 ----------------------------
 
-The main directories to look at within DyND are the 'src'
-and 'include' directories. These contain the main source
+The main directories to look at within DyND are the `src`
+and `include` directories. These contain the main source
 code and header files.
 
 The source files are mostly distributed in subdirectories
-of ``src/dynd``, with a few that are the main objects or
-not easily categorized in ``src/dynd`` itself. The same
-applies to the headers in the ``include/dynd`` directory. In
+of `src/dynd`, with a few that are the main objects or
+not easily categorized in `src/dynd` itself. The same
+applies to the headers in the `include/dynd` directory. In
 general, if a header .hpp file has a corresponding .cpp file,
-it goes into the ``src/*`` directory corresponding
-to ``include/*``.
+it goes into the `src/*` directory corresponding
+to `include/*`.
 
 ### Main Source
 
@@ -96,7 +100,7 @@ and
 [``array.hpp``](https://github.com/libdynd/libdynd/blob/master/include/dynd/array.hpp).
 The file
 [``config.hpp``](https://github.com/libdynd/libdynd/blob/master/include/dynd/config.hpp)
-has some per-compiler logic to enable/disable various supported 
+has some per-compiler logic to enable/disable various supported
 C++ features, define some common macros, and declare the
 version number strings.
 

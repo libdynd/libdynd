@@ -1,8 +1,8 @@
-﻿# DyND CKernels
+﻿# DyND Kernels
 
 The initial versions of DyND began with an iterator approach,
 similar to the nditer object in NumPy. With the addition of
-the variable-sized dimension type ``var``, it became
+the variable-sized dimension type `var`, it became
 clear that this does not generalize cleanly to handle
 broadcasting and other operations on 'var' dimensions
 nicely. The solution was to define a hierarchical kernel
@@ -11,8 +11,7 @@ mechanism, which is described here.
 * [Assignment CKernels](assign_ckernels.md)
 * [Expression CKernels](expr_ckernels.md)
 * [Comparison CKernels](compare_ckernels.md)
-* [Accumulator CKernels](accum_ckernels.md)
-* [Multi-dimensional kernel documentation](multidim_kernels.md)
+* [Multi-dimensional kernel documentation](../devdocs/multidim_kernels.md)
 
 Headers and implementation for kernels are in the
 ``dynd/kernels`` subdirectories.
