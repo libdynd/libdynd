@@ -13,6 +13,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(LIB_SUFFIX "" CACHE STRING
     "Typically an empty string or 64. Controls installation to lib or lib64")
 
+add_definitions(-DDYND_SHARED_LIBRARY_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
+
 if(NOT WIN32)
   set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
   set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
@@ -122,6 +124,7 @@ else()
     else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Wno-missing-field-initializers -fPIC -Werror -Wno-ignored-attributes")
     endif()
+    set(DYND_LINK_LIBS ${DYND_LINK_LIBS} dl)
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.9)
             message(FATAL_ERROR "Only GCC 4.9 and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
@@ -333,6 +336,7 @@ set(libdynd_SRC
     src/dynd/comparison.cpp
     src/dynd/compound_add.cpp
     src/dynd/compound_div.cpp
+    src/dynd/config.cpp
     src/dynd/convert.cpp
     src/dynd/divide.cpp
     src/dynd/old_fft.cpp

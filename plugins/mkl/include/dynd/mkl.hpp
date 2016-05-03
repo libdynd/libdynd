@@ -48,3 +48,5 @@ namespace nd {
   } // namespace dynd::nd::mkl
 } // namespace dynd::nd
 } // namespace dynd
+
+extern "C" void dynd_mkl_init();
