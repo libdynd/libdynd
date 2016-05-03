@@ -239,7 +239,6 @@ nd::reg_entry &nd::detail::get_regfunctions() {
                              {"take", take},
                              {"tan", tan},
                              {"total_order", total_order},
-                             {"uniform", random::uniform},
                              {"random", {{"uniform", random::uniform}}}});
 
   return registry;
