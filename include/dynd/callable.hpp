@@ -17,13 +17,6 @@ namespace nd {
   namespace detail {
 
     /**
-     * Returns a reference to the map of registered callables.
-     * NOTE: The internal representation will change, this
-     *       function will change.
-     */
-    DYND_API std::map<std::string, callable> &get_regfunctions();
-
-    /**
      * Presently, there are some specially treated keyword arguments in
      * arrfuncs. The "dst_tp" keyword argument always tells the desired
      * output type, and the "dst" keyword argument always provides an
@@ -328,9 +321,28 @@ namespace nd {
       }
     };
 
+    struct namespace_entry {
+      callable m_entry;
+
+      namespace_entry() = default;
+
+      namespace_entry(const callable &entry) : m_entry(entry) {}
+
+      bool is_callable() const { return true; }
+
+      bool is_namespace() const { return false; }
+    };
+
+    /**
+     * Returns a reference to the map of registered callables.
+     * NOTE: The internal representation will change, this
+     *       function will change.
+     */
+    DYND_API std::map<std::string, namespace_entry> &get_regfunctions();
+
   } // namespace dynd::nd::detail
 
-  DYND_API std::map<std::string, callable> &callables();
+  DYND_API std::map<std::string, detail::namespace_entry> &callables();
 
   DYND_API void reg(const std::string &name, const callable &f);
 

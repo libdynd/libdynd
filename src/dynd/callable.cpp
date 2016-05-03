@@ -41,58 +41,6 @@ public:
 
 } // anonymous namespace
 
-std::map<std::string, nd::callable> &nd::detail::get_regfunctions() {
-  static map<std::string, callable> registry{{"add", add},
-                                             {"assign", assign},
-                                             {"assign_na", assign_na},
-                                             {"bitwise_and", bitwise_and},
-                                             {"bitwise_not", bitwise_not},
-                                             {"bitwise_or", bitwise_or},
-                                             {"bitwise_xor", bitwise_xor},
-                                             {"cbrt", cbrt},
-                                             {"compound_add", compound_add},
-                                             {"compound_div", compound_div},
-                                             {"conj", conj},
-                                             {"cos", cos},
-                                             {"dereference", dereference},
-                                             {"divide", divide},
-                                             {"equal", equal},
-                                             {"exp", exp},
-                                             {"greater", greater},
-                                             {"greater_equal", greater_equal},
-                                             {"imag", imag},
-                                             {"is_na", is_na},
-                                             {"left_shift", left_shift},
-                                             {"less", less},
-                                             {"less_equal", less_equal},
-                                             {"logical_and", logical_and},
-                                             {"logical_not", logical_not},
-                                             {"logical_or", logical_or},
-                                             {"logical_xor", logical_xor},
-                                             {"max", max},
-                                             {"min", min},
-                                             {"minus", minus},
-                                             {"mod", mod},
-                                             {"multiply", multiply},
-                                             {"not_equal", not_equal},
-                                             {"plus", plus},
-                                             {"pow", pow},
-                                             {"range", range},
-                                             {"real", real},
-                                             {"right_shift", right_shift},
-                                             {"serialize", serialize},
-                                             {"sin", sin},
-                                             {"sqrt", sqrt},
-                                             {"subtract", subtract},
-                                             {"sum", sum},
-                                             {"take", take},
-                                             {"tan", tan},
-                                             {"total_order", total_order},
-                                             {"uniform", random::uniform}};
-
-  return registry;
-}
-
 nd::callable dynd::make_callable_from_assignment(const ndt::type &dst_tp, const ndt::type &src_tp,
                                                  assign_error_mode errmode) {
   return nd::make_callable<unary_assignment_callable>(ndt::make_type<ndt::callable_type>(dst_tp, {src_tp}), errmode);
@@ -244,14 +192,66 @@ nd::array nd::callable::call(size_t narg, const array *args, size_t nkwd,
   return dst;
 }
 
-std::map<std::string, nd::callable> &nd::callables() { return detail::get_regfunctions(); }
+std::map<std::string, nd::detail::namespace_entry> &nd::detail::get_regfunctions() {
+  static map<std::string, namespace_entry> registry{{"add", add},
+                                                    {"assign", assign},
+                                                    {"assign_na", assign_na},
+                                                    {"bitwise_and", bitwise_and},
+                                                    {"bitwise_not", bitwise_not},
+                                                    {"bitwise_or", bitwise_or},
+                                                    {"bitwise_xor", bitwise_xor},
+                                                    {"cbrt", cbrt},
+                                                    {"compound_add", compound_add},
+                                                    {"compound_div", compound_div},
+                                                    {"conj", conj},
+                                                    {"cos", cos},
+                                                    {"dereference", dereference},
+                                                    {"divide", divide},
+                                                    {"equal", equal},
+                                                    {"exp", exp},
+                                                    {"greater", greater},
+                                                    {"greater_equal", greater_equal},
+                                                    {"imag", imag},
+                                                    {"is_na", is_na},
+                                                    {"left_shift", left_shift},
+                                                    {"less", less},
+                                                    {"less_equal", less_equal},
+                                                    {"logical_and", logical_and},
+                                                    {"logical_not", logical_not},
+                                                    {"logical_or", logical_or},
+                                                    {"logical_xor", logical_xor},
+                                                    {"max", max},
+                                                    {"min", min},
+                                                    {"minus", minus},
+                                                    {"mod", mod},
+                                                    {"multiply", multiply},
+                                                    {"not_equal", not_equal},
+                                                    {"plus", plus},
+                                                    {"pow", pow},
+                                                    {"range", range},
+                                                    {"real", real},
+                                                    {"right_shift", right_shift},
+                                                    {"serialize", serialize},
+                                                    {"sin", sin},
+                                                    {"sqrt", sqrt},
+                                                    {"subtract", subtract},
+                                                    {"sum", sum},
+                                                    {"take", take},
+                                                    {"tan", tan},
+                                                    {"total_order", total_order},
+                                                    {"uniform", random::uniform}};
+
+  return registry;
+}
+
+std::map<std::string, nd::detail::namespace_entry> &nd::callables() { return detail::get_regfunctions(); }
 
 nd::callable &nd::reg(const std::string &name) {
-  std::map<std::string, callable> &registry = detail::get_regfunctions();
+  std::map<std::string, nd::detail::namespace_entry> &registry = detail::get_regfunctions();
 
   auto it = registry.find(name);
   if (it != registry.end()) {
-    return it->second;
+    return it->second.m_entry;
   }
 
   stringstream ss;
@@ -262,6 +262,6 @@ nd::callable &nd::reg(const std::string &name) {
 }
 
 void nd::reg(const std::string &name, const nd::callable &f) {
-  std::map<std::string, callable> &registry = detail::get_regfunctions();
-  registry[name] = f;
+  std::map<std::string, detail::namespace_entry> &registry = detail::get_regfunctions();
+  registry[name].m_entry = f;
 }
