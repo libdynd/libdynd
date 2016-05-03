@@ -32,7 +32,7 @@ using make_types =
 } // unnamed namespace
 
 TEST(MKL, Load) {
-  load("libdynd_mkl.so");
+  load("libdynd_mkl");
 
   EXPECT_EQ(nd::mkl::fft, nd::reg("fft"));
   EXPECT_EQ(nd::mkl::ifft, nd::reg("ifft"));

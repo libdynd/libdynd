@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <string>
 #include <regex>
+#include <string>
 
 #include <dlfcn.h>
 
@@ -13,7 +13,16 @@
 using namespace std;
 using namespace dynd;
 
-void dynd::load(const std::string &path) {
+void dynd::load(const std::string &raw_path) {
+  static const char *shared_library_suffix = DYND_SHARED_LIBRARY_SUFFIX;
+
+  std::string path = raw_path;
+
+  size_t i = path.find(".");
+  if (i == std::string::npos) {
+    path += shared_library_suffix;
+  }
+
   void *lib = dlopen(path.c_str(), RTLD_LAZY);
   if (lib == nullptr) {
     throw runtime_error("could not load plugin");

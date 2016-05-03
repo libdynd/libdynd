@@ -13,6 +13,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(LIB_SUFFIX "" CACHE STRING
     "Typically an empty string or 64. Controls installation to lib or lib64")
 
+add_definitions(-DDYND_SHARED_LIBRARY_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
+
 if(NOT WIN32)
   set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
   set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
