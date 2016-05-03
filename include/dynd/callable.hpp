@@ -187,6 +187,45 @@ namespace nd {
     }
   };
 
+  class reg_entry {
+    bool m_is_namespace;
+    callable m_value;
+    std::map<std::string, reg_entry> m_namespace;
+
+  public:
+    typedef typename std::map<std::string, reg_entry>::iterator iterator;
+
+    reg_entry() = default;
+
+    reg_entry(const callable &entry) : m_is_namespace(false), m_value(entry) {}
+
+    reg_entry(std::initializer_list<std::pair<const std::string, reg_entry>> values) : m_is_namespace(true), m_namespace(values) {}
+
+    reg_entry(const std::map<std::string, reg_entry> &values) : m_is_namespace(true), m_namespace(values) {}
+
+    callable &value() { return m_value; }
+    const callable &value() const { return m_value; }
+
+    std::map<std::string, reg_entry> &all() { return m_namespace; }
+
+    bool is_namespace() const { return m_is_namespace; }
+
+    iterator begin() { return m_namespace.begin(); }
+
+    iterator end() { return m_namespace.end(); }
+
+    reg_entry &operator=(const reg_entry &rhs) {
+      m_is_namespace = rhs.m_is_namespace;
+      if (m_is_namespace) {
+        m_namespace = rhs.m_namespace;
+      } else {
+        m_value = rhs.m_value;
+      }
+
+      return *this;
+    }
+  };
+
   template <typename CallableType, typename... ArgTypes>
   std::enable_if_t<std::is_base_of<base_callable, CallableType>::value, callable> make_callable(ArgTypes &&... args) {
     return callable(new CallableType(std::forward<ArgTypes>(args)...), true);
@@ -321,28 +360,16 @@ namespace nd {
       }
     };
 
-    struct namespace_entry {
-      callable m_entry;
-
-      namespace_entry() = default;
-
-      namespace_entry(const callable &entry) : m_entry(entry) {}
-
-      bool is_callable() const { return true; }
-
-      bool is_namespace() const { return false; }
-    };
-
     /**
      * Returns a reference to the map of registered callables.
      * NOTE: The internal representation will change, this
      *       function will change.
      */
-    DYND_API std::map<std::string, namespace_entry> &get_regfunctions();
+    DYND_API reg_entry &get_regfunctions();
 
   } // namespace dynd::nd::detail
 
-  DYND_API std::map<std::string, detail::namespace_entry> &callables();
+  DYND_API reg_entry &root();
 
   DYND_API void reg(const std::string &name, const callable &f);
 
