@@ -20,6 +20,8 @@ set(mkl_SRC
 
 add_library(dynd-mkl SHARED ${mkl_SRC})
 
-target_link_libraries(dynd-mkl libdynd ${BLAS_LIBRARIES})
+target_link_libraries(dynd-mkl libdynd mkl_rt)
+
+install(TARGETS dynd-mkl DESTINATION lib)
 
 install(DIRECTORY "include/dynd" DESTINATION "include" COMPONENT headers)
