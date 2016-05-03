@@ -13,9 +13,10 @@
 using namespace std;
 using namespace dynd;
 
-void dynd::load(const std::string &raw_path) {
+void dynd::load(const std::string &DYND_IGNORE_UNUSED(raw_path)) {
   static const char *shared_library_suffix = DYND_SHARED_LIBRARY_SUFFIX;
 
+#if __linux__ || __APPLE__
   std::string path = raw_path;
 
   size_t i = path.find(".");
@@ -41,4 +42,5 @@ void dynd::load(const std::string &raw_path) {
   init();
 
   dlclose(lib);
+#endif
 }
