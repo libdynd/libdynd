@@ -6,7 +6,9 @@
 #include <regex>
 #include <string>
 
+#if __linux__ || __APPLE__
 #include <dlfcn.h>
+#endif
 
 #include <dynd/config.hpp>
 
