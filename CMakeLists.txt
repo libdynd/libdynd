@@ -333,6 +333,7 @@ set(libdynd_SRC
     src/dynd/comparison.cpp
     src/dynd/compound_add.cpp
     src/dynd/compound_div.cpp
+    src/dynd/config.cpp
     src/dynd/convert.cpp
     src/dynd/divide.cpp
     src/dynd/old_fft.cpp
@@ -447,6 +448,8 @@ if (DYND_FFTW)
     include_directories(${FFTW_PATH})
     set(DYND_LINK_LIBS ${DYND_LINK_LIBS} fftw3 fftw3f)
 endif()
+
+set(DYND_LINK_LIBS ${DYND_LINK_LIBS} dl)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 

@@ -136,7 +136,7 @@ add_executable(test_libdynd ${tests_SRC})
 set(LINK_LIBS ${LINK_LIBS} libdynd)
 
 if(DYND_BUILD_PLUGINS)
-    set(LINK_LIBS ${LINK_LIBS} dynd-mkl)
+    set(LINK_LIBS ${LINK_LIBS} dynd_mkl)
 endif()
 
 if(WIN32)

@@ -4,7 +4,7 @@
 #
 
 cmake_minimum_required(VERSION 2.6)
-project(libdynd-mkl)
+project(libdynd_mkl)
 
 set(CMAKE_MACOSX_RPATH 1)
 
@@ -18,10 +18,10 @@ set(mkl_SRC
     src/dynd/mkl.cpp
 )
 
-add_library(dynd-mkl SHARED ${mkl_SRC})
+add_library(dynd_mkl SHARED ${mkl_SRC})
 
-target_link_libraries(dynd-mkl libdynd mkl_rt)
+target_link_libraries(dynd_mkl libdynd mkl_rt)
 
-install(TARGETS dynd-mkl DESTINATION lib)
+install(TARGETS dynd_mkl DESTINATION lib)
 
 install(DIRECTORY "include/dynd" DESTINATION "include" COMPONENT headers)
