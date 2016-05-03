@@ -124,6 +124,7 @@ else()
     else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Wno-missing-field-initializers -fPIC -Werror -Wno-ignored-attributes")
     endif()
+    set(DYND_LINK_LIBS ${DYND_LINK_LIBS} dl)
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.9)
             message(FATAL_ERROR "Only GCC 4.9 and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
@@ -450,8 +451,6 @@ if (DYND_FFTW)
     include_directories(${FFTW_PATH})
     set(DYND_LINK_LIBS ${DYND_LINK_LIBS} fftw3 fftw3f)
 endif()
-
-set(DYND_LINK_LIBS ${DYND_LINK_LIBS} dl)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
