@@ -244,14 +244,19 @@ nd::reg_entry &nd::detail::get_regfunctions() {
   return registry;
 }
 
-nd::reg_entry &nd::root() { return detail::get_regfunctions(); }
+nd::reg_entry &nd::get() { return detail::get_regfunctions(); }
 
-nd::callable &nd::reg(const std::string &name) {
-  std::map<std::string, nd::reg_entry> &registry = detail::get_regfunctions().all();
+nd::reg_entry &nd::get(const std::string &path, reg_entry &entry) {
+  size_t i = path.find(".");
+  std::string name = path.substr(0, i);
 
-  auto it = registry.find(name);
-  if (it != registry.end()) {
-    return it->second.value();
+  auto it = entry.find(name);
+  if (it != entry.end()) {
+    if (i == std::string::npos) {
+      return it->second;
+    } else {
+      return get(path.substr(i + 1), it->second);
+    }
   }
 
   stringstream ss;
@@ -261,7 +266,17 @@ nd::callable &nd::reg(const std::string &name) {
   throw invalid_argument(ss.str());
 }
 
-void nd::reg(const std::string &name, const nd::callable &f) {
-  std::map<std::string, reg_entry> &registry = detail::get_regfunctions().all();
-  registry.emplace(name, f);
+nd::callable &nd::get(const std::string &name) { return get(name, get()).value(); }
+
+void nd::set(const std::string &name, const reg_entry &entry) {
+  reg_entry &root = get();
+  root.insert({name, entry});
+
+  for (auto observer : detail::observers) {
+    observer(&root);
+  }
 }
+
+DYND_API std::vector<void (*)(nd::reg_entry *)> nd::detail::observers;
+
+void nd::observe(void (*callback)(reg_entry *)) { detail::observers.push_back(callback); }

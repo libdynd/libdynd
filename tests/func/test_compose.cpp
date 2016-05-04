@@ -3,28 +3,27 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
+#include <dynd/assignment.hpp>
 #include <dynd/callable.hpp>
-#include <dynd/types/fixed_string_type.hpp>
+#include <dynd/convert.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/index.hpp>
-#include <dynd/functional.hpp>
-#include <dynd/assignment.hpp>
-#include <dynd/convert.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(Compose, Simple)
-{
-  nd::callable composed = nd::functional::compose(nd::copy, nd::reg("sin"), ndt::make_type<double>());
+TEST(Compose, Simple) {
+  nd::callable composed = nd::functional::compose(nd::copy, nd::get("sin"), ndt::make_type<double>());
   nd::array a = nd::empty(ndt::make_type<double>());
   composed({"0.0"}, {{"dst", a}});
   EXPECT_EQ(0., a.as<double>());

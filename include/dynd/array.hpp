@@ -29,7 +29,7 @@ namespace ndt {
 namespace nd {
   class callable;
 
-  DYND_API callable &reg(const std::string &name);
+  DYND_API callable &get(const std::string &name);
 
   class DYND_API array;
 
@@ -355,7 +355,7 @@ namespace nd {
      */
     template <typename... ArgTypes>
     array f(const char *name, ArgTypes &&... args) const {
-      callable &f = reg(name);
+      callable &f = nd::get(name);
       return f(*this, std::forward<ArgTypes>(args)...);
     }
 

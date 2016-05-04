@@ -199,7 +199,8 @@ namespace nd {
 
     reg_entry(const callable &entry) : m_is_namespace(false), m_value(entry) {}
 
-    reg_entry(std::initializer_list<std::pair<const std::string, reg_entry>> values) : m_is_namespace(true), m_namespace(values) {}
+    reg_entry(std::initializer_list<std::pair<const std::string, reg_entry>> values)
+        : m_is_namespace(true), m_namespace(values) {}
 
     reg_entry(const std::map<std::string, reg_entry> &values) : m_is_namespace(true), m_namespace(values) {}
 
@@ -210,9 +211,15 @@ namespace nd {
 
     bool is_namespace() const { return m_is_namespace; }
 
+    void insert(const std::pair<const std::string, reg_entry> &entry) { m_namespace.insert(entry); }
+
     iterator begin() { return m_namespace.begin(); }
 
     iterator end() { return m_namespace.end(); }
+
+    iterator find(const std::string &name) {
+      return m_namespace.find(name);
+    }
 
     reg_entry &operator=(const reg_entry &rhs) {
       m_is_namespace = rhs.m_is_namespace;
@@ -367,11 +374,16 @@ namespace nd {
      */
     DYND_API reg_entry &get_regfunctions();
 
+    extern DYND_API std::vector<void (*)(reg_entry *)> observers;
+
   } // namespace dynd::nd::detail
 
-  DYND_API reg_entry &root();
+  DYND_API reg_entry &get();
+  DYND_API reg_entry &get(const std::string &name, reg_entry &entry);
 
-  DYND_API void reg(const std::string &name, const callable &f);
+  DYND_API void set(const std::string &name, const reg_entry &entry);
+
+  DYND_API void observe(void (*callback)(reg_entry *));
 
 } // namespace dynd::nd
 
