@@ -64,7 +64,4 @@ nd::callable nd::mkl::ifft = nd::make_callable<nd::mkl::ifft_callable<dynd::comp
 
 nd::callable nd::mkl::conv = make_conv();
 
-void dynd_mkl_init() {
-  nd::reg("fft", nd::mkl::fft);
-  nd::reg("ifft", nd::mkl::ifft);
-}
+void dynd_mkl_init() { nd::set("mkl", {{"fft", nd::mkl::fft}, {"ifft", nd::mkl::ifft}, {"conv", nd::mkl::conv}}); }

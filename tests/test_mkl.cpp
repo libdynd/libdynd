@@ -34,24 +34,23 @@ using make_types =
 TEST(MKL, Load) {
   load("libdynd_mkl");
 
-  EXPECT_EQ(nd::mkl::fft, nd::reg("fft"));
-  EXPECT_EQ(nd::mkl::ifft, nd::reg("ifft"));
+  EXPECT_EQ(nd::mkl::fft, nd::get("mkl.fft"));
+  EXPECT_EQ(nd::mkl::ifft, nd::get("mkl.ifft"));
+  EXPECT_EQ(nd::mkl::conv, nd::get("mkl.conv"));
 }
 
 TYPED_TEST_CASE_P(FFT);
 
 TYPED_TEST_P(FFT, Linear) {
-  nd::callable fft = nd::reg("fft");
-
   const ndt::type &res_tp = ndt::make_type<TypeParam>();
 
   nd::array x0 = nd::random::uniform({}, {{"dst_tp", res_tp}});
   nd::array x1 = nd::random::uniform({}, {{"dst_tp", res_tp}});
   nd::array x = x0 + x1;
 
-  nd::array y0 = fft(x0);
-  nd::array y1 = fft(x1);
-  nd::array y = fft(x);
+  nd::array y0 = nd::mkl::fft(x0);
+  nd::array y1 = nd::mkl::fft(x1);
+  nd::array y = nd::mkl::fft(x);
 
   EXPECT_ARRAY_NEAR(y0 + y1, y);
 }
