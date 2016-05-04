@@ -905,7 +905,7 @@ using std::isfinite;
 using std::isinf;
 using std::isnan;
 
-void load(const std::string &path);
+DYND_API void load(const std::string &path);
 
 namespace ndt {
 
