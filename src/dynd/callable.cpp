@@ -273,10 +273,10 @@ void nd::set(const std::string &name, const reg_entry &entry) {
   root.insert({name, entry});
 
   for (auto observer : detail::observers) {
-    observer(&root);
+    observer(name.c_str(), &root);
   }
 }
 
-DYND_API std::vector<void (*)(nd::reg_entry *)> nd::detail::observers;
+DYND_API std::vector<void (*)(const char *, nd::reg_entry *)> nd::detail::observers;
 
-void nd::observe(void (*callback)(reg_entry *)) { detail::observers.push_back(callback); }
+void nd::observe(void (*callback)(const char *, reg_entry *)) { detail::observers.push_back(callback); }

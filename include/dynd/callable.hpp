@@ -374,7 +374,7 @@ namespace nd {
      */
     DYND_API reg_entry &get_regfunctions();
 
-    extern DYND_API std::vector<void (*)(reg_entry *)> observers;
+    extern DYND_API std::vector<void (*)(const char *, reg_entry *)> observers;
 
   } // namespace dynd::nd::detail
 
@@ -383,7 +383,7 @@ namespace nd {
 
   DYND_API void set(const std::string &name, const reg_entry &entry);
 
-  DYND_API void observe(void (*callback)(reg_entry *));
+  DYND_API void observe(void (*callback)(const char *, reg_entry *));
 
 } // namespace dynd::nd
 
