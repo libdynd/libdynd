@@ -24,8 +24,8 @@ namespace nd {
       }
     }
 
-    template <typename ClosureType>
-    void emplace_back(ClosureType closure) {
+    template <typename ClosureType, typename... ArgTypes>
+    void emplace_back(ArgTypes &&... args) {
       size_t offset = m_size;
       m_size += aligned_size(sizeof(call_node));
       reserve(m_size);
@@ -44,7 +44,13 @@ namespace nd {
           },
           aligned_size(sizeof(call_node)) + aligned_size(sizeof(ClosureType))};
 
-      storagebuf<call_node, call_graph>::emplace_back_no_init<ClosureType>(closure);
+      storagebuf<call_node, call_graph>::emplace_back_no_init<ClosureType>(std::forward<ArgTypes>(args)...);
+    }
+
+    template <typename Arg0Type>
+    void emplace_back(Arg0Type &&arg0) {
+      typedef remove_reference_then_cv_t<Arg0Type> closure_type;
+      this->emplace_back<closure_type, Arg0Type>(std::forward<Arg0Type>(arg0));
     }
   };
 
