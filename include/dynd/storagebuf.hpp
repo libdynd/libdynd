@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <new>
-#include <cstring>
 #include <algorithm>
+#include <cstring>
 #include <map>
+#include <new>
 
 #include <dynd/visibility.hpp>
 
@@ -127,6 +127,17 @@ public:
     m_size += aligned_size(sizeof(KernelType));
     reserve(m_size);
     KernelType::init(this->get_at<KernelType>(offset), std::forward<ArgTypes>(args)...);
+  }
+
+  template <typename KernelType, typename... ArgTypes>
+  void emplace_back_no_init(ArgTypes &&... args) {
+    /* Alignment requirement of the type. */
+    static_assert(alignof(KernelType) <= 8, "kernel types require alignment to be at most 8 bytes");
+
+    size_t offset = m_size;
+    m_size += aligned_size(sizeof(KernelType));
+    reserve(m_size);
+    new (this->get_at<KernelType>(offset)) KernelType(std::forward<ArgTypes>(args)...);
   }
 
   void emplace_back(size_t size) {
