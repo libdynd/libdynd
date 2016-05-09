@@ -271,6 +271,20 @@ namespace detail {
     intptr_t finish() { return m_count; }
   };
 
+  struct string_contains {
+    bool m_found;
+
+    string_contains() : m_found(false) {}
+
+    bool operator()(const size_t DYND_UNUSED(match))
+    {
+      m_found = true;
+      return true;
+    }
+
+    bool finish() { return m_found; }
+  };
+
   template <class StringType>
   struct string_inplace_replacer {
     StringType &m_dst;

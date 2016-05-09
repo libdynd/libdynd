@@ -122,6 +122,45 @@ void string_replace(StringType &dst, const StringType &src, const StringType &ol
   }
 }
 
+/*
+  Returns `true` if `str` starts with `sub`.
+*/
+template <class StringType>
+bool string_startswith(const StringType &str, const StringType &sub)
+{
+  if (sub.size() > str.size()) {
+    return false;
+  }
+
+  return memcmp(str.begin(), sub.begin(), sub.size()) == 0;
+}
+
+/*
+  Returns `true` if `str` ends with `sub`.
+*/
+template <class StringType>
+bool string_endswith(const StringType &str, const StringType &sub)
+{
+  if (sub.size() > str.size()) {
+    return false;
+  }
+
+  return memcmp(str.begin() + str.size() - sub.size(), sub.begin(), sub.size()) == 0;
+}
+
+/*
+  Returns `true` if `str` contains `sub`.
+*/
+template <class StringType>
+bool string_contains(const StringType &str, const StringType &sub)
+{
+  detail::string_contains f;
+
+  detail::string_search(str, sub, f);
+
+  return f.finish();
+}
+
 namespace nd {
 
   extern DYND_API callable string_concatenation;
@@ -130,6 +169,9 @@ namespace nd {
   extern DYND_API callable string_rfind;
   extern DYND_API callable string_replace;
   extern DYND_API callable string_split;
+  extern DYND_API callable string_startswith;
+  extern DYND_API callable string_endswith;
+  extern DYND_API callable string_contains;
 
 } // namespace dynd::nd
 } // namespace dynd
