@@ -36,7 +36,7 @@ namespace nd {
                         size_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
         size_t ndim = src_tp[0].get_ndim();
-        MKL_INT mode = VSL_CONV_MODE_DIRECT;
+        MKL_INT mode = VSL_CONV_MODE_AUTO;
 
         switch (ndim) {
         case 1:

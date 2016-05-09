@@ -62,8 +62,7 @@ namespace nd {
      *      kdp->get_function<kernel_single_t>()
      */
     template <typename T>
-    T get_function() const
-    {
+    T get_function() const {
       return reinterpret_cast<T>(function);
     }
 
@@ -71,17 +70,17 @@ namespace nd {
      * Calls the destructor of the ckernel if it is
      * non-NULL.
      */
-    void destroy()
-    {
+    void destroy() {
       if (destructor != NULL) {
         destructor(this);
       }
     }
 
+    void call(array *dst, const array *src) { reinterpret_cast<kernel_call_t>(function)(this, dst, src); }
+
     void single(char *dst, char *const *src) { (*reinterpret_cast<kernel_single_t>(function))(this, dst, src); }
 
-    void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-    {
+    void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count) {
       (*reinterpret_cast<kernel_strided_t>(function))(this, dst, dst_stride, src, src_stride, count);
     }
 
@@ -89,8 +88,7 @@ namespace nd {
      * Returns the pointer to a child ckernel at the provided
      * offset.
      */
-    kernel_prefix *get_child(intptr_t offset)
-    {
+    kernel_prefix *get_child(intptr_t offset) {
       return reinterpret_cast<kernel_prefix *>(reinterpret_cast<char *>(this) + kernel_builder::aligned_size(offset));
     }
 
@@ -99,8 +97,7 @@ namespace nd {
      */
     size_t *get_offsets() { return reinterpret_cast<size_t *>(this + 1); }
 
-    static kernel_prefix *init(kernel_prefix *self, void *func)
-    {
+    static kernel_prefix *init(kernel_prefix *self, void *func) {
       self->function = func;
       self->destructor = NULL;
       return self;
