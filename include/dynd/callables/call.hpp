@@ -41,7 +41,8 @@ namespace nd {
                            },
                            aligned_size(sizeof(call_node)) + aligned_size(sizeof(ClosureType))};
 
-      new (self + 1) ClosureType(std::forward<ArgTypes>(args)...);
+      new (reinterpret_cast<char *>(self) + aligned_size(sizeof(call_node)))
+          ClosureType(std::forward<ArgTypes>(args)...);
     }
   };
 
