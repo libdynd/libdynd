@@ -21,23 +21,27 @@ namespace nd {
   class kernel_builder;
 
   struct call_node {
-    typedef void (*instantiate_type_t)(call_node *node, kernel_builder *ckb, kernel_request_t kernreq, char *data,
-                                       const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta);
-    typedef void (*destroy_type_t)(call_node *node);
+    void (*destroy)(call_node *);
+    void (*instantiate)(call_node *, kernel_builder *, kernel_request_t, char *, const char *, size_t,
+                        const char *const *);
+    size_t data_size;
 
-    destroy_type_t destroy;
-    instantiate_type_t instantiate;
-    size_t aligned_size;
-
-    call_node(instantiate_type_t instantiate)
-        : instantiate(instantiate), aligned_size(dynd::aligned_size(sizeof(call_node))) {}
-
-    call_node(instantiate_type_t instantiate, destroy_type_t destroy, size_t data_size)
-        : destroy(destroy), instantiate(instantiate), aligned_size(dynd::aligned_size(data_size)) {}
-
-    template <typename... ArgTypes>
+    template <typename ClosureType, typename... ArgTypes>
     static void init(call_node *self, ArgTypes &&... args) {
-      new (self) call_node(std::forward<ArgTypes>(args)...);
+      new (self) call_node{[](call_node *self) {
+                             ClosureType *closure = reinterpret_cast<ClosureType *>(reinterpret_cast<char *>(self) +
+                                                                                    aligned_size(sizeof(call_node)));
+                             closure->~ClosureType();
+                           },
+                           [](call_node *self, kernel_builder *kb, kernel_request_t kernreq, char *data,
+                              const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta) {
+                             ClosureType *closure = reinterpret_cast<ClosureType *>(reinterpret_cast<char *>(self) +
+                                                                                    aligned_size(sizeof(call_node)));
+                             (*closure)(*kb, kernreq, data, dst_arrmeta, nsrc, src_arrmeta);
+                           },
+                           aligned_size(sizeof(call_node)) + aligned_size(sizeof(ClosureType))};
+
+      new (self + 1) ClosureType(std::forward<ArgTypes>(args)...);
     }
   };
 
