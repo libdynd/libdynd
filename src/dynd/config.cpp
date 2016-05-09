@@ -51,8 +51,7 @@ void dynd::load(const std::string &DYND_IGNORE_UNUSED(raw_path)) {
   if (lib == nullptr) {
     throw runtime_error("Could not load DyND plugin \"" + path + "\"");
   }
-
-  void *sym = GetProcAddress(lib, name.c_str());
+  void *sym = reinterpret_cast<void *>(GetProcAddress(lib, name.c_str()));
   if (sym == nullptr) {
     FreeLibrary(lib);
     throw runtime_error("Could not load DyND plugin \"" + path + "\", it does not contain an initialization function");
