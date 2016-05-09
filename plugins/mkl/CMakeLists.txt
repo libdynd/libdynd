@@ -20,7 +20,7 @@ set(mkl_SRC
 
 add_library(dynd_mkl SHARED ${mkl_SRC})
 
-target_link_libraries(dynd_mkl libdynd ${BLAS_LIBRARIES})
+target_link_libraries(dynd_mkl libdynd mkl_rt)
 
 install(TARGETS dynd_mkl DESTINATION lib)
 
