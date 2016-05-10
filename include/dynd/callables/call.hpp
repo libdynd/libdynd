@@ -12,7 +12,7 @@ namespace dynd {
 /**
  * Aligns a size as required by kernels.
  */
-static constexpr size_t aligned_size(size_t size) { return (size + static_cast<size_t>(7)) & ~static_cast<size_t>(7); }
+inline constexpr size_t aligned_size(size_t size) { return (size + static_cast<size_t>(7)) & ~static_cast<size_t>(7); }
 
 typedef uint32_t kernel_request_t;
 
