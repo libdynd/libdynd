@@ -14,7 +14,7 @@
 
 namespace dynd {
 
-template <typename T, typename DerivedType>
+template <typename PrefixType, typename DerivedType>
 class storagebuf {
 protected:
   // Pointer to the kernel function pointers + data
@@ -97,7 +97,7 @@ public:
 
   void *set(void *dst, int value, size_t size) { return std::memset(dst, value, size); }
 
-  T *get() const { return reinterpret_cast<T *>(m_data); }
+  PrefixType *get() const { return reinterpret_cast<PrefixType *>(m_data); }
 
   /**
    * For use during construction, gets the ckernel component
@@ -126,18 +126,20 @@ public:
     size_t offset = m_size;
     m_size += aligned_size(sizeof(KernelType));
     reserve(m_size);
+
     KernelType::init(this->get_at<KernelType>(offset), std::forward<ArgTypes>(args)...);
   }
 
   template <typename KernelType, typename... ArgTypes>
-  void emplace_back_no_init(ArgTypes &&... args) {
+  void emplace_back_sep(ArgTypes &&... args) {
     /* Alignment requirement of the type. */
     static_assert(alignof(KernelType) <= 8, "kernel types require alignment to be at most 8 bytes");
 
     size_t offset = m_size;
-    m_size += aligned_size(sizeof(KernelType));
+    m_size += aligned_size(sizeof(PrefixType)) + aligned_size(sizeof(KernelType));
     reserve(m_size);
-    new (this->get_at<KernelType>(offset)) KernelType(std::forward<ArgTypes>(args)...);
+
+    PrefixType::template init<KernelType>(this->get_at<PrefixType>(offset), std::forward<ArgTypes>(args)...);
   }
 
   void emplace_back(size_t size) {

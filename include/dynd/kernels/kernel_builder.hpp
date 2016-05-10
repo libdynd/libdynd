@@ -36,12 +36,12 @@ namespace nd {
     void emplace_back(ArgTypes &&... args) {
       storagebuf<kernel_prefix, kernel_builder>::emplace_back<KernelType>(std::forward<ArgTypes>(args)...);
 
-      m_call = reinterpret_cast<call_node *>(reinterpret_cast<char *>(m_call) + m_call->aligned_size);
+      m_call = reinterpret_cast<call_node *>(reinterpret_cast<char *>(m_call) + m_call->data_size);
     }
 
     void emplace_back(size_t size) { storagebuf<kernel_prefix, kernel_builder>::emplace_back(size); }
 
-    void pass() { m_call = reinterpret_cast<call_node *>(reinterpret_cast<char *>(m_call) + m_call->aligned_size); }
+    void pass() { m_call = reinterpret_cast<call_node *>(reinterpret_cast<char *>(m_call) + m_call->data_size); }
 
     void operator()(kernel_request_t kr, char *data, const char *res_metadata, size_t narg,
                     const char *const *arg_metadata) {
