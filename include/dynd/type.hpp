@@ -832,6 +832,13 @@ namespace ndt {
     return type(new T(ret_tp, arg_tp, kwd_tp), false);
   }
 
+  template <typename T>
+  std::enable_if_t<std::is_base_of<base_type, T>::value, type>
+  make_type(const type &ret_tp, std::initializer_list<type> arg_tp,
+            const std::vector<std::pair<type, std::string>> &kwd_tp) {
+    return type(new T(ret_tp, arg_tp, kwd_tp), false);
+  }
+
   /*
   #define DYND_BOOL_NA (2)
   #define DYND_INT8_NA (std::numeric_limits<int8_t>::min())
