@@ -5,15 +5,15 @@ if NOT "%1"=="-libnames" goto notlibnames
     exit /B 0
 :notlibnames
 
-if NOT "%1"=="-libndname" goto notlibndname
+if NOT "%1"=="-libdyndname" goto notlibdyndname
     echo @DYND_LIB_FILE@
     exit /B 0
-:notlibndname
+:notlibdyndname
 
-if NOT "%1"=="-libndtname" goto notlibndtname
+if NOT "%1"=="-libdyndtname" goto notlibdyndtname
     echo @DYNDT_LIB_FILE@
     exit /B 0
-:notlibndtname
+:notlibdyndtname
 
 if NOT "%1"=="-libdir" goto notlibdir
     REM This batch file should be in a ...\bin relative to ...\lib
@@ -48,10 +48,10 @@ echo Usage: %0 OPTION
 echo Print information for linking libdynd.
 echo
 echo Options:
-echo   -libnames    Prints a semicolon separated list of the library names.
-echo   -libndname   Prints the name of the nd library.
-echo   -libndtname  Prints the name of the ndt library.
-echo   -libdir      Prints the full path of the directory containing the libraries.
-echo   -includedir  Prints the directory with the libdynd include files.
-echo   -version     Prints the version of libdynd.
+echo   -libnames      Prints a semicolon separated list of the library names.
+echo   -libdyndname   Prints the name of the dynd library.
+echo   -libdyndtname  Prints the name of the dyndt library.
+echo   -libdir        Prints the full path of the directory containing the libraries.
+echo   -includedir    Prints the directory with the libdynd include files.
+echo   -version       Prints the version of libdynd.
 exit /B 1
