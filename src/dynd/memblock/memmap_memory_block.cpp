@@ -3,11 +3,11 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <algorithm>
+#include <cstdlib>
+#include <limits>
 #include <stdexcept>
 #include <vector>
-#include <cstdlib>
-#include <algorithm>
-#include <limits>
 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -15,9 +15,9 @@
 #endif
 #include <Windows.h>
 #else
+#include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
 #endif
 
@@ -27,8 +27,7 @@ using namespace std;
 using namespace dynd;
 
 #ifdef WIN32
-static intptr_t get_file_size(HANDLE hFile)
-{
+static intptr_t get_file_size(HANDLE hFile) {
   DWORD fsLow = 0, fsHigh = 0;
   fsLow = GetFileSize(hFile, &fsHigh);
   uint64_t fs = fsLow + (static_cast<uint64_t>(fsHigh) << 32);
@@ -41,15 +40,13 @@ static intptr_t get_file_size(HANDLE hFile)
 }
 #endif
 
-static void clip_begin_end(intptr_t size, intptr_t &begin, intptr_t &end)
-{
+static void clip_begin_end(intptr_t size, intptr_t &begin, intptr_t &end) {
   if (begin < 0) {
     begin += size;
     if (begin < 0) {
       begin = 0;
     }
-  }
-  else if (begin >= size) {
+  } else if (begin >= size) {
     begin = size;
   }
   // Handle the end offset
@@ -58,19 +55,15 @@ static void clip_begin_end(intptr_t size, intptr_t &begin, intptr_t &end)
     if (end <= begin) {
       end = begin;
     }
-  }
-  else if (end <= begin) {
+  } else if (end <= begin) {
     end = begin;
-  }
-  else if (end >= size) {
+  } else if (end >= size) {
     end = size;
   }
 }
 
 namespace {
-struct memmap_memory_block {
-  /** Every memory block object needs this at the front */
-  memory_block_data m_mbd;
+struct memmap_memory_block : public memory_block_data {
   // Parameters used to construct the memory block
   std::string m_filename;
   uint32_t m_access;
@@ -89,8 +82,8 @@ struct memmap_memory_block {
 
   memmap_memory_block(const std::string &filename, uint32_t access, char **out_pointer, intptr_t *out_size,
                       intptr_t begin, intptr_t end)
-      : m_mbd(1, memmap_memory_block_type), m_filename(filename), m_access(access), m_begin(begin), m_end(end)
-  {
+      : memory_block_data(1, memmap_memory_block_type), m_filename(filename), m_access(access), m_begin(begin),
+        m_end(end) {
     bool readwrite = false; // ((access & nd::write_access_flag) == nd::write_access_flag);
 #ifdef WIN32
     // TODO: This function isn't quite exception-safe, use a smart pointer for the handles to fix.
@@ -200,8 +193,7 @@ struct memmap_memory_block {
 #endif
   }
 
-  ~memmap_memory_block()
-  {
+  ~memmap_memory_block() {
 #ifdef WIN32
     UnmapViewOfFile(m_mapPointer);
     CloseHandle(m_hMapFile);
@@ -217,8 +209,7 @@ struct memmap_memory_block {
 
 intrusive_ptr<memory_block_data> dynd::make_memmap_memory_block(const std::string &filename, uint32_t access,
                                                                 char **out_pointer, intptr_t *out_size, intptr_t begin,
-                                                                intptr_t end)
-{
+                                                                intptr_t end) {
   memmap_memory_block *pmb = new memmap_memory_block(filename, access, out_pointer, out_size, begin, end);
   return intrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(pmb), false);
 }
@@ -226,8 +217,7 @@ intrusive_ptr<memory_block_data> dynd::make_memmap_memory_block(const std::strin
 namespace dynd {
 namespace detail {
 
-  void free_memmap_memory_block(memory_block_data *memblock)
-  {
+  void free_memmap_memory_block(memory_block_data *memblock) {
     memmap_memory_block *emb = reinterpret_cast<memmap_memory_block *>(memblock);
     delete emb;
   }
@@ -235,8 +225,7 @@ namespace detail {
 } // namespace dynd::detail
 
 void dynd::memmap_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                           const std::string &indent)
-{
+                                           const std::string &indent) {
   const memmap_memory_block *emb = reinterpret_cast<const memmap_memory_block *>(memblock);
   o << indent << " filename: " << emb->m_filename << "\n";
   o << indent << " begin: " << emb->m_begin << "\n";

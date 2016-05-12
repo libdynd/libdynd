@@ -3,56 +3,32 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/exceptions.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
 #include <dynd/types/base_memory_type.hpp>
-#include <dynd/exceptions.hpp>
-#include <dynd/shape_tools.hpp>
 
 using namespace std;
 using namespace dynd;
 
-namespace dynd {
-namespace detail {
-
-  void free_array_memory_block(memory_block_data *memblock)
-  {
-    array_preamble *preamble = reinterpret_cast<array_preamble *>(memblock);
-    preamble->~array_preamble();
-
-    // Finally free the memory block itself
-    delete[] reinterpret_cast<char *>(memblock);
-  }
-}
-} // namespace dynd::detail
-
-intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_size)
-{
-  char *result = new char[sizeof(array_preamble) + arrmeta_size];
-  if (result == 0) {
-    throw bad_alloc();
-  }
+intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_size) {
+  array_preamble *result = new (arrmeta_size) array_preamble();
   // Zero out all the arrmeta to start
-  memset(result, 0, sizeof(array_preamble) + arrmeta_size);
-  return intrusive_ptr<memory_block_data>(new (result) memory_block_data(1, array_memory_block_type), false);
+  memset(result + 1, 0, arrmeta_size);
+  return intrusive_ptr<memory_block_data>(result, false);
 }
 
 intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_size, size_t extra_size,
-                                                               size_t extra_alignment, char **out_extra_ptr)
-{
+                                                               size_t extra_alignment, char **out_extra_ptr) {
   size_t extra_offset = inc_to_alignment(sizeof(array_preamble) + arrmeta_size, extra_alignment);
-  char *result = new char[extra_offset + extra_size];
-  if (result == 0) {
-    throw bad_alloc();
-  }
+  array_preamble *result = new (extra_offset + extra_size - sizeof(array_preamble)) array_preamble();
   // Zero out all the arrmeta to start
-  memset(result, 0, sizeof(array_preamble) + arrmeta_size);
+  memset(result + 1, 0, arrmeta_size);
   // Return a pointer to the extra allocated memory
-  *out_extra_ptr = result + extra_offset;
-  return intrusive_ptr<memory_block_data>(new (result) memory_block_data(1, array_memory_block_type), false);
+  *out_extra_ptr = reinterpret_cast<char *>(result) + extra_offset;
+  return intrusive_ptr<memory_block_data>(result, false);
 }
 
-intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const intrusive_ptr<memory_block_data> &ndo)
-{
+intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const intrusive_ptr<memory_block_data> &ndo) {
   // Allocate the new memory block.
   const array_preamble *preamble = reinterpret_cast<const array_preamble *>(ndo.get());
   size_t arrmeta_size = 0;
@@ -83,8 +59,8 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
   return result;
 }
 
-void dynd::array_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o, const std::string &indent)
-{
+void dynd::array_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
+                                          const std::string &indent) {
   const array_preamble *preamble = reinterpret_cast<const array_preamble *>(memblock);
   if (!preamble->tp.is_null()) {
     o << indent << " type: " << preamble->tp << "\n";
