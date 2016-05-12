@@ -60,6 +60,8 @@ public:
   const char *metadata() const { return reinterpret_cast<const char *>(this + 1); }
 
   static void *operator new(size_t size, size_t extra_size) { return ::operator new(size + extra_size); }
+
+  static void operator delete(void *ptr) { return ::operator delete(ptr); }
 };
 
 /**
