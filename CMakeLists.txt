@@ -123,7 +123,6 @@ else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++14 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers")
     else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Wno-missing-field-initializers -fPIC -Werror -Wno-ignored-attributes")
-        set(DYND_LINK_LIBS ${DYND_LINK_LIBS} dl)
     endif()
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -134,6 +133,10 @@ else()
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -ferror-limit=20 -Wno-missing-braces -ftemplate-depth=500")
     endif()
+endif()
+
+if("${UNIX}" AND NOT CMAKE_SYSTEM_NAME MATCHES "BSD")
+    set(DYND_LINK_LIBS ${DYND_LINK_LIBS} dl)
 endif()
 
 # LLVM, disabled for now
