@@ -5,6 +5,16 @@ if [ "$1" = "-libnames" ]; then
     exit 0
 fi
 
+if [ "$1" = "-libdyndname" ]; then
+    echo @DYND_LIB_FILE@
+    exit 0
+fi
+
+if [ "$1" = "-libdyndtname" ]; then
+    echo @DYNDT_LIB_FILE@
+    exit 0
+fi
+
 if [ "$1" = "-libdir" ]; then
     # This script should be in .../bin relative to .../lib.
     # Note this isn't robust against symbolic links, etc.
@@ -38,8 +48,10 @@ echo Usage: $0 OPTION
 echo Print information for linking libdynd.
 echo
 echo Options:
-echo   -libnames    Prints a semicolon separated list of the library names.
-echo   -libdir      Prints the full path of the directory containing the libraries.
-echo   -includedir  Prints the directory with the libdynd include files.
-echo   -version     Prints the version of libdynd.
+echo   -libnames      Prints a semicolon separated list of the library names.
+echo   -libdyndname   Prints the name of the dynd library.
+echo   -libdyndtname  Prints the name of the dyndt library.
+echo   -libdir        Prints the full path of the directory containing the libraries.
+echo   -includedir    Prints the directory with the libdynd include files.
+echo   -version       Prints the version of libdynd.
 exit 1
