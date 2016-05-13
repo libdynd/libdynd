@@ -31,7 +31,7 @@ inline intptr_t get_file_size(HANDLE hFile) {
   uint64_t fs = fsLow + (static_cast<uint64_t>(fsHigh) << 32);
 #ifdef _WIN64
   if (fs > (uint64_t)std::numeric_limits<intptr_t>::max()) {
-    throw runtime_error("On 32-bit systems, maximum file size is 2GB");
+    throw std::runtime_error("On 32-bit systems, maximum file size is 2GB");
   }
 #endif
   return static_cast<intptr_t>(fs);
