@@ -99,7 +99,7 @@ inline void intrusive_ptr_retain(array_preamble *ptr) { ++ptr->m_use_count; }
 
 inline void intrusive_ptr_release(array_preamble *ptr) {
   if (--ptr->m_use_count == 0) {
-    detail::memory_block_free(ptr);
+    delete ptr;
   }
 }
 

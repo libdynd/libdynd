@@ -8,6 +8,7 @@
 #include <dynd/memblock/fixed_size_pod_memory_block.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
 #include <dynd/memblock/memory_block.hpp>
+#include <dynd/memblock/objectarray_memory_block.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/memblock/zeroinit_memory_block.hpp>
 
@@ -16,38 +17,6 @@ using namespace dynd;
 
 namespace dynd {
 namespace detail {
-
-  /**
-   * INTERNAL: Frees a memory_block created by make_external_memory_block.
-   * This should only be called by the memory_block decref code.
-   */
-  void free_external_memory_block(memory_block_data *memblock);
-  /**
-   * INTERNAL: Frees a memory_block created by make_fixed_size_pod_memory_block.
-   * This should only be called by the memory_block decref code.
-   */
-  void free_fixed_size_pod_memory_block(memory_block_data *memblock);
-  /**
-   * INTERNAL: Frees a memory_block created by make_pod_memory_block.
-   * This should only be called by the memory_block decref code.
-   */
-  void free_pod_memory_block(memory_block_data *memblock);
-  /**
-   * INTERNAL: Frees a memory_block created by make_zeroinit_memory_block.
-   * This should only be called by the memory_block decref code.
-   */
-  void free_zeroinit_memory_block(memory_block_data *memblock);
-
-  /**
-   * INTERNAL: Frees a memory_block created by make_objectarray_memory_block.
-   * This should only be called by the memory_block decref code.
-   */
-  void free_objectarray_memory_block(memory_block_data *memblock);
-  /**
-   * INTERNAL: Frees a memory_block created by make_memmap_memory_block.
-   * This should only be called by the memory_block decref code.
-   */
-  void free_memmap_memory_block(memory_block_data *memblock);
 
   /**
    * INTERNAL: Static instance of the pod allocator API for the POD memory block.
@@ -64,41 +33,7 @@ namespace detail {
 }
 } // namespace dynd::detail
 
-void dynd::detail::memory_block_free(memory_block_data *memblock) {
-  // cout << "freeing memory block " << (void *)memblock << endl;
-  switch ((memory_block_type_t)memblock->m_type) {
-  case external_memory_block_type: {
-    free_external_memory_block(memblock);
-    return;
-  }
-  case fixed_size_pod_memory_block_type: {
-    free_fixed_size_pod_memory_block(memblock);
-    return;
-  }
-  case pod_memory_block_type: {
-    free_pod_memory_block(memblock);
-    return;
-  }
-  case zeroinit_memory_block_type: {
-    free_zeroinit_memory_block(memblock);
-    return;
-  }
-  case objectarray_memory_block_type: {
-    free_objectarray_memory_block(memblock);
-    return;
-  }
-  case array_memory_block_type:
-    delete reinterpret_cast<array_preamble *>(memblock);
-    return;
-  case memmap_memory_block_type:
-    free_memmap_memory_block(memblock);
-    return;
-  }
-
-  stringstream ss;
-  ss << "unrecognized memory block type, " << memblock->m_type << ", likely memory corruption";
-  throw runtime_error(ss.str());
-}
+memory_block_data::~memory_block_data() {}
 
 std::ostream &dynd::operator<<(std::ostream &o, memory_block_type_t mbt) {
   switch (mbt) {

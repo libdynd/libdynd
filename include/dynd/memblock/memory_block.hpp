@@ -64,6 +64,8 @@ public:
   /** A memory_block_type_t enum value */
   uint32_t m_type;
 
+  virtual ~memory_block_data();
+
   /**
    * Allocates the requested amount of memory from the memory_block, returning
    * a pointer.
@@ -98,22 +100,13 @@ private:
   api *get_api();
 };
 
-namespace detail {
-  /**
-   * Frees the data for a memory block. Is called
-   * by memory_block_decref when the reference count
-   * reaches zero.
-   */
-  DYNDT_API void memory_block_free(memory_block_data *memblock);
-} // namespace detail
-
 inline long intrusive_ptr_use_count(memory_block_data *ptr) { return ptr->m_use_count; }
 
 inline void intrusive_ptr_retain(memory_block_data *ptr) { ++ptr->m_use_count; }
 
 inline void intrusive_ptr_release(memory_block_data *ptr) {
   if (--ptr->m_use_count == 0) {
-    detail::memory_block_free(ptr);
+    delete ptr;
   }
 }
 

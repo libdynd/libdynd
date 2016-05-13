@@ -24,12 +24,6 @@ intrusive_ptr<memory_block_data> dynd::make_objectarray_memory_block(const ndt::
 namespace dynd {
 namespace detail {
 
-  void free_objectarray_memory_block(memory_block_data *memblock)
-  {
-    objectarray_memory_block *emb = reinterpret_cast<objectarray_memory_block *>(memblock);
-    delete emb;
-  }
-
   static char *allocate(memory_block_data *self, size_t count)
   {
     //    cout << "allocating " << size_bytes << " of memory with alignment " << alignment << endl;

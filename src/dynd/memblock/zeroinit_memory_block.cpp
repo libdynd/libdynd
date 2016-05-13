@@ -34,12 +34,6 @@ intrusive_ptr<memory_block_data> dynd::make_zeroinit_memory_block(const ndt::typ
 namespace dynd {
 namespace detail {
 
-  void free_zeroinit_memory_block(memory_block_data *memblock)
-  {
-    zeroinit_memory_block *emb = reinterpret_cast<zeroinit_memory_block *>(memblock);
-    delete emb;
-  }
-
   static char *allocate(memory_block_data *self, size_t count)
   {
     intptr_t size_bytes = count * reinterpret_cast<zeroinit_memory_block *>(self)->data_size;

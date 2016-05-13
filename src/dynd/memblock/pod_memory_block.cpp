@@ -23,12 +23,6 @@ intrusive_ptr<memory_block_data> dynd::make_pod_memory_block(const ndt::type &tp
 namespace dynd {
 namespace detail {
 
-  void free_pod_memory_block(memory_block_data *memblock)
-  {
-    pod_memory_block *emb = reinterpret_cast<pod_memory_block *>(memblock);
-    delete emb;
-  }
-
   static char *allocate(memory_block_data *self, size_t count)
   {
     intptr_t size_bytes = count * reinterpret_cast<pod_memory_block *>(self)->data_size;
