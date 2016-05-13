@@ -8,8 +8,8 @@
 #include <iostream>
 #include <string>
 
-#include <dynd/type.hpp>
 #include <dynd/memblock/memory_block.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
 
@@ -24,24 +24,26 @@ struct zeroinit_memory_block : memory_block_data {
 
   zeroinit_memory_block(size_t data_size, intptr_t data_alignment, intptr_t initial_capacity_bytes)
       : memory_block_data(1, zeroinit_memory_block_type), data_size(data_size), data_alignment(data_alignment),
-        m_total_allocated_capacity(0), m_memory_handles()
-  {
+        m_total_allocated_capacity(0), m_memory_handles() {
     append_memory(initial_capacity_bytes);
   }
 
-  ~zeroinit_memory_block()
-  {
+  ~zeroinit_memory_block() {
     for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
       free(m_memory_handles[i]);
     }
   }
 
+  char *alloc(size_t count);
+  char *resize(char *previous_allocated, size_t count);
+  void finalize();
+  void reset();
+
   /**
    * Allocates some new memory from which to dole out
    * more. Adds it to the memory handles vector.
    */
-  void append_memory(intptr_t capacity_bytes)
-  {
+  void append_memory(intptr_t capacity_bytes) {
     m_memory_handles.push_back(NULL);
     m_memory_begin = reinterpret_cast<char *>(malloc(capacity_bytes));
     m_memory_handles.back() = m_memory_begin;
@@ -62,7 +64,7 @@ struct zeroinit_memory_block : memory_block_data {
  * The initial capacity can be set if a good estimate is known.
  */
 DYNDT_API intrusive_ptr<memory_block_data> make_zeroinit_memory_block(const ndt::type &element_tp,
-                                                                     intptr_t initial_capacity_bytes = 2048);
+                                                                      intptr_t initial_capacity_bytes = 2048);
 
 DYNDT_API void zeroinit_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
                                                  const std::string &indent);

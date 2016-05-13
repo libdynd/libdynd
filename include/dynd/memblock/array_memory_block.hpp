@@ -64,6 +64,10 @@ public:
   static void operator delete(void *ptr) { return ::operator delete(ptr); }
 
   static void operator delete(void *ptr, size_t DYND_UNUSED(extra_size)) { return ::operator delete(ptr); }
+
+  friend void intrusive_ptr_retain(array_preamble *ptr);
+  friend void intrusive_ptr_release(array_preamble *ptr);
+  friend long intrusive_ptr_use_count(array_preamble *ptr);
 };
 
 /**

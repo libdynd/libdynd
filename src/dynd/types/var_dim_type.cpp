@@ -39,9 +39,9 @@ bool ndt::var_dim_type::is_expression() const { return m_element_tp.is_expressio
 
 bool ndt::var_dim_type::is_unique_data_owner(const char *arrmeta) const {
   const metadata_type *md = reinterpret_cast<const metadata_type *>(arrmeta);
-  if (md->blockref && (md->blockref->m_use_count != 1 || (md->blockref->m_type != pod_memory_block_type &&
-                                                          md->blockref->m_type != zeroinit_memory_block_type &&
-                                                          md->blockref->m_type != objectarray_memory_block_type))) {
+  if (md->blockref && (md->blockref->get_use_count() != 1 || (md->blockref->m_type != pod_memory_block_type &&
+                                                              md->blockref->m_type != zeroinit_memory_block_type &&
+                                                              md->blockref->m_type != objectarray_memory_block_type))) {
     return false;
   }
   if (m_element_tp.is_builtin()) {

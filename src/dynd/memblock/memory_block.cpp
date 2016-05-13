@@ -15,24 +15,6 @@
 using namespace std;
 using namespace dynd;
 
-namespace dynd {
-namespace detail {
-
-  /**
-   * INTERNAL: Static instance of the pod allocator API for the POD memory block.
-   */
-  extern memory_block_data::api pod_memory_block_allocator_api;
-  /**
-   * INTERNAL: Static instance of the pod allocator API for the zeroinit memory block.
-   */
-  extern memory_block_data::api zeroinit_memory_block_allocator_api;
-  /**
-   * INTERNAL: Static instance of the objectarray allocator API for the objectarray memory block.
-   */
-  extern memory_block_data::api objectarray_memory_block_allocator_api;
-}
-} // namespace dynd::detail
-
 memory_block_data::~memory_block_data() {}
 
 std::ostream &dynd::operator<<(std::ostream &o, memory_block_type_t mbt) {
@@ -67,7 +49,7 @@ std::ostream &dynd::operator<<(std::ostream &o, memory_block_type_t mbt) {
 void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostream &o, const std::string &indent) {
   if (memblock != NULL) {
     o << indent << "------ memory_block at " << (const void *)memblock << "\n";
-    o << indent << " reference count: " << (int32_t)memblock->m_use_count << "\n";
+    o << indent << " reference count: " << memblock->get_use_count() << "\n";
     o << indent << " type: " << (memory_block_type_t)memblock->m_type << "\n";
     switch ((memory_block_type_t)memblock->m_type) {
     case external_memory_block_type:
@@ -95,17 +77,5 @@ void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostr
     o << indent << "------" << endl;
   } else {
     o << indent << "------ NULL memory block" << endl;
-  }
-}
-
-memory_block_data::api *memory_block_data::get_api() {
-  switch (m_type) {
-  case pod_memory_block_type:
-  case zeroinit_memory_block_type:
-    return &detail::pod_memory_block_allocator_api;
-  case objectarray_memory_block_type:
-    return &detail::objectarray_memory_block_allocator_api;
-  default:
-    throw std::runtime_error("cannot get an allocator API from this memory_block");
   }
 }
