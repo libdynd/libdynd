@@ -30,8 +30,8 @@ struct objectarray_memory_block : memory_block_data {
 
   objectarray_memory_block(const ndt::type &dt, size_t arrmeta_size, const char *arrmeta, intptr_t stride,
                            intptr_t initial_count)
-      : memory_block_data(1, objectarray_memory_block_type), m_dt(dt), arrmeta_size(arrmeta_size), m_arrmeta(arrmeta),
-        m_stride(stride), m_total_allocated_count(0), m_finalized(false), m_memory_handles() {
+      : memory_block_data(1), m_dt(dt), arrmeta_size(arrmeta_size), m_arrmeta(arrmeta), m_stride(stride),
+        m_total_allocated_count(0), m_finalized(false), m_memory_handles() {
     if ((dt.get_flags() & type_flag_destructor) == 0) {
       std::stringstream ss;
       ss << "Cannot create objectarray memory block with dynd type " << dt;

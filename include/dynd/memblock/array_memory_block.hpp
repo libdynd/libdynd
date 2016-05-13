@@ -26,7 +26,7 @@ public:
   char *data;
   intrusive_ptr<memory_block_data> owner;
 
-  array_preamble() : memory_block_data(1, array_memory_block_type) {}
+  array_preamble() : memory_block_data(1) {}
 
   ~array_preamble() {
     if (!tp.is_builtin()) {

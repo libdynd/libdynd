@@ -79,8 +79,7 @@ struct memmap_memory_block : public memory_block_data {
 
   memmap_memory_block(const std::string &filename, uint32_t access, char **out_pointer, intptr_t *out_size,
                       intptr_t begin, intptr_t end)
-      : memory_block_data(1, memmap_memory_block_type), m_filename(filename), m_access(access), m_begin(begin),
-        m_end(end) {
+      : memory_block_data(1), m_filename(filename), m_access(access), m_begin(begin), m_end(end) {
     bool readwrite = false; // ((access & nd::write_access_flag) == nd::write_access_flag);
 #ifdef WIN32
     // TODO: This function isn't quite exception-safe, use a smart pointer for the handles to fix.

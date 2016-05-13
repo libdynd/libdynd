@@ -45,8 +45,8 @@ struct pod_memory_block : memory_block_data {
   }
 
   pod_memory_block(size_t data_size, intptr_t data_alignment, intptr_t initial_capacity_bytes)
-      : memory_block_data(1, pod_memory_block_type), data_size(data_size), data_alignment(data_alignment),
-        m_total_allocated_capacity(0), m_memory_handles() {
+      : memory_block_data(1), data_size(data_size), data_alignment(data_alignment), m_total_allocated_capacity(0),
+        m_memory_handles() {
     append_memory(initial_capacity_bytes);
   }
 

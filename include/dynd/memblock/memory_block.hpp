@@ -13,47 +13,17 @@
 namespace dynd {
 
 /**
- * These are all the types of memory blocks supported by the dnd library.
- */
-enum memory_block_type_t {
-  /** A dynd array containing the arrmeta specified by the type */
-  array_memory_block_type,
-  /** Memory from outside the dnd library */
-  external_memory_block_type,
-  /** For when the data is POD and its size is fully known ahead of time */
-  fixed_size_pod_memory_block_type,
-  /** For when the data is POD, and the amount of memory needs to grow */
-  pod_memory_block_type,
-  /** Like pod_memory_block_type, but with zero-initialization */
-  zeroinit_memory_block_type,
-  /**
-   * For when the data is object (requires destruction),
-   * and the amount of memory needs to grow */
-  objectarray_memory_block_type,
-  /** Wraps memory mapped files */
-  memmap_memory_block_type
-};
-
-DYNDT_API std::ostream &operator<<(std::ostream &o, memory_block_type_t mbt);
-
-/**
  * This is the data that goes at the start of every memory block, including
- * an atomic reference count and a memory_block_type_t. There is a fixed set
- * of memory block types, of which 'external' is presently the only
- * extensible ones.
+ * an atomic reference count. There is a fixed set of memory block types, of which 'external'
+ * is presently the only extensible ones.
  */
 class DYNDT_API memory_block_data {
 protected:
   std::atomic_long m_use_count;
 
-  explicit memory_block_data(long use_count, memory_block_type_t type) : m_use_count(use_count), m_type(type) {
-    // std::cout << "memblock " << (void *)this << " cre: " << this->m_use_count << std::endl;
-  }
+  explicit memory_block_data(long use_count) : m_use_count(use_count) {}
 
 public:
-  /** A memory_block_type_t enum value */
-  uint32_t m_type;
-
   virtual ~memory_block_data();
 
   long get_use_count() const { return m_use_count; }

@@ -14,7 +14,7 @@ namespace dynd {
 
 class fixed_size_pod_memory_block : public memory_block_data {
 public:
-  fixed_size_pod_memory_block() : memory_block_data(1, fixed_size_pod_memory_block_type) {}
+  fixed_size_pod_memory_block() : memory_block_data(1) {}
 
   void debug_print(std::ostream &o, const std::string &indent);
 
