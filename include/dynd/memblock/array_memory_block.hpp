@@ -62,6 +62,8 @@ public:
   static void *operator new(size_t size, size_t extra_size) { return ::operator new(size + extra_size); }
 
   static void operator delete(void *ptr) { return ::operator delete(ptr); }
+
+  static void operator delete(void *ptr, size_t) { return ::operator delete(ptr); }
 };
 
 /**
