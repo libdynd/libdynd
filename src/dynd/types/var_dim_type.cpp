@@ -334,7 +334,7 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
     } else if (flags & type_flag_zeroinit) {
       md->blockref = make_zeroinit_memory_block(m_element_tp);
     } else {
-      md->blockref = make_pod_memory_block(m_element_tp);
+      md->blockref = make_memory_block<pod_memory_block>(m_element_tp);
     }
   }
   if (!m_element_tp.is_builtin()) {

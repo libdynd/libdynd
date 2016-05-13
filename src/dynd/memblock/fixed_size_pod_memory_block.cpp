@@ -10,13 +10,6 @@
 using namespace std;
 using namespace dynd;
 
-namespace dynd {
-namespace detail {
-
-  void free_fixed_size_pod_memory_block(memory_block_data *memblock) { delete[] reinterpret_cast<char *>(memblock); }
-}
-} // namespace dynd::detail
-
 intrusive_ptr<memory_block_data> dynd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment,
                                                                         char **out_datapointer) {
   // Calculate the aligned starting point for the data
@@ -29,10 +22,4 @@ intrusive_ptr<memory_block_data> dynd::make_fixed_size_pod_memory_block(intptr_t
   *out_datapointer = reinterpret_cast<char *>(result) + start;
   // Use placement new to initialize and return the memory block
   return intrusive_ptr<memory_block_data>(result, false);
-}
-
-void dynd::fixed_size_pod_memory_block::debug_print(std::ostream &o, const std::string &indent) {
-  o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";
-  o << indent << " reference count: " << m_use_count << "\n";
-  o << indent << "------" << endl;
 }

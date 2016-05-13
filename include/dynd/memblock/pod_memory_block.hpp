@@ -13,7 +13,8 @@
 
 namespace dynd {
 
-struct pod_memory_block : memory_block_data {
+class pod_memory_block : public memory_block_data {
+public:
   size_t data_size;
   intptr_t data_alignment;
   intptr_t m_total_allocated_capacity;
@@ -22,10 +23,19 @@ struct pod_memory_block : memory_block_data {
   /** The current malloc'd memory being doled out */
   char *m_memory_begin, *m_memory_current, *m_memory_end;
 
-  char *alloc(size_t count);
-  char *resize(char *previous_allocated, size_t count);
-  void finalize();
-  void reset();
+  pod_memory_block(size_t data_size, intptr_t data_alignment, intptr_t initial_capacity_bytes = 2048)
+      : data_size(data_size), data_alignment(data_alignment), m_total_allocated_capacity(0), m_memory_handles() {
+    append_memory(initial_capacity_bytes);
+  }
+
+  pod_memory_block(const ndt::type &tp, intptr_t initial_capacity_bytes = 2048)
+      : pod_memory_block(tp.get_default_data_size(), tp.get_data_alignment(), initial_capacity_bytes) {}
+
+  ~pod_memory_block() {
+    for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
+      free(m_memory_handles[i]);
+    }
+  }
 
   /**
    * Allocates some new memory from which to dole out
@@ -44,28 +54,99 @@ struct pod_memory_block : memory_block_data {
     m_total_allocated_capacity += capacity_bytes;
   }
 
-  pod_memory_block(size_t data_size, intptr_t data_alignment, intptr_t initial_capacity_bytes)
-      : memory_block_data(1), data_size(data_size), data_alignment(data_alignment), m_total_allocated_capacity(0),
-        m_memory_handles() {
-    append_memory(initial_capacity_bytes);
-  }
+  char *alloc(size_t count) {
+    intptr_t size_bytes = count * data_size;
 
-  ~pod_memory_block() {
-    for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
-      free(m_memory_handles[i]);
+    //    cout << "allocating " << size_bytes << " of memory with alignment " << alignment << endl;
+    // Allocate new POD memory of the requested size and alignment
+    char *begin = reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(m_memory_current) + data_alignment - 1) &
+                                           ~(data_alignment - 1));
+    char *end = begin + size_bytes;
+    if (end > m_memory_end) {
+      m_total_allocated_capacity -= m_memory_end - m_memory_current;
+      // Allocate memory to double the amount used so far, or the requested size, whichever is larger
+      // NOTE: We're assuming malloc produces memory which has good enough alignment for anything
+      append_memory(std::max(m_total_allocated_capacity, size_bytes));
+      begin = m_memory_begin;
+      end = begin + size_bytes;
     }
+
+    // Indicate where to allocate the next memory
+    m_memory_current = end;
+
+    // Return the allocated memory
+    return begin;
+    //    cout << "allocated at address " << (void *)begin << endl;
   }
 
-  void debug_print(std::ostream &o, const std::string &indent);
-};
+  char *resize(char *inout_begin, size_t count) {
+    intptr_t size_bytes = count * data_size;
 
-/**
- * Creates a memory block which can be used to allocate POD output memory
- * for blockref types.
- *
- * The initial capacity can be set if a good estimate is known.
- */
-DYNDT_API intrusive_ptr<memory_block_data> make_pod_memory_block(const ndt::type &tp,
-                                                                 intptr_t initial_capacity_bytes = 2048);
+    //    cout << "resizing memory " << (void *)*inout_begin << " / " << (void *)*inout_end << " from size " <<
+    // (*inout_end - *inout_begin) << " to " << size_bytes << endl;
+    //    cout << "memory state before " << (void *)emb->m_memory_begin << " / " << (void *)emb->m_memory_current << " /
+    // " << (void *)emb->m_memory_end << endl;
+    char **inout_end = &m_memory_current;
+    char *end = inout_begin + size_bytes;
+    if (end <= m_memory_end) {
+      // If it fits, just adjust the current allocation point
+      m_memory_current = end;
+      *inout_end = end;
+    } else {
+      // If it doesn't fit, need to copy to newly malloc'd memory
+      char *old_current = inout_begin, *old_end = *inout_end;
+      // Allocate memory to double the amount used so far, or the requested size, whichever is larger
+      // NOTE: We're assuming malloc produces memory which has good enough alignment for anything
+      append_memory(std::max(m_total_allocated_capacity, size_bytes));
+      memcpy(m_memory_begin, inout_begin, *inout_end - inout_begin);
+      end = m_memory_begin + size_bytes;
+      m_memory_current = end;
+      inout_begin = m_memory_begin;
+      *inout_end = end;
+      m_total_allocated_capacity -= old_end - old_current;
+    }
+    //    cout << "memory state after " << (void *)emb->m_memory_begin << " / " << (void *)emb->m_memory_current << " /
+    // " << (void *)emb->m_memory_end << endl;
+
+    return inout_begin;
+  }
+
+  void finalize() {
+    if (m_memory_current < m_memory_end) {
+      m_total_allocated_capacity -= m_memory_end - m_memory_current;
+    }
+
+    m_memory_begin = NULL;
+    m_memory_current = NULL;
+    m_memory_end = NULL;
+  }
+
+  void reset() {
+    if (m_memory_handles.size() > 1) {
+      // If there are more than one allocated memory chunks,
+      // throw them all away except the last
+      for (size_t i = 0, i_end = m_memory_handles.size() - 1; i != i_end; ++i) {
+        free(m_memory_handles[i]);
+      }
+      m_memory_handles.front() = m_memory_handles.back();
+      m_memory_handles.resize(1);
+    }
+
+    // Reset to use the whole chunk
+    m_memory_current = m_memory_begin;
+    m_total_allocated_capacity = m_memory_end - m_memory_begin;
+  }
+
+  void debug_print(std::ostream &o, const std::string &indent) {
+    o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";
+    o << indent << " reference count: " << m_use_count << "\n";
+    if (m_memory_begin != NULL) {
+      o << indent << " allocated: " << m_total_allocated_capacity << "\n";
+    } else {
+      o << indent << " finalized: " << m_total_allocated_capacity << "\n";
+    }
+    o << indent << "------" << std::endl;
+  }
+};
 
 } // namespace dynd

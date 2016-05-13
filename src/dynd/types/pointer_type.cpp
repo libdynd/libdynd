@@ -177,7 +177,7 @@ void ndt::pointer_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
   // TODO: Will need a different kind of memory block if the data isn't POD.
   if (blockref_alloc) {
     pointer_type_arrmeta *md = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
-    md->blockref = make_pod_memory_block(m_target_tp).release();
+    md->blockref = make_memory_block<pod_memory_block>(m_target_tp).release();
   }
   if (!m_target_tp.is_builtin()) {
     m_target_tp.extended()->arrmeta_default_construct(arrmeta + sizeof(pointer_type_arrmeta), blockref_alloc);

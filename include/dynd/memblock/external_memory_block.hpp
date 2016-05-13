@@ -18,8 +18,7 @@ public:
   /** A function which frees the external object */
   external_memory_block_free_t m_free_fn;
 
-  external_memory_block(void *object, external_memory_block_free_t free_fn)
-      : memory_block_data(1), m_object(object), m_free_fn(free_fn) {}
+  external_memory_block(void *object, external_memory_block_free_t free_fn) : m_object(object), m_free_fn(free_fn) {}
 
   ~external_memory_block() { m_free_fn(m_object); }
 
