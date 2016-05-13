@@ -14,9 +14,11 @@ namespace dynd {
 
 class fixed_size_pod_memory_block : public memory_block_data {
 public:
-  fixed_size_pod_memory_block() : memory_block_data(1) {}
-
-  void debug_print(std::ostream &o, const std::string &indent);
+  void debug_print(std::ostream &o, const std::string &indent) {
+    o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";
+    o << indent << " reference count: " << m_use_count << "\n";
+    o << indent << "------" << std::endl;
+  }
 
   static void *operator new(size_t size, size_t extra_size) { return ::operator new(size + extra_size); }
 

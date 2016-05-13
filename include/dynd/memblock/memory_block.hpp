@@ -21,7 +21,7 @@ class DYNDT_API memory_block_data {
 protected:
   std::atomic_long m_use_count;
 
-  explicit memory_block_data(long use_count) : m_use_count(use_count) {}
+  memory_block_data() : m_use_count(1) {}
 
 public:
   virtual ~memory_block_data();
@@ -77,6 +77,11 @@ inline void intrusive_ptr_release(memory_block_data *ptr) {
   if (--ptr->m_use_count == 0) {
     delete ptr;
   }
+}
+
+template <typename T, typename... ArgTypes>
+intrusive_ptr<memory_block_data> make_memory_block(ArgTypes &&... args) {
+  return intrusive_ptr<memory_block_data>(new T(std::forward<ArgTypes>(args)...), false);
 }
 
 } // namespace dynd

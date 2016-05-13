@@ -3,14 +3,14 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/view.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/pointer_type.hpp>
-#include <dynd/types/bytes_type.hpp>
-#include <dynd/shape_tools.hpp>
-#include <dynd/types/substitute_shape.hpp>
 #include <dynd/callables/view_callable.hpp>
+#include <dynd/shape_tools.hpp>
+#include <dynd/types/bytes_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/pointer_type.hpp>
+#include <dynd/types/substitute_shape.hpp>
+#include <dynd/types/var_dim_type.hpp>
+#include <dynd/view.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -30,8 +30,7 @@ using namespace dynd;
  * \returns If it worked, returns true, otherwise false.
  */
 static bool try_view(const ndt::type &tp, const char *arrmeta, const ndt::type &view_tp, char *view_arrmeta,
-                     const intrusive_ptr<memory_block_data> &embedded_reference)
-{
+                     const intrusive_ptr<memory_block_data> &embedded_reference) {
   switch (tp.get_id()) {
   case fixed_dim_id: {
     // All the strided dim types share the same arrmeta, so can be
@@ -50,8 +49,7 @@ static bool try_view(const ndt::type &tp, const char *arrmeta, const ndt::type &
                    view_arrmeta + sizeof(fixed_dim_type_arrmeta), embedded_reference)) {
         *view_md = *md;
         return true;
-      }
-      else {
+      } else {
         return false;
       }
     }
@@ -66,16 +64,14 @@ static bool try_view(const ndt::type &tp, const char *arrmeta, const ndt::type &
         tp.extended()->arrmeta_copy_construct(view_arrmeta, arrmeta, embedded_reference);
       }
       return true;
-    }
-    else if (tp.is_pod() && view_tp.is_pod() && tp.get_data_size() == view_tp.get_data_size() &&
-             tp.get_data_alignment() >= view_tp.get_data_alignment()) {
+    } else if (tp.is_pod() && view_tp.is_pod() && tp.get_data_size() == view_tp.get_data_size() &&
+               tp.get_data_alignment() >= view_tp.get_data_alignment()) {
       // POD types with matching properties
       if (view_tp.get_arrmeta_size() > 0) {
         view_tp.extended()->arrmeta_default_construct(view_arrmeta, true);
       }
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   }
@@ -230,8 +226,7 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr, ndt::
 }
 */
 
-static nd::array view_as_bytes(const nd::array &DYND_UNUSED(arr), const ndt::type &DYND_UNUSED(tp))
-{
+static nd::array view_as_bytes(const nd::array &DYND_UNUSED(arr), const ndt::type &DYND_UNUSED(tp)) {
   throw std::runtime_error("view_as_bytes is not yet implemented");
 
   /*
@@ -352,21 +347,18 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
 }
 */
 
-static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
-{
+static nd::array view_concrete(const nd::array &arr, const ndt::type &tp) {
   // Allocate a result array to attempt the view in it
-  nd::array result(reinterpret_cast<array_preamble *>(make_array_memory_block(tp.get_arrmeta_size()).get()), true);
+  nd::array result(reinterpret_cast<array_preamble *>(make_array_memory_block(tp, tp.get_arrmeta_size()).get()), true);
   // Copy the fields
   result.get()->data = arr.get()->data;
   if (!arr.get()->owner) {
     // Embedded data, need reference to the array
     result.get()->owner = arr.get();
-  }
-  else {
+  } else {
     // Use the same data reference, avoid producing a chain
     result.get()->owner = arr.get_data_memblock();
   }
-  result.get()->tp = tp;
   result.get()->flags = arr.get()->flags;
   // First handle a special case of viewing outermost "var" as "fixed[#]"
   if (arr.get_type().get_id() == var_dim_id && tp.get_id() == fixed_dim_id) {
@@ -405,36 +397,31 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
   throw type_error(ss.str());
 }
 
-nd::array nd::old_view(const nd::array &arr, const ndt::type &tp)
-{
+nd::array nd::old_view(const nd::array &arr, const ndt::type &tp) {
   if (arr.get_type() == tp) {
     // If the types match exactly, simply return 'arr'
     return arr;
-  }
-  else if (tp.get_id() == bytes_id) {
+  } else if (tp.get_id() == bytes_id) {
     // If it's a request to view the data as raw bytes
     nd::array result = view_as_bytes(arr, tp);
     if (!result.is_null()) {
       return result;
     }
-  }
-  else if (arr.get_type().get_id() == bytes_id) {
+  } else if (arr.get_type().get_id() == bytes_id) {
     // If it's a request to view raw bytes as something else
     //    nd::array result = view_from_bytes(arr, tp);
     //    if (!result.is_null()) {
     //    return result;
     //}
     return nd::array();
-  }
-  else if (arr.get_ndim() == tp.get_ndim()) {
+  } else if (arr.get_ndim() == tp.get_ndim()) {
     // If the type is symbolic, e.g. has a "Fixed" symbolic dimension,
     // first substitute in the shape from the array
     if (tp.is_symbolic()) {
       dimvector shape(arr.get_ndim());
       arr.get_shape(shape.get());
       return view_concrete(arr, substitute_shape(tp, arr.get_ndim(), shape.get()));
-    }
-    else {
+    } else {
       return view_concrete(arr, tp);
     }
   }

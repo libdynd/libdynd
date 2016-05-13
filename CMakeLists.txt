@@ -238,7 +238,6 @@ set(libdyndt_SRC
     src/dynd/memblock/memmap_memory_block.cpp
     src/dynd/memblock/memory_block.cpp
     src/dynd/memblock/objectarray_memory_block.cpp
-    src/dynd/memblock/pod_memory_block.cpp
     src/dynd/memblock/zeroinit_memory_block.cpp
     include/dynd/memblock/array_memory_block.hpp
     include/dynd/memblock/external_memory_block.hpp

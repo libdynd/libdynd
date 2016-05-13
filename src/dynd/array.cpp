@@ -48,11 +48,10 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
   ndt::type array_type = ndt::make_fixed_dim(ndim, shape, uniform_tp);
 
   // Allocate the array arrmeta and data in one memory block
-  intrusive_ptr<memory_block_data> result = make_array_memory_block(array_type.get_arrmeta_size());
+  intrusive_ptr<memory_block_data> result = make_array_memory_block(array_type, array_type.get_arrmeta_size());
 
   // Fill in the preamble arrmeta
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-  ndo->tp = array_type;
   ndo->data = data_ptr;
   ndo->owner = data_reference;
   ndo->flags = access_flags;
@@ -143,12 +142,10 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
     ndt::type dt = get()->tp->apply_linear_index(nindices, indices, 0, this_dt, collapse_leading);
     array result;
     if (!dt.is_builtin()) {
-      intrusive_ptr<memory_block_data> memblock = make_array_memory_block(dt.extended()->get_arrmeta_size());
+      intrusive_ptr<memory_block_data> memblock = make_array_memory_block(dt, dt.extended()->get_arrmeta_size());
       result = array(reinterpret_cast<array_preamble *>(memblock.get()), true);
-      result.get()->tp = dt;
     } else {
-      result = array(reinterpret_cast<array_preamble *>(make_array_memory_block(0).get()), true);
-      result.get()->tp = dt;
+      result = array(reinterpret_cast<array_preamble *>(make_array_memory_block(dt, 0).get()), true);
     }
     result.get()->data = get()->data;
     if (get()->owner) {
@@ -703,14 +700,14 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const {
   ndt::type dst_tp = src_tp.with_new_axis(i, new_ndim);
 
   // This is taken from view_concrete in view.cpp
-  nd::array res(reinterpret_cast<array_preamble *>(make_array_memory_block(dst_tp.get_arrmeta_size()).get()), true);
+  nd::array res(reinterpret_cast<array_preamble *>(make_array_memory_block(dst_tp, dst_tp.get_arrmeta_size()).get()),
+                true);
   res.get()->data = get()->data;
   if (!get()->owner) {
     res.get()->owner = get();
   } else {
     res.get()->owner = get_data_memblock();
   }
-  res.get()->tp = dst_tp;
   res.get()->flags = get()->flags;
 
   char *src_arrmeta = const_cast<char *>(get()->metadata());
@@ -810,9 +807,9 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const {
         throw std::runtime_error("creating an unaligned type");
         //        result_tp = ndt::make_fixed_dim(dim_size, make_unaligned(scalar_tp));
       }
-      array result(
-          reinterpret_cast<array_preamble *>(make_array_memory_block(result_tp.extended()->get_arrmeta_size()).get()),
-          true);
+      array result(reinterpret_cast<array_preamble *>(
+                       make_array_memory_block(result_tp, result_tp.extended()->get_arrmeta_size()).get()),
+                   true);
       // Copy all the array arrmeta fields
       result.get()->data = get()->data;
       if (get()->owner) {
@@ -820,7 +817,6 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const {
       } else {
         result.get()->owner = intrusive_ptr<array_preamble>::get();
       }
-      result.get()->tp = result_tp;
       result.get()->flags = get()->flags;
       // The result has one strided ndarray field
       fixed_dim_type_arrmeta *result_md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get()->metadata());
@@ -918,10 +914,9 @@ nd::array nd::empty_shell(const ndt::type &tp) {
   if (tp.is_builtin()) {
     char *data_ptr = NULL;
     intptr_t data_alignment = tp.get_data_alignment();
-    intrusive_ptr<memory_block_data> result = make_array_memory_block(0, tp.get_data_size(), data_alignment, &data_ptr);
+    intrusive_ptr<memory_block_data> result = make_array_memory_block(tp, 0, tp.get_data_size(), data_alignment, &data_ptr);
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
     // It's a builtin type id, so no incref
-    preamble->tp = tp;
     preamble->data = data_ptr;
     preamble->owner = NULL;
     preamble->flags = nd::read_access_flag | nd::write_access_flag;
@@ -933,7 +928,7 @@ nd::array nd::empty_shell(const ndt::type &tp) {
     intrusive_ptr<memory_block_data> result;
     if (tp.get_base_id() != memory_id) {
       // Allocate memory the default way
-      result = make_array_memory_block(arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
+      result = make_array_memory_block(tp, arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
       if (tp.get_flags() & type_flag_zeroinit) {
         memset(data_ptr, 0, data_size);
       }
@@ -942,14 +937,13 @@ nd::array nd::empty_shell(const ndt::type &tp) {
       }
     } else {
       // Allocate memory based on the memory_kind type
-      result = make_array_memory_block(arrmeta_size);
+      result = make_array_memory_block(tp, arrmeta_size);
       tp.extended<ndt::base_memory_type>()->data_alloc(&data_ptr, data_size);
       if (tp.get_flags() & type_flag_zeroinit) {
         tp.extended<ndt::base_memory_type>()->data_zeroinit(data_ptr, data_size);
       }
     }
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
-    preamble->tp = tp;
     preamble->data = data_ptr;
     preamble->owner = NULL;
     preamble->flags = nd::read_access_flag | nd::write_access_flag;
@@ -1119,13 +1113,12 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values) 
   const ndt::tuple_type *fsd = result_type.extended<ndt::tuple_type>();
   char *data_ptr = NULL;
 
-  array result(
-      reinterpret_cast<array_preamble *>(make_array_memory_block(fsd->get_arrmeta_size(), fsd->get_default_data_size(),
-                                                                 fsd->get_data_alignment(), &data_ptr)
-                                             .get()),
-      true);
+  array result(reinterpret_cast<array_preamble *>(make_array_memory_block(result_type, fsd->get_arrmeta_size(),
+                                                                          fsd->get_default_data_size(),
+                                                                          fsd->get_data_alignment(), &data_ptr)
+                                                      .get()),
+               true);
   // Set the array properties
-  result.get()->tp = result_type;
   result.get()->data = data_ptr;
   result.get()->owner = NULL;
   result.get()->flags = flags;

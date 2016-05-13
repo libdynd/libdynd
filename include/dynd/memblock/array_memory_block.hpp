@@ -26,7 +26,10 @@ public:
   char *data;
   intrusive_ptr<memory_block_data> owner;
 
-  array_preamble() : memory_block_data(1) {}
+  array_preamble(const ndt::type &tp, size_t arrmeta_size) : tp(tp) {
+    // Zero out all the arrmeta to start
+    memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
+  }
 
   ~array_preamble() {
     if (!tp.is_builtin()) {
@@ -59,7 +62,16 @@ public:
   /** Return a pointer to the arrmeta, immediately after the preamble */
   const char *metadata() const { return reinterpret_cast<const char *>(this + 1); }
 
-  void debug_print(std::ostream &o, const std::string &indent);
+  void debug_print(std::ostream &o, const std::string &indent) {
+    o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";
+    o << indent << " reference count: " << m_use_count << "\n";
+    if (!tp.is_null()) {
+      o << indent << " type: " << tp << "\n";
+    } else {
+      o << indent << " uninitialized nd::array\n";
+    }
+    o << indent << "------" << std::endl;
+  }
 
   static void *operator new(size_t size, size_t extra_size) { return ::operator new(size + extra_size); }
 
@@ -77,7 +89,9 @@ public:
  *
  * The created object is uninitialized.
  */
-DYNDT_API intrusive_ptr<memory_block_data> make_array_memory_block(size_t arrmeta_size);
+inline intrusive_ptr<memory_block_data> make_array_memory_block(const ndt::type &tp, size_t arrmeta_size) {
+  return intrusive_ptr<memory_block_data>(new (arrmeta_size) array_preamble(tp, arrmeta_size), false);
+}
 
 /**
  * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta),
@@ -85,8 +99,9 @@ DYNDT_API intrusive_ptr<memory_block_data> make_array_memory_block(size_t arrmet
  *
  * The created object is uninitialized.
  */
-DYNDT_API intrusive_ptr<memory_block_data> make_array_memory_block(size_t arrmeta_size, size_t extra_size,
-                                                                   size_t extra_alignment, char **out_extra_ptr);
+DYNDT_API intrusive_ptr<memory_block_data> make_array_memory_block(const ndt::type &tp, size_t arrmeta_size,
+                                                                   size_t extra_size, size_t extra_alignment,
+                                                                   char **out_extra_ptr);
 
 /**
  * Makes a shallow copy of the nd::array memory block. In the copy, only the
