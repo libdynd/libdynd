@@ -874,7 +874,7 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const {
       o << "\n";
     }
     if (ndo->owner) {
-      memory_block_debug_print(ndo->owner.get(), o, "    ");
+      ndo->owner->debug_print(o, "    ");
     }
   } else {
     o << indent << "NULL\n";

@@ -427,7 +427,7 @@ void ndt::var_dim_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o
   o << indent << "var_dim arrmeta\n";
   o << indent << " stride: " << md->stride << "\n";
   o << indent << " offset: " << md->offset << "\n";
-  memory_block_debug_print(md->blockref.get(), o, indent + " ");
+  md->blockref->debug_print(o, indent + " ");
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_debug_print(arrmeta + sizeof(metadata_type), o, indent + "  ");
   }

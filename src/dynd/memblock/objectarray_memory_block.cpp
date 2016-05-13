@@ -124,14 +124,15 @@ void objectarray_memory_block::reset() {
   }
 }
 
-void dynd::objectarray_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                                const std::string &indent) {
-  const objectarray_memory_block *emb = reinterpret_cast<const objectarray_memory_block *>(memblock);
-  o << " type: " << emb->m_dt << "\n";
-  o << " stride: " << emb->m_stride << "\n";
-  if (!emb->m_finalized) {
-    o << indent << " allocated count: " << emb->m_total_allocated_count << "\n";
+void objectarray_memory_block::debug_print(std::ostream &o, const std::string &indent) {
+  o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";
+  o << indent << " reference count: " << m_use_count << "\n";
+  o << " type: " << m_dt << "\n";
+  o << " stride: " << m_stride << "\n";
+  if (!m_finalized) {
+    o << indent << " allocated count: " << m_total_allocated_count << "\n";
   } else {
-    o << indent << " finalized count: " << emb->m_total_allocated_count << "\n";
+    o << indent << " finalized count: " << m_total_allocated_count << "\n";
   }
+  o << indent << "------" << endl;
 }

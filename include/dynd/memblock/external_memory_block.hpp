@@ -22,6 +22,8 @@ public:
       : memory_block_data(1, external_memory_block_type), m_object(object), m_free_fn(free_fn) {}
 
   ~external_memory_block() { m_free_fn(m_object); }
+
+  void debug_print(std::ostream &o, const std::string &indent);
 };
 
 /**
@@ -29,8 +31,5 @@ public:
  */
 DYNDT_API intrusive_ptr<memory_block_data> make_external_memory_block(void *object,
                                                                       external_memory_block_free_t free_fn);
-
-DYNDT_API void external_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                                 const std::string &indent);
 
 } // namespace dynd

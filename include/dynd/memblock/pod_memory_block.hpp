@@ -55,6 +55,8 @@ struct pod_memory_block : memory_block_data {
       free(m_memory_handles[i]);
     }
   }
+
+  void debug_print(std::ostream &o, const std::string &indent);
 };
 
 /**
@@ -65,8 +67,5 @@ struct pod_memory_block : memory_block_data {
  */
 DYNDT_API intrusive_ptr<memory_block_data> make_pod_memory_block(const ndt::type &tp,
                                                                  intptr_t initial_capacity_bytes = 2048);
-
-DYNDT_API void pod_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                            const std::string &indent);
 
 } // namespace dynd

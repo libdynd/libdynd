@@ -71,6 +71,8 @@ struct objectarray_memory_block : memory_block_data {
     }
     m_total_allocated_count += count;
   }
+
+  void debug_print(std::ostream &o, const std::string &indent);
 };
 
 /**
@@ -89,8 +91,5 @@ struct objectarray_memory_block : memory_block_data {
 DYNDT_API intrusive_ptr<memory_block_data> make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta,
                                                                          intptr_t stride, intptr_t initial_count = 64,
                                                                          size_t arrmeta_size = 0);
-
-DYNDT_API void objectarray_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                                    const std::string &indent);
 
 } // namespace dynd

@@ -31,6 +31,8 @@ intrusive_ptr<memory_block_data> dynd::make_fixed_size_pod_memory_block(intptr_t
   return intrusive_ptr<memory_block_data>(result, false);
 }
 
-void dynd::fixed_size_pod_memory_block_debug_print(const memory_block_data *DYND_UNUSED(memblock),
-                                                   std::ostream &DYND_UNUSED(o),
-                                                   const std::string &DYND_UNUSED(indent)) {}
+void dynd::fixed_size_pod_memory_block::debug_print(std::ostream &o, const std::string &indent) {
+  o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";
+  o << indent << " reference count: " << m_use_count << "\n";
+  o << indent << "------" << endl;
+}

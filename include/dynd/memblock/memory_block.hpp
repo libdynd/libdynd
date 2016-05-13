@@ -87,6 +87,13 @@ public:
    */
   virtual void reset() { throw std::runtime_error("reset is not implemented"); }
 
+  /**
+   * Does a debug dump of the memory block.
+   */
+  virtual void debug_print(std::ostream &o, const std::string &indent) = 0;
+
+  void debug_print(std::ostream &o) { debug_print(o, ""); }
+
   friend void intrusive_ptr_retain(memory_block_data *ptr);
   friend void intrusive_ptr_release(memory_block_data *ptr);
   friend long intrusive_ptr_use_count(memory_block_data *ptr);
@@ -101,11 +108,5 @@ inline void intrusive_ptr_release(memory_block_data *ptr) {
     delete ptr;
   }
 }
-
-/**
- * Does a debug dump of the memory block.
- */
-DYNDT_API void memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                        const std::string &indent = "");
 
 } // namespace dynd

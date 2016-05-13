@@ -59,12 +59,13 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
   return result;
 }
 
-void dynd::array_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                          const std::string &indent) {
-  const array_preamble *preamble = reinterpret_cast<const array_preamble *>(memblock);
-  if (!preamble->tp.is_null()) {
-    o << indent << " type: " << preamble->tp << "\n";
+void dynd::array_preamble::debug_print(std::ostream &o, const std::string &indent) {
+  o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";
+  o << indent << " reference count: " << m_use_count << "\n";
+  if (!tp.is_null()) {
+    o << indent << " type: " << tp << "\n";
   } else {
     o << indent << " uninitialized nd::array\n";
   }
+  o << indent << "------" << endl;
 }

@@ -136,12 +136,13 @@ void zeroinit_memory_block::reset() {
   emb->m_total_allocated_capacity = emb->m_memory_end - emb->m_memory_begin;
 }
 
-void dynd::zeroinit_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                             const std::string &indent) {
-  const zeroinit_memory_block *emb = reinterpret_cast<const zeroinit_memory_block *>(memblock);
-  if (emb->m_memory_begin != NULL) {
-    o << indent << " allocated: " << emb->m_total_allocated_capacity << "\n";
+void zeroinit_memory_block::debug_print(std::ostream &o, const std::string &indent) {
+  o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";
+  o << indent << " reference count: " << m_use_count << "\n";
+  if (m_memory_begin != NULL) {
+    o << indent << " allocated: " << m_total_allocated_capacity << "\n";
   } else {
-    o << indent << " finalized: " << emb->m_total_allocated_capacity << "\n";
+    o << indent << " finalized: " << m_total_allocated_capacity << "\n";
   }
+  o << indent << "------" << endl;
 }

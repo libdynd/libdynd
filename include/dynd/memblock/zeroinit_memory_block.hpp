@@ -55,6 +55,8 @@ struct zeroinit_memory_block : memory_block_data {
     m_memory_end = m_memory_current + capacity_bytes;
     m_total_allocated_capacity += capacity_bytes;
   }
+
+  void debug_print(std::ostream &o, const std::string &indent);
 };
 
 /**
@@ -65,8 +67,5 @@ struct zeroinit_memory_block : memory_block_data {
  */
 DYNDT_API intrusive_ptr<memory_block_data> make_zeroinit_memory_block(const ndt::type &element_tp,
                                                                       intptr_t initial_capacity_bytes = 2048);
-
-DYNDT_API void zeroinit_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                                 const std::string &indent);
 
 } // namespace dynd
