@@ -919,9 +919,8 @@ nd::array nd::as_struct(size_t size, const pair<const char *, array> *pairs) {
 nd::array nd::empty_shell(const ndt::type &tp) {
   if (tp.is_builtin()) {
     char *data_ptr = NULL;
-    intptr_t data_size = tp.get_data_size();
     intptr_t data_alignment = tp.get_data_alignment();
-    intrusive_ptr<memory_block_data> result(make_array_memory_block(0, data_size, data_alignment, &data_ptr));
+    intrusive_ptr<memory_block_data> result = make_array_memory_block(0, tp.get_data_size(), data_alignment, &data_ptr);
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
     // It's a builtin type id, so no incref
     preamble->tp = tp;

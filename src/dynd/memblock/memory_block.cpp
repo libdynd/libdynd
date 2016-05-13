@@ -3,13 +3,13 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/memblock/array_memory_block.hpp>
+#include <dynd/memblock/external_memory_block.hpp>
+#include <dynd/memblock/fixed_size_pod_memory_block.hpp>
+#include <dynd/memblock/memmap_memory_block.hpp>
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/memblock/zeroinit_memory_block.hpp>
-#include <dynd/memblock/fixed_size_pod_memory_block.hpp>
-#include <dynd/memblock/array_memory_block.hpp>
-#include <dynd/memblock/external_memory_block.hpp>
-#include <dynd/memblock/memmap_memory_block.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -39,11 +39,6 @@ namespace detail {
   void free_zeroinit_memory_block(memory_block_data *memblock);
 
   /**
-   * INTERNAL: Frees a memory_block created by make_array_memory_block.
-   * This should only be called by the memory_block decref code.
-   */
-  void free_array_memory_block(memory_block_data *memblock);
-  /**
    * INTERNAL: Frees a memory_block created by make_objectarray_memory_block.
    * This should only be called by the memory_block decref code.
    */
@@ -69,8 +64,7 @@ namespace detail {
 }
 } // namespace dynd::detail
 
-void dynd::detail::memory_block_free(memory_block_data *memblock)
-{
+void dynd::detail::memory_block_free(memory_block_data *memblock) {
   // cout << "freeing memory block " << (void *)memblock << endl;
   switch ((memory_block_type_t)memblock->m_type) {
   case external_memory_block_type: {
@@ -94,7 +88,7 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
     return;
   }
   case array_memory_block_type:
-    free_array_memory_block(memblock);
+    delete reinterpret_cast<array_preamble *>(memblock);
     return;
   case memmap_memory_block_type:
     free_memmap_memory_block(memblock);
@@ -106,8 +100,7 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
   throw runtime_error(ss.str());
 }
 
-std::ostream &dynd::operator<<(std::ostream &o, memory_block_type_t mbt)
-{
+std::ostream &dynd::operator<<(std::ostream &o, memory_block_type_t mbt) {
   switch (mbt) {
   case external_memory_block_type:
     o << "external";
@@ -136,8 +129,7 @@ std::ostream &dynd::operator<<(std::ostream &o, memory_block_type_t mbt)
   return o;
 }
 
-void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostream &o, const std::string &indent)
-{
+void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostream &o, const std::string &indent) {
   if (memblock != NULL) {
     o << indent << "------ memory_block at " << (const void *)memblock << "\n";
     o << indent << " reference count: " << (int32_t)memblock->m_use_count << "\n";
@@ -166,14 +158,12 @@ void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostr
       break;
     }
     o << indent << "------" << endl;
-  }
-  else {
+  } else {
     o << indent << "------ NULL memory block" << endl;
   }
 }
 
-memory_block_data::api *memory_block_data::get_api()
-{
+memory_block_data::api *memory_block_data::get_api() {
   switch (m_type) {
   case pod_memory_block_type:
   case zeroinit_memory_block_type:

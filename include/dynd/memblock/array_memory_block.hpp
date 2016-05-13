@@ -8,8 +8,8 @@
 #include <iostream>
 #include <string>
 
-#include <dynd/type.hpp>
 #include <dynd/memblock/memory_block.hpp>
+#include <dynd/type.hpp>
 #include <dynd/types/base_memory_type.hpp>
 
 namespace dynd {
@@ -19,19 +19,16 @@ namespace dynd {
  * arrmeta after this structure is determined by the type
  * object.
  */
-struct DYNDT_API array_preamble : memory_block_data {
-  /**
-   * type is overloaded - for builtin scalar types, it
-   * simply contains the type id. If (type&~builtin_id_mask)
-   * is 0, its a builtin type.
-   */
+class DYNDT_API array_preamble : public memory_block_data {
+public:
   ndt::type tp;
   uint64_t flags;
   char *data;
   intrusive_ptr<memory_block_data> owner;
 
-  ~array_preamble()
-  {
+  array_preamble() : memory_block_data(1, array_memory_block_type) {}
+
+  ~array_preamble() {
     if (!tp.is_builtin()) {
       char *arrmeta = reinterpret_cast<char *>(this + 1);
 
@@ -61,6 +58,12 @@ struct DYNDT_API array_preamble : memory_block_data {
 
   /** Return a pointer to the arrmeta, immediately after the preamble */
   const char *metadata() const { return reinterpret_cast<const char *>(this + 1); }
+
+  static void *operator new(size_t size, size_t extra_size) { return ::operator new(size + extra_size); }
+
+  static void operator delete(void *ptr) { return ::operator delete(ptr); }
+
+  static void operator delete(void *ptr, size_t DYND_UNUSED(extra_size)) { return ::operator delete(ptr); }
 };
 
 /**
@@ -77,7 +80,7 @@ DYNDT_API intrusive_ptr<memory_block_data> make_array_memory_block(size_t arrmet
  * The created object is uninitialized.
  */
 DYNDT_API intrusive_ptr<memory_block_data> make_array_memory_block(size_t arrmeta_size, size_t extra_size,
-                                                                  size_t extra_alignment, char **out_extra_ptr);
+                                                                   size_t extra_alignment, char **out_extra_ptr);
 
 /**
  * Makes a shallow copy of the nd::array memory block. In the copy, only the
@@ -94,8 +97,7 @@ inline long intrusive_ptr_use_count(array_preamble *ptr) { return ptr->m_use_cou
 
 inline void intrusive_ptr_retain(array_preamble *ptr) { ++ptr->m_use_count; }
 
-inline void intrusive_ptr_release(array_preamble *ptr)
-{
+inline void intrusive_ptr_release(array_preamble *ptr) {
   if (--ptr->m_use_count == 0) {
     detail::memory_block_free(ptr);
   }

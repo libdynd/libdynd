@@ -42,7 +42,13 @@ DYNDT_API std::ostream &operator<<(std::ostream &o, memory_block_type_t mbt);
  * of memory block types, of which 'external' is presently the only
  * extensible ones.
  */
-struct DYNDT_API memory_block_data {
+class DYNDT_API memory_block_data {
+protected:
+  explicit memory_block_data(long use_count, memory_block_type_t type) : m_use_count(use_count), m_type(type) {
+    // std::cout << "memblock " << (void *)this << " cre: " << this->m_use_count << std::endl;
+  }
+
+public:
   /**
    * This is a struct of function pointers for allocating
    * data within a memory_block.
@@ -57,13 +63,6 @@ struct DYNDT_API memory_block_data {
   std::atomic_long m_use_count;
   /** A memory_block_type_t enum value */
   uint32_t m_type;
-
-  explicit memory_block_data(long use_count, memory_block_type_t type) : m_use_count(use_count), m_type(type)
-  {
-    // std::cout << "memblock " << (void *)this << " cre: " << this->m_use_count << std::endl;
-  }
-
-  // virtual ~memory_block_data() {}
 
   /**
    * Allocates the requested amount of memory from the memory_block, returning
@@ -112,8 +111,7 @@ inline long intrusive_ptr_use_count(memory_block_data *ptr) { return ptr->m_use_
 
 inline void intrusive_ptr_retain(memory_block_data *ptr) { ++ptr->m_use_count; }
 
-inline void intrusive_ptr_release(memory_block_data *ptr)
-{
+inline void intrusive_ptr_release(memory_block_data *ptr) {
   if (--ptr->m_use_count == 0) {
     detail::memory_block_free(ptr);
   }

@@ -3,10 +3,11 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
 
 #include <benchmark/benchmark.h>
 
@@ -16,18 +17,30 @@ using namespace std;
 using namespace dynd;
 
 template <typename T>
-static void BM_Array_BuiltinEmpty(benchmark::State &state)
-{
-  ndt::type tp = ndt::make_type<T>();
+static void BM_UniquePtr(benchmark::State &state) {
   while (state.KeepRunning()) {
-    nd::empty(tp);
+    benchmark::DoNotOptimize(std::make_unique<T>());
   }
 }
-BENCHMARK_TEMPLATE(BM_Array_BuiltinEmpty, int32_t);
-BENCHMARK_TEMPLATE(BM_Array_BuiltinEmpty, int64_t);
+
+BENCHMARK_TEMPLATE(BM_UniquePtr, int);
+BENCHMARK_TEMPLATE(BM_UniquePtr, long long);
+BENCHMARK_TEMPLATE(BM_UniquePtr, float);
+BENCHMARK_TEMPLATE(BM_UniquePtr, double);
+
+template <typename T>
+static void BM_Array_BuiltinEmpty(benchmark::State &state) {
+  const ndt::type &tp = ndt::make_type<T>();
+  while (state.KeepRunning()) {
+    benchmark::DoNotOptimize(nd::empty(tp));
+  }
+}
+BENCHMARK_TEMPLATE(BM_Array_BuiltinEmpty, int);
+BENCHMARK_TEMPLATE(BM_Array_BuiltinEmpty, long);
 BENCHMARK_TEMPLATE(BM_Array_BuiltinEmpty, float);
 BENCHMARK_TEMPLATE(BM_Array_BuiltinEmpty, double);
 
+/*
 template <typename T>
 static void BM_Array_1DEmpty(benchmark::State &state)
 {
@@ -47,3 +60,4 @@ static void BM_Array_2DEmpty(benchmark::State &state)
   }
 }
 BENCHMARK_TEMPLATE(BM_Array_2DEmpty, int)->RangePair(2, 512, 2, 512);
+*/

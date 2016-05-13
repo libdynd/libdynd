@@ -11,8 +11,8 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/benchmark ${CMAKE_CURRENT_BINARY
 set(benchmarks_SRC
     benchmark_libdynd.cpp
     dispatcher.cpp
-    benchmark_dispatch_map.cpp
-#    array/benchmark_empty.cpp
+#    benchmark_dispatch_map.cpp
+    array/benchmark_empty.cpp
 #    func/benchmark_apply.cpp
 #    func/benchmark_arithmetic.cpp
 #    func/benchmark_random.cpp
@@ -47,6 +47,7 @@ else()
         libdynd
         pthread
         benchmark
+#        profiler
         )
 endif()
 
