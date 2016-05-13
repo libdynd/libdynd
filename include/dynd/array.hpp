@@ -1172,8 +1172,8 @@ inline nd::array make_array_memory_block(const ndt::type &tp, size_t arrmeta_siz
  *
  * The created object is uninitialized.
  */
-DYNDT_API nd::array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, size_t extra_size,
-                                            size_t extra_alignment, char **out_extra_ptr);
+DYND_API nd::array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, size_t extra_size,
+                                           size_t extra_alignment, char **out_extra_ptr);
 
 /**
  * Makes a shallow copy of the nd::array memory block. In the copy, only the
