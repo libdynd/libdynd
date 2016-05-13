@@ -214,16 +214,6 @@ intrusive_ptr<memory_block_data> dynd::make_memmap_memory_block(const std::strin
   return intrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(pmb), false);
 }
 
-namespace dynd {
-namespace detail {
-
-  void free_memmap_memory_block(memory_block_data *memblock) {
-    memmap_memory_block *emb = reinterpret_cast<memmap_memory_block *>(memblock);
-    delete emb;
-  }
-}
-} // namespace dynd::detail
-
 void dynd::memmap_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
                                            const std::string &indent) {
   const memmap_memory_block *emb = reinterpret_cast<const memmap_memory_block *>(memblock);

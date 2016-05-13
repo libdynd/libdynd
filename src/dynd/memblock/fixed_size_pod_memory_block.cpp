@@ -18,23 +18,19 @@ namespace detail {
 } // namespace dynd::detail
 
 intrusive_ptr<memory_block_data> dynd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment,
-                                                                        char **out_datapointer)
-{
+                                                                        char **out_datapointer) {
   // Calculate the aligned starting point for the data
   intptr_t start =
       (intptr_t)(((uintptr_t)sizeof(memory_block_data) + (uintptr_t)(alignment - 1)) & ~((uintptr_t)(alignment - 1)));
   // Allocate it
-  char *result = new char[start + size_bytes];
-  if (result == 0) {
-    throw bad_alloc();
-  }
+  fixed_size_pod_memory_block *result =
+      new (start + size_bytes - sizeof(fixed_size_pod_memory_block)) fixed_size_pod_memory_block();
   // Give back the data pointer
-  *out_datapointer = result + start;
+  *out_datapointer = reinterpret_cast<char *>(result) + start;
   // Use placement new to initialize and return the memory block
-  return intrusive_ptr<memory_block_data>(new (result) fixed_size_pod_memory_block(1), false);
+  return intrusive_ptr<memory_block_data>(result, false);
 }
 
 void dynd::fixed_size_pod_memory_block_debug_print(const memory_block_data *DYND_UNUSED(memblock),
-                                                   std::ostream &DYND_UNUSED(o), const std::string &DYND_UNUSED(indent))
-{
-}
+                                                   std::ostream &DYND_UNUSED(o),
+                                                   const std::string &DYND_UNUSED(indent)) {}

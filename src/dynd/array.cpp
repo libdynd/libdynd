@@ -180,10 +180,10 @@ void nd::array::flag_as_immutable() {
 
   // Check that nobody else is peeking into our data
   bool ok = true;
-  if (intrusive_ptr<array_preamble>::get()->m_use_count != 1) {
+  if (intrusive_ptr<array_preamble>::get()->get_use_count() != 1) {
     // More than one reference to the array itself
     ok = false;
-  } else if (get()->owner && (get()->owner->m_use_count != 1 ||
+  } else if (get()->owner && (get()->owner->get_use_count() != 1 ||
                               !(get()->owner->m_type == fixed_size_pod_memory_block_type ||
                                 get()->owner->m_type == pod_memory_block_type))) {
     // More than one reference to the array's data, or the reference is to
@@ -845,7 +845,7 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const {
   if (intrusive_ptr<array_preamble>::get()) {
     const array_preamble *ndo = get();
     o << " address: " << (void *)intrusive_ptr<array_preamble>::get() << "\n";
-    o << " refcount: " << static_cast<long>(ndo->m_use_count) << "\n";
+    o << " refcount: " << ndo->get_use_count() << "\n";
     o << " type:\n";
     o << "  pointer: " << (void *)ndo->tp.extended() << "\n";
     o << "  type: " << get_type() << "\n";

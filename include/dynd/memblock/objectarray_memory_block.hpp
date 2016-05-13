@@ -31,8 +31,7 @@ struct objectarray_memory_block : memory_block_data {
   objectarray_memory_block(const ndt::type &dt, size_t arrmeta_size, const char *arrmeta, intptr_t stride,
                            intptr_t initial_count)
       : memory_block_data(1, objectarray_memory_block_type), m_dt(dt), arrmeta_size(arrmeta_size), m_arrmeta(arrmeta),
-        m_stride(stride), m_total_allocated_count(0), m_finalized(false), m_memory_handles()
-  {
+        m_stride(stride), m_total_allocated_count(0), m_finalized(false), m_memory_handles() {
     if ((dt.get_flags() & type_flag_destructor) == 0) {
       std::stringstream ss;
       ss << "Cannot create objectarray memory block with dynd type " << dt;
@@ -42,8 +41,7 @@ struct objectarray_memory_block : memory_block_data {
     append_memory(initial_count);
   }
 
-  ~objectarray_memory_block()
-  {
+  ~objectarray_memory_block() {
     for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
       memory_chunk &mc = m_memory_handles[i];
       m_dt.extended()->data_destruct_strided(m_arrmeta + arrmeta_size, mc.memory, m_stride, mc.used_count);
@@ -51,12 +49,16 @@ struct objectarray_memory_block : memory_block_data {
     }
   }
 
+  char *alloc(size_t count);
+  char *resize(char *previous_allocated, size_t count);
+  void finalize();
+  void reset();
+
   /**
    * Allocates some new memory from which to dole out
    * more. Adds it to the memory handles vector.
    */
-  void append_memory(intptr_t count)
-  {
+  void append_memory(intptr_t count) {
     m_memory_handles.push_back(memory_chunk());
     memory_chunk &mc = m_memory_handles.back();
     mc.used_count = 0;
@@ -85,8 +87,8 @@ struct objectarray_memory_block : memory_block_data {
  * \param initial_count  The number of elements to allocate at the start.
  */
 DYNDT_API intrusive_ptr<memory_block_data> make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta,
-                                                                        intptr_t stride, intptr_t initial_count = 64,
-                                                                        size_t arrmeta_size = 0);
+                                                                         intptr_t stride, intptr_t initial_count = 64,
+                                                                         size_t arrmeta_size = 0);
 
 DYNDT_API void objectarray_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
                                                     const std::string &indent);

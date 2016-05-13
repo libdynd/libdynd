@@ -12,8 +12,15 @@
 
 namespace dynd {
 
-struct fixed_size_pod_memory_block : memory_block_data {
-  fixed_size_pod_memory_block(long use_count) : memory_block_data(use_count, fixed_size_pod_memory_block_type) {}
+class fixed_size_pod_memory_block : public memory_block_data {
+public:
+  fixed_size_pod_memory_block() : memory_block_data(1, fixed_size_pod_memory_block_type) {}
+
+  static void *operator new(size_t size, size_t extra_size) { return ::operator new(size + extra_size); }
+
+  static void operator delete(void *ptr) { return ::operator delete(ptr); }
+
+  static void operator delete(void *ptr, size_t DYND_UNUSED(extra_size)) { return ::operator delete(ptr); }
 };
 
 /**
@@ -21,7 +28,7 @@ struct fixed_size_pod_memory_block : memory_block_data {
  * memory allocated for data is placed in the output parameter.
  */
 DYNDT_API intrusive_ptr<memory_block_data> make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment,
-                                                                           char **out_datapointer);
+                                                                            char **out_datapointer);
 
 DYNDT_API void fixed_size_pod_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
                                                        const std::string &indent);

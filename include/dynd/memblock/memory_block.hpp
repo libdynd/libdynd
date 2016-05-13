@@ -44,25 +44,19 @@ DYNDT_API std::ostream &operator<<(std::ostream &o, memory_block_type_t mbt);
  */
 class DYNDT_API memory_block_data {
 protected:
+  std::atomic_long m_use_count;
+
   explicit memory_block_data(long use_count, memory_block_type_t type) : m_use_count(use_count), m_type(type) {
     // std::cout << "memblock " << (void *)this << " cre: " << this->m_use_count << std::endl;
   }
 
 public:
-  /**
-   * This is a struct of function pointers for allocating
-   * data within a memory_block.
-   */
-  struct DYNDT_API api {
-    char *(*allocate)(memory_block_data *self, size_t count);
-    char *(*resize)(memory_block_data *self, char *previous_allocated, size_t count);
-    void (*finalize)(memory_block_data *self);
-    void (*reset)(memory_block_data *self);
-  };
-
-  std::atomic_long m_use_count;
   /** A memory_block_type_t enum value */
   uint32_t m_type;
+
+  virtual ~memory_block_data();
+
+  long get_use_count() const { return m_use_count; }
 
   /**
    * Allocates the requested amount of memory from the memory_block, returning
@@ -70,18 +64,20 @@ public:
    *
    * Call this once per output variable.
    */
-  char *alloc(size_t count) { return get_api()->allocate(this, count); }
+  virtual char *alloc(size_t DYND_UNUSED(count)) { throw std::runtime_error("alloc is not implemented"); }
 
   /**
    * Resizes the most recently allocated memory from the memory_block.
    */
-  char *resize(char *previous_allocated, size_t count) { return get_api()->resize(this, previous_allocated, count); }
+  virtual char *resize(char *DYND_UNUSED(previous_allocated), size_t DYND_UNUSED(count)) {
+    throw std::runtime_error("resize is not implemented");
+  }
 
   /**
    * Finalizes the memory block so it can no longer be used to allocate more
    * memory.
    */
-  void finalize() { get_api()->finalize(this); }
+  virtual void finalize() { throw std::runtime_error("finalize is not implemented"); }
 
   /**
    * When a memory block is being used as a temporary buffer, resets it to
@@ -89,23 +85,12 @@ public:
    * to be used for variable-sized data to be reused repeatedly in such
    * a temporary buffer.
    */
-  void reset() { get_api()->reset(this); }
+  virtual void reset() { throw std::runtime_error("reset is not implemented"); }
 
-  /**
-   * Returns a pointer to a memory allocator API for the type of the memory block.
-   */
-private:
-  api *get_api();
+  friend void intrusive_ptr_retain(memory_block_data *ptr);
+  friend void intrusive_ptr_release(memory_block_data *ptr);
+  friend long intrusive_ptr_use_count(memory_block_data *ptr);
 };
-
-namespace detail {
-  /**
-   * Frees the data for a memory block. Is called
-   * by memory_block_decref when the reference count
-   * reaches zero.
-   */
-  DYNDT_API void memory_block_free(memory_block_data *memblock);
-} // namespace detail
 
 inline long intrusive_ptr_use_count(memory_block_data *ptr) { return ptr->m_use_count; }
 
@@ -113,7 +98,7 @@ inline void intrusive_ptr_retain(memory_block_data *ptr) { ++ptr->m_use_count; }
 
 inline void intrusive_ptr_release(memory_block_data *ptr) {
   if (--ptr->m_use_count == 0) {
-    detail::memory_block_free(ptr);
+    delete ptr;
   }
 }
 

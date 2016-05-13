@@ -13,7 +13,7 @@ using namespace dynd;
 intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_size) {
   array_preamble *result = new (arrmeta_size) array_preamble();
   // Zero out all the arrmeta to start
-  memset(result + 1, 0, arrmeta_size);
+  memset(reinterpret_cast<char *>(result + 1), 0, arrmeta_size);
   return intrusive_ptr<memory_block_data>(result, false);
 }
 
@@ -22,7 +22,7 @@ intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_si
   size_t extra_offset = inc_to_alignment(sizeof(array_preamble) + arrmeta_size, extra_alignment);
   array_preamble *result = new (extra_offset + extra_size - sizeof(array_preamble)) array_preamble();
   // Zero out all the arrmeta to start
-  memset(result + 1, 0, arrmeta_size);
+  memset(reinterpret_cast<char *>(result + 1), 0, arrmeta_size);
   // Return a pointer to the extra allocated memory
   *out_extra_ptr = reinterpret_cast<char *>(result) + extra_offset;
   return intrusive_ptr<memory_block_data>(result, false);
