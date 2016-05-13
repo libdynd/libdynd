@@ -159,7 +159,7 @@ before_deploy:
   - mkdir deploy
   - mv build/*.tar.gz deploy/
   - conda install --yes anaconda-client
-  - anaconda --token $ANACONDA_TOKEN upload $(conda render --output --no-source conda.recipe) --user dynd --channel dev
+  - anaconda --token $ANACONDA_TOKEN upload $(conda render -h --output --no-source conda.recipe) --user dynd --channel dev
 
 deploy:
   skip_cleanup: true
