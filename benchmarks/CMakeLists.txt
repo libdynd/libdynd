@@ -47,7 +47,7 @@ else()
         libdynd
         pthread
         benchmark
-        profiler
+#        profiler
         )
 endif()
 

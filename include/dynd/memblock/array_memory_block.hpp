@@ -63,7 +63,7 @@ public:
 
   static void operator delete(void *ptr) { return ::operator delete(ptr); }
 
-  static void operator delete(void *ptr, size_t) { return ::operator delete(ptr); }
+  static void operator delete(void *ptr, size_t DYND_UNUSED(extra_size)) { return ::operator delete(ptr); }
 };
 
 /**
