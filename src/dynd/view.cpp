@@ -349,7 +349,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
 
 static nd::array view_concrete(const nd::array &arr, const ndt::type &tp) {
   // Allocate a result array to attempt the view in it
-  nd::array result(reinterpret_cast<array_preamble *>(make_array_memory_block(tp, tp.get_arrmeta_size()).get()), true);
+  nd::array result = make_array_memory_block(tp, tp.get_arrmeta_size());
   // Copy the fields
   result.get()->data = arr.get()->data;
   if (!arr.get()->owner) {

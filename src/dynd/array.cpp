@@ -48,16 +48,15 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
   ndt::type array_type = ndt::make_fixed_dim(ndim, shape, uniform_tp);
 
   // Allocate the array arrmeta and data in one memory block
-  intrusive_ptr<memory_block_data> result = make_array_memory_block(array_type, array_type.get_arrmeta_size());
+  array result = make_array_memory_block(array_type, array_type.get_arrmeta_size());
 
   // Fill in the preamble arrmeta
-  array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-  ndo->data = data_ptr;
-  ndo->owner = data_reference;
-  ndo->flags = access_flags;
+  result->data = data_ptr;
+  result->owner = data_reference;
+  result->flags = access_flags;
 
   // Fill in the array arrmeta with the shape and strides
-  fixed_dim_type_arrmeta *meta = reinterpret_cast<fixed_dim_type_arrmeta *>(ndo + 1);
+  fixed_dim_type_arrmeta *meta = reinterpret_cast<fixed_dim_type_arrmeta *>(result->metadata());
   for (intptr_t i = 0; i < ndim; ++i) {
     intptr_t dim_size = shape[i];
     meta[i].stride = dim_size > 1 ? strides[i] : 0;
@@ -69,7 +68,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
     *out_uniform_arrmeta = reinterpret_cast<char *>(meta + ndim);
   }
 
-  return nd::array(ndo, true);
+  return result;
 }
 
 /**
@@ -77,12 +76,9 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
  * have identical arrmeta, but this function doesn't check that.
  */
 static nd::array make_array_clone_with_new_type(const nd::array &n, const ndt::type &new_dt) {
-  nd::array result(reinterpret_cast<array_preamble *>(
-                       shallow_copy_array_memory_block(intrusive_ptr<memory_block_data>(n.get(), true)).get()),
-                   true);
-  array_preamble *preamble = result.get();
+  nd::array result = shallow_copy_array_memory_block(n);
   // Swap in the type
-  preamble->tp = new_dt;
+  result->tp = new_dt;
   return result;
 }
 
@@ -142,10 +138,9 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
     ndt::type dt = get()->tp->apply_linear_index(nindices, indices, 0, this_dt, collapse_leading);
     array result;
     if (!dt.is_builtin()) {
-      intrusive_ptr<memory_block_data> memblock = make_array_memory_block(dt, dt.extended()->get_arrmeta_size());
-      result = array(reinterpret_cast<array_preamble *>(memblock.get()), true);
+      result = make_array_memory_block(dt, dt.extended()->get_arrmeta_size());
     } else {
-      result = array(reinterpret_cast<array_preamble *>(make_array_memory_block(dt, 0).get()), true);
+      result = make_array_memory_block(dt, 0);
     }
     result.get()->data = get()->data;
     if (get()->owner) {
@@ -589,9 +584,7 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const {
   // Make a shallow copy of the arrmeta. When we permute the type,
   // its arrmeta has identical structure, so we can fix it up
   // while we're transforming the type.
-  nd::array res(reinterpret_cast<array_preamble *>(
-                    shallow_copy_array_memory_block(intrusive_ptr<memory_block_data>(get(), true)).get()),
-                true);
+  nd::array res = shallow_copy_array_memory_block(*this);
 
   ndt::type transformed_tp;
   bool was_transformed = false;
@@ -700,8 +693,7 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const {
   ndt::type dst_tp = src_tp.with_new_axis(i, new_ndim);
 
   // This is taken from view_concrete in view.cpp
-  nd::array res(reinterpret_cast<array_preamble *>(make_array_memory_block(dst_tp, dst_tp.get_arrmeta_size()).get()),
-                true);
+  nd::array res = make_array_memory_block(dst_tp, dst_tp.get_arrmeta_size());
   res.get()->data = get()->data;
   if (!get()->owner) {
     res.get()->owner = get();
@@ -807,9 +799,7 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const {
         throw std::runtime_error("creating an unaligned type");
         //        result_tp = ndt::make_fixed_dim(dim_size, make_unaligned(scalar_tp));
       }
-      array result(reinterpret_cast<array_preamble *>(
-                       make_array_memory_block(result_tp, result_tp.extended()->get_arrmeta_size()).get()),
-                   true);
+      array result = make_array_memory_block(result_tp, result_tp.extended()->get_arrmeta_size());
       // Copy all the array arrmeta fields
       result.get()->data = get()->data;
       if (get()->owner) {
@@ -914,18 +904,17 @@ nd::array nd::empty_shell(const ndt::type &tp) {
   if (tp.is_builtin()) {
     char *data_ptr = NULL;
     intptr_t data_alignment = tp.get_data_alignment();
-    intrusive_ptr<memory_block_data> result = make_array_memory_block(tp, 0, tp.get_data_size(), data_alignment, &data_ptr);
-    array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
+    array result = make_array_memory_block(tp, 0, tp.get_data_size(), data_alignment, &data_ptr);
     // It's a builtin type id, so no incref
-    preamble->data = data_ptr;
-    preamble->owner = NULL;
-    preamble->flags = nd::read_access_flag | nd::write_access_flag;
-    return nd::array(preamble, true);
+    result->data = data_ptr;
+    result->owner = NULL;
+    result->flags = nd::read_access_flag | nd::write_access_flag;
+    return result;
   } else if (!tp.is_symbolic()) {
     char *data_ptr = NULL;
     size_t arrmeta_size = tp.extended()->get_arrmeta_size();
     size_t data_size = tp.extended()->get_default_data_size();
-    intrusive_ptr<memory_block_data> result;
+    array result;
     if (tp.get_base_id() != memory_id) {
       // Allocate memory the default way
       result = make_array_memory_block(tp, arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
@@ -943,11 +932,10 @@ nd::array nd::empty_shell(const ndt::type &tp) {
         tp.extended<ndt::base_memory_type>()->data_zeroinit(data_ptr, data_size);
       }
     }
-    array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
-    preamble->data = data_ptr;
-    preamble->owner = NULL;
-    preamble->flags = nd::read_access_flag | nd::write_access_flag;
-    return nd::array(preamble, true);
+    result->data = data_ptr;
+    result->owner = NULL;
+    result->flags = nd::read_access_flag | nd::write_access_flag;
+    return result;
   } else {
     stringstream ss;
     ss << "Cannot create a dynd array with symbolic type " << tp;
@@ -960,8 +948,7 @@ nd::array nd::empty(const ndt::type &tp) {
   nd::array res = nd::empty_shell(tp);
   // Construct the arrmeta with default settings
   if (tp.get_arrmeta_size() > 0) {
-    array_preamble *preamble = res.get();
-    preamble->tp->arrmeta_default_construct(reinterpret_cast<char *>(preamble + 1), true);
+    res->tp->arrmeta_default_construct(res->metadata(), true);
   }
   return res;
 }
@@ -1113,15 +1100,12 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values) 
   const ndt::tuple_type *fsd = result_type.extended<ndt::tuple_type>();
   char *data_ptr = NULL;
 
-  array result(reinterpret_cast<array_preamble *>(make_array_memory_block(result_type, fsd->get_arrmeta_size(),
-                                                                          fsd->get_default_data_size(),
-                                                                          fsd->get_data_alignment(), &data_ptr)
-                                                      .get()),
-               true);
+  array result = make_array_memory_block(result_type, fsd->get_arrmeta_size(), fsd->get_default_data_size(),
+                                         fsd->get_data_alignment(), &data_ptr);
   // Set the array properties
-  result.get()->data = data_ptr;
-  result.get()->owner = NULL;
-  result.get()->flags = flags;
+  result->data = data_ptr;
+  result->owner = NULL;
+  result->flags = flags;
 
   // Set the data offsets arrmeta for the tuple type. It's a bunch of pointer
   // types, so the offsets are pretty simple.

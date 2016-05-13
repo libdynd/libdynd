@@ -1157,4 +1157,30 @@ DYND_API void broadcast_to_shape(intptr_t ndim, const intptr_t *shape, intptr_t 
  */
 DYND_API void incremental_broadcast(intptr_t out_undim, intptr_t *out_shape, intptr_t undim, const intptr_t *shape);
 
+/**
+ * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta)
+ *
+ * The created object is uninitialized.
+ */
+inline nd::array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size) {
+  return nd::array(new (arrmeta_size) array_preamble(tp, arrmeta_size), false);
+}
+
+/**
+ * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta),
+ * as well as storage for embedding additional POD storage such as the array data.
+ *
+ * The created object is uninitialized.
+ */
+DYNDT_API nd::array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, size_t extra_size,
+                                            size_t extra_alignment, char **out_extra_ptr);
+
+/**
+ * Makes a shallow copy of the nd::array memory block. In the copy, only the
+ * nd::array arrmeta is duplicated, all the references are the same. Any NULL
+ * references are swapped to point at the original nd::array memory block, as they
+ * are a signal that the data was embedded in the same memory allocation.
+ */
+DYNDT_API nd::array shallow_copy_array_memory_block(const nd::array &ndo);
+
 } // namespace dynd

@@ -84,33 +84,6 @@ public:
   friend long intrusive_ptr_use_count(array_preamble *ptr);
 };
 
-/**
- * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta)
- *
- * The created object is uninitialized.
- */
-inline intrusive_ptr<memory_block_data> make_array_memory_block(const ndt::type &tp, size_t arrmeta_size) {
-  return intrusive_ptr<memory_block_data>(new (arrmeta_size) array_preamble(tp, arrmeta_size), false);
-}
-
-/**
- * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta),
- * as well as storage for embedding additional POD storage such as the array data.
- *
- * The created object is uninitialized.
- */
-DYNDT_API intrusive_ptr<memory_block_data> make_array_memory_block(const ndt::type &tp, size_t arrmeta_size,
-                                                                   size_t extra_size, size_t extra_alignment,
-                                                                   char **out_extra_ptr);
-
-/**
- * Makes a shallow copy of the nd::array memory block. In the copy, only the
- * nd::array arrmeta is duplicated, all the references are the same. Any NULL
- * references are swapped to point at the original nd::array memory block, as they
- * are a signal that the data was embedded in the same memory allocation.
- */
-DYNDT_API intrusive_ptr<memory_block_data> shallow_copy_array_memory_block(const intrusive_ptr<memory_block_data> &ndo);
-
 inline long intrusive_ptr_use_count(array_preamble *ptr) { return ptr->m_use_count; }
 
 inline void intrusive_ptr_retain(array_preamble *ptr) { ++ptr->m_use_count; }
