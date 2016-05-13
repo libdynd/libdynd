@@ -26,7 +26,7 @@ public:
   char *data;
   intrusive_ptr<memory_block_data> owner;
 
-  array_preamble() : memory_block_data(1, array_memory_block_type) {}
+  array_preamble() : memory_block_data(1) {}
 
   ~array_preamble() {
     if (!tp.is_builtin()) {
@@ -58,6 +58,8 @@ public:
 
   /** Return a pointer to the arrmeta, immediately after the preamble */
   const char *metadata() const { return reinterpret_cast<const char *>(this + 1); }
+
+  void debug_print(std::ostream &o, const std::string &indent);
 
   static void *operator new(size_t size, size_t extra_size) { return ::operator new(size + extra_size); }
 
@@ -93,9 +95,6 @@ DYNDT_API intrusive_ptr<memory_block_data> make_array_memory_block(size_t arrmet
  * are a signal that the data was embedded in the same memory allocation.
  */
 DYNDT_API intrusive_ptr<memory_block_data> shallow_copy_array_memory_block(const intrusive_ptr<memory_block_data> &ndo);
-
-DYNDT_API void array_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                              const std::string &indent);
 
 inline long intrusive_ptr_use_count(array_preamble *ptr) { return ptr->m_use_count; }
 

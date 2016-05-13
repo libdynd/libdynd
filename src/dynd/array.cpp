@@ -183,9 +183,7 @@ void nd::array::flag_as_immutable() {
   if (intrusive_ptr<array_preamble>::get()->get_use_count() != 1) {
     // More than one reference to the array itself
     ok = false;
-  } else if (get()->owner && (get()->owner->get_use_count() != 1 ||
-                              !(get()->owner->m_type == fixed_size_pod_memory_block_type ||
-                                get()->owner->m_type == pod_memory_block_type))) {
+  } else if (get()->owner && get()->owner->get_use_count() != 1) {
     // More than one reference to the array's data, or the reference is to
     // something
     // other than a memblock owning its data, such as an external memblock.
@@ -874,7 +872,7 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const {
       o << "\n";
     }
     if (ndo->owner) {
-      memory_block_debug_print(ndo->owner.get(), o, "    ");
+      ndo->owner->debug_print(o, "    ");
     }
   } else {
     o << indent << "NULL\n";

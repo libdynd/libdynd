@@ -39,9 +39,7 @@ bool ndt::var_dim_type::is_expression() const { return m_element_tp.is_expressio
 
 bool ndt::var_dim_type::is_unique_data_owner(const char *arrmeta) const {
   const metadata_type *md = reinterpret_cast<const metadata_type *>(arrmeta);
-  if (md->blockref && (md->blockref->get_use_count() != 1 || (md->blockref->m_type != pod_memory_block_type &&
-                                                              md->blockref->m_type != zeroinit_memory_block_type &&
-                                                              md->blockref->m_type != objectarray_memory_block_type))) {
+  if (md->blockref && md->blockref->get_use_count() != 1) {
     return false;
   }
   if (m_element_tp.is_builtin()) {
@@ -376,25 +374,8 @@ void ndt::var_dim_type::arrmeta_reset_buffers(char *arrmeta) const {
   }
 
   if (md->blockref) {
-    uint32_t br_type = md->blockref->m_type;
-    if (br_type == zeroinit_memory_block_type || br_type == pod_memory_block_type) {
-      md->blockref->reset();
-      return;
-    } else if (br_type == objectarray_memory_block_type) {
-      md->blockref->reset();
-      return;
-    }
+    md->blockref->reset();
   }
-
-  stringstream ss;
-  ss << "can only reset the buffers of a var_dim type ";
-  ss << "if it was default-constructed. Its blockref is ";
-  if (!md->blockref) {
-    ss << "NULL";
-  } else {
-    ss << "of the wrong type " << (memory_block_type_t)md->blockref->m_type;
-  }
-  throw runtime_error(ss.str());
 }
 
 void ndt::var_dim_type::arrmeta_finalize_buffers(char *arrmeta) const {
@@ -427,7 +408,7 @@ void ndt::var_dim_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o
   o << indent << "var_dim arrmeta\n";
   o << indent << " stride: " << md->stride << "\n";
   o << indent << " offset: " << md->offset << "\n";
-  memory_block_debug_print(md->blockref.get(), o, indent + " ");
+  md->blockref->debug_print(o, indent + " ");
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_debug_print(arrmeta + sizeof(metadata_type), o, indent + "  ");
   }

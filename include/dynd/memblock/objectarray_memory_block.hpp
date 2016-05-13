@@ -30,8 +30,8 @@ struct objectarray_memory_block : memory_block_data {
 
   objectarray_memory_block(const ndt::type &dt, size_t arrmeta_size, const char *arrmeta, intptr_t stride,
                            intptr_t initial_count)
-      : memory_block_data(1, objectarray_memory_block_type), m_dt(dt), arrmeta_size(arrmeta_size), m_arrmeta(arrmeta),
-        m_stride(stride), m_total_allocated_count(0), m_finalized(false), m_memory_handles() {
+      : memory_block_data(1), m_dt(dt), arrmeta_size(arrmeta_size), m_arrmeta(arrmeta), m_stride(stride),
+        m_total_allocated_count(0), m_finalized(false), m_memory_handles() {
     if ((dt.get_flags() & type_flag_destructor) == 0) {
       std::stringstream ss;
       ss << "Cannot create objectarray memory block with dynd type " << dt;
@@ -71,6 +71,8 @@ struct objectarray_memory_block : memory_block_data {
     }
     m_total_allocated_count += count;
   }
+
+  void debug_print(std::ostream &o, const std::string &indent);
 };
 
 /**
@@ -89,8 +91,5 @@ struct objectarray_memory_block : memory_block_data {
 DYNDT_API intrusive_ptr<memory_block_data> make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta,
                                                                          intptr_t stride, intptr_t initial_count = 64,
                                                                          size_t arrmeta_size = 0);
-
-DYNDT_API void objectarray_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                                    const std::string &indent);
 
 } // namespace dynd

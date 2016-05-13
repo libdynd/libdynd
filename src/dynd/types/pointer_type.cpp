@@ -25,9 +25,7 @@ void ndt::pointer_type::print_type(std::ostream &o) const { o << "pointer[" << m
 
 bool ndt::pointer_type::is_unique_data_owner(const char *arrmeta) const {
   const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(*arrmeta);
-  if (md->blockref &&
-      (md->blockref->get_use_count() != 1 ||
-       (md->blockref->m_type != pod_memory_block_type && md->blockref->m_type != fixed_size_pod_memory_block_type))) {
+  if (md->blockref && md->blockref->get_use_count() != 1) {
     return false;
   }
   return true;
@@ -224,7 +222,7 @@ void ndt::pointer_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o
   const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
   o << indent << "pointer arrmeta\n";
   o << indent << " offset: " << md->offset << "\n";
-  memory_block_debug_print(md->blockref.get(), o, indent + " ");
+  md->blockref->debug_print(o, indent + " ");
   if (!m_target_tp.is_builtin()) {
     m_target_tp.extended()->arrmeta_debug_print(arrmeta + sizeof(pointer_type_arrmeta), o, indent + " ");
   }

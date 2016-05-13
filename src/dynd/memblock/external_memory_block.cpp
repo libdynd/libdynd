@@ -8,6 +8,7 @@
 
 #include <dynd/memblock/external_memory_block.hpp>
 
+using namespace std;
 using namespace dynd;
 
 intrusive_ptr<memory_block_data> dynd::make_external_memory_block(void *object, external_memory_block_free_t free_fn) {
@@ -15,9 +16,10 @@ intrusive_ptr<memory_block_data> dynd::make_external_memory_block(void *object, 
   return intrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(emb), false);
 }
 
-void dynd::external_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
-                                             const std::string &indent) {
-  const external_memory_block *mb = reinterpret_cast<const external_memory_block *>(memblock);
-  o << indent << " object void pointer: " << mb->m_object << "\n";
-  o << indent << " free function: " << (const void *)mb->m_free_fn << "\n";
+void external_memory_block::debug_print(std::ostream &o, const std::string &indent) {
+  o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";
+  o << indent << " reference count: " << m_use_count << "\n";
+  o << indent << " object void pointer: " << m_object << "\n";
+  o << indent << " free function: " << (const void *)m_free_fn << "\n";
+  o << indent << "------" << endl;
 }
