@@ -1181,6 +1181,6 @@ DYNDT_API nd::array make_array_memory_block(const ndt::type &tp, size_t arrmeta_
  * references are swapped to point at the original nd::array memory block, as they
  * are a signal that the data was embedded in the same memory allocation.
  */
-DYNDT_API nd::array shallow_copy_array_memory_block(const nd::array &ndo);
+DYND_API nd::array shallow_copy_array_memory_block(const nd::array &ndo);
 
 } // namespace dynd
