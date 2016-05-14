@@ -10,9 +10,11 @@
 namespace dynd {
 namespace nd {
 
-  class DYNDT_API buffer : public intrusive_ptr<array_preamble> {
+  class DYND_API buffer : public intrusive_ptr<array_preamble> {
   public:
     using intrusive_ptr<array_preamble>::intrusive_ptr;
+
+    buffer() = default;
   };
 
 } // namespace dynd::nd
