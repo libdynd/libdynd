@@ -231,13 +231,13 @@ set(libdyndt_SRC
     include/dynd/types/string_type.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/type_type.hpp
-    # MemBlock
-    src/dynd/memblock/memory_block.cpp
+    # Memory blocks
+    src/dynd/memblock/base_memory_block.cpp
     include/dynd/memblock/array_memory_block.hpp
+    include/dynd/memblock/base_memory_block.hpp
     include/dynd/memblock/external_memory_block.hpp
     include/dynd/memblock/fixed_size_pod_memory_block.hpp
     include/dynd/memblock/memmap_memory_block.hpp
-    include/dynd/memblock/memory_block.hpp
     include/dynd/memblock/objectarray_memory_block.hpp
     include/dynd/memblock/pod_memory_block.hpp
     include/dynd/memblock/zeroinit_memory_block.hpp

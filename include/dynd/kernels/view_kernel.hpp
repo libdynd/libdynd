@@ -18,7 +18,7 @@ namespace nd {
       }
       dst->get()->data = src[0]->data;
 
-      dst->get()->owner = src[0]->owner ? src[0]->owner : memory_block(src[0].get(), true);
+      dst->get()->set_owner(src[0]->get_owner() ? src[0]->get_owner() : src[0]);
     }
   };
 

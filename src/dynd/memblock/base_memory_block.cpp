@@ -3,9 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/memblock/memory_block.hpp>
+#include <dynd/memblock/base_memory_block.hpp>
 
 using namespace std;
 using namespace dynd;
 
-nd::memory_block_data::~memory_block_data() {}
+nd::base_memory_block::~base_memory_block() {}

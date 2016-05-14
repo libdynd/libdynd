@@ -8,13 +8,13 @@
 #include <iostream>
 #include <string>
 
-#include <dynd/memblock/memory_block.hpp>
+#include <dynd/memblock/base_memory_block.hpp>
 #include <dynd/type.hpp>
 
 namespace dynd {
 namespace nd {
 
-  struct zeroinit_memory_block : memory_block_data {
+  struct zeroinit_memory_block : base_memory_block {
     size_t data_size;
     intptr_t data_alignment;
     intptr_t m_total_allocated_capacity;

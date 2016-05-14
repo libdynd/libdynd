@@ -8,12 +8,12 @@
 #include <iostream>
 #include <string>
 
-#include <dynd/memblock/memory_block.hpp>
+#include <dynd/memblock/base_memory_block.hpp>
 
 namespace dynd {
 namespace nd {
 
-  class fixed_size_pod_memory_block : public memory_block_data {
+  class fixed_size_pod_memory_block : public base_memory_block {
   public:
     void debug_print(std::ostream &o, const std::string &indent) {
       o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";

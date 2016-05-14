@@ -20,7 +20,7 @@
 #include <unistd.h>
 #endif
 
-#include <dynd/memblock/memory_block.hpp>
+#include <dynd/memblock/base_memory_block.hpp>
 
 namespace dynd {
 
@@ -80,7 +80,7 @@ namespace nd {
    *             negative, in which case it is interpreted as an offset from the
    *             end of the file.
    */
-  struct memmap_memory_block : public memory_block_data {
+  struct memmap_memory_block : public base_memory_block {
     // Parameters used to construct the memory block
     std::string m_filename;
     uint32_t m_access;

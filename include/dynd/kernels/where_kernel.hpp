@@ -13,11 +13,11 @@ namespace nd {
   struct where_kernel : base_strided_kernel<where_kernel, 2> {
     size_t &it;
     intptr_t ret_stride;
-    intrusive_ptr<memory_block_data> dst_memory_block;
+    memory_block dst_memory_block;
     size_t ret_element_size;
     size_t capacity;
 
-    where_kernel(char *data, intptr_t ret_stride, const intrusive_ptr<memory_block_data> &dst_memory_block)
+    where_kernel(char *data, intptr_t ret_stride, const memory_block &dst_memory_block)
         : it(*reinterpret_cast<size_t *>(data)), ret_stride(ret_stride), dst_memory_block(dst_memory_block),
           ret_element_size(sizeof(intptr_t)), capacity(0) {}
 

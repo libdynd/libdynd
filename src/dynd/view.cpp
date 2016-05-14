@@ -352,12 +352,12 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp) {
   nd::array result = nd::make_array_memory_block(tp, tp.get_arrmeta_size());
   // Copy the fields
   result.get()->data = arr.get()->data;
-  if (!arr.get()->owner) {
+  if (!arr->get_owner()) {
     // Embedded data, need reference to the array
-    result.get()->owner = arr;
+    result->set_owner(arr);
   } else {
     // Use the same data reference, avoid producing a chain
-    result.get()->owner = arr.get_data_memblock();
+    result->set_owner(arr.get_data_memblock());
   }
   result.get()->flags = arr.get()->flags;
   // First handle a special case of viewing outermost "var" as "fixed[#]"
@@ -371,7 +371,7 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp) {
     if ((intptr_t)in_dat->size == out_am->dim_size) {
       // Use the more specific data reference from the var arrmeta if possible
       if (in_am->blockref) {
-        result.get()->owner = nd::memory_block(in_am->blockref.get(), true);
+        result->set_owner(in_am->blockref);
       }
       result.get()->data = in_dat->begin + in_am->offset;
       // Try to copy the rest of the arrmeta as a view

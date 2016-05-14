@@ -328,8 +328,8 @@ namespace nd {
     }
 
     inline memory_block get_data_memblock() const {
-      if (get()->owner) {
-        return get()->owner;
+      if (m_ptr->get_owner()) {
+        return m_ptr->get_owner();
       } else {
         return memory_block(get(), true);
       }
@@ -1049,8 +1049,9 @@ namespace nd {
    *
    * The created object is uninitialized.
    */
-  inline array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size) {
-    return array(new (arrmeta_size) array_preamble(tp, arrmeta_size), false);
+  inline array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size,
+                                       const memory_block &owner = memory_block()) {
+    return array(new (arrmeta_size) array_preamble(tp, arrmeta_size, owner), false);
   }
 
   /**

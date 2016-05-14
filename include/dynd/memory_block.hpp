@@ -6,14 +6,14 @@
 #pragma once
 
 #include <dynd/buffer.hpp>
-#include <dynd/memblock/memory_block.hpp>
+#include <dynd/memblock/base_memory_block.hpp>
 
 namespace dynd {
 namespace nd {
 
-  class DYNDT_API memory_block : public intrusive_ptr<memory_block_data> {
+  class DYNDT_API memory_block : public intrusive_ptr<base_memory_block> {
   public:
-    using intrusive_ptr<memory_block_data>::intrusive_ptr;
+    using intrusive_ptr<base_memory_block>::intrusive_ptr;
 
     memory_block() = default;
 
@@ -29,7 +29,7 @@ namespace nd {
    * Creates a memory block of a pre-determined fixed size. A pointer to the
    * memory allocated for data is placed in the output parameter.
    */
-  DYNDT_API intrusive_ptr<memory_block_data> make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment,
+  DYNDT_API intrusive_ptr<base_memory_block> make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment,
                                                                               char **out_datapointer);
 
   /**

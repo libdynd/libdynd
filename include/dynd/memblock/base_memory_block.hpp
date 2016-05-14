@@ -18,14 +18,14 @@ namespace nd {
    * an atomic reference count. There is a fixed set of memory block types, of which 'external'
    * is presently the only extensible ones.
    */
-  class DYNDT_API memory_block_data {
+  class DYNDT_API base_memory_block {
   protected:
     std::atomic_long m_use_count;
 
-    memory_block_data() : m_use_count(1) {}
+    base_memory_block() : m_use_count(1) {}
 
   public:
-    virtual ~memory_block_data();
+    virtual ~base_memory_block();
 
     long get_use_count() const { return m_use_count; }
 
@@ -65,16 +65,16 @@ namespace nd {
 
     void debug_print(std::ostream &o) { debug_print(o, ""); }
 
-    friend void intrusive_ptr_retain(memory_block_data *ptr);
-    friend void intrusive_ptr_release(memory_block_data *ptr);
-    friend long intrusive_ptr_use_count(memory_block_data *ptr);
+    friend void intrusive_ptr_retain(base_memory_block *ptr);
+    friend void intrusive_ptr_release(base_memory_block *ptr);
+    friend long intrusive_ptr_use_count(base_memory_block *ptr);
   };
 
-  inline long intrusive_ptr_use_count(memory_block_data *ptr) { return ptr->m_use_count; }
+  inline long intrusive_ptr_use_count(base_memory_block *ptr) { return ptr->m_use_count; }
 
-  inline void intrusive_ptr_retain(memory_block_data *ptr) { ++ptr->m_use_count; }
+  inline void intrusive_ptr_retain(base_memory_block *ptr) { ++ptr->m_use_count; }
 
-  inline void intrusive_ptr_release(memory_block_data *ptr) {
+  inline void intrusive_ptr_release(base_memory_block *ptr) {
     if (--ptr->m_use_count == 0) {
       delete ptr;
     }

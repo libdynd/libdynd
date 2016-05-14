@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 
-#include <dynd/memblock/memory_block.hpp>
+#include <dynd/memblock/base_memory_block.hpp>
 #include <dynd/type.hpp>
 
 namespace dynd {
@@ -32,7 +32,7 @@ namespace nd {
    *                get_default_data_size() corresponding to default-constructed arrmeta.
    * \param initial_count  The number of elements to allocate at the start.
    */
-  struct objectarray_memory_block : memory_block_data {
+  struct objectarray_memory_block : base_memory_block {
     ndt::type m_dt;
     size_t arrmeta_size;
     const char *m_arrmeta;
