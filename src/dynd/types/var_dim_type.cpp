@@ -330,11 +330,12 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
   if (blockref_alloc) {
     uint32_t flags = m_element_tp.get_flags();
     if (flags & type_flag_destructor) {
-      md->blockref = nd::make_objectarray_memory_block(m_element_tp, arrmeta, element_size, 64, sizeof(metadata_type));
+      md->blockref = nd::make_memory_block<nd::objectarray_memory_block>(m_element_tp, sizeof(metadata_type), arrmeta,
+                                                                         element_size, 64);
     } else if (flags & type_flag_zeroinit) {
       md->blockref = nd::make_zeroinit_memory_block(m_element_tp);
     } else {
-      md->blockref = nd::make_memory_block<pod_memory_block>(m_element_tp);
+      md->blockref = nd::make_memory_block<nd::pod_memory_block>(m_element_tp);
     }
   }
   if (!m_element_tp.is_builtin()) {
