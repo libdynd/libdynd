@@ -37,8 +37,7 @@ using namespace dynd;
 
 nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t ndim, const intptr_t *shape,
                                            const intptr_t *strides, int64_t access_flags, char *data_ptr,
-                                           const intrusive_ptr<memory_block_data> &data_reference,
-                                           char **out_uniform_arrmeta) {
+                                           const memory_block &data_reference, char **out_uniform_arrmeta) {
   if (out_uniform_arrmeta == NULL && !uniform_tp.is_builtin() && uniform_tp.extended()->get_arrmeta_size() > 0) {
     stringstream ss;
     ss << "Cannot make a strided array with type " << uniform_tp << " from a preexisting data pointer";
@@ -52,7 +51,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
 
   // Fill in the preamble arrmeta
   result->data = data_ptr;
-  result->owner = data_reference;
+  result->owner = memory_block(data_reference.get(), true);
   result->flags = access_flags;
 
   // Fill in the array arrmeta with the shape and strides
@@ -147,7 +146,7 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
       result.get()->owner = get()->owner;
     } else {
       // If the data reference is NULL, the data is embedded in the array itself
-      result.get()->owner = get();
+      result.get()->owner = memory_block(get(), true);
     }
     intptr_t offset = get()->tp->apply_linear_index(nindices, indices, get()->metadata(), dt, result.get()->metadata(),
                                                     intrusive_ptr<memory_block_data>(get(), true), 0, this_dt,
@@ -172,7 +171,7 @@ void nd::array::flag_as_immutable() {
 
   // Check that nobody else is peeking into our data
   bool ok = true;
-  if (intrusive_ptr<array_preamble>::get()->get_use_count() != 1) {
+  if (m_ptr->get_use_count() != 1) {
     // More than one reference to the array itself
     ok = false;
   } else if (get()->owner && get()->owner->get_use_count() != 1) {
@@ -696,7 +695,7 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const {
   nd::array res = make_array_memory_block(dst_tp, dst_tp.get_arrmeta_size());
   res.get()->data = get()->data;
   if (!get()->owner) {
-    res.get()->owner = get();
+    res.get()->owner = memory_block(get(), true);
   } else {
     res.get()->owner = get_data_memblock();
   }
@@ -805,7 +804,7 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const {
       if (get()->owner) {
         result.get()->owner = get()->owner;
       } else {
-        result.get()->owner = intrusive_ptr<array_preamble>::get();
+        result.get()->owner = *this;
       }
       result.get()->flags = get()->flags;
       // The result has one strided ndarray field
@@ -826,9 +825,9 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const {
 
 void nd::array::debug_print(std::ostream &o, const std::string &indent) const {
   o << indent << "------ array\n";
-  if (intrusive_ptr<array_preamble>::get()) {
+  if (m_ptr) {
     const array_preamble *ndo = get();
-    o << " address: " << (void *)intrusive_ptr<array_preamble>::get() << "\n";
+    o << " address: " << (void *)m_ptr << "\n";
     o << " refcount: " << ndo->get_use_count() << "\n";
     o << " type:\n";
     o << "  pointer: " << (void *)ndo->tp.extended() << "\n";
@@ -907,7 +906,7 @@ nd::array nd::empty_shell(const ndt::type &tp) {
     array result = make_array_memory_block(tp, 0, tp.get_data_size(), data_alignment, &data_ptr);
     // It's a builtin type id, so no incref
     result->data = data_ptr;
-    result->owner = NULL;
+    result->owner = memory_block();
     result->flags = nd::read_access_flag | nd::write_access_flag;
     return result;
   } else if (!tp.is_symbolic()) {
@@ -933,7 +932,7 @@ nd::array nd::empty_shell(const ndt::type &tp) {
       }
     }
     result->data = data_ptr;
-    result->owner = NULL;
+    result->owner = memory_block();
     result->flags = nd::read_access_flag | nd::write_access_flag;
     return result;
   } else {
@@ -1045,8 +1044,8 @@ nd::array nd::reshape(const nd::array &a, const nd::array &shape) {
     shape_copy[i] = shape(i).as<intptr_t>();
   }
 
-  return make_strided_array_from_data(a.get_dtype(), ndim, shape_copy.get(), strides.get(), a.get_flags(), a.data(),
-                                      intrusive_ptr<memory_block_data>(a.get(), true), NULL);
+  return make_strided_array_from_data(a.get_dtype(), ndim, shape_copy.get(), strides.get(), a.get_flags(), a.data(), a,
+                                      NULL);
 }
 
 nd::array nd::memmap(const std::string &DYND_UNUSED(filename), intptr_t DYND_UNUSED(begin), intptr_t DYND_UNUSED(end),
@@ -1104,7 +1103,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values) 
                                          fsd->get_data_alignment(), &data_ptr);
   // Set the array properties
   result->data = data_ptr;
-  result->owner = NULL;
+  result->owner = memory_block();
   result->flags = flags;
 
   // Set the data offsets arrmeta for the tuple type. It's a bunch of pointer
@@ -1120,8 +1119,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values) 
     pointer_type_arrmeta *pmeta;
     pmeta = reinterpret_cast<pointer_type_arrmeta *>(result.get()->metadata() + arrmeta_offsets[i]);
     pmeta->offset = 0;
-    pmeta->blockref = field_values[i].get()->owner ? field_values[i].get()->owner
-                                                   : intrusive_ptr<memory_block_data>(field_values[i].get(), true);
+    pmeta->blockref = field_values[i]->owner ? field_values[i]->owner : field_values[i];
 
     const ndt::type &field_dt = field_values[i].get_type();
     if (field_dt.get_arrmeta_size() > 0) {
@@ -1405,8 +1403,8 @@ nd::array &nd::array::operator/=(const array &rhs) {
   return *this;
 }
 
-nd::array dynd::make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, size_t extra_size,
-                                        size_t extra_alignment, char **out_extra_ptr) {
+nd::array nd::make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, size_t extra_size,
+                                      size_t extra_alignment, char **out_extra_ptr) {
   size_t extra_offset = inc_to_alignment(sizeof(array_preamble) + arrmeta_size, extra_alignment);
   array_preamble *result = new (extra_offset + extra_size - sizeof(array_preamble)) array_preamble(tp, arrmeta_size);
   // Return a pointer to the extra allocated memory
@@ -1414,7 +1412,7 @@ nd::array dynd::make_array_memory_block(const ndt::type &tp, size_t arrmeta_size
   return nd::array(result, false);
 }
 
-nd::array dynd::shallow_copy_array_memory_block(const nd::array &ndo) {
+nd::array nd::shallow_copy_array_memory_block(const nd::array &ndo) {
   // Allocate the new memory block.
   size_t arrmeta_size = 0;
   if (!ndo->tp.is_builtin()) {
@@ -1424,9 +1422,9 @@ nd::array dynd::shallow_copy_array_memory_block(const nd::array &ndo) {
   nd::array result = make_array_memory_block(ndo->tp, arrmeta_size);
   // Clone the data pointer
   result->data = ndo->data;
-  result->owner = ndo->owner;
+  result->owner = memory_block(ndo->owner.get(), true);
   if (!result->owner) {
-    result->owner = ndo.get();
+    result->owner = memory_block(ndo.get(), true);
   }
 
   // Copy the flags

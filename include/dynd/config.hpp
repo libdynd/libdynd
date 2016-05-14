@@ -916,9 +916,13 @@ namespace ndt {
 
 } // namespace dynd::ndt
 
+class memory_block;
+
 namespace nd {
 
+  class buffer;
   class array;
+
   class callable;
 
 } // namespace dynd ::nd

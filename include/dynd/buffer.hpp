@@ -17,5 +17,7 @@ namespace nd {
     buffer() = default;
   };
 
+  inline memory_block::memory_block(const buffer &other) : intrusive_ptr<memory_block_data>(other.get(), true) {}
+
 } // namespace dynd::nd
 } // namespace dynd

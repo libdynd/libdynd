@@ -200,7 +200,7 @@ namespace nd {
     }
 
     /** Returns true if the array is NULL */
-    inline bool is_null() const { return intrusive_ptr<array_preamble>::get() == NULL; }
+    inline bool is_null() const { return m_ptr == NULL; }
 
     char *data() const {
       if (get()->flags & write_access_flag) {
@@ -327,11 +327,11 @@ namespace nd {
       }
     }
 
-    inline intrusive_ptr<memory_block_data> get_data_memblock() const {
+    inline memory_block get_data_memblock() const {
       if (get()->owner) {
         return get()->owner;
       } else {
-        return intrusive_ptr<memory_block_data>(get(), true);
+        return memory_block(get(), true);
       }
     }
 
@@ -786,8 +786,7 @@ namespace nd {
    */
   DYND_API array make_strided_array_from_data(const ndt::type &uniform_dtype, intptr_t ndim, const intptr_t *shape,
                                               const intptr_t *strides, int64_t access_flags, char *data_ptr,
-                                              const intrusive_ptr<memory_block_data> &data_reference,
-                                              char **out_uniform_arrmeta = NULL);
+                                              const memory_block &data_reference, char **out_uniform_arrmeta = NULL);
 
   inline array_vals array::vals() const { return array_vals(*this); }
 
@@ -1045,6 +1044,32 @@ namespace nd {
    */
   DYND_API array combine_into_tuple(size_t field_count, const array *field_values);
 
+  /**
+   * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta)
+   *
+   * The created object is uninitialized.
+   */
+  inline array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size) {
+    return array(new (arrmeta_size) array_preamble(tp, arrmeta_size), false);
+  }
+
+  /**
+   * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta),
+   * as well as storage for embedding additional POD storage such as the array data.
+   *
+   * The created object is uninitialized.
+   */
+  DYND_API array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, size_t extra_size,
+                                         size_t extra_alignment, char **out_extra_ptr);
+
+  /**
+   * Makes a shallow copy of the nd::array memory block. In the copy, only the
+   * nd::array arrmeta is duplicated, all the references are the same. Any NULL
+   * references are swapped to point at the original nd::array memory block, as they
+   * are a signal that the data was embedded in the same memory allocation.
+   */
+  DYND_API array shallow_copy_array_memory_block(const array &ndo);
+
 } // namespace dynd::nd
 
 namespace ndt {
@@ -1155,31 +1180,5 @@ DYND_API void broadcast_to_shape(intptr_t ndim, const intptr_t *shape, intptr_t 
  * \param shape  The input shape.
  */
 DYND_API void incremental_broadcast(intptr_t out_undim, intptr_t *out_shape, intptr_t undim, const intptr_t *shape);
-
-/**
- * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta)
- *
- * The created object is uninitialized.
- */
-inline nd::array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size) {
-  return nd::array(new (arrmeta_size) array_preamble(tp, arrmeta_size), false);
-}
-
-/**
- * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta),
- * as well as storage for embedding additional POD storage such as the array data.
- *
- * The created object is uninitialized.
- */
-DYND_API nd::array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, size_t extra_size,
-                                           size_t extra_alignment, char **out_extra_ptr);
-
-/**
- * Makes a shallow copy of the nd::array memory block. In the copy, only the
- * nd::array arrmeta is duplicated, all the references are the same. Any NULL
- * references are swapped to point at the original nd::array memory block, as they
- * are a signal that the data was embedded in the same memory allocation.
- */
-DYND_API nd::array shallow_copy_array_memory_block(const nd::array &ndo);
 
 } // namespace dynd
