@@ -333,7 +333,7 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
       md->blockref = nd::make_memory_block<nd::objectarray_memory_block>(m_element_tp, sizeof(metadata_type), arrmeta,
                                                                          element_size, 64);
     } else if (flags & type_flag_zeroinit) {
-      md->blockref = nd::make_zeroinit_memory_block(m_element_tp);
+      md->blockref = nd::make_memory_block<nd::zeroinit_memory_block>(m_element_tp);
     } else {
       md->blockref = nd::make_memory_block<nd::pod_memory_block>(m_element_tp);
     }
