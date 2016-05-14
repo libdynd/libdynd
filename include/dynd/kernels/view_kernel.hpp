@@ -16,7 +16,7 @@ namespace nd {
       if (!dst_tp.is_builtin()) {
         dst_tp.extended()->arrmeta_copy_construct(dst->get()->metadata(), src[0]->metadata(), src[0]);
       }
-      dst->get()->data = src[0]->data;
+      dst->get()->set_data(src[0]->get_data());
 
       dst->get()->set_owner(src[0]->get_owner() ? src[0]->get_owner() : src[0]);
     }
