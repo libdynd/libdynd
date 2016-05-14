@@ -19,7 +19,7 @@ namespace nd {
       }
       (*dst)->data = *reinterpret_cast<char **>(src[0]->data) +
                      reinterpret_cast<const pointer_type_arrmeta *>(src[0]->metadata())->offset;
-      (*dst)->owner = src[0].get_data_memblock();
+      (*dst)->set_owner(src[0].get_data_memblock());
     }
   };
 

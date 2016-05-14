@@ -25,9 +25,17 @@ namespace nd {
     ndt::type tp;
     uint64_t flags;
     char *data;
-    memory_block owner;
 
+  private:
+    memory_block m_owner;
+
+  public:
     array_preamble(const ndt::type &tp, size_t arrmeta_size) : tp(tp) {
+      // Zero out all the arrmeta to start
+      memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
+    }
+
+    array_preamble(const ndt::type &tp, size_t arrmeta_size, const memory_block &owner) : tp(tp), m_owner(owner) {
       // Zero out all the arrmeta to start
       memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
     }
@@ -36,7 +44,7 @@ namespace nd {
       if (!tp.is_builtin()) {
         char *arrmeta = reinterpret_cast<char *>(this + 1);
 
-        if (!owner) {
+        if (!m_owner) {
           // Call the data destructor if necessary (i.e. the nd::array owns
           // the data memory, and the type has a data destructor)
           if (!tp->is_expression() && (tp->get_flags() & type_flag_destructor) != 0) {
@@ -56,6 +64,10 @@ namespace nd {
         tp->arrmeta_destruct(arrmeta);
       }
     }
+
+    const memory_block &get_owner() const { return m_owner; }
+
+    void set_owner(const memory_block &owner) { m_owner = owner; }
 
     /** Return a pointer to the arrmeta, immediately after the preamble */
     char *metadata() { return reinterpret_cast<char *>(this + 1); }
