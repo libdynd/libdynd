@@ -8,4 +8,4 @@
 using namespace std;
 using namespace dynd;
 
-memory_block_data::~memory_block_data() {}
+nd::memory_block_data::~memory_block_data() {}

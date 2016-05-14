@@ -66,14 +66,6 @@ void ndt::int_kind_sym_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmet
   throw runtime_error(ss.str());
 }
 
-size_t ndt::int_kind_sym_type::arrmeta_copy_construct_onedim(char *DYND_UNUSED(dst_arrmeta),
-                                                             const char *DYND_UNUSED(src_arrmeta),
-                                                             memory_block_data *DYND_UNUSED(embedded_reference)) const {
-  stringstream ss;
-  ss << "Cannot copy construct arrmeta for symbolic type " << type(this, true);
-  throw runtime_error(ss.str());
-}
-
 void ndt::int_kind_sym_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const {}
 
 void ndt::int_kind_sym_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const {}

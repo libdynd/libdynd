@@ -3,17 +3,25 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/memblock/objectarray_memory_block.hpp>
-#include <dynd/memblock/zeroinit_memory_block.hpp>
 #include <dynd/buffer.hpp>
+#include <dynd/memblock/fixed_size_pod_memory_block.hpp>
+#include <dynd/memblock/zeroinit_memory_block.hpp>
 
 using namespace std;
 using namespace dynd;
 
-nd::memory_block nd::make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta, intptr_t stride,
-                                                   intptr_t initial_count, size_t arrmeta_size) {
-  objectarray_memory_block *pmb = new objectarray_memory_block(dt, arrmeta_size, arrmeta, stride, initial_count);
-  return memory_block(reinterpret_cast<memory_block_data *>(pmb), false);
+intrusive_ptr<nd::memory_block_data> nd::make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t alignment,
+                                                                          char **out_datapointer) {
+  // Calculate the aligned starting point for the data
+  intptr_t start =
+      (intptr_t)(((uintptr_t)sizeof(memory_block_data) + (uintptr_t)(alignment - 1)) & ~((uintptr_t)(alignment - 1)));
+  // Allocate it
+  fixed_size_pod_memory_block *result =
+      new (start + size_bytes - sizeof(fixed_size_pod_memory_block)) fixed_size_pod_memory_block();
+  // Give back the data pointer
+  *out_datapointer = reinterpret_cast<char *>(result) + start;
+  // Use placement new to initialize and return the memory block
+  return intrusive_ptr<memory_block_data>(result, false);
 }
 
 nd::memory_block nd::make_zeroinit_memory_block(const ndt::type &element_tp, intptr_t initial_capacity_bytes) {
