@@ -3,20 +3,20 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
-#include "inc_gtest.hpp"
 #include "../dynd_assertions.hpp"
+#include "inc_gtest.hpp"
 
-#include <dynd/types/fixed_string_type.hpp>
-#include <dynd/callable.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/index.hpp>
 #include <dynd/array.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/functional.hpp>
+#include <dynd/index.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 
 #include <dynd/arithmetic.hpp>
 
@@ -118,7 +118,8 @@ TEST(Callable, DecomposedDynamicCall) {
   ndt::type types[3] = {values[0].get_type(), values[1].get_type(), values[2].get_type()};
   const char *const arrmetas[3] = {values[0].get()->metadata(), values[1].get()->metadata(),
                                    values[2].get()->metadata()};
-  char *const datas[3] = {values[0].get()->data, values[1].get()->data, values[2].get()->data};
+  char *const datas[3] = {const_cast<char *>(values[0].cdata()), const_cast<char *>(values[1].cdata()),
+                          const_cast<char *>(values[2].cdata())};
   //  const char *names[3] = {"x", "y", "z"};
 
   af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; });
@@ -164,9 +165,9 @@ TEST(Callable, Assignment_CallInterface) {
 }
 
 /*
+#include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IRReader/IRReader.h>
-#include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/Support/SourceMgr.h>
 */
 

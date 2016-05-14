@@ -349,16 +349,8 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
 
 static nd::array view_concrete(const nd::array &arr, const ndt::type &tp) {
   // Allocate a result array to attempt the view in it
-  nd::array result = nd::make_array_memory_block(tp, tp.get_arrmeta_size());
-  // Copy the fields
-  result.get()->data = arr.get()->data;
-  if (!arr->get_owner()) {
-    // Embedded data, need reference to the array
-    result->set_owner(arr);
-  } else {
-    // Use the same data reference, avoid producing a chain
-    result->set_owner(arr.get_data_memblock());
-  }
+  nd::array result = nd::make_array_memory_block(tp, tp.get_arrmeta_size(), arr->get_data(),
+                                                 arr->get_owner() ? arr.get_data_memblock() : arr);
   result.get()->flags = arr.get()->flags;
   // First handle a special case of viewing outermost "var" as "fixed[#]"
   if (arr.get_type().get_id() == var_dim_id && tp.get_id() == fixed_dim_id) {
@@ -373,7 +365,7 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp) {
       if (in_am->blockref) {
         result->set_owner(in_am->blockref);
       }
-      result.get()->data = in_dat->begin + in_am->offset;
+      result->set_data(in_dat->begin + in_am->offset);
       // Try to copy the rest of the arrmeta as a view
       if (try_view(arr.get_type().extended<ndt::base_dim_type>()->get_element_type(),
                    arr.get()->metadata() + sizeof(ndt::var_dim_type::metadata_type),

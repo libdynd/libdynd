@@ -47,10 +47,9 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
   ndt::type array_type = ndt::make_fixed_dim(ndim, shape, uniform_tp);
 
   // Allocate the array arrmeta and data in one memory block
-  array result = make_array_memory_block(array_type, array_type.get_arrmeta_size(), data_reference);
+  array result = make_array_memory_block(array_type, array_type.get_arrmeta_size(), data_ptr, data_reference);
 
   // Fill in the preamble arrmeta
-  result->data = data_ptr;
   result->flags = access_flags;
 
   // Fill in the array arrmeta with the shape and strides
@@ -134,13 +133,14 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
   } else {
     ndt::type this_dt = get()->tp;
     ndt::type dt = get()->tp->apply_linear_index(nindices, indices, 0, this_dt, collapse_leading);
-    array result = make_array_memory_block(dt, dt.is_builtin() ? 0 : dt.extended()->get_arrmeta_size(),
+    array result = make_array_memory_block(dt, dt.is_builtin() ? 0 : dt.extended()->get_arrmeta_size(), data(),
                                            m_ptr->get_owner() ? m_ptr->get_owner() : *this);
-    result.get()->data = get()->data;
-    intptr_t offset = get()->tp->apply_linear_index(nindices, indices, get()->metadata(), dt, result->metadata(), *this,
-                                                    0, this_dt, collapse_leading, &result.get()->data,
-                                                    const_cast<memory_block &>(result->get_owner()));
-    result.get()->data += offset;
+    char *data = result->get_data();
+    intptr_t offset =
+        get()->tp->apply_linear_index(nindices, indices, get()->metadata(), dt, result->metadata(), *this, 0, this_dt,
+                                      collapse_leading, &data, const_cast<memory_block &>(result->get_owner()));
+    result->set_data(data);
+    result->set_data(result->get_data() + offset);
     result.get()->flags = get()->flags;
     return result;
   }
@@ -681,9 +681,8 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const {
   ndt::type dst_tp = src_tp.with_new_axis(i, new_ndim);
 
   // This is taken from view_concrete in view.cpp
-  nd::array res =
-      make_array_memory_block(dst_tp, dst_tp.get_arrmeta_size(), m_ptr->get_owner() ? get_data_memblock() : *this);
-  res.get()->data = get()->data;
+  nd::array res = make_array_memory_block(dst_tp, dst_tp.get_arrmeta_size(), data(),
+                                          m_ptr->get_owner() ? get_data_memblock() : *this);
   res.get()->flags = get()->flags;
 
   char *src_arrmeta = const_cast<char *>(get()->metadata());
@@ -773,7 +772,7 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const {
       }
       // Create the result array, adjusting the type if the data isn't aligned
       // correctly
-      char *data_ptr = get()->data;
+      char *data_ptr = data();
       ndt::type result_tp;
       intptr_t dim_size = nbytes / scalar_tp.get_data_size();
       if ((((uintptr_t)data_ptr) & (scalar_tp.get_data_alignment() - 1)) == 0) {
@@ -782,10 +781,9 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const {
         throw std::runtime_error("creating an unaligned type");
         //        result_tp = ndt::make_fixed_dim(dim_size, make_unaligned(scalar_tp));
       }
-      array result = make_array_memory_block(result_tp, result_tp.extended()->get_arrmeta_size(),
+      array result = make_array_memory_block(result_tp, result_tp.extended()->get_arrmeta_size(), data(),
                                              m_ptr->get_owner() ? m_ptr->get_owner() : *this);
       // Copy all the array arrmeta fields
-      result.get()->data = get()->data;
       result.get()->flags = get()->flags;
       // The result has one strided ndarray field
       fixed_dim_type_arrmeta *result_md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get()->metadata());
@@ -829,7 +827,7 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const {
       ndo->tp->arrmeta_debug_print(get()->metadata(), o, indent + "   ");
     }
     o << " data:\n";
-    o << "   pointer: " << (void *)ndo->data << "\n";
+    o << "   pointer: " << (void *)ndo->get_data() << "\n";
     o << "   reference: " << (void *)ndo->get_owner().get();
     if (!ndo->get_owner()) {
       o << " (embedded in array memory)\n";
@@ -850,10 +848,10 @@ std::ostream &nd::operator<<(std::ostream &o, const array &rhs) {
     o << "array(";
     array v = rhs.eval();
     if (v.get()->tp.is_builtin()) {
-      print_builtin_scalar(v.get()->tp.get_id(), o, v.get()->data);
+      print_builtin_scalar(v.get()->tp.get_id(), o, v->get_data());
     } else {
       stringstream ss;
-      v.get()->tp->print_data(ss, v.get()->metadata(), v.get()->data);
+      v.get()->tp->print_data(ss, v.get()->metadata(), v->get_data());
       print_indented(o, "      ", ss.str(), true);
     }
     o << ",\n      type=\"" << rhs.get_type() << "\")";
@@ -885,7 +883,7 @@ nd::array nd::empty_shell(const ndt::type &tp) {
     intptr_t data_alignment = tp.get_data_alignment();
     array result = make_array_memory_block(tp, 0, tp.get_data_size(), data_alignment, &data_ptr);
     // It's a builtin type id, so no incref
-    result->data = data_ptr;
+    result->set_data(data_ptr);
     result->flags = nd::read_access_flag | nd::write_access_flag;
     return result;
   } else if (!tp.is_symbolic()) {
@@ -904,13 +902,13 @@ nd::array nd::empty_shell(const ndt::type &tp) {
       }
     } else {
       // Allocate memory based on the memory_kind type
-      result = make_array_memory_block(tp, arrmeta_size);
       tp.extended<ndt::base_memory_type>()->data_alloc(&data_ptr, data_size);
       if (tp.get_flags() & type_flag_zeroinit) {
         tp.extended<ndt::base_memory_type>()->data_zeroinit(data_ptr, data_size);
       }
+      result = make_array_memory_block(tp, arrmeta_size);
     }
-    result->data = data_ptr;
+    result->set_data(data_ptr);
     result->flags = nd::read_access_flag | nd::write_access_flag;
     return result;
   } else {
@@ -1051,7 +1049,6 @@ nd::array nd::memmap(const std::string &DYND_UNUSED(filename), intptr_t DYND_UNU
     // Set the array arrmeta
     array_preamble *ndo = result.get();
     ndo->tp = dt.release();
-    ndo->data = data_ptr;
     ndo->flags = access;
     // Set the bytes arrmeta, telling the system
     // about the memmapped memblock
@@ -1079,7 +1076,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values) 
   array result = make_array_memory_block(result_type, fsd->get_arrmeta_size(), fsd->get_default_data_size(),
                                          fsd->get_data_alignment(), &data_ptr);
   // Set the array properties
-  result->data = data_ptr;
+  result->set_data(data_ptr);
   result->flags = flags;
 
   // Set the data offsets arrmeta for the tuple type. It's a bunch of pointer
@@ -1394,8 +1391,8 @@ nd::array nd::shallow_copy_array_memory_block(const nd::array &ndo) {
     arrmeta_size = ndo->tp->get_arrmeta_size();
   }
 
-  nd::array result = make_array_memory_block(ndo->tp, arrmeta_size, ndo->get_owner() ? ndo->get_owner() : ndo);
-  result->data = ndo->data;
+  nd::array result =
+      make_array_memory_block(ndo->tp, arrmeta_size, ndo->get_data(), ndo->get_owner() ? ndo->get_owner() : ndo);
   result->flags = ndo->flags;
 
   if (!ndo->tp.is_builtin()) {

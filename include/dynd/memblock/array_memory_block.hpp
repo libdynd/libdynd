@@ -24,9 +24,9 @@ namespace nd {
   public:
     ndt::type tp;
     uint64_t flags;
-    char *data;
 
   private:
+    char *data;
     memory_block m_owner;
 
   public:
@@ -35,7 +35,8 @@ namespace nd {
       memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
     }
 
-    array_preamble(const ndt::type &tp, size_t arrmeta_size, const memory_block &owner) : tp(tp), m_owner(owner) {
+    array_preamble(const ndt::type &tp, size_t arrmeta_size, char *data, const memory_block &owner)
+        : tp(tp), data(data), m_owner(owner) {
       // Zero out all the arrmeta to start
       memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
     }
@@ -64,6 +65,10 @@ namespace nd {
         tp->arrmeta_destruct(arrmeta);
       }
     }
+
+    char *get_data() const { return data; }
+
+    void set_data(char *data) { this->data = data; }
 
     const memory_block &get_owner() const { return m_owner; }
 

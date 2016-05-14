@@ -138,7 +138,7 @@ namespace nd {
     template <typename T>
     void init(T &&value) {
       nd::init<typename remove_reference_then_cv<T>::type> init(get()->tp, get()->metadata());
-      init.single(get()->data, std::forward<T>(value));
+      init.single(data(), std::forward<T>(value));
 
       get()->flags =
           (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
@@ -147,7 +147,7 @@ namespace nd {
     template <typename ValueType>
     void init(const ValueType *values, size_t size) {
       nd::init<ValueType> init(get()->tp, get()->metadata());
-      init.contiguous(get()->data, values, size);
+      init.contiguous(data(), values, size);
 
       get()->flags =
           (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
@@ -204,13 +204,13 @@ namespace nd {
 
     char *data() const {
       if (get()->flags & write_access_flag) {
-        return get()->data;
+        return get()->get_data();
       }
 
       throw std::runtime_error("tried to write to a dynd array that is not writable");
     }
 
-    const char *cdata() const { return get()->data; }
+    const char *cdata() const { return get()->get_data(); }
 
     inline uint32_t get_access_flags() const {
       return get()->flags & (immutable_access_flag | read_access_flag | write_access_flag);
@@ -289,14 +289,14 @@ namespace nd {
     }
     inline void get_shape(intptr_t *out_shape) const {
       if (!get()->tp.is_builtin() && get()->tp->get_ndim() > 0) {
-        get()->tp->get_shape(get()->tp->get_ndim(), 0, out_shape, get()->metadata(), get()->data);
+        get()->tp->get_shape(get()->tp->get_ndim(), 0, out_shape, get()->metadata(), cdata());
       }
     }
 
     /**
      * Returns the size of the leading (leftmost) dimension.
      */
-    inline intptr_t get_dim_size() const { return get_type().get_dim_size(get()->metadata(), get()->data); }
+    inline intptr_t get_dim_size() const { return get_type().get_dim_size(get()->metadata(), cdata()); }
 
     /**
      * Returns the size of the requested dimension.
@@ -307,7 +307,7 @@ namespace nd {
         return ss[i].dim_size;
       } else if (0 <= i && i < get_ndim()) {
         dimvector shape(i + 1);
-        get()->tp->get_shape(i + 1, 0, shape.get(), get()->metadata(), get()->data);
+        get()->tp->get_shape(i + 1, 0, shape.get(), get()->metadata(), cdata());
         return shape[i];
       } else {
         std::stringstream ss;
@@ -615,12 +615,12 @@ namespace nd {
 
       ndt::type tp = ndt::make_type<ValueType>();
       if (tp == get()->tp) {
-        as.single(value, get()->data);
+        as.single(value, const_cast<char *>(cdata()));
       } else {
         array a = empty(tp);
         a.assign(*this, error_mode);
 
-        as.single(value, a.get()->data);
+        as.single(value, const_cast<char *>(a.cdata()));
       }
 
       return value;
@@ -1049,9 +1049,13 @@ namespace nd {
    *
    * The created object is uninitialized.
    */
-  inline array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size,
-                                       const memory_block &owner = memory_block()) {
-    return array(new (arrmeta_size) array_preamble(tp, arrmeta_size, owner), false);
+  inline array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size) {
+    return array(new (arrmeta_size) array_preamble(tp, arrmeta_size), false);
+  }
+
+  inline array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, char *data,
+                                       const memory_block &owner) {
+    return array(new (arrmeta_size) array_preamble(tp, arrmeta_size, data, owner), false);
   }
 
   /**

@@ -17,8 +17,8 @@ namespace nd {
         dst_tp.extended()->arrmeta_copy_construct((*dst)->metadata(), src[0]->metadata() + sizeof(pointer_type_arrmeta),
                                                   src[0]);
       }
-      (*dst)->data = *reinterpret_cast<char **>(src[0]->data) +
-                     reinterpret_cast<const pointer_type_arrmeta *>(src[0]->metadata())->offset;
+      (*dst)->set_data(*reinterpret_cast<char **>(src[0]->get_data()) +
+                       reinterpret_cast<const pointer_type_arrmeta *>(src[0]->metadata())->offset);
       (*dst)->set_owner(src[0].get_data_memblock());
     }
   };
