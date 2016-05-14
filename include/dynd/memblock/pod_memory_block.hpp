@@ -142,7 +142,7 @@ namespace nd {
 
     void debug_print(std::ostream &o, const std::string &indent) {
       o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";
-      o << indent << " reference count: " << m_use_count << "\n";
+      o << indent << " reference count: " << static_cast<long>(m_use_count) << "\n";
       if (m_memory_begin != NULL) {
         o << indent << " allocated: " << m_total_allocated_capacity << "\n";
       } else {
