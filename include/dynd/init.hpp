@@ -17,8 +17,7 @@ namespace nd {
 
     void single(char *data, const ValueType &value) const { *reinterpret_cast<ValueType *>(data) = value; }
 
-    void contiguous(char *data, const ValueType *values, size_t size) const
-    {
+    void contiguous(char *data, const ValueType *values, size_t size) const {
       for (size_t i = 0; i < size; ++i) {
         single(data, values[i]);
         data += sizeof(ValueType);
@@ -32,8 +31,7 @@ namespace nd {
 
     void single(char *data, bool value) const { *reinterpret_cast<bool1 *>(data) = value; }
 
-    void contiguous(char *data, const bool *values, size_t size) const
-    {
+    void contiguous(char *data, const bool *values, size_t size) const {
       for (size_t i = 0; i < size; ++i) {
         single(data, values[i]);
         data += sizeof(bool1);
@@ -45,13 +43,11 @@ namespace nd {
   struct init<bytes> {
     init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
-    void single(char *data, const bytes &value) const
-    {
+    void single(char *data, const bytes &value) const {
       reinterpret_cast<bytes *>(data)->assign(value.data(), value.size());
     }
 
-    void contiguous(char *data, const bytes *values, size_t size) const
-    {
+    void contiguous(char *data, const bytes *values, size_t size) const {
       for (size_t i = 0; i < size; ++i) {
         single(data, values[i]);
         data += sizeof(bytes);
@@ -63,13 +59,11 @@ namespace nd {
   struct init<std::string> {
     init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
-    void single(char *data, const std::string &value) const
-    {
+    void single(char *data, const std::string &value) const {
       reinterpret_cast<string *>(data)->assign(value.data(), value.size());
     }
 
-    void contiguous(char *data, const std::string *values, size_t size) const
-    {
+    void contiguous(char *data, const std::string *values, size_t size) const {
       for (size_t i = 0; i < size; ++i) {
         single(data, values[i]);
         data += sizeof(string);
@@ -83,8 +77,7 @@ namespace nd {
 
     void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, strlen(value)); }
 
-    void contiguous(char *data, const char *const *values, size_t size) const
-    {
+    void contiguous(char *data, const char *const *values, size_t size) const {
       for (size_t i = 0; i < size; ++i) {
         single(data, values[i]);
         data += sizeof(string);
@@ -98,8 +91,7 @@ namespace nd {
 
     void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, N - 1); }
 
-    void contiguous(char *data, const char *const *values, size_t size) const
-    {
+    void contiguous(char *data, const char *const *values, size_t size) const {
       for (size_t i = 0; i < size; ++i) {
         single(data, values[i]);
         data += sizeof(string);
@@ -113,8 +105,7 @@ namespace nd {
 
     void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, N - 1); }
 
-    void contiguous(char *data, const char *const *values, size_t size) const
-    {
+    void contiguous(char *data, const char *const *values, size_t size) const {
       for (size_t i = 0; i < size; ++i) {
         single(data, values[i]);
         data += sizeof(string);
@@ -133,8 +124,7 @@ namespace nd {
 
     container_init(const ndt::type &tp, const char *metadata)
         : child(tp.extended<ndt::base_dim_type>()->get_element_type(),
-                metadata + tp.extended<ndt::base_dim_type>()->get_element_arrmeta_offset())
-    {
+                metadata + tp.extended<ndt::base_dim_type>()->get_element_arrmeta_offset()) {
       switch (tp.get_id()) {
       case fixed_dim_id:
         stride = reinterpret_cast<const size_stride_t *>(metadata)->stride;
@@ -158,13 +148,12 @@ namespace nd {
     typedef void (*closure_type)(const container_init *, char *, const std::initializer_list<ValueType> &);
     typedef ValueType value_type;
 
-    intrusive_ptr<memory_block_data> memblock;
+    memory_block memblock;
     closure_type closure;
     init<value_type> child;
 
     container_init(const ndt::type &tp, const char *metadata)
-        : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t))
-    {
+        : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {
       switch (tp.get_id()) {
       case fixed_dim_id:
         closure = [](const container_init *self, char *data, const std::initializer_list<ValueType> &values) {
@@ -196,9 +185,7 @@ namespace nd {
     init<value_type> child;
 
     container_init(const ndt::type &tp, const char *metadata)
-        : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t))
-    {
-    }
+        : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
 
     void single(char *data, const ContainerType &values) const { child.contiguous(data, values.data(), values.size()); }
   };

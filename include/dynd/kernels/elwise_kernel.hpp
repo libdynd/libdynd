@@ -186,12 +186,12 @@ namespace nd {
         : base_strided_kernel<elwise_kernel<var_dim_id, fixed_dim_id, TraitsType, N>, N> {
       typedef elwise_kernel self_type;
 
-      memory_block_data *m_dst_memblock;
+      base_memory_block *m_dst_memblock;
       size_t m_dst_target_alignment;
       intptr_t m_dst_stride, m_dst_offset, m_src_stride[N], m_src_offset[N], m_src_size[N];
       bool m_is_src_var[N];
 
-      elwise_kernel(memory_block_data *dst_memblock, size_t dst_target_alignment, intptr_t dst_stride,
+      elwise_kernel(base_memory_block *dst_memblock, size_t dst_target_alignment, intptr_t dst_stride,
                     intptr_t dst_offset, const intptr_t *src_stride, const intptr_t *src_offset,
                     const intptr_t *src_size, const bool *is_src_var)
           : m_dst_memblock(dst_memblock), m_dst_target_alignment(dst_target_alignment), m_dst_stride(dst_stride),
@@ -308,11 +308,11 @@ namespace nd {
         : base_strided_kernel<elwise_kernel<var_dim_id, fixed_dim_id, TraitsType, 0>, 0> {
       typedef elwise_kernel self_type;
 
-      memory_block_data *m_dst_memblock;
+      base_memory_block *m_dst_memblock;
       size_t m_dst_target_alignment;
       intptr_t m_dst_stride, m_dst_offset;
 
-      elwise_kernel(memory_block_data *dst_memblock, size_t dst_target_alignment, intptr_t dst_stride,
+      elwise_kernel(base_memory_block *dst_memblock, size_t dst_target_alignment, intptr_t dst_stride,
                     intptr_t dst_offset, const intptr_t *DYND_UNUSED(src_stride),
                     const intptr_t *DYND_UNUSED(src_offset), const intptr_t *DYND_UNUSED(src_size),
                     const bool *DYND_UNUSED(is_src_var))

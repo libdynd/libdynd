@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/memblock/memory_block.hpp>
+#include <dynd/memblock/base_memory_block.hpp>
 
 namespace dynd {
 namespace nd {
@@ -15,7 +15,7 @@ namespace nd {
   /**
    * A memory block which is a reference to an external object.
    */
-  class external_memory_block : public memory_block_data {
+  class external_memory_block : public base_memory_block {
   public:
     /** A void pointer for the external object */
     void *m_object;

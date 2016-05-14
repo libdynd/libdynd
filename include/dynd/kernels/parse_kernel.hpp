@@ -13,8 +13,7 @@ namespace dynd {
 namespace nd {
   namespace json {
 
-    inline bool _parse_number(const char *&rbegin, const char *&end)
-    {
+    inline bool _parse_number(const char *&rbegin, const char *&end) {
       const char *begin = rbegin;
       if (begin == end) {
         return false;
@@ -29,14 +28,12 @@ namespace nd {
       // Either '0' or a non-zero digit followed by digits
       if (*begin == '0') {
         ++begin;
-      }
-      else if ('1' <= *begin && *begin <= '9') {
+      } else if ('1' <= *begin && *begin <= '9') {
         ++begin;
         while (begin < end && ('0' <= *begin && *begin <= '9')) {
           ++begin;
         }
-      }
-      else {
+      } else {
         return false;
       }
       // Optional decimal point, followed by one or more digits
@@ -77,8 +74,7 @@ namespace nd {
       return true;
     }
 
-    inline bool _parse_na(const char *&begin, const char *end)
-    {
+    inline bool _parse_na(const char *&begin, const char *end) {
       size_t size = end - begin;
 
       if (size >= 4) {
@@ -109,8 +105,7 @@ namespace nd {
     struct parse_kernel : base_strided_kernel<parse_kernel<RetTypeID>, 2> {
       typedef typename type_of<RetTypeID>::type ret_type;
 
-      void single(char *ret, char *const *args)
-      {
+      void single(char *ret, char *const *args) {
         const char *begin = *reinterpret_cast<const char **>(args[0]);
         const char *end = *reinterpret_cast<const char **>(args[1]);
 
@@ -125,8 +120,7 @@ namespace nd {
 
     template <>
     struct parse_kernel<bool_id> : base_strided_kernel<parse_kernel<bool_id>, 2> {
-      void single(char *ret, char *const *args)
-      {
+      void single(char *ret, char *const *args) {
         *reinterpret_cast<bool1 *>(ret) =
             parse_bool(*reinterpret_cast<const char **>(args[0]), *reinterpret_cast<const char **>(args[1]));
       }
@@ -134,8 +128,7 @@ namespace nd {
 
     template <>
     struct parse_kernel<string_id> : base_strided_kernel<parse_kernel<string_id>, 2> {
-      void single(char *res, char *const *args)
-      {
+      void single(char *res, char *const *args) {
         const char *&rbegin = *reinterpret_cast<const char **>(args[0]);
         const char *begin = *reinterpret_cast<const char **>(args[0]);
         const char *end = *reinterpret_cast<const char **>(args[1]);
@@ -169,8 +162,7 @@ namespace nd {
                       throw json_parse_error(rbegin, e.what(), tp);
                     }
           */
-        }
-        else {
+        } else {
           throw json_parse_error(begin, "expected a string", ndt::type());
         }
         rbegin = begin;
@@ -217,22 +209,19 @@ namespace nd {
     struct parse_kernel<option_id> : base_strided_kernel<parse_kernel<option_id>, 2> {
       intptr_t parse_offset;
 
-      ~parse_kernel()
-      {
+      ~parse_kernel() {
         get_child()->destroy();
         get_child(parse_offset)->destroy();
       }
 
-      void single(char *ret, char *const *args)
-      {
+      void single(char *ret, char *const *args) {
         const char *begin = *reinterpret_cast<const char **>(args[0]);
         const char *end = *reinterpret_cast<const char **>(args[1]);
 
         if (_parse_na(begin, end)) {
           get_child()->single(ret, nullptr);
           *reinterpret_cast<const char **>(args[0]) = begin;
-        }
-        else {
+        } else {
           get_child(parse_offset)->single(ret, args);
         }
       }
@@ -246,19 +235,15 @@ namespace nd {
       std::vector<intptr_t> child_offsets;
 
       parse_kernel(const ndt::type &res_tp, size_t field_count, const size_t *data_offsets)
-          : res_tp(res_tp), field_count(field_count), data_offsets(data_offsets), child_offsets(field_count)
-      {
-      }
+          : res_tp(res_tp), field_count(field_count), data_offsets(data_offsets), child_offsets(field_count) {}
 
-      ~parse_kernel()
-      {
+      ~parse_kernel() {
         for (intptr_t offset : child_offsets) {
           get_child(offset)->destroy();
         }
       }
 
-      void single(char *res, char *const *args)
-      {
+      void single(char *res, char *const *args) {
 
         const char *&begin = *reinterpret_cast<const char **>(args[0]);
         const char *&end = *reinterpret_cast<const char **>(args[1]);
@@ -287,8 +272,7 @@ namespace nd {
               std::string name;
               unescape_string(strbegin, strend, name);
               i = res_tp.extended<ndt::struct_type>()->get_field_index(name);
-            }
-            else {
+            } else {
               i = res_tp.extended<ndt::struct_type>()->get_field_index(std::string(strbegin, strend));
             }
 
@@ -314,12 +298,10 @@ namespace nd {
 
       ~parse_kernel() { get_child()->destroy(); }
 
-      parse_kernel(const ndt::type &ret_tp, size_t size, intptr_t stride) : ret_tp(ret_tp), _size(size), stride(stride)
-      {
-      }
+      parse_kernel(const ndt::type &ret_tp, size_t size, intptr_t stride)
+          : ret_tp(ret_tp), _size(size), stride(stride) {}
 
-      void single(char *ret, char *const *args)
-      {
+      void single(char *ret, char *const *args) {
         if (!parse_token(args, "[")) {
           throw json_parse_error(args, "expected list starting with '['", ret_tp);
         }
@@ -347,18 +329,15 @@ namespace nd {
       typedef ndt::var_dim_type::data_type ret_type;
 
       ndt::type ret_tp;
-      intrusive_ptr<memory_block_data> blockref;
+      memory_block blockref;
       intptr_t stride;
 
-      parse_kernel(const ndt::type &ret_tp, const intrusive_ptr<memory_block_data> &blockref, intptr_t stride)
-          : ret_tp(ret_tp), blockref(blockref), stride(stride)
-      {
-      }
+      parse_kernel(const ndt::type &ret_tp, const memory_block &blockref, intptr_t stride)
+          : ret_tp(ret_tp), blockref(blockref), stride(stride) {}
 
       ~parse_kernel() { get_child()->destroy(); }
 
-      void single(char *ret, char *const *args)
-      {
+      void single(char *ret, char *const *args) {
         if (!parse_token(args, "[")) {
           throw json_parse_error(args, "expected list starting with '['", ret_tp);
         }

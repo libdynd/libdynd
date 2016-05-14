@@ -8,13 +8,13 @@
 #include <iostream>
 #include <string>
 
-#include <dynd/memblock/memory_block.hpp>
+#include <dynd/memblock/base_memory_block.hpp>
 #include <dynd/type.hpp>
 
 namespace dynd {
 namespace nd {
 
-  class pod_memory_block : public memory_block_data {
+  class pod_memory_block : public base_memory_block {
   public:
     size_t data_size;
     intptr_t data_alignment;

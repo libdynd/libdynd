@@ -15,13 +15,11 @@ namespace dynd {
 namespace nd {
 
   struct string_split_kernel : base_strided_kernel<string_split_kernel, 2> {
+    memory_block m_dst_memblock;
 
-    intrusive_ptr<memory_block_data> m_dst_memblock;
+    string_split_kernel(const memory_block &dst_memblock) : m_dst_memblock(dst_memblock) {}
 
-    string_split_kernel(intrusive_ptr<memory_block_data> dst_memblock) : m_dst_memblock(dst_memblock) {}
-
-    void single(char *dst, char *const *src)
-    {
+    void single(char *dst, char *const *src) {
       ndt::var_dim_type::data_type *dst_v = reinterpret_cast<ndt::var_dim_type::data_type *>(dst);
 
       const string *const *s = reinterpret_cast<const string *const *>(src);

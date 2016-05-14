@@ -12,7 +12,7 @@
 
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/irange.hpp>
-#include <dynd/memblock/memory_block.hpp>
+#include <dynd/memblock/base_memory_block.hpp>
 #include <dynd/types/type_id.hpp>
 
 namespace dynd {
