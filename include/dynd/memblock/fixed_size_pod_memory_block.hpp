@@ -17,7 +17,7 @@ namespace nd {
   public:
     void debug_print(std::ostream &o, const std::string &indent) {
       o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";
-      o << indent << " reference count: " << m_use_count << "\n";
+      o << indent << " reference count: " << static_cast<long>(m_use_count) << "\n";
       o << indent << "------" << std::endl;
     }
 
