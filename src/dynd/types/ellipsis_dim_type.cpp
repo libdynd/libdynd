@@ -12,16 +12,14 @@ using namespace dynd;
 
 ndt::ellipsis_dim_type::ellipsis_dim_type(const std::string &name, const type &element_type)
     : base_dim_type(ellipsis_dim_id, element_type, 0, 1, 0, type_flag_symbolic | type_flag_variadic, false),
-      m_name(name)
-{
+      m_name(name) {
   if (!m_name.empty()) {
     // Make sure name begins with a capital letter, and is an identifier
     const char *begin = m_name.c_str(), *end = m_name.c_str() + m_name.size();
     if (end - begin == 0) {
       // Convert empty string into NULL
       m_name = "";
-    }
-    else if (!is_valid_typevar_name(begin, end)) {
+    } else if (!is_valid_typevar_name(begin, end)) {
       stringstream ss;
       ss << "dynd ellipsis name \"";
       print_escaped_utf8_string(ss, m_name);
@@ -31,20 +29,17 @@ ndt::ellipsis_dim_type::ellipsis_dim_type(const std::string &name, const type &e
   }
 }
 
-void ndt::ellipsis_dim_type::get_vars(std::unordered_set<std::string> &vars) const
-{
+void ndt::ellipsis_dim_type::get_vars(std::unordered_set<std::string> &vars) const {
   vars.insert(m_name);
   m_element_tp.get_vars(vars);
 }
 
 void ndt::ellipsis_dim_type::print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),
-                                        const char *DYND_UNUSED(data)) const
-{
+                                        const char *DYND_UNUSED(data)) const {
   throw type_error("Cannot store data of ellipsis type");
 }
 
-void ndt::ellipsis_dim_type::print_type(std::ostream &o) const
-{
+void ndt::ellipsis_dim_type::print_type(std::ostream &o) const {
   // Type variables are barewords starting with a capital letter
   if (!m_name.empty()) {
     o << m_name;
@@ -52,18 +47,15 @@ void ndt::ellipsis_dim_type::print_type(std::ostream &o) const
   o << "... * " << get_element_type();
 }
 
-intptr_t ndt::ellipsis_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
-{
+intptr_t ndt::ellipsis_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const {
   return -1;
 }
 
-bool ndt::ellipsis_dim_type::is_lossless_assignment(const type &dst_tp, const type &src_tp) const
-{
+bool ndt::ellipsis_dim_type::is_lossless_assignment(const type &dst_tp, const type &src_tp) const {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    }
-    else if (src_tp.get_id() == ellipsis_dim_id) {
+    } else if (src_tp.get_id() == ellipsis_dim_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -71,61 +63,51 @@ bool ndt::ellipsis_dim_type::is_lossless_assignment(const type &dst_tp, const ty
   return false;
 }
 
-bool ndt::ellipsis_dim_type::operator==(const base_type &rhs) const
-{
+bool ndt::ellipsis_dim_type::operator==(const base_type &rhs) const {
   if (this == &rhs) {
     return true;
-  }
-  else if (rhs.get_id() != ellipsis_dim_id) {
+  } else if (rhs.get_id() != ellipsis_dim_id) {
     return false;
-  }
-  else {
+  } else {
     const ellipsis_dim_type *tvt = static_cast<const ellipsis_dim_type *>(&rhs);
     return m_name == tvt->m_name && m_element_tp == tvt->m_element_tp;
   }
 }
 
 ndt::type ndt::ellipsis_dim_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta), intptr_t i,
-                                                        intptr_t total_ndim) const
-{
+                                                        intptr_t total_ndim) const {
   if (i == 0) {
     return type(this, true);
-  }
-  else if (i <= m_element_tp.get_ndim()) {
+  } else if (i <= m_element_tp.get_ndim()) {
     return m_element_tp.get_type_at_dimension(NULL, i - 1, total_ndim + 1);
-  }
-  else {
+  } else {
     return m_element_tp.get_type_at_dimension(NULL, m_element_tp.get_ndim(), total_ndim + 1 + m_element_tp.get_ndim());
   }
 }
 
 void ndt::ellipsis_dim_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                                                       bool DYND_UNUSED(blockref_alloc)) const
-{
+                                                       bool DYND_UNUSED(blockref_alloc)) const {
   throw type_error("Cannot store data of ellipsis type");
 }
 
-void ndt::ellipsis_dim_type::arrmeta_copy_construct(
-    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
-{
+void ndt::ellipsis_dim_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta),
+                                                    const char *DYND_UNUSED(src_arrmeta),
+                                                    const nd::memory_block &DYND_UNUSED(embedded_reference)) const {
   throw type_error("Cannot store data of ellipsis type");
 }
 
-size_t ndt::ellipsis_dim_type::arrmeta_copy_construct_onedim(
-    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
-{
+size_t
+ndt::ellipsis_dim_type::arrmeta_copy_construct_onedim(char *DYND_UNUSED(dst_arrmeta),
+                                                      const char *DYND_UNUSED(src_arrmeta),
+                                                      const nd::memory_block &DYND_UNUSED(embedded_reference)) const {
   throw type_error("Cannot store data of ellipsis type");
 }
 
-void ndt::ellipsis_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
-{
+void ndt::ellipsis_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {
   throw type_error("Cannot store data of ellipsis type");
 }
 
-bool ndt::ellipsis_dim_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const
-{
+bool ndt::ellipsis_dim_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const {
   // TODO XXX This is wrong, "Any" could represent a type that doesn't match
   // against this one...
   if (candidate_tp.get_id() == any_kind_id) {
@@ -140,8 +122,7 @@ bool ndt::ellipsis_dim_type::match(const type &candidate_tp, std::map<std::strin
         // This typevar hasn't been seen yet, make it
         // be an empty dim fragment
         tv_type = make_type<dim_fragment_type>();
-      }
-      else {
+      } else {
         // Make sure the type matches previous
         // instances of the type var, which is
         // always ok from the zero dims case
@@ -155,11 +136,9 @@ bool ndt::ellipsis_dim_type::match(const type &candidate_tp, std::map<std::strin
       }
     }
     return m_element_tp.match(candidate_tp, tp_vars);
-  }
-  else if (candidate_tp.get_id() == ellipsis_dim_id) {
+  } else if (candidate_tp.get_id() == ellipsis_dim_id) {
     return m_element_tp.match(candidate_tp.extended<ellipsis_dim_type>()->m_element_tp, tp_vars);
-  }
-  else if (candidate_tp.get_ndim() >= get_ndim() - 1) {
+  } else if (candidate_tp.get_ndim() >= get_ndim() - 1) {
     intptr_t matched_ndim = candidate_tp.get_ndim() - get_ndim() + 1;
     const std::string &tv_name = get_name();
     if (!tv_name.empty()) {
@@ -168,20 +147,17 @@ bool ndt::ellipsis_dim_type::match(const type &candidate_tp, std::map<std::strin
         // This typevar hasn't been seen yet, so it's
         // a dim fragment of the given size.
         tv_type = make_dim_fragment(matched_ndim, candidate_tp);
-      }
-      else {
+      } else {
         // Make sure the type matches previous  instances of the type var,
         // which in this case means they should broadcast together.
         if (tv_type.get_id() == dim_fragment_id) {
           type result = tv_type.extended<dim_fragment_type>()->broadcast_with_type(matched_ndim, candidate_tp);
           if (result.is_null()) {
             return false;
-          }
-          else {
+          } else {
             tv_type.swap(result);
           }
-        }
-        else {
+        } else {
           // Inconsistent type var usage, previously
           // wasn't a dim fragment
           return false;
@@ -194,8 +170,7 @@ bool ndt::ellipsis_dim_type::match(const type &candidate_tp, std::map<std::strin
   return false;
 }
 
-std::map<std::string, std::pair<ndt::type, const char *>> ndt::ellipsis_dim_type::get_dynamic_type_properties() const
-{
+std::map<std::string, std::pair<ndt::type, const char *>> ndt::ellipsis_dim_type::get_dynamic_type_properties() const {
   std::map<std::string, std::pair<ndt::type, const char *>> properties;
   properties["name"] = {ndt::type("string"), reinterpret_cast<const char *>(&m_name)};
   properties["element_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_element_tp)};
@@ -203,7 +178,6 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::ellipsis_dim_type
   return properties;
 }
 
-ndt::type ndt::ellipsis_dim_type::with_element_type(const type &element_tp) const
-{
+ndt::type ndt::ellipsis_dim_type::with_element_type(const type &element_tp) const {
   return make_ellipsis_dim(m_name, element_tp);
 }

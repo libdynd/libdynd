@@ -13,24 +13,6 @@
 using namespace std;
 using namespace dynd;
 
-intrusive_ptr<memory_block_data> dynd::make_zeroinit_memory_block(const ndt::type &element_tp,
-                                                                  intptr_t initial_capacity_bytes) {
-  // This is a temporary hack until the new bytes and string types are working
-  size_t data_size;
-  switch (element_tp.get_id()) {
-  case bytes_id:
-  case string_id:
-    data_size = 1;
-    break;
-  default:
-    data_size = element_tp.get_default_data_size();
-  }
-
-  zeroinit_memory_block *pmb =
-      new zeroinit_memory_block(data_size, element_tp.get_data_alignment(), initial_capacity_bytes);
-  return intrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(pmb), false);
-}
-
 char *zeroinit_memory_block::alloc(size_t count) {
   memory_block_data *self = this;
 

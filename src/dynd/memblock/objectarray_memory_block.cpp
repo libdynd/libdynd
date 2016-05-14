@@ -13,13 +13,6 @@
 using namespace std;
 using namespace dynd;
 
-intrusive_ptr<memory_block_data> dynd::make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta,
-                                                                     intptr_t stride, intptr_t initial_count,
-                                                                     size_t arrmeta_size) {
-  objectarray_memory_block *pmb = new objectarray_memory_block(dt, arrmeta_size, arrmeta, stride, initial_count);
-  return intrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(pmb), false);
-}
-
 char *objectarray_memory_block::alloc(size_t count) {
   memory_block_data *self = this;
 

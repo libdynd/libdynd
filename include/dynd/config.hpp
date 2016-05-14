@@ -916,9 +916,9 @@ namespace ndt {
 
 } // namespace dynd::ndt
 
-class memory_block;
-
 namespace nd {
+
+  class memory_block;
 
   class buffer;
   class array;

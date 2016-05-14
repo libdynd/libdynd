@@ -30,14 +30,12 @@ struct option {
 };
 
 template <typename ValueType>
-option<ValueType> opt()
-{
+option<ValueType> opt() {
   return option<ValueType>();
 }
 
 template <typename ValueType>
-option<ValueType> opt(ValueType value)
-{
+option<ValueType> opt(ValueType value) {
   return option<ValueType>(value);
 }
 
@@ -78,7 +76,7 @@ namespace ndt {
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                const intrusive_ptr<memory_block_data> &embedded_reference) const;
+                                const nd::memory_block &embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;

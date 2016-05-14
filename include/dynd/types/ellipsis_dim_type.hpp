@@ -39,9 +39,9 @@ namespace ndt {
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                const intrusive_ptr<memory_block_data> &embedded_reference) const;
+                                const nd::memory_block &embedded_reference) const;
     size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                         const intrusive_ptr<memory_block_data> &embedded_reference) const;
+                                         const nd::memory_block &embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
 
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
@@ -50,8 +50,7 @@ namespace ndt {
 
     virtual type with_element_type(const type &element_tp) const;
 
-    static type make_if_not_variadic(const type &element_tp)
-    {
+    static type make_if_not_variadic(const type &element_tp) {
       if (element_tp.is_variadic()) {
         return element_tp;
       }
@@ -61,14 +60,12 @@ namespace ndt {
   };
 
   /** Makes an ellipsis type with the specified name and element type */
-  inline type make_ellipsis_dim(const std::string &name, const type &element_type)
-  {
+  inline type make_ellipsis_dim(const std::string &name, const type &element_type) {
     return type(new ellipsis_dim_type(name, element_type), false);
   }
 
   /** Make an unnamed ellipsis type */
-  inline type make_ellipsis_dim(const type &element_type)
-  {
+  inline type make_ellipsis_dim(const type &element_type) {
     return type(new ellipsis_dim_type("", element_type), false);
   }
 

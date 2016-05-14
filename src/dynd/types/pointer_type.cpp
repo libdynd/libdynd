@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/buffer.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/types/pointer_type.hpp>
 
@@ -75,17 +76,17 @@ ndt::type ndt::pointer_type::apply_linear_index(intptr_t nindices, const irange 
 
 intptr_t ndt::pointer_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                const type &result_tp, char *out_arrmeta,
-                                               const intrusive_ptr<memory_block_data> &embedded_reference,
-                                               size_t current_i, const type &root_tp,
-                                               bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
-                                               intrusive_ptr<memory_block_data> &DYND_UNUSED(inout_dataref)) const {
+                                               const nd::memory_block &embedded_reference, size_t current_i,
+                                               const type &root_tp, bool DYND_UNUSED(leading_dimension),
+                                               char **DYND_UNUSED(inout_data),
+                                               nd::memory_block &DYND_UNUSED(inout_dataref)) const {
   const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
   pointer_type_arrmeta *out_md = reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
   // If there are no more indices, copy the rest verbatim
   out_md->blockref = md->blockref;
   out_md->offset = md->offset;
   if (!m_target_tp.is_builtin()) {
-    intrusive_ptr<memory_block_data> tmp;
+    nd::memory_block tmp;
     const pointer_type *pdt = result_tp.extended<pointer_type>();
     // The indexing may cause a change to the arrmeta offset
     out_md->offset += m_target_tp.extended()->apply_linear_index(
@@ -177,7 +178,7 @@ void ndt::pointer_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
   // TODO: Will need a different kind of memory block if the data isn't POD.
   if (blockref_alloc) {
     pointer_type_arrmeta *md = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
-    md->blockref = make_memory_block<pod_memory_block>(m_target_tp).release();
+    md->blockref = nd::make_memory_block<pod_memory_block>(m_target_tp);
   }
   if (!m_target_tp.is_builtin()) {
     m_target_tp.extended()->arrmeta_default_construct(arrmeta + sizeof(pointer_type_arrmeta), blockref_alloc);
@@ -185,7 +186,7 @@ void ndt::pointer_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
 }
 
 void ndt::pointer_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                               const intrusive_ptr<memory_block_data> &embedded_reference) const {
+                                               const nd::memory_block &embedded_reference) const {
   // Copy the blockref, switching it to the embedded_reference if necessary
   const pointer_type_arrmeta *src_md = reinterpret_cast<const pointer_type_arrmeta *>(src_arrmeta);
   pointer_type_arrmeta *dst_md = reinterpret_cast<pointer_type_arrmeta *>(dst_arrmeta);

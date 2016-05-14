@@ -58,13 +58,4 @@ struct zeroinit_memory_block : memory_block_data {
   void debug_print(std::ostream &o, const std::string &indent);
 };
 
-/**
- * Creates a memory block which can be used to allocate zero-initialized
- * POD output memory for blockref types.
- *
- * The initial capacity can be set if a good estimate is known.
- */
-DYNDT_API intrusive_ptr<memory_block_data> make_zeroinit_memory_block(const ndt::type &element_tp,
-                                                                      intptr_t initial_capacity_bytes = 2048);
-
 } // namespace dynd

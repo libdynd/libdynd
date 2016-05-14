@@ -83,9 +83,9 @@ namespace ndt {
     type apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i, const type &root_tp,
                             bool leading_dimension) const;
     intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta, const type &result_tp,
-                                char *out_arrmeta, const intrusive_ptr<memory_block_data> &embedded_reference,
-                                size_t current_i, const type &root_tp, bool leading_dimension, char **inout_data,
-                                intrusive_ptr<memory_block_data> &inout_dataref) const;
+                                char *out_arrmeta, const nd::memory_block &embedded_reference, size_t current_i,
+                                const type &root_tp, bool leading_dimension, char **inout_data,
+                                nd::memory_block &inout_dataref) const;
 
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 

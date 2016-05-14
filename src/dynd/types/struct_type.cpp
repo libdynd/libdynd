@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/buffer.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/any_kind_type.hpp>
@@ -218,10 +219,9 @@ ndt::type ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *
 
 intptr_t ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                               const type &result_tp, char *out_arrmeta,
-                                              const intrusive_ptr<memory_block_data> &embedded_reference,
-                                              size_t current_i, const type &root_tp, bool leading_dimension,
-                                              char **inout_data,
-                                              intrusive_ptr<memory_block_data> &inout_dataref) const {
+                                              const nd::memory_block &embedded_reference, size_t current_i,
+                                              const type &root_tp, bool leading_dimension, char **inout_data,
+                                              nd::memory_block &inout_dataref) const {
   if (nindices == 0) {
     // If there are no more indices, copy the arrmeta verbatim
     arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
@@ -245,7 +245,7 @@ intptr_t ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *i
               nindices - 1, indices + 1, arrmeta + m_arrmeta_offsets[start_index], result_tp, out_arrmeta,
               embedded_reference, current_i + 1, root_tp, true, inout_data, inout_dataref);
         } else {
-          intrusive_ptr<memory_block_data> tmp;
+          nd::memory_block tmp;
           offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
                                                       arrmeta + m_arrmeta_offsets[start_index], result_tp, out_arrmeta,
                                                       embedded_reference, current_i + 1, root_tp, false, NULL, tmp);
@@ -253,7 +253,7 @@ intptr_t ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *i
       }
       return offset;
     } else {
-      intrusive_ptr<memory_block_data> tmp;
+      nd::memory_block tmp;
       intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_arrmeta);
       const struct_type *result_e_dt = result_tp.extended<struct_type>();
       for (intptr_t i = 0; i < dimension_size; ++i) {

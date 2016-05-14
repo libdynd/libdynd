@@ -10,7 +10,7 @@
 namespace dynd {
 namespace nd {
 
-  class DYND_API buffer : public intrusive_ptr<array_preamble> {
+  class DYNDT_API buffer : public intrusive_ptr<array_preamble> {
   public:
     using intrusive_ptr<array_preamble>::intrusive_ptr;
 

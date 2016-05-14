@@ -10,8 +10,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include <dynd/irange.hpp>
 #include <dynd/eval/eval_context.hpp>
+#include <dynd/irange.hpp>
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/types/type_id.hpp>
 
@@ -101,9 +101,7 @@ namespace ndt {
     base_type(type_id_t id, size_t data_size, size_t data_alignment, uint32_t flags, size_t arrmeta_size, size_t ndim,
               size_t strided_ndim)
         : m_use_count(1), m_id(id), m_metadata_size(arrmeta_size), m_data_size(data_size),
-          m_data_alignment(data_alignment), flags(flags), m_ndim(ndim), m_fixed_ndim(strided_ndim)
-    {
-    }
+          m_data_alignment(data_alignment), flags(flags), m_ndim(ndim), m_fixed_ndim(strided_ndim) {}
 
     virtual ~base_type();
 
@@ -214,8 +212,7 @@ namespace ndt {
                                       const eval::eval_context *ectx) const;
     /** Copies a C++ std::string with a UTF8 encoding to a string element */
     inline void set_from_utf8_string(const char *arrmeta, char *data, const std::string &utf8_str,
-                                     const eval::eval_context *ectx) const
-    {
+                                     const eval::eval_context *ectx) const {
       this->set_from_utf8_string(arrmeta, data, utf8_str.data(), utf8_str.data() + utf8_str.size(), ectx);
     }
 
@@ -292,9 +289,9 @@ namespace ndt {
      */
     virtual intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                         const ndt::type &result_type, char *out_arrmeta,
-                                        const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
+                                        const nd::memory_block &embedded_reference, size_t current_i,
                                         const ndt::type &root_tp, bool leading_dimension, char **inout_data,
-                                        intrusive_ptr<memory_block_data> &inout_dataref) const;
+                                        nd::memory_block &inout_dataref) const;
 
     /**
      * The 'at' function is used for indexing. Indexing one dimension with
@@ -400,7 +397,7 @@ namespace ndt {
      *                            that memory.
      */
     virtual void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                        const intrusive_ptr<memory_block_data> &embedded_reference) const;
+                                        const nd::memory_block &embedded_reference) const;
 
     /** Destructs any references or other state contained in the nd::arrays'
      * arrmeta */
@@ -484,8 +481,7 @@ namespace ndt {
    * Checks if the type is builtin or not, and if not,
    * increments the reference count of the type.
    */
-  inline void intrusive_ptr_retain(const base_type *ptr)
-  {
+  inline void intrusive_ptr_retain(const base_type *ptr) {
     if (!is_builtin_type(ptr)) {
       ++ptr->m_use_count;
     }
@@ -496,8 +492,7 @@ namespace ndt {
    * decrements the reference count of the type,
    * freeing it if the count reaches zero.
    */
-  inline void intrusive_ptr_release(const base_type *ptr)
-  {
+  inline void intrusive_ptr_release(const base_type *ptr) {
     if (!is_builtin_type(ptr)) {
       if (--ptr->m_use_count == 0) {
         delete ptr;

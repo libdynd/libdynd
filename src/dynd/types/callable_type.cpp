@@ -141,10 +141,10 @@ ndt::type ndt::callable_type::apply_linear_index(intptr_t DYND_UNUSED(nindices),
 intptr_t ndt::callable_type::apply_linear_index(intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
                                                 const char *DYND_UNUSED(arrmeta), const type &DYND_UNUSED(result_tp),
                                                 char *DYND_UNUSED(out_arrmeta),
-                                                const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference),
+                                                const nd::memory_block &DYND_UNUSED(embedded_reference),
                                                 size_t DYND_UNUSED(current_i), const type &DYND_UNUSED(root_tp),
                                                 bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
-                                                intrusive_ptr<memory_block_data> &DYND_UNUSED(inout_dataref)) const {
+                                                nd::memory_block &DYND_UNUSED(inout_dataref)) const {
   throw type_error("Cannot store data of funcproto type");
 }
 
@@ -174,9 +174,8 @@ bool ndt::callable_type::operator==(const base_type &rhs) const {
 void ndt::callable_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const {
 }
 
-void ndt::callable_type::arrmeta_copy_construct(
-    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const {}
+void ndt::callable_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+                                                const nd::memory_block &DYND_UNUSED(embedded_reference)) const {}
 
 void ndt::callable_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const {}
 

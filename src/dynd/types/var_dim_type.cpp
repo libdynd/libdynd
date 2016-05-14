@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/buffer.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/memblock/objectarray_memory_block.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
@@ -124,13 +125,12 @@ ndt::type ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange 
 
 intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                const type &result_tp, char *out_arrmeta,
-                                               const intrusive_ptr<memory_block_data> &embedded_reference,
-                                               size_t current_i, const type &root_tp, bool leading_dimension,
-                                               char **inout_data,
-                                               intrusive_ptr<memory_block_data> &inout_dataref) const {
+                                               const nd::memory_block &embedded_reference, size_t current_i,
+                                               const type &root_tp, bool leading_dimension, char **inout_data,
+                                               nd::memory_block &inout_dataref) const {
   if (nindices == 0) {
     // If there are no more indices, copy the arrmeta verbatim
-    arrmeta_copy_construct(out_arrmeta, arrmeta, intrusive_ptr<memory_block_data>(embedded_reference));
+    arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
     return 0;
   } else {
     const metadata_type *md = reinterpret_cast<const metadata_type *>(arrmeta);
@@ -153,7 +153,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
           return 0;
         }
       } else if (indices->is_nop()) {
-        intrusive_ptr<memory_block_data> tmp;
+        nd::memory_block tmp;
         // If the indexing operation does nothing, then leave things unchanged
         metadata_type *out_md = reinterpret_cast<metadata_type *>(out_arrmeta);
         out_md->blockref = md->blockref ? md->blockref : embedded_reference;
@@ -174,7 +174,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
       }
     } else {
       if (indices->step() == 0) {
-        intrusive_ptr<memory_block_data> tmp;
+        nd::memory_block tmp;
         // TODO: This is incorrect, but is here as a stopgap to be replaced by a
         // sliced<> type
         pointer_type_arrmeta *out_md = reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
@@ -188,7 +188,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
         }
         return 0;
       } else if (indices->is_nop()) {
-        intrusive_ptr<memory_block_data> tmp;
+        nd::memory_block tmp;
         // If the indexing operation does nothing, then leave things unchanged
         metadata_type *out_md = reinterpret_cast<metadata_type *>(out_arrmeta);
         out_md->blockref = md->blockref ? md->blockref : embedded_reference;
@@ -330,11 +330,11 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
   if (blockref_alloc) {
     uint32_t flags = m_element_tp.get_flags();
     if (flags & type_flag_destructor) {
-      md->blockref = make_objectarray_memory_block(m_element_tp, arrmeta, element_size, 64, sizeof(metadata_type));
+      md->blockref = nd::make_objectarray_memory_block(m_element_tp, arrmeta, element_size, 64, sizeof(metadata_type));
     } else if (flags & type_flag_zeroinit) {
-      md->blockref = make_zeroinit_memory_block(m_element_tp);
+      md->blockref = nd::make_zeroinit_memory_block(m_element_tp);
     } else {
-      md->blockref = make_memory_block<pod_memory_block>(m_element_tp);
+      md->blockref = nd::make_memory_block<pod_memory_block>(m_element_tp);
     }
   }
   if (!m_element_tp.is_builtin()) {
@@ -343,7 +343,7 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
 }
 
 void ndt::var_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                               const intrusive_ptr<memory_block_data> &embedded_reference) const {
+                                               const nd::memory_block &embedded_reference) const {
   const metadata_type *src_md = reinterpret_cast<const metadata_type *>(src_arrmeta);
   metadata_type *dst_md = reinterpret_cast<metadata_type *>(dst_arrmeta);
   dst_md->stride = src_md->stride;
@@ -355,9 +355,8 @@ void ndt::var_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *sr
   }
 }
 
-size_t
-ndt::var_dim_type::arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                                 const intrusive_ptr<memory_block_data> &embedded_reference) const {
+size_t ndt::var_dim_type::arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
+                                                        const nd::memory_block &embedded_reference) const {
   const metadata_type *src_md = reinterpret_cast<const metadata_type *>(src_arrmeta);
   metadata_type *dst_md = reinterpret_cast<metadata_type *>(dst_arrmeta);
   dst_md->stride = src_md->stride;

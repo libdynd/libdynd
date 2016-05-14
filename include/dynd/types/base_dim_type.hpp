@@ -30,25 +30,21 @@ namespace ndt {
 
     void get_element_types(std::size_t ndim, const type **element_tp) const;
 
-    std::vector<const type *> get_element_types(std::size_t ndim) const
-    {
+    std::vector<const type *> get_element_types(std::size_t ndim) const {
       std::vector<const type *> element_tp(ndim);
       get_element_types(ndim, element_tp.data());
 
       return element_tp;
     }
 
-    bool is_type_subarray(const type &subarray_tp) const
-    {
+    bool is_type_subarray(const type &subarray_tp) const {
       // Uniform dimensions can share one implementation
       intptr_t this_ndim = get_ndim(), stp_ndim = subarray_tp.get_ndim();
       if (this_ndim > stp_ndim) {
         return get_element_type().is_type_subarray(subarray_tp);
-      }
-      else if (this_ndim == stp_ndim) {
+      } else if (this_ndim == stp_ndim) {
         return (*this) == (*subarray_tp.extended());
-      }
-      else {
+      } else {
         return false;
       }
     }
@@ -70,8 +66,7 @@ namespace ndt {
      */
     virtual intptr_t get_dim_size(const char *arrmeta = NULL, const char *data = NULL) const = 0;
 
-    intptr_t get_size(const char *arrmeta) const
-    {
+    intptr_t get_size(const char *arrmeta) const {
       std::intptr_t dim_size = get_dim_size(arrmeta, NULL);
       if (dim_size == -1) {
         return -1;
@@ -97,7 +92,7 @@ namespace ndt {
      *                            hold a reference to that memory.
      */
     virtual size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                                 const intrusive_ptr<memory_block_data> &embedded_reference) const = 0;
+                                                 const nd::memory_block &embedded_reference) const = 0;
 
     virtual bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
