@@ -14,6 +14,12 @@
 namespace dynd {
 namespace nd {
 
+  /**
+   * Creates a memory block which can be used to allocate zero-initialized
+   * POD output memory for blockref types.
+   *
+   * The initial capacity can be set if a good estimate is known.
+   */
   struct zeroinit_memory_block : base_memory_block {
     size_t data_size;
     intptr_t data_alignment;
@@ -23,8 +29,9 @@ namespace nd {
     /** The current malloc'd memory being doled out */
     char *m_memory_begin, *m_memory_current, *m_memory_end;
 
-    zeroinit_memory_block(size_t data_size, intptr_t data_alignment, intptr_t initial_capacity_bytes)
-        : data_size(data_size), data_alignment(data_alignment), m_total_allocated_capacity(0), m_memory_handles() {
+    zeroinit_memory_block(const ndt::type &element_tp, intptr_t initial_capacity_bytes = 2048)
+        : data_size(element_tp.get_default_data_size()), data_alignment(element_tp.get_data_alignment()),
+          m_total_allocated_capacity(0) {
       append_memory(initial_capacity_bytes);
     }
 
