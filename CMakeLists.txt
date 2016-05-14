@@ -232,7 +232,6 @@ set(libdyndt_SRC
     include/dynd/types/type_id.hpp
     include/dynd/types/type_type.hpp
     # MemBlock
-    src/dynd/memblock/array_memory_block.cpp
     src/dynd/memblock/external_memory_block.cpp
     src/dynd/memblock/fixed_size_pod_memory_block.cpp
     src/dynd/memblock/memmap_memory_block.cpp

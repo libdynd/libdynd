@@ -9,10 +9,10 @@
 #include <stdexcept>
 #include <string>
 
+#include <dynd/buffer.hpp>
 #include <dynd/config.hpp>
 #include <dynd/init.hpp>
 #include <dynd/irange.hpp>
-#include <dynd/memblock/array_memory_block.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/pointer_type.hpp>
@@ -134,7 +134,7 @@ namespace nd {
   /**
    * This is the primary multi-dimensional array class.
    */
-  class DYND_API array : public intrusive_ptr<array_preamble> {
+  class DYND_API array : public buffer {
     template <typename T>
     void init(T &&value) {
       nd::init<typename remove_reference_then_cv<T>::type> init(get()->tp, get()->metadata());
@@ -154,7 +154,7 @@ namespace nd {
     }
 
   public:
-    using intrusive_ptr<array_preamble>::intrusive_ptr;
+    using buffer::buffer;
 
     /**
       * Constructs an array with no data.
@@ -166,28 +166,27 @@ namespace nd {
       */
     template <typename T,
               typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
-    array(T &&value) : intrusive_ptr<array_preamble>(empty(ndt::type_for(value))) {
+    array(T &&value) : buffer(empty(ndt::type_for(value))) {
       init(std::forward<T>(value));
     }
 
     /** Constructs an array from a 1D initializer list */
     template <typename ValueType>
-    array(const std::initializer_list<ValueType> &values)
-        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values))) {
+    array(const std::initializer_list<ValueType> &values) : buffer(empty(ndt::type_for(values))) {
       init(values);
     }
 
     /** Constructs an array from a 2D initializer list */
     template <typename ValueType>
     array(const std::initializer_list<std::initializer_list<ValueType>> &values)
-        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values))) {
+        : buffer(empty(ndt::type_for(values))) {
       init(values);
     }
 
     /** Constructs an array from a 3D initializer list */
     template <typename ValueType>
     array(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
-        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values))) {
+        : buffer(empty(ndt::type_for(values))) {
       init(values);
     }
 
@@ -196,7 +195,7 @@ namespace nd {
      */
     template <typename ValueType>
     array(const ValueType *values, size_t size)
-        : intrusive_ptr<array_preamble>(empty(ndt::make_fixed_dim(size, ndt::make_type<ValueType>()))) {
+        : buffer(empty(ndt::make_fixed_dim(size, ndt::make_type<ValueType>()))) {
       init(values, size);
     }
 
