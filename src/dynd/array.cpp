@@ -148,9 +148,9 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
       // If the data reference is NULL, the data is embedded in the array itself
       result.get()->owner = memory_block(get(), true);
     }
-    intptr_t offset = get()->tp->apply_linear_index(nindices, indices, get()->metadata(), dt, result.get()->metadata(),
-                                                    intrusive_ptr<memory_block_data>(get(), true), 0, this_dt,
-                                                    collapse_leading, &result.get()->data, result.get()->owner);
+    intptr_t offset =
+        get()->tp->apply_linear_index(nindices, indices, get()->metadata(), dt, result.get()->metadata(), *this, 0,
+                                      this_dt, collapse_leading, &result.get()->data, result.get()->owner);
     result.get()->data += offset;
     result.get()->flags = get()->flags;
     return result;
@@ -704,8 +704,7 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const {
   char *src_arrmeta = const_cast<char *>(get()->metadata());
   char *dst_arrmeta = res.get()->metadata();
   for (intptr_t j = 0; j < i; ++j) {
-    dst_tp.extended<ndt::base_dim_type>()->arrmeta_copy_construct_onedim(dst_arrmeta, src_arrmeta,
-                                                                         intrusive_ptr<memory_block_data>());
+    dst_tp.extended<ndt::base_dim_type>()->arrmeta_copy_construct_onedim(dst_arrmeta, src_arrmeta, memory_block());
     src_tp = src_tp.get_type_at_dimension(&src_arrmeta, 1);
     dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
   }
@@ -716,7 +715,7 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const {
     dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
   }
   if (!dst_tp.is_builtin()) {
-    dst_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta, intrusive_ptr<memory_block_data>());
+    dst_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta, memory_block());
   }
 
   return res;
@@ -1124,8 +1123,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values) 
     const ndt::type &field_dt = field_values[i].get_type();
     if (field_dt.get_arrmeta_size() > 0) {
       field_dt.extended()->arrmeta_copy_construct(reinterpret_cast<char *>(pmeta + 1),
-                                                  field_values[i].get()->metadata(),
-                                                  intrusive_ptr<memory_block_data>(field_values[i].get(), true));
+                                                  field_values[i].get()->metadata(), field_values[i]);
     }
   }
 
@@ -1431,8 +1429,7 @@ nd::array nd::shallow_copy_array_memory_block(const nd::array &ndo) {
   result->flags = ndo->flags;
 
   if (!ndo->tp.is_builtin()) {
-    ndo->tp.extended()->arrmeta_copy_construct(result->metadata(), ndo->metadata(),
-                                               intrusive_ptr<memory_block_data>(ndo.get(), true));
+    ndo->tp.extended()->arrmeta_copy_construct(result->metadata(), ndo->metadata(), ndo);
   }
 
   return result;

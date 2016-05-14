@@ -20,7 +20,7 @@ namespace nd {
    * arrmeta after this structure is determined by the type
    * object.
    */
-  class array_preamble : public memory_block_data {
+  class DYNDT_API array_preamble : public memory_block_data {
   public:
     ndt::type tp;
     uint64_t flags;

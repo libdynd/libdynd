@@ -46,9 +46,9 @@ namespace ndt {
                             bool leading_dimension) const;
 
     intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta, const type &result_type,
-                                char *out_arrmeta, const intrusive_ptr<memory_block_data> &embedded_reference,
-                                size_t current_i, const type &root_tp, bool leading_dimension, char **inout_data,
-                                intrusive_ptr<memory_block_data> &inout_dataref) const;
+                                char *out_arrmeta, const nd::memory_block &embedded_reference, size_t current_i,
+                                const type &root_tp, bool leading_dimension, char **inout_data,
+                                nd::memory_block &inout_dataref) const;
 
     type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
 
@@ -58,8 +58,7 @@ namespace ndt {
 
     virtual bool operator==(const base_type &rhs) const = 0;
 
-    inline bool is_type_subarray(const type &subarray_tp) const
-    {
+    inline bool is_type_subarray(const type &subarray_tp) const {
       return (!subarray_tp.is_builtin() && (*this) == (*subarray_tp.extended())) ||
              m_element_tp.is_type_subarray(subarray_tp);
     }
@@ -72,7 +71,7 @@ namespace ndt {
 
     virtual void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     virtual void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                        const intrusive_ptr<memory_block_data> &embedded_reference) const;
+                                        const nd::memory_block &embedded_reference) const;
     virtual void arrmeta_destruct(char *arrmeta) const;
 
     virtual void data_alloc(char **data, size_t size) const = 0;

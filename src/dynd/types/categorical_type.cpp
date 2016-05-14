@@ -7,12 +7,12 @@
 #include <map>
 #include <set>
 
-#include <dynd/callable.hpp>
-#include <dynd/types/categorical_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/array_range.hpp>
 #include <dynd/assignment.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/search.hpp>
+#include <dynd/types/categorical_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 
 using namespace dynd;
 using namespace std;
@@ -361,9 +361,8 @@ void ndt::categorical_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta)
   // Data is stored as uint##, no arrmeta to process
 }
 
-void ndt::categorical_type::arrmeta_copy_construct(
-    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const {
+void ndt::categorical_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+                                                   const nd::memory_block &DYND_UNUSED(embedded_reference)) const {
   // Data is stored as uint##, no arrmeta to process
 }
 

@@ -41,8 +41,7 @@ namespace ndt {
 
     void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
 
-    size_t get_category_count() const
-    {
+    size_t get_category_count() const {
       return (size_t) reinterpret_cast<const fixed_dim_type_arrmeta *>(m_categories.get()->metadata())->dim_size;
     }
 
@@ -60,8 +59,7 @@ namespace ndt {
     uint32_t get_value_from_category(const char *category_arrmeta, const char *category_data) const;
     uint32_t get_value_from_category(const nd::array &category) const;
 
-    const char *get_category_data_from_value(uint32_t value) const
-    {
+    const char *get_category_data_from_value(uint32_t value) const {
       if (value >= get_category_count()) {
         throw std::runtime_error("category value is out of bounds");
       }
@@ -82,7 +80,7 @@ namespace ndt {
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                const intrusive_ptr<memory_block_data> &embedded_reference) const;
+                                const nd::memory_block &embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 

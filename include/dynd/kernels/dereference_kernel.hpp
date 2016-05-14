@@ -15,7 +15,7 @@ namespace nd {
       const ndt::type &dst_tp = dst->get_type();
       if (!dst_tp.is_builtin()) {
         dst_tp.extended()->arrmeta_copy_construct((*dst)->metadata(), src[0]->metadata() + sizeof(pointer_type_arrmeta),
-                                                  intrusive_ptr<memory_block_data>(src[0].get(), true));
+                                                  src[0]);
       }
       (*dst)->data = *reinterpret_cast<char **>(src[0]->data) +
                      reinterpret_cast<const pointer_type_arrmeta *>(src[0]->metadata())->offset;

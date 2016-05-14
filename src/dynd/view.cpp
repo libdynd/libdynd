@@ -30,7 +30,7 @@ using namespace dynd;
  * \returns If it worked, returns true, otherwise false.
  */
 static bool try_view(const ndt::type &tp, const char *arrmeta, const ndt::type &view_tp, char *view_arrmeta,
-                     const intrusive_ptr<memory_block_data> &embedded_reference) {
+                     const nd::memory_block &embedded_reference) {
   switch (tp.get_id()) {
   case fixed_dim_id: {
     // All the strided dim types share the same arrmeta, so can be
@@ -378,15 +378,13 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp) {
       if (try_view(arr.get_type().extended<ndt::base_dim_type>()->get_element_type(),
                    arr.get()->metadata() + sizeof(ndt::var_dim_type::metadata_type),
                    tp.extended<ndt::base_dim_type>()->get_element_type(),
-                   result.get()->metadata() + sizeof(fixed_dim_type_arrmeta),
-                   intrusive_ptr<memory_block_data>(arr.get(), true))) {
+                   result.get()->metadata() + sizeof(fixed_dim_type_arrmeta), arr)) {
         return result;
       }
     }
   }
   // Otherwise try to copy the arrmeta as a view
-  else if (try_view(arr.get_type(), arr.get()->metadata(), tp, result.get()->metadata(),
-                    intrusive_ptr<memory_block_data>(arr.get(), true))) {
+  else if (try_view(arr.get_type(), arr.get()->metadata(), tp, result.get()->metadata(), arr)) {
     // If it succeeded, return it
     return result;
   }

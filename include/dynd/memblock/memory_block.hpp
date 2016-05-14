@@ -79,9 +79,4 @@ inline void intrusive_ptr_release(memory_block_data *ptr) {
   }
 }
 
-template <typename T, typename... ArgTypes>
-intrusive_ptr<memory_block_data> make_memory_block(ArgTypes &&... args) {
-  return intrusive_ptr<memory_block_data>(new T(std::forward<ArgTypes>(args)...), false);
-}
-
 } // namespace dynd

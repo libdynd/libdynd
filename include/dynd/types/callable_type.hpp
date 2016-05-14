@@ -87,9 +87,9 @@ namespace ndt {
     type apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i, const type &root_tp,
                             bool leading_dimension) const;
     intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta, const type &result_tp,
-                                char *out_arrmeta, const intrusive_ptr<memory_block_data> &embedded_reference,
-                                size_t current_i, const type &root_tp, bool leading_dimension, char **inout_data,
-                                intrusive_ptr<memory_block_data> &inout_dataref) const;
+                                char *out_arrmeta, const nd::memory_block &embedded_reference, size_t current_i,
+                                const type &root_tp, bool leading_dimension, char **inout_data,
+                                nd::memory_block &inout_dataref) const;
 
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
@@ -97,7 +97,7 @@ namespace ndt {
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                const intrusive_ptr<memory_block_data> &embedded_reference) const;
+                                const nd::memory_block &embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
@@ -141,7 +141,7 @@ namespace ndt {
     static type equivalent() { return make_type<typename funcproto_of<R (T::*)(A...)>::type>(); }
   };
 
-//  DYNDT_API type make_generic_funcproto(intptr_t nargs);
+  //  DYNDT_API type make_generic_funcproto(intptr_t nargs);
 
 } // namespace dynd::ndt
 } // namespace dynd

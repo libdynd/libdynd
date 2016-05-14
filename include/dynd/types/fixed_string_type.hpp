@@ -42,7 +42,7 @@ namespace ndt {
 
     void arrmeta_default_construct(char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const {}
     void arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-                                const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const {}
+                                const nd::memory_block &DYND_UNUSED(embedded_reference)) const {}
     void arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
     void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
                              const std::string &DYND_UNUSED(indent)) const {}

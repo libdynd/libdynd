@@ -27,8 +27,7 @@ protected:
   fixed_dim operator()(const char *metadata, char *data) { return fixed_dim(metadata, data); }
 
   template <typename Index0Type, typename... IndexType>
-  decltype(auto) operator()(const char *metadata, char *data, Index0Type index0, IndexType... index)
-  {
+  decltype(auto) operator()(const char *metadata, char *data, Index0Type index0, IndexType... index) {
     return as_t<ElementType>::operator()(
         metadata + sizeof(fixed_dim_type_arrmeta),
         data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride, index...);
@@ -51,21 +50,18 @@ public:
   void set_data(char *data) { this->m_data = data; }
 
   template <typename... IndexType>
-  decltype(auto) operator()(IndexType... index)
-  {
+  decltype(auto) operator()(IndexType... index) {
     static_assert(sizeof...(IndexType) <= ndim, "too many indices");
     return (*this)(this->m_metadata, this->m_data, index...);
   }
 
   template <int NDim = 1>
-  iterator_type<NDim> begin()
-  {
+  iterator_type<NDim> begin() {
     return iterator_type<NDim>(this->m_metadata, this->m_data);
   }
 
   template <int NDim = 1>
-  iterator_type<NDim> end()
-  {
+  iterator_type<NDim> end() {
     return iterator_type<NDim>(this->m_metadata,
                                this->m_data +
                                    reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size *
@@ -96,18 +92,14 @@ class fixed_dim_iterator : public as_t<ElementType>::template iterator_type<NDim
 public:
   fixed_dim_iterator(const char *metadata, char *data)
       : as_t<ElementType>::template iterator_type<NDim - 1>(metadata + sizeof(fixed_dim_type_arrmeta), data),
-        m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride)
-  {
-  }
+        m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride) {}
 
-  fixed_dim_iterator &operator++()
-  {
+  fixed_dim_iterator &operator++() {
     this->m_data += m_stride;
     return *this;
   }
 
-  fixed_dim_iterator operator++(int)
-  {
+  fixed_dim_iterator operator++(int) {
     fixed_dim_iterator tmp(*this);
     operator++();
     return tmp;
@@ -128,8 +120,7 @@ namespace ndt {
 
     intptr_t get_fixed_dim_size() const { return m_dim_size; }
 
-    intptr_t get_fixed_stride(const char *arrmeta) const
-    {
+    intptr_t get_fixed_stride(const char *arrmeta) const {
       return reinterpret_cast<const size_stride_t *>(arrmeta)->stride;
     }
 
@@ -148,9 +139,9 @@ namespace ndt {
     type apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i, const type &root_tp,
                             bool leading_dimension) const;
     intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta, const type &result_tp,
-                                char *out_arrmeta, const intrusive_ptr<memory_block_data> &embedded_reference,
-                                size_t current_i, const type &root_tp, bool leading_dimension, char **inout_data,
-                                intrusive_ptr<memory_block_data> &inout_dataref) const;
+                                char *out_arrmeta, const nd::memory_block &embedded_reference, size_t current_i,
+                                const type &root_tp, bool leading_dimension, char **inout_data,
+                                nd::memory_block &inout_dataref) const;
     type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
 
     type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
@@ -169,13 +160,13 @@ namespace ndt {
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                const intrusive_ptr<memory_block_data> &embedded_reference) const;
+                                const nd::memory_block &embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
     size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                         const intrusive_ptr<memory_block_data> &embedded_reference) const;
+                                         const nd::memory_block &embedded_reference) const;
 
     size_t get_iterdata_size(intptr_t ndim) const;
     size_t iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim,
@@ -214,8 +205,7 @@ namespace ndt {
 
   DYNDT_API type make_fixed_dim(intptr_t ndim, const intptr_t *shape, const type &dtp);
 
-  inline type make_fixed_dim(size_t dim_size, const type &element_tp, intptr_t ndim)
-  {
+  inline type make_fixed_dim(size_t dim_size, const type &element_tp, intptr_t ndim) {
     type result = element_tp;
     for (intptr_t i = 0; i < ndim; ++i) {
       result = make_fixed_dim(dim_size, result);

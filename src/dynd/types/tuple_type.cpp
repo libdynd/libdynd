@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/buffer.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/option_type.hpp>
@@ -160,9 +161,9 @@ ndt::type ndt::tuple_type::apply_linear_index(intptr_t nindices, const irange *i
 
 intptr_t ndt::tuple_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                              const type &result_tp, char *out_arrmeta,
-                                             const intrusive_ptr<memory_block_data> &embedded_reference,
-                                             size_t current_i, const type &root_tp, bool leading_dimension,
-                                             char **inout_data, intrusive_ptr<memory_block_data> &inout_dataref) const {
+                                             const nd::memory_block &embedded_reference, size_t current_i,
+                                             const type &root_tp, bool leading_dimension, char **inout_data,
+                                             nd::memory_block &inout_dataref) const {
   if (nindices == 0) {
     // If there are no more indices, copy the arrmeta verbatim
     arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
@@ -174,7 +175,7 @@ intptr_t ndt::tuple_type::apply_linear_index(intptr_t nindices, const irange *in
     apply_single_linear_index(*indices, get_field_count(), current_i, &root_tp, remove_dimension, start_index,
                               index_stride, dimension_size);
     if (remove_dimension) {
-      intrusive_ptr<memory_block_data> tmp;
+      nd::memory_block tmp;
       const type &ft = get_field_type(start_index);
       intptr_t offset = offsets[start_index];
       if (!ft.is_builtin()) {
@@ -194,7 +195,7 @@ intptr_t ndt::tuple_type::apply_linear_index(intptr_t nindices, const irange *in
       }
       return offset;
     } else {
-      intrusive_ptr<memory_block_data> tmp;
+      nd::memory_block tmp;
       intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_arrmeta);
       const tuple_type *result_e_dt = result_tp.extended<tuple_type>();
       for (intptr_t i = 0; i < dimension_size; ++i) {
@@ -313,7 +314,7 @@ void ndt::tuple_type::arrmeta_default_construct(char *arrmeta, bool blockref_all
 }
 
 void ndt::tuple_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                             const intrusive_ptr<memory_block_data> &embedded_reference) const {
+                                             const nd::memory_block &embedded_reference) const {
   uintptr_t *dst_data_offsets = reinterpret_cast<uintptr_t *>(dst_arrmeta);
   if (dst_data_offsets != 0) {
     // Copy all the field offsets
