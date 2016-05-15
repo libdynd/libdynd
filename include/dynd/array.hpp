@@ -808,15 +808,6 @@ namespace nd {
   }
 
   /**
-   * Constructs an uninitialized array with uninitialized arrmeta of the
-   * given dtype. Default-sized space for data is allocated.
-   *
-   * IMPORTANT: You should use nd::empty normally. If you use this function,
-   *            you must manually initialize the arrmeta as well.
-   */
-  DYND_API array empty_shell(const ndt::type &tp);
-
-  /**
    * Constructs an uninitialized array of the given dtype, with ndim/shape
    * pointer. This function is not named ``empty`` because (intptr_t, intptr_t,
    * type) and (intptr_t, const intptr_t *, type) can sometimes result in
@@ -1051,6 +1042,22 @@ namespace nd {
    */
   inline array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size) {
     return array(new (arrmeta_size) array_preamble(tp, arrmeta_size), false);
+  }
+
+  inline array make_array(const ndt::type &tp, uint64_t flags = read_access_flag | write_access_flag) {
+    if (tp.is_symbolic()) {
+      std::stringstream ss;
+      ss << "Cannot create a dynd array with symbolic type " << tp;
+      throw type_error(ss.str());
+    }
+
+    size_t arrmeta_size = tp.get_arrmeta_size();
+    size_t data_offset = inc_to_alignment(sizeof(array_preamble) + arrmeta_size, tp.get_data_alignment());
+    size_t data_size = tp.get_default_data_size();
+
+    return array(new (data_offset + data_size - sizeof(array_preamble))
+                     array_preamble(tp, arrmeta_size, data_offset, data_size, flags),
+                 false);
   }
 
   inline array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, char *data,

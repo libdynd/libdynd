@@ -877,54 +877,14 @@ nd::array nd::as_struct(size_t size, const pair<const char *, array> *pairs) {
   return res;
 }
 
-nd::array nd::empty_shell(const ndt::type &tp) {
-  if (tp.is_builtin()) {
-    char *data_ptr = NULL;
-    intptr_t data_alignment = tp.get_data_alignment();
-    array result = make_array_memory_block(tp, 0, tp.get_data_size(), data_alignment, &data_ptr);
-    // It's a builtin type id, so no incref
-    result->set_data(data_ptr);
-    result->flags = nd::read_access_flag | nd::write_access_flag;
-    return result;
-  } else if (!tp.is_symbolic()) {
-    char *data_ptr = NULL;
-    size_t arrmeta_size = tp.extended()->get_arrmeta_size();
-    size_t data_size = tp.extended()->get_default_data_size();
-    array result;
-    if (tp.get_base_id() != memory_id) {
-      // Allocate memory the default way
-      result = make_array_memory_block(tp, arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
-      if (tp.get_flags() & type_flag_zeroinit) {
-        memset(data_ptr, 0, data_size);
-      }
-      if (tp.get_flags() & type_flag_construct) {
-        tp.extended()->data_construct(NULL, data_ptr);
-      }
-    } else {
-      // Allocate memory based on the memory_kind type
-      tp.extended<ndt::base_memory_type>()->data_alloc(&data_ptr, data_size);
-      if (tp.get_flags() & type_flag_zeroinit) {
-        tp.extended<ndt::base_memory_type>()->data_zeroinit(data_ptr, data_size);
-      }
-      result = make_array_memory_block(tp, arrmeta_size);
-    }
-    result->set_data(data_ptr);
-    result->flags = nd::read_access_flag | nd::write_access_flag;
-    return result;
-  } else {
-    stringstream ss;
-    ss << "Cannot create a dynd array with symbolic type " << tp;
-    throw type_error(ss.str());
-  }
-}
-
 nd::array nd::empty(const ndt::type &tp) {
   // Create an empty shell
-  nd::array res = nd::empty_shell(tp);
+  array res = make_array(tp);
   // Construct the arrmeta with default settings
   if (tp.get_arrmeta_size() > 0) {
     res->tp->arrmeta_default_construct(res->metadata(), true);
   }
+
   return res;
 }
 
@@ -1071,13 +1031,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values) 
 
   ndt::type result_type = ndt::make_type<ndt::tuple_type>(field_types.size(), field_types.data());
   const ndt::tuple_type *fsd = result_type.extended<ndt::tuple_type>();
-  char *data_ptr = NULL;
-
-  array result = make_array_memory_block(result_type, fsd->get_arrmeta_size(), fsd->get_default_data_size(),
-                                         fsd->get_data_alignment(), &data_ptr);
-  // Set the array properties
-  result->set_data(data_ptr);
-  result->flags = flags;
+  array result = make_array(result_type, flags);
 
   // Set the data offsets arrmeta for the tuple type. It's a bunch of pointer
   // types, so the offsets are pretty simple.
@@ -1102,7 +1056,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values) 
   }
 
   // Set the data pointers
-  const char **dp = reinterpret_cast<const char **>(data_ptr);
+  const char **dp = reinterpret_cast<const char **>(result.data());
   for (size_t i = 0; i != field_count; ++i) {
     dp[i] = field_values[i].cdata();
   }
@@ -1377,6 +1331,10 @@ nd::array &nd::array::operator/=(const array &rhs) {
 
 nd::array nd::make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, size_t extra_size,
                                       size_t extra_alignment, char **out_extra_ptr) {
+  if (extra_alignment != tp.get_data_alignment()) {
+    throw std::runtime_error("different alignment");
+  }
+
   size_t extra_offset = inc_to_alignment(sizeof(array_preamble) + arrmeta_size, extra_alignment);
   array_preamble *result = new (extra_offset + extra_size - sizeof(array_preamble)) array_preamble(tp, arrmeta_size);
   // Return a pointer to the extra allocated memory
