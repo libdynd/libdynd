@@ -17,14 +17,11 @@ namespace nd {
     const intptr_t src0_element_data_size;
 
     unique_kernel(intptr_t src0_size, intptr_t src0_stride, size_t src0_element_data_size)
-        : src0_size(src0_size), src0_stride(src0_stride), src0_element_data_size(src0_element_data_size)
-    {
-    }
+        : src0_size(src0_size), src0_stride(src0_stride), src0_element_data_size(src0_element_data_size) {}
 
     ~unique_kernel() { get_child()->destroy(); }
 
-    void call(array *DYND_UNUSED(dst), const array *src)
-    {
+    void call(array *DYND_UNUSED(dst), const array *src) {
       kernel_prefix *child = get_child();
       size_t new_size =
           (std::unique(strided_iterator(src[0].data(), src0_element_data_size, src0_stride),
@@ -38,7 +35,8 @@ namespace nd {
            src[0].data()) /
           src0_stride;
 
-      src[0]->tp = ndt::make_fixed_dim(new_size, src[0]->tp.extended<ndt::fixed_dim_type>()->get_element_type());
+      src[0]->set_type(
+          ndt::make_fixed_dim(new_size, src[0]->get_type().extended<ndt::fixed_dim_type>()->get_element_type()));
       reinterpret_cast<size_stride_t *>(src[0]->metadata())->dim_size = new_size;
     }
   };
