@@ -45,13 +45,14 @@ namespace nd {
       }
     }
 
-    array_preamble(const ndt::type &tp, size_t arrmeta_size, char *data) : tp(tp), m_data(data) {
+    array_preamble(const ndt::type &tp, size_t arrmeta_size, char *data, uint64_t flags)
+        : tp(tp), m_data(data), flags(flags) {
       // Zero out all the arrmeta to start
       memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
     }
 
-    array_preamble(const ndt::type &tp, size_t arrmeta_size, char *data, const memory_block &owner)
-        : tp(tp), m_data(data), m_owner(owner) {
+    array_preamble(const ndt::type &tp, size_t arrmeta_size, char *data, const memory_block &owner, uint64_t flags)
+        : tp(tp), m_data(data), m_owner(owner), flags(flags) {
       // Zero out all the arrmeta to start
       memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
     }
