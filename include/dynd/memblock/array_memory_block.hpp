@@ -91,8 +91,6 @@ namespace nd {
 
     uint64_t get_flags() const { return m_flags; }
 
-    void set_flags(uint64_t flags) { m_flags = flags; }
-
     /** Return a pointer to the arrmeta, immediately after the preamble */
     char *metadata() { return reinterpret_cast<char *>(this + 1); }
 

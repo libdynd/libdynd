@@ -147,41 +147,6 @@ nd::array nd::array::assign(const array &rhs, assign_error_mode error_mode) cons
 
 nd::array nd::array::assign_na() const { return nd::assign_na({}, {{"dst", *this}}); }
 
-void nd::array::flag_as_immutable() {
-  // If it's already immutable, everything's ok
-  if ((get_flags() & immutable_access_flag) != 0) {
-    return;
-  }
-
-  // Check that nobody else is peeking into our data
-  bool ok = true;
-  if (m_ptr->get_use_count() != 1) {
-    // More than one reference to the array itself
-    ok = false;
-  } else if (m_ptr->get_owner() && m_ptr->get_owner()->get_use_count() != 1) {
-    // More than one reference to the array's data, or the reference is to
-    // something
-    // other than a memblock owning its data, such as an external memblock.
-    ok = false;
-  } else if (!get()->get_type().is_builtin() && !get()->get_type()->is_unique_data_owner(get()->metadata())) {
-    ok = false;
-  }
-
-  if (ok) {
-    // Finalize any allocated data in the arrmeta
-    if (!get()->get_type().is_builtin()) {
-      get()->get_type()->arrmeta_finalize_buffers(get()->metadata());
-    }
-    // Clear the write flag, and set the immutable flag
-    get()->set_flags((get()->get_flags() & ~(uint64_t)write_access_flag) | immutable_access_flag);
-  } else {
-    stringstream ss;
-    ss << "Unable to flag array of type " << get_type() << " as immutable, because ";
-    ss << "it does not uniquely own all of its data";
-    throw runtime_error(ss.str());
-  }
-}
-
 nd::array nd::array::p(const char *name) const { return access(*this, name); }
 
 nd::array nd::array::p(const std::string &name) const { return p(name.c_str()); }
@@ -267,42 +232,21 @@ nd::array nd::array::eval() const {
   }
 }
 
-nd::array nd::array::eval_immutable() const {
-  const ndt::type &current_tp = get_type();
-  if ((get_access_flags() & immutable_access_flag) && !current_tp.is_expression()) {
-    return *this;
-  } else {
-    // Create a canonical type for the result
-    const ndt::type &dt = current_tp.get_canonical_type();
-    array result(nd::empty(dt));
-    if (dt.get_id() == fixed_dim_id) {
-      // Reorder strides of output strided dimensions in a KEEPORDER fashion
-      dt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), get_type(),
-                                                                              get()->metadata());
-    }
-    result.assign(*this);
-    result.get()->set_flags(immutable_access_flag | read_access_flag);
-    return result;
-  }
-}
-
 nd::array nd::array::eval_copy(uint32_t access_flags) const {
+  access_flags = access_flags ? access_flags : (int32_t)default_access_flags;
+  // If the access_flags are just readonly, add immutable
+  // because we just created a unique instance
+  access_flags = (access_flags != read_access_flag) ? access_flags : (read_access_flag | immutable_access_flag);
+
   const ndt::type &current_tp = get_type();
   const ndt::type &dt = current_tp.get_canonical_type();
-  array result(nd::empty(dt));
+  array result = nd::empty(dt, access_flags);
   if (dt.get_id() == fixed_dim_id) {
     // Reorder strides of output strided dimensions in a KEEPORDER fashion
     dt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), get_type(),
                                                                             get()->metadata());
   }
   result.assign(*this);
-  // If the access_flags are 0, use the defaults
-  access_flags = access_flags ? access_flags : (int32_t)nd::default_access_flags;
-  // If the access_flags are just readonly, add immutable
-  // because we just created a unique instance
-  access_flags =
-      (access_flags != nd::read_access_flag) ? access_flags : (nd::read_access_flag | nd::immutable_access_flag);
-  result.get()->set_flags(access_flags);
   return result;
 }
 

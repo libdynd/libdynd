@@ -122,7 +122,6 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques, c
     dst_ptr += stride;
   }
   categories.get_type().extended()->arrmeta_finalize_buffers(categories.get()->metadata());
-  categories.flag_as_immutable();
 
   return categories;
 }
@@ -135,12 +134,11 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
     // already
     // sorted. No validation of this is done, the caller should have ensured it
     // was correct already, typically by construction.
-    m_categories = categories.eval_immutable();
+    m_categories = categories.eval();
     m_category_tp = m_categories.get_type().at(0);
 
     category_count = categories.get_dim_size();
     m_value_to_category_index = nd::old_range(category_count);
-    m_value_to_category_index.flag_as_immutable();
     m_category_index_to_value = m_value_to_category_index;
   } else {
     // Process the categories array to make sure it's valid

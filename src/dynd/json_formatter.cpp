@@ -339,7 +339,6 @@ nd::array dynd::format_json(const nd::array &n, bool struct_as_list) {
 
   // Finalize processing and mark the result as immutable
   result.get_type().extended()->arrmeta_finalize_buffers(result.get()->metadata());
-  result.flag_as_immutable();
 
   return result;
 }

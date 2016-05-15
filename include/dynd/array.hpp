@@ -278,12 +278,6 @@ namespace nd {
       }
     }
 
-    /**
-     * If the caller has the only reference to this array and its data,
-     * makes the access flags into read-only and immutable.
-     */
-    void flag_as_immutable();
-
     /** The flags, including access permissions. */
     inline uint64_t get_flags() const { return m_ptr->get_flags(); }
 
@@ -407,12 +401,6 @@ namespace nd {
      * returns it as is, otherwise evaluates into a new copy.
      */
     array eval() const;
-
-    /**
-     * Evaluates the array into an immutable strided array, or
-     * returns it untouched if it is already both immutable and strided.
-     */
-    array eval_immutable() const;
 
     /**
      * Evaluates the array node into a newly allocated strided array,
