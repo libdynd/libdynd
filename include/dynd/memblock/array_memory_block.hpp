@@ -79,8 +79,6 @@ namespace nd {
 
     const ndt::type &get_type() const { return m_tp; }
 
-    void set_type(const ndt::type &tp) { m_tp = tp; }
-
     char *get_data() const { return m_data; }
 
     void set_data(char *data) { m_data = data; }

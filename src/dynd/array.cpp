@@ -70,9 +70,11 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
  * have identical arrmeta, but this function doesn't check that.
  */
 static nd::array make_array_clone_with_new_type(const nd::array &n, const ndt::type &new_dt) {
-  nd::array result = shallow_copy_array_memory_block(n);
-  // Swap in the type
-  result->set_type(new_dt);
+  nd::array result = nd::make_array(new_dt, n->get_data(), n->get_owner() ? n->get_owner() : n, n->get_flags());
+  if (new_dt.get_arrmeta_size() > 0) {
+    new_dt.extended()->arrmeta_copy_construct(result->metadata(), n->metadata(), nd::memory_block());
+  }
+
   return result;
 }
 
@@ -135,6 +137,9 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
     intptr_t offset = get()->get_type()->apply_linear_index(nindices, indices, get()->metadata(), dt,
                                                             result->metadata(), *this, 0, this_dt, collapse_leading,
                                                             &data, const_cast<memory_block &>(result->get_owner()));
+    //    result = make_array(result->get_type(), data + offset, result->get_owner(), result->get_flags());
+    //  result = make_array(result->get_type(), result->get_data, result->get_owner(), result->get_flags());
+
     result->set_data(data);
     result->set_data(result->get_data() + offset);
     return result;
@@ -522,11 +527,11 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const {
   pdd.arrmeta = res.get()->metadata();
   permute_type_dims(get_type(), 0, &pdd, transformed_tp, was_transformed);
 
-  // We can now substitute our transformed type into
-  // the result array
-  res.get()->set_type(transformed_tp);
+  nd::array second_res = make_array(transformed_tp, m_ptr->get_data(), m_ptr->get_owner() ? m_ptr->get_owner() : *this,
+                                    m_ptr->get_flags());
+  transformed_tp.extended()->arrmeta_copy_construct(second_res->metadata(), res->metadata(), memory_block());
 
-  return res;
+  return second_res;
 }
 
 nd::array nd::array::rotate(intptr_t to, intptr_t from) const {
