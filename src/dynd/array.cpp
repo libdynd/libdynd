@@ -1329,19 +1329,6 @@ nd::array &nd::array::operator/=(const array &rhs) {
   return *this;
 }
 
-nd::array nd::make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, size_t extra_size,
-                                      size_t extra_alignment, char **out_extra_ptr) {
-  if (extra_alignment != tp.get_data_alignment()) {
-    throw std::runtime_error("different alignment");
-  }
-
-  size_t extra_offset = inc_to_alignment(sizeof(array_preamble) + arrmeta_size, extra_alignment);
-  array_preamble *result = new (extra_offset + extra_size - sizeof(array_preamble)) array_preamble(tp, arrmeta_size);
-  // Return a pointer to the extra allocated memory
-  *out_extra_ptr = reinterpret_cast<char *>(result) + extra_offset;
-  return nd::array(result, false);
-}
-
 nd::array nd::shallow_copy_array_memory_block(const nd::array &ndo) {
   // Allocate the new memory block.
   size_t arrmeta_size = 0;
