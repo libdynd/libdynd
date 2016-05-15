@@ -1056,9 +1056,12 @@ namespace nd {
                  false);
   }
 
-  inline array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, char *data,
-                                       const memory_block &owner) {
-    return array(new (arrmeta_size) array_preamble(tp, arrmeta_size, data, owner), false);
+  inline array make_array(const ndt::type &tp, char *data) {
+    return array(new (tp.get_arrmeta_size()) array_preamble(tp, tp.get_arrmeta_size(), data), false);
+  }
+
+  inline array make_array(const ndt::type &tp, char *data, const memory_block &owner) {
+    return array(new (tp.get_arrmeta_size()) array_preamble(tp, tp.get_arrmeta_size(), data, owner), false);
   }
 
   /**
