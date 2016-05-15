@@ -21,6 +21,7 @@ TEST(Pointer, AddressOf)
 
 }
 
+/*
 TEST(Pointer, Dereference)
 {
   int vals[4] = {5, -1, 7, 3};
@@ -31,3 +32,4 @@ TEST(Pointer, Dereference)
 
   EXPECT_ARRAY_EQ(nd::array({5, -1, 7, 3}), nd::dereference(a));
 }
+*/

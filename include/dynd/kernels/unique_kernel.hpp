@@ -35,8 +35,8 @@ namespace nd {
            src[0].data()) /
           src0_stride;
 
-      src[0]->set_type(
-          ndt::make_fixed_dim(new_size, src[0]->get_type().extended<ndt::fixed_dim_type>()->get_element_type()));
+//      src[0]->set_type(
+  //        ndt::make_fixed_dim(new_size, src[0]->get_type().extended<ndt::fixed_dim_type>()->get_element_type()));
       reinterpret_cast<size_stride_t *>(src[0]->metadata())->dim_size = new_size;
     }
   };

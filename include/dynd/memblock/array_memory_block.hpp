@@ -79,15 +79,11 @@ namespace nd {
 
     const ndt::type &get_type() const { return m_tp; }
 
-    void set_type(const ndt::type &tp) { m_tp = tp; }
-
     char *get_data() const { return m_data; }
 
     void set_data(char *data) { m_data = data; }
 
     const memory_block &get_owner() const { return m_owner; }
-
-    void set_owner(const memory_block &owner) { m_owner = owner; }
 
     uint64_t get_flags() const { return m_flags; }
 
