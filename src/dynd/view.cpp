@@ -362,9 +362,16 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp) {
     if ((intptr_t)in_dat->size == out_am->dim_size) {
       // Use the more specific data reference from the var arrmeta if possible
       if (in_am->blockref) {
-        result->set_owner(in_am->blockref);
+        result = nd::make_array(result->get_type(), result->get_data(), in_am->blockref, result->get_flags());
+        fixed_dim_type_arrmeta *out_am = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get()->metadata());
+        out_am->dim_size = tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+        out_am->stride = in_am->stride;
       }
-      result->set_data(in_dat->begin + in_am->offset);
+      result =
+          nd::make_array(result->get_type(), in_dat->begin + in_am->offset, result->get_owner(), result->get_flags());
+      fixed_dim_type_arrmeta *out_am = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get()->metadata());
+      out_am->dim_size = tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+      out_am->stride = in_am->stride;
       // Try to copy the rest of the arrmeta as a view
       if (try_view(arr.get_type().extended<ndt::base_dim_type>()->get_element_type(),
                    arr.get()->metadata() + sizeof(ndt::var_dim_type::metadata_type),

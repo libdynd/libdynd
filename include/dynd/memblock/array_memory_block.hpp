@@ -87,8 +87,6 @@ namespace nd {
 
     const memory_block &get_owner() const { return m_owner; }
 
-    void set_owner(const memory_block &owner) { m_owner = owner; }
-
     uint64_t get_flags() const { return m_flags; }
 
     /** Return a pointer to the arrmeta, immediately after the preamble */

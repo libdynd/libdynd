@@ -13,12 +13,12 @@ namespace nd {
   struct view_kernel : base_kernel<view_kernel> {
     void call(const array *dst, const array *src) {
       const ndt::type &dst_tp = dst->get_type();
+      *const_cast<array *>(dst) =
+          make_array(dst_tp, src[0]->get_data(), src[0]->get_owner() ? src[0]->get_owner() : src[0],
+                     read_access_flag | write_access_flag);
       if (!dst_tp.is_builtin()) {
         dst_tp.extended()->arrmeta_copy_construct(dst->get()->metadata(), src[0]->metadata(), src[0]);
       }
-      dst->get()->set_data(src[0]->get_data());
-
-      dst->get()->set_owner(src[0]->get_owner() ? src[0]->get_owner() : src[0]);
     }
   };
 
