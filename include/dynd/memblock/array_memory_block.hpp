@@ -45,7 +45,7 @@ namespace nd {
       }
     }
 
-    array_preamble(const ndt::type &tp, size_t arrmeta_size) : tp(tp) {
+    array_preamble(const ndt::type &tp, size_t arrmeta_size, char *data) : tp(tp), m_data(data) {
       // Zero out all the arrmeta to start
       memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
     }
