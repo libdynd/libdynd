@@ -15,7 +15,7 @@ namespace nd {
   public:
     dereference_callable() : base_callable(ndt::type("(pointer[Any]) -> Any")) {}
 
-    array alloc(const ndt::type *dst_tp) const { return empty_shell(*dst_tp); }
+    array alloc(const ndt::type *dst_tp) const { return make_array(*dst_tp); }
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &DYND_UNUSED(dst_tp), size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,

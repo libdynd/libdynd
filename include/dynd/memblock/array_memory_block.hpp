@@ -23,20 +23,35 @@ namespace nd {
   class DYNDT_API array_preamble : public base_memory_block {
   public:
     ndt::type tp;
-    uint64_t flags;
 
   private:
-    char *data;
+    char *m_data;
     memory_block m_owner;
 
   public:
+    uint64_t flags;
+
+    array_preamble(const ndt::type &tp, size_t arrmeta_size, size_t data_offset, size_t data_size, uint64_t flags)
+        : tp(tp), m_data(reinterpret_cast<char *>(this) + data_offset), flags(flags) {
+      // Zero out all the arrmeta to start
+      memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
+
+      if (tp.get_flags() & type_flag_zeroinit) {
+        memset(m_data, 0, data_size);
+      }
+
+      if (tp.get_flags() & type_flag_construct) {
+        tp.extended()->data_construct(NULL, m_data);
+      }
+    }
+
     array_preamble(const ndt::type &tp, size_t arrmeta_size) : tp(tp) {
       // Zero out all the arrmeta to start
       memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
     }
 
     array_preamble(const ndt::type &tp, size_t arrmeta_size, char *data, const memory_block &owner)
-        : tp(tp), data(data), m_owner(owner) {
+        : tp(tp), m_data(data), m_owner(owner) {
       // Zero out all the arrmeta to start
       memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
     }
@@ -49,14 +64,14 @@ namespace nd {
           // Call the data destructor if necessary (i.e. the nd::array owns
           // the data memory, and the type has a data destructor)
           if (!tp->is_expression() && (tp->get_flags() & type_flag_destructor) != 0) {
-            tp->data_destruct(arrmeta, data);
+            tp->data_destruct(arrmeta, m_data);
           }
 
           // Free the ndobject data if it wasn't allocated together with the memory block
           if (!tp->is_expression()) {
             const ndt::type &dtp = tp->get_type_at_dimension(NULL, tp->get_ndim());
             if (dtp.get_base_id() == memory_id) {
-              dtp.extended<ndt::base_memory_type>()->data_free(data);
+              dtp.extended<ndt::base_memory_type>()->data_free(m_data);
             }
           }
         }
@@ -66,9 +81,9 @@ namespace nd {
       }
     }
 
-    char *get_data() const { return data; }
+    char *get_data() const { return m_data; }
 
-    void set_data(char *data) { this->data = data; }
+    void set_data(char *data) { m_data = data; }
 
     const memory_block &get_owner() const { return m_owner; }
 
