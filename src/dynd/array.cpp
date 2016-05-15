@@ -137,12 +137,14 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
     intptr_t offset = get()->get_type()->apply_linear_index(nindices, indices, get()->metadata(), dt,
                                                             result->metadata(), *this, 0, this_dt, collapse_leading,
                                                             &data, const_cast<memory_block &>(result->get_owner()));
-    //    result = make_array(result->get_type(), data + offset, result->get_owner(), result->get_flags());
-    //  result = make_array(result->get_type(), result->get_data, result->get_owner(), result->get_flags());
 
-    result->set_data(data);
-    result->set_data(result->get_data() + offset);
-    return result;
+    nd::array second_result = make_array(result->get_type(), data + offset, result->get_owner(), result->get_flags());
+    if (second_result.get_type().get_arrmeta_size() > 0) {
+      second_result.get_type()->arrmeta_copy_construct(second_result->metadata(), result->metadata(),
+                                                       const_cast<memory_block &>(result->get_owner()));
+    }
+
+    return second_result;
   }
 }
 

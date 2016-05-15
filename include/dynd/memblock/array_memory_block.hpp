@@ -81,8 +81,6 @@ namespace nd {
 
     char *get_data() const { return m_data; }
 
-    void set_data(char *data) { m_data = data; }
-
     const memory_block &get_owner() const { return m_owner; }
 
     uint64_t get_flags() const { return m_flags; }
