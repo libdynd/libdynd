@@ -33,12 +33,6 @@ namespace nd {
 
   class DYND_API array;
 
-  /**
-   * Constructs an uninitialized array of the given dtype. This is
-   * the usual function to use for allocating such an array.
-   */
-  DYND_API array empty(const ndt::type &tp);
-
   enum array_access_flags {
     /** If an array is readable */
     read_access_flag = 0x01,
@@ -53,6 +47,13 @@ namespace nd {
     readwrite_access_flags = read_access_flag | write_access_flag,
     default_access_flags = read_access_flag | write_access_flag,
   };
+
+  /**
+   * Constructs an uninitialized array of the given dtype. This is
+   * the usual function to use for allocating such an array.
+   */
+  inline array empty(const ndt::type &tp);
+  inline array empty(const ndt::type &tp, uint64_t flags);
 
   /** Stream printing function */
   DYND_API std::ostream &operator<<(std::ostream &o, const array &rhs);
@@ -137,20 +138,14 @@ namespace nd {
   class DYND_API array : public buffer {
     template <typename T>
     void init(T &&value) {
-      nd::init<typename remove_reference_then_cv<T>::type> init(get()->tp, get()->metadata());
-      init.single(data(), std::forward<T>(value));
-
-      get()->flags =
-          (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
+      nd::init<typename remove_reference_then_cv<T>::type> init(get()->get_type(), get()->metadata());
+      init.single(m_ptr->get_data(), std::forward<T>(value));
     }
 
     template <typename ValueType>
     void init(const ValueType *values, size_t size) {
-      nd::init<ValueType> init(get()->tp, get()->metadata());
-      init.contiguous(data(), values, size);
-
-      get()->flags =
-          (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
+      nd::init<ValueType> init(get()->get_type(), get()->metadata());
+      init.contiguous(m_ptr->get_data(), values, size);
     }
 
   public:
@@ -166,27 +161,37 @@ namespace nd {
       */
     template <typename T,
               typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
-    array(T &&value) : buffer(empty(ndt::type_for(value))) {
+    array(T &&value)
+        : buffer(empty(ndt::type_for(value), (ndt::type_for(value).get_ndim() == 0)
+                                                 ? (read_access_flag | immutable_access_flag)
+                                                 : readwrite_access_flags)) {
       init(std::forward<T>(value));
     }
 
     /** Constructs an array from a 1D initializer list */
     template <typename ValueType>
-    array(const std::initializer_list<ValueType> &values) : buffer(empty(ndt::type_for(values))) {
+    array(const std::initializer_list<ValueType> &values)
+        : buffer(empty(ndt::type_for(values), (ndt::type_for(values).get_ndim() == 0)
+                                                  ? (read_access_flag | immutable_access_flag)
+                                                  : readwrite_access_flags)) {
       init(values);
     }
 
     /** Constructs an array from a 2D initializer list */
     template <typename ValueType>
     array(const std::initializer_list<std::initializer_list<ValueType>> &values)
-        : buffer(empty(ndt::type_for(values))) {
+        : buffer(empty(ndt::type_for(values), (ndt::type_for(values).get_ndim() == 0)
+                                                  ? (read_access_flag | immutable_access_flag)
+                                                  : readwrite_access_flags)) {
       init(values);
     }
 
     /** Constructs an array from a 3D initializer list */
     template <typename ValueType>
     array(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
-        : buffer(empty(ndt::type_for(values))) {
+        : buffer(empty(ndt::type_for(values), (ndt::type_for(values).get_ndim() == 0)
+                                                  ? (read_access_flag | immutable_access_flag)
+                                                  : readwrite_access_flags)) {
       init(values);
     }
 
@@ -203,7 +208,7 @@ namespace nd {
     inline bool is_null() const { return m_ptr == NULL; }
 
     char *data() const {
-      if (get()->flags & write_access_flag) {
+      if (m_ptr->get_flags() & write_access_flag) {
         return get()->get_data();
       }
 
@@ -213,22 +218,22 @@ namespace nd {
     const char *cdata() const { return get()->get_data(); }
 
     inline uint32_t get_access_flags() const {
-      return get()->flags & (immutable_access_flag | read_access_flag | write_access_flag);
+      return m_ptr->get_flags() & (immutable_access_flag | read_access_flag | write_access_flag);
     }
 
-    inline bool is_immutable() const { return (get()->flags & immutable_access_flag) != 0; }
+    inline bool is_immutable() const { return (m_ptr->get_flags() & immutable_access_flag) != 0; }
 
     /** Returns true if the object is a scalar */
     inline bool is_scalar() const { return get_type().is_scalar(); }
 
     /** The type */
-    const ndt::type &get_type() const { return *reinterpret_cast<const ndt::type *>(&get()->tp); }
+    const ndt::type &get_type() const { return *reinterpret_cast<const ndt::type *>(&get()->get_type()); }
 
     inline intptr_t get_ndim() const {
-      if (get()->tp.is_builtin()) {
+      if (get()->get_type().is_builtin()) {
         return 0;
       } else {
-        return get()->tp->get_ndim();
+        return get()->get_type()->get_ndim();
       }
     }
 
@@ -237,12 +242,12 @@ namespace nd {
      * ndarray.dtype property
      */
     inline ndt::type get_dtype() const {
-      size_t ndim = get()->tp.get_ndim();
+      size_t ndim = get()->get_type().get_ndim();
       if (ndim == 0) {
-        return get()->tp;
+        return get()->get_type();
       }
 
-      return get()->tp->get_type_at_dimension(NULL, ndim);
+      return get()->get_type()->get_type_at_dimension(NULL, ndim);
     }
 
     /**
@@ -254,21 +259,21 @@ namespace nd {
      *                   in the data type.
      */
     inline ndt::type get_dtype(size_t include_ndim) const {
-      if (get()->tp.is_builtin()) {
+      if (get()->get_type().is_builtin()) {
         if (include_ndim > 0) {
           throw too_many_indices(get_type(), include_ndim, 0);
         }
-        return ndt::type(get()->tp.get_id());
+        return ndt::type(get()->get_type().get_id());
       } else {
-        size_t ndim = get()->tp->get_ndim();
+        size_t ndim = get()->get_type()->get_ndim();
         if (ndim < include_ndim) {
           throw too_many_indices(get_type(), include_ndim, ndim);
         }
         ndim -= include_ndim;
         if (ndim == 0) {
-          return get()->tp;
+          return get()->get_type();
         } else {
-          return get()->tp->get_type_at_dimension(NULL, ndim);
+          return get()->get_type()->get_type_at_dimension(NULL, ndim);
         }
       }
     }
@@ -280,7 +285,7 @@ namespace nd {
     void flag_as_immutable();
 
     /** The flags, including access permissions. */
-    inline uint64_t get_flags() const { return get()->flags; }
+    inline uint64_t get_flags() const { return m_ptr->get_flags(); }
 
     inline std::vector<intptr_t> get_shape() const {
       std::vector<intptr_t> result(get_ndim());
@@ -288,8 +293,8 @@ namespace nd {
       return result;
     }
     inline void get_shape(intptr_t *out_shape) const {
-      if (!get()->tp.is_builtin() && get()->tp->get_ndim() > 0) {
-        get()->tp->get_shape(get()->tp->get_ndim(), 0, out_shape, get()->metadata(), cdata());
+      if (!get()->get_type().is_builtin() && get()->get_type()->get_ndim() > 0) {
+        get()->get_type()->get_shape(get()->get_type()->get_ndim(), 0, out_shape, get()->metadata(), cdata());
       }
     }
 
@@ -307,7 +312,7 @@ namespace nd {
         return ss[i].dim_size;
       } else if (0 <= i && i < get_ndim()) {
         dimvector shape(i + 1);
-        get()->tp->get_shape(i + 1, 0, shape.get(), get()->metadata(), cdata());
+        get()->get_type()->get_shape(i + 1, 0, shape.get(), get()->metadata(), cdata());
         return shape[i];
       } else {
         std::stringstream ss;
@@ -322,8 +327,8 @@ namespace nd {
       return result;
     }
     inline void get_strides(intptr_t *out_strides) const {
-      if (!get()->tp.is_builtin()) {
-        get()->tp->get_strides(0, out_strides, get()->metadata());
+      if (!get()->get_type().is_builtin()) {
+        get()->get_type()->get_strides(0, out_strides, get()->metadata());
       }
     }
 
@@ -614,7 +619,7 @@ namespace nd {
       nd::as<ValueType> as;
 
       ndt::type tp = ndt::make_type<ValueType>();
-      if (tp == get()->tp) {
+      if (tp == get()->get_type()) {
         as.single(value, const_cast<char *>(cdata()));
       } else {
         array a = empty(tp);
@@ -1040,28 +1045,43 @@ namespace nd {
    *
    * The created object is uninitialized.
    */
-  inline array make_array(const ndt::type &tp, uint64_t flags = read_access_flag | write_access_flag) {
+  inline array make_array(const ndt::type &tp, uint64_t flags) {
     if (tp.is_symbolic()) {
       std::stringstream ss;
       ss << "Cannot create a dynd array with symbolic type " << tp;
       throw type_error(ss.str());
     }
 
-    size_t arrmeta_size = tp.get_arrmeta_size();
-    size_t data_offset = inc_to_alignment(sizeof(array_preamble) + arrmeta_size, tp.get_data_alignment());
+    size_t data_offset = inc_to_alignment(sizeof(array_preamble) + tp.get_arrmeta_size(), tp.get_data_alignment());
     size_t data_size = tp.get_default_data_size();
 
     return array(new (data_offset + data_size - sizeof(array_preamble))
-                     array_preamble(tp, arrmeta_size, data_offset, data_size, flags),
+                     array_preamble(tp, data_offset, data_size, flags),
                  false);
   }
 
   inline array make_array(const ndt::type &tp, char *data, uint64_t flags) {
-    return array(new (tp.get_arrmeta_size()) array_preamble(tp, tp.get_arrmeta_size(), data, flags), false);
+    return array(new (tp.get_arrmeta_size()) array_preamble(tp, data, flags), false);
   }
 
   inline array make_array(const ndt::type &tp, char *data, const memory_block &owner, uint64_t flags) {
-    return array(new (tp.get_arrmeta_size()) array_preamble(tp, tp.get_arrmeta_size(), data, owner, flags), false);
+    return array(new (tp.get_arrmeta_size()) array_preamble(tp, data, owner, flags), false);
+  }
+
+  inline array empty(const ndt::type &tp, uint64_t flags) {
+    // Create an empty shell
+    array res = make_array(tp, flags);
+    // Construct the arrmeta with default settings
+    if (tp.get_arrmeta_size() > 0) {
+      res->get_type()->arrmeta_default_construct(res->metadata(), true);
+    }
+
+    return res;
+  }
+
+  inline array empty(const ndt::type &tp) {
+    // (tp.get_ndim() == 0) ? (read_access_flag | immutable_access_flag) : readwrite_access_flags
+    return empty(tp, readwrite_access_flags);
   }
 
   /**

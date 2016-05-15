@@ -21,56 +21,51 @@ namespace nd {
    * object.
    */
   class DYNDT_API array_preamble : public base_memory_block {
-  public:
-    ndt::type tp;
-
-  private:
+    ndt::type m_tp;
     char *m_data;
     memory_block m_owner;
+    uint64_t m_flags;
 
   public:
-    uint64_t flags;
-
-    array_preamble(const ndt::type &tp, size_t arrmeta_size, size_t data_offset, size_t data_size, uint64_t flags)
-        : tp(tp), m_data(reinterpret_cast<char *>(this) + data_offset), flags(flags) {
+    array_preamble(const ndt::type &tp, size_t data_offset, size_t data_size, uint64_t flags)
+        : m_tp(tp), m_data(reinterpret_cast<char *>(this) + data_offset), m_flags(flags) {
       // Zero out all the arrmeta to start
-      memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
+      memset(reinterpret_cast<char *>(this + 1), 0, m_tp.get_arrmeta_size());
 
-      if (tp.get_flags() & type_flag_zeroinit) {
+      if (m_tp.get_flags() & type_flag_zeroinit) {
         memset(m_data, 0, data_size);
       }
 
       if (tp.get_flags() & type_flag_construct) {
-        tp.extended()->data_construct(NULL, m_data);
+        m_tp.extended()->data_construct(NULL, m_data);
       }
     }
 
-    array_preamble(const ndt::type &tp, size_t arrmeta_size, char *data, uint64_t flags)
-        : tp(tp), m_data(data), flags(flags) {
+    array_preamble(const ndt::type &tp, char *data, uint64_t flags) : m_tp(tp), m_data(data), m_flags(flags) {
       // Zero out all the arrmeta to start
-      memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
+      memset(reinterpret_cast<char *>(this + 1), 0, m_tp.get_arrmeta_size());
     }
 
-    array_preamble(const ndt::type &tp, size_t arrmeta_size, char *data, const memory_block &owner, uint64_t flags)
-        : tp(tp), m_data(data), m_owner(owner), flags(flags) {
+    array_preamble(const ndt::type &tp, char *data, const memory_block &owner, uint64_t flags)
+        : m_tp(tp), m_data(data), m_owner(owner), m_flags(flags) {
       // Zero out all the arrmeta to start
-      memset(reinterpret_cast<char *>(this + 1), 0, arrmeta_size);
+      memset(reinterpret_cast<char *>(this + 1), 0, m_tp.get_arrmeta_size());
     }
 
     ~array_preamble() {
-      if (!tp.is_builtin()) {
+      if (!m_tp.is_builtin()) {
         char *arrmeta = reinterpret_cast<char *>(this + 1);
 
         if (!m_owner) {
           // Call the data destructor if necessary (i.e. the nd::array owns
           // the data memory, and the type has a data destructor)
-          if (!tp->is_expression() && (tp->get_flags() & type_flag_destructor) != 0) {
-            tp->data_destruct(arrmeta, m_data);
+          if (!m_tp->is_expression() && (m_tp->get_flags() & type_flag_destructor) != 0) {
+            m_tp->data_destruct(arrmeta, m_data);
           }
 
           // Free the ndobject data if it wasn't allocated together with the memory block
-          if (!tp->is_expression()) {
-            const ndt::type &dtp = tp->get_type_at_dimension(NULL, tp->get_ndim());
+          if (!m_tp->is_expression()) {
+            const ndt::type &dtp = m_tp->get_type_at_dimension(NULL, m_tp->get_ndim());
             if (dtp.get_base_id() == memory_id) {
               dtp.extended<ndt::base_memory_type>()->data_free(m_data);
             }
@@ -78,9 +73,13 @@ namespace nd {
         }
 
         // Free the references contained in the arrmeta
-        tp->arrmeta_destruct(arrmeta);
+        m_tp->arrmeta_destruct(arrmeta);
       }
     }
+
+    const ndt::type &get_type() const { return m_tp; }
+
+    void set_type(const ndt::type &tp) { m_tp = tp; }
 
     char *get_data() const { return m_data; }
 
@@ -89,6 +88,10 @@ namespace nd {
     const memory_block &get_owner() const { return m_owner; }
 
     void set_owner(const memory_block &owner) { m_owner = owner; }
+
+    uint64_t get_flags() const { return m_flags; }
+
+    void set_flags(uint64_t flags) { m_flags = flags; }
 
     /** Return a pointer to the arrmeta, immediately after the preamble */
     char *metadata() { return reinterpret_cast<char *>(this + 1); }
@@ -99,8 +102,8 @@ namespace nd {
     void debug_print(std::ostream &o, const std::string &indent) {
       o << indent << "------ memory_block at " << static_cast<const void *>(this) << "\n";
       o << indent << " reference count: " << static_cast<long>(m_use_count) << "\n";
-      if (!tp.is_null()) {
-        o << indent << " type: " << tp << "\n";
+      if (!m_tp.is_null()) {
+        o << indent << " type: " << m_tp << "\n";
       } else {
         o << indent << " uninitialized nd::array\n";
       }
