@@ -47,10 +47,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
   ndt::type array_type = ndt::make_fixed_dim(ndim, shape, uniform_tp);
 
   // Allocate the array arrmeta and data in one memory block
-  array result = make_array(array_type, data_ptr, data_reference);
-
-  // Fill in the preamble arrmeta
-  result->flags = access_flags;
+  array result = make_array(array_type, data_ptr, data_reference, access_flags);
 
   // Fill in the array arrmeta with the shape and strides
   fixed_dim_type_arrmeta *meta = reinterpret_cast<fixed_dim_type_arrmeta *>(result->metadata());
@@ -133,14 +130,13 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
   } else {
     ndt::type this_dt = get()->tp;
     ndt::type dt = get()->tp->apply_linear_index(nindices, indices, 0, this_dt, collapse_leading);
-    array result = make_array(dt, data(), m_ptr->get_owner() ? m_ptr->get_owner() : *this);
+    array result = make_array(dt, data(), m_ptr->get_owner() ? m_ptr->get_owner() : *this, get()->flags);
     char *data = result->get_data();
     intptr_t offset =
         get()->tp->apply_linear_index(nindices, indices, get()->metadata(), dt, result->metadata(), *this, 0, this_dt,
                                       collapse_leading, &data, const_cast<memory_block &>(result->get_owner()));
     result->set_data(data);
     result->set_data(result->get_data() + offset);
-    result.get()->flags = get()->flags;
     return result;
   }
 }
@@ -680,8 +676,7 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const {
   ndt::type dst_tp = src_tp.with_new_axis(i, new_ndim);
 
   // This is taken from view_concrete in view.cpp
-  nd::array res = make_array(dst_tp, data(), m_ptr->get_owner() ? get_data_memblock() : *this);
-  res.get()->flags = get()->flags;
+  nd::array res = make_array(dst_tp, data(), m_ptr->get_owner() ? get_data_memblock() : *this, get()->flags);
 
   char *src_arrmeta = const_cast<char *>(get()->metadata());
   char *dst_arrmeta = res.get()->metadata();
@@ -779,9 +774,7 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const {
         throw std::runtime_error("creating an unaligned type");
         //        result_tp = ndt::make_fixed_dim(dim_size, make_unaligned(scalar_tp));
       }
-      array result = make_array(result_tp, data(), m_ptr->get_owner() ? m_ptr->get_owner() : *this);
-      // Copy all the array arrmeta fields
-      result.get()->flags = get()->flags;
+      array result = make_array(result_tp, data(), m_ptr->get_owner() ? m_ptr->get_owner() : *this, get()->flags);
       // The result has one strided ndarray field
       fixed_dim_type_arrmeta *result_md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get()->metadata());
       result_md->dim_size = dim_size;
@@ -1328,8 +1321,7 @@ nd::array &nd::array::operator/=(const array &rhs) {
 
 nd::array nd::shallow_copy_array_memory_block(const nd::array &ndo) {
   // Allocate the new memory block.
-  nd::array result = make_array(ndo->tp, ndo->get_data(), ndo->get_owner() ? ndo->get_owner() : ndo);
-  result->flags = ndo->flags;
+  nd::array result = make_array(ndo->tp, ndo->get_data(), ndo->get_owner() ? ndo->get_owner() : ndo, ndo->flags);
 
   if (!ndo->tp.is_builtin()) {
     ndo->tp.extended()->arrmeta_copy_construct(result->metadata(), ndo->metadata(), ndo);

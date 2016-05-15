@@ -349,8 +349,8 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
 
 static nd::array view_concrete(const nd::array &arr, const ndt::type &tp) {
   // Allocate a result array to attempt the view in it
-  nd::array result = nd::make_array(tp, arr->get_data(), arr->get_owner() ? arr.get_data_memblock() : arr);
-  result.get()->flags = arr.get()->flags;
+  nd::array result =
+      nd::make_array(tp, arr->get_data(), arr->get_owner() ? arr.get_data_memblock() : arr, arr.get()->flags);
   // First handle a special case of viewing outermost "var" as "fixed[#]"
   if (arr.get_type().get_id() == var_dim_id && tp.get_id() == fixed_dim_id) {
     const ndt::var_dim_type::metadata_type *in_am =

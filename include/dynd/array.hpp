@@ -1056,12 +1056,12 @@ namespace nd {
                  false);
   }
 
-  inline array make_array(const ndt::type &tp, char *data) {
-    return array(new (tp.get_arrmeta_size()) array_preamble(tp, tp.get_arrmeta_size(), data), false);
+  inline array make_array(const ndt::type &tp, char *data, uint64_t flags) {
+    return array(new (tp.get_arrmeta_size()) array_preamble(tp, tp.get_arrmeta_size(), data, flags), false);
   }
 
-  inline array make_array(const ndt::type &tp, char *data, const memory_block &owner) {
-    return array(new (tp.get_arrmeta_size()) array_preamble(tp, tp.get_arrmeta_size(), data, owner), false);
+  inline array make_array(const ndt::type &tp, char *data, const memory_block &owner, uint64_t flags) {
+    return array(new (tp.get_arrmeta_size()) array_preamble(tp, tp.get_arrmeta_size(), data, owner, flags), false);
   }
 
   /**
