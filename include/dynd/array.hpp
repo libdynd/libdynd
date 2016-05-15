@@ -1040,10 +1040,6 @@ namespace nd {
    *
    * The created object is uninitialized.
    */
-  inline array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size) {
-    return array(new (arrmeta_size) array_preamble(tp, arrmeta_size), false);
-  }
-
   inline array make_array(const ndt::type &tp, uint64_t flags = read_access_flag | write_access_flag) {
     if (tp.is_symbolic()) {
       std::stringstream ss;
@@ -1064,15 +1060,6 @@ namespace nd {
                                        const memory_block &owner) {
     return array(new (arrmeta_size) array_preamble(tp, arrmeta_size, data, owner), false);
   }
-
-  /**
-   * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta),
-   * as well as storage for embedding additional POD storage such as the array data.
-   *
-   * The created object is uninitialized.
-   */
-  DYND_API array make_array_memory_block(const ndt::type &tp, size_t arrmeta_size, size_t extra_size,
-                                         size_t extra_alignment, char **out_extra_ptr);
 
   /**
    * Makes a shallow copy of the nd::array memory block. In the copy, only the
