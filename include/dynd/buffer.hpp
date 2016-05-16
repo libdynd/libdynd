@@ -42,7 +42,7 @@ namespace nd {
       return *this;
     }
 
-    inline bool is_immutable() const { return (m_ptr->m_flags & immutable_access_flag) != 0; }
+    bool is_immutable() const { return (m_ptr->m_flags & immutable_access_flag) != 0; }
   };
 
   inline memory_block::memory_block(const buffer &other)

@@ -248,7 +248,6 @@ set(libdyndt_SRC
     src/dynd/git_version.cpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp
     src/dynd/int128.cpp
-    src/dynd/memory_block.cpp
     src/dynd/parse_util.cpp
     src/dynd/shape_tools.cpp
     src/dynd/string_encodings.cpp

@@ -349,8 +349,8 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
 
 static nd::array view_concrete(const nd::array &arr, const ndt::type &tp) {
   // Allocate a result array to attempt the view in it
-  nd::array result =
-      nd::make_array(tp, arr->get_data(), arr.get_owner() ? arr.get_data_memblock() : arr, arr.get_flags());
+  nd::array result = nd::make_array(tp, const_cast<char *>(arr.cdata()),
+                                    arr.get_owner() ? arr.get_data_memblock() : arr, arr.get_flags());
   // First handle a special case of viewing outermost "var" as "fixed[#]"
   if (arr.get_type().get_id() == var_dim_id && tp.get_id() == fixed_dim_id) {
     const ndt::var_dim_type::metadata_type *in_am =
@@ -362,7 +362,8 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp) {
     if ((intptr_t)in_dat->size == out_am->dim_size) {
       // Use the more specific data reference from the var arrmeta if possible
       if (in_am->blockref) {
-        result = nd::make_array(result.get_type(), result->get_data(), in_am->blockref, result.get_flags());
+        result =
+            nd::make_array(result.get_type(), const_cast<char *>(result.cdata()), in_am->blockref, result.get_flags());
         fixed_dim_type_arrmeta *out_am = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get()->metadata());
         out_am->dim_size = tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
         out_am->stride = in_am->stride;
