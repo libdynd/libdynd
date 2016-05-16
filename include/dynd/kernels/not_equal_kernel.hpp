@@ -11,32 +11,27 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t I0, type_id_t I1>
-  struct not_equal_kernel : base_strided_kernel<not_equal_kernel<I0, I1>, 2> {
-    typedef typename type_of<I0>::type A0;
-    typedef typename type_of<I1>::type A1;
-    typedef typename std::common_type<A0, A1>::type T;
+  template <typename Arg0Type, typename Arg1Type>
+  struct not_equal_kernel : base_strided_kernel<not_equal_kernel<Arg0Type, Arg1Type>, 2> {
+    typedef typename std::common_type<Arg0Type, Arg1Type>::type T;
 
-    void single(char *dst, char *const *src)
-    {
-      *reinterpret_cast<bool1 *>(dst) =
-          static_cast<T>(*reinterpret_cast<A0 *>(src[0])) != static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
+    void single(char *dst, char *const *src) {
+      *reinterpret_cast<bool1 *>(dst) = static_cast<T>(*reinterpret_cast<Arg0Type *>(src[0])) !=
+                                        static_cast<T>(*reinterpret_cast<Arg1Type *>(src[1]));
     }
   };
 
-  template <type_id_t Arg0ID>
-  struct not_equal_kernel<Arg0ID, Arg0ID> : base_strided_kernel<not_equal_kernel<Arg0ID, Arg0ID>, 2> {
-    typedef typename type_of<Arg0ID>::type arg0_type;
-
-    void single(char *res, char *const *args)
-    {
+  template <typename Arg0Type>
+  struct not_equal_kernel<Arg0Type, Arg0Type> : base_strided_kernel<not_equal_kernel<Arg0Type, Arg0Type>, 2> {
+    void single(char *res, char *const *args) {
       *reinterpret_cast<bool1 *>(res) =
-          *reinterpret_cast<arg0_type *>(args[0]) != *reinterpret_cast<arg0_type *>(args[1]);
+          *reinterpret_cast<Arg0Type *>(args[0]) != *reinterpret_cast<Arg0Type *>(args[1]);
     }
   };
 
   template <>
-  struct not_equal_kernel<tuple_id, tuple_id> : base_strided_kernel<not_equal_kernel<tuple_id, tuple_id>, 2> {
+  struct not_equal_kernel<ndt::tuple_type, ndt::tuple_type>
+      : base_strided_kernel<not_equal_kernel<ndt::tuple_type, ndt::tuple_type>, 2> {
     size_t field_count;
     const size_t *src0_data_offsets, *src1_data_offsets;
     // After this are field_count sorting_less kernel offsets, for
@@ -44,20 +39,16 @@ namespace nd {
     // with each 0 <= i < field_count
 
     not_equal_kernel(size_t field_count, const size_t *src0_data_offsets, const size_t *src1_data_offsets)
-        : field_count(field_count), src0_data_offsets(src0_data_offsets), src1_data_offsets(src1_data_offsets)
-    {
-    }
+        : field_count(field_count), src0_data_offsets(src0_data_offsets), src1_data_offsets(src1_data_offsets) {}
 
-    ~not_equal_kernel()
-    {
+    ~not_equal_kernel() {
       size_t *kernel_offsets = reinterpret_cast<size_t *>(this + 1);
       for (size_t i = 0; i != field_count; ++i) {
         get_child(kernel_offsets[i])->destroy();
       }
     }
 
-    void single(char *dst, char *const *src)
-    {
+    void single(char *dst, char *const *src) {
       const size_t *kernel_offsets = reinterpret_cast<const size_t *>(this + 1);
       char *child_src[2];
       for (size_t i = 0; i != field_count; ++i) {

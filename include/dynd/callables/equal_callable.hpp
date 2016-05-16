@@ -12,16 +12,16 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t Arg0ID, type_id_t Arg1ID>
-  class equal_callable : public default_instantiable_callable<equal_kernel<Arg0ID, Arg1ID>> {
+  template <typename Arg0Type, typename Arg1Type>
+  class equal_callable : public default_instantiable_callable<equal_kernel<Arg0Type, Arg1Type>> {
   public:
     equal_callable()
-        : default_instantiable_callable<equal_kernel<Arg0ID, Arg1ID>>(
-              ndt::make_type<ndt::callable_type>(ndt::make_type<bool1>(), {ndt::type(Arg0ID), ndt::type(Arg1ID)})) {}
+        : default_instantiable_callable<equal_kernel<Arg0Type, Arg1Type>>(ndt::make_type<ndt::callable_type>(
+              ndt::make_type<bool1>(), {ndt::make_type<Arg0Type>(), ndt::make_type<Arg1Type>()})) {}
   };
 
   template <>
-  class equal_callable<tuple_id, tuple_id> : public base_callable {
+  class equal_callable<ndt::tuple_type, ndt::tuple_type> : public base_callable {
   public:
     equal_callable()
         : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<bool1>(),
@@ -43,19 +43,20 @@ namespace nd {
                                                      const char *const *src_arrmeta) {
         intptr_t self_offset = kb.size();
 
-        kb.emplace_back<equal_kernel<tuple_id, tuple_id>>(kernreq, field_count,
-                                                          reinterpret_cast<const uintptr_t *>(src_arrmeta[0]),
-                                                          reinterpret_cast<const uintptr_t *>(src_arrmeta[1]));
+        kb.emplace_back<equal_kernel<ndt::tuple_type, ndt::tuple_type>>(
+            kernreq, field_count, reinterpret_cast<const uintptr_t *>(src_arrmeta[0]),
+            reinterpret_cast<const uintptr_t *>(src_arrmeta[1]));
         kb.emplace_back(field_count * sizeof(size_t));
 
-        equal_kernel<tuple_id, tuple_id> *e = kb.get_at<equal_kernel<tuple_id, tuple_id>>(self_offset);
+        equal_kernel<ndt::tuple_type, ndt::tuple_type> *e =
+            kb.get_at<equal_kernel<ndt::tuple_type, ndt::tuple_type>>(self_offset);
         size_t *field_kernel_offsets;
         for (size_t i = 0; i != field_count; ++i) {
           // Reserve space for the child, and save the offset to this
           // field comparison kernel. Have to re-get
           // the pointer because creating the field comparison kernel may
           // move the memory.
-          e = kb.get_at<equal_kernel<tuple_id, tuple_id>>(self_offset);
+          e = kb.get_at<equal_kernel<ndt::tuple_type, ndt::tuple_type>>(self_offset);
           field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
           field_kernel_offsets[i] = kb.size() - self_offset;
           const char *field_arrmeta = src_arrmeta[0] + arrmeta_offsets[i];

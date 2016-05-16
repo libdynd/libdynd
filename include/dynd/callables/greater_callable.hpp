@@ -11,12 +11,12 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t Arg0ID, type_id_t Arg1ID>
-  class greater_callable : public default_instantiable_callable<greater_kernel<Arg0ID, Arg1ID>> {
+  template <typename Arg0Type, typename Arg1Type>
+  class greater_callable : public default_instantiable_callable<greater_kernel<Arg0Type, Arg1Type>> {
   public:
     greater_callable()
-        : default_instantiable_callable<greater_kernel<Arg0ID, Arg1ID>>(
-              ndt::make_type<ndt::callable_type>(ndt::make_type<bool1>(), {ndt::type(Arg0ID), ndt::type(Arg1ID)})) {}
+        : default_instantiable_callable<greater_kernel<Arg0Type, Arg1Type>>(ndt::make_type<ndt::callable_type>(
+              ndt::make_type<bool1>(), {ndt::make_type<Arg0Type>(), ndt::make_type<Arg1Type>()})) {}
   };
 
 } // namespace dynd::nd
