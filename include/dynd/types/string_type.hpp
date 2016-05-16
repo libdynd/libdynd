@@ -8,8 +8,8 @@
 #pragma once
 
 #include <dynd/bytes.hpp>
-#include <dynd/type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/type.hpp>
 #include <dynd/types/sso_bytestring.hpp>
 
 namespace dynd {
@@ -49,13 +49,11 @@ public:
     return !std::lexicographical_compare(rhs.begin(), rhs.end(), begin(), end());
   }
 
-  bool operator>=(const string &rhs) const
-  {
+  bool operator>=(const string &rhs) const {
     return !std::lexicographical_compare(begin(), end(), rhs.begin(), rhs.end());
   }
 
-  bool operator>(const string &rhs) const
-  {
+  bool operator>(const string &rhs) const {
     return std::lexicographical_compare(rhs.begin(), rhs.end(), begin(), end());
   }
 
@@ -117,6 +115,8 @@ namespace ndt {
 
   template <>
   struct traits<string> {
+    typedef string_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;

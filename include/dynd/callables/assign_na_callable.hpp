@@ -11,12 +11,13 @@
 namespace dynd {
 namespace nd {
 
-  template <typename ResValueType>
-  class assign_na_callable : public default_instantiable_callable<assign_na_kernel<ResValueType>> {
+  template <typename ReturnValueType>
+  class assign_na_callable : public default_instantiable_callable<assign_na_kernel<ReturnValueType>> {
   public:
     assign_na_callable()
-        : default_instantiable_callable<assign_na_kernel<ResValueType>>(
-              ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::option_type>(ndt::make_type<ResValueType>()))) {}
+        : default_instantiable_callable<assign_na_kernel<ReturnValueType>>(
+              ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::option_type>(ndt::make_type<ReturnValueType>()))) {
+    }
   };
 
   template <>
