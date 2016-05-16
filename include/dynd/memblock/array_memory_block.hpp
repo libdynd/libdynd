@@ -92,8 +92,6 @@ namespace nd {
       }
     }
 
-    char *get_data() const { return m_data; }
-
     /** Return a pointer to the arrmeta, immediately after the preamble */
     char *metadata() const { return const_cast<char *>(reinterpret_cast<const char *>(this + 1)); }
 

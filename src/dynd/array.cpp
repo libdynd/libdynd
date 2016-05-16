@@ -70,7 +70,8 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
  * have identical arrmeta, but this function doesn't check that.
  */
 static nd::array make_array_clone_with_new_type(const nd::array &n, const ndt::type &new_dt) {
-  nd::array result = nd::make_array(new_dt, n->get_data(), n.get_owner() ? n.get_owner() : n, n.get_flags());
+  nd::array result =
+      nd::make_array(new_dt, const_cast<char *>(n.cdata()), n.get_owner() ? n.get_owner() : n, n.get_flags());
   if (new_dt.get_arrmeta_size() > 0) {
     new_dt.extended()->arrmeta_copy_construct(result->metadata(), n->metadata(), nd::memory_block());
   }
@@ -133,7 +134,7 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
     ndt::type this_dt = get_type();
     ndt::type dt = get_type()->apply_linear_index(nindices, indices, 0, this_dt, collapse_leading);
     array result = make_array(dt, data(), get_owner() ? get_owner() : *this, get_flags());
-    char *data = result->get_data();
+    char *data = result.data();
     intptr_t offset =
         get_type()->apply_linear_index(nindices, indices, get()->metadata(), dt, result->metadata(), *this, 0, this_dt,
                                        collapse_leading, &data, const_cast<memory_block &>(result.get_owner()));
@@ -529,7 +530,7 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const {
   pdd.arrmeta = res.get()->metadata();
   permute_type_dims(get_type(), 0, &pdd, transformed_tp, was_transformed);
 
-  nd::array second_res = make_array(transformed_tp, m_ptr->get_data(), get_owner() ? get_owner() : *this, get_flags());
+  nd::array second_res = make_array(transformed_tp, data(), get_owner() ? get_owner() : *this, get_flags());
   transformed_tp.extended()->arrmeta_copy_construct(second_res->metadata(), res->metadata(), memory_block());
 
   return second_res;
@@ -766,7 +767,7 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const {
       get_type()->arrmeta_debug_print(get()->metadata(), o, indent + "   ");
     }
     o << " data:\n";
-    o << "   pointer: " << (void *)m_ptr->get_data() << "\n";
+    o << "   pointer: " << (void *)cdata() << "\n";
     o << "   reference: " << (void *)get_owner().get();
     if (!get_owner()) {
       o << " (embedded in array memory)\n";
@@ -787,10 +788,10 @@ std::ostream &nd::operator<<(std::ostream &o, const array &rhs) {
     o << "array(";
     array v = rhs.eval();
     if (v.get_type().is_builtin()) {
-      print_builtin_scalar(v.get_type().get_id(), o, v->get_data());
+      print_builtin_scalar(v.get_type().get_id(), o, v.cdata());
     } else {
       stringstream ss;
-      v.get_type()->print_data(ss, v.get()->metadata(), v->get_data());
+      v.get_type()->print_data(ss, v.get()->metadata(), v.cdata());
       print_indented(o, "      ", ss.str(), true);
     }
     o << ",\n      type=\"" << rhs.get_type() << "\")";
@@ -1259,8 +1260,8 @@ nd::array &nd::array::operator/=(const array &rhs) {
 
 nd::array nd::shallow_copy_array_memory_block(const nd::array &ndo) {
   // Allocate the new memory block.
-  nd::array result =
-      make_array(ndo.get_type(), ndo->get_data(), ndo.get_owner() ? ndo.get_owner() : ndo, ndo.get_flags());
+  nd::array result = make_array(ndo.get_type(), const_cast<char *>(ndo.cdata()),
+                                ndo.get_owner() ? ndo.get_owner() : ndo, ndo.get_flags());
 
   if (!ndo.get_type().is_builtin()) {
     ndo.get_type().extended()->arrmeta_copy_construct(result->metadata(), ndo->metadata(), ndo);

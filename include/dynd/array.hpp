@@ -124,13 +124,13 @@ namespace nd {
     template <typename T>
     void init(T &&value) {
       nd::init<typename remove_reference_then_cv<T>::type> init(get_type(), get()->metadata());
-      init.single(m_ptr->get_data(), std::forward<T>(value));
+      init.single(const_cast<char *>(cdata()), std::forward<T>(value));
     }
 
     template <typename ValueType>
     void init(const ValueType *values, size_t size) {
       nd::init<ValueType> init(get_type(), get()->metadata());
-      init.contiguous(m_ptr->get_data(), values, size);
+      init.contiguous(const_cast<char *>(cdata()), values, size);
     }
 
   public:
