@@ -233,7 +233,7 @@ set(libdyndt_SRC
     include/dynd/types/type_type.hpp
     # Memory blocks
     src/dynd/memblock/base_memory_block.cpp
-    include/dynd/memblock/array_memory_block.hpp
+    include/dynd/memblock/buffer_memory_block.hpp
     include/dynd/memblock/base_memory_block.hpp
     include/dynd/memblock/external_memory_block.hpp
     include/dynd/memblock/fixed_size_pod_memory_block.hpp
@@ -242,6 +242,7 @@ set(libdyndt_SRC
     include/dynd/memblock/pod_memory_block.hpp
     include/dynd/memblock/zeroinit_memory_block.hpp
     # Main
+    src/dynd/buffer.cpp
     src/dynd/exceptions.cpp
     src/dynd/float16.cpp
     src/dynd/float128.cpp

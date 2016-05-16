@@ -23,6 +23,12 @@
 #include <dynd/git_version.hpp>
 #include <dynd/visibility.hpp>
 
+/**
+ * Preprocessor macro for marking variables unused, and suppressing
+ * warnings for them.
+ */
+#define DYND_UNUSED(x)
+
 /** The number of elements to process at once when doing chunking/buffering */
 #define DYND_BUFFER_CHUNK_SIZE 128
 
@@ -309,8 +315,18 @@ bool operator==(const intrusive_ptr<T> &lhs, const intrusive_ptr<T> &rhs) {
 }
 
 template <typename T>
+bool operator==(const intrusive_ptr<T> &lhs, std::nullptr_t DYND_UNUSED(rhs)) {
+  return !lhs.get();
+}
+
+template <typename T>
 bool operator!=(const intrusive_ptr<T> &lhs, const intrusive_ptr<T> &rhs) {
   return lhs.get() == rhs.get();
+}
+
+template <typename T>
+bool operator!=(const intrusive_ptr<T> &lhs, std::nullptr_t DYND_UNUSED(rhs)) {
+  return lhs.get();
 }
 
 template <template <typename...> class T, typename U>
@@ -497,12 +513,6 @@ struct arg_at {
 #ifndef DYND_ASSIGNMENT_TRACING
 #define DYND_ASSIGNMENT_TRACING 0
 #endif
-
-/**
- * Preprocessor macro for marking variables unused, and suppressing
- * warnings for them.
- */
-#define DYND_UNUSED(x)
 
 #ifndef DYND_IGNORE_UNUSED
 #define DYND_IGNORE_UNUSED(NAME) NAME

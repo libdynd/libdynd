@@ -35,14 +35,14 @@ namespace nd {
    * arrmeta after this structure is determined by the type
    * object.
    */
-  class DYNDT_API array_preamble : public base_memory_block {
+  class DYNDT_API buffer_memory_block : public base_memory_block {
     ndt::type m_tp;
     char *m_data;
     memory_block m_owner;
     uint64_t m_flags;
 
   public:
-    array_preamble(const ndt::type &tp, size_t data_offset, size_t data_size, uint64_t flags)
+    buffer_memory_block(const ndt::type &tp, size_t data_offset, size_t data_size, uint64_t flags)
         : m_tp(tp), m_data(reinterpret_cast<char *>(this) + data_offset), m_flags(flags) {
       // Zero out all the arrmeta to start
       memset(reinterpret_cast<char *>(this + 1), 0, m_tp.get_arrmeta_size());
@@ -56,18 +56,18 @@ namespace nd {
       }
     }
 
-    array_preamble(const ndt::type &tp, char *data, uint64_t flags) : m_tp(tp), m_data(data), m_flags(flags) {
+    buffer_memory_block(const ndt::type &tp, char *data, uint64_t flags) : m_tp(tp), m_data(data), m_flags(flags) {
       // Zero out all the arrmeta to start
       memset(reinterpret_cast<char *>(this + 1), 0, m_tp.get_arrmeta_size());
     }
 
-    array_preamble(const ndt::type &tp, char *data, const memory_block &owner, uint64_t flags)
+    buffer_memory_block(const ndt::type &tp, char *data, const memory_block &owner, uint64_t flags)
         : m_tp(tp), m_data(data), m_owner(owner), m_flags(flags) {
       // Zero out all the arrmeta to start
       memset(reinterpret_cast<char *>(this + 1), 0, m_tp.get_arrmeta_size());
     }
 
-    ~array_preamble() {
+    ~buffer_memory_block() {
       if (!m_tp.is_builtin()) {
         char *arrmeta = reinterpret_cast<char *>(this + 1);
 
@@ -117,16 +117,16 @@ namespace nd {
 
     friend class buffer;
 
-    friend void intrusive_ptr_retain(const array_preamble *ptr);
-    friend void intrusive_ptr_release(const array_preamble *ptr);
-    friend long intrusive_ptr_use_count(const array_preamble *ptr);
+    friend void intrusive_ptr_retain(const buffer_memory_block *ptr);
+    friend void intrusive_ptr_release(const buffer_memory_block *ptr);
+    friend long intrusive_ptr_use_count(const buffer_memory_block *ptr);
   };
 
-  inline long intrusive_ptr_use_count(const array_preamble *ptr) { return ptr->m_use_count; }
+  inline long intrusive_ptr_use_count(const buffer_memory_block *ptr) { return ptr->m_use_count; }
 
-  inline void intrusive_ptr_retain(const array_preamble *ptr) { ++ptr->m_use_count; }
+  inline void intrusive_ptr_retain(const buffer_memory_block *ptr) { ++ptr->m_use_count; }
 
-  inline void intrusive_ptr_release(const array_preamble *ptr) {
+  inline void intrusive_ptr_release(const buffer_memory_block *ptr) {
     if (--ptr->m_use_count == 0) {
       delete ptr;
     }
