@@ -36,50 +36,50 @@ TEST(Array, FromValueConstructor) {
   // Bool
   a = nd::array(true);
   EXPECT_EQ(ndt::make_type<bool1>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   a = nd::array(bool1(true));
   EXPECT_EQ(ndt::make_type<bool1>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   // Signed int
   a = nd::array((int8_t)1);
   EXPECT_EQ(ndt::make_type<int8_t>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   a = nd::array((int16_t)1);
   EXPECT_EQ(ndt::make_type<int16_t>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   a = nd::array((int32_t)1);
   EXPECT_EQ(ndt::make_type<int32_t>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   a = nd::array((int64_t)1);
   EXPECT_EQ(ndt::make_type<int64_t>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   // Unsigned int
   a = nd::array((uint8_t)1);
   EXPECT_EQ(ndt::make_type<uint8_t>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   a = nd::array((uint16_t)1);
   EXPECT_EQ(ndt::make_type<uint16_t>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   a = nd::array((uint32_t)1);
   EXPECT_EQ(ndt::make_type<uint32_t>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   a = nd::array((uint64_t)1);
   EXPECT_EQ(ndt::make_type<uint64_t>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   // Floating point
   a = nd::array(1.0f);
   EXPECT_EQ(ndt::make_type<float>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   a = nd::array(1.0);
   EXPECT_EQ(ndt::make_type<double>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   // Complex
   a = nd::array(dynd::complex<float>(1, 1));
   EXPECT_EQ(ndt::make_type<dynd::complex<float>>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
   a = nd::array(dynd::complex<double>(1, 1));
   EXPECT_EQ(ndt::make_type<dynd::complex<double>>(), a.get_type());
-  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
+  EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_flags());
 }
 
 TYPED_TEST_P(Array, ScalarConstructor) {
@@ -88,7 +88,7 @@ TYPED_TEST_P(Array, ScalarConstructor) {
   a = nd::empty(TestFixture::MakeType(ndt::make_type<float>()));
   EXPECT_EQ(TestFixture::MakeType(ndt::make_type<float>()), a.get_type());
   EXPECT_EQ(ndt::make_type<float>(), a.get_type().get_canonical_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
+  EXPECT_EQ(nd::readwrite_access_flags, a.get_flags());
   EXPECT_TRUE(a.is_scalar());
 }
 

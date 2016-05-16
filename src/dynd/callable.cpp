@@ -88,17 +88,17 @@ nd::array nd::callable::call(size_t narg, const array *args, size_t nkwd,
   size_t j = 0;
   if (m_ptr->is_arg_variadic()) {
     for (size_t i = 0; i < narg; ++i) {
-      detail::check_arg(m_ptr, i, args[i]->get_type(), args[i]->metadata(), tp_vars);
+      detail::check_arg(m_ptr, i, args[i].get_type(), args[i]->metadata(), tp_vars);
 
-      args_tp[i] = args[i]->get_type();
+      args_tp[i] = args[i].get_type();
       args_arrmeta[i] = args[i]->metadata();
     }
   } else {
     size_t i = 0;
     for (; i < m_ptr->get_narg(); ++i) {
-      detail::check_arg(m_ptr, i, args[i]->get_type(), args[i]->metadata(), tp_vars);
+      detail::check_arg(m_ptr, i, args[i].get_type(), args[i]->metadata(), tp_vars);
 
-      args_tp[i] = args[i]->get_type();
+      args_tp[i] = args[i].get_type();
       args_arrmeta[i] = args[i]->metadata();
     }
 

@@ -3,25 +3,24 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
+#include <dynd/json_parser.hpp>
 #include <dynd/string.hpp>
-#include <dynd/types/string_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/json_parser.hpp>
+#include <dynd/types/string_type.hpp>
 
 #include "dynd_assertions.hpp"
 
 using namespace std;
 using namespace dynd;
 
-TEST(StringType, Create)
-{
+TEST(StringType, Create) {
   ndt::type d;
 
   // Strings with various encodings
@@ -37,8 +36,7 @@ TEST(StringType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(StringType, ArrayCreation)
-{
+TEST(StringType, ArrayCreation) {
   nd::array a;
 
   // A C-style string literal
@@ -70,14 +68,13 @@ TEST(StringType, ArrayCreation)
   EXPECT_EQ("of strings that are various sizes", a(4).as<std::string>());
 }
 
-TEST(StringType, AccessFlags)
-{
+TEST(StringType, AccessFlags) {
   nd::array a, b;
 
   // Default construction from a string produces an immutable fixed_string
   a = std::string("testing one two three testing one two three four five "
                   "testing one two three four five six seven");
-  //  EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag, (int)a.get_access_flags());
+  //  EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag, (int)a.get_flags());
   // Turn it into a fixed_string type for this test
   a = nd::empty(ndt::make_type<ndt::fixed_string_type>(95, string_encoding_utf_8)).assign(a);
   EXPECT_EQ(ndt::make_type<ndt::fixed_string_type>(95, string_encoding_utf_8), a.get_type());
@@ -85,7 +82,7 @@ TEST(StringType, AccessFlags)
   // Converting to a blockref string of the same encoding produces a reference
   // into the fixed_string value
   b = nd::empty(ndt::make_type<ndt::string_type>()).assign(a);
-  EXPECT_EQ(nd::read_access_flag | nd::write_access_flag, (int)b.get_access_flags());
+  EXPECT_EQ(nd::read_access_flag | nd::write_access_flag, (int)b.get_flags());
   EXPECT_EQ(ndt::make_type<ndt::string_type>(), b.get_type());
   // The data array for 'a' matches the referenced data for 'b' (TODO: Restore
   // this property)
@@ -175,29 +172,25 @@ TEST(StringType, Unicode)
 }
 */
 
-TEST(StringType, CanonicalDType)
-{
+TEST(StringType, CanonicalDType) {
   // The canonical type of a string type is the same type
   EXPECT_EQ((ndt::make_type<ndt::string_type>()), (ndt::make_type<ndt::string_type>().get_canonical_type()));
 }
 
-TEST(StringType, Storage)
-{
+TEST(StringType, Storage) {
   nd::array a;
 
   a = "testing";
   EXPECT_EQ(ndt::make_type<ndt::bytes_type>(1), a.storage().get_type());
 }
 
-TEST(StringType, Properties)
-{
+TEST(StringType, Properties) {
   ndt::type d = ndt::make_type<ndt::string_type>();
 
   EXPECT_EQ("utf8", d.p<std::string>("encoding"));
 }
 
-TEST(StringType, EncodingSizes)
-{
+TEST(StringType, EncodingSizes) {
   EXPECT_EQ(1, string_encoding_char_size_table[string_encoding_ascii]);
   EXPECT_EQ(1, string_encoding_char_size_table[string_encoding_utf_8]);
   EXPECT_EQ(2, string_encoding_char_size_table[string_encoding_ucs_2]);
@@ -246,8 +239,7 @@ TEST(StringType, StringToBool)
 }
 */
 
-TEST(StringType, StringToInteger)
-{
+TEST(StringType, StringToInteger) {
   // Test the boundary cases of the various integers
   nd::array i8 = nd::empty(ndt::make_type<int8_t>());
   EXPECT_EQ(-128, i8.assign(nd::array("-128")).as<int8_t>());
@@ -306,8 +298,7 @@ TEST(StringType, StringToInteger)
   */
 }
 
-TEST(StringType, Comparisons)
-{
+TEST(StringType, Comparisons) {
   nd::array a, b;
 
   // Basic test
@@ -367,8 +358,7 @@ TEST(StringType, Comparisons)
     */
 }
 
-TEST(StringType, ConcatenationScalar)
-{
+TEST(StringType, ConcatenationScalar) {
   dynd::string a("first");
   dynd::string b("second");
 
@@ -381,8 +371,7 @@ TEST(StringType, ConcatenationScalar)
   ASSERT_EQ(dynd::string("foobar"), a);
 }
 
-TEST(StringType, Concatenation)
-{
+TEST(StringType, Concatenation) {
   nd::array a, b, c;
 
   a = "first";
@@ -398,8 +387,7 @@ TEST(StringType, Concatenation)
   EXPECT_ARRAY_EQ(nd::array({"testingalpha", "onebeta", "twogamma"}), nd::string_concatenation(a, b));
 }
 
-TEST(StringType, Find1)
-{
+TEST(StringType, Find1) {
   nd::array a, b;
 
   a = {"abc", "ababc", "ababab", "abd"};
@@ -409,8 +397,7 @@ TEST(StringType, Find1)
   EXPECT_ARRAY_EQ(c, nd::string_find(a, b));
 }
 
-TEST(StringType, Find2)
-{
+TEST(StringType, Find2) {
   nd::array a, b;
 
   a = "abc";
@@ -420,8 +407,7 @@ TEST(StringType, Find2)
   EXPECT_ARRAY_EQ(c, nd::string_find(a, b));
 }
 
-TEST(StringType, Find3)
-{
+TEST(StringType, Find3) {
   /* This tests the "fast path" where the needle is a single
      character */
   nd::array a, b;
@@ -433,8 +419,7 @@ TEST(StringType, Find3)
   EXPECT_ARRAY_EQ(c, nd::string_find(a, b));
 }
 
-TEST(StringType, RFind1)
-{
+TEST(StringType, RFind1) {
   nd::array a, b;
 
   a = {"abc", "ababc", "abcdabc", "abd"};
@@ -444,8 +429,7 @@ TEST(StringType, RFind1)
   EXPECT_ARRAY_EQ(c, nd::string_rfind(a, b));
 }
 
-TEST(StringType, Count1)
-{
+TEST(StringType, Count1) {
   nd::array a, b;
 
   a = {"abc", "xxxabcxxxabcxxx", "ababab", "abd"};
@@ -455,8 +439,7 @@ TEST(StringType, Count1)
   EXPECT_ARRAY_EQ(c, nd::string_count(a, b));
 }
 
-TEST(StringType, Count2)
-{
+TEST(StringType, Count2) {
   nd::array a, b;
 
   a = "abc";
@@ -466,8 +449,7 @@ TEST(StringType, Count2)
   EXPECT_ARRAY_EQ(c, nd::string_count(a, b));
 }
 
-TEST(StringType, Count3)
-{
+TEST(StringType, Count3) {
   /* This tests the "fast path" where the needle is a single
      character */
   nd::array a, b;
@@ -479,8 +461,7 @@ TEST(StringType, Count3)
   EXPECT_ARRAY_EQ(c, nd::string_count(a, b));
 }
 
-TEST(StringType, Replace)
-{
+TEST(StringType, Replace) {
   nd::array a, b, c, d;
 
   /* Tests the five main code paths:
@@ -499,8 +480,7 @@ TEST(StringType, Replace)
                   nd::string_replace(a, b, c));
 }
 
-TEST(StringType, Split)
-{
+TEST(StringType, Split) {
   nd::array a, b, c;
 
   a = {"xaxxbxxxc", "xxxabcxxxabcxxx", "cabababc", "foobar"};
@@ -539,39 +519,35 @@ TEST(StringType, Split)
 TEST(StringType, StartsWith) {
   nd::array a, b, c;
 
-  a = {"abcdef", "ab",  "abd", "",    "Xabc"};
-  b = {"abc",    "abc", "abc", "abc", "abc"};
-  c = {true,     false, false, false, false};
+  a = {"abcdef", "ab", "abd", "", "Xabc"};
+  b = {"abc", "abc", "abc", "abc", "abc"};
+  c = {true, false, false, false, false};
 
-  EXPECT_ARRAY_EQ(c,
-                  nd::string_startswith(a, b));
+  EXPECT_ARRAY_EQ(c, nd::string_startswith(a, b));
 }
 
 TEST(StringType, EndsWith) {
   nd::array a, b, c;
 
-  a = {"defabc", "ab",  "abd", "",    "Xabc"};
-  b = {"abc",    "abc", "abc", "abc", "abc"};
-  c = {true,     false, false, false, true};
+  a = {"defabc", "ab", "abd", "", "Xabc"};
+  b = {"abc", "abc", "abc", "abc", "abc"};
+  c = {true, false, false, false, true};
 
-  EXPECT_ARRAY_EQ(c,
-                  nd::string_endswith(a, b));
+  EXPECT_ARRAY_EQ(c, nd::string_endswith(a, b));
 }
 
 TEST(StringType, Contains) {
   nd::array a, b, c;
 
-  a = {"defabc", "ab",  "abd", "XXabcXX", "Xabc"};
-  b = {"abc",    "abc", "abc", "abc",     "abc"};
-  c = {true,     false, false, true,      true};
+  a = {"defabc", "ab", "abd", "XXabcXX", "Xabc"};
+  b = {"abc", "abc", "abc", "abc", "abc"};
+  c = {true, false, false, true, true};
 
-  EXPECT_ARRAY_EQ(c,
-                  nd::string_contains(a, b));
+  EXPECT_ARRAY_EQ(c, nd::string_contains(a, b));
 }
 
 template <class T>
-static bool ascii_T_compare(const char *x, const T *y, intptr_t count)
-{
+static bool ascii_T_compare(const char *x, const T *y, intptr_t count) {
   for (intptr_t i = 0; i < count; ++i) {
     if ((T)x[i] != y[i]) {
       return false;

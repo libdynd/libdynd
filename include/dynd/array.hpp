@@ -33,21 +33,6 @@ namespace nd {
 
   class DYND_API array;
 
-  enum array_access_flags {
-    /** If an array is readable */
-    read_access_flag = 0x01,
-    /** If an array is writable */
-    write_access_flag = 0x02,
-    /** If an array will not be written to by anyone else either */
-    immutable_access_flag = 0x04
-  };
-
-  // Some additional access flags combinations for convenience
-  enum {
-    readwrite_access_flags = read_access_flag | write_access_flag,
-    default_access_flags = read_access_flag | write_access_flag,
-  };
-
   /**
    * Constructs an uninitialized array of the given dtype. This is
    * the usual function to use for allocating such an array.
@@ -138,13 +123,13 @@ namespace nd {
   class DYND_API array : public buffer {
     template <typename T>
     void init(T &&value) {
-      nd::init<typename remove_reference_then_cv<T>::type> init(get()->get_type(), get()->metadata());
+      nd::init<typename remove_reference_then_cv<T>::type> init(get_type(), get()->metadata());
       init.single(m_ptr->get_data(), std::forward<T>(value));
     }
 
     template <typename ValueType>
     void init(const ValueType *values, size_t size) {
-      nd::init<ValueType> init(get()->get_type(), get()->metadata());
+      nd::init<ValueType> init(get_type(), get()->metadata());
       init.contiguous(m_ptr->get_data(), values, size);
     }
 
@@ -207,33 +192,14 @@ namespace nd {
     /** Returns true if the array is NULL */
     inline bool is_null() const { return m_ptr == NULL; }
 
-    char *data() const {
-      if (m_ptr->get_flags() & write_access_flag) {
-        return get()->get_data();
-      }
-
-      throw std::runtime_error("tried to write to a dynd array that is not writable");
-    }
-
-    const char *cdata() const { return get()->get_data(); }
-
-    inline uint32_t get_access_flags() const {
-      return m_ptr->get_flags() & (immutable_access_flag | read_access_flag | write_access_flag);
-    }
-
-    inline bool is_immutable() const { return (m_ptr->get_flags() & immutable_access_flag) != 0; }
-
     /** Returns true if the object is a scalar */
     inline bool is_scalar() const { return get_type().is_scalar(); }
 
-    /** The type */
-    const ndt::type &get_type() const { return *reinterpret_cast<const ndt::type *>(&get()->get_type()); }
-
     inline intptr_t get_ndim() const {
-      if (get()->get_type().is_builtin()) {
+      if (get_type().is_builtin()) {
         return 0;
       } else {
-        return get()->get_type()->get_ndim();
+        return get_type()->get_ndim();
       }
     }
 
@@ -242,12 +208,12 @@ namespace nd {
      * ndarray.dtype property
      */
     inline ndt::type get_dtype() const {
-      size_t ndim = get()->get_type().get_ndim();
+      size_t ndim = get_type().get_ndim();
       if (ndim == 0) {
-        return get()->get_type();
+        return get_type();
       }
 
-      return get()->get_type()->get_type_at_dimension(NULL, ndim);
+      return get_type()->get_type_at_dimension(NULL, ndim);
     }
 
     /**
@@ -259,27 +225,24 @@ namespace nd {
      *                   in the data type.
      */
     inline ndt::type get_dtype(size_t include_ndim) const {
-      if (get()->get_type().is_builtin()) {
+      if (get_type().is_builtin()) {
         if (include_ndim > 0) {
           throw too_many_indices(get_type(), include_ndim, 0);
         }
-        return ndt::type(get()->get_type().get_id());
+        return ndt::type(get_type().get_id());
       } else {
-        size_t ndim = get()->get_type()->get_ndim();
+        size_t ndim = get_type()->get_ndim();
         if (ndim < include_ndim) {
           throw too_many_indices(get_type(), include_ndim, ndim);
         }
         ndim -= include_ndim;
         if (ndim == 0) {
-          return get()->get_type();
+          return get_type();
         } else {
-          return get()->get_type()->get_type_at_dimension(NULL, ndim);
+          return get_type()->get_type_at_dimension(NULL, ndim);
         }
       }
     }
-
-    /** The flags, including access permissions. */
-    inline uint64_t get_flags() const { return m_ptr->get_flags(); }
 
     inline std::vector<intptr_t> get_shape() const {
       std::vector<intptr_t> result(get_ndim());
@@ -287,8 +250,8 @@ namespace nd {
       return result;
     }
     inline void get_shape(intptr_t *out_shape) const {
-      if (!get()->get_type().is_builtin() && get()->get_type()->get_ndim() > 0) {
-        get()->get_type()->get_shape(get()->get_type()->get_ndim(), 0, out_shape, get()->metadata(), cdata());
+      if (!get_type().is_builtin() && get_type()->get_ndim() > 0) {
+        get_type()->get_shape(get_type()->get_ndim(), 0, out_shape, get()->metadata(), cdata());
       }
     }
 
@@ -306,7 +269,7 @@ namespace nd {
         return ss[i].dim_size;
       } else if (0 <= i && i < get_ndim()) {
         dimvector shape(i + 1);
-        get()->get_type()->get_shape(i + 1, 0, shape.get(), get()->metadata(), cdata());
+        get_type()->get_shape(i + 1, 0, shape.get(), get()->metadata(), cdata());
         return shape[i];
       } else {
         std::stringstream ss;
@@ -321,16 +284,8 @@ namespace nd {
       return result;
     }
     inline void get_strides(intptr_t *out_strides) const {
-      if (!get()->get_type().is_builtin()) {
-        get()->get_type()->get_strides(0, out_strides, get()->metadata());
-      }
-    }
-
-    inline memory_block get_data_memblock() const {
-      if (m_ptr->get_owner()) {
-        return m_ptr->get_owner();
-      } else {
-        return memory_block(get(), true);
+      if (!get_type().is_builtin()) {
+        get_type()->get_strides(0, out_strides, get()->metadata());
       }
     }
 
@@ -607,7 +562,7 @@ namespace nd {
       nd::as<ValueType> as;
 
       ndt::type tp = ndt::make_type<ValueType>();
-      if (tp == get()->get_type()) {
+      if (tp == get_type()) {
         as.single(value, const_cast<char *>(cdata()));
       } else {
         array a = empty(tp);
@@ -1061,7 +1016,7 @@ namespace nd {
     array res = make_array(tp, flags);
     // Construct the arrmeta with default settings
     if (tp.get_arrmeta_size() > 0) {
-      res->get_type()->arrmeta_default_construct(res->metadata(), true);
+      res.get_type()->arrmeta_default_construct(res->metadata(), true);
     }
 
     return res;

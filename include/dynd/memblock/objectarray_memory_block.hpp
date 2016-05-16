@@ -32,7 +32,7 @@ namespace nd {
    *                get_default_data_size() corresponding to default-constructed arrmeta.
    * \param initial_count  The number of elements to allocate at the start.
    */
-  struct objectarray_memory_block : base_memory_block {
+  class objectarray_memory_block : public base_memory_block {
     ndt::type m_dt;
     size_t arrmeta_size;
     const char *m_arrmeta;
@@ -42,6 +42,7 @@ namespace nd {
     /** The malloc'd memory */
     std::vector<memory_chunk> m_memory_handles;
 
+  public:
     objectarray_memory_block(const ndt::type &dt, size_t arrmeta_size, const char *arrmeta, intptr_t stride,
                              intptr_t initial_count)
         : m_dt(dt), arrmeta_size(arrmeta_size), m_arrmeta(arrmeta), m_stride(stride), m_total_allocated_count(0),
