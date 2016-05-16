@@ -11,26 +11,20 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t I0, type_id_t I1>
-  struct greater_equal_kernel : base_strided_kernel<greater_equal_kernel<I0, I1>, 2> {
-    typedef typename type_of<I0>::type A0;
-    typedef typename type_of<I1>::type A1;
-    typedef typename std::common_type<A0, A1>::type T;
+  template <typename Arg0Type, typename Arg1Type>
+  struct greater_equal_kernel : base_strided_kernel<greater_equal_kernel<Arg0Type, Arg1Type>, 2> {
+    typedef typename std::common_type<Arg0Type, Arg1Type>::type T;
 
-    void single(char *dst, char *const *src)
-    {
-      *reinterpret_cast<bool1 *>(dst) =
-          static_cast<T>(*reinterpret_cast<A0 *>(src[0])) >= static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
+    void single(char *dst, char *const *src) {
+      *reinterpret_cast<bool1 *>(dst) = static_cast<T>(*reinterpret_cast<Arg0Type *>(src[0])) >=
+                                        static_cast<T>(*reinterpret_cast<Arg1Type *>(src[1]));
     }
   };
 
-  template <type_id_t I0>
-  struct greater_equal_kernel<I0, I0> : base_strided_kernel<greater_equal_kernel<I0, I0>, 2> {
-    typedef typename type_of<I0>::type A0;
-
-    void single(char *dst, char *const *src)
-    {
-      *reinterpret_cast<bool1 *>(dst) = *reinterpret_cast<A0 *>(src[0]) >= *reinterpret_cast<A0 *>(src[1]);
+  template <typename Arg0Type>
+  struct greater_equal_kernel<Arg0Type, Arg0Type> : base_strided_kernel<greater_equal_kernel<Arg0Type, Arg0Type>, 2> {
+    void single(char *dst, char *const *src) {
+      *reinterpret_cast<bool1 *>(dst) = *reinterpret_cast<Arg0Type *>(src[0]) >= *reinterpret_cast<Arg0Type *>(src[1]);
     }
   };
 

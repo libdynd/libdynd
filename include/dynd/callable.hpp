@@ -167,6 +167,15 @@ namespace nd {
       return dispatcher<2 + sizeof...(I), callable>(callables.begin(), callables.end());
     }
 
+    template <template <typename...> class KernelType, typename I0, typename I1, typename... I, typename... A>
+    static dispatcher<2 + sizeof...(I), callable> make_all(A &&... a) {
+      std::vector<std::pair<std::array<type_id_t, 2 + sizeof...(I)>, callable>> callables;
+      for_each<typename outer<I0, I1, I...>::type>(detail::new_make_all_on_types<KernelType>(), callables,
+                                                   std::forward<A>(a)...);
+
+      return dispatcher<2 + sizeof...(I), callable>(callables.begin(), callables.end());
+    }
+
     template <template <type_id_t> class KernelType, template <type_id_t> class Condition, typename I0, typename... A>
     static dispatcher<1, callable> make_all_if(A &&... a) {
       std::vector<std::pair<std::array<type_id_t, 1>, callable>> callables;
@@ -217,9 +226,7 @@ namespace nd {
 
     iterator end() { return m_namespace.end(); }
 
-    iterator find(const std::string &name) {
-      return m_namespace.find(name);
-    }
+    iterator find(const std::string &name) { return m_namespace.find(name); }
 
     reg_entry &operator=(const reg_entry &rhs) {
       m_is_namespace = rhs.m_is_namespace;
@@ -274,6 +281,14 @@ namespace nd {
 
   namespace detail {
 
+    template <template <typename...> class KernelType, typename S>
+    struct new_apply;
+
+    template <template <typename...> class KernelType, typename... I>
+    struct new_apply<KernelType, type_sequence<I...>> {
+      typedef KernelType<I...> type;
+    };
+
     template <template <type_id_t...> class KernelType, typename S>
     struct apply;
 
@@ -311,11 +326,32 @@ namespace nd {
       }
     };
 
+    template <typename T>
+    struct XYZ;
+
+    template <typename... T>
+    struct XYZ<type_sequence<T...>> {
+      static std::array<type_id_t, sizeof...(T)> as_array() {
+        std::array<type_id_t, sizeof...(T)> a = {type_id_of<T>::value...};
+
+        return a;
+      }
+    };
+
     template <template <typename...> class KernelType>
     struct new_make_all_on_types {
       template <typename Type, typename... A>
       void on_each(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &callables, A &&... a) const {
         callables.push_back({{type_id_of<Type>::value}, make_callable<KernelType<Type>>(std::forward<A>(a)...)});
+      }
+
+      template <typename TypeSequence, typename... A>
+      void on_each(std::vector<std::pair<std::array<type_id_t, TypeSequence::size>, callable>> &callables,
+                   A &&... a) const {
+        auto arr = XYZ<TypeSequence>::as_array();
+
+        callables.push_back(
+            {arr, make_callable<typename new_apply<KernelType, TypeSequence>::type>(std::forward<A>(a)...)});
       }
     };
 
