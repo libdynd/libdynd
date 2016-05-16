@@ -80,10 +80,9 @@ namespace nd {
    *             negative, in which case it is interpreted as an offset from the
    *             end of the file.
    */
-  struct memmap_memory_block : public base_memory_block {
+  class memmap_memory_block : public base_memory_block {
     // Parameters used to construct the memory block
     std::string m_filename;
-    uint32_t m_access;
     intptr_t m_begin, m_end;
 // Handle to the mapped memory
 #ifdef WIN32
@@ -97,9 +96,10 @@ namespace nd {
     // alignment requirements)
     intptr_t m_mapOffset;
 
-    memmap_memory_block(const std::string &filename, uint32_t access, char **out_pointer, intptr_t *out_size,
-                        intptr_t begin = 0, intptr_t end = std::numeric_limits<intptr_t>::max())
-        : m_filename(filename), m_access(access), m_begin(begin), m_end(end) {
+  public:
+    memmap_memory_block(const std::string &filename, uint32_t DYND_UNUSED(access), char **out_pointer,
+                        intptr_t *out_size, intptr_t begin = 0, intptr_t end = std::numeric_limits<intptr_t>::max())
+        : m_filename(filename), m_begin(begin), m_end(end) {
       bool readwrite = false; // ((access & nd::write_access_flag) == nd::write_access_flag);
 #ifdef WIN32
       // TODO: This function isn't quite exception-safe, use a smart pointer for the handles to fix.

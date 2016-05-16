@@ -20,7 +20,7 @@ namespace nd {
    */
   class DYNDT_API base_memory_block {
   protected:
-    std::atomic_long m_use_count;
+    mutable std::atomic_long m_use_count;
 
     base_memory_block() : m_use_count(1) {}
 

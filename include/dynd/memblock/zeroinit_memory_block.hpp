@@ -20,7 +20,7 @@ namespace nd {
    *
    * The initial capacity can be set if a good estimate is known.
    */
-  struct zeroinit_memory_block : base_memory_block {
+  class zeroinit_memory_block : public base_memory_block {
     size_t data_size;
     intptr_t data_alignment;
     intptr_t m_total_allocated_capacity;
@@ -29,6 +29,7 @@ namespace nd {
     /** The current malloc'd memory being doled out */
     char *m_memory_begin, *m_memory_current, *m_memory_end;
 
+  public:
     zeroinit_memory_block(const ndt::type &element_tp, intptr_t initial_capacity_bytes = 2048)
         : data_size(element_tp.get_default_data_size()), data_alignment(element_tp.get_data_alignment()),
           m_total_allocated_capacity(0) {

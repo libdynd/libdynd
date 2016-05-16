@@ -70,7 +70,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
  * have identical arrmeta, but this function doesn't check that.
  */
 static nd::array make_array_clone_with_new_type(const nd::array &n, const ndt::type &new_dt) {
-  nd::array result = nd::make_array(new_dt, n->get_data(), n->get_owner() ? n->get_owner() : n, n->get_flags());
+  nd::array result = nd::make_array(new_dt, n->get_data(), n.get_owner() ? n.get_owner() : n, n.get_flags());
   if (new_dt.get_arrmeta_size() > 0) {
     new_dt.extended()->arrmeta_copy_construct(result->metadata(), n->metadata(), nd::memory_block());
   }
@@ -130,18 +130,18 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
     }
     return *this;
   } else {
-    ndt::type this_dt = get()->get_type();
-    ndt::type dt = get()->get_type()->apply_linear_index(nindices, indices, 0, this_dt, collapse_leading);
-    array result = make_array(dt, data(), m_ptr->get_owner() ? m_ptr->get_owner() : *this, get()->get_flags());
+    ndt::type this_dt = get_type();
+    ndt::type dt = get_type()->apply_linear_index(nindices, indices, 0, this_dt, collapse_leading);
+    array result = make_array(dt, data(), get_owner() ? get_owner() : *this, get_flags());
     char *data = result->get_data();
-    intptr_t offset = get()->get_type()->apply_linear_index(nindices, indices, get()->metadata(), dt,
-                                                            result->metadata(), *this, 0, this_dt, collapse_leading,
-                                                            &data, const_cast<memory_block &>(result->get_owner()));
+    intptr_t offset =
+        get_type()->apply_linear_index(nindices, indices, get()->metadata(), dt, result->metadata(), *this, 0, this_dt,
+                                       collapse_leading, &data, const_cast<memory_block &>(result.get_owner()));
 
-    nd::array second_result = make_array(result->get_type(), data + offset, result->get_owner(), result->get_flags());
+    nd::array second_result = make_array(result.get_type(), data + offset, result.get_owner(), result.get_flags());
     if (second_result.get_type().get_arrmeta_size() > 0) {
       second_result.get_type()->arrmeta_copy_construct(second_result->metadata(), result->metadata(),
-                                                       const_cast<memory_block &>(result->get_owner()));
+                                                       const_cast<memory_block &>(result.get_owner()));
     }
 
     return second_result;
@@ -529,8 +529,7 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const {
   pdd.arrmeta = res.get()->metadata();
   permute_type_dims(get_type(), 0, &pdd, transformed_tp, was_transformed);
 
-  nd::array second_res = make_array(transformed_tp, m_ptr->get_data(), m_ptr->get_owner() ? m_ptr->get_owner() : *this,
-                                    m_ptr->get_flags());
+  nd::array second_res = make_array(transformed_tp, m_ptr->get_data(), get_owner() ? get_owner() : *this, get_flags());
   transformed_tp.extended()->arrmeta_copy_construct(second_res->metadata(), res->metadata(), memory_block());
 
   return second_res;
@@ -627,7 +626,7 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const {
   ndt::type dst_tp = src_tp.with_new_axis(i, new_ndim);
 
   // This is taken from view_concrete in view.cpp
-  nd::array res = make_array(dst_tp, data(), m_ptr->get_owner() ? get_data_memblock() : *this, get()->get_flags());
+  nd::array res = make_array(dst_tp, data(), get_owner() ? get_data_memblock() : *this, get_flags());
 
   char *src_arrmeta = const_cast<char *>(get()->metadata());
   char *dst_arrmeta = res.get()->metadata();
@@ -725,7 +724,7 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const {
         throw std::runtime_error("creating an unaligned type");
         //        result_tp = ndt::make_fixed_dim(dim_size, make_unaligned(scalar_tp));
       }
-      array result = make_array(result_tp, data(), m_ptr->get_owner() ? m_ptr->get_owner() : *this, get()->get_flags());
+      array result = make_array(result_tp, data(), get_owner() ? get_owner() : *this, get_flags());
       // The result has one strided ndarray field
       fixed_dim_type_arrmeta *result_md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get()->metadata());
       result_md->dim_size = dim_size;
@@ -748,34 +747,34 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const {
     o << " address: " << (void *)m_ptr << "\n";
     o << " refcount: " << m_ptr->get_use_count() << "\n";
     o << " type:\n";
-    o << "  pointer: " << (void *)m_ptr->get_type().extended() << "\n";
+    o << "  pointer: " << (void *)get_type().extended() << "\n";
     o << "  type: " << get_type() << "\n";
     if (!get_type().is_builtin()) {
       o << "  type refcount: " << get_type().extended()->get_use_count() << "\n";
     }
     o << " arrmeta:\n";
-    o << "  flags: " << m_ptr->get_flags() << " (";
-    if (m_ptr->get_flags() & read_access_flag)
+    o << "  flags: " << get_flags() << " (";
+    if (get_flags() & read_access_flag)
       o << "read_access ";
-    if (m_ptr->get_flags() & write_access_flag)
+    if (get_flags() & write_access_flag)
       o << "write_access ";
-    if (m_ptr->get_flags() & immutable_access_flag)
+    if (get_flags() & immutable_access_flag)
       o << "immutable ";
     o << ")\n";
-    if (!m_ptr->get_type().is_builtin()) {
+    if (!get_type().is_builtin()) {
       o << "  type-specific arrmeta:\n";
-      m_ptr->get_type()->arrmeta_debug_print(get()->metadata(), o, indent + "   ");
+      get_type()->arrmeta_debug_print(get()->metadata(), o, indent + "   ");
     }
     o << " data:\n";
     o << "   pointer: " << (void *)m_ptr->get_data() << "\n";
-    o << "   reference: " << (void *)m_ptr->get_owner().get();
-    if (!m_ptr->get_owner()) {
+    o << "   reference: " << (void *)get_owner().get();
+    if (!get_owner()) {
       o << " (embedded in array memory)\n";
     } else {
       o << "\n";
     }
-    if (m_ptr->get_owner()) {
-      m_ptr->get_owner()->debug_print(o, "    ");
+    if (get_owner()) {
+      get_owner()->debug_print(o, "    ");
     }
   } else {
     o << indent << "NULL\n";
@@ -787,11 +786,11 @@ std::ostream &nd::operator<<(std::ostream &o, const array &rhs) {
   if (!rhs.is_null()) {
     o << "array(";
     array v = rhs.eval();
-    if (v.get()->get_type().is_builtin()) {
-      print_builtin_scalar(v.get()->get_type().get_id(), o, v->get_data());
+    if (v.get_type().is_builtin()) {
+      print_builtin_scalar(v.get_type().get_id(), o, v->get_data());
     } else {
       stringstream ss;
-      v.get()->get_type()->print_data(ss, v.get()->metadata(), v->get_data());
+      v.get_type()->print_data(ss, v.get()->metadata(), v->get_data());
       print_indented(o, "      ", ss.str(), true);
     }
     o << ",\n      type=\"" << rhs.get_type() << "\")";
@@ -836,10 +835,10 @@ nd::array nd::empty_like(const nd::array &rhs, const ndt::type &uniform_tp) {
 
 nd::array nd::empty_like(const nd::array &rhs) {
   ndt::type dt;
-  if (rhs.get()->get_type().is_builtin()) {
-    dt = ndt::type(rhs.get()->get_type().get_id());
+  if (rhs.get_type().is_builtin()) {
+    dt = ndt::type(rhs.get_type().get_id());
   } else {
-    dt = rhs.get()->get_type()->get_canonical_type();
+    dt = rhs.get_type()->get_canonical_type();
   }
 
   if (rhs.is_scalar()) {
@@ -975,7 +974,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values) 
     pointer_type_arrmeta *pmeta;
     pmeta = reinterpret_cast<pointer_type_arrmeta *>(result.get()->metadata() + arrmeta_offsets[i]);
     pmeta->offset = 0;
-    pmeta->blockref = field_values[i]->get_owner() ? field_values[i]->get_owner() : field_values[i];
+    pmeta->blockref = field_values[i].get_owner() ? field_values[i].get_owner() : field_values[i];
 
     const ndt::type &field_dt = field_values[i].get_type();
     if (field_dt.get_arrmeta_size() > 0) {
@@ -1261,10 +1260,10 @@ nd::array &nd::array::operator/=(const array &rhs) {
 nd::array nd::shallow_copy_array_memory_block(const nd::array &ndo) {
   // Allocate the new memory block.
   nd::array result =
-      make_array(ndo->get_type(), ndo->get_data(), ndo->get_owner() ? ndo->get_owner() : ndo, ndo->get_flags());
+      make_array(ndo.get_type(), ndo->get_data(), ndo.get_owner() ? ndo.get_owner() : ndo, ndo.get_flags());
 
-  if (!ndo->get_type().is_builtin()) {
-    ndo->get_type().extended()->arrmeta_copy_construct(result->metadata(), ndo->metadata(), ndo);
+  if (!ndo.get_type().is_builtin()) {
+    ndo.get_type().extended()->arrmeta_copy_construct(result->metadata(), ndo->metadata(), ndo);
   }
 
   return result;
