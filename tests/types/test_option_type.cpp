@@ -3,21 +3,23 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "dynd_assertions.hpp"
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/view.hpp>
+#include <dynd/json_parser.hpp>
 #include <dynd/option.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/json_parser.hpp>
+#include <dynd/view.hpp>
 
 using namespace std;
 using namespace dynd;
+
+TEST(OptionType, BaseOf) { EXPECT_TRUE((is_same<ndt::any_kind_type, ndt::base_of_t<ndt::option_type>>::value)); }
 
 TEST(OptionType, Create) {
   ndt::type d;

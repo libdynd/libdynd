@@ -17,6 +17,7 @@
 
 #include <dynd/buffer.hpp>
 #include <dynd/type.hpp>
+#include <dynd/types/any_kind_type.hpp>
 
 namespace dynd {
 
@@ -35,6 +36,8 @@ namespace ndt {
     type m_target_tp;
 
   public:
+    typedef any_kind_type base;
+
     pointer_type(const type &target_tp);
 
     const type &get_value_type() const { return m_target_tp.value_type(); }

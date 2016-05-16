@@ -721,6 +721,8 @@ namespace ndt {
 
   template <>
   struct traits<void> {
+    typedef any_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = false;
@@ -853,6 +855,8 @@ namespace ndt {
 
   template <>
   struct traits<bool1> {
+    typedef bool_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -862,6 +866,8 @@ namespace ndt {
 
   template <>
   struct traits<bool> {
+    typedef bool_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = false;
@@ -871,6 +877,8 @@ namespace ndt {
 
   template <>
   struct traits<signed char> {
+    typedef int_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -882,6 +890,8 @@ namespace ndt {
 
   template <>
   struct traits<short> {
+    typedef int_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -891,6 +901,8 @@ namespace ndt {
 
   template <>
   struct traits<int> {
+    typedef int_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -902,6 +914,8 @@ namespace ndt {
 
   template <>
   struct traits<long> {
+    typedef int_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -911,6 +925,8 @@ namespace ndt {
 
   template <>
   struct traits<long long> {
+    typedef int_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -920,6 +936,8 @@ namespace ndt {
 
   template <>
   struct traits<int128> {
+    typedef int_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -929,6 +947,8 @@ namespace ndt {
 
   template <>
   struct traits<unsigned char> {
+    typedef uint_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -938,6 +958,8 @@ namespace ndt {
 
   template <>
   struct traits<unsigned short> {
+    typedef uint_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -947,6 +969,8 @@ namespace ndt {
 
   template <>
   struct traits<unsigned int> {
+    typedef uint_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -958,6 +982,8 @@ namespace ndt {
 
   template <>
   struct traits<unsigned long> {
+    typedef uint_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -967,6 +993,8 @@ namespace ndt {
 
   template <>
   struct traits<unsigned long long> {
+    typedef uint_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -976,6 +1004,8 @@ namespace ndt {
 
   template <>
   struct traits<uint128> {
+    typedef uint_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -994,6 +1024,8 @@ namespace ndt {
 
   template <>
   struct traits<float16> {
+    typedef float_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -1003,6 +1035,8 @@ namespace ndt {
 
   template <>
   struct traits<float> {
+    typedef float_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -1012,6 +1046,8 @@ namespace ndt {
 
   template <>
   struct traits<double> {
+    typedef float_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -1021,6 +1057,8 @@ namespace ndt {
 
   template <>
   struct traits<float128> {
+    typedef float_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -1030,6 +1068,8 @@ namespace ndt {
 
   template <typename T>
   struct traits<complex<T>> {
+    typedef complex_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
@@ -1039,6 +1079,8 @@ namespace ndt {
 
   template <typename T>
   struct traits<std::complex<T>> {
+    typedef complex_kind_type base;
+
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;

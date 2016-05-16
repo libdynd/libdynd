@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/type.hpp>
+#include <dynd/types/any_kind_type.hpp>
 
 #define DYND_BOOL_NA (2)
 #define DYND_INT8_NA (std::numeric_limits<int8_t>::min())
@@ -51,6 +52,8 @@ namespace ndt {
     type m_value_tp;
 
   public:
+    typedef any_kind_type base;
+
     option_type(const type &value_tp);
 
     size_t get_default_data_size() const { return m_value_tp.get_default_data_size(); }
