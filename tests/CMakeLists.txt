@@ -38,6 +38,7 @@ set(tests_SRC
     types/test_fixed_bytes_type.cpp
     types/test_fixed_string_kind_type.cpp
     types/test_fixed_string_type.cpp
+    types/test_int_kind_type.cpp
     types/test_option_type.cpp
     types/test_pointer_type.cpp
     types/test_scalar_kind_type.cpp

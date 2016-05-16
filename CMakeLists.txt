@@ -198,7 +198,7 @@ set(libdyndt_SRC
     src/dynd/types/fixed_dim_type.cpp
     src/dynd/types/fixed_string_kind_type.cpp
     src/dynd/types/fixed_string_type.cpp
-    src/dynd/types/int_kind_sym_type.cpp
+    src/dynd/types/int_kind_type.cpp
     src/dynd/types/option_type.cpp
     src/dynd/types/pointer_type.cpp
     src/dynd/types/pow_dimsym_type.cpp

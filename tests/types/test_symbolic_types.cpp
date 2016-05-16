@@ -14,7 +14,6 @@
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
-#include <dynd/types/int_kind_sym_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
