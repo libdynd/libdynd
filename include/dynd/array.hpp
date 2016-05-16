@@ -13,7 +13,6 @@
 #include <dynd/config.hpp>
 #include <dynd/init.hpp>
 #include <dynd/irange.hpp>
-#include <dynd/shortvector.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -27,11 +26,8 @@ namespace ndt {
 } // namespace ndt;
 
 namespace nd {
-  class callable;
 
   DYND_API callable &get(const std::string &name);
-
-  class DYND_API array;
 
   /**
    * Constructs an uninitialized array of the given dtype. This is
@@ -187,106 +183,6 @@ namespace nd {
     array(const ValueType *values, size_t size)
         : buffer(empty(ndt::make_fixed_dim(size, ndt::make_type<ValueType>()))) {
       init(values, size);
-    }
-
-    /** Returns true if the array is NULL */
-    inline bool is_null() const { return m_ptr == NULL; }
-
-    /** Returns true if the object is a scalar */
-    inline bool is_scalar() const { return get_type().is_scalar(); }
-
-    inline intptr_t get_ndim() const {
-      if (get_type().is_builtin()) {
-        return 0;
-      } else {
-        return get_type()->get_ndim();
-      }
-    }
-
-    /**
-     * The data type of the array. This is similar to numpy's
-     * ndarray.dtype property
-     */
-    inline ndt::type get_dtype() const {
-      size_t ndim = get_type().get_ndim();
-      if (ndim == 0) {
-        return get_type();
-      }
-
-      return get_type()->get_type_at_dimension(NULL, ndim);
-    }
-
-    /**
-     * The data type of the array. This is similar to numpy's
-     * ndarray.dtype property, but may include some array dimensions
-     * if requested.
-     *
-     * \param include_ndim  The number of array dimensions to include
-     *                   in the data type.
-     */
-    inline ndt::type get_dtype(size_t include_ndim) const {
-      if (get_type().is_builtin()) {
-        if (include_ndim > 0) {
-          throw too_many_indices(get_type(), include_ndim, 0);
-        }
-        return ndt::type(get_type().get_id());
-      } else {
-        size_t ndim = get_type()->get_ndim();
-        if (ndim < include_ndim) {
-          throw too_many_indices(get_type(), include_ndim, ndim);
-        }
-        ndim -= include_ndim;
-        if (ndim == 0) {
-          return get_type();
-        } else {
-          return get_type()->get_type_at_dimension(NULL, ndim);
-        }
-      }
-    }
-
-    inline std::vector<intptr_t> get_shape() const {
-      std::vector<intptr_t> result(get_ndim());
-      get_shape(&result[0]);
-      return result;
-    }
-    inline void get_shape(intptr_t *out_shape) const {
-      if (!get_type().is_builtin() && get_type()->get_ndim() > 0) {
-        get_type()->get_shape(get_type()->get_ndim(), 0, out_shape, get()->metadata(), cdata());
-      }
-    }
-
-    /**
-     * Returns the size of the leading (leftmost) dimension.
-     */
-    inline intptr_t get_dim_size() const { return get_type().get_dim_size(get()->metadata(), cdata()); }
-
-    /**
-     * Returns the size of the requested dimension.
-     */
-    inline intptr_t get_dim_size(intptr_t i) const {
-      if (0 <= i && i < get_type().get_strided_ndim()) {
-        const size_stride_t *ss = reinterpret_cast<const size_stride_t *>(get()->metadata());
-        return ss[i].dim_size;
-      } else if (0 <= i && i < get_ndim()) {
-        dimvector shape(i + 1);
-        get_type()->get_shape(i + 1, 0, shape.get(), get()->metadata(), cdata());
-        return shape[i];
-      } else {
-        std::stringstream ss;
-        ss << "Not enough dimensions in array, tried to access axis " << i << " for type " << get_type();
-        throw std::invalid_argument(ss.str());
-      }
-    }
-
-    std::vector<intptr_t> get_strides() const {
-      std::vector<intptr_t> result(get_ndim());
-      get_strides(&result[0]);
-      return result;
-    }
-    inline void get_strides(intptr_t *out_strides) const {
-      if (!get_type().is_builtin()) {
-        get_type()->get_strides(0, out_strides, get()->metadata());
-      }
     }
 
     /**
@@ -592,8 +488,6 @@ namespace nd {
     //   bool op_sorting_less(const array &rhs) const;
 
     bool equals_exact(const array &rhs) const;
-
-    void debug_print(std::ostream &o, const std::string &indent = "") const;
 
     friend DYND_API std::ostream &operator<<(std::ostream &o, const array &rhs);
     friend class array_vals;
@@ -995,20 +889,20 @@ namespace nd {
       throw type_error(ss.str());
     }
 
-    size_t data_offset = inc_to_alignment(sizeof(array_preamble) + tp.get_arrmeta_size(), tp.get_data_alignment());
+    size_t data_offset = inc_to_alignment(sizeof(buffer_memory_block) + tp.get_arrmeta_size(), tp.get_data_alignment());
     size_t data_size = tp.get_default_data_size();
 
-    return array(new (data_offset + data_size - sizeof(array_preamble))
-                     array_preamble(tp, data_offset, data_size, flags),
+    return array(new (data_offset + data_size - sizeof(buffer_memory_block))
+                     buffer_memory_block(tp, data_offset, data_size, flags),
                  false);
   }
 
   inline array make_array(const ndt::type &tp, char *data, uint64_t flags) {
-    return array(new (tp.get_arrmeta_size()) array_preamble(tp, data, flags), false);
+    return array(new (tp.get_arrmeta_size()) buffer_memory_block(tp, data, flags), false);
   }
 
   inline array make_array(const ndt::type &tp, char *data, const memory_block &owner, uint64_t flags) {
-    return array(new (tp.get_arrmeta_size()) array_preamble(tp, data, owner, flags), false);
+    return array(new (tp.get_arrmeta_size()) buffer_memory_block(tp, data, owner, flags), false);
   }
 
   inline array empty(const ndt::type &tp, uint64_t flags) {

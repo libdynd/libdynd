@@ -742,47 +742,6 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const {
   return make_array_clone_with_new_type(*this, viewed_tp);
 }
 
-void nd::array::debug_print(std::ostream &o, const std::string &indent) const {
-  o << indent << "------ array\n";
-  if (m_ptr) {
-    o << " address: " << (void *)m_ptr << "\n";
-    o << " refcount: " << m_ptr->get_use_count() << "\n";
-    o << " type:\n";
-    o << "  pointer: " << (void *)get_type().extended() << "\n";
-    o << "  type: " << get_type() << "\n";
-    if (!get_type().is_builtin()) {
-      o << "  type refcount: " << get_type().extended()->get_use_count() << "\n";
-    }
-    o << " arrmeta:\n";
-    o << "  flags: " << get_flags() << " (";
-    if (get_flags() & read_access_flag)
-      o << "read_access ";
-    if (get_flags() & write_access_flag)
-      o << "write_access ";
-    if (get_flags() & immutable_access_flag)
-      o << "immutable ";
-    o << ")\n";
-    if (!get_type().is_builtin()) {
-      o << "  type-specific arrmeta:\n";
-      get_type()->arrmeta_debug_print(get()->metadata(), o, indent + "   ");
-    }
-    o << " data:\n";
-    o << "   pointer: " << (void *)cdata() << "\n";
-    o << "   reference: " << (void *)get_owner().get();
-    if (!get_owner()) {
-      o << " (embedded in array memory)\n";
-    } else {
-      o << "\n";
-    }
-    if (get_owner()) {
-      get_owner()->debug_print(o, "    ");
-    }
-  } else {
-    o << indent << "NULL\n";
-  }
-  o << indent << "------" << endl;
-}
-
 std::ostream &nd::operator<<(std::ostream &o, const array &rhs) {
   if (!rhs.is_null()) {
     o << "array(";
