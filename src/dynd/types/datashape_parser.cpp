@@ -23,8 +23,7 @@
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/types/int_kind_sym_type.hpp>
-#include <dynd/types/option_type.hpp>
+#include <dynd/types/int_kind_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/pow_dimsym_type.hpp>
@@ -1178,13 +1177,13 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       result = ndt::make_type<ndt::fixed_bytes_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "FixedString")) {
       result = ndt::make_type<ndt::fixed_string_kind_type>();
+    } else if (compare_range_to_literal(nbegin, nend, "Int")) {
+      result = ndt::make_type<ndt::int_kind_type>();
     }
+
     /*
         else if (compare_range_to_literal(nbegin, nend, "Bool")) {
           result = ndt::make_kind_sym(bool_kind);
-        }
-        else if (compare_range_to_literal(nbegin, nend, "Int")) {
-          result = ndt::make_int_kind_sym();
         }
         else if (compare_range_to_literal(nbegin, nend, "UInt")) {
           result = ndt::make_kind_sym(uint_kind);
