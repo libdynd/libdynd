@@ -50,7 +50,7 @@ namespace nd {
           cg.emplace_back([g, a, b](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                                     const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                     const char *const *DYND_UNUSED(src_arrmeta)) {
-            kb.emplace_back<uniform_kernel<ReturnType, ndt::int_kind_type, GeneratorType>>(kernreq, g.get(), a, b);
+            kb.emplace_back<uniform_kernel<ReturnType, GeneratorType>>(kernreq, g.get(), a, b);
           });
 
           return dst_tp;
@@ -93,7 +93,7 @@ namespace nd {
           cg.emplace_back([g, a, b](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                                     const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                     const char *const *DYND_UNUSED(src_arrmeta)) {
-            kb.emplace_back<uniform_kernel<ReturnType, ndt::float_kind_type, GeneratorType>>(kernreq, g.get(), a, b);
+            kb.emplace_back<uniform_kernel<ReturnType, GeneratorType>>(kernreq, g.get(), a, b);
           });
 
           return dst_tp;
@@ -132,7 +132,7 @@ namespace nd {
           cg.emplace_back([g, a, b](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                                     const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                     const char *const *DYND_UNUSED(src_arrmeta)) {
-            kb.emplace_back<uniform_kernel<ReturnType, ndt::complex_kind_type, GeneratorType>>(kernreq, g.get(), a, b);
+            kb.emplace_back<uniform_kernel<ReturnType, GeneratorType>>(kernreq, g.get(), a, b);
           });
 
           return dst_tp;

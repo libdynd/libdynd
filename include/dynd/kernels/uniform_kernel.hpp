@@ -13,6 +13,25 @@
 
 namespace dynd {
 
+/*
+template <bool Condition, typename Type = int>
+struct RequiresC_F {
+  using type = Type;
+};
+
+template <typename Type>
+struct RequiresC_F<false, Type> {};
+
+template <bool Condition, typename Type>
+using RequiresC = typename RequiresC_F<Condition, Type>::type;
+
+template <typename Condition, typename Type = int>
+using Requires = RequiresC<Condition::value, Type>;
+*/
+
+template <bool Value>
+using Requires = std::enable_if_t<Value>;
+
 inline std::shared_ptr<std::default_random_engine> &get_random_device() {
   static std::random_device random_device;
   static std::shared_ptr<std::default_random_engine> g(new std::default_random_engine(random_device()));
@@ -20,16 +39,25 @@ inline std::shared_ptr<std::default_random_engine> &get_random_device() {
   return g;
 }
 
+template <typename T>
+constexpr bool is_integral_v = is_integral<T>::value;
+
+template <typename T>
+constexpr bool is_floating_point_v = is_floating_point<T>::value;
+
+template <typename T>
+constexpr bool is_complex_v = is_complex<T>::value;
+
 namespace nd {
   namespace random {
     namespace detail {
 
-      template <typename ReturnType, typename ReturnBaseType, typename GeneratorType>
+      template <typename ReturnType, typename GeneratorType, typename Enable = void>
       struct uniform_kernel;
 
       template <typename ReturnType, typename GeneratorType>
-      struct uniform_kernel<ReturnType, ndt::int_kind_type, GeneratorType>
-          : base_strided_kernel<uniform_kernel<ReturnType, ndt::int_kind_type, GeneratorType>, 0> {
+      struct uniform_kernel<ReturnType, GeneratorType, Requires<is_integral_v<ReturnType>>>
+          : base_strided_kernel<uniform_kernel<ReturnType, GeneratorType, Requires<is_integral_v<ReturnType>>>, 0> {
         GeneratorType &g;
         std::uniform_int_distribution<ReturnType> d;
 
@@ -39,12 +67,9 @@ namespace nd {
       };
 
       template <typename ReturnType, typename GeneratorType>
-      struct uniform_kernel<ReturnType, ndt::uint_kind_type, GeneratorType>
-          : uniform_kernel<ReturnType, ndt::int_kind_type, GeneratorType> {};
-
-      template <typename ReturnType, typename GeneratorType>
-      struct uniform_kernel<ReturnType, ndt::float_kind_type, GeneratorType>
-          : base_strided_kernel<uniform_kernel<ReturnType, ndt::float_kind_type, GeneratorType>, 0> {
+      struct uniform_kernel<ReturnType, GeneratorType, Requires<is_floating_point_v<ReturnType>>>
+          : base_strided_kernel<uniform_kernel<ReturnType, GeneratorType, Requires<is_floating_point_v<ReturnType>>>,
+                                0> {
         GeneratorType &g;
         std::uniform_real_distribution<ReturnType> d;
 
@@ -54,8 +79,8 @@ namespace nd {
       };
 
       template <typename ReturnType, typename GeneratorType>
-      struct uniform_kernel<ReturnType, ndt::complex_kind_type, GeneratorType>
-          : base_strided_kernel<uniform_kernel<ReturnType, ndt::complex_kind_type, GeneratorType>, 0> {
+      struct uniform_kernel<ReturnType, GeneratorType, Requires<is_complex_v<ReturnType>>>
+          : base_strided_kernel<uniform_kernel<ReturnType, GeneratorType, Requires<is_complex_v<ReturnType>>>, 0> {
         GeneratorType &g;
         std::uniform_real_distribution<typename ReturnType::value_type> d_real;
         std::uniform_real_distribution<typename ReturnType::value_type> d_imag;
@@ -71,7 +96,7 @@ namespace nd {
     } // namespace dynd::nd::random::detail
 
     template <typename ReturnType, typename GeneratorType>
-    using uniform_kernel = detail::uniform_kernel<ReturnType, ndt::base_of_t<ReturnType>, GeneratorType>;
+    using uniform_kernel = detail::uniform_kernel<ReturnType, GeneratorType>;
 
   } // namespace dynd::nd::random
 } // namespace dynd::nd
