@@ -135,6 +135,14 @@ typedef join<integral_ids, join<float_ids, complex_ids>::type>::type arithmetic_
 
 typedef type_id_sequence<fixed_dim_id, var_dim_id> dim_ids;
 
+typedef type_sequence<int8_t, int16_t, int32_t, int64_t, int128> int_types;
+typedef type_sequence<bool, uint8_t, uint16_t, uint32_t, uint64_t, uint128> uint_types;
+typedef type_sequence<float16, float, double, float128> float_types;
+typedef type_sequence<complex<float>, complex<double>> complex_types;
+
+typedef join<int_types, uint_types>::type integral_types;
+typedef join<integral_types, join<float_types, complex_types>::type>::type arithmetic_types;
+
 enum type_flags_t {
   // A symbolic name instead of just "0"
   type_flag_none = 0x00000000,

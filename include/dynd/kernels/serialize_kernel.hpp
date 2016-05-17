@@ -7,15 +7,16 @@
 
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_strided_kernel.hpp>
+#include <dynd/types/scalar_kind_type.hpp>
 
 namespace dynd {
 namespace nd {
 
-  template <type_id_t Arg0ID>
+  template <typename Arg0Type>
   struct serialize_kernel;
 
   template <>
-  struct serialize_kernel<scalar_kind_id> : base_strided_kernel<serialize_kernel<scalar_kind_id>, 1> {
+  struct serialize_kernel<ndt::scalar_kind_type> : base_strided_kernel<serialize_kernel<ndt::scalar_kind_type>, 1> {
     size_t data_size;
 
     serialize_kernel(size_t data_size) : data_size(data_size) {}

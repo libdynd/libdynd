@@ -11,10 +11,8 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t RetElementID, type_id_t RetElementBaseID>
+  template <typename ReturnElementType, typename ReturnElementBaseType>
   class range_callable : public base_callable {
-    typedef typename type_of<RetElementID>::type ret_element_type;
-
   public:
     range_callable() : base_callable(ndt::type("(start: ?Scalar, stop: ?Scalar, step: ?Scalar) -> Fixed * Scalar")) {}
 
@@ -22,34 +20,34 @@ namespace nd {
                       const ndt::type &DYND_UNUSED(ret_tp), size_t DYND_UNUSED(narg),
                       const ndt::type *DYND_UNUSED(arg_tp), size_t DYND_UNUSED(nkwd), const array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      ret_element_type start;
-      ret_element_type stop;
-      ret_element_type step;
+      ReturnElementType start;
+      ReturnElementType stop;
+      ReturnElementType step;
 
       if (kwds[0].is_na()) {
         start = 0;
-        stop = kwds[1].as<ret_element_type>();
-        step = kwds[2].as<ret_element_type>();
+        stop = kwds[1].as<ReturnElementType>();
+        step = kwds[2].as<ReturnElementType>();
       } else {
         if (kwds[1].is_na() && kwds[2].is_na()) {
           start = 0;
-          stop = kwds[0].as<ret_element_type>();
+          stop = kwds[0].as<ReturnElementType>();
           step = 1;
         } else if (kwds[2].is_na()) {
-          start = kwds[0].as<ret_element_type>();
-          stop = kwds[1].as<ret_element_type>();
+          start = kwds[0].as<ReturnElementType>();
+          stop = kwds[1].as<ReturnElementType>();
           step = 1;
         } else {
-          start = kwds[0].as<ret_element_type>();
-          stop = kwds[1].as<ret_element_type>();
-          step = kwds[2].as<ret_element_type>();
+          start = kwds[0].as<ReturnElementType>();
+          stop = kwds[1].as<ReturnElementType>();
+          step = kwds[2].as<ReturnElementType>();
         }
       }
 
       cg.emplace_back([start, stop, step](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                                           const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
                                           const char *const *DYND_UNUSED(src_arrmeta)) {
-        kb.emplace_back<range_kernel<RetElementID>>(
+        kb.emplace_back<range_kernel<ReturnElementType>>(
             kernreq, start, stop, step,
             reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(dst_arrmeta)->dim_size,
             reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(dst_arrmeta)->stride);
@@ -57,17 +55,17 @@ namespace nd {
 
       if (step > 0) {
         if (stop <= start) {
-          return ndt::make_type<ndt::fixed_dim_type>(0, RetElementID);
+          return ndt::make_type<ndt::fixed_dim_type>(0, ndt::make_type<ReturnElementType>());
         } else {
           return ndt::make_type<ndt::fixed_dim_type>(static_cast<size_t>((stop - start + step - 1) / step),
-                                                     RetElementID);
+                                                     ndt::make_type<ReturnElementType>());
         }
       } else if (step < 0) {
         if (stop >= start) {
-          return ndt::make_type<ndt::fixed_dim_type>(0, RetElementID);
+          return ndt::make_type<ndt::fixed_dim_type>(0, ndt::make_type<ReturnElementType>());
         } else {
           return ndt::make_type<ndt::fixed_dim_type>(static_cast<size_t>((stop - start + step + 1) / step),
-                                                     RetElementID);
+                                                     ndt::make_type<ReturnElementType>());
         }
       } else {
         throw std::runtime_error("");
@@ -75,10 +73,8 @@ namespace nd {
     }
   };
 
-  template <type_id_t RetElementID>
-  class range_callable<RetElementID, float_kind_id> : public base_callable {
-    typedef typename type_of<RetElementID>::type ret_element_type;
-
+  template <typename ReturnElementType>
+  class range_callable<ReturnElementType, ndt::float_kind_type> : public base_callable {
   public:
     range_callable() : base_callable(ndt::type("(start: ?Scalar, stop: Scalar, step: ?Scalar) -> Fixed * Scalar")) {}
 
@@ -86,40 +82,41 @@ namespace nd {
                       const ndt::type &DYND_UNUSED(ret_tp), size_t DYND_UNUSED(narg),
                       const ndt::type *DYND_UNUSED(arg_tp), size_t DYND_UNUSED(nkwd), const array *kwds,
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-      ret_element_type start;
-      ret_element_type stop;
-      ret_element_type step;
+      ReturnElementType start;
+      ReturnElementType stop;
+      ReturnElementType step;
 
       if (kwds[0].is_na()) {
         start = 0;
-        stop = kwds[1].as<ret_element_type>();
-        step = kwds[2].as<ret_element_type>();
+        stop = kwds[1].as<ReturnElementType>();
+        step = kwds[2].as<ReturnElementType>();
       } else {
         if (kwds[1].is_na() && kwds[2].is_na()) {
           start = 0;
-          stop = kwds[0].as<ret_element_type>();
+          stop = kwds[0].as<ReturnElementType>();
           step = 1;
         } else if (kwds[2].is_na()) {
-          start = kwds[0].as<ret_element_type>();
-          stop = kwds[1].as<ret_element_type>();
+          start = kwds[0].as<ReturnElementType>();
+          stop = kwds[1].as<ReturnElementType>();
           step = 1;
         } else {
-          start = kwds[0].as<ret_element_type>();
-          stop = kwds[1].as<ret_element_type>();
-          step = kwds[2].as<ret_element_type>();
+          start = kwds[0].as<ReturnElementType>();
+          stop = kwds[1].as<ReturnElementType>();
+          step = kwds[2].as<ReturnElementType>();
         }
       }
 
-      cg.emplace_back([start, stop, step](kernel_builder &kb, kernel_request_t kernreq,char *DYND_UNUSED(data), const char *ret_metadata,
-                                          size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-        kb.emplace_back<range_kernel<RetElementID>>(
+      cg.emplace_back([start, stop, step](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                                          const char *ret_metadata, size_t DYND_UNUSED(nsrc),
+                                          const char *const *DYND_UNUSED(src_arrmeta)) {
+        kb.emplace_back<range_kernel<ReturnElementType>>(
             kernreq, start, stop, step,
             reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(ret_metadata)->dim_size,
             reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(ret_metadata)->stride);
       });
 
-      size_t size = static_cast<size_t>(floor((stop - start + static_cast<ret_element_type>(0.5) * step) / step));
-      return ndt::make_type<ndt::fixed_dim_type>(size, RetElementID);
+      size_t size = static_cast<size_t>(floor((stop - start + static_cast<ReturnElementType>(0.5) * step) / step));
+      return ndt::make_type<ndt::fixed_dim_type>(size, ndt::make_type<ReturnElementType>());
     }
   };
 
@@ -131,10 +128,10 @@ namespace nd {
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &ret_tp, size_t narg, const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                       const std::map<std::string, ndt::type> &tp_vars) {
-      static callable fint32 = nd::make_callable<range_callable<int32_id, int_kind_id>>();
-      static callable fint64 = nd::make_callable<range_callable<int64_id, int_kind_id>>();
-      static callable ffloat32 = nd::make_callable<range_callable<float32_id, float_kind_id>>();
-      static callable ffloat64 = nd::make_callable<range_callable<float64_id, float_kind_id>>();
+      static callable fint32 = nd::make_callable<range_callable<int32_t, ndt::int_kind_type>>();
+      static callable fint64 = nd::make_callable<range_callable<int64_t, ndt::int_kind_type>>();
+      static callable ffloat32 = nd::make_callable<range_callable<float, ndt::float_kind_type>>();
+      static callable ffloat64 = nd::make_callable<range_callable<double, ndt::float_kind_type>>();
 
       const ndt::type &ret_element_tp = (kwds[0].is_na() ? kwds[1] : kwds[0]).get_type();
       switch (ret_element_tp.get_id()) {
