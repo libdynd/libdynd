@@ -15,18 +15,17 @@ namespace nd {
   namespace random {
     namespace detail {
 
-      template <type_id_t ResID, type_id_t ResBaseID, typename GeneratorType>
+      template <typename ReturnType, typename ReturnBaseType, typename GeneratorType>
       class uniform_callable;
 
-      template <type_id_t ResID, typename GeneratorType>
-      class uniform_callable<ResID, int_kind_id, GeneratorType> : public base_callable {
-        typedef typename type_of<ResID>::type R;
-
+      template <typename ReturnType, typename GeneratorType>
+      class uniform_callable<ReturnType, ndt::int_kind_type, GeneratorType> : public base_callable {
       public:
         uniform_callable()
-            : base_callable(
-                  ndt::make_type<ndt::callable_type>(ResID, {}, {{ndt::make_type<ndt::option_type>(ResID), "a"},
-                                                                 {ndt::make_type<ndt::option_type>(ResID), "b"}})) {}
+            : base_callable(ndt::make_type<ndt::callable_type>(
+                  ndt::make_type<ReturnType>(), {},
+                  {{ndt::make_type<ndt::option_type>(ndt::make_type<ReturnType>()), "a"},
+                   {ndt::make_type<ndt::option_type>(ndt::make_type<ReturnType>()), "b"}})) {}
 
         ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                           const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -34,43 +33,42 @@ namespace nd {
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
-          R a;
+          ReturnType a;
           if (kwds[0].is_na()) {
             a = 0;
           } else {
-            a = kwds[0].as<R>();
+            a = kwds[0].as<ReturnType>();
           }
 
-          R b;
+          ReturnType b;
           if (kwds[1].is_na()) {
-            b = std::numeric_limits<R>::max();
+            b = std::numeric_limits<ReturnType>::max();
           } else {
-            b = kwds[1].as<R>();
+            b = kwds[1].as<ReturnType>();
           }
 
           cg.emplace_back([g, a, b](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                                     const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                     const char *const *DYND_UNUSED(src_arrmeta)) {
-            kb.emplace_back<uniform_kernel<ResID, int_kind_id, GeneratorType>>(kernreq, g.get(), a, b);
+            kb.emplace_back<uniform_kernel<ReturnType, ndt::int_kind_type, GeneratorType>>(kernreq, g.get(), a, b);
           });
 
           return dst_tp;
         }
       };
 
-      template <type_id_t ResID, typename GeneratorType>
-      class uniform_callable<ResID, uint_kind_id, GeneratorType>
-          : public uniform_callable<ResID, int_kind_id, GeneratorType> {};
+      template <typename ReturnType, typename GeneratorType>
+      class uniform_callable<ReturnType, ndt::uint_kind_type, GeneratorType>
+          : public uniform_callable<ReturnType, ndt::int_kind_type, GeneratorType> {};
 
-      template <type_id_t ResID, typename GeneratorType>
-      class uniform_callable<ResID, float_kind_id, GeneratorType> : public base_callable {
-        typedef typename type_of<ResID>::type R;
-
+      template <typename ReturnType, typename GeneratorType>
+      class uniform_callable<ReturnType, ndt::float_kind_type, GeneratorType> : public base_callable {
       public:
         uniform_callable()
-            : base_callable(
-                  ndt::make_type<ndt::callable_type>(ResID, {}, {{ndt::make_type<ndt::option_type>(ResID), "a"},
-                                                                 {ndt::make_type<ndt::option_type>(ResID), "b"}})) {}
+            : base_callable(ndt::make_type<ndt::callable_type>(
+                  ndt::make_type<ReturnType>(), {},
+                  {{ndt::make_type<ndt::option_type>(ndt::make_type<ReturnType>()), "a"},
+                   {ndt::make_type<ndt::option_type>(ndt::make_type<ReturnType>()), "b"}})) {}
 
         ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                           const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -78,39 +76,38 @@ namespace nd {
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
-          R a;
+          ReturnType a;
           if (kwds[0].is_na()) {
             a = 0;
           } else {
-            a = kwds[0].as<R>();
+            a = kwds[0].as<ReturnType>();
           }
 
-          R b;
+          ReturnType b;
           if (kwds[1].is_na()) {
             b = 1;
           } else {
-            b = kwds[1].as<R>();
+            b = kwds[1].as<ReturnType>();
           }
 
           cg.emplace_back([g, a, b](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                                     const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                     const char *const *DYND_UNUSED(src_arrmeta)) {
-            kb.emplace_back<uniform_kernel<ResID, float_kind_id, GeneratorType>>(kernreq, g.get(), a, b);
+            kb.emplace_back<uniform_kernel<ReturnType, ndt::float_kind_type, GeneratorType>>(kernreq, g.get(), a, b);
           });
 
           return dst_tp;
         }
       };
 
-      template <type_id_t ResID, typename GeneratorType>
-      class uniform_callable<ResID, complex_kind_id, GeneratorType> : public base_callable {
-        typedef typename type_of<ResID>::type R;
-
+      template <typename ReturnType, typename GeneratorType>
+      class uniform_callable<ReturnType, ndt::complex_kind_type, GeneratorType> : public base_callable {
       public:
         uniform_callable()
-            : base_callable(
-                  ndt::make_type<ndt::callable_type>(ResID, {}, {{ndt::make_type<ndt::option_type>(ResID), "a"},
-                                                                 {ndt::make_type<ndt::option_type>(ResID), "b"}})) {}
+            : base_callable(ndt::make_type<ndt::callable_type>(
+                  ndt::make_type<ReturnType>(), {},
+                  {{ndt::make_type<ndt::option_type>(ndt::make_type<ReturnType>()), "a"},
+                   {ndt::make_type<ndt::option_type>(ndt::make_type<ReturnType>()), "b"}})) {}
 
         ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                           const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -118,24 +115,24 @@ namespace nd {
                           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
-          R a;
+          ReturnType a;
           if (kwds[0].is_na()) {
-            a = R(0, 0);
+            a = ReturnType(0, 0);
           } else {
-            a = kwds[0].as<R>();
+            a = kwds[0].as<ReturnType>();
           }
 
-          R b;
+          ReturnType b;
           if (kwds[1].is_na()) {
-            b = R(1, 1);
+            b = ReturnType(1, 1);
           } else {
-            b = kwds[1].as<R>();
+            b = kwds[1].as<ReturnType>();
           }
 
           cg.emplace_back([g, a, b](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                                     const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                     const char *const *DYND_UNUSED(src_arrmeta)) {
-            kb.emplace_back<uniform_kernel<ResID, complex_kind_id, GeneratorType>>(kernreq, g.get(), a, b);
+            kb.emplace_back<uniform_kernel<ReturnType, ndt::complex_kind_type, GeneratorType>>(kernreq, g.get(), a, b);
           });
 
           return dst_tp;
@@ -144,8 +141,8 @@ namespace nd {
 
     } // namespace dynd::nd::detail
 
-    template <type_id_t ResID, typename GeneratorType>
-    using uniform_callable = detail::uniform_callable<ResID, base_id_of<ResID>::value, GeneratorType>;
+    template <typename ReturnType, typename GeneratorType>
+    using uniform_callable = detail::uniform_callable<ReturnType, ndt::base_of_t<ReturnType>, GeneratorType>;
 
   } // namespace dynd::nd::random
 } // namespace dynd::nd

@@ -198,6 +198,7 @@ set(libdyndt_SRC
     src/dynd/types/fixed_dim_type.cpp
     src/dynd/types/fixed_string_kind_type.cpp
     src/dynd/types/fixed_string_type.cpp
+    src/dynd/types/float_kind_type.cpp
     src/dynd/types/int_kind_type.cpp
     src/dynd/types/option_type.cpp
     src/dynd/types/pointer_type.cpp
@@ -212,6 +213,7 @@ set(libdyndt_SRC
     src/dynd/types/typevar_type.cpp
     src/dynd/types/typevar_constructed_type.cpp
     src/dynd/types/typevar_dim_type.cpp
+    src/dynd/types/uint_kind_type.cpp
     src/dynd/types/var_dim_type.cpp
     include/dynd/types/any_kind_type.hpp
     include/dynd/types/array_type.hpp

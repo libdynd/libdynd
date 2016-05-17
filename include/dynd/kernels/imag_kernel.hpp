@@ -10,14 +10,10 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t Arg0ID>
-  struct imag_kernel : base_strided_kernel<imag_kernel<Arg0ID>, 1> {
-    typedef typename type_of<Arg0ID>::type complex_type;
-    typedef typename complex_type::value_type real_type;
-
-    void single(char *dst, char *const *src)
-    {
-      *reinterpret_cast<real_type *>(dst) = reinterpret_cast<complex_type *>(src[0])->imag();
+  template <typename Arg0Type>
+  struct imag_kernel : base_strided_kernel<imag_kernel<Arg0Type>, 1> {
+    void single(char *dst, char *const *src) {
+      *reinterpret_cast<typename Arg0Type::value_type *>(dst) = reinterpret_cast<Arg0Type *>(src[0])->imag();
     }
   };
 
