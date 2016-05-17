@@ -14,11 +14,12 @@ namespace dynd {
 namespace nd {
   namespace random {
 
-    template <typename ReturnType, typename GeneratorType, typename Requires = void>
+    template <typename ReturnType, typename GeneratorType, typename Enable = void>
     class uniform_callable;
 
     template <typename ReturnType, typename GeneratorType>
-    class uniform_callable<ReturnType, GeneratorType, Requires<is_integral<ReturnType>::value>> : public base_callable {
+    class uniform_callable<ReturnType, GeneratorType, std::enable_if_t<is_integral<ReturnType>::value>>
+        : public base_callable {
     public:
       uniform_callable()
           : base_callable(ndt::make_type<ndt::callable_type>(
@@ -57,7 +58,7 @@ namespace nd {
     };
 
     template <typename ReturnType, typename GeneratorType>
-    class uniform_callable<ReturnType, GeneratorType, Requires<is_floating_point<ReturnType>::value>>
+    class uniform_callable<ReturnType, GeneratorType, std::enable_if_t<is_floating_point<ReturnType>::value>>
         : public base_callable {
     public:
       uniform_callable()
@@ -97,7 +98,8 @@ namespace nd {
     };
 
     template <typename ReturnType, typename GeneratorType>
-    class uniform_callable<ReturnType, GeneratorType, Requires<is_complex<ReturnType>::value>> : public base_callable {
+    class uniform_callable<ReturnType, GeneratorType, std::enable_if_t<is_complex<ReturnType>::value>>
+        : public base_callable {
     public:
       uniform_callable()
           : base_callable(ndt::make_type<ndt::callable_type>(

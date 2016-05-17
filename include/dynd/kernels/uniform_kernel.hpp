@@ -23,11 +23,11 @@ inline std::shared_ptr<std::default_random_engine> &get_random_device() {
 namespace nd {
   namespace random {
 
-    template <typename ReturnType, typename GeneratorType, typename Requires = void>
+    template <typename ReturnType, typename GeneratorType, typename Enable = void>
     struct uniform_kernel;
 
     template <typename ReturnType, typename GeneratorType>
-    struct uniform_kernel<ReturnType, GeneratorType, Requires<is_integral<ReturnType>::value>>
+    struct uniform_kernel<ReturnType, GeneratorType, std::enable_if_t<is_integral<ReturnType>::value>>
         : base_strided_kernel<uniform_kernel<ReturnType, GeneratorType>, 0> {
       GeneratorType &g;
       std::uniform_int_distribution<ReturnType> d;
@@ -38,7 +38,7 @@ namespace nd {
     };
 
     template <typename ReturnType, typename GeneratorType>
-    struct uniform_kernel<ReturnType, GeneratorType, Requires<is_floating_point<ReturnType>::value>>
+    struct uniform_kernel<ReturnType, GeneratorType, std::enable_if_t<is_floating_point<ReturnType>::value>>
         : base_strided_kernel<uniform_kernel<ReturnType, GeneratorType>, 0> {
       GeneratorType &g;
       std::uniform_real_distribution<ReturnType> d;
@@ -49,7 +49,7 @@ namespace nd {
     };
 
     template <typename ReturnType, typename GeneratorType>
-    struct uniform_kernel<ReturnType, GeneratorType, Requires<is_complex<ReturnType>::value>>
+    struct uniform_kernel<ReturnType, GeneratorType, std::enable_if_t<is_complex<ReturnType>::value>>
         : base_strided_kernel<uniform_kernel<ReturnType, GeneratorType>, 0> {
       GeneratorType &g;
       std::uniform_real_distribution<typename ReturnType::value_type> d_real;
