@@ -136,7 +136,7 @@ else()
 endif()
 
 if("${UNIX}" AND NOT CMAKE_SYSTEM_NAME MATCHES "BSD")
-    set(DYND_LINK_LIBS ${DYND_LINK_LIBS} dl)
+    set(DYNDT_LINK_LIBS ${DYNDT_LINK_LIBS} dl)
 endif()
 
 # LLVM, disabled for now
@@ -246,6 +246,7 @@ set(libdyndt_SRC
     include/dynd/memblock/zeroinit_memory_block.hpp
     # Main
     src/dynd/buffer.cpp
+    src/dynd/config.cpp
     src/dynd/exceptions.cpp
     src/dynd/float16.cpp
     src/dynd/float128.cpp
@@ -340,7 +341,6 @@ set(libdynd_SRC
     src/dynd/comparison.cpp
     src/dynd/compound_add.cpp
     src/dynd/compound_div.cpp
-    src/dynd/config.cpp
     src/dynd/convert.cpp
     src/dynd/divide.cpp
     src/dynd/old_fft.cpp
@@ -537,8 +537,11 @@ endif()
 if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
     # If we're not making an installable static library,
     # link the sublibraries normally
-    target_link_libraries(libdynd ${DYND_LINK_LIBS} libdyndt)
+    set(DYND_LINK_LIBS ${DYND_LINK_LIBS} libdyndt)    
 endif()
+
+target_link_libraries(libdyndt ${DYNDT_LINK_LIBS})
+target_link_libraries(libdynd ${DYND_LINK_LIBS})
 
 if(DYND_BUILD_TESTS)
     add_subdirectory(tests)
