@@ -10,6 +10,7 @@
 #include <dynd/parse_util.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/array_type.hpp>
+#include <dynd/types/bool_kind_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
@@ -1180,6 +1181,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       result = ndt::make_type<ndt::fixed_bytes_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "FixedString")) {
       result = ndt::make_type<ndt::fixed_string_kind_type>();
+    } else if (compare_range_to_literal(nbegin, nend, "Bool")) {
+      result = ndt::make_type<ndt::bool_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "Int")) {
       result = ndt::make_type<ndt::int_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "UInt")) {
@@ -1188,13 +1191,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       result = ndt::make_type<ndt::float_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "Complex")) {
       result = ndt::make_type<ndt::complex_kind_type>();
-    }
-    /*
-        else if (compare_range_to_literal(nbegin, nend, "Bool")) {
-          result = ndt::make_kind_sym(bool_kind);
-        }
-    */
-    else if (isupper(*nbegin)) {
+    } else if (isupper(*nbegin)) {
       if (!parse_token_ds(begin, end, '[')) {
         result = ndt::make_type<ndt::typevar_type>(std::string(nbegin, nend));
       } else {

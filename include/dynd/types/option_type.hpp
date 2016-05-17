@@ -101,4 +101,10 @@ namespace ndt {
   };
 
 } // namespace dynd::ndt
+
+template <>
+struct type_id_of<ndt::option_type> {
+  static const type_id_t value = option_id;
+};
+
 } // namespace dynd

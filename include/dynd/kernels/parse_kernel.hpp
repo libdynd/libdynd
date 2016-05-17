@@ -101,10 +101,8 @@ namespace nd {
       return false;
     }
 
-    template <type_id_t RetTypeID>
-    struct parse_kernel : base_strided_kernel<parse_kernel<RetTypeID>, 2> {
-      typedef typename type_of<RetTypeID>::type ret_type;
-
+    template <typename ReturnType>
+    struct parse_kernel : base_strided_kernel<parse_kernel<ReturnType>, 2> {
       void single(char *ret, char *const *args) {
         const char *begin = *reinterpret_cast<const char **>(args[0]);
         const char *end = *reinterpret_cast<const char **>(args[1]);
@@ -113,13 +111,13 @@ namespace nd {
           throw std::runtime_error("JSON error");
         }
 
-        *reinterpret_cast<ret_type *>(ret) = dynd::parse<ret_type>(begin, end);
+        *reinterpret_cast<ReturnType *>(ret) = dynd::parse<ReturnType>(begin, end);
         *reinterpret_cast<const char **>(args[0]) = end;
       }
     };
 
     template <>
-    struct parse_kernel<bool_id> : base_strided_kernel<parse_kernel<bool_id>, 2> {
+    struct parse_kernel<bool> : base_strided_kernel<parse_kernel<bool>, 2> {
       void single(char *ret, char *const *args) {
         *reinterpret_cast<bool1 *>(ret) =
             parse_bool(*reinterpret_cast<const char **>(args[0]), *reinterpret_cast<const char **>(args[1]));
@@ -127,7 +125,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<string_id> : base_strided_kernel<parse_kernel<string_id>, 2> {
+    struct parse_kernel<string> : base_strided_kernel<parse_kernel<string>, 2> {
       void single(char *res, char *const *args) {
         const char *&rbegin = *reinterpret_cast<const char **>(args[0]);
         const char *begin = *reinterpret_cast<const char **>(args[0]);
@@ -206,7 +204,7 @@ namespace nd {
     */
 
     template <>
-    struct parse_kernel<option_id> : base_strided_kernel<parse_kernel<option_id>, 2> {
+    struct parse_kernel<ndt::option_type> : base_strided_kernel<parse_kernel<ndt::option_type>, 2> {
       intptr_t parse_offset;
 
       ~parse_kernel() {
@@ -228,7 +226,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<struct_id> : base_strided_kernel<parse_kernel<struct_id>, 2> {
+    struct parse_kernel<ndt::struct_type> : base_strided_kernel<parse_kernel<ndt::struct_type>, 2> {
       ndt::type res_tp;
       size_t field_count;
       const size_t *data_offsets;
@@ -291,7 +289,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<fixed_dim_id> : base_strided_kernel<parse_kernel<fixed_dim_id>, 2> {
+    struct parse_kernel<ndt::fixed_dim_type> : base_strided_kernel<parse_kernel<ndt::fixed_dim_type>, 2> {
       ndt::type ret_tp;
       size_t _size;
       intptr_t stride;
@@ -325,7 +323,7 @@ namespace nd {
     };
 
     template <>
-    struct parse_kernel<var_dim_id> : base_strided_kernel<parse_kernel<var_dim_id>, 2> {
+    struct parse_kernel<ndt::var_dim_type> : base_strided_kernel<parse_kernel<ndt::var_dim_type>, 2> {
       typedef ndt::var_dim_type::data_type ret_type;
 
       ndt::type ret_tp;
