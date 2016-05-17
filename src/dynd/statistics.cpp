@@ -18,11 +18,11 @@ using namespace dynd;
 DYND_API nd::callable nd::max = nd::functional::reduction(nd::make_callable<nd::max_dispatch_callable>(
     ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::scalar_kind_type>(),
                                        {ndt::make_type<ndt::scalar_kind_type>()}),
-    nd::callable::new_make_all<nd::max_callable, arithmetic_ids>()));
+    nd::callable::make_all<nd::max_callable, arithmetic_types>()));
 
 DYND_API nd::callable nd::mean = nd::make_callable<nd::mean_callable>(ndt::type(int64_id));
 
 DYND_API nd::callable nd::min = nd::functional::reduction(nd::make_callable<nd::min_dispatch_callable>(
     ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::scalar_kind_type>(),
                                        {ndt::make_type<ndt::scalar_kind_type>()}),
-    nd::callable::new_make_all<nd::min_callable, arithmetic_ids>()));
+    nd::callable::make_all<nd::min_callable, arithmetic_types>()));

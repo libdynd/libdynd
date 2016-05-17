@@ -12,22 +12,20 @@ namespace nd {
 
   typedef intptr_t stride_t;
 
-  template <type_id_t RetElementID>
-  struct range_kernel : base_strided_kernel<range_kernel<RetElementID>, 0> {
-    typedef typename type_of<RetElementID>::type type;
-
-    type start;
-    type stop;
-    type step;
+  template <typename ReturnElementType>
+  struct range_kernel : base_strided_kernel<range_kernel<ReturnElementType>, 0> {
+    ReturnElementType start;
+    ReturnElementType stop;
+    ReturnElementType step;
     size_t size;
     stride_t stride;
 
-    range_kernel(type start, type stop, type step, size_t size, stride_t stride)
+    range_kernel(ReturnElementType start, ReturnElementType stop, ReturnElementType step, size_t size, stride_t stride)
         : start(start), stop(stop), step(step), size(size), stride(stride) {}
 
     void single(char *ret, char *const *DYND_UNUSED(args)) {
       for (size_t i = 0; i < size; ++i) {
-        *reinterpret_cast<type *>(ret) = start + static_cast<type>(i) * step;
+        *reinterpret_cast<ReturnElementType *>(ret) = start + static_cast<ReturnElementType>(i) * step;
         ret += stride;
       }
     }

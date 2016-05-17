@@ -187,6 +187,7 @@ set(libdyndt_SRC
     src/dynd/types/categorical_kind_type.cpp
     src/dynd/types/callable_type.cpp
     src/dynd/types/char_type.cpp
+    src/dynd/types/complex_kind_type.cpp
     src/dynd/types/cuda_host_type.cpp
     src/dynd/types/cuda_device_type.cpp
     src/dynd/types/datashape_formatter.cpp

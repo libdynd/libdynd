@@ -14,6 +14,7 @@
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/char_type.hpp>
+#include <dynd/types/complex_kind_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
@@ -1185,14 +1186,12 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       result = ndt::make_type<ndt::uint_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "Float")) {
       result = ndt::make_type<ndt::float_kind_type>();
+    } else if (compare_range_to_literal(nbegin, nend, "Complex")) {
+      result = ndt::make_type<ndt::complex_kind_type>();
     }
-
     /*
         else if (compare_range_to_literal(nbegin, nend, "Bool")) {
           result = ndt::make_kind_sym(bool_kind);
-        }
-        else if (compare_range_to_literal(nbegin, nend, "Complex")) {
-          result = ndt::make_kind_sym(complex_kind);
         }
     */
     else if (isupper(*nbegin)) {
