@@ -12,15 +12,12 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t Arg0ID>
-  class conj_callable : public default_instantiable_callable<conj_kernel<Arg0ID>> {
+  template <typename Arg0Type>
+  class conj_callable : public default_instantiable_callable<conj_kernel<Arg0Type>> {
   public:
     conj_callable()
-        : default_instantiable_callable<conj_kernel<Arg0ID>>(
-              ndt::make_type<ndt::callable_type>(ndt::make_type<typename nd::conj_kernel<Arg0ID>::complex_type>(),
-                                                 {ndt::make_type<typename nd::conj_kernel<Arg0ID>::complex_type>()}))
-
-    {}
+        : default_instantiable_callable<conj_kernel<Arg0Type>>(
+              ndt::make_type<ndt::callable_type>(ndt::make_type<Arg0Type>(), {ndt::make_type<Arg0Type>()})) {}
   };
 
 } // namespace dynd::nd

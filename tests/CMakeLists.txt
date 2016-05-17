@@ -38,6 +38,7 @@ set(tests_SRC
     types/test_fixed_bytes_type.cpp
     types/test_fixed_string_kind_type.cpp
     types/test_fixed_string_type.cpp
+    types/test_float_kind_type.cpp
     types/test_int_kind_type.cpp
     types/test_option_type.cpp
     types/test_pointer_type.cpp
@@ -55,6 +56,7 @@ set(tests_SRC
     types/test_type_substitute.cpp
     types/test_type_pattern_match.cpp
 #    types/test_type_promotion.cpp
+    types/test_uint_kind_type.cpp
     types/test_var_dim_type.cpp
     func/test_apply.cpp
     func/test_arithmetic.cpp

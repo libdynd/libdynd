@@ -23,6 +23,7 @@
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
+#include <dynd/types/float_kind_type.hpp>
 #include <dynd/types/int_kind_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/pointer_type.hpp>
@@ -36,6 +37,7 @@
 #include <dynd/types/typevar_constructed_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
+#include <dynd/types/uint_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
@@ -1179,20 +1181,15 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       result = ndt::make_type<ndt::fixed_string_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "Int")) {
       result = ndt::make_type<ndt::int_kind_type>();
+    } else if (compare_range_to_literal(nbegin, nend, "UInt")) {
+      result = ndt::make_type<ndt::uint_kind_type>();
+    } else if (compare_range_to_literal(nbegin, nend, "Float")) {
+      result = ndt::make_type<ndt::float_kind_type>();
     }
 
     /*
         else if (compare_range_to_literal(nbegin, nend, "Bool")) {
           result = ndt::make_kind_sym(bool_kind);
-        }
-        else if (compare_range_to_literal(nbegin, nend, "UInt")) {
-          result = ndt::make_kind_sym(uint_kind);
-        }
-        else if (compare_range_to_literal(nbegin, nend, "Int")) {
-          result = ndt::make_kind_sym(sint_kind);
-        }
-        else if (compare_range_to_literal(nbegin, nend, "Float")) {
-          result = ndt::make_kind_sym(real_kind);
         }
         else if (compare_range_to_literal(nbegin, nend, "Complex")) {
           result = ndt::make_kind_sym(complex_kind);
