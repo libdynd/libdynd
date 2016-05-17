@@ -757,6 +757,9 @@ enum assign_error_mode {
   assign_error_default
 };
 
+template <bool Value>
+using Requires = std::enable_if_t<Value>;
+
 struct overflow_check_t {};
 
 inline std::ostream &operator<<(std::ostream &o, assign_error_mode errmode) {

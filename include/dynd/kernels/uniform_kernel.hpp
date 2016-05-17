@@ -13,25 +13,6 @@
 
 namespace dynd {
 
-/*
-template <bool Condition, typename Type = int>
-struct RequiresC_F {
-  using type = Type;
-};
-
-template <typename Type>
-struct RequiresC_F<false, Type> {};
-
-template <bool Condition, typename Type>
-using RequiresC = typename RequiresC_F<Condition, Type>::type;
-
-template <typename Condition, typename Type = int>
-using Requires = RequiresC<Condition::value, Type>;
-*/
-
-template <bool Value>
-using Requires = std::enable_if_t<Value>;
-
 inline std::shared_ptr<std::default_random_engine> &get_random_device() {
   static std::random_device random_device;
   static std::shared_ptr<std::default_random_engine> g(new std::default_random_engine(random_device()));
@@ -42,7 +23,7 @@ inline std::shared_ptr<std::default_random_engine> &get_random_device() {
 namespace nd {
   namespace random {
 
-    template <typename ReturnType, typename GeneratorType, typename Enable = void>
+    template <typename ReturnType, typename GeneratorType, typename Requires = void>
     struct uniform_kernel;
 
     template <typename ReturnType, typename GeneratorType>
