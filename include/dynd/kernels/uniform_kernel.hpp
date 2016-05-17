@@ -39,64 +39,48 @@ inline std::shared_ptr<std::default_random_engine> &get_random_device() {
   return g;
 }
 
-template <typename T>
-constexpr bool is_integral_v = is_integral<T>::value;
-
-template <typename T>
-constexpr bool is_floating_point_v = is_floating_point<T>::value;
-
-template <typename T>
-constexpr bool is_complex_v = is_complex<T>::value;
-
 namespace nd {
   namespace random {
-    namespace detail {
 
-      template <typename ReturnType, typename GeneratorType, typename Enable = void>
-      struct uniform_kernel;
-
-      template <typename ReturnType, typename GeneratorType>
-      struct uniform_kernel<ReturnType, GeneratorType, Requires<is_integral_v<ReturnType>>>
-          : base_strided_kernel<uniform_kernel<ReturnType, GeneratorType, Requires<is_integral_v<ReturnType>>>, 0> {
-        GeneratorType &g;
-        std::uniform_int_distribution<ReturnType> d;
-
-        uniform_kernel(GeneratorType *g, ReturnType a, ReturnType b) : g(*g), d(a, b) {}
-
-        void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<ReturnType *>(dst) = d(g); }
-      };
-
-      template <typename ReturnType, typename GeneratorType>
-      struct uniform_kernel<ReturnType, GeneratorType, Requires<is_floating_point_v<ReturnType>>>
-          : base_strided_kernel<uniform_kernel<ReturnType, GeneratorType, Requires<is_floating_point_v<ReturnType>>>,
-                                0> {
-        GeneratorType &g;
-        std::uniform_real_distribution<ReturnType> d;
-
-        uniform_kernel(GeneratorType *g, ReturnType a, ReturnType b) : g(*g), d(a, b) {}
-
-        void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<ReturnType *>(dst) = d(g); }
-      };
-
-      template <typename ReturnType, typename GeneratorType>
-      struct uniform_kernel<ReturnType, GeneratorType, Requires<is_complex_v<ReturnType>>>
-          : base_strided_kernel<uniform_kernel<ReturnType, GeneratorType, Requires<is_complex_v<ReturnType>>>, 0> {
-        GeneratorType &g;
-        std::uniform_real_distribution<typename ReturnType::value_type> d_real;
-        std::uniform_real_distribution<typename ReturnType::value_type> d_imag;
-
-        uniform_kernel(GeneratorType *g, ReturnType a, ReturnType b)
-            : g(*g), d_real(a.real(), b.real()), d_imag(a.imag(), b.imag()) {}
-
-        void single(char *dst, char *const *DYND_UNUSED(src)) {
-          *reinterpret_cast<ReturnType *>(dst) = ReturnType(d_real(g), d_imag(g));
-        }
-      };
-
-    } // namespace dynd::nd::random::detail
+    template <typename ReturnType, typename GeneratorType, typename Enable = void>
+    struct uniform_kernel;
 
     template <typename ReturnType, typename GeneratorType>
-    using uniform_kernel = detail::uniform_kernel<ReturnType, GeneratorType>;
+    struct uniform_kernel<ReturnType, GeneratorType, Requires<is_integral<ReturnType>::value>>
+        : base_strided_kernel<uniform_kernel<ReturnType, GeneratorType>, 0> {
+      GeneratorType &g;
+      std::uniform_int_distribution<ReturnType> d;
+
+      uniform_kernel(GeneratorType *g, ReturnType a, ReturnType b) : g(*g), d(a, b) {}
+
+      void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<ReturnType *>(dst) = d(g); }
+    };
+
+    template <typename ReturnType, typename GeneratorType>
+    struct uniform_kernel<ReturnType, GeneratorType, Requires<is_floating_point<ReturnType>::value>>
+        : base_strided_kernel<uniform_kernel<ReturnType, GeneratorType>, 0> {
+      GeneratorType &g;
+      std::uniform_real_distribution<ReturnType> d;
+
+      uniform_kernel(GeneratorType *g, ReturnType a, ReturnType b) : g(*g), d(a, b) {}
+
+      void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<ReturnType *>(dst) = d(g); }
+    };
+
+    template <typename ReturnType, typename GeneratorType>
+    struct uniform_kernel<ReturnType, GeneratorType, Requires<is_complex<ReturnType>::value>>
+        : base_strided_kernel<uniform_kernel<ReturnType, GeneratorType>, 0> {
+      GeneratorType &g;
+      std::uniform_real_distribution<typename ReturnType::value_type> d_real;
+      std::uniform_real_distribution<typename ReturnType::value_type> d_imag;
+
+      uniform_kernel(GeneratorType *g, ReturnType a, ReturnType b)
+          : g(*g), d_real(a.real(), b.real()), d_imag(a.imag(), b.imag()) {}
+
+      void single(char *dst, char *const *DYND_UNUSED(src)) {
+        *reinterpret_cast<ReturnType *>(dst) = ReturnType(d_real(g), d_imag(g));
+      }
+    };
 
   } // namespace dynd::nd::random
 } // namespace dynd::nd
