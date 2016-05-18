@@ -678,9 +678,6 @@ struct is_integral : std::is_integral<T> {};
 template <typename T>
 struct is_floating_point : std::is_floating_point<T> {};
 
-template <>
-struct is_floating_point<float16> : std::integral_constant<bool, true> {};
-
 template <typename T>
 struct is_complex : std::false_type {};
 
