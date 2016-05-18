@@ -38,7 +38,7 @@ namespace ndt {
   public:
     typedef any_kind_type base;
 
-    pointer_type(const type &target_tp);
+    pointer_type(const type &target_tp = ndt::make_type<ndt::any_kind_type>());
 
     const type &get_value_type() const { return m_target_tp.value_type(); }
     const type &get_operand_type() const;

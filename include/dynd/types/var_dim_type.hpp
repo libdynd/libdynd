@@ -6,13 +6,13 @@
 #pragma once
 
 #include <dynd/buffer.hpp>
+#include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/base_dim_type.hpp>
 
 namespace dynd {
 namespace ndt {
 
   class DYNDT_API var_dim_type : public base_dim_type {
-
   public:
     struct metadata_type {
       nd::memory_block blockref; // A reference to the memory block which contains the array's data.
@@ -25,7 +25,7 @@ namespace ndt {
       size_t size;
     };
 
-    var_dim_type(const type &element_tp);
+    var_dim_type(const type &element_tp = ndt::make_type<ndt::any_kind_type>());
 
     var_dim_type(size_t ndim, const type &element_tp)
         : var_dim_type(ndim == 1 ? element_tp : make_type<var_dim_type>(ndim - 1, element_tp)) {}

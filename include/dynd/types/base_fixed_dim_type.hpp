@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/base_dim_type.hpp>
 
 namespace dynd {
@@ -14,7 +15,7 @@ namespace ndt {
   public:
     using base_dim_type::base_dim_type;
 
-    base_fixed_dim_type(const type &element_tp);
+    base_fixed_dim_type(const type &element_tp = ndt::make_type<ndt::any_kind_type>());
 
     size_t get_default_data_size() const;
 

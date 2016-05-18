@@ -487,50 +487,6 @@ struct type_of<type_id> {
   typedef ndt::type type;
 };
 
-namespace ndt {
-
-  template <typename T>
-  struct traits;
-
-  template <typename T>
-  struct has_traits;
-
-  namespace detail {
-
-    template <typename TypeType, bool HasTraits>
-    struct base_of;
-
-    template <typename TypeType>
-    struct base_of<TypeType, true> {
-      typedef typename traits<TypeType>::base type;
-    };
-
-    template <typename TypeType>
-    struct base_of<TypeType, false> {
-      typedef typename TypeType::base type;
-    };
-
-  } // namespace dynd::ndt::detail
-
-  template <typename TypeType>
-  struct base_of {
-    typedef typename detail::base_of<TypeType, has_traits<TypeType>::value>::type type;
-  };
-
-  class bool_kind_type;
-  class int_kind_type;
-  class uint_kind_type;
-  class float_kind_type;
-  class complex_kind_type;
-  class any_kind_type;
-  class bytes_kind_type;
-  class string_kind_type;
-
-  template <typename TypeType>
-  using base_of_t = typename base_of<TypeType>::type;
-
-} // namespace dynd::ndt
-
 template <type_id_t ID>
 struct base_id_of;
 

@@ -19,8 +19,6 @@
 using namespace std;
 using namespace dynd;
 
-TEST(OptionType, BaseOf) { EXPECT_TRUE((is_same<ndt::any_kind_type, ndt::base_of_t<ndt::option_type>>::value)); }
-
 TEST(OptionType, Create) {
   ndt::type d;
 
