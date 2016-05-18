@@ -723,6 +723,16 @@ struct is_unsigned {
 };
 
 template <typename T>
+struct is_signed_integral {
+  static const bool value = is_signed<T>::value && is_integral<T>::value;
+};
+
+template <typename T>
+struct is_unsigned_integral {
+  static const bool value = is_unsigned<T>::value && is_integral<T>::value;
+};
+
+template <typename T>
 T strto(const char *begin, char **end);
 
 template <>

@@ -51,4 +51,10 @@ namespace ndt {
   };
 
 } // namespace dynd::ndt
+
+template <>
+struct type_id_of<ndt::fixed_string_type> {
+  static const type_id_t value = fixed_string_id;
+};
+
 } // namespace dynd

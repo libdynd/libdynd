@@ -123,4 +123,10 @@ namespace ndt {
   };
 
 } // namespace dynd::ndt
+
+template <>
+struct type_id_of<ndt::tuple_type> {
+  static const type_id_t value = tuple_id;
+};
+
 } // namespace dynd

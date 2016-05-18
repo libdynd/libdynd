@@ -93,4 +93,10 @@ namespace ndt {
   inline type make_var_dim(const type &element_tp) { return make_type<var_dim_type>(element_tp); }
 
 } // namespace dynd::ndt
+
+template <>
+struct type_id_of<ndt::var_dim_type> {
+  static const type_id_t value = var_dim_id;
+};
+
 } // namespace dynd
