@@ -678,6 +678,9 @@ struct is_integral : std::is_integral<T> {};
 template <typename T>
 struct is_floating_point : std::is_floating_point<T> {};
 
+template <>
+struct is_floating_point<float16> : std::integral_constant<bool, true> {};
+
 template <typename T>
 struct is_complex : std::false_type {};
 
@@ -720,6 +723,16 @@ struct is_signed {
 template <typename T>
 struct is_unsigned {
   static const bool value = std::is_unsigned<T>::value || std::is_same<T, uint128>::value;
+};
+
+template <typename T>
+struct is_signed_integral {
+  static const bool value = is_signed<T>::value && is_integral<T>::value;
+};
+
+template <typename T>
+struct is_unsigned_integral {
+  static const bool value = is_unsigned<T>::value && is_integral<T>::value;
 };
 
 template <typename T>

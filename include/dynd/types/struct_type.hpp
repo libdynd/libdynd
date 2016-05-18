@@ -93,4 +93,10 @@ namespace ndt {
   };
 
 } // namespace dynd::ndt
+
+template <>
+struct type_id_of<ndt::struct_type> {
+  static const type_id_t value = struct_id;
+};
+
 } // namespace dynd
