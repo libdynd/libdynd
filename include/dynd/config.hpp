@@ -717,9 +717,29 @@ struct is_signed {
   static const bool value = std::is_signed<T>::value || std::is_same<T, int128>::value;
 };
 
+template <>
+struct is_signed<int128> {
+  static const bool value = true;
+};
+
+template <>
+struct is_signed<uint128> {
+  static const bool value = false;
+};
+
 template <typename T>
 struct is_unsigned {
   static const bool value = std::is_unsigned<T>::value || std::is_same<T, uint128>::value;
+};
+
+template <>
+struct is_unsigned<int128> {
+  static const bool value = false;
+};
+
+template <>
+struct is_unsigned<uint128> {
+  static const bool value = true;
 };
 
 template <typename T>
