@@ -115,8 +115,6 @@ namespace ndt {
 
   template <>
   struct traits<string> {
-    typedef string_kind_type base;
-
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;

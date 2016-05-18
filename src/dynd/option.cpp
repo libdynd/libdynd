@@ -41,11 +41,10 @@ nd::callable make_assign_na() {
 }
 
 nd::callable make_is_na() {
-  typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, int128_id, uint32_id, float32_id, float64_id,
-                           complex_float32_id, complex_float64_id, void_id, bytes_id, string_id, fixed_dim_id>
-      type_ids;
-
-  dispatcher<1, nd::callable> dispatcher = nd::callable::new_make_all<nd::is_na_callable, type_ids>();
+  dispatcher<1, nd::callable> dispatcher = nd::callable::make_all<
+      nd::is_na_callable,
+      type_sequence<bool, int8_t, int16_t, int32_t, int64_t, int128, uint32_t, float, double, dynd::complex<float>,
+                    dynd::complex<double>, void, dynd::bytes, dynd::string, ndt::fixed_dim_type>>();
   dynd::dispatcher<1, nd::callable> dim_dispatcher;
 
   for (auto tp_id : {fixed_dim_id, var_dim_id}) {

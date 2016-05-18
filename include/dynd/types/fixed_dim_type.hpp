@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/base_fixed_dim_type.hpp>
 
 namespace dynd {
@@ -114,7 +115,7 @@ namespace ndt {
   public:
     typedef size_stride_t metadata_type;
 
-    fixed_dim_type(intptr_t dim_size, const type &element_tp);
+    fixed_dim_type(intptr_t dim_size, const type &element_tp = ndt::make_type<ndt::any_kind_type>());
 
     size_t get_default_data_size() const;
 

@@ -22,10 +22,5 @@ namespace ndt {
     void print_type(std::ostream &o) const;
   };
 
-  template <>
-  struct base_of<scalar_kind_type> {
-    typedef any_kind_type type;
-  };
-
 } // namespace dynd::ndt
 } // namespace dynd

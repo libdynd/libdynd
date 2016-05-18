@@ -12,8 +12,6 @@ namespace ndt {
 
   class bool_kind_type : public base_type {
   public:
-    typedef scalar_kind_type base;
-
     bool_kind_type() : base_type(bool_kind_id, 0, 1, type_flag_symbolic, 0, 0, 0) {}
 
     bool match(const type &candidate_tp, std::map<std::string, type> &DYND_UNUSED(tp_vars)) const {
@@ -28,11 +26,6 @@ namespace ndt {
     void print_type(std::ostream &o) const { o << "Bool"; }
 
     bool operator==(const base_type &rhs) const { return this == &rhs || rhs.get_id() == bool_kind_id; }
-  };
-
-  template <>
-  struct base_of<bool_kind_type> {
-    typedef scalar_kind_type type;
   };
 
 } // namespace dynd::ndt
