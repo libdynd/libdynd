@@ -733,6 +733,16 @@ struct is_unsigned {
 };
 
 template <>
+struct is_signed<bool> {
+  static const bool value = false;
+};
+
+template <>
+struct is_unsigned<bool> {
+  static const bool value = false;
+};
+
+template <>
 struct is_unsigned<int128> {
   static const bool value = false;
 };

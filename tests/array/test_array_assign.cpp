@@ -56,12 +56,12 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Bool) {
   a.assign(TestFixture::Second::To(22), ectx_nocheck.errmode);
   EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
   if (!TestFixture::First::IsTypeID(cuda_device_id) && !TestFixture::Second::IsTypeID(cuda_device_id)) {
-    //    EXPECT_THROW(a.assign(TestFixture::Second::To(2)), runtime_error);
-    //  EXPECT_THROW(a.assign(TestFixture::Second::To(-1)), runtime_error);
-    // EXPECT_THROW(a.assign(TestFixture::Second::To(1.5)), runtime_error);
-    //  EXPECT_THROW(a.assign(TestFixture::Second::To(1.5), ectx_overflow.errmode), runtime_error);
-    //    EXPECT_THROW(a.assign(TestFixture::Second::To(1.5), ectx_fractional.errmode), runtime_error);
-    //  EXPECT_THROW(a.assign(TestFixture::Second::To(1.5), ectx_inexact.errmode), runtime_error);
+    EXPECT_THROW(a.assign(TestFixture::Second::To(2)), runtime_error);
+    EXPECT_THROW(a.assign(TestFixture::Second::To(-1)), runtime_error);
+    EXPECT_THROW(a.assign(TestFixture::Second::To(1.5)), runtime_error);
+    EXPECT_THROW(a.assign(TestFixture::Second::To(1.5), ectx_overflow.errmode), runtime_error);
+    EXPECT_THROW(a.assign(TestFixture::Second::To(1.5), ectx_fractional.errmode), runtime_error);
+    EXPECT_THROW(a.assign(TestFixture::Second::To(1.5), ectx_inexact.errmode), runtime_error);
   }
 }
 
