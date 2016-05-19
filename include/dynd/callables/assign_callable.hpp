@@ -17,7 +17,7 @@ namespace nd {
   public:
     assign_callable()
         : base_callable(ndt::make_type<ndt::callable_type>(
-              ndt::type(ResID), {ndt::type(Arg0ID)},
+              ndt::make_type<typename type_of<ResID>::type>(), {ndt::make_type<typename type_of<Arg0ID>::type>()},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
@@ -32,7 +32,7 @@ namespace nd {
         cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                            const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                            const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
+          kb.emplace_back<detail::assignment_kernel<typename type_of<ResID>::type, typename type_of<Arg0ID>::type,
                                                     assign_error_nocheck>>(kernreq);
         });
         break;
@@ -40,7 +40,7 @@ namespace nd {
         cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                            const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                            const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
+          kb.emplace_back<detail::assignment_kernel<typename type_of<ResID>::type, typename type_of<Arg0ID>::type,
                                                     assign_error_overflow>>(kernreq);
         });
         break;
@@ -48,7 +48,7 @@ namespace nd {
         cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                            const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                            const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
+          kb.emplace_back<detail::assignment_kernel<typename type_of<ResID>::type, typename type_of<Arg0ID>::type,
                                                     assign_error_fractional>>(kernreq);
         });
         break;
@@ -56,7 +56,7 @@ namespace nd {
         cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                            const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                            const char *const *DYND_UNUSED(src_arrmeta)) {
-          kb.emplace_back<detail::assignment_kernel<ResID, base_id_of<ResID>::value, Arg0ID, base_id_of<Arg0ID>::value,
+          kb.emplace_back<detail::assignment_kernel<typename type_of<ResID>::type, typename type_of<Arg0ID>::type,
                                                     assign_error_inexact>>(kernreq);
         });
         break;
@@ -87,36 +87,32 @@ namespace nd {
         cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                             const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                             const char *const *src_arrmeta) {
-          kb.emplace_back<
-              detail::assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
-              kernreq, src_tp[0], src_arrmeta[0]);
+          kb.emplace_back<detail::assignment_kernel<bool1, string, assign_error_nocheck>>(kernreq, src_tp[0],
+                                                                                          src_arrmeta[0]);
         });
         break;
       case assign_error_overflow:
         cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                             const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                             const char *const *src_arrmeta) {
-          kb.emplace_back<
-              detail::assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_overflow>>(
-              kernreq, src_tp[0], src_arrmeta[0]);
+          kb.emplace_back<detail::assignment_kernel<bool1, string, assign_error_overflow>>(kernreq, src_tp[0],
+                                                                                           src_arrmeta[0]);
         });
         break;
       case assign_error_fractional:
         cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                             const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                             const char *const *src_arrmeta) {
-          kb.emplace_back<
-              detail::assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_fractional>>(
-              kernreq, src_tp[0], src_arrmeta[0]);
+          kb.emplace_back<detail::assignment_kernel<bool1, string, assign_error_fractional>>(kernreq, src_tp[0],
+                                                                                             src_arrmeta[0]);
         });
         break;
       case assign_error_inexact:
         cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                             const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                             const char *const *src_arrmeta) {
-          kb.emplace_back<
-              detail::assignment_kernel<bool_id, bool_kind_id, string_id, string_kind_id, assign_error_inexact>>(
-              kernreq, src_tp[0], src_arrmeta[0]);
+          kb.emplace_back<detail::assignment_kernel<bool1, string, assign_error_inexact>>(kernreq, src_tp[0],
+                                                                                          src_arrmeta[0]);
         });
         break;
       default:
@@ -174,7 +170,7 @@ namespace nd {
                                     ? ndt::make_type<ndt::fixed_string_type>(src0_size, src0_encoding)
                                     : ndt::make_type<ndt::string_type>();
 
-        kb.emplace_back<detail::assignment_kernel<IntID, int_kind_id, string_id, string_kind_id, assign_error_default>>(
+        kb.emplace_back<detail::assignment_kernel<typename type_of<IntID>::type, string, assign_error_default>>(
             kernreq, string_type, src_arrmeta[0], error_mode);
       });
 
@@ -209,7 +205,7 @@ namespace nd {
         ndt::type string_tp = dst_id == fixed_string_id
                                   ? ndt::make_type<ndt::fixed_string_type>(string_size, string_encoding)
                                   : ndt::make_type<ndt::string_type>();
-        kb.emplace_back<detail::assignment_kernel<IntID, int_kind_id, string_id, string_kind_id, assign_error_default>>(
+        kb.emplace_back<detail::assignment_kernel<typename type_of<IntID>::type, string, assign_error_default>>(
             kernreq, string_tp, dst_arrmeta);
       });
 
@@ -235,9 +231,8 @@ namespace nd {
       cg.emplace_back([error_mode](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                                    const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                                    const char *const *src_arrmeta) {
-        kb.emplace_back<
-            detail::assignment_kernel<float64_id, float_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
-            kernreq, ndt::type(string_id), src_arrmeta[0], error_mode);
+        kb.emplace_back<detail::assignment_kernel<double, string, assign_error_nocheck>>(kernreq, ndt::type(string_id),
+                                                                                         src_arrmeta[0], error_mode);
       });
 
       return dst_tp;
@@ -265,8 +260,7 @@ namespace nd {
       cg.emplace_back([dst_data_size, dst_encoding, src0_encoding, error_mode](
           kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *DYND_UNUSED(dst_arrmeta),
           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-        kb.emplace_back<detail::assignment_kernel<fixed_string_id, string_kind_id, string_id, string_kind_id,
-                                                  assign_error_nocheck>>(
+        kb.emplace_back<detail::assignment_kernel<ndt::fixed_string_type, string, assign_error_nocheck>>(
             kernreq, get_next_unicode_codepoint_function(src0_encoding, error_mode),
             get_append_unicode_codepoint_function(dst_encoding, error_mode), dst_data_size,
             error_mode != assign_error_nocheck);
@@ -294,8 +288,8 @@ namespace nd {
                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                           const char *const *DYND_UNUSED(src_arrmeta)) {
         const ndt::fixed_string_type *src_fs = src_tp[0].extended<ndt::fixed_string_type>();
-        kb.emplace_back<detail::assignment_kernel<fixed_string_id, string_kind_id, fixed_string_id, string_kind_id,
-                                                  assign_error_nocheck>>(
+        kb.emplace_back<
+            detail::assignment_kernel<ndt::fixed_string_type, ndt::fixed_string_type, assign_error_nocheck>>(
             kernreq, get_next_unicode_codepoint_function(src_fs->get_encoding(), error_mode),
             get_append_unicode_codepoint_function(dst_tp.extended<ndt::fixed_string_type>()->get_encoding(),
                                                   error_mode),
@@ -321,8 +315,7 @@ namespace nd {
       cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                           const char *dst_arrmeta, size_t DYND_UNUSED(nsrc),
                           const char *const *DYND_UNUSED(src_arrmeta)) {
-        kb.emplace_back<
-            detail::assignment_kernel<string_id, string_kind_id, int8_id, int_kind_id, assign_error_nocheck>>(
+        kb.emplace_back<detail::assignment_kernel<string, int8_t, assign_error_nocheck>>(
             kernreq, dst_tp, src_tp[0].get_id(), dst_arrmeta);
       });
 
@@ -349,8 +342,7 @@ namespace nd {
       cg.emplace_back([dst_encoding, src0_data_size, src0_encoding, error_mode](
           kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *DYND_UNUSED(dst_arrmeta),
           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-        kb.emplace_back<detail::assignment_kernel<string_id, string_kind_id, fixed_string_id, string_kind_id,
-                                                  assign_error_nocheck>>(
+        kb.emplace_back<detail::assignment_kernel<string, ndt::fixed_string_type, assign_error_nocheck>>(
             kernreq, dst_encoding, src0_encoding, src0_data_size,
             get_next_unicode_codepoint_function(src0_encoding, error_mode),
             get_append_unicode_codepoint_function(dst_encoding, error_mode));
@@ -375,8 +367,7 @@ namespace nd {
       cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                          const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                          const char *const *src_arrmeta) {
-        kb.emplace_back<
-            detail::assignment_kernel<type_id, scalar_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
+        kb.emplace_back<detail::assignment_kernel<ndt::type, string, assign_error_nocheck>>(
             kernreq, ndt::type(string_id), src_arrmeta[0]);
       });
 
@@ -404,8 +395,7 @@ namespace nd {
       cg.emplace_back([error_mode, dst_encoding, src0_data_size, src0_encoding](
           kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *DYND_UNUSED(dst_arrmeta),
           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-        kb.emplace_back<detail::assignment_kernel<string_id, string_kind_id, fixed_string_id, string_kind_id,
-                                                  assign_error_nocheck>>(
+        kb.emplace_back<detail::assignment_kernel<string, ndt::fixed_string_type, assign_error_nocheck>>(
             kernreq, dst_encoding, src0_encoding, src0_data_size,
             get_next_unicode_codepoint_function(src0_encoding, error_mode),
             get_append_unicode_codepoint_function(dst_encoding, error_mode));
@@ -432,9 +422,8 @@ namespace nd {
       cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                           const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                           const char *const *src_arrmeta) {
-        kb.emplace_back<
-            detail::assignment_kernel<float32_id, float_kind_id, string_id, string_kind_id, assign_error_nocheck>>(
-            kernreq, src_tp[0], src_arrmeta[0], error_mode);
+        kb.emplace_back<detail::assignment_kernel<float, string, assign_error_nocheck>>(kernreq, src_tp[0],
+                                                                                        src_arrmeta[0], error_mode);
       });
 
       return dst_tp;
@@ -455,8 +444,7 @@ namespace nd {
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
                          size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-        kb.emplace_back<
-            detail::assignment_kernel<string_id, string_kind_id, type_id, scalar_kind_id, assign_error_nocheck>>(
+        kb.emplace_back<detail::assignment_kernel<string, ndt::type, assign_error_nocheck>>(
             kernreq, ndt::type(string_id), dst_arrmeta);
       });
 
@@ -484,8 +472,7 @@ namespace nd {
       cg.emplace_back([error_mode, dst_data_size, dst_encoding, src0_encoding](
           kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *DYND_UNUSED(dst_arrmeta),
           size_t DYND_UNUSED(nsrc), const char *const *DYND_UNUSED(src_arrmeta)) {
-        kb.emplace_back<detail::assignment_kernel<fixed_string_id, string_kind_id, string_id, string_kind_id,
-                                                  assign_error_nocheck>>(
+        kb.emplace_back<detail::assignment_kernel<ndt::fixed_string_type, string, assign_error_nocheck>>(
             kernreq, get_next_unicode_codepoint_function(src0_encoding, error_mode),
             get_append_unicode_codepoint_function(dst_encoding, error_mode), dst_data_size,
             error_mode != assign_error_nocheck);
@@ -509,7 +496,7 @@ namespace nd {
                       const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
       cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
                          size_t DYND_UNUSED(nsrc), const char *const *src_arrmeta) {
-        kb.emplace_back<assignment_kernel<pointer_id, pointer_id>>(kernreq);
+        kb.emplace_back<assignment_kernel<ndt::pointer_type, ndt::pointer_type>>(kernreq);
 
         const char *child_src_arrmeta = src_arrmeta[0] + sizeof(pointer_type_arrmeta);
         kb(kernel_request_single, nullptr, dst_arrmeta, 1, &child_src_arrmeta);
@@ -534,8 +521,7 @@ namespace nd {
                          size_t nsrc, const char *const *src_arrmeta) {
         intptr_t ckb_offset = kb.size();
         intptr_t root_ckb_offset = ckb_offset;
-        typedef detail::assignment_kernel<option_id, any_kind_id, option_id, any_kind_id, assign_error_nocheck>
-            self_type;
+        typedef detail::assignment_kernel<ndt::option_type, ndt::option_type, assign_error_nocheck> self_type;
 
         kb.emplace_back<self_type>(kernreq);
         ckb_offset = kb.size();

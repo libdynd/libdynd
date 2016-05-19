@@ -3,17 +3,17 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <cmath>
 #include <iostream>
 #include <stdexcept>
-#include <cmath>
 
-#include "inc_gtest.hpp"
 #include "../test_memory.hpp"
 #include "dynd_assertions.hpp"
+#include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/json_parser.hpp>
 #include <dynd/assignment.hpp>
+#include <dynd/json_parser.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -566,9 +566,9 @@ TEST(ArrayAssign, ZeroSizedAssign) {
   a.vals() = b;
   EXPECT_EQ(0, a.get_dim_size());
   // With a struct -- need to fix this
-//  a = nd::empty("var * {a:int32, b:string}");
-//  b = nd::empty(0, "{a:int32, b:string}");
-//  a.vals() = b;
+  //  a = nd::empty("var * {a:int32, b:string}");
+  //  b = nd::empty(0, "{a:int32, b:string}");
+  //  a.vals() = b;
 }
 
 /*
