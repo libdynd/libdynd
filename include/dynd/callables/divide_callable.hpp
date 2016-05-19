@@ -11,9 +11,10 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t Arg0ID, type_id_t Arg1ID>
-  using divide_callable = functional::apply_function_callable<decltype(&dynd::detail::inline_divide<Arg0ID, Arg1ID>::f),
-                                                              &dynd::detail::inline_divide<Arg0ID, Arg1ID>::f>;
+  template <typename Arg0Type, typename Arg1Type>
+  using divide_callable =
+      functional::apply_function_callable<decltype(&dynd::detail::inline_divide<Arg0Type, Arg1Type>::f),
+                                          &dynd::detail::inline_divide<Arg0Type, Arg1Type>::f>;
 
 } // namespace dynd::nd
 } // namespace dynd

@@ -19,8 +19,7 @@
 // std::pow already unambiguously does what we want for all
 // given combinations of input types.
 
-template <type_id_t, type_id_t>
+template <typename, typename>
 using isdef_pow = std::true_type;
 
-DYND_API nd::callable nd::pow =
-    make_binary_arithmetic<nd::pow_callable, isdef_pow, type_id_sequence<float32_id, float64_id>>();
+DYND_API nd::callable nd::pow = make_binary_arithmetic<nd::pow_callable, isdef_pow, type_sequence<float, double>>();

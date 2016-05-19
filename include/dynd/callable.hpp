@@ -51,6 +51,9 @@ namespace nd {
     template <template <type_id_t...> class KernelType, template <type_id_t...> class Condition>
     struct make_all_if;
 
+    template <template <typename...> class KernelType, template <typename...> class Condition>
+    struct new_make_all_if;
+
   } // namespace dynd::nd::detail
 
   /**
@@ -184,12 +187,32 @@ namespace nd {
       return dispatcher<1, callable>(callables.begin(), callables.end());
     }
 
+    template <template <typename> class KernelType, template <typename> class Condition, typename Type0Sequence,
+              typename... A>
+    static dispatcher<1, callable> new_make_all_if(A &&... a) {
+      std::vector<std::pair<std::array<type_id_t, 1>, callable>> callables;
+      for_each<Type0Sequence>(detail::new_make_all_if<KernelType, Condition>(), callables, std::forward<A>(a)...);
+
+      return dispatcher<1, callable>(callables.begin(), callables.end());
+    }
+
     template <template <type_id_t, type_id_t, type_id_t...> class KernelType,
               template <type_id_t, type_id_t, type_id_t...> class Condition, typename I0, typename I1, typename... I,
               typename... A>
     static dispatcher<2 + sizeof...(I), callable> make_all_if(A &&... a) {
       std::vector<std::pair<std::array<type_id_t, 2 + sizeof...(I)>, callable>> callables;
       for_each<typename outer<I0, I1, I...>::type>(detail::make_all_if<KernelType, Condition>(), callables,
+                                                   std::forward<A>(a)...);
+
+      return dispatcher<2 + sizeof...(I), callable>(callables.begin(), callables.end());
+    }
+
+    template <template <typename, typename, typename...> class KernelType,
+              template <typename, typename, typename...> class Condition, typename I0, typename I1, typename... I,
+              typename... A>
+    static dispatcher<2 + sizeof...(I), callable> new_make_all_if(A &&... a) {
+      std::vector<std::pair<std::array<type_id_t, 2 + sizeof...(I)>, callable>> callables;
+      for_each<typename outer<I0, I1, I...>::type>(detail::new_make_all_if<KernelType, Condition>(), callables,
                                                    std::forward<A>(a)...);
 
       return dispatcher<2 + sizeof...(I), callable>(callables.begin(), callables.end());
@@ -387,6 +410,40 @@ namespace nd {
       }
     };
 
+    // insert_callable_if is an internal helper template for make_all_if that reorganizes
+    // its template parameters so that when a set of types does not pass the conditional
+    // test for whether or not it should be added to a callable, the kernel template used
+    // is never instantiated.
+    template <bool Enable, template <typename...> class KernelType>
+    struct new_insert_callable_if;
+
+    template <template <typename...> class KernelType>
+    struct new_insert_callable_if<false, KernelType> {
+      template <typename Arg0Type, typename... A>
+      static void insert(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &DYND_UNUSED(callables),
+                         A &&... DYND_UNUSED(a)) {}
+      template <typename TypeSequence, typename... A>
+      static void
+      insert(std::vector<std::pair<std::array<type_id_t, TypeSequence::size>, callable>> &DYND_UNUSED(callables),
+             A &&... DYND_UNUSED(a)) {}
+    };
+
+    template <template <typename...> class KernelType>
+    struct new_insert_callable_if<true, KernelType> {
+      template <typename Arg0Type, typename... A>
+      static void insert(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &callables, A &&... a) {
+        callables.push_back(
+            {{type_id_of<Arg0Type>::value}, make_callable<KernelType<Arg0Type>>(std::forward<A>(a)...)});
+      }
+      template <typename TypeSequence, typename... A>
+      static void insert(std::vector<std::pair<std::array<type_id_t, TypeSequence::size>, callable>> &callables,
+                         A &&... a) {
+
+        callables.push_back({{XYZ<TypeSequence>::as_array()},
+                             make_callable<typename new_apply<KernelType, TypeSequence>::type>(std::forward<A>(a)...)});
+      }
+    };
+
     template <template <type_id_t...> class KernelType, template <type_id_t...> class Condition>
     struct make_all_if {
       template <type_id_t TypeID, typename... A>
@@ -400,6 +457,22 @@ namespace nd {
                    A &&... a) const {
         insert_callable_if<apply<Condition, TypeIDSequence>::type::value,
                            KernelType>::template insert<TypeIDSequence, A...>(callables, std::forward<A>(a)...);
+      }
+    };
+
+    template <template <typename...> class KernelType, template <typename...> class Condition>
+    struct new_make_all_if {
+      template <typename Type, typename... A>
+      void on_each(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &callables, A &&... a) const {
+        new_insert_callable_if<Condition<Type>::value, KernelType>::template insert<Type, A...>(callables,
+                                                                                                std::forward<A>(a)...);
+      }
+
+      template <typename TypeSequence, typename... A>
+      void on_each(std::vector<std::pair<std::array<type_id_t, TypeSequence::size>, callable>> &callables,
+                   A &&... a) const {
+        new_insert_callable_if<new_apply<Condition, TypeSequence>::type::value,
+                               KernelType>::template insert<TypeSequence, A...>(callables, std::forward<A>(a)...);
       }
     };
 

@@ -7,4 +7,4 @@
 #include <dynd/unary_arithmetic.hpp>
 
 DYND_API nd::callable nd::logical_not =
-    make_unary_arithmetic<nd::logical_not_callable, dynd::detail::isdef_logical_not, arithmetic_ids>();
+    make_unary_arithmetic<nd::logical_not_callable, dynd::detail::isdef_logical_not, arithmetic_types>();
