@@ -84,10 +84,10 @@ namespace nd {
     }
   };
 
-  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  template <typename ReturnType, typename Arg0Type>
   struct compound_div_kernel_t
-      : compound_div_kernel<typename type_of<DstTypeID>::type, typename type_of<Src0TypeID>::type,
-                            !is_lossless_assignable<DstTypeID, Src0TypeID>::value> {};
+      : compound_div_kernel<ReturnType, Arg0Type, !is_lossless_assignable<type_id_of<ReturnType>::value,
+                                                                          type_id_of<Arg0Type>::value>::value> {};
 
 } // namespace dynd::nd
 } // namespace dynd
