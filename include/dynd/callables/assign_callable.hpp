@@ -87,32 +87,32 @@ namespace nd {
         cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                             const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                             const char *const *src_arrmeta) {
-          kb.emplace_back<detail::assignment_kernel<bool, string, assign_error_nocheck>>(kernreq, src_tp[0],
-                                                                                         src_arrmeta[0]);
+          kb.emplace_back<detail::assignment_kernel<bool1, string, assign_error_nocheck>>(kernreq, src_tp[0],
+                                                                                          src_arrmeta[0]);
         });
         break;
       case assign_error_overflow:
         cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                             const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                             const char *const *src_arrmeta) {
-          kb.emplace_back<detail::assignment_kernel<bool, string, assign_error_overflow>>(kernreq, src_tp[0],
-                                                                                          src_arrmeta[0]);
+          kb.emplace_back<detail::assignment_kernel<bool1, string, assign_error_overflow>>(kernreq, src_tp[0],
+                                                                                           src_arrmeta[0]);
         });
         break;
       case assign_error_fractional:
         cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                             const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                             const char *const *src_arrmeta) {
-          kb.emplace_back<detail::assignment_kernel<bool, string, assign_error_fractional>>(kernreq, src_tp[0],
-                                                                                            src_arrmeta[0]);
+          kb.emplace_back<detail::assignment_kernel<bool1, string, assign_error_fractional>>(kernreq, src_tp[0],
+                                                                                             src_arrmeta[0]);
         });
         break;
       case assign_error_inexact:
         cg.emplace_back([=](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
                             const char *DYND_UNUSED(dst_arrmeta), size_t DYND_UNUSED(nsrc),
                             const char *const *src_arrmeta) {
-          kb.emplace_back<detail::assignment_kernel<bool, string, assign_error_inexact>>(kernreq, src_tp[0],
-                                                                                         src_arrmeta[0]);
+          kb.emplace_back<detail::assignment_kernel<bool1, string, assign_error_inexact>>(kernreq, src_tp[0],
+                                                                                          src_arrmeta[0]);
         });
         break;
       default:

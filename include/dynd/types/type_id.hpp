@@ -405,7 +405,7 @@ struct type_of;
 
 template <>
 struct type_of<bool_id> {
-  typedef bool type;
+  typedef bool1 type;
 };
 template <>
 struct type_of<int8_id> {

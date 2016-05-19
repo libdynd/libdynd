@@ -738,7 +738,17 @@ struct is_signed<bool> {
 };
 
 template <>
+struct is_signed<bool1> {
+  static const bool value = false;
+};
+
+template <>
 struct is_unsigned<bool> {
+  static const bool value = false;
+};
+
+template <>
+struct is_unsigned<bool1> {
   static const bool value = false;
 };
 

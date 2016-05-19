@@ -175,8 +175,8 @@ namespace nd {
 
     // Anything -> boolean with no checking
     template <typename Arg0Type>
-    struct assignment_kernel<bool, Arg0Type, assign_error_nocheck>
-        : base_strided_kernel<assignment_kernel<bool, Arg0Type, assign_error_nocheck>, 1> {
+    struct assignment_kernel<bool1, Arg0Type, assign_error_nocheck>
+        : base_strided_kernel<assignment_kernel<bool1, Arg0Type, assign_error_nocheck>, 1> {
       void single(char *dst, char *const *src) {
         Arg0Type s = *reinterpret_cast<Arg0Type *>(src[0]);
 
@@ -467,8 +467,8 @@ namespace nd {
 
     // Anything -> boolean with overflow checking
     template <typename Arg0Type>
-    struct assignment_kernel<bool, Arg0Type, assign_error_overflow>
-        : base_strided_kernel<assignment_kernel<bool, Arg0Type, assign_error_overflow>, 1> {
+    struct assignment_kernel<bool1, Arg0Type, assign_error_overflow>
+        : base_strided_kernel<assignment_kernel<bool1, Arg0Type, assign_error_overflow>, 1> {
       void single(char *dst, char *const *src) {
         *reinterpret_cast<bool1 *>(dst) = overflow_cast<bool1>(*reinterpret_cast<Arg0Type *>(src[0]));
       }
@@ -476,37 +476,38 @@ namespace nd {
 
     // Anything -> boolean with other error checking
     template <typename Arg0Type>
-    struct assignment_kernel<bool, Arg0Type, assign_error_fractional>
-        : assignment_kernel<bool, Arg0Type, assign_error_overflow> {};
+    struct assignment_kernel<bool1, Arg0Type, assign_error_fractional>
+        : assignment_kernel<bool1, Arg0Type, assign_error_overflow> {};
 
     template <typename Arg0Type>
-    struct assignment_kernel<bool, Arg0Type, assign_error_inexact>
-        : assignment_kernel<bool, Arg0Type, assign_error_overflow> {};
+    struct assignment_kernel<bool1, Arg0Type, assign_error_inexact>
+        : assignment_kernel<bool1, Arg0Type, assign_error_overflow> {};
 
     // Boolean -> boolean with other error checking
     template <>
-    struct assignment_kernel<bool, bool, assign_error_overflow> : assignment_kernel<bool, bool, assign_error_nocheck> {
-    };
+    struct assignment_kernel<bool1, bool1, assign_error_overflow>
+        : assignment_kernel<bool1, bool1, assign_error_nocheck> {};
 
     template <>
-    struct assignment_kernel<bool, bool, assign_error_fractional>
-        : assignment_kernel<bool, bool, assign_error_nocheck> {};
+    struct assignment_kernel<bool1, bool1, assign_error_fractional>
+        : assignment_kernel<bool1, bool1, assign_error_nocheck> {};
 
     template <>
-    struct assignment_kernel<bool, bool, assign_error_inexact> : assignment_kernel<bool, bool, assign_error_nocheck> {};
+    struct assignment_kernel<bool1, bool1, assign_error_inexact>
+        : assignment_kernel<bool1, bool1, assign_error_nocheck> {};
 
     // Boolean -> anything with other error checking
     template <typename ReturnType>
-    struct assignment_kernel<ReturnType, bool, assign_error_overflow>
-        : assignment_kernel<ReturnType, bool, assign_error_nocheck> {};
+    struct assignment_kernel<ReturnType, bool1, assign_error_overflow>
+        : assignment_kernel<ReturnType, bool1, assign_error_nocheck> {};
 
     template <typename ReturnType>
-    struct assignment_kernel<ReturnType, bool, assign_error_fractional>
-        : assignment_kernel<ReturnType, bool, assign_error_nocheck> {};
+    struct assignment_kernel<ReturnType, bool1, assign_error_fractional>
+        : assignment_kernel<ReturnType, bool1, assign_error_nocheck> {};
 
     template <typename ReturnType>
-    struct assignment_kernel<ReturnType, bool, assign_error_inexact>
-        : assignment_kernel<ReturnType, bool, assign_error_nocheck> {};
+    struct assignment_kernel<ReturnType, bool1, assign_error_inexact>
+        : assignment_kernel<ReturnType, bool1, assign_error_nocheck> {};
 
     // Signed int -> signed int with overflow checking
     template <typename ReturnType, typename Arg0Type>
@@ -1048,8 +1049,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_kernel<bool, string, assign_error_nocheck>
-        : base_strided_kernel<assignment_kernel<bool, string, assign_error_nocheck>, 1> {
+    struct assignment_kernel<bool1, string, assign_error_nocheck>
+        : base_strided_kernel<assignment_kernel<bool1, string, assign_error_nocheck>, 1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -1066,8 +1067,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_kernel<bool, string, assign_error_inexact>
-        : base_strided_kernel<assignment_kernel<bool, string, assign_error_inexact>, 1> {
+    struct assignment_kernel<bool1, string, assign_error_inexact>
+        : base_strided_kernel<assignment_kernel<bool1, string, assign_error_inexact>, 1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -1084,8 +1085,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_kernel<bool, string, assign_error_default>
-        : base_strided_kernel<assignment_kernel<bool, string, assign_error_default>, 1> {
+    struct assignment_kernel<bool1, string, assign_error_default>
+        : base_strided_kernel<assignment_kernel<bool1, string, assign_error_default>, 1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -1102,8 +1103,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_kernel<bool, string, assign_error_overflow>
-        : base_strided_kernel<assignment_kernel<bool, string, assign_error_overflow>, 1> {
+    struct assignment_kernel<bool1, string, assign_error_overflow>
+        : base_strided_kernel<assignment_kernel<bool1, string, assign_error_overflow>, 1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -1120,8 +1121,8 @@ namespace nd {
     };
 
     template <>
-    struct assignment_kernel<bool, string, assign_error_fractional>
-        : base_strided_kernel<assignment_kernel<bool, string, assign_error_fractional>, 1> {
+    struct assignment_kernel<bool1, string, assign_error_fractional>
+        : base_strided_kernel<assignment_kernel<bool1, string, assign_error_fractional>, 1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
