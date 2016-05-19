@@ -85,9 +85,7 @@ namespace nd {
   }
 
   template <class T>
-  typename std::enable_if<base_id_of<type_id_of<T>::value>::value == int_kind_id ||
-                              base_id_of<type_id_of<T>::value>::value == uint_kind_id,
-                          nd::array>::type
+  typename std::enable_if<is_signed_integral<T>::value || is_unsigned_integral<T>::value, nd::array>::type
   old_linspace(T start, T stop, intptr_t count = 50) {
     return old_linspace((double)start, (double)stop, count);
   }

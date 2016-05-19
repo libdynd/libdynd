@@ -1212,23 +1212,6 @@ namespace ndt {
   struct traits<std::vector<ValueType>> : container_traits<std::vector<ValueType>, traits<ValueType>::ndim + 1> {};
 
   /**
-    * Returns the common type of two types. For built-in types, this is analogous to
-    * std::common_type.
-    */
-  DYNDT_API extern class common_type {
-    typedef type (*child_type)(const type &, const type &);
-
-    struct init;
-
-    static std::map<std::array<type_id_t, 2>, child_type> children;
-
-  public:
-    common_type();
-
-    DYNDT_API ndt::type operator()(const ndt::type &tp0, const ndt::type &tp1) const;
-  } common_type;
-
-  /**
    * Constructs an array type from a shape and
    * a data type. Each dimension >= 0 is made
    * using a fixed_dim type, and each dimension == -1

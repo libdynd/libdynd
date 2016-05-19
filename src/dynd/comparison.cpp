@@ -23,32 +23,34 @@ template <template <typename...> class KernelType>
 dispatcher<2, nd::callable> make_comparison_children() {
   typedef type_sequence<bool, int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double>
       numeric_types;
-  typedef type_id_sequence<bool_id, int8_id, int16_id, int32_id, int64_id, uint8_id, uint16_id, uint32_id, uint64_id,
-                           float32_id, float64_id>
-      numeric_ids;
+
+  static const std::vector<type_id_t> numeric_ids = {bool_id,   int8_id,   int16_id,  int32_id,   int64_id,  uint8_id,
+                                                     uint16_id, uint32_id, uint64_id, float32_id, float64_id};
 
   dispatcher<2, nd::callable> dispatcher = nd::callable::make_all<KernelType, numeric_types, numeric_types>();
 
-  for (type_id_t i0 : i2a<numeric_ids>()) {
-    for (type_id_t i1 : i2a<dim_ids>()) {
+  for (type_id_t i0 : numeric_ids) {
+    for (type_id_t i1 : {fixed_dim_id, var_dim_id}) {
       dispatcher.insert({{i0, i1}, nd::get_elwise()});
     }
   }
 
-  for (type_id_t i : i2a<numeric_ids>()) {
+  for (type_id_t i : numeric_ids) {
     dispatcher.insert({{option_id, i}, nd::functional::forward_na<0>(ndt::type("Any"))});
     dispatcher.insert({{i, option_id}, nd::functional::forward_na<1>(ndt::type("Any"))});
   }
   dispatcher.insert({{option_id, option_id}, nd::functional::forward_na<0, 1>(ndt::type("Any"))});
 
-  for (type_id_t dim_tp_id : i2a<dim_ids>()) {
+  for (type_id_t dim_tp_id : {fixed_dim_id, var_dim_id}) {
     dispatcher.insert({{dim_tp_id, option_id}, nd::get_elwise()});
     dispatcher.insert({{option_id, dim_tp_id}, nd::get_elwise()});
   }
 
-  for (type_id_t i0 : i2a<dim_ids>()) {
-    typedef join<numeric_ids, dim_ids>::type type_ids;
-    for (type_id_t i1 : i2a<type_ids>()) {
+  for (type_id_t i0 : {fixed_dim_id, var_dim_id}) {
+    for (type_id_t i1 : {fixed_dim_id, var_dim_id}) {
+      dispatcher.insert({{i0, i1}, nd::get_elwise()});
+    }
+    for (type_id_t i1 : numeric_ids) {
       dispatcher.insert({{i0, i1}, nd::get_elwise()});
     }
   }

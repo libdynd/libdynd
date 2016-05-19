@@ -121,7 +121,7 @@ namespace nd {
           ss << index_dim_size << " and " << self->m_dst_dim_size;
           throw std::invalid_argument(ss.str());
         }
-        if (index_el_tp.get_id() != type_id_of<intptr_t>::value) {
+        if (index_el_tp.get_id() != ndt::make_type<intptr_t>().get_id()) {
           std::stringstream ss;
           ss << "indexed take arrfunc: index type should be intptr, not ";
           ss << index_el_tp;
@@ -179,7 +179,7 @@ namespace nd {
             ss << index_dim_size << " and " << self->m_dst_dim_size;
             throw std::invalid_argument(ss.str());
           }
-          if (index_el_tp.get_id() != type_id_of<intptr_t>::value) {
+          if (index_el_tp.get_id() != ndt::make_type<intptr_t>().get_id()) {
             std::stringstream ss;
             ss << "indexed take arrfunc: index type should be intptr, not ";
             ss << index_el_tp;
@@ -203,7 +203,7 @@ namespace nd {
       if (mask_el_tp.get_id() == bool_id) {
         static callable f = make_callable<take_callable<bool_id>>();
         return f->resolve(this, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-      } else if (mask_el_tp.get_id() == type_id_of<intptr_t>::value) {
+      } else if (mask_el_tp.get_id() == ndt::make_type<intptr_t>().get_id()) {
         static callable f = make_callable<indexed_take_callable>();
         return f->resolve(this, nullptr, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
       } else {
