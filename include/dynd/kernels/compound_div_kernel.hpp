@@ -11,7 +11,8 @@
 namespace dynd {
 namespace nd {
 
-  template <typename DstType, typename Src0Type, bool UseBinaryOperator>
+  template <typename ReturnType, typename Arg0Type,
+            bool UseBinaryOperator = !is_lossless_assignable<ReturnType, Arg0Type>::value>
   struct compound_div_kernel;
 
   template <typename DstType, typename Src0Type>
@@ -83,11 +84,6 @@ namespace nd {
       }
     }
   };
-
-  template <typename ReturnType, typename Arg0Type>
-  struct compound_div_kernel_t
-      : compound_div_kernel<ReturnType, Arg0Type, !is_lossless_assignable<type_id_of<ReturnType>::value,
-                                                                          type_id_of<Arg0Type>::value>::value> {};
 
 } // namespace dynd::nd
 } // namespace dynd

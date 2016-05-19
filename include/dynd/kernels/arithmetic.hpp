@@ -160,10 +160,10 @@ namespace detail {
   // Arithmetic operators that need zero checking.
   template <typename Arg0Type, typename Arg1Type>
   constexpr bool needs_zero_check() {
-    using Base0 = base_id_of<type_id_of<Arg0Type>::value>;
-    using Base1 = base_id_of<type_id_of<Arg1Type>::value>;
-    return ((Base0::value == bool_kind_id) || (Base0::value == int_kind_id) || (Base0::value == uint_kind_id)) &&
-           ((Base1::value == bool_kind_id) || (Base1::value == int_kind_id) || (Base1::value == uint_kind_id));
+    return (std::is_same<Arg0Type, bool1>::value || is_signed_integral<Arg0Type>::value ||
+            is_unsigned_integral<Arg0Type>::value) &&
+           (std::is_same<Arg1Type, bool1>::value || is_signed_integral<Arg1Type>::value ||
+            is_unsigned_integral<Arg0Type>::value);
   }
 
 #define DYND_DEF_BINARY_OP_CALLABLE_ZEROCHECK_INT(OP, NAME)                                                            \

@@ -27,7 +27,7 @@ template <template <typename, typename> class KernelType, template <typename, ty
 nd::callable make_binary_arithmetic() {
   const ndt::type &tp = ndt::type("(Any, Any) -> Any");
 
-  auto dispatcher = nd::callable::new_make_all_if<KernelType, Condition, TypeSequence, TypeSequence>();
+  auto dispatcher = nd::callable::make_all_if<KernelType, Condition, TypeSequence, TypeSequence>();
   dispatcher.insert({{{option_id, any_kind_id}, nd::functional::forward_na<0>(ndt::type("Any"))},
                      {{any_kind_id, option_id}, nd::functional::forward_na<1>(ndt::type("Any"))},
                      {{option_id, option_id}, nd::functional::forward_na<0, 1>(ndt::type("Any"))},
