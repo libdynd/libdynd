@@ -122,19 +122,6 @@ enum type_id_t {
 template <type_id_t Value>
 using id_constant = std::integral_constant<type_id_t, Value>;
 
-template <type_id_t... I>
-using type_id_sequence = integer_sequence<type_id_t, I...>;
-
-typedef type_id_sequence<int8_id, int16_id, int32_id, int64_id, int128_id> int_ids;
-typedef type_id_sequence<bool_id, uint8_id, uint16_id, uint32_id, uint64_id, uint128_id> uint_ids;
-typedef type_id_sequence<float16_id, float32_id, float64_id, float128_id> float_ids;
-typedef type_id_sequence<complex_float32_id, complex_float64_id> complex_ids;
-
-typedef join<int_ids, uint_ids>::type integral_ids;
-typedef join<integral_ids, join<float_ids, complex_ids>::type>::type arithmetic_ids;
-
-typedef type_id_sequence<fixed_dim_id, var_dim_id> dim_ids;
-
 typedef type_sequence<int8_t, int16_t, int32_t, int64_t, int128> int_types;
 typedef type_sequence<bool1, uint8_t, uint16_t, uint32_t, uint64_t, uint128> uint_types;
 typedef type_sequence<float16, float, double, float128> float_types;

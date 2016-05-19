@@ -14,10 +14,6 @@ using namespace dynd;
 
 namespace {
 
-typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int16_id, int32_id, int64_id, float32_id,
-                         float64_id, complex_float32_id, complex_float64_id>
-    binop_ids;
-
 typedef type_sequence<uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t, float, double,
                       dynd::complex<float>, dynd::complex<double>>
     binop_types;
