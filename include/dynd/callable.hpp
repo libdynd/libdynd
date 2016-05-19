@@ -268,7 +268,7 @@ namespace nd {
       }
 
       template <typename TypeSequence, typename... A>
-      void on_each(std::vector<std::pair<std::array<type_id_t, TypeSequence::size>, callable>> &callables,
+      void on_each(std::vector<std::pair<std::array<type_id_t, TypeSequence::size()>, callable>> &callables,
                    A &&... a) const {
         auto arr = XYZ<TypeSequence>::as_array();
 
@@ -291,7 +291,7 @@ namespace nd {
                          A &&... DYND_UNUSED(a)) {}
       template <typename TypeSequence, typename... A>
       static void
-      insert(std::vector<std::pair<std::array<type_id_t, TypeSequence::size>, callable>> &DYND_UNUSED(callables),
+      insert(std::vector<std::pair<std::array<type_id_t, TypeSequence::size()>, callable>> &DYND_UNUSED(callables),
              A &&... DYND_UNUSED(a)) {}
     };
 
@@ -303,7 +303,7 @@ namespace nd {
             {{type_id_of<Arg0Type>::value}, make_callable<KernelType<Arg0Type>>(std::forward<A>(a)...)});
       }
       template <typename TypeSequence, typename... A>
-      static void insert(std::vector<std::pair<std::array<type_id_t, TypeSequence::size>, callable>> &callables,
+      static void insert(std::vector<std::pair<std::array<type_id_t, TypeSequence::size()>, callable>> &callables,
                          A &&... a) {
 
         callables.push_back({{XYZ<TypeSequence>::as_array()},
@@ -320,7 +320,7 @@ namespace nd {
       }
 
       template <typename TypeSequence, typename... A>
-      void on_each(std::vector<std::pair<std::array<type_id_t, TypeSequence::size>, callable>> &callables,
+      void on_each(std::vector<std::pair<std::array<type_id_t, TypeSequence::size()>, callable>> &callables,
                    A &&... a) const {
         new_insert_callable_if<new_apply<Condition, TypeSequence>::type::value,
                                KernelType>::template insert<TypeSequence, A...>(callables, std::forward<A>(a)...);
