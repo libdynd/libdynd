@@ -36,16 +36,6 @@ struct front<type_sequence<T0, T...>> {
 };
 
 template <typename T0, typename... T>
-struct at<type_sequence<T0, T...>, 0> {
-  typedef T0 type;
-};
-
-template <size_t I, typename T0, typename... T>
-struct at<type_sequence<T0, T...>, I> {
-  typedef typename at<type_sequence<T...>, I - 1>::type type;
-};
-
-template <typename T0, typename... T>
 struct from<type_sequence<T0, T...>, 0> {
   typedef type_sequence<T0, T...> type;
 };
@@ -120,17 +110,28 @@ struct outer<S0, S1, S...> {
 };
 
 template <typename S, typename A0, typename... A>
-typename std::enable_if<S::size() == 1, void>::type for_each(A0 &&a0, A &&... a) {
+std::enable_if_t<S::size() == 1, void> for_each(A0 &&a0, A &&... a) {
   a0.template on_each<typename front<S>::type>(std::forward<A>(a)...);
 }
 
 template <typename S, typename... A>
-typename std::enable_if<(S::size() > 1), void>::type for_each(A &&... a) {
+std::enable_if_t<(S::size() > 1), void> for_each(A &&... a) {
   for_each<typename to<S, 1>::type>(std::forward<A>(a)...);
   for_each<typename pop_front<S>::type>(std::forward<A>(a)...);
 }
 
 template <typename... A>
 using outer_t = typename outer<A...>::type;
+
+template <template <typename...> class T, typename TypeSequence>
+struct instantiate;
+
+template <template <typename...> class T, typename... Types>
+struct instantiate<T, type_sequence<Types...>> {
+  typedef T<Types...> type;
+};
+
+template <template <typename...> class T, typename TypeSequence>
+using instantiate_t = typename instantiate<T, TypeSequence>::type;
 
 } // namespace dynd
