@@ -54,7 +54,7 @@ namespace ndt {
   public:
     typedef any_kind_type base;
 
-    option_type(const type &value_tp);
+    option_type(const type &value_tp = ndt::make_type<ndt::any_kind_type>());
 
     size_t get_default_data_size() const { return m_value_tp.get_default_data_size(); }
 

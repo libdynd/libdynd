@@ -12,8 +12,6 @@ namespace ndt {
 
   class DYNDT_API float_kind_type : public base_type {
   public:
-    typedef scalar_kind_type base;
-
     float_kind_type();
 
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
@@ -23,11 +21,6 @@ namespace ndt {
     void print_type(std::ostream &o) const;
 
     bool operator==(const base_type &rhs) const;
-  };
-
-  template <>
-  struct base_of<float_kind_type> {
-    typedef scalar_kind_type type;
   };
 
 } // namespace dynd::ndt

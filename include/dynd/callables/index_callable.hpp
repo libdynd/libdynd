@@ -9,11 +9,12 @@
 #include <dynd/kernels/index_kernel.hpp>
 #include <dynd/type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/index.hpp>
 
 namespace dynd {
 namespace nd {
 
-  template <type_id_t Arg0ID>
+  template <typename Arg0Type>
   class index_callable : public base_callable {
   public:
     struct data_type {
@@ -52,7 +53,7 @@ namespace nd {
   };
 
   template <>
-  class index_callable<fixed_dim_id> : public base_callable {
+  class index_callable<ndt::fixed_dim_type> : public base_callable {
   public:
     struct data_type {
       intptr_t nindices;

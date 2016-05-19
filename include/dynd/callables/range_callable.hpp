@@ -11,8 +11,12 @@
 namespace dynd {
 namespace nd {
 
-  template <typename ReturnElementType, typename ReturnElementBaseType>
-  class range_callable : public base_callable {
+  template <typename ReturnElementType, typename Enable = void>
+  class range_callable;
+
+  template <typename ReturnElementType>
+  class range_callable<ReturnElementType, std::enable_if_t<is_signed_integral<ReturnElementType>::value>>
+      : public base_callable {
   public:
     range_callable() : base_callable(ndt::type("(start: ?Scalar, stop: ?Scalar, step: ?Scalar) -> Fixed * Scalar")) {}
 
@@ -74,7 +78,8 @@ namespace nd {
   };
 
   template <typename ReturnElementType>
-  class range_callable<ReturnElementType, ndt::float_kind_type> : public base_callable {
+  class range_callable<ReturnElementType, std::enable_if_t<is_floating_point<ReturnElementType>::value>>
+      : public base_callable {
   public:
     range_callable() : base_callable(ndt::type("(start: ?Scalar, stop: Scalar, step: ?Scalar) -> Fixed * Scalar")) {}
 
@@ -128,10 +133,10 @@ namespace nd {
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &ret_tp, size_t narg, const ndt::type *arg_tp, size_t nkwd, const array *kwds,
                       const std::map<std::string, ndt::type> &tp_vars) {
-      static callable fint32 = nd::make_callable<range_callable<int32_t, ndt::int_kind_type>>();
-      static callable fint64 = nd::make_callable<range_callable<int64_t, ndt::int_kind_type>>();
-      static callable ffloat32 = nd::make_callable<range_callable<float, ndt::float_kind_type>>();
-      static callable ffloat64 = nd::make_callable<range_callable<double, ndt::float_kind_type>>();
+      static callable fint32 = nd::make_callable<range_callable<int32_t>>();
+      static callable fint64 = nd::make_callable<range_callable<int64_t>>();
+      static callable ffloat32 = nd::make_callable<range_callable<float>>();
+      static callable ffloat64 = nd::make_callable<range_callable<double>>();
 
       const ndt::type &ret_element_tp = (kwds[0].is_na() ? kwds[1] : kwds[0]).get_type();
       switch (ret_element_tp.get_id()) {

@@ -6,4 +6,4 @@
 #include <dynd/callables/plus_callable.hpp>
 #include <dynd/unary_arithmetic.hpp>
 
-DYND_API nd::callable nd::plus = make_unary_arithmetic<nd::plus_callable, dynd::detail::isdef_plus, arithmetic_ids>();
+DYND_API nd::callable nd::plus = make_unary_arithmetic<nd::plus_callable, dynd::detail::isdef_plus, arithmetic_types>();

@@ -6,4 +6,4 @@
 #include <dynd/binary_arithmetic.hpp>
 #include <dynd/callables/add_callable.hpp>
 
-DYND_API nd::callable nd::add = make_binary_arithmetic<nd::add_callable, dynd::detail::isdef_add, arithmetic_ids>();
+DYND_API nd::callable nd::add = make_binary_arithmetic<nd::add_callable, dynd::detail::isdef_add, arithmetic_types>();

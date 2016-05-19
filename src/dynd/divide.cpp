@@ -7,4 +7,4 @@
 #include <dynd/callables/divide_callable.hpp>
 
 DYND_API nd::callable nd::divide =
-    make_binary_arithmetic<nd::divide_callable, dynd::detail::isdef_divide, arithmetic_ids>();
+    make_binary_arithmetic<nd::divide_callable, dynd::detail::isdef_divide, arithmetic_types>();

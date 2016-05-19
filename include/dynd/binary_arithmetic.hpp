@@ -18,12 +18,16 @@ typedef type_id_sequence<uint8_id, uint16_id, uint32_id, uint64_id, int8_id, int
                          float64_id, complex_float32_id, complex_float64_id>
     binop_ids;
 
-template <template <type_id_t, type_id_t> class KernelType, template <type_id_t, type_id_t> class Condition,
-          typename TypeIDSequence>
+typedef type_sequence<uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t, float, double,
+                      dynd::complex<float>, dynd::complex<double>>
+    binop_types;
+
+template <template <typename, typename> class KernelType, template <typename, typename> class Condition,
+          typename TypeSequence>
 nd::callable make_binary_arithmetic() {
   const ndt::type &tp = ndt::type("(Any, Any) -> Any");
 
-  auto dispatcher = nd::callable::make_all_if<KernelType, Condition, TypeIDSequence, TypeIDSequence>();
+  auto dispatcher = nd::callable::make_all_if<KernelType, Condition, TypeSequence, TypeSequence>();
   dispatcher.insert({{{option_id, any_kind_id}, nd::functional::forward_na<0>(ndt::type("Any"))},
                      {{any_kind_id, option_id}, nd::functional::forward_na<1>(ndt::type("Any"))},
                      {{option_id, option_id}, nd::functional::forward_na<0, 1>(ndt::type("Any"))},

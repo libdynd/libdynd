@@ -23,30 +23,6 @@ TEST(Type, NDTTypeObject) {
   EXPECT_EQ(sizeof(ndt::base_type *), sizeof(ndt::type));
 }
 
-TEST(Type, BaseOf) {
-  EXPECT_TRUE((is_same<ndt::bool_kind_type, ndt::base_of_t<bool>>::value));
-
-  EXPECT_TRUE((is_same<ndt::int_kind_type, ndt::base_of_t<int8_t>>::value));
-  EXPECT_TRUE((is_same<ndt::int_kind_type, ndt::base_of_t<int16_t>>::value));
-  EXPECT_TRUE((is_same<ndt::int_kind_type, ndt::base_of_t<int32_t>>::value));
-  EXPECT_TRUE((is_same<ndt::int_kind_type, ndt::base_of_t<int64_t>>::value));
-  EXPECT_TRUE((is_same<ndt::int_kind_type, ndt::base_of_t<int128>>::value));
-
-  EXPECT_TRUE((is_same<ndt::uint_kind_type, ndt::base_of_t<uint8_t>>::value));
-  EXPECT_TRUE((is_same<ndt::uint_kind_type, ndt::base_of_t<uint16_t>>::value));
-  EXPECT_TRUE((is_same<ndt::uint_kind_type, ndt::base_of_t<uint32_t>>::value));
-  EXPECT_TRUE((is_same<ndt::uint_kind_type, ndt::base_of_t<uint64_t>>::value));
-  EXPECT_TRUE((is_same<ndt::uint_kind_type, ndt::base_of_t<uint128>>::value));
-
-  EXPECT_TRUE((is_same<ndt::float_kind_type, ndt::base_of_t<float16>>::value));
-  EXPECT_TRUE((is_same<ndt::float_kind_type, ndt::base_of_t<float>>::value));
-  EXPECT_TRUE((is_same<ndt::float_kind_type, ndt::base_of_t<double>>::value));
-  EXPECT_TRUE((is_same<ndt::float_kind_type, ndt::base_of_t<float128>>::value));
-
-  EXPECT_TRUE((is_same<ndt::complex_kind_type, ndt::base_of_t<dynd::complex<float>>>::value));
-  EXPECT_TRUE((is_same<ndt::complex_kind_type, ndt::base_of_t<dynd::complex<double>>>::value));
-}
-
 TEST(Type, BasicConstructor) {
   ndt::type d;
 

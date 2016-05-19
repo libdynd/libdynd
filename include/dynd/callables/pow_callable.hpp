@@ -11,10 +11,9 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  using pow_callable =
-      functional::apply_function_callable<decltype(&dynd::detail::inline_pow<Src0TypeID, Src1TypeID>::f),
-                                          &dynd::detail::inline_pow<Src0TypeID, Src1TypeID>::f>;
+  template <typename Arg0Type, typename Arg1Type>
+  using pow_callable = functional::apply_function_callable<decltype(&dynd::detail::inline_pow<Arg0Type, Arg1Type>::f),
+                                                           &dynd::detail::inline_pow<Arg0Type, Arg1Type>::f>;
 
 } // namespace dynd::nd
 } // namespace dynd

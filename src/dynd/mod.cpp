@@ -6,4 +6,4 @@
 #include <dynd/binary_arithmetic.hpp>
 #include <dynd/callables/mod_callable.hpp>
 
-DYND_API nd::callable nd::mod = make_binary_arithmetic<nd::mod_callable, dynd::detail::isdef_mod, integral_ids>();
+DYND_API nd::callable nd::mod = make_binary_arithmetic<nd::mod_callable, dynd::detail::isdef_mod, integral_types>();

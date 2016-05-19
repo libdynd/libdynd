@@ -136,7 +136,7 @@ typedef join<integral_ids, join<float_ids, complex_ids>::type>::type arithmetic_
 typedef type_id_sequence<fixed_dim_id, var_dim_id> dim_ids;
 
 typedef type_sequence<int8_t, int16_t, int32_t, int64_t, int128> int_types;
-typedef type_sequence<bool, uint8_t, uint16_t, uint32_t, uint64_t, uint128> uint_types;
+typedef type_sequence<bool1, uint8_t, uint16_t, uint32_t, uint64_t, uint128> uint_types;
 typedef type_sequence<float16, float, double, float128> float_types;
 typedef type_sequence<complex<float>, complex<double>> complex_types;
 
@@ -487,50 +487,6 @@ struct type_of<type_id> {
   typedef ndt::type type;
 };
 
-namespace ndt {
-
-  template <typename T>
-  struct traits;
-
-  template <typename T>
-  struct has_traits;
-
-  namespace detail {
-
-    template <typename TypeType, bool HasTraits>
-    struct base_of;
-
-    template <typename TypeType>
-    struct base_of<TypeType, true> {
-      typedef typename traits<TypeType>::base type;
-    };
-
-    template <typename TypeType>
-    struct base_of<TypeType, false> {
-      typedef typename TypeType::base type;
-    };
-
-  } // namespace dynd::ndt::detail
-
-  template <typename TypeType>
-  struct base_of {
-    typedef typename detail::base_of<TypeType, has_traits<TypeType>::value>::type type;
-  };
-
-  class bool_kind_type;
-  class int_kind_type;
-  class uint_kind_type;
-  class float_kind_type;
-  class complex_kind_type;
-  class any_kind_type;
-  class bytes_kind_type;
-  class string_kind_type;
-
-  template <typename TypeType>
-  using base_of_t = typename base_of<TypeType>::type;
-
-} // namespace dynd::ndt
-
 template <type_id_t ID>
 struct base_id_of;
 
@@ -678,54 +634,69 @@ struct base_id_of<dim_kind_id> : id_constant<any_kind_id> {};
 template <>
 struct base_id_of<typevar_id> : id_constant<scalar_kind_id> {};
 
-namespace detail {
+template <typename ReturnType, typename Arg0Type, typename Enable = void>
+struct is_lossless_assignable {
+  static const bool value = false;
+};
 
-  template <type_id_t DstTypeID, type_id_t DstBaseID, type_id_t SrcTypeID, type_id_t SrcBaseID>
-  struct is_lossless_assignable {
-    static const bool value = false;
-  };
+template <typename ReturnType, typename Arg0Type>
+struct is_lossless_assignable<ReturnType, Arg0Type, std::enable_if_t<is_floating_point<ReturnType>::value &&
+                                                                     is_signed_integral<Arg0Type>::value>> {
+  static const bool value = true;
+};
 
-  template <type_id_t DstTypeID, type_id_t SrcTypeID>
-  struct is_lossless_assignable<DstTypeID, float_kind_id, SrcTypeID, int_kind_id> {
-    static const bool value = true;
-  };
+template <typename ReturnType, typename Arg0Type>
+struct is_lossless_assignable<ReturnType, Arg0Type, std::enable_if_t<is_floating_point<ReturnType>::value &&
+                                                                     is_unsigned_integral<Arg0Type>::value>> {
+  static const bool value = true;
+};
 
-  template <type_id_t DstTypeID, type_id_t SrcTypeID>
-  struct is_lossless_assignable<DstTypeID, float_kind_id, SrcTypeID, uint_kind_id> {
-    static const bool value = true;
-  };
+template <typename ReturnType>
+struct is_lossless_assignable<ReturnType, bool1, std::enable_if_t<is_complex<ReturnType>::value>> {
+  static const bool value = true;
+};
 
-  template <type_id_t DstTypeID, type_id_t SrcTypeID>
-  struct is_lossless_assignable<DstTypeID, complex_kind_id, SrcTypeID, bool_kind_id> {
-    static const bool value = true;
-  };
+template <typename ReturnType, typename Arg0Type>
+struct is_lossless_assignable<ReturnType, Arg0Type,
+                              std::enable_if_t<is_complex<ReturnType>::value && is_signed_integral<Arg0Type>::value>> {
+  static const bool value = false;
+};
 
-  template <type_id_t DstTypeID, type_id_t SrcTypeID>
-  struct is_lossless_assignable<DstTypeID, complex_kind_id, SrcTypeID, int_kind_id> {
-    static const bool value = false;
-  };
+template <typename ReturnType, typename Arg0Type>
+struct is_lossless_assignable<
+    ReturnType, Arg0Type, std::enable_if_t<is_complex<ReturnType>::value && is_unsigned_integral<Arg0Type>::value>> {
+  static const bool value = false;
+};
 
-  template <type_id_t DstTypeID, type_id_t SrcTypeID>
-  struct is_lossless_assignable<DstTypeID, complex_kind_id, SrcTypeID, uint_kind_id> {
-    static const bool value = false;
-  };
+template <typename ReturnType, typename Arg0Type>
+struct is_lossless_assignable<ReturnType, Arg0Type,
+                              std::enable_if_t<is_complex<ReturnType>::value && is_floating_point<Arg0Type>::value>> {
+  static const bool value = (sizeof(ReturnType) / 2) > sizeof(Arg0Type);
+};
 
-  template <type_id_t DstTypeID, type_id_t SrcTypeID>
-  struct is_lossless_assignable<DstTypeID, complex_kind_id, SrcTypeID, float_kind_id> {
-    static const bool value = (sizeof(typename type_of<DstTypeID>::type) / 2) >
-                              sizeof(typename type_of<SrcTypeID>::type);
-  };
+template <typename ReturnType, typename Arg0Type>
+struct is_lossless_assignable<ReturnType, Arg0Type, std::enable_if_t<is_signed_integral<ReturnType>::value &&
+                                                                     is_signed_integral<Arg0Type>::value>> {
+  static const bool value = sizeof(ReturnType) > sizeof(Arg0Type);
+};
 
-  template <type_id_t DstTypeID, type_id_t SrcTypeID, type_id_t BaseTypeID>
-  struct is_lossless_assignable<DstTypeID, BaseTypeID, SrcTypeID, BaseTypeID> {
-    static const bool value = sizeof(typename type_of<DstTypeID>::type) > sizeof(typename type_of<SrcTypeID>::type);
-  };
+template <typename ReturnType, typename Arg0Type>
+struct is_lossless_assignable<ReturnType, Arg0Type, std::enable_if_t<is_unsigned_integral<ReturnType>::value &&
+                                                                     is_unsigned_integral<Arg0Type>::value>> {
+  static const bool value = sizeof(ReturnType) > sizeof(Arg0Type);
+};
 
-} // namespace dynd::detail
+template <typename ReturnType, typename Arg0Type>
+struct is_lossless_assignable<ReturnType, Arg0Type, std::enable_if_t<is_floating_point<ReturnType>::value &&
+                                                                     is_floating_point<Arg0Type>::value>> {
+  static const bool value = sizeof(ReturnType) > sizeof(Arg0Type);
+};
 
-template <type_id_t DstTypeID, type_id_t Src0TypeID>
-struct is_lossless_assignable : detail::is_lossless_assignable<DstTypeID, base_id_of<DstTypeID>::value, Src0TypeID,
-                                                               base_id_of<Src0TypeID>::value> {};
+template <typename ReturnType, typename Arg0Type>
+struct is_lossless_assignable<ReturnType, Arg0Type,
+                              std::enable_if_t<is_complex<ReturnType>::value && is_complex<Arg0Type>::value>> {
+  static const bool value = sizeof(ReturnType) > sizeof(Arg0Type);
+};
 
 // Metaprogram for determining if a type is a valid C++ scalar
 // of a particular type.

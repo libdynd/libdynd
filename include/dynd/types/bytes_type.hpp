@@ -51,8 +51,6 @@ namespace ndt {
 
   template <>
   struct traits<bytes> {
-    typedef bytes_kind_type base;
-
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;

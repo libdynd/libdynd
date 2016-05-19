@@ -11,9 +11,9 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t Src0TypeID>
-  using cbrt_callable = functional::apply_function_callable<decltype(&dynd::detail::inline_cbrt<Src0TypeID>::f),
-                                                            &dynd::detail::inline_cbrt<Src0TypeID>::f>;
+  template <typename Arg0Type>
+  using cbrt_callable = functional::apply_function_callable<decltype(&dynd::detail::inline_cbrt<Arg0Type>::f),
+                                                            &dynd::detail::inline_cbrt<Arg0Type>::f>;
 
 } // namespace dynd::nd
 } // namespace dynd
