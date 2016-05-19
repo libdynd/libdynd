@@ -11,9 +11,9 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t Arg0ID>
-  using plus_callable = functional::apply_function_callable<decltype(&dynd::detail::inline_plus<Arg0ID>::f),
-                                                            &dynd::detail::inline_plus<Arg0ID>::f>;
+  template <typename Arg0Type>
+  using plus_callable = functional::apply_function_callable<decltype(&dynd::detail::inline_plus<Arg0Type>::f),
+                                                            &dynd::detail::inline_plus<Arg0Type>::f>;
 
 } // namespace dynd::nd
 } // namespace dynd

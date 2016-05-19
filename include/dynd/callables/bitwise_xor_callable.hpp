@@ -11,10 +11,10 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  template <typename Arg0Type, typename Arg1Type>
   using bitwise_xor_callable =
-      functional::apply_function_callable<decltype(&dynd::detail::inline_bitwise_xor<Src0TypeID, Src1TypeID>::f),
-                                          &dynd::detail::inline_bitwise_xor<Src0TypeID, Src1TypeID>::f>;
+      functional::apply_function_callable<decltype(&dynd::detail::inline_bitwise_xor<Arg0Type, Arg1Type>::f),
+                                          &dynd::detail::inline_bitwise_xor<Arg0Type, Arg1Type>::f>;
 
 } // namespace dynd::nd
 } // namespace dynd

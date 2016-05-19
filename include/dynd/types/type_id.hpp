@@ -136,7 +136,7 @@ typedef join<integral_ids, join<float_ids, complex_ids>::type>::type arithmetic_
 typedef type_id_sequence<fixed_dim_id, var_dim_id> dim_ids;
 
 typedef type_sequence<int8_t, int16_t, int32_t, int64_t, int128> int_types;
-typedef type_sequence<bool, uint8_t, uint16_t, uint32_t, uint64_t, uint128> uint_types;
+typedef type_sequence<bool1, uint8_t, uint16_t, uint32_t, uint64_t, uint128> uint_types;
 typedef type_sequence<float16, float, double, float128> float_types;
 typedef type_sequence<complex<float>, complex<double>> complex_types;
 

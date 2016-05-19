@@ -20,8 +20,8 @@ namespace detail {
   template <typename>                                                                                                  \
   static auto NAME##_isdef_test(long)->std::false_type;                                                                \
                                                                                                                        \
-  template <type_id_t Src0TypeID>                                                                                      \
-  struct isdef_##NAME : decltype(NAME##_isdef_test<typename type_of<Src0TypeID>::type>(0)) {};
+  template <typename Arg0Type>                                                                                         \
+  struct isdef_##NAME : decltype(NAME##_isdef_test<Arg0Type>(0)) {};
 
   DYND_CHECK_UNARY_OP(+, plus)
   DYND_ALLOW_UNSIGNED_UNARY_MINUS
@@ -40,9 +40,8 @@ namespace detail {
   template <typename, typename>                                                                                        \
   static auto NAME##_isdef_test(long)->std::false_type;                                                                \
                                                                                                                        \
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
-  struct isdef_##NAME                                                                                                  \
-      : decltype(NAME##_isdef_test<typename type_of<Src0TypeID>::type, typename type_of<Src1TypeID>::type>(0)) {};
+  template <typename Arg0Type, typename Arg1Type>                                                                      \
+  struct isdef_##NAME : decltype(NAME##_isdef_test<Arg0Type, Arg1Type>(0)) {};
 
   DYND_CHECK_BINARY_OP(+, add)
   DYND_CHECK_BINARY_OP(-, subtract)
@@ -65,17 +64,17 @@ namespace detail {
   // First define a template to check if a condition is true for every member of a
   // given parameter pack.
 
-  template <template <type_id_t> class Condition, type_id_t... T>
+  template <template <typename> class Condition, typename... ArgTypes>
   struct all;
 
-  template <template <type_id_t> class Condition, type_id_t ID0>
-  struct all<Condition, ID0> {
-    static constexpr bool value = Condition<ID0>::value;
+  template <template <typename> class Condition, typename Arg0Type>
+  struct all<Condition, Arg0Type> {
+    static constexpr bool value = Condition<Arg0Type>::value;
   };
 
-  template <template <type_id_t> class Condition, type_id_t ID0, type_id_t... IDS>
-  struct all<Condition, ID0, IDS...> {
-    static constexpr bool value = Condition<ID0>::value && all<Condition, IDS...>::value;
+  template <template <typename> class Condition, typename Arg0Type, typename... ArgTypes>
+  struct all<Condition, Arg0Type, ArgTypes...> {
+    static constexpr bool value = Condition<Arg0Type>::value && all<Condition, ArgTypes...>::value;
   };
 
   // Use a similar technique as before to check if a conversion to bool exists
@@ -85,17 +84,17 @@ namespace detail {
   template <typename>
   static auto bool_cast_isdef_test(long) -> std::false_type;
 
-  template <type_id_t Src0TypeID>
-  struct isdef_bool_cast : decltype(bool_cast_isdef_test<typename type_of<Src0TypeID>::type>(0)) {};
+  template <typename Arg0Type>
+  struct isdef_bool_cast : decltype(bool_cast_isdef_test<Arg0Type>(0)) {};
 
   // logical_xor is defined if both types have a conversion to bool.
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  using isdef_logical_xor = all<isdef_bool_cast, Src0TypeID, Src1TypeID>;
+  template <typename Arg0Type, typename Arg1Type>
+  using isdef_logical_xor = all<isdef_bool_cast, Arg0Type, Arg1Type>;
 
 #define DYND_DEF_UNARY_OP_CALLABLE(OP, NAME)                                                                           \
-  template <type_id_t Src0TypeID>                                                                                      \
+  template <typename Arg0Type>                                                                                         \
   struct inline_##NAME {                                                                                               \
-    static auto f(typename type_of<Src0TypeID>::type a) { return OP a; }                                               \
+    static auto f(Arg0Type a) { return OP a; }                                                                         \
   };
 
   DYND_DEF_UNARY_OP_CALLABLE(+, plus)
@@ -108,9 +107,9 @@ namespace detail {
 #undef DYND_DEF_UNARY_OP_CALLABLE
 
 #define DYND_DEF_BINARY_OP_CALLABLE(OP, NAME)                                                                          \
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
+  template <typename Arg0Type, typename Arg1Type>                                                                      \
   struct inline_##NAME {                                                                                               \
-    static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return a OP b; }       \
+    static auto f(Arg0Type a, Arg1Type b) { return a OP b; }                                                           \
   };
 
   DYND_DEF_BINARY_OP_CALLABLE(+, add)
@@ -132,50 +131,48 @@ namespace detail {
 
 #undef DYND_DEF_BINARY_OP_CALLABLE
 
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  template <typename Arg0Type, typename Arg1Type>
   struct inline_logical_xor {
-    static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) {
+    static auto f(Arg0Type a, Arg1Type b) {
       DYND_ALLOW_INT_BOOL_CAST
       return static_cast<bool>(a) ^ static_cast<bool>(b);
       DYND_END_ALLOW_INT_BOOL_CAST
     }
   };
 
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  template <typename Arg0Type, typename Arg1Type>
   struct inline_pow {
     DYND_ALLOW_INT_FLOAT_CAST
-    static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) {
-      return std::pow(static_cast<double>(a), static_cast<double>(b));
-    }
+    static auto f(Arg0Type a, Arg1Type b) { return std::pow(static_cast<double>(a), static_cast<double>(b)); }
     DYND_END_ALLOW_INT_FLOAT_CAST
   };
 
-  template <type_id_t Src0TypeID>
+  template <typename Arg0Type>
   struct inline_sqrt {
-    static auto f(typename type_of<Src0TypeID>::type a) { return std::sqrt(a); }
+    static auto f(Arg0Type a) { return std::sqrt(a); }
   };
 
-  template <type_id_t Src0TypeID>
+  template <typename Arg0Type>
   struct inline_cbrt {
-    static auto f(typename type_of<Src0TypeID>::type a) { return std::cbrt(a); }
+    static auto f(Arg0Type a) { return std::cbrt(a); }
   };
 
   // Arithmetic operators that need zero checking.
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  template <typename Arg0Type, typename Arg1Type>
   constexpr bool needs_zero_check() {
-    using Base0 = base_id_of<Src0TypeID>;
-    using Base1 = base_id_of<Src1TypeID>;
+    using Base0 = base_id_of<type_id_of<Arg0Type>::value>;
+    using Base1 = base_id_of<type_id_of<Arg1Type>::value>;
     return ((Base0::value == bool_kind_id) || (Base0::value == int_kind_id) || (Base0::value == uint_kind_id)) &&
            ((Base1::value == bool_kind_id) || (Base1::value == int_kind_id) || (Base1::value == uint_kind_id));
   }
 
 #define DYND_DEF_BINARY_OP_CALLABLE_ZEROCHECK_INT(OP, NAME)                                                            \
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID, bool check>                                                    \
+  template <typename Arg0Type, typename Arg1Type, bool check>                                                          \
   struct inline_##NAME##_base;                                                                                         \
                                                                                                                        \
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
-  struct inline_##NAME##_base<Src0TypeID, Src1TypeID, true> {                                                          \
-    static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) {                        \
+  template <typename Arg0Type, typename Arg1Type>                                                                      \
+  struct inline_##NAME##_base<Arg0Type, Arg1Type, true> {                                                              \
+    static auto f(Arg0Type a, Arg1Type b) {                                                                            \
       if (b == 0) {                                                                                                    \
         throw dynd::zero_division_error("Integer division or modulo by zero.");                                        \
       }                                                                                                                \
@@ -183,13 +180,13 @@ namespace detail {
     }                                                                                                                  \
   };                                                                                                                   \
                                                                                                                        \
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
-  struct inline_##NAME##_base<Src0TypeID, Src1TypeID, false> {                                                         \
-    static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return a OP b; }       \
+  template <typename Arg0Type, typename Arg1Type>                                                                      \
+  struct inline_##NAME##_base<Arg0Type, Arg1Type, false> {                                                             \
+    static auto f(Arg0Type a, Arg1Type b) { return a OP b; }                                                           \
   };                                                                                                                   \
                                                                                                                        \
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
-  using inline_##NAME = inline_##NAME##_base<Src0TypeID, Src1TypeID, needs_zero_check<Src0TypeID, Src1TypeID>()>;
+  template <typename Arg0Type, typename Arg1Type>                                                                      \
+  using inline_##NAME = inline_##NAME##_base<Arg0Type, Arg1Type, needs_zero_check<Arg0Type, Arg1Type>()>;
 
   DYND_DEF_BINARY_OP_CALLABLE_ZEROCHECK_INT(/, divide)
   DYND_ALLOW_INT_BOOL_OPS

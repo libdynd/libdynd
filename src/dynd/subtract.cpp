@@ -7,4 +7,4 @@
 #include <dynd/callables/subtract_callable.hpp>
 
 DYND_API nd::callable nd::subtract =
-    make_binary_arithmetic<nd::subtract_callable, dynd::detail::isdef_subtract, arithmetic_ids>();
+    make_binary_arithmetic<nd::subtract_callable, dynd::detail::isdef_subtract, arithmetic_types>();
