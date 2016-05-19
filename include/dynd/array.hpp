@@ -974,43 +974,6 @@ DYND_API void broadcast_input_shapes(intptr_t ninputs, const nd::array *inputs, 
                                      dimvector &out_shape, shortvector<int> &out_axis_perm);
 
 /**
- * An exception for various kinds of broadcast errors.
- */
-class DYND_API broadcast_error : public dynd_exception {
-public:
-  broadcast_error(const std::string &m);
-
-  /**
-   * An exception for when 'src' doesn't broadcast to 'dst'
-   */
-  broadcast_error(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim, const intptr_t *src_shape);
-
-  /**
-   * An exception for when 'src' doesn't broadcast to 'dst'
-   */
-  broadcast_error(const nd::array &dst, const nd::array &src);
-
-  /**
-   * An exception for when a number of input operands can't be broadcast
-   * together.
-   */
-  broadcast_error(intptr_t ninputs, const nd::array *inputs);
-
-  broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta);
-
-  broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const char *src_name);
-
-  /**
-   * For when broadcasting is occurring in a context where
-   * much of the global information about the broadcasting isn't
-   * available, e.g. broadcasting a var dim inside a kernel.
-   */
-  broadcast_error(intptr_t dst_size, intptr_t src_size, const char *dst_name, const char *src_name);
-
-  virtual ~broadcast_error() throw();
-};
-
-/**
  * This function broadcasts the dimensions and strides of 'src' to a given
  * shape, raising an error if it cannot be broadcast.
  *

@@ -259,6 +259,63 @@ zero_division_error::~zero_division_error() throw() {}
 type_error::~type_error() throw() {}
 invalid_id::~invalid_id() throw() {}
 
+broadcast_error::broadcast_error(const std::string &m) : dynd_exception("broadcast error", m) {}
+
+broadcast_error::~broadcast_error() throw() {}
+
+inline std::string broadcast_error_message(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim,
+                                           const intptr_t *src_shape) {
+  stringstream ss;
+
+  ss << "cannot broadcast shape ";
+  print_shape(ss, src_ndim, src_shape);
+  ss << " to shape ";
+  print_shape(ss, dst_ndim, dst_shape);
+
+  return ss.str();
+}
+
+broadcast_error::broadcast_error(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim,
+                                 const intptr_t *src_shape)
+    : dynd_exception("broadcast error", broadcast_error_message(dst_ndim, dst_shape, src_ndim, src_shape)) {}
+
+inline std::string broadcast_error_message(const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
+                                           const char *src_arrmeta) {
+  stringstream ss;
+  ss << "cannot broadcast input datashape '";
+  format_datashape(ss, src_tp, src_arrmeta, NULL, false);
+  ss << "' into datashape '";
+  format_datashape(ss, dst_tp, dst_arrmeta, NULL, false);
+  ss << "'";
+  return ss.str();
+}
+
+broadcast_error::broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
+                                 const char *src_arrmeta)
+    : dynd_exception("broadcast error", broadcast_error_message(dst_tp, dst_arrmeta, src_tp, src_arrmeta)) {}
+
+inline std::string broadcast_error_message(const ndt::type &dst_tp, const char *dst_arrmeta, const char *src_name) {
+  stringstream ss;
+  ss << "cannot broadcast input " << src_name << " into datashape '";
+  format_datashape(ss, dst_tp, dst_arrmeta, NULL, false);
+  ss << "'";
+  return ss.str();
+}
+
+broadcast_error::broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const char *src_name)
+    : dynd_exception("broadcast error", broadcast_error_message(dst_tp, dst_arrmeta, src_name)) {}
+
+inline std::string broadcast_error_message(intptr_t dst_size, intptr_t src_size, const char *dst_name,
+                                           const char *src_name) {
+  stringstream ss;
+  ss << "cannot broadcast input " << src_name << " with size " << src_size;
+  ss << " into output " << dst_name << " with size " << dst_size;
+  return ss.str();
+}
+
+broadcast_error::broadcast_error(intptr_t dst_size, intptr_t src_size, const char *dst_name, const char *src_name)
+    : dynd_exception("broadcast error", broadcast_error_message(dst_size, src_size, dst_name, src_name)) {}
+
 #ifdef DYND_CUDA
 
 inline std::string cuda_runtime_error_message(cudaError_t error) { return cudaGetErrorString(error); }

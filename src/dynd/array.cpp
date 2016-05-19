@@ -951,6 +951,23 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values) 
   return result;
 }
 
+inline std::string broadcast_error_message(intptr_t ninputs, const nd::array *inputs) {
+  stringstream ss;
+
+  ss << "cannot broadcast input dynd operands with shapes ";
+  for (intptr_t i = 0; i < ninputs; ++i) {
+    intptr_t undim = inputs[i].get_ndim();
+    dimvector shape(undim);
+    inputs[i].get_shape(shape.get());
+    print_shape(ss, undim, shape.get());
+    if (i + 1 != ninputs) {
+      ss << " ";
+    }
+  }
+
+  return ss.str();
+}
+
 void dynd::broadcast_input_shapes(intptr_t ninputs, const nd::array *inputs, intptr_t &out_undim, dimvector &out_shape,
                                   shortvector<int> &out_axis_perm) {
   // Get the number of broadcast dimensions
@@ -991,13 +1008,13 @@ void dynd::broadcast_input_shapes(intptr_t ninputs, const nd::array *inputs, int
       } else if (itershape_size >= 0) {
         if (size != 1 && itershape_size != size) {
           // cout << "operand " << i << ", comparing size " << itershape_size << " vs " << size << "\n";
-          throw broadcast_error(ninputs, inputs);
+          throw broadcast_error(broadcast_error_message(ninputs, inputs));
         }
       } else { // itershape_size < 0
         if (itershape_size == -1 && size > 0) {
           shape[k] = -size;
         } else if (size > 1 && itershape_size != -size) {
-          throw broadcast_error(ninputs, inputs);
+          throw broadcast_error(broadcast_error_message(ninputs, inputs));
         }
       }
     }
@@ -1013,99 +1030,6 @@ void dynd::broadcast_input_shapes(intptr_t ninputs, const nd::array *inputs, int
     out_axis_perm[0] = 0;
   }
 }
-
-broadcast_error::broadcast_error(const std::string &m) : dynd_exception("broadcast error", m) {}
-
-broadcast_error::~broadcast_error() throw() {}
-
-inline std::string broadcast_error_message(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim,
-                                           const intptr_t *src_shape) {
-  stringstream ss;
-
-  ss << "cannot broadcast shape ";
-  print_shape(ss, src_ndim, src_shape);
-  ss << " to shape ";
-  print_shape(ss, dst_ndim, dst_shape);
-
-  return ss.str();
-}
-
-broadcast_error::broadcast_error(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim,
-                                 const intptr_t *src_shape)
-    : dynd_exception("broadcast error", broadcast_error_message(dst_ndim, dst_shape, src_ndim, src_shape)) {}
-
-inline std::string broadcast_error_message(const nd::array &dst, const nd::array &src) {
-  vector<intptr_t> dst_shape = dst.get_shape(), src_shape = src.get_shape();
-  stringstream ss;
-
-  ss << "cannot broadcast dynd array with type ";
-  ss << src.get_type() << " and shape ";
-  print_shape(ss, src_shape);
-  ss << " to type " << dst.get_type() << " and shape ";
-  print_shape(ss, dst_shape);
-
-  return ss.str();
-}
-
-broadcast_error::broadcast_error(const nd::array &dst, const nd::array &src)
-    : dynd_exception("broadcast error", broadcast_error_message(dst, src)) {}
-
-inline std::string broadcast_error_message(intptr_t ninputs, const nd::array *inputs) {
-  stringstream ss;
-
-  ss << "cannot broadcast input dynd operands with shapes ";
-  for (intptr_t i = 0; i < ninputs; ++i) {
-    intptr_t undim = inputs[i].get_ndim();
-    dimvector shape(undim);
-    inputs[i].get_shape(shape.get());
-    print_shape(ss, undim, shape.get());
-    if (i + 1 != ninputs) {
-      ss << " ";
-    }
-  }
-
-  return ss.str();
-}
-
-broadcast_error::broadcast_error(intptr_t ninputs, const nd::array *inputs)
-    : dynd_exception("broadcast error", broadcast_error_message(ninputs, inputs)) {}
-
-inline std::string broadcast_error_message(const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
-                                           const char *src_arrmeta) {
-  stringstream ss;
-  ss << "cannot broadcast input datashape '";
-  format_datashape(ss, src_tp, src_arrmeta, NULL, false);
-  ss << "' into datashape '";
-  format_datashape(ss, dst_tp, dst_arrmeta, NULL, false);
-  ss << "'";
-  return ss.str();
-}
-
-broadcast_error::broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
-                                 const char *src_arrmeta)
-    : dynd_exception("broadcast error", broadcast_error_message(dst_tp, dst_arrmeta, src_tp, src_arrmeta)) {}
-
-inline std::string broadcast_error_message(const ndt::type &dst_tp, const char *dst_arrmeta, const char *src_name) {
-  stringstream ss;
-  ss << "cannot broadcast input " << src_name << " into datashape '";
-  format_datashape(ss, dst_tp, dst_arrmeta, NULL, false);
-  ss << "'";
-  return ss.str();
-}
-
-broadcast_error::broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const char *src_name)
-    : dynd_exception("broadcast error", broadcast_error_message(dst_tp, dst_arrmeta, src_name)) {}
-
-inline std::string broadcast_error_message(intptr_t dst_size, intptr_t src_size, const char *dst_name,
-                                           const char *src_name) {
-  stringstream ss;
-  ss << "cannot broadcast input " << src_name << " with size " << src_size;
-  ss << " into output " << dst_name << " with size " << dst_size;
-  return ss.str();
-}
-
-broadcast_error::broadcast_error(intptr_t dst_size, intptr_t src_size, const char *dst_name, const char *src_name)
-    : dynd_exception("broadcast error", broadcast_error_message(dst_size, src_size, dst_name, src_name)) {}
 
 void dynd::broadcast_to_shape(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim,
                               const intptr_t *src_shape, const intptr_t *src_strides, intptr_t *out_strides) {

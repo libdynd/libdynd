@@ -186,6 +186,32 @@ public:
   virtual ~not_comparable_error() throw();
 };
 
+/**
+ * An exception for various kinds of broadcast errors.
+ */
+class DYNDT_API broadcast_error : public dynd_exception {
+public:
+  broadcast_error(const std::string &m);
+
+  /**
+   * An exception for when 'src' doesn't broadcast to 'dst'
+   */
+  broadcast_error(intptr_t dst_ndim, const intptr_t *dst_shape, intptr_t src_ndim, const intptr_t *src_shape);
+
+  broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta);
+
+  broadcast_error(const ndt::type &dst_tp, const char *dst_arrmeta, const char *src_name);
+
+  /**
+   * For when broadcasting is occurring in a context where
+   * much of the global information about the broadcasting isn't
+   * available, e.g. broadcasting a var dim inside a kernel.
+   */
+  broadcast_error(intptr_t dst_size, intptr_t src_size, const char *dst_name, const char *src_name);
+
+  virtual ~broadcast_error() throw();
+};
+
 #ifdef DYND_CUDA
 
 /**
