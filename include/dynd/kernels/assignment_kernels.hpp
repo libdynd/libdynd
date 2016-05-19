@@ -93,7 +93,15 @@ namespace nd {
         DYND_TRACE_ASSIGNMENT(static_cast<ReturnType>(*reinterpret_cast<Arg0Type *>(src[0])), ReturnType,
                               *reinterpret_cast<Arg0Type *>(src[0]), Arg0Type);
 
+// This warning is being triggered in spite of the explicit cast, unfortunately have to suppress manually
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif
         *reinterpret_cast<ReturnType *>(dst) = static_cast<ReturnType>(*reinterpret_cast<Arg0Type *>(src[0]));
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
       }
     };
 
