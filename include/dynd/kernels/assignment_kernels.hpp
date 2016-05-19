@@ -34,7 +34,7 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t, type_id_t>
+  template <typename, typename>
   class assign_callable;
 }
 
