@@ -40,10 +40,10 @@ namespace nd {
                             const char *actual_arrmeta, std::map<std::string, ndt::type> &tp_vars);
 
     template <template <typename...> class KernelType>
-    struct new_make_all_on_types;
+    struct make_all;
 
     template <template <typename...> class KernelType, template <typename...> class Condition>
-    struct new_make_all_if;
+    struct make_all_if;
 
   } // namespace dynd::nd::detail
 
@@ -121,7 +121,7 @@ namespace nd {
     template <template <typename> class KernelType, typename I0, typename... A>
     static dispatcher<1, callable> make_all(A &&... a) {
       std::vector<std::pair<std::array<type_id_t, 1>, callable>> callables;
-      for_each<I0>(detail::new_make_all_on_types<KernelType>(), callables, std::forward<A>(a)...);
+      for_each<I0>(detail::make_all<KernelType>(), callables, std::forward<A>(a)...);
 
       return dispatcher<1, callable>(callables.begin(), callables.end());
     }
@@ -129,17 +129,16 @@ namespace nd {
     template <template <typename...> class KernelType, typename I0, typename I1, typename... I, typename... A>
     static dispatcher<2 + sizeof...(I), callable> make_all(A &&... a) {
       std::vector<std::pair<std::array<type_id_t, 2 + sizeof...(I)>, callable>> callables;
-      for_each<typename outer<I0, I1, I...>::type>(detail::new_make_all_on_types<KernelType>(), callables,
-                                                   std::forward<A>(a)...);
+      for_each<typename outer<I0, I1, I...>::type>(detail::make_all<KernelType>(), callables, std::forward<A>(a)...);
 
       return dispatcher<2 + sizeof...(I), callable>(callables.begin(), callables.end());
     }
 
     template <template <typename> class KernelType, template <typename> class Condition, typename Type0Sequence,
               typename... A>
-    static dispatcher<1, callable> new_make_all_if(A &&... a) {
+    static dispatcher<1, callable> make_all_if(A &&... a) {
       std::vector<std::pair<std::array<type_id_t, 1>, callable>> callables;
-      for_each<Type0Sequence>(detail::new_make_all_if<KernelType, Condition>(), callables, std::forward<A>(a)...);
+      for_each<Type0Sequence>(detail::make_all_if<KernelType, Condition>(), callables, std::forward<A>(a)...);
 
       return dispatcher<1, callable>(callables.begin(), callables.end());
     }
@@ -147,9 +146,9 @@ namespace nd {
     template <template <typename, typename, typename...> class KernelType,
               template <typename, typename, typename...> class Condition, typename I0, typename I1, typename... I,
               typename... A>
-    static dispatcher<2 + sizeof...(I), callable> new_make_all_if(A &&... a) {
+    static dispatcher<2 + sizeof...(I), callable> make_all_if(A &&... a) {
       std::vector<std::pair<std::array<type_id_t, 2 + sizeof...(I)>, callable>> callables;
-      for_each<typename outer<I0, I1, I...>::type>(detail::new_make_all_if<KernelType, Condition>(), callables,
+      for_each<typename outer<I0, I1, I...>::type>(detail::make_all_if<KernelType, Condition>(), callables,
                                                    std::forward<A>(a)...);
 
       return dispatcher<2 + sizeof...(I), callable>(callables.begin(), callables.end());
@@ -262,7 +261,7 @@ namespace nd {
     };
 
     template <template <typename...> class KernelType>
-    struct new_make_all_on_types {
+    struct make_all {
       template <typename Type, typename... A>
       void on_each(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &callables, A &&... a) const {
         callables.push_back({{type_id_of<Type>::value}, make_callable<KernelType<Type>>(std::forward<A>(a)...)});
@@ -313,7 +312,7 @@ namespace nd {
     };
 
     template <template <typename...> class KernelType, template <typename...> class Condition>
-    struct new_make_all_if {
+    struct make_all_if {
       template <typename Type, typename... A>
       void on_each(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &callables, A &&... a) const {
         new_insert_callable_if<Condition<Type>::value, KernelType>::template insert<Type, A...>(callables,
