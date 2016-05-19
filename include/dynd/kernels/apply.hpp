@@ -54,11 +54,11 @@ namespace nd {
     template <typename func_type, int N = args_of<typename funcproto_of<func_type>::type>::type::size>
     using as_apply_arg_sequence = typename to<typename args_of<typename funcproto_of<func_type>::type>::type, N>::type;
 
-    template <typename A, typename I = make_index_sequence<A::size>>
+    template <typename A, typename I = std::make_index_sequence<A::size>>
     struct apply_args;
 
     template <typename... A, size_t... I>
-    struct apply_args<type_sequence<A...>, index_sequence<I...>> : apply_arg<A, I>... {
+    struct apply_args<type_sequence<A...>, std::index_sequence<I...>> : apply_arg<A, I>... {
       apply_args(char *DYND_IGNORE_UNUSED(data), const char *const *DYND_IGNORE_UNUSED(src_arrmeta))
           : apply_arg<A, I>(data, src_arrmeta[I])... {}
 
@@ -74,16 +74,16 @@ namespace nd {
       T get() { return m_val; }
     };
 
-    template <typename K, typename J = make_index_sequence<K::size>>
+    template <typename K, typename J = std::make_index_sequence<K::size>>
     struct apply_kwds;
 
     template <>
-    struct apply_kwds<type_sequence<>, index_sequence<>> {
+    struct apply_kwds<type_sequence<>, std::index_sequence<>> {
       apply_kwds(intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds)) {}
     };
 
     template <typename... K, size_t... J>
-    struct apply_kwds<type_sequence<K...>, index_sequence<J...>> : apply_kwd<K, J>... {
+    struct apply_kwds<type_sequence<K...>, std::index_sequence<J...>> : apply_kwd<K, J>... {
       apply_kwds(intptr_t DYND_UNUSED(nkwd), const nd::array *kwds) : apply_kwd<K, J>(kwds[J])... {}
     };
 
