@@ -3,21 +3,20 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "dynd_assertions.hpp"
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/types/var_dim_type.hpp>
 #include <dynd/json_parser.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(VarArrayDType, Basic)
-{
+TEST(VarArrayDType, Basic) {
   ndt::type d = ndt::make_type<ndt::var_dim_type>(ndt::make_type<int32_t>());
 
   EXPECT_EQ(ndt::make_type<int32_t>(), d.p<ndt::type>("element_type"));
@@ -25,8 +24,7 @@ TEST(VarArrayDType, Basic)
   EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(VarArrayDType, Shape)
-{
+TEST(VarArrayDType, Shape) {
   ndt::type dfloat = ndt::make_type<float>();
   ndt::type darr1 = ndt::make_fixed_dim(2, dfloat);
   ndt::type darr2 = ndt::make_type<ndt::var_dim_type>(darr1);
@@ -44,8 +42,7 @@ TEST(VarArrayDType, Shape)
   EXPECT_EQ(2, a.get_dim_size(2));
 }
 
-TEST(VarArrayDType, DTypeSubscriptSimpleSingle)
-{
+TEST(VarArrayDType, DTypeSubscriptSimpleSingle) {
   nd::array n = parse_json("var * int32", "[2,4,6,8]");
 
   // Indexing collapses the leading dimension to just the int
@@ -64,8 +61,7 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSingle)
   EXPECT_THROW(n(-5), index_out_of_bounds);
 }
 
-TEST(VarArrayDType, DTypeSubscriptSimpleSlice)
-{
+TEST(VarArrayDType, DTypeSubscriptSimpleSlice) {
   nd::array n = parse_json("var * int32", "[2,4,6,8]");
 
   // Slicing does not collapse the leading dimension to a strided array (as it
@@ -99,8 +95,7 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSlice)
   EXPECT_EQ(8, n(3).as<int>());
 }
 
-TEST(VarArrayDType, DTypeSubscriptNested)
-{
+TEST(VarArrayDType, DTypeSubscriptNested) {
   nd::array n = parse_json("var * var * int32", "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
 
   // Indexing with a zero-sized index does not convert the leading dim from var
@@ -156,8 +151,7 @@ TEST(VarArrayDType, DTypeSubscriptNested)
   EXPECT_THROW(n(3, -4), index_out_of_bounds);
 }
 
-TEST(VarArrayDType, DTypeSubscriptFixedVarNested)
-{
+TEST(VarArrayDType, DTypeSubscriptFixedVarNested) {
   nd::array n = parse_json("4 * var * int32", "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
 
   EXPECT_EQ(ndt::type("4 * var * int32"), n.get_type());
@@ -172,8 +166,7 @@ TEST(VarArrayDType, DTypeSubscriptFixedVarNested)
   EXPECT_EQ(3, n(3, irange()).get_shape()[0]);
 }
 
-TEST(VarArrayDType, DTypeSubscriptStridedVarNested)
-{
+TEST(VarArrayDType, DTypeSubscriptStridedVarNested) {
   nd::array n = parse_json("var * var * int32", "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
   // View as a fixed dim type
   n = n.view("4 * var * int32");
@@ -188,8 +181,7 @@ TEST(VarArrayDType, DTypeSubscriptStridedVarNested)
   EXPECT_EQ(3, n(3, irange()).get_shape()[0]);
 }
 
-TEST(VarArrayDType, DTypeSubscriptFixedVarStruct)
-{
+TEST(VarArrayDType, DTypeSubscriptFixedVarStruct) {
   nd::array n = parse_json("2 * var * {first_name: string, last_name: string, "
                            "gender: fixed_string[1], pictured: bool,}",
                            "[[{\"first_name\":\"Frank\",\"last_name\":\"Abrams\","
@@ -208,8 +200,7 @@ TEST(VarArrayDType, DTypeSubscriptFixedVarStruct)
   EXPECT_EQ("F", ngender(1, 0).as<std::string>());
 }
 
-TEST(VarArrayDType, AccessCStructOfVar)
-{
+TEST(VarArrayDType, AccessCStructOfVar) {
   // A slightly complicated case of property access/indexing
   nd::array n = parse_json("var * {a: int32, b: var * int32}", "[{\"a\":10, \"b\":[1,2,3,4,5]},"
                                                                " {\"a\":20, \"b\":[7,8,9]}]");
@@ -233,8 +224,7 @@ TEST(VarArrayDType, AccessCStructOfVar)
   EXPECT_EQ(9, n2(1, 2).as<int>());
 }
 
-TEST(VarArrayDType, AssignKernel)
-{
+TEST(VarArrayDType, AssignKernel) {
   nd::array a, b;
 
   // Assignment scalar -> uninitialized var array
@@ -311,8 +301,7 @@ TEST(VarArrayDType, AssignKernel)
   EXPECT_THROW(a.assign(b), broadcast_error);
 }
 
-TEST(VarArrayDType, AssignVarStridedKernel)
-{
+TEST(VarArrayDType, AssignVarStridedKernel) {
   nd::array a, b;
   int vals_int[] = {3, 5, 7};
 
@@ -375,8 +364,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   EXPECT_THROW(a.assign(b), broadcast_error);
 }
 
-TEST(VarArrayDType, AssignVarFixedKernel)
-{
+TEST(VarArrayDType, AssignVarFixedKernel) {
   nd::array a, b;
 
   // Assignment fixed array -> uninitialized var array
@@ -438,8 +426,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   EXPECT_THROW(a.assign(b), broadcast_error);
 }
 
-TEST(VarDimDType, IsTypeSubarray)
-{
+TEST(VarDimDType, IsTypeSubarray) {
   EXPECT_TRUE(ndt::type("var * int32").is_type_subarray(ndt::type("var * int32")));
   EXPECT_TRUE(ndt::type("3 * var * int32").is_type_subarray(ndt::type("var * int32")));
   EXPECT_TRUE(ndt::type("var * var * int32").is_type_subarray(ndt::type("int32")));
@@ -452,8 +439,7 @@ TEST(VarDimDType, IsTypeSubarray)
   EXPECT_FALSE(ndt::type("3 * int32").is_type_subarray(ndt::type("var * int32")));
 }
 
-TEST(VarArrayDType, AssignAfterCreated)
-{
+TEST(VarArrayDType, AssignAfterCreated) {
   nd::array a;
 
   a = nd::empty("var * int32");
@@ -468,3 +454,5 @@ TEST(VarArrayDType, AssignAfterCreated)
   a.vals() = vals;
   EXPECT_JSON_EQ_ARR("[1, 3, 5]", a);
 }
+
+TEST(VarDimType, IDOf) { EXPECT_EQ(var_dim_id, ndt::id_of<ndt::var_dim_type>::value); }

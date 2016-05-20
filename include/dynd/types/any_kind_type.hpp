@@ -51,5 +51,8 @@ namespace ndt {
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
   };
 
+  template <>
+  struct id_of<any_kind_type> : std::integral_constant<type_id_t, any_kind_id> {};
+
 } // namespace dynd::ndt
 } // namespace dynd

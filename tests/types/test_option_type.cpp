@@ -142,3 +142,5 @@ TEST(OptionType, String)
   EXPECT_EQ("NA", a(1).as<std::string>());
 }
 */
+
+TEST(OptionType, IDOf) { EXPECT_EQ(option_id, ndt::id_of<ndt::option_type>::value); }

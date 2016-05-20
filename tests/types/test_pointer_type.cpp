@@ -3,19 +3,18 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
 
-#include <dynd/types/pointer_type.hpp>
 #include <dynd/array.hpp>
+#include <dynd/types/pointer_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(PointerType, PointerToBuiltIn)
-{
+TEST(PointerType, PointerToBuiltIn) {
   ndt::type d;
 
   d = ndt::make_type<ndt::pointer_type>(ndt::make_type<char>());
@@ -32,11 +31,12 @@ TEST(PointerType, PointerToBuiltIn)
   EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(PointerType, IsTypeSubarray)
-{
+TEST(PointerType, IsTypeSubarray) {
   EXPECT_TRUE(ndt::type("pointer[int32]").is_type_subarray(ndt::type("pointer[int32]")));
   EXPECT_TRUE(ndt::type("Fixed * 3 * pointer[int32]").is_type_subarray(ndt::type("3 * pointer[int32]")));
   EXPECT_TRUE(ndt::type("3 * 10 * pointer[int32]").is_type_subarray(ndt::type("pointer[int32]")));
   EXPECT_TRUE(ndt::type("pointer[int32]").is_type_subarray(ndt::make_type<int32_t>()));
   EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::type("pointer[int32]")));
 }
+
+TEST(PointerType, IDOf) { EXPECT_EQ(pointer_id, ndt::id_of<ndt::pointer_type>::value); }

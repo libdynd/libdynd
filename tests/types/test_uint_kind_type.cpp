@@ -52,3 +52,5 @@ TEST(UIntKindType, Match) {
 
   EXPECT_FALSE(uint_kind_tp.match(ndt::make_type<void>()));
 }
+
+TEST(UIntKindType, IDOf) { EXPECT_EQ(uint_kind_id, ndt::id_of<ndt::uint_kind_type>::value); }

@@ -136,6 +136,9 @@ namespace ndt {
     }
   };
 
+  template <>
+  struct id_of<callable_type> : std::integral_constant<type_id_t, callable_id> {};
+
   template <typename R, typename T, typename... A>
   struct traits<R (T::*)(A...)> {
     static type equivalent() { return make_type<typename funcproto_of<R (T::*)(A...)>::type>(); }

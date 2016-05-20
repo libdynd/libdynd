@@ -23,5 +23,8 @@ namespace ndt {
     bool operator==(const base_type &rhs) const;
   };
 
+  template <>
+  struct id_of<complex_kind_type> : std::integral_constant<type_id_t, complex_kind_id> {};
+
 } // namespace dynd::ndt
 } // namespace dynd

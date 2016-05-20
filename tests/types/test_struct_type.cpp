@@ -436,3 +436,5 @@ TEST(StructType, InvalidFieldName) {
   EXPECT_EQ(-1, dt.extended<ndt::struct_type>()->get_field_index("z"));
   EXPECT_THROW(s.p("z"), invalid_argument);
 }
+
+TEST(StructType, IDOf) { EXPECT_EQ(struct_id, ndt::id_of<ndt::struct_type>::value); }

@@ -22,5 +22,8 @@ namespace ndt {
     void print_type(std::ostream &o) const;
   };
 
+  template <>
+  struct id_of<scalar_kind_type> : std::integral_constant<type_id_t, scalar_kind_id> {};
+
 } // namespace dynd::ndt
 } // namespace dynd
