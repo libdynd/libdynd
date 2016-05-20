@@ -15,10 +15,6 @@ set(LIB_SUFFIX "" CACHE STRING
 
 add_definitions(-DDYND_SHARED_LIBRARY_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
-if(NOT WIN32)
-  set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
-  set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-endif()
 
 CHECK_TYPE_SIZE("float" SIZEOF_FLOAT)
 if(NOT (SIZEOF_FLOAT EQUAL 4))
@@ -112,26 +108,26 @@ if("${MSVC}" OR "${DYND_SIMULATED_COMPILER}" STREQUAL "MSVC")
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         # If this is the clang-cl compiler.
         # Don't enable -WX here yet.
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHsc -bigobj -wd4503")
+        set(CMAKE_CXX_FLAGS "-EHsc -bigobj -wd4503 ${CMAKE_CXX_FLAGS}")
     elseif(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19)
         message(FATAL_ERROR "Only MSVC 2015 (Version 19.0) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
     else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc -bigobj -wd4503")
+        set(CMAKE_CXX_FLAGS "-WX -EHsc -bigobj -wd4503 ${CMAKE_CXX_FLAGS}")
     endif()
 else()
-    if(WIN32)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++14 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers")
-    else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Wno-missing-field-initializers -fPIC -Werror -Wno-ignored-attributes")
-    endif()
-
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.9)
             message(FATAL_ERROR "Only GCC 4.9 and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
         endif()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fmax-errors=20 -Wno-type-limits -Wno-maybe-uninitialized")
+        set(CMAKE_CXX_FLAGS "-std=c++14 -fmax-errors=20 -Wno-type-limits -Wno-maybe-uninitialized ${CMAKE_CXX_FLAGS}")
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -ferror-limit=20 -Wno-missing-braces -ftemplate-depth=500")
+        set(CMAKE_CXX_FLAGS "-std=c++1y -ferror-limit=20 -Wno-missing-braces -ftemplate-depth=500 ${CMAKE_CXX_FLAGS}")
+    endif()
+
+    if(WIN32)
+        set(CMAKE_CXX_FLAGS "-O3 -std=c++14 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers ${CMAKE_CXX_FLAGS}")
+    else()
+        set(CMAKE_CXX_FLAGS "-O3 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Wno-missing-field-initializers -fPIC -Werror -Wno-ignored-attributes ${CMAKE_CXX_FLAGS}")
     endif()
 endif()
 
