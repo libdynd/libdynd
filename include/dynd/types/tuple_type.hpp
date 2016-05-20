@@ -122,11 +122,8 @@ namespace ndt {
     }
   };
 
+  template <>
+  struct id_of<tuple_type> : std::integral_constant<type_id_t, tuple_id> {};
+
 } // namespace dynd::ndt
-
-template <>
-struct type_id_of<ndt::tuple_type> {
-  static const type_id_t value = tuple_id;
-};
-
 } // namespace dynd

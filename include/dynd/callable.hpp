@@ -246,7 +246,7 @@ namespace nd {
     template <typename... T>
     struct as_ids<type_sequence<T...>> {
       static std::array<type_id_t, sizeof...(T)> get() {
-        std::array<type_id_t, sizeof...(T)> a = {type_id_of<T>::value...};
+        std::array<type_id_t, sizeof...(T)> a = {ndt::id_of<T>::value...};
 
         return a;
       }
@@ -257,7 +257,7 @@ namespace nd {
       template <typename Type, typename... ArgTypes>
       void on_each(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &callables, ArgTypes &&... args) const {
         typedef CallableType<Type> callable_type;
-        callables.push_back({{type_id_of<Type>::value}, make_callable<callable_type>(std::forward<ArgTypes>(args)...)});
+        callables.push_back({{ndt::id_of<Type>::value}, make_callable<callable_type>(std::forward<ArgTypes>(args)...)});
       }
 
       template <typename TypeSequence, typename... ArgTypes>
@@ -292,7 +292,7 @@ namespace nd {
       template <typename Arg0Type, typename... A>
       static void insert(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &callables, A &&... a) {
         callables.push_back(
-            {{type_id_of<Arg0Type>::value}, make_callable<KernelType<Arg0Type>>(std::forward<A>(a)...)});
+            {{ndt::id_of<Arg0Type>::value}, make_callable<KernelType<Arg0Type>>(std::forward<A>(a)...)});
       }
       template <typename TypeSequence, typename... A>
       static void insert(std::vector<std::pair<std::array<type_id_t, TypeSequence::size()>, callable>> &callables,

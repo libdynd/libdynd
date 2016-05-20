@@ -93,6 +93,9 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
   };
 
+  template <>
+  struct id_of<option_type> : std::integral_constant<type_id_t, option_id> {};
+
   template <typename ValueType>
   struct traits<option<ValueType>> {
     static const bool is_same_layout = true;
@@ -101,10 +104,4 @@ namespace ndt {
   };
 
 } // namespace dynd::ndt
-
-template <>
-struct type_id_of<ndt::option_type> {
-  static const type_id_t value = option_id;
-};
-
 } // namespace dynd

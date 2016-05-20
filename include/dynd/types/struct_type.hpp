@@ -92,11 +92,8 @@ namespace ndt {
     virtual bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
   };
 
+  template <>
+  struct id_of<struct_type> : std::integral_constant<type_id_t, struct_id> {};
+
 } // namespace dynd::ndt
-
-template <>
-struct type_id_of<ndt::struct_type> {
-  static const type_id_t value = struct_id;
-};
-
 } // namespace dynd
