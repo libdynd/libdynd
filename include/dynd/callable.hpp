@@ -240,40 +240,32 @@ namespace nd {
 
   namespace detail {
 
-    template <template <typename...> class KernelType, typename S>
-    struct new_apply;
-
-    template <template <typename...> class KernelType, typename... I>
-    struct new_apply<KernelType, type_sequence<I...>> {
-      typedef KernelType<I...> type;
-    };
-
     template <typename T>
-    struct XYZ;
+    struct as_ids;
 
     template <typename... T>
-    struct XYZ<type_sequence<T...>> {
-      static std::array<type_id_t, sizeof...(T)> as_array() {
+    struct as_ids<type_sequence<T...>> {
+      static std::array<type_id_t, sizeof...(T)> get() {
         std::array<type_id_t, sizeof...(T)> a = {type_id_of<T>::value...};
 
         return a;
       }
     };
 
-    template <template <typename...> class KernelType>
+    template <template <typename...> class CallableType>
     struct make_all {
-      template <typename Type, typename... A>
-      void on_each(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &callables, A &&... a) const {
-        callables.push_back({{type_id_of<Type>::value}, make_callable<KernelType<Type>>(std::forward<A>(a)...)});
+      template <typename Type, typename... ArgTypes>
+      void on_each(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &callables, ArgTypes &&... args) const {
+        typedef CallableType<Type> callable_type;
+        callables.push_back({{type_id_of<Type>::value}, make_callable<callable_type>(std::forward<ArgTypes>(args)...)});
       }
 
-      template <typename TypeSequence, typename... A>
-      void on_each(std::vector<std::pair<std::array<type_id_t, TypeSequence::size>, callable>> &callables,
-                   A &&... a) const {
-        auto arr = XYZ<TypeSequence>::as_array();
-
+      template <typename TypeSequence, typename... ArgTypes>
+      void on_each(std::vector<std::pair<std::array<type_id_t, TypeSequence::size()>, callable>> &callables,
+                   ArgTypes &&... args) const {
+        typedef instantiate_t<CallableType, TypeSequence> callable_type;
         callables.push_back(
-            {arr, make_callable<typename new_apply<KernelType, TypeSequence>::type>(std::forward<A>(a)...)});
+            {as_ids<TypeSequence>::get(), make_callable<callable_type>(std::forward<ArgTypes>(args)...)});
       }
     };
 
@@ -282,32 +274,32 @@ namespace nd {
     // test for whether or not it should be added to a callable, the kernel template used
     // is never instantiated.
     template <bool Enable, template <typename...> class KernelType>
-    struct new_insert_callable_if;
+    struct insert_callable_if;
 
     template <template <typename...> class KernelType>
-    struct new_insert_callable_if<false, KernelType> {
+    struct insert_callable_if<false, KernelType> {
       template <typename Arg0Type, typename... A>
       static void insert(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &DYND_UNUSED(callables),
                          A &&... DYND_UNUSED(a)) {}
       template <typename TypeSequence, typename... A>
       static void
-      insert(std::vector<std::pair<std::array<type_id_t, TypeSequence::size>, callable>> &DYND_UNUSED(callables),
+      insert(std::vector<std::pair<std::array<type_id_t, TypeSequence::size()>, callable>> &DYND_UNUSED(callables),
              A &&... DYND_UNUSED(a)) {}
     };
 
     template <template <typename...> class KernelType>
-    struct new_insert_callable_if<true, KernelType> {
+    struct insert_callable_if<true, KernelType> {
       template <typename Arg0Type, typename... A>
       static void insert(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &callables, A &&... a) {
         callables.push_back(
             {{type_id_of<Arg0Type>::value}, make_callable<KernelType<Arg0Type>>(std::forward<A>(a)...)});
       }
       template <typename TypeSequence, typename... A>
-      static void insert(std::vector<std::pair<std::array<type_id_t, TypeSequence::size>, callable>> &callables,
+      static void insert(std::vector<std::pair<std::array<type_id_t, TypeSequence::size()>, callable>> &callables,
                          A &&... a) {
 
-        callables.push_back({{XYZ<TypeSequence>::as_array()},
-                             make_callable<typename new_apply<KernelType, TypeSequence>::type>(std::forward<A>(a)...)});
+        callables.push_back({{as_ids<TypeSequence>::get()},
+                             make_callable<instantiate_t<KernelType, TypeSequence>>(std::forward<A>(a)...)});
       }
     };
 
@@ -315,15 +307,15 @@ namespace nd {
     struct make_all_if {
       template <typename Type, typename... A>
       void on_each(std::vector<std::pair<std::array<type_id_t, 1>, callable>> &callables, A &&... a) const {
-        new_insert_callable_if<Condition<Type>::value, KernelType>::template insert<Type, A...>(callables,
-                                                                                                std::forward<A>(a)...);
+        insert_callable_if<Condition<Type>::value, KernelType>::template insert<Type, A...>(callables,
+                                                                                            std::forward<A>(a)...);
       }
 
       template <typename TypeSequence, typename... A>
-      void on_each(std::vector<std::pair<std::array<type_id_t, TypeSequence::size>, callable>> &callables,
+      void on_each(std::vector<std::pair<std::array<type_id_t, TypeSequence::size()>, callable>> &callables,
                    A &&... a) const {
-        new_insert_callable_if<new_apply<Condition, TypeSequence>::type::value,
-                               KernelType>::template insert<TypeSequence, A...>(callables, std::forward<A>(a)...);
+        insert_callable_if<instantiate_t<Condition, TypeSequence>::value,
+                           KernelType>::template insert<TypeSequence, A...>(callables, std::forward<A>(a)...);
       }
     };
 

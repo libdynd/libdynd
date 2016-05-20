@@ -13,14 +13,6 @@ namespace dynd {
 template <typename T>
 struct front;
 
-/**
- * Metafunction that returns the last type of a type_sequence<T...>.
- *
- * "back<type_sequence<int, float, double>>::type" is "double"
- */
-template <typename T>
-struct back;
-
 template <typename I, size_t J>
 struct at;
 
@@ -33,49 +25,14 @@ struct to;
 template <typename I, typename J>
 struct join;
 
-template <typename I, typename J>
-struct take;
-
 template <typename... T>
 struct type_sequence {
-  enum { size = sizeof...(T) };
-
-  static constexpr size_t size2() { return sizeof...(T); }
-};
-
-template <typename T>
-struct is_type_sequence {
-  static const bool value = false;
-};
-
-template <typename... T>
-struct is_type_sequence<type_sequence<T...>> {
-  static const bool value = true;
-};
-
-template <typename T>
-struct back<type_sequence<T>> {
-  typedef T type;
-};
-
-template <typename T0, typename... T>
-struct back<type_sequence<T0, T...>> {
-  typedef typename back<type_sequence<T...>>::type type;
+  static constexpr size_t size() { return sizeof...(T); }
 };
 
 template <typename T0, typename... T>
 struct front<type_sequence<T0, T...>> {
   typedef T0 type;
-};
-
-template <typename T0, typename... T>
-struct at<type_sequence<T0, T...>, 0> {
-  typedef T0 type;
-};
-
-template <size_t I, typename T0, typename... T>
-struct at<type_sequence<T0, T...>, I> {
-  typedef typename at<type_sequence<T...>, I - 1>::type type;
 };
 
 template <typename T0, typename... T>
@@ -123,11 +80,6 @@ struct join<type_sequence<T...>, type_sequence<U...>> {
   typedef type_sequence<T..., U...> type;
 };
 
-template <typename... T, size_t... I>
-struct take<type_sequence<T...>, std::index_sequence<I...>> {
-  typedef type_sequence<typename at<type_sequence<T...>, I>::type...> type;
-};
-
 template <typename T>
 struct pop_front {
   typedef typename from<T, 1>::type type;
@@ -158,17 +110,28 @@ struct outer<S0, S1, S...> {
 };
 
 template <typename S, typename A0, typename... A>
-typename std::enable_if<S::size == 1 && is_type_sequence<S>::value, void>::type for_each(A0 &&a0, A &&... a) {
+std::enable_if_t<S::size() == 1, void> for_each(A0 &&a0, A &&... a) {
   a0.template on_each<typename front<S>::type>(std::forward<A>(a)...);
 }
 
 template <typename S, typename... A>
-typename std::enable_if<(S::size2() > 1), void>::type for_each(A &&... a) {
+std::enable_if_t<(S::size() > 1), void> for_each(A &&... a) {
   for_each<typename to<S, 1>::type>(std::forward<A>(a)...);
   for_each<typename pop_front<S>::type>(std::forward<A>(a)...);
 }
 
 template <typename... A>
 using outer_t = typename outer<A...>::type;
+
+template <template <typename...> class T, typename TypeSequence>
+struct instantiate;
+
+template <template <typename...> class T, typename... Types>
+struct instantiate<T, type_sequence<Types...>> {
+  typedef T<Types...> type;
+};
+
+template <template <typename...> class T, typename TypeSequence>
+using instantiate_t = typename instantiate<T, TypeSequence>::type;
 
 } // namespace dynd
