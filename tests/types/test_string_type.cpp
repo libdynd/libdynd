@@ -591,3 +591,5 @@ TEST(StringType, Iter)
   it.destroy();
 }
 */
+
+TEST(StringType, IDOf) { EXPECT_EQ(string_id, ndt::id_of<ndt::string_type>::value); }

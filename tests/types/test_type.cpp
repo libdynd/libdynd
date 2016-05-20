@@ -199,3 +199,34 @@ TEST(TypeFor, InitializerList) {
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>())),
             ndt::type_for({{0, 1}, {2}}));
 }
+
+TEST(Fundamental, IDOf) {
+  EXPECT_EQ(bool_id, ndt::id_of<bool>::value);
+
+  EXPECT_EQ(int8_id, ndt::id_of<int8_t>::value);
+  EXPECT_EQ(int16_id, ndt::id_of<int16_t>::value);
+  EXPECT_EQ(int32_id, ndt::id_of<int32_t>::value);
+  EXPECT_EQ(int64_id, ndt::id_of<int64_t>::value);
+  EXPECT_EQ(int128_id, ndt::id_of<int128>::value);
+
+  EXPECT_EQ(uint8_id, ndt::id_of<uint8_t>::value);
+  EXPECT_EQ(uint16_id, ndt::id_of<uint16_t>::value);
+  EXPECT_EQ(uint32_id, ndt::id_of<uint32_t>::value);
+  EXPECT_EQ(uint64_id, ndt::id_of<uint64_t>::value);
+  EXPECT_EQ(uint128_id, ndt::id_of<uint128>::value);
+
+  EXPECT_EQ(float16_id, ndt::id_of<float16>::value);
+  EXPECT_EQ(float32_id, ndt::id_of<float>::value);
+  EXPECT_EQ(float64_id, ndt::id_of<double>::value);
+  EXPECT_EQ(float128_id, ndt::id_of<float128>::value);
+
+  EXPECT_EQ(complex_float32_id, ndt::id_of<dynd::complex<float>>::value);
+  EXPECT_EQ(complex_float64_id, ndt::id_of<dynd::complex<double>>::value);
+
+  EXPECT_EQ(void_id, ndt::id_of<void>::value);
+
+  /*
+    EXPECT_EQ(ndt::make_type<ndt::fixed_bytes_kind_type>(), ndt::type(fixed_bytes_id));
+    EXPECT_EQ(ndt::make_type<ndt::pointer_type>(ndt::make_type<ndt::any_kind_type>()), ndt::type(pointer_id));
+  */
+}

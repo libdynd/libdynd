@@ -113,3 +113,5 @@ TEST(Bytes, Summary) {
   hexadecimal_print_summarized(ss, x, 10, 12);
   EXPECT_EQ("0001 ... 09", ss.str());
 }
+
+TEST(BytesType, IDOf) { EXPECT_EQ(bytes_id, ndt::id_of<ndt::bytes_type>::value); }

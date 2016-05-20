@@ -3,21 +3,20 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/types/type_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/type_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(TypeType, Create)
-{
+TEST(TypeType, Create) {
   ndt::type d;
 
   // Strings with various encodings and sizes
@@ -32,8 +31,7 @@ TEST(TypeType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(TypeType, BasicNDArray)
-{
+TEST(TypeType, BasicNDArray) {
   nd::array a;
 
   a = ndt::type("int32");
@@ -41,8 +39,7 @@ TEST(TypeType, BasicNDArray)
   EXPECT_EQ(ndt::make_type<int32_t>(), a.as<ndt::type>());
 }
 
-TEST(DTypeDType, StringCasting)
-{
+TEST(DTypeDType, StringCasting) {
   nd::array a;
 
   a = nd::array("int32");
@@ -53,8 +50,7 @@ TEST(DTypeDType, StringCasting)
   EXPECT_EQ("int32", b.as<std::string>());
 }
 
-TEST(DTypeDType, ScalarRefCount)
-{
+TEST(DTypeDType, ScalarRefCount) {
   nd::array a;
   ndt::type d, d2;
   d = ndt::type("Fixed * 12 * int");
@@ -78,8 +74,7 @@ TEST(DTypeDType, ScalarRefCount)
   EXPECT_EQ(1, d.extended()->get_use_count());
 }
 
-TEST(DTypeDType, StridedArrayRefCount)
-{
+TEST(DTypeDType, StridedArrayRefCount) {
   nd::array a;
   ndt::type d;
   d = ndt::type("Fixed * 12 * int");
@@ -125,8 +120,7 @@ TEST(DTypeDType, StridedArrayRefCount)
   EXPECT_EQ(1, d.extended()->get_use_count());
 }
 
-TEST(DTypeDType, FixedArrayRefCount)
-{
+TEST(DTypeDType, FixedArrayRefCount) {
   nd::array a;
   ndt::type d;
   d = ndt::type("Fixed * 12 * int");
@@ -172,8 +166,7 @@ TEST(DTypeDType, FixedArrayRefCount)
   EXPECT_EQ(1, d.extended()->get_use_count());
 }
 
-TEST(DTypeDType, VarArrayRefCount)
-{
+TEST(DTypeDType, VarArrayRefCount) {
   nd::array a;
   ndt::type d;
   d = ndt::type("Fixed * 12 * int");
@@ -181,8 +174,8 @@ TEST(DTypeDType, VarArrayRefCount)
   // 1D Var Array
   a = nd::empty(ndt::make_type<ndt::var_dim_type>(ndt::make_type<ndt::type_type>()));
   // It should have an objectarray memory block type
-//  EXPECT_EQ((uint32_t)objectarray_memory_block_type,
-//            reinterpret_cast<const ndt::var_dim_type::metadata_type *>(a.get()->metadata())->blockref->m_type);
+  //  EXPECT_EQ((uint32_t)objectarray_memory_block_type,
+  //            reinterpret_cast<const ndt::var_dim_type::metadata_type *>(a.get()->metadata())->blockref->m_type);
   a.vals() = nd::empty("10 * type");
   EXPECT_EQ(1, d.extended()->get_use_count());
   a.vals() = d;
@@ -225,8 +218,7 @@ TEST(DTypeDType, VarArrayRefCount)
   EXPECT_EQ(1, d.extended()->get_use_count());
 }
 
-TEST(DTypeDType, CStructRefCount)
-{
+TEST(DTypeDType, CStructRefCount) {
   nd::array a;
   ndt::type d;
   d = ndt::type("Fixed * 12 * int");
@@ -275,8 +267,7 @@ TEST(DTypeDType, CStructRefCount)
   EXPECT_EQ(1, d.extended()->get_use_count());
 }
 
-TEST(DTypeDType, StructRefCount)
-{
+TEST(DTypeDType, StructRefCount) {
   nd::array a;
   ndt::type d;
   d = ndt::type("Fixed * 12 * int");
@@ -324,3 +315,5 @@ TEST(DTypeDType, StructRefCount)
   a = 1.0;
   EXPECT_EQ(1, d.extended()->get_use_count());
 }
+
+TEST(TypeType, IDOf) { EXPECT_EQ(type_id, ndt::id_of<ndt::type_type>::value); }
