@@ -50,11 +50,8 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
   };
 
+  template <>
+  struct id_of<fixed_string_type> : std::integral_constant<type_id_t, fixed_string_id> {};
+
 } // namespace dynd::ndt
-
-template <>
-struct type_id_of<ndt::fixed_string_type> {
-  static const type_id_t value = fixed_string_id;
-};
-
 } // namespace dynd

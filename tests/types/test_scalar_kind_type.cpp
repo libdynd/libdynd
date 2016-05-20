@@ -37,3 +37,5 @@ TEST(ScalarKindType, Match) {
   EXPECT_FALSE(tp.match(ndt::type("Fixed * Any")));
   EXPECT_FALSE(tp.match(ndt::type("Dims... * float64")));
 }
+
+TEST(ScalarKindType, IDOf) { EXPECT_EQ(scalar_kind_id, ndt::id_of<ndt::scalar_kind_type>::value); }

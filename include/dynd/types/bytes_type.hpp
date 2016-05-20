@@ -50,6 +50,12 @@ namespace ndt {
   };
 
   template <>
+  struct id_of<bytes> : std::integral_constant<type_id_t, bytes_id> {};
+
+  template <>
+  struct id_of<bytes_type> : std::integral_constant<type_id_t, bytes_id> {};
+
+  template <>
   struct traits<bytes> {
     static const size_t ndim = 0;
 

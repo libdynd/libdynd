@@ -52,3 +52,5 @@ TEST(BoolKindType, Match) {
 
   EXPECT_FALSE(bool_kind_tp.match(ndt::make_type<void>()));
 }
+
+TEST(BoolKindType, IDOf) { EXPECT_EQ(bool_kind_id, ndt::id_of<ndt::bool_kind_type>::value); }

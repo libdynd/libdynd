@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/types/array_type.hpp>
@@ -14,8 +14,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(ArrayType, Constructor)
-{
+TEST(ArrayType, Constructor) {
   ndt::type array_tp = ndt::make_type<ndt::array_type>();
   EXPECT_EQ(array_id, array_tp.get_id());
   EXPECT_EQ(scalar_kind_id, array_tp.get_base_id());
@@ -24,3 +23,5 @@ TEST(ArrayType, Constructor)
   EXPECT_FALSE(array_tp.is_expression());
   EXPECT_EQ(array_tp, ndt::type(array_tp.str())); // Round trip through a string
 }
+
+TEST(ArrayType, IDOf) { EXPECT_EQ(array_id, ndt::id_of<ndt::array_type>::value); }

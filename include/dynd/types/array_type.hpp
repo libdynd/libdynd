@@ -25,5 +25,8 @@ namespace ndt {
     void print_type(std::ostream &o) const;
   };
 
+  template <>
+  struct id_of<array_type> : std::integral_constant<type_id_t, array_id> {};
+
 } // namespace dynd::ndt
 } // namespace dynd

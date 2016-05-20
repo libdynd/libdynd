@@ -52,3 +52,5 @@ TEST(FloatKindType, Match) {
 
   EXPECT_FALSE(float_kind_tp.match(ndt::make_type<void>()));
 }
+
+TEST(FloatKindType, IDOf) { EXPECT_EQ(float_kind_id, ndt::id_of<ndt::float_kind_type>::value); }

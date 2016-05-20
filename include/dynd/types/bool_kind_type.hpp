@@ -28,5 +28,8 @@ namespace ndt {
     bool operator==(const base_type &rhs) const { return this == &rhs || rhs.get_id() == bool_kind_id; }
   };
 
+  template <>
+  struct id_of<bool_kind_type> : std::integral_constant<type_id_t, bool_kind_id> {};
+
 } // namespace dynd::ndt
 } // namespace dynd

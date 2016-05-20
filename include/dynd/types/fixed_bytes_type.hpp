@@ -33,11 +33,8 @@ namespace ndt {
                              const std::string &DYND_UNUSED(indent)) const {}
   };
 
+  template <>
+  struct id_of<fixed_bytes_type> : std::integral_constant<type_id_t, fixed_bytes_id> {};
+
 } // namespace dynd::ndt
-
-template <>
-struct type_id_of<ndt::fixed_bytes_type> {
-  static const type_id_t value = fixed_bytes_id;
-};
-
 } // namespace dynd

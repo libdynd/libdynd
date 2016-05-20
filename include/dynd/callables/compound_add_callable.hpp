@@ -15,8 +15,8 @@ namespace nd {
   class compound_add_callable : public default_instantiable_callable<compound_add_kernel<ReturnType, Arg0Type>> {
   public:
     compound_add_callable()
-        : default_instantiable_callable<compound_add_kernel<ReturnType, Arg0Type>>(ndt::make_type<ndt::callable_type>(
-              ndt::type(type_id_of<ReturnType>::value), {ndt::type(type_id_of<Arg0Type>::value)})) {}
+        : default_instantiable_callable<compound_add_kernel<ReturnType, Arg0Type>>(
+              ndt::make_type<ndt::callable_type>(ndt::make_type<ReturnType>(), {ndt::make_type<Arg0Type>()})) {}
   };
 
 } // namespace dynd::nd

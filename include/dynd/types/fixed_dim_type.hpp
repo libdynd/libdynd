@@ -202,6 +202,9 @@ namespace ndt {
     virtual type with_element_type(const type &element_tp) const;
   };
 
+  template <>
+  struct id_of<fixed_dim_type> : std::integral_constant<type_id_t, fixed_dim_id> {};
+
   DYNDT_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 
   DYNDT_API type make_fixed_dim(intptr_t ndim, const intptr_t *shape, const type &dtp);

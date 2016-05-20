@@ -114,6 +114,12 @@ namespace ndt {
   };
 
   template <>
+  struct id_of<string> : std::integral_constant<type_id_t, string_id> {};
+
+  template <>
+  struct id_of<string_type> : std::integral_constant<type_id_t, string_id> {};
+
+  template <>
   struct traits<string> {
     static const size_t ndim = 0;
 

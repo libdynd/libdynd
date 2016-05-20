@@ -93,6 +93,9 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
   };
 
+  template <>
+  struct id_of<pointer_type> : std::integral_constant<type_id_t, pointer_id> {};
+
   template <typename T>
   struct traits<T *> {
     static const size_t ndim = 0;

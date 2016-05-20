@@ -14,12 +14,6 @@ namespace dynd {
 class bytes;
 class string;
 
-namespace ndt {
-
-  class fixed_dim_type;
-
-} // namespace dynd::ndt
-
 enum type_id_t {
   // The value zero is reserved for an uninitialized type.
   uninitialized_id,
@@ -235,244 +229,85 @@ namespace detail {
   };
 }
 
-// Type trait for the type id
-template <typename T>
-struct type_id_of;
+namespace ndt {
 
-template <typename T>
-struct type_id_of<const T> {
-  static const type_id_t value = type_id_of<T>::value;
-};
+  // Type trait for the type id
+  template <typename T>
+  struct id_of;
 
-// Can't use bool, because it doesn't have a guaranteed sizeof
-template <>
-struct type_id_of<bool1> {
-  static const type_id_t value = bool_id;
-};
+  // Can't use bool, because it doesn't have a guaranteed sizeof
+  template <>
+  struct id_of<bool1> {
+    static const type_id_t value = bool_id;
+  };
 
-template <>
-struct type_id_of<bool> {
-  static const type_id_t value = bool_id;
-};
+  template <>
+  struct id_of<bool> : std::integral_constant<type_id_t, bool_id> {};
 
-template <>
-struct type_id_of<char> {
-  static const type_id_t value = ((char)-1) < 0 ? int8_id : uint8_id;
-};
+  template <>
+  struct id_of<char> : std::integral_constant<type_id_t, ((char)-1) < 0 ? int8_id : uint8_id> {};
 
-template <>
-struct type_id_of<signed char> {
-  static const type_id_t value = int8_id;
-};
+  template <>
+  struct id_of<signed char> : std::integral_constant<type_id_t, int8_id> {};
 
-template <>
-struct type_id_of<short> {
-  static const type_id_t value = int16_id;
-};
+  template <>
+  struct id_of<short> : std::integral_constant<type_id_t, int16_id> {};
 
-template <>
-struct type_id_of<int> {
-  static const type_id_t value = int32_id;
-};
+  template <>
+  struct id_of<int> : std::integral_constant<type_id_t, int32_id> {};
 
-template <>
-struct type_id_of<long> {
-  static const type_id_t value = static_cast<type_id_t>(int8_id + detail::log2_x<sizeof(long)>::value);
-};
+  template <>
+  struct id_of<long>
+      : std::integral_constant<type_id_t, static_cast<type_id_t>(int8_id + detail::log2_x<sizeof(long)>::value)> {};
 
-template <>
-struct type_id_of<long long> {
-  static const type_id_t value = int64_id;
-};
+  template <>
+  struct id_of<long long> : std::integral_constant<type_id_t, int64_id> {};
 
-template <>
-struct type_id_of<int128> {
-  static const type_id_t value = int128_id;
-};
+  template <>
+  struct id_of<int128> : std::integral_constant<type_id_t, int128_id> {};
 
-template <>
-struct type_id_of<uint8_t> {
-  static const type_id_t value = uint8_id;
-};
+  template <>
+  struct id_of<uint8_t> : std::integral_constant<type_id_t, uint8_id> {};
 
-template <>
-struct type_id_of<uint16_t> {
-  static const type_id_t value = uint16_id;
-};
+  template <>
+  struct id_of<uint16_t> : std::integral_constant<type_id_t, uint16_id> {};
 
-template <>
-struct type_id_of<unsigned int> {
-  static const type_id_t value = uint32_id;
-};
+  template <>
+  struct id_of<unsigned int> : std::integral_constant<type_id_t, uint32_id> {};
 
-template <>
-struct type_id_of<unsigned long> {
-  static const type_id_t value = static_cast<type_id_t>(uint8_id + detail::log2_x<sizeof(unsigned long)>::value);
-};
+  template <>
+  struct id_of<unsigned long>
+      : std::integral_constant<type_id_t,
+                               static_cast<type_id_t>(uint8_id + detail::log2_x<sizeof(unsigned long)>::value)> {};
 
-template <>
-struct type_id_of<unsigned long long> {
-  static const type_id_t value = uint64_id;
-};
+  template <>
+  struct id_of<unsigned long long> : std::integral_constant<type_id_t, uint64_id> {};
 
-template <>
-struct type_id_of<uint128> {
-  static const type_id_t value = uint128_id;
-};
+  template <>
+  struct id_of<uint128> : std::integral_constant<type_id_t, uint128_id> {};
 
-template <>
-struct type_id_of<float16> {
-  static const type_id_t value = float16_id;
-};
+  template <>
+  struct id_of<float16> : std::integral_constant<type_id_t, float16_id> {};
 
-template <>
-struct type_id_of<float32> {
-  static const type_id_t value = float32_id;
-};
+  template <>
+  struct id_of<float32> : std::integral_constant<type_id_t, float32_id> {};
 
-template <>
-struct type_id_of<float64> {
-  static const type_id_t value = float64_id;
-};
+  template <>
+  struct id_of<float64> : std::integral_constant<type_id_t, float64_id> {};
 
-template <>
-struct type_id_of<float128> {
-  static const type_id_t value = float128_id;
-};
+  template <>
+  struct id_of<float128> : std::integral_constant<type_id_t, float128_id> {};
 
-template <>
-struct type_id_of<complex64> {
-  static const type_id_t value = complex_float32_id;
-};
+  template <>
+  struct id_of<complex64> : std::integral_constant<type_id_t, complex_float32_id> {};
 
-template <>
-struct type_id_of<complex128> {
-  static const type_id_t value = complex_float64_id;
-};
+  template <>
+  struct id_of<complex128> : std::integral_constant<type_id_t, complex_float64_id> {};
 
-template <>
-struct type_id_of<void> {
-  static const type_id_t value = void_id;
-};
+  template <>
+  struct id_of<void> : std::integral_constant<type_id_t, void_id> {};
 
-template <>
-struct type_id_of<dynd::bytes> {
-  static const type_id_t value = bytes_id;
-};
-
-template <>
-struct type_id_of<dynd::string> {
-  static const type_id_t value = string_id;
-};
-
-template <>
-struct type_id_of<ndt::type> {
-  static const type_id_t value = type_id;
-};
-
-template <>
-struct type_id_of<ndt::fixed_dim_type> {
-  static const type_id_t value = fixed_dim_id;
-};
-
-// Also allow type_id_of<std::complex<>> as synonyms for
-// type_id_of<dynd_complex<>>
-template <>
-struct type_id_of<std::complex<float>> {
-  static const type_id_t value = complex_float32_id;
-};
-
-template <>
-struct type_id_of<std::complex<double>> {
-  static const type_id_t value = complex_float64_id;
-};
-
-template <type_id_t TypeID>
-struct type_of;
-
-template <>
-struct type_of<bool_id> {
-  typedef bool1 type;
-};
-template <>
-struct type_of<int8_id> {
-  typedef int8 type;
-};
-template <>
-struct type_of<int16_id> {
-  typedef int16 type;
-};
-template <>
-struct type_of<int32_id> {
-  typedef int32 type;
-};
-template <>
-struct type_of<int64_id> {
-  typedef int64 type;
-};
-template <>
-struct type_of<int128_id> {
-  typedef int128 type;
-};
-template <>
-struct type_of<uint8_id> {
-  typedef uint8 type;
-};
-template <>
-struct type_of<uint16_id> {
-  typedef uint16 type;
-};
-template <>
-struct type_of<uint32_id> {
-  typedef uint32 type;
-};
-template <>
-struct type_of<uint64_id> {
-  typedef uint64 type;
-};
-template <>
-struct type_of<uint128_id> {
-  typedef uint128 type;
-};
-template <>
-struct type_of<float16_id> {
-  typedef float16 type;
-};
-template <>
-struct type_of<float32_id> {
-  typedef float32 type;
-};
-template <>
-struct type_of<float64_id> {
-  typedef float64 type;
-};
-template <>
-struct type_of<float128_id> {
-  typedef float128 type;
-};
-template <>
-struct type_of<complex_float32_id> {
-  typedef complex64 type;
-};
-template <>
-struct type_of<complex_float64_id> {
-  typedef complex128 type;
-};
-
-template <>
-struct type_of<bytes_id> {
-  typedef bytes type;
-};
-
-template <>
-struct type_of<string_id> {
-  typedef string type;
-};
-
-template <>
-struct type_of<type_id> {
-  typedef ndt::type type;
-};
+} // namespace dynd::ndt
 
 template <type_id_t ID>
 struct base_id_of;
@@ -789,7 +624,7 @@ struct is_dynd_scalar<std::complex<double>> {
 // a type property.
 template <typename T>
 struct property_type_id_of {
-  static const type_id_t value = type_id_of<T>::value;
+  static const type_id_t value = ndt::id_of<T>::value;
 };
 
 template <>

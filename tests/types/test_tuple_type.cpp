@@ -3,16 +3,16 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "dynd_assertions.hpp"
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/types/tuple_type.hpp>
-#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/json_parser.hpp>
+#include <dynd/types/fixed_string_type.hpp>
+#include <dynd/types/tuple_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -74,3 +74,5 @@ TEST(TupleType, Properties) {
   EXPECT_ARRAY_EQ((nd::array{3 * sizeof(size_t), 3 * sizeof(size_t), 3 * sizeof(size_t)}),
                   tp.p<std::vector<uintptr_t>>("metadata_offsets"));
 }
+
+TEST(TupleType, IDOf) { EXPECT_EQ(tuple_id, ndt::id_of<ndt::tuple_type>::value); }

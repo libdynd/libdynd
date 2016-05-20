@@ -44,5 +44,11 @@ namespace ndt {
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
   };
 
+  template <>
+  struct id_of<type_type> : std::integral_constant<type_id_t, type_id> {};
+
+  template <>
+  struct id_of<type> : std::integral_constant<type_id_t, type_id> {};
+
 } // namespace dynd::ndt
 } // namespace dynd

@@ -52,3 +52,5 @@ TEST(ComplexKindType, Match) {
 
   EXPECT_FALSE(complex_kind_tp.match(ndt::make_type<void>()));
 }
+
+TEST(ComplexKindType, IDOf) { EXPECT_EQ(complex_kind_id, ndt::id_of<ndt::complex_kind_type>::value); }
