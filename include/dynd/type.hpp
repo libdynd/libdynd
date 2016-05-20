@@ -1043,7 +1043,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<std::complex<T>>::value); }
+    static type equivalent() { return make_type<complex<T>>(); }
   };
 
   template <>
