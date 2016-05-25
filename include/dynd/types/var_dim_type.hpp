@@ -25,10 +25,7 @@ namespace ndt {
       size_t size;
     };
 
-    var_dim_type(const type &element_tp = ndt::make_type<ndt::any_kind_type>());
-
-    var_dim_type(size_t ndim, const type &element_tp)
-        : var_dim_type(ndim == 1 ? element_tp : make_type<var_dim_type>(ndim - 1, element_tp)) {}
+    var_dim_type(const type &element_tp = make_type<any_kind_type>());
 
     size_t get_default_data_size() const { return sizeof(data_type); }
 

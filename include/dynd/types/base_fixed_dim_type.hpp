@@ -60,31 +60,13 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
     virtual type with_element_type(const type &element_tp) const;
-
-    static type make(const type &element_tp) { return type(new base_fixed_dim_type(element_tp), false); }
-
-    static type make(const type &element_tp, intptr_t ndim) {
-      if (ndim > 0) {
-        type result = make(element_tp);
-        for (intptr_t i = 1; i < ndim; ++i) {
-          result = make(result);
-        }
-        return result;
-      } else {
-        return element_tp;
-      }
-    }
   };
 
-  DYNDT_API type make_fixed_dim_kind(const type &element_tp);
-
-  inline type make_fixed_dim_kind(const type &uniform_tp, intptr_t ndim) {
-    return base_fixed_dim_type::make(uniform_tp, ndim);
-  }
+  typedef base_fixed_dim_type fixed_dim_kind_type;
 
   template <typename T>
   struct traits<T[]> {
-    static type equivalent() { return base_fixed_dim_type::make(make_type<T>()); }
+    static type equivalent() { return make_type<fixed_dim_kind_type>(make_type<T>()); }
   };
 
   // Need to handle const properly
@@ -92,8 +74,6 @@ namespace ndt {
   struct traits<const T[]> {
     static type equivalent() { return make_type<T[]>(); }
   };
-
-  typedef base_fixed_dim_type fixed_dim_kind_type;
 
 } // namespace dynd::ndt
 } // namespace dynd

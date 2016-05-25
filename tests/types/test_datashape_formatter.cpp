@@ -50,15 +50,17 @@ TEST(DataShapeFormatter, DTypeStringAtoms) {
 }
 
 TEST(DataShapeFormatter, DTypeUniformArrays) {
-  EXPECT_EQ("Fixed * Fixed * Fixed * int32",
-            format_datashape(ndt::make_fixed_dim_kind(ndt::make_type<int32_t>(), 3), "", false));
+  EXPECT_EQ(
+      "Fixed * Fixed * Fixed * int32",
+      format_datashape(ndt::pow(ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<int32_t>()), 3), "", false));
   EXPECT_EQ("var * int32", format_datashape(ndt::make_type<ndt::var_dim_type>(ndt::make_type<int32_t>()), "", false));
   EXPECT_EQ("var * 3 * int32",
             format_datashape(ndt::make_type<ndt::var_dim_type>(ndt::make_fixed_dim(3, ndt::make_type<int32_t>())), "",
                              false));
   EXPECT_EQ("var * Fixed * int32",
-            format_datashape(ndt::make_type<ndt::var_dim_type>(ndt::make_fixed_dim_kind(ndt::make_type<int32_t>())), "",
-                             false));
+            format_datashape(
+                ndt::make_type<ndt::var_dim_type>(ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<int32_t>())),
+                "", false));
 }
 
 TEST(DataShapeFormatter, DTypeStructs) {

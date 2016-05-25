@@ -101,24 +101,25 @@ TEST(DataShapeParser, StringAtoms) {
 }
 
 TEST(DataShapeParser, Option) {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>())),
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>())),
             ndt::type("Fixed * option[bool]"));
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>())),
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>())),
             ndt::type("Fixed * ?bool"));
-  EXPECT_EQ(
-      ndt::make_fixed_dim_kind(ndt::make_type<ndt::option_type>(ndt::make_fixed_dim_kind(ndt::make_type<float>()))),
-      ndt::type("Fixed * option[Fixed * float32]"));
-  EXPECT_EQ(
-      ndt::make_fixed_dim_kind(ndt::make_type<ndt::option_type>(ndt::make_fixed_dim_kind(ndt::make_type<float>()))),
-      ndt::type("Fixed * ?Fixed * float32"));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_kind_type>(
+                ndt::make_type<ndt::option_type>(ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<float>()))),
+            ndt::type("Fixed * option[Fixed * float32]"));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_kind_type>(
+                ndt::make_type<ndt::option_type>(ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<float>()))),
+            ndt::type("Fixed * ?Fixed * float32"));
   EXPECT_EQ(ndt::make_type<ndt::struct_type>({{ndt::make_type<ndt::option_type>(ndt::make_type<int32_t>()), "x"},
                                               {ndt::make_type<ndt::option_type>(ndt::make_type<int64_t>()), "y"}}),
             ndt::type("{x : ?int32, y : ?int64}"));
 }
 
 TEST(DataShapeParser, StridedDim) {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<bool1>()), ndt::type("Fixed * bool"));
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<float>(), 2), ndt::type("Fixed * Fixed * float32"));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<bool1>()), ndt::type("Fixed * bool"));
+  EXPECT_EQ(ndt::pow(ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<float>()), 2),
+            ndt::type("Fixed * Fixed * float32"));
   EXPECT_EQ(ndt::type("Fixed * Fixed * float32"), ndt::type("Fixed**2 * float32"));
 }
 
@@ -137,16 +138,16 @@ TEST(DataShapeParser, VarDim) {
 }
 
 TEST(DataShapeParser, StridedFixedDim) {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_fixed_dim(3, ndt::make_type<float>())),
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_fixed_dim(3, ndt::make_type<float>())),
             ndt::type("Fixed * 3 * float32"));
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim_kind(ndt::make_type<float>())),
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<float>())),
             ndt::type("3 * Fixed * float32"));
 }
 
 TEST(DataShapeParser, StridedVarFixedDim) {
-  EXPECT_EQ(
-      ndt::make_fixed_dim_kind(ndt::make_type<ndt::var_dim_type>(ndt::make_fixed_dim(3, ndt::make_type<float>()))),
-      ndt::type("Fixed * var * 3 * float32"));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_kind_type>(
+                ndt::make_type<ndt::var_dim_type>(ndt::make_fixed_dim(3, ndt::make_type<float>()))),
+            ndt::type("Fixed * var * 3 * float32"));
 }
 
 TEST(DataShapeParser, TypeVarConstructed) {

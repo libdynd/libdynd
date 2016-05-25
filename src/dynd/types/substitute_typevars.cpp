@@ -54,7 +54,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
   case fixed_dim_id:
     if (!pattern.extended<base_fixed_dim_type>()->is_sized()) {
       if (!concrete) {
-        return ndt::make_fixed_dim_kind(
+        return ndt::make_type<ndt::fixed_dim_kind_type>(
             ndt::substitute(pattern.extended<base_dim_type>()->get_element_type(), typevars, concrete));
       } else {
         throw invalid_argument("The dynd pattern type includes a symbolic "
@@ -138,7 +138,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
         switch (it->second.get_id()) {
         case fixed_dim_id:
           if (!it->second.extended<base_fixed_dim_type>()->is_sized()) {
-            return ndt::make_fixed_dim_kind(
+            return ndt::make_type<ndt::fixed_dim_kind_type>(
                 ndt::substitute(pattern.extended<typevar_dim_type>()->get_element_type(), typevars, concrete));
           } else {
             return ndt::make_fixed_dim(
@@ -239,7 +239,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
             throw invalid_argument(ss.str());
           }
           for (intptr_t i = 0; i < exponent; ++i) {
-            result = ndt::make_fixed_dim_kind(result);
+            result = ndt::make_type<ndt::fixed_dim_kind_type>(result);
           }
           return result;
         } else {
