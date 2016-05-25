@@ -12,7 +12,8 @@ namespace ndt {
 
   class DYNDT_API array_type : public base_type {
   public:
-    array_type();
+    array_type()
+        : base_type(array_id, sizeof(void *), alignof(void *), type_flag_construct | type_flag_destructor, 0, 0, 0) {}
 
     bool operator==(const base_type &rhs) const;
 

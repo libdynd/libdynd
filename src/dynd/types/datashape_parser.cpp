@@ -1075,7 +1075,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
           ndt::type element_tp = parse_datashape(begin, end, symtable);
           if ('0' <= *bbegin && *bbegin <= '9') {
             intptr_t dim_size = parse<intptr_t>(bbegin, bend);
-            result = ndt::make_fixed_dim(dim_size, element_tp, exponent);
+            result = ndt::pow(ndt::make_fixed_dim(dim_size, element_tp), exponent);
           } else if (compare_range_to_literal(bbegin, bend, "var")) {
             result = ndt::pow(ndt::make_type<ndt::var_dim_type>(element_tp), exponent);
           } else if (compare_range_to_literal(bbegin, bend, "Fixed")) {
@@ -1144,8 +1144,6 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       } else {
         throw datashape_parse_error(begin, "expected a '*'");
       }
-    } else if (parse_token_ds(begin, end, '|')) {
-      result = ndt::make_type<ndt::type_type>(parse_datashape(begin, end, symtable));
     } else if (compare_range_to_literal(nbegin, nend, "string")) {
       result = parse_string_parameters(begin, end);
     } else if (compare_range_to_literal(nbegin, nend, "fixed_string")) {
@@ -1285,14 +1283,6 @@ static ndt::type parse_stmt(const char *&rbegin, const char *end, map<std::strin
       } else {
         return ndt::type();
       }
-    }
-    if (parse_token_ds(begin, end, '|')) {
-      ndt::type pattern = parse_datashape(begin, end, symtable);
-      if (pattern.is_null()) {
-        throw datashape_parse_error(begin, "expected a data type");
-      }
-      rbegin = begin;
-      return ndt::make_type<ndt::type_type>(pattern);
     }
     if (!parse_name_no_ws(begin, end, tname_begin, tname_end)) {
       skip_whitespace_and_pound_comments(begin, end);

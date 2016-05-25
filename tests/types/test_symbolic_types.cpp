@@ -187,18 +187,6 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
   EXPECT_THROW(ndt::make_ellipsis_dim("Two+", ndt::make_type<int>()), type_error);
 }
 
-TEST(SymbolicTypes, TypeTypeWithPattern) {
-  ndt::type tp;
-
-  tp = ndt::make_type<ndt::type_type>(ndt::type("N * int32"));
-  EXPECT_FALSE(tp.is_symbolic());
-  EXPECT_EQ(ndt::type("N * int32"), tp.extended<ndt::type_type>()->get_pattern_type());
-  EXPECT_EQ(tp, ndt::type(tp.str()));
-
-  // The pattern type must be symbolic
-  EXPECT_THROW(ndt::type("type | 4 * int32"), type_error);
-}
-
 TEST(SymbolicTypes, VariadicTuple) {
   ndt::type tp;
 

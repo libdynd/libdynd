@@ -10,39 +10,13 @@
 using namespace std;
 using namespace dynd;
 
-ndt::type_type::type_type()
-    : base_type(dynd::type_id, sizeof(ndt::type), sizeof(ndt::type), type_flag_zeroinit | type_flag_destructor, 0, 0,
-                0) {}
-
-ndt::type_type::type_type(const type &pattern_tp)
-    : base_type(dynd::type_id, sizeof(ndt::type), sizeof(ndt::type), type_flag_zeroinit | type_flag_destructor, 0, 0,
-                0),
-      m_pattern_tp(pattern_tp) {
-  if (!m_pattern_tp.is_symbolic()) {
-    throw type_error("type_type must have a symbolic type for a pattern");
-  }
-}
-
 void ndt::type_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const {
   o << *reinterpret_cast<const ndt::type *>(data);
 }
 
-void ndt::type_type::print_type(std::ostream &o) const {
-  o << "type";
-  if (!m_pattern_tp.is_null()) {
-    o << " | " << m_pattern_tp;
-  }
-}
+void ndt::type_type::print_type(std::ostream &o) const { o << "type"; }
 
-bool ndt::type_type::operator==(const base_type &rhs) const {
-  if (this == &rhs) {
-    return true;
-  } else if (rhs.get_id() != type_id) {
-    return false;
-  } else {
-    return m_pattern_tp == static_cast<const type_type *>(&rhs)->m_pattern_tp;
-  }
-}
+bool ndt::type_type::operator==(const base_type &rhs) const { return this == &rhs || rhs.get_id() == type_id; }
 
 void ndt::type_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const {}
 

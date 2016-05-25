@@ -399,18 +399,6 @@ void ndt::fixed_dim_type::foreach_leading(const char *arrmeta, char *data, forea
   }
 }
 
-ndt::type ndt::make_fixed_dim(size_t dim_size, const type &element_tp) {
-  return type(new fixed_dim_type(dim_size, element_tp), false);
-}
-
-ndt::type ndt::make_fixed_dim(intptr_t ndim, const intptr_t *shape, const type &uniform_tp) {
-  type result = uniform_tp;
-  for (ptrdiff_t i = (ptrdiff_t)ndim - 1; i >= 0; --i) {
-    result = make_fixed_dim(shape[i], result);
-  }
-  return result;
-}
-
 void ndt::fixed_dim_type::reorder_default_constructed_strides(char *dst_arrmeta, const type &src_tp,
                                                               const char *src_arrmeta) const {
   if (m_element_tp.get_id() != fixed_dim_id) {

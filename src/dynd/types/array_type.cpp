@@ -9,11 +9,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::array_type::array_type()
-    : base_type(array_id, sizeof(void *), alignof(void *), type_flag_construct | type_flag_destructor, 0, 0, 0)
-{
-}
-
 bool ndt::array_type::operator==(const base_type &rhs) const { return this == &rhs || rhs.get_id() == array_id; }
 
 void ndt::array_type::data_construct(const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data)) const

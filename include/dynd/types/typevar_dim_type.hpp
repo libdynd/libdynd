@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <dynd/types/base_dim_type.hpp>
+#include <dynd/types/typevar_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -17,7 +18,18 @@ namespace ndt {
     std::string m_name;
 
   public:
-    typevar_dim_type(const std::string &name, const type &element_type);
+    typevar_dim_type(const std::string &name, const type &element_type)
+        : base_dim_type(typevar_dim_id, element_type, 0, 1, 0, type_flag_symbolic, false), m_name(name) {
+      if (m_name.empty()) {
+        throw type_error("dynd typevar name cannot be null");
+      } else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
+        std::stringstream ss;
+        ss << "dynd typevar name ";
+        print_escaped_utf8_string(ss, m_name);
+        ss << " is not valid, it must be alphanumeric and begin with a capital";
+        throw type_error(ss.str());
+      }
+    }
 
     typevar_dim_type(const std::string &name, const type &element_tp, size_t ndim)
         : typevar_dim_type(name, ndim == 1 ? element_tp : make_type<typevar_dim_type>(name, element_tp, ndim - 1)) {}

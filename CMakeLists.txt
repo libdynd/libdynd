@@ -172,7 +172,6 @@ set(libdyndt_SRC
     # Types
     src/dynd/types/any_kind_type.cpp
     src/dynd/types/array_type.cpp
-    src/dynd/types/base_bytes_type.cpp
     src/dynd/types/base_type.cpp
     src/dynd/types/base_dim_type.cpp
     src/dynd/types/base_expr_type.cpp
@@ -533,7 +532,7 @@ endif()
 if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
     # If we're not making an installable static library,
     # link the sublibraries normally
-    set(DYND_LINK_LIBS ${DYND_LINK_LIBS} libdyndt)    
+    set(DYND_LINK_LIBS ${DYND_LINK_LIBS} libdyndt)
 endif()
 
 target_link_libraries(libdyndt ${DYNDT_LINK_LIBS})

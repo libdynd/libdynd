@@ -37,7 +37,34 @@ namespace ndt {
      */
     bool m_variadic;
 
-    tuple_type(type_id_t id, size_t size, const type *element_tp, bool variadic, uint32_t flags);
+    tuple_type(type_id_t id, size_t size, const type *element_tp, bool variadic, uint32_t flags)
+        : base_type(id, 0, 1, flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
+          m_field_count(size), m_field_types(size), m_arrmeta_offsets(size), m_variadic(variadic) {
+      // Calculate the needed element alignment and arrmeta offsets
+      size_t arrmeta_offset = get_field_count() * sizeof(size_t);
+
+      this->m_data_alignment = 1;
+
+      for (intptr_t i = 0; i < m_field_count; ++i) {
+        m_field_types[i] = element_tp[i];
+      }
+
+      for (intptr_t i = 0; i != m_field_count; ++i) {
+        const type &ft = get_field_type(i);
+        size_t field_alignment = ft.get_data_alignment();
+        // Accumulate the biggest field alignment as the type alignment
+        if (field_alignment > this->m_data_alignment) {
+          this->m_data_alignment = (uint8_t)field_alignment;
+        }
+        // Inherit any operand flags from the fields
+        this->flags |= (ft.get_flags() & type_flags_operand_inherited);
+        // Calculate the arrmeta offsets
+        m_arrmeta_offsets[i] = arrmeta_offset;
+        arrmeta_offset += ft.get_arrmeta_size();
+      }
+
+      this->m_metadata_size = arrmeta_offset;
+    }
 
   public:
     tuple_type(size_t size, const type *element_tp, bool variadic = false)

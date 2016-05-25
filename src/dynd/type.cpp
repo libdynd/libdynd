@@ -306,7 +306,8 @@ const ndt::type &ndt::type::value_type() const {
 ndt::type ndt::type::with_new_axis(intptr_t i, intptr_t new_ndim) const {
   ndt::type tp = without_memory_type();
 
-  tp = tp.with_replaced_dtype(ndt::make_fixed_dim(1, tp.get_type_at_dimension(NULL, i), new_ndim), tp.get_ndim() - i);
+  tp = tp.with_replaced_dtype(ndt::pow(ndt::make_fixed_dim(1, tp.get_type_at_dimension(NULL, i)), new_ndim),
+                              tp.get_ndim() - i);
   if (get_base_id() == memory_id) {
     tp = extended<base_memory_type>()->with_replaced_storage_type(tp);
   }
