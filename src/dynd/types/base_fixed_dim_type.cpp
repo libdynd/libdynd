@@ -183,8 +183,6 @@ ndt::base_fixed_dim_type::get_dynamic_type_properties() const {
   return properties;
 }
 
-ndt::type ndt::make_fixed_dim_kind(const type &element_tp) { return type(new base_fixed_dim_type(element_tp), false); }
-
 ndt::type ndt::base_fixed_dim_type::with_element_type(const type &element_tp) const {
-  return make_fixed_dim_kind(element_tp);
+  return make_type<fixed_dim_kind_type>(element_tp);
 }

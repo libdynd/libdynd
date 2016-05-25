@@ -222,7 +222,7 @@ namespace ndt {
   struct traits<fixed_dim<ElementType>> {
     static const bool is_same_layout = false;
 
-    static type equivalent() { return base_fixed_dim_type::make(make_type<ElementType>()); }
+    static type equivalent() { return make_type<fixed_dim_kind_type>(make_type<ElementType>()); }
   };
 
 } // namespace dynd::ndt

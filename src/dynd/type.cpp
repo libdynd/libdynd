@@ -575,7 +575,7 @@ DYNDT_API map<type_id_t, ndt::reg_info_t> &ndt::detail::infos() {
       {tuple_id, {make_type<tuple_type>(true)}},
       {struct_id, {make_type<struct_type>(true)}},
       {fixed_dim_kind_id, {type()}},
-      {fixed_dim_id, {base_fixed_dim_type::make(make_type<any_kind_type>())}},
+      {fixed_dim_id, {make_type<fixed_dim_kind_type>(make_type<any_kind_type>())}},
       {var_dim_id, {ndt::make_type<ndt::var_dim_type>(make_type<any_kind_type>())}},
       {categorical_id, {make_type<categorical_kind_type>()}},
       {option_id, {make_type<option_type>(make_type<any_kind_type>())}},
@@ -585,6 +585,17 @@ DYNDT_API map<type_id_t, ndt::reg_info_t> &ndt::detail::infos() {
       {callable_id, {type()}}};
 
   return infos;
+}
+
+DYNDT_API ndt::type ndt::pow(const type &base_tp, size_t exponent) {
+  switch (exponent) {
+  case 0:
+    return base_tp.extended<base_dim_type>()->get_element_type();
+  case 1:
+    return base_tp;
+  default:
+    return base_tp.extended<base_dim_type>()->with_element_type(pow(base_tp, exponent - 1));
+  }
 }
 
 DYNDT_API void ndt::reg(type_id_t id, const ndt::type &tp) {

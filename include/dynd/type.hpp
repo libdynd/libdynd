@@ -756,6 +756,8 @@ namespace ndt {
     return detail::_make_type<T>(0, std::forward<ArgTypes>(args)...);
   }
 
+  DYNDT_API type pow(const type &base_tp, size_t exponent);
+
   template <typename ValueType>
   type type_for(const ValueType &value) {
     return make_type<ValueType>(value);
