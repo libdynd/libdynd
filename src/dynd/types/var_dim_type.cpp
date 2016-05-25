@@ -15,18 +15,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::var_dim_type::var_dim_type(const type &element_tp)
-    : base_dim_type(var_dim_id, element_tp, sizeof(data_type), alignof(data_type), sizeof(metadata_type),
-                    type_flag_zeroinit | type_flag_blockref, false) {
-  // NOTE: The element type may have type_flag_destructor set. In this case,
-  //       the var_dim type does NOT need to also set it, because the lifetime
-  //       of the elements it allocates is owned by the
-  //       objectarray_memory_block,
-  //       not by the var_dim elements.
-  // Propagate just the value-inherited flags from the element
-  this->flags |= (element_tp.get_flags() & type_flags_value_inherited);
-}
-
 void ndt::var_dim_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const {
   const metadata_type *md = reinterpret_cast<const metadata_type *>(arrmeta);
   const data_type *d = reinterpret_cast<const data_type *>(data);

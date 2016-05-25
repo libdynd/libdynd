@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <dynd/types/base_type.hpp>
+#include <dynd/types/typevar_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -18,7 +19,26 @@ namespace ndt {
     type m_arg;
 
   public:
-    typevar_constructed_type(const std::string &name, const type &arg);
+    typevar_constructed_type(const std::string &name, const type &arg)
+        : base_type(typevar_constructed_id, 0, 1, type_flag_symbolic, 0, arg.get_ndim(), arg.get_strided_ndim()),
+          m_name(name), m_arg(arg) {
+      //  static ndt::type args_pattern("((...), {...})");
+      if (m_name.empty()) {
+        throw type_error("dynd typevar name cannot be null");
+      } else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
+        std::stringstream ss;
+        ss << "dynd typevar name ";
+        print_escaped_utf8_string(ss, m_name);
+        ss << " is not valid, it must be alphanumeric and begin with a capital";
+        throw type_error(ss.str());
+      }
+      // else if (!args.get_type().match(args_pattern)) {
+      //  stringstream ss;
+      // ss << "dynd constructed typevar must have args matching " << args_pattern
+      // << ", which " << args.get_type() << " does not";
+      // throw type_error(ss.str());
+      //}
+    }
 
     std::string get_name() const { return m_name; }
 

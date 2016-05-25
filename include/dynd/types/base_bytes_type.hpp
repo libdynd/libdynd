@@ -18,9 +18,7 @@ namespace ndt {
   class DYNDT_API base_bytes_type : public base_type {
   public:
     base_bytes_type(type_id_t type_id, size_t data_size, size_t alignment, uint32_t flags, size_t arrmeta_size)
-        : base_type(type_id, data_size, alignment, flags, arrmeta_size, 0, 0)
-    {
-    }
+        : base_type(type_id, data_size, alignment, flags, arrmeta_size, 0, 0) {}
 
     /** Retrieves the data range in which a bytes object is stored */
     virtual void get_bytes_range(const char **out_begin, const char **out_end, const char *arrmeta,
@@ -28,7 +26,7 @@ namespace ndt {
 
     // Bytes types stop the iterdata chain
     // TODO: Maybe it should be more flexible?
-    size_t get_iterdata_size(intptr_t ndim) const;
+    size_t get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const { return 0; }
   };
 
 } // namespace dynd::ndt

@@ -10,8 +10,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::any_kind_type::any_kind_type() : base_type(any_kind_id, 0, 1, type_flag_symbolic | type_flag_variadic, 0, 0, 0) {}
-
 size_t ndt::any_kind_type::get_default_data_size() const {
   stringstream ss;
   ss << "Cannot get default data size of type " << type(this, true);

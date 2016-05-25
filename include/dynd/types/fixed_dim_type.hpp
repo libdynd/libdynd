@@ -19,94 +19,6 @@ struct DYNDT_API fixed_dim_type_iterdata {
   intptr_t stride;
 };
 
-template <typename ElementType, int NDim>
-class fixed_dim_iterator;
-
-template <typename ElementType>
-class fixed_dim : public as_t<ElementType> {
-protected:
-  fixed_dim operator()(const char *metadata, char *data) { return fixed_dim(metadata, data); }
-
-  template <typename Index0Type, typename... IndexType>
-  decltype(auto) operator()(const char *metadata, char *data, Index0Type index0, IndexType... index) {
-    return as_t<ElementType>::operator()(
-        metadata + sizeof(fixed_dim_type_arrmeta),
-        data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride, index...);
-  }
-
-public:
-  static const intptr_t ndim = as_t<ElementType>::ndim + 1;
-  typedef typename as_t<ElementType>::data_type data_type;
-
-  template <int NDim>
-  class iterator_type : public fixed_dim_iterator<ElementType, NDim> {
-  public:
-    iterator_type(const char *metadata, char *data) : fixed_dim_iterator<ElementType, NDim>(metadata, data) {}
-  };
-
-  fixed_dim(const char *metadata, char *data) : as_t<ElementType>(metadata, data) {}
-
-  size_t size() const { return reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size; }
-
-  void set_data(char *data) { this->m_data = data; }
-
-  template <typename... IndexType>
-  decltype(auto) operator()(IndexType... index) {
-    static_assert(sizeof...(IndexType) <= ndim, "too many indices");
-    return (*this)(this->m_metadata, this->m_data, index...);
-  }
-
-  template <int NDim = 1>
-  iterator_type<NDim> begin() {
-    return iterator_type<NDim>(this->m_metadata, this->m_data);
-  }
-
-  template <int NDim = 1>
-  iterator_type<NDim> end() {
-    return iterator_type<NDim>(this->m_metadata,
-                               this->m_data +
-                                   reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size *
-                                       reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->stride);
-  }
-};
-
-template <typename ElementType>
-class fixed_dim_iterator<ElementType, 0> {
-protected:
-  const char *m_metadata;
-  char *m_data;
-
-public:
-  fixed_dim_iterator(const char *metadata, char *data) : m_metadata(metadata), m_data(data) {}
-
-  fixed_dim<ElementType> operator*() { return fixed_dim<ElementType>(m_metadata, m_data); }
-
-  bool operator==(const fixed_dim_iterator &rhs) const { return m_data == rhs.m_data; }
-
-  bool operator!=(const fixed_dim_iterator &rhs) const { return m_data != rhs.m_data; }
-};
-
-template <typename ElementType, int NDim>
-class fixed_dim_iterator : public as_t<ElementType>::template iterator_type<NDim - 1> {
-  intptr_t m_stride;
-
-public:
-  fixed_dim_iterator(const char *metadata, char *data)
-      : as_t<ElementType>::template iterator_type<NDim - 1>(metadata + sizeof(fixed_dim_type_arrmeta), data),
-        m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride) {}
-
-  fixed_dim_iterator &operator++() {
-    this->m_data += m_stride;
-    return *this;
-  }
-
-  fixed_dim_iterator operator++(int) {
-    fixed_dim_iterator tmp(*this);
-    operator++();
-    return tmp;
-  }
-};
-
 namespace ndt {
 
   class DYNDT_API fixed_dim_type : public base_fixed_dim_type {
@@ -205,25 +117,9 @@ namespace ndt {
   template <>
   struct id_of<fixed_dim_type> : std::integral_constant<type_id_t, fixed_dim_id> {};
 
-  DYNDT_API type make_fixed_dim(size_t dim_size, const type &element_tp);
-
-  DYNDT_API type make_fixed_dim(intptr_t ndim, const intptr_t *shape, const type &dtp);
-
-  inline type make_fixed_dim(size_t dim_size, const type &element_tp, intptr_t ndim) {
-    type result = element_tp;
-    for (intptr_t i = 0; i < ndim; ++i) {
-      result = make_fixed_dim(dim_size, result);
-    }
-
-    return result;
+  inline type make_fixed_dim(size_t dim_size, const type &element_tp) {
+    return make_type<fixed_dim_type>(dim_size, element_tp);
   }
-
-  template <typename ElementType>
-  struct traits<fixed_dim<ElementType>> {
-    static const bool is_same_layout = false;
-
-    static type equivalent() { return make_type<fixed_dim_kind_type>(make_type<ElementType>()); }
-  };
 
 } // namespace dynd::ndt
 } // namespace dynd

@@ -14,16 +14,12 @@ namespace ndt {
    * A type whose instance represents a type itself.
    */
   class DYNDT_API type_type : public base_type {
-    type m_pattern_tp;
-
   public:
     typedef type data_type;
 
-    type_type();
-
-    type_type(const type &pattern_tp);
-
-    const type &get_pattern_type() const { return m_pattern_tp; }
+    type_type()
+        : base_type(dynd::type_id, sizeof(ndt::type), sizeof(ndt::type), type_flag_zeroinit | type_flag_destructor, 0,
+                    0, 0) {}
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 

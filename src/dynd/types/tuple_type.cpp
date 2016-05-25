@@ -13,36 +13,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::tuple_type::tuple_type(type_id_t type_id, size_t size, const type *element_tp, bool variadic, uint32_t flags)
-    : base_type(type_id, 0, 1, flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
-      m_field_count(size), m_field_types(size), m_arrmeta_offsets(size), m_variadic(variadic) {
-
-  // Calculate the needed element alignment and arrmeta offsets
-  size_t arrmeta_offset = get_field_count() * sizeof(size_t);
-
-  this->m_data_alignment = 1;
-
-  for (intptr_t i = 0; i < m_field_count; ++i) {
-    m_field_types[i] = element_tp[i];
-  }
-
-  for (intptr_t i = 0; i != m_field_count; ++i) {
-    const type &ft = get_field_type(i);
-    size_t field_alignment = ft.get_data_alignment();
-    // Accumulate the biggest field alignment as the type alignment
-    if (field_alignment > this->m_data_alignment) {
-      this->m_data_alignment = (uint8_t)field_alignment;
-    }
-    // Inherit any operand flags from the fields
-    this->flags |= (ft.get_flags() & type_flags_operand_inherited);
-    // Calculate the arrmeta offsets
-    m_arrmeta_offsets[i] = arrmeta_offset;
-    arrmeta_offset += ft.get_arrmeta_size();
-  }
-
-  this->m_metadata_size = arrmeta_offset;
-}
-
 void ndt::tuple_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const {
   const uintptr_t *data_offsets = reinterpret_cast<const uintptr_t *>(arrmeta);
   o << "[";

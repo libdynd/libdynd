@@ -14,17 +14,13 @@
 #include <dynd/init.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/types/bytes_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 namespace dynd {
-
-namespace ndt {
-  DYNDT_API type make_fixed_dim(size_t dim_size, const type &element_tp);
-} // namespace ndt;
-
 namespace nd {
 
   DYND_API callable &get(const std::string &name);

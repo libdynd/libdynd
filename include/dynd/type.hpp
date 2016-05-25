@@ -122,7 +122,7 @@ DYNDT_API char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata
 namespace ndt {
   typedef type (*type_make_t)(type_id_t tp_id, const nd::array &args);
 
-  DYNDT_API type make_fixed_dim(size_t dim_size, const type &element_tp);
+  inline type make_fixed_dim(size_t dim_size, const type &element_tp);
   inline type make_var_dim(const type &element_tp);
 
   template <typename T>
