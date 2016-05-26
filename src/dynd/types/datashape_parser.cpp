@@ -1081,7 +1081,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
           } else if (compare_range_to_literal(bbegin, bend, "Fixed")) {
             result = ndt::pow(ndt::make_type<ndt::fixed_dim_kind_type>(element_tp), exponent);
           } else if (isupper(*bbegin)) {
-            result = ndt::make_type<ndt::typevar_dim_type>(std::string(bbegin, bend), element_tp, exponent);
+            result = ndt::pow(ndt::make_type<ndt::typevar_dim_type>(std::string(bbegin, bend), element_tp), exponent);
           } else {
             throw datashape_parse_error(bbegin, "invalid dimension type for base of dimensional power");
           }

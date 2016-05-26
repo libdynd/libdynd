@@ -13,50 +13,6 @@
 using namespace std;
 using namespace dynd;
 
-namespace {
-
-std::vector<std::string> names_from_fields(const std::vector<std::pair<ndt::type, std::string>> &fields) {
-  std::vector<std::string> field_names;
-  for (size_t i = 0; i < fields.size(); ++i) {
-    field_names.push_back(fields[i].second);
-  }
-
-  return field_names;
-}
-
-std::vector<ndt::type> types_from_fields(const std::vector<std::pair<ndt::type, std::string>> &fields) {
-  std::vector<ndt::type> field_types;
-  for (size_t i = 0; i < fields.size(); ++i) {
-    field_types.push_back(fields[i].first);
-  }
-
-  return field_types;
-}
-
-} // unnamed namespace
-
-ndt::struct_type::struct_type(type_id_t DYND_UNUSED(id), const std::vector<std::string> &field_names,
-                              const std::vector<type> &field_types, bool variadic)
-    : tuple_type(struct_id, field_types.size(), field_types.data(), variadic, type_flag_none),
-      m_field_names(field_names) {
-  // Make sure that the number of names matches
-  uintptr_t name_count = field_names.size();
-  if (name_count != (uintptr_t)m_field_count) {
-    stringstream ss;
-    ss << "dynd struct type requires that the number of names, " << name_count << " matches the number of types, "
-       << m_field_count;
-    throw invalid_argument(ss.str());
-  }
-
-  for (intptr_t i = 0; i < m_field_count; ++i) {
-    m_field_tp.emplace_back(field_types[i], field_names[i]);
-  }
-}
-
-ndt::struct_type::struct_type(type_id_t DYND_UNUSED(id), const std::vector<std::pair<type, std::string>> &fields,
-                              bool variadic)
-    : struct_type(names_from_fields(fields), types_from_fields(fields), variadic) {}
-
 intptr_t ndt::struct_type::get_field_index(const std::string &name) const {
   auto it = std::find(m_field_names.begin(), m_field_names.end(), name);
   if (it != m_field_names.end()) {

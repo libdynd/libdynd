@@ -13,7 +13,7 @@ namespace ndt {
 
   class DYNDT_API scalar_kind_type : public base_type {
   public:
-    scalar_kind_type();
+    scalar_kind_type() : base_type(scalar_kind_id, 0, 0, type_flag_symbolic, 0, 0, 0) {}
 
     bool operator==(const base_type &rhs) const;
 

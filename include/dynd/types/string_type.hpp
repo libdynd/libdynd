@@ -81,7 +81,8 @@ namespace ndt {
   public:
     typedef string data_type;
 
-    string_type();
+    string_type()
+        : base_string_type(string_id, sizeof(string), alignof(string), type_flag_zeroinit | type_flag_destructor, 0) {}
 
     string_encoding_t get_encoding() const { return m_encoding; }
 

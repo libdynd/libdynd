@@ -21,7 +21,7 @@ namespace ndt {
 
   class DYNDT_API state_type : public base_type {
   public:
-    state_type();
+    state_type() : base_type(state_id, 0, 1, type_flag_symbolic, 0, 0, 0) {}
 
     void print_type(std::ostream &o) const;
 
