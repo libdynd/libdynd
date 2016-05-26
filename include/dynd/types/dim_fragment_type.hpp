@@ -87,6 +87,9 @@ namespace ndt {
     virtual type with_element_type(const type &element_tp) const;
   }; // class dim_fragment_type
 
+  template <>
+  struct id_of<dim_fragment_type> : std::integral_constant<type_id_t, dim_fragment_id> {};
+
   /** Makes a dim fragment out of the tagged dims provided */
   inline type make_dim_fragment(intptr_t ndim, const intptr_t *tagged_dims) {
     if (ndim > 0) {

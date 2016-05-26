@@ -66,5 +66,8 @@ namespace ndt {
                              const std::string &DYND_UNUSED(indent)) const {}
   };
 
+  template <>
+  struct id_of<char_type> : std::integral_constant<type_id_t, char_id> {};
+
 } // namespace dynd::ndt
 } // namespace dynd

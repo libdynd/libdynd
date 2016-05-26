@@ -73,5 +73,8 @@ namespace ndt {
     virtual type with_element_type(const type &element_tp) const;
   };
 
+  template <>
+  struct id_of<pow_dimsym_type> : std::integral_constant<type_id_t, pow_dimsym_id> {};
+
 } // namespace dynd::ndt
 } // namespace dynd

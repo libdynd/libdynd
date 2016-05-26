@@ -29,6 +29,9 @@ namespace ndt {
   };
 
   template <>
+  struct id_of<state_type> : std::integral_constant<type_id_t, state_id> {};
+
+  template <>
   struct traits<nd::state> {
     static type equivalent() { return make_type<state_type>(); }
   };
