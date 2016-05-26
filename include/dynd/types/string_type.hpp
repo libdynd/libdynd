@@ -140,5 +140,32 @@ namespace ndt {
     static type equivalent() { return make_type<string>(); }
   };
 
+  template <>
+  struct traits<const char *> {
+    static const size_t ndim = 0;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return make_type<string_type>(); }
+  };
+
+  template <size_t N>
+  struct traits<char[N]> {
+    static const size_t ndim = 0;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return make_type<string_type>(); }
+  };
+
+  template <size_t N>
+  struct traits<const char[N]> {
+    static const size_t ndim = 0;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return make_type<string_type>(); }
+  };
+
 } // namespace dynd::ndt
 } // namespace dynd
