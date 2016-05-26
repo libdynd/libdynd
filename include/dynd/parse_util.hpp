@@ -1225,7 +1225,7 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
       break;
     }
     std::stringstream ss;
-    ss << "No NA value has been configured for option[" << ndt::type(tid) << "]";
+    ss << "No NA value has been configured for option[" << tid << "]";
     throw type_error(ss.str());
   }
 

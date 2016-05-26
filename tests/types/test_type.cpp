@@ -33,7 +33,7 @@ TEST(Type, BasicConstructor) {
   EXPECT_TRUE(d.is_builtin());
 
   // void type
-  d = ndt::type(void_id);
+  d = ndt::make_type<void>();
   EXPECT_EQ(void_id, d.get_id());
   EXPECT_EQ(any_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
@@ -43,7 +43,7 @@ TEST(Type, BasicConstructor) {
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // bool type
-  d = ndt::type(bool_id);
+  d = ndt::make_type<bool>();
   EXPECT_EQ(bool_id, d.get_id());
   EXPECT_EQ(bool_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
@@ -53,7 +53,7 @@ TEST(Type, BasicConstructor) {
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // int8 type
-  d = ndt::type(int8_id);
+  d = ndt::make_type<int8_t>();
   EXPECT_EQ(int8_id, d.get_id());
   EXPECT_EQ(int_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
@@ -63,7 +63,7 @@ TEST(Type, BasicConstructor) {
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // int16 type
-  d = ndt::type(int16_id);
+  d = ndt::make_type<int16_t>();
   EXPECT_EQ(int_kind_id, d.get_base_id());
   EXPECT_EQ(2u, d.get_data_alignment());
   EXPECT_EQ(2u, d.get_data_size());
@@ -72,7 +72,7 @@ TEST(Type, BasicConstructor) {
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // int32 type
-  d = ndt::type(int32_id);
+  d = ndt::make_type<int32_t>();
   EXPECT_EQ(int32_id, d.get_id());
   EXPECT_EQ(int_kind_id, d.get_base_id());
   EXPECT_EQ(4u, d.get_data_alignment());
@@ -158,30 +158,6 @@ TEST(Type, BasicConstructor) {
   EXPECT_TRUE(d.is_builtin());
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
-}
-
-TEST(Type, TypeIDConstructor) {
-  EXPECT_EQ(bool_id, ndt::type(bool_id).get_id());
-  EXPECT_EQ(int8_id, ndt::type(int8_id).get_id());
-  EXPECT_EQ(int16_id, ndt::type(int16_id).get_id());
-  EXPECT_EQ(int32_id, ndt::type(int32_id).get_id());
-  EXPECT_EQ(int64_id, ndt::type(int64_id).get_id());
-  EXPECT_EQ(int128_id, ndt::type(int128_id).get_id());
-  EXPECT_EQ(uint8_id, ndt::type(uint8_id).get_id());
-  EXPECT_EQ(uint16_id, ndt::type(uint16_id).get_id());
-  EXPECT_EQ(uint32_id, ndt::type(uint32_id).get_id());
-  EXPECT_EQ(uint64_id, ndt::type(uint64_id).get_id());
-  EXPECT_EQ(uint128_id, ndt::type(uint128_id).get_id());
-  EXPECT_EQ(float16_id, ndt::type(float16_id).get_id());
-  EXPECT_EQ(float32_id, ndt::type(float32_id).get_id());
-  EXPECT_EQ(float64_id, ndt::type(float64_id).get_id());
-  EXPECT_EQ(float128_id, ndt::type(float128_id).get_id());
-  EXPECT_EQ(complex_float32_id, ndt::type(complex_float32_id).get_id());
-  EXPECT_EQ(complex_float64_id, ndt::type(complex_float64_id).get_id());
-  EXPECT_EQ(void_id, ndt::type(void_id).get_id());
-  EXPECT_EQ(ndt::make_type<ndt::bytes_type>(), ndt::type(bytes_id));
-  EXPECT_EQ(ndt::make_type<ndt::fixed_bytes_kind_type>(), ndt::type(fixed_bytes_id));
-  EXPECT_EQ(ndt::make_type<ndt::pointer_type>(ndt::make_type<ndt::any_kind_type>()), ndt::type(pointer_id));
 }
 
 TEST(TypeFor, InitializerList) {

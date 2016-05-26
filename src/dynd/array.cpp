@@ -796,7 +796,7 @@ nd::array nd::empty_like(const nd::array &rhs, const ndt::type &uniform_tp) {
 nd::array nd::empty_like(const nd::array &rhs) {
   ndt::type dt;
   if (rhs.get_type().is_builtin()) {
-    dt = ndt::type(rhs.get_type().get_id());
+    dt = rhs.get_type();
   } else {
     dt = rhs.get_type()->get_canonical_type();
   }

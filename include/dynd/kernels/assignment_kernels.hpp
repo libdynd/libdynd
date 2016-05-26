@@ -992,7 +992,7 @@ namespace nd {
         //       guaranteed to parse to the same float number, would be
         //       better.
         std::stringstream ss;
-        ndt::type(src_id).print_data(ss, NULL, src[0]);
+        ndt::type(reinterpret_cast<ndt::base_type *>(src_id), false).print_data(ss, NULL, src[0]);
         dst_string_tp->set_from_utf8_string(dst_arrmeta, dst, ss.str(), &eval::default_eval_context);
       }
     };

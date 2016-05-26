@@ -126,7 +126,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(string_id); }
+    static type equivalent() { return make_type<string_type>(); }
 
     static string na() { return string(); }
   };

@@ -189,9 +189,6 @@ namespace ndt {
       */
     type() = default;
 
-    /** Construct from a type ID */
-    type(type_id_t tp_id);
-
     /** Construct from a string representation */
     explicit type(const std::string &rep);
 

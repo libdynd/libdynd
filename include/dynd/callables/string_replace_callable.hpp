@@ -15,7 +15,8 @@ namespace nd {
   public:
     string_replace_callable()
         : default_instantiable_callable<string_replace_kernel>(ndt::make_type<ndt::callable_type>(
-              ndt::type(string_id), {ndt::type(string_id), ndt::type(string_id), ndt::type(string_id)})) {}
+              ndt::make_type<string>(),
+              {ndt::make_type<string>(), ndt::make_type<string>(), ndt::make_type<string>()})) {}
   };
 
 } // namespace dynd::nd

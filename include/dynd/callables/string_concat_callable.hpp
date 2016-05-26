@@ -14,8 +14,8 @@ namespace nd {
   class string_concat_callable : public default_instantiable_callable<string_concatenation_kernel> {
   public:
     string_concat_callable()
-        : default_instantiable_callable<string_concatenation_kernel>(
-              ndt::make_type<ndt::callable_type>(ndt::type(string_id), {ndt::type(string_id), ndt::type(string_id)})) {}
+        : default_instantiable_callable<string_concatenation_kernel>(ndt::make_type<ndt::callable_type>(
+              ndt::make_type<string>(), {ndt::make_type<string>(), ndt::make_type<string>()})) {}
   };
 
 } // namespace dynd::nd

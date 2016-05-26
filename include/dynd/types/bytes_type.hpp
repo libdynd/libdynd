@@ -69,7 +69,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(bytes_id); }
+    static type equivalent() { return make_type<bytes_type>(); }
 
     static bytes na() { return bytes(); }
   };
