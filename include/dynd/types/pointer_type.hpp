@@ -36,9 +36,11 @@ namespace ndt {
     type m_target_tp;
 
   public:
-    typedef any_kind_type base;
-
-    pointer_type(const type &target_tp = ndt::make_type<ndt::any_kind_type>());
+    pointer_type(const type &target_tp = make_type<any_kind_type>())
+        : base_type(pointer_id, sizeof(char *), alignof(char *),
+                    target_tp.get_flags() | type_flag_zeroinit | type_flag_blockref,
+                    target_tp.get_arrmeta_size() + sizeof(pointer_type_arrmeta), 0, 0),
+          m_target_tp(target_tp) {}
 
     const type &get_value_type() const { return m_target_tp.value_type(); }
     const type &get_operand_type() const;

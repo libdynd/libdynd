@@ -13,7 +13,28 @@ namespace ndt {
 
   class DYNDT_API fixed_bytes_type : public base_bytes_type {
   public:
-    fixed_bytes_type(intptr_t element_size, intptr_t alignment);
+    fixed_bytes_type(intptr_t data_size, intptr_t data_alignment)
+        : base_bytes_type(fixed_bytes_id, data_size, data_alignment, type_flag_none, 0) {
+      if (data_alignment > data_size) {
+        std::stringstream ss;
+        ss << "Cannot make a bytes[" << data_size << ", align=";
+        ss << data_alignment << "] type, its alignment is greater than its size";
+        throw std::runtime_error(ss.str());
+      }
+      if (data_alignment != 1 && data_alignment != 2 && data_alignment != 4 && data_alignment != 8 &&
+          data_alignment != 16) {
+        std::stringstream ss;
+        ss << "Cannot make a bytes[" << data_size << ", align=";
+        ss << data_alignment << "] type, its alignment is not a small power of two";
+        throw std::runtime_error(ss.str());
+      }
+      if ((data_size & (data_alignment - 1)) != 0) {
+        std::stringstream ss;
+        ss << "Cannot make a fixed_bytes[" << data_size << ", align=";
+        ss << data_alignment << "] type, its alignment does not divide into its element size";
+        throw std::runtime_error(ss.str());
+      }
+    }
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 

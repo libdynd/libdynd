@@ -54,7 +54,17 @@ namespace ndt {
   public:
     typedef any_kind_type base;
 
-    option_type(const type &value_tp = ndt::make_type<ndt::any_kind_type>());
+    option_type(const type &value_tp = make_type<any_kind_type>())
+        : base_type(option_id, value_tp.get_data_size(), value_tp.get_data_alignment(),
+                    value_tp.get_flags() & (type_flags_value_inherited | type_flags_operand_inherited),
+                    value_tp.get_arrmeta_size(), value_tp.get_ndim(), 0),
+          m_value_tp(value_tp) {
+      if (value_tp.get_id() == option_id) {
+        std::stringstream ss;
+        ss << "Cannot construct an option type out of " << value_tp << ", it is already an option type";
+        throw type_error(ss.str());
+      }
+    }
 
     size_t get_default_data_size() const { return m_value_tp.get_default_data_size(); }
 

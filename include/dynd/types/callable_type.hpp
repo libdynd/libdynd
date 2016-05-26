@@ -25,7 +25,37 @@ namespace ndt {
   public:
     typedef nd::callable data_type;
 
-    callable_type(const type &ret_type, const type &pos_types, const type &kwd_types);
+    callable_type(const type &ret_type, const type &pos_types, const type &kwd_types)
+        : base_type(callable_id, sizeof(void *), alignof(void *), type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
+          m_return_type(ret_type), m_pos_tuple(pos_types), m_kwd_struct(kwd_types) {
+      if (m_pos_tuple.get_id() != tuple_id) {
+        std::stringstream ss;
+        ss << "dynd callable positional arg types require a tuple type, got a "
+              "type \""
+           << m_pos_tuple << "\"";
+        throw std::invalid_argument(ss.str());
+      }
+      if (m_kwd_struct.get_id() != struct_id) {
+        std::stringstream ss;
+        ss << "dynd callable keyword arg types require a struct type, got a "
+              "type \""
+           << m_kwd_struct << "\"";
+        throw std::invalid_argument(ss.str());
+      }
+
+      for (intptr_t i = 0, i_end = get_nkwd(); i < i_end; ++i) {
+        if (m_kwd_struct.extended<tuple_type>()->get_field_type(i).get_id() == option_id) {
+          m_opt_kwd_indices.push_back(i);
+        }
+      }
+
+      // TODO: Should check that all the kwd names are simple identifier names
+      //       because struct_type does not check that.
+
+      // Note that we don't base the flags of this type on that of its arguments
+      // and return types, because it is something the can be instantiated, even
+      // for arguments that are symbolic.
+    }
 
     callable_type(const type &ret, size_t narg, const type *args, const std::vector<std::pair<type, std::string>> &kwds)
         : callable_type(ret, make_type<tuple_type>(narg, args), make_type<struct_type>(kwds)) {}

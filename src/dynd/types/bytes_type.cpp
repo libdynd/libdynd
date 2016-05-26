@@ -12,17 +12,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::bytes_type::bytes_type(size_t alignment)
-    : base_bytes_type(bytes_id, sizeof(bytes), alignof(bytes), type_flag_zeroinit | type_flag_destructor, 0),
-      m_alignment(alignment)
-{
-  if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
-    std::stringstream ss;
-    ss << "Cannot make a dynd bytes type with alignment " << alignment << ", it must be a small power of two";
-    throw std::runtime_error(ss.str());
-  }
-}
-
 void ndt::bytes_type::get_bytes_range(const char **out_begin, const char **out_end, const char *DYND_UNUSED(arrmeta),
                                       const char *data) const
 {

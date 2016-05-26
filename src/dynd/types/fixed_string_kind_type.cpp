@@ -10,9 +10,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::fixed_string_kind_type::fixed_string_kind_type()
-    : base_string_type(fixed_string_id, 0, 0, type_flag_symbolic, 0) {}
-
 size_t ndt::fixed_string_kind_type::get_default_data_size() const {
   stringstream ss;
   ss << "Cannot get default data size of type " << type(this, true);

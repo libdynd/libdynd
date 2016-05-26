@@ -21,7 +21,22 @@ namespace ndt {
     string_encoding_t m_encoding;
 
   public:
-    char_type(string_encoding_t encoding = string_encoding_utf_32);
+    char_type(string_encoding_t encoding = string_encoding_utf_32)
+        : base_type(char_id, string_encoding_char_size_table[encoding], string_encoding_char_size_table[encoding],
+                    type_flag_none, 0, 0, 0),
+          m_encoding(encoding) {
+      switch (encoding) {
+      case string_encoding_ascii:
+      case string_encoding_ucs_2:
+      case string_encoding_utf_32:
+        break;
+      default: {
+        std::stringstream ss;
+        ss << "dynd char type requires fixed-size encoding, " << encoding << " is not supported";
+        throw std::runtime_error(ss.str());
+      }
+      }
+    }
 
     string_encoding_t get_encoding() const { return m_encoding; }
 

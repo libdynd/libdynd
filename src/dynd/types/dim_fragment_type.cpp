@@ -11,12 +11,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::dim_fragment_type::dim_fragment_type(intptr_t ndim, const intptr_t *tagged_dims)
-    : base_dim_type(dim_fragment_id, make_type<void>(), 0, 1, 0, type_flag_symbolic, false),
-      m_tagged_dims(ndim, tagged_dims) {
-  this->m_ndim = static_cast<uint8_t>(ndim);
-}
-
 static inline ndt::type get_tagged_dims_from_type(intptr_t ndim, const ndt::type &tp, intptr_t *out_tagged_dims) {
   ndt::type dtp = tp.without_memory_type();
   for (int i = 0; i < ndim; ++i) {

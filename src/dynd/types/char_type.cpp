@@ -11,24 +11,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::char_type::char_type(string_encoding_t encoding)
-    : base_type(char_id, string_encoding_char_size_table[encoding], string_encoding_char_size_table[encoding],
-                type_flag_none, 0, 0, 0),
-      m_encoding(encoding)
-{
-  switch (encoding) {
-  case string_encoding_ascii:
-  case string_encoding_ucs_2:
-  case string_encoding_utf_32:
-    break;
-  default: {
-    stringstream ss;
-    ss << "dynd char type requires fixed-size encoding, " << encoding << " is not supported";
-    throw runtime_error(ss.str());
-  }
-  }
-}
-
 uint32_t ndt::char_type::get_code_point(const char *data) const
 {
   next_unicode_codepoint_t next_fn;

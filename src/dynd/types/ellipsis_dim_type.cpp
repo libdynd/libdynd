@@ -10,25 +10,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::ellipsis_dim_type::ellipsis_dim_type(const std::string &name, const type &element_type)
-    : base_dim_type(ellipsis_dim_id, element_type, 0, 1, 0, type_flag_symbolic | type_flag_variadic, false),
-      m_name(name) {
-  if (!m_name.empty()) {
-    // Make sure name begins with a capital letter, and is an identifier
-    const char *begin = m_name.c_str(), *end = m_name.c_str() + m_name.size();
-    if (end - begin == 0) {
-      // Convert empty string into NULL
-      m_name = "";
-    } else if (!is_valid_typevar_name(begin, end)) {
-      stringstream ss;
-      ss << "dynd ellipsis name \"";
-      print_escaped_utf8_string(ss, m_name);
-      ss << "\" is not valid, it must be alphanumeric and begin with a capital";
-      throw type_error(ss.str());
-    }
-  }
-}
-
 void ndt::ellipsis_dim_type::get_vars(std::unordered_set<std::string> &vars) const {
   vars.insert(m_name);
   m_element_tp.get_vars(vars);

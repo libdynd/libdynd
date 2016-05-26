@@ -8,8 +8,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::int_kind_type::int_kind_type() : base_type(int_kind_id, 0, 1, type_flag_symbolic, 0, 0, 0) {}
-
 bool ndt::int_kind_type::match(const type &candidate_tp, std::map<std::string, type> &DYND_UNUSED(tp_vars)) const {
   return candidate_tp.get_base_id() == int_kind_id;
 }

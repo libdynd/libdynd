@@ -22,7 +22,15 @@ namespace ndt {
   public:
     typedef bytes data_type;
 
-    bytes_type(size_t alignment = 1);
+    bytes_type(size_t alignment = 1)
+        : base_bytes_type(bytes_id, sizeof(bytes), alignof(bytes), type_flag_zeroinit | type_flag_destructor, 0),
+          m_alignment(alignment) {
+      if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
+        std::stringstream ss;
+        ss << "Cannot make a dynd bytes type with alignment " << alignment << ", it must be a small power of two";
+        throw std::runtime_error(ss.str());
+      }
+    }
 
     /** Alignment of the bytes data being pointed to. */
     size_t get_target_alignment() const { return m_alignment; }

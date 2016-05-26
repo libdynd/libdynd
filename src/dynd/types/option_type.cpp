@@ -80,18 +80,6 @@ bool dynd::is_avail_builtin(type_id_t value_id, const char *data) {
   }
 }
 
-ndt::option_type::option_type(const type &value_tp)
-    : base_type(option_id, value_tp.get_data_size(), value_tp.get_data_alignment(),
-                value_tp.get_flags() & (type_flags_value_inherited | type_flags_operand_inherited),
-                value_tp.get_arrmeta_size(), value_tp.get_ndim(), 0),
-      m_value_tp(value_tp) {
-  if (value_tp.get_id() == option_id) {
-    stringstream ss;
-    ss << "Cannot construct an option type out of " << value_tp << ", it is already an option type";
-    throw type_error(ss.str());
-  }
-}
-
 void ndt::option_type::get_vars(std::unordered_set<std::string> &vars) const { m_value_tp.get_vars(vars); }
 
 void ndt::option_type::print_type(std::ostream &o) const { o << "?" << m_value_tp; }
