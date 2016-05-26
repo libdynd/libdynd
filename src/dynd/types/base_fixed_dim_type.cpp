@@ -38,7 +38,7 @@ void ndt::base_fixed_dim_type::transform_child_types(type_transform_fn_t transfo
   bool was_transformed = false;
   transform_fn(m_element_tp, arrmeta_offset, extra, tmp_tp, was_transformed);
   if (was_transformed) {
-    out_transformed_tp = type(new base_fixed_dim_type(tmp_tp), false);
+    out_transformed_tp = make_type<base_fixed_dim_type>(tmp_tp);
     out_was_transformed = true;
   } else {
     out_transformed_tp = type(this, true);
@@ -46,7 +46,7 @@ void ndt::base_fixed_dim_type::transform_child_types(type_transform_fn_t transfo
 }
 
 ndt::type ndt::base_fixed_dim_type::get_canonical_type() const {
-  return type(new base_fixed_dim_type(m_element_tp.get_canonical_type()), false);
+  return make_type<base_fixed_dim_type>(m_element_tp.get_canonical_type());
 }
 
 ndt::type ndt::base_fixed_dim_type::at_single(intptr_t DYND_UNUSED(i0), const char **DYND_UNUSED(inout_arrmeta),

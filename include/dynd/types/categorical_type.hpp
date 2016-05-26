@@ -33,7 +33,7 @@ namespace ndt {
     nd::array m_value_to_category_index;
 
   public:
-    categorical_type(const nd::array &categories, bool presorted = false);
+    categorical_type(type_id_t new_id, const nd::array &categories, bool presorted = false);
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 

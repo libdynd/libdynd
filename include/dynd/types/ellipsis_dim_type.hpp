@@ -20,8 +20,8 @@ namespace ndt {
     std::string m_name;
 
   public:
-    ellipsis_dim_type(const std::string &name, const type &element_type)
-        : base_dim_type(ellipsis_dim_id, element_type, 0, 1, 0, type_flag_symbolic | type_flag_variadic, false),
+    ellipsis_dim_type(type_id_t new_id, const std::string &name, const type &element_type)
+        : base_dim_type(new_id, ellipsis_dim_id, element_type, 0, 1, 0, type_flag_symbolic | type_flag_variadic, false),
           m_name(name) {
       if (!m_name.empty()) {
         // Make sure name begins with a capital letter, and is an identifier
@@ -79,13 +79,11 @@ namespace ndt {
 
   /** Makes an ellipsis type with the specified name and element type */
   inline type make_ellipsis_dim(const std::string &name, const type &element_type) {
-    return type(new ellipsis_dim_type(name, element_type), false);
+    return make_type<ellipsis_dim_type>(name, element_type);
   }
 
   /** Make an unnamed ellipsis type */
-  inline type make_ellipsis_dim(const type &element_type) {
-    return type(new ellipsis_dim_type("", element_type), false);
-  }
+  inline type make_ellipsis_dim(const type &element_type) { return make_type<ellipsis_dim_type>("", element_type); }
 
 } // namespace dynd::ndt
 } // namespace dynd

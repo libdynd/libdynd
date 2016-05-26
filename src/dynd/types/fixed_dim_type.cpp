@@ -57,7 +57,7 @@ void ndt::fixed_dim_type::transform_child_types(type_transform_fn_t transform_fn
   bool was_transformed = false;
   transform_fn(m_element_tp, arrmeta_offset + sizeof(fixed_dim_type_arrmeta), extra, tmp_tp, was_transformed);
   if (was_transformed) {
-    out_transformed_tp = type(new fixed_dim_type(m_dim_size, tmp_tp), false);
+    out_transformed_tp = make_type<fixed_dim_type>(m_dim_size, tmp_tp);
     out_was_transformed = true;
   } else {
     out_transformed_tp = type(this, true);
@@ -65,7 +65,7 @@ void ndt::fixed_dim_type::transform_child_types(type_transform_fn_t transform_fn
 }
 
 ndt::type ndt::fixed_dim_type::get_canonical_type() const {
-  return type(new fixed_dim_type(m_dim_size, m_element_tp.get_canonical_type()), false);
+  return make_type<fixed_dim_type>(m_dim_size, m_element_tp.get_canonical_type());
 }
 
 ndt::type ndt::fixed_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i,

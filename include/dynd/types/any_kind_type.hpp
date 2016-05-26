@@ -12,7 +12,8 @@ namespace ndt {
 
   class DYNDT_API any_kind_type : public base_type {
   public:
-    any_kind_type() : base_type(any_kind_id, 0, 1, type_flag_symbolic | type_flag_variadic, 0, 0, 0) {}
+    any_kind_type(type_id_t new_id)
+        : base_type(new_id, any_kind_id, 0, 1, type_flag_symbolic | type_flag_variadic, 0, 0, 0) {}
 
     size_t get_default_data_size() const;
 

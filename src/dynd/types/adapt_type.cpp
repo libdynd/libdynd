@@ -8,15 +8,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::adapt_type::adapt_type(const ndt::type &value_tp, const ndt::type &storage_tp, const nd::callable &forward,
-                            const nd::callable &inverse)
-    : base_expr_type(adapt_id, storage_tp.get_data_size(), storage_tp.get_data_alignment(), type_flag_none,
-                     storage_tp.get_arrmeta_size(), storage_tp.get_ndim()),
-      m_value_tp(value_tp), m_storage_tp(storage_tp), m_forward(forward), m_inverse(inverse) {}
-
-ndt::adapt_type::adapt_type(const nd::callable &forward, const nd::callable &inverse)
-    : adapt_type(forward->get_ret_type(), forward->get_arg_types()[0], forward, inverse) {}
-
 void ndt::adapt_type::print_type(ostream &o) const {
   o << "adapt[";
   if (m_forward.is_null()) {

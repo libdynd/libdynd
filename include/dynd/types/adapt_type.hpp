@@ -18,10 +18,14 @@ namespace ndt {
     nd::callable m_inverse;
 
   public:
-    adapt_type(const ndt::type &value_tp, const ndt::type &storage_tp, const nd::callable &forward,
-               const nd::callable &inverse);
+    adapt_type(type_id_t new_id, const ndt::type &value_tp, const ndt::type &storage_tp, const nd::callable &forward,
+               const nd::callable &inverse)
+        : base_expr_type(new_id, adapt_id, storage_tp.get_data_size(), storage_tp.get_data_alignment(), type_flag_none,
+                         storage_tp.get_arrmeta_size(), storage_tp.get_ndim()),
+          m_value_tp(value_tp), m_storage_tp(storage_tp), m_forward(forward), m_inverse(inverse) {}
 
-    adapt_type(const nd::callable &forward, const nd::callable &inverse);
+    adapt_type(type_id_t new_id, const nd::callable &forward, const nd::callable &inverse)
+        : adapt_type(new_id, forward->get_ret_type(), forward->get_arg_types()[0], forward, inverse) {}
 
     const ndt::type &get_value_type() const { return m_value_tp; }
     const ndt::type &get_storage_type() const { return m_storage_tp; }
@@ -30,8 +34,7 @@ namespace ndt {
 
     const type &get_operand_type() const { return m_storage_tp; }
 
-    type with_replaced_storage_type(const type &DYND_UNUSED(replacement_type)) const
-    {
+    type with_replaced_storage_type(const type &DYND_UNUSED(replacement_type)) const {
       throw std::runtime_error("with_replaced_storage_type is not implemented in adapt_type");
     }
 

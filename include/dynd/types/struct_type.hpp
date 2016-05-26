@@ -42,9 +42,9 @@ namespace ndt {
     const std::vector<std::string> m_field_names;
     std::vector<std::pair<type, std::string>> m_field_tp;
 
-    struct_type(type_id_t DYND_UNUSED(id), const std::vector<std::string> &field_names,
+    struct_type(type_id_t new_id, type_id_t DYND_UNUSED(id), const std::vector<std::string> &field_names,
                 const std::vector<type> &field_types, bool variadic = false)
-        : tuple_type(struct_id, field_types.size(), field_types.data(), variadic, type_flag_none),
+        : tuple_type(new_id, struct_id, field_types.size(), field_types.data(), variadic, type_flag_none),
           m_field_names(field_names) {
       // Make sure that the number of names matches
       uintptr_t name_count = field_names.size();
@@ -60,21 +60,21 @@ namespace ndt {
       }
     }
 
-    struct_type(type_id_t DYND_UNUSED(id), const std::vector<std::pair<type, std::string>> &fields,
+    struct_type(type_id_t new_id, type_id_t DYND_UNUSED(id), const std::vector<std::pair<type, std::string>> &fields,
                 bool variadic = false)
-        : struct_type(detail::names_from_fields(fields), detail::types_from_fields(fields), variadic) {}
+        : struct_type(new_id, detail::names_from_fields(fields), detail::types_from_fields(fields), variadic) {}
 
-    struct_type(type_id_t id, bool variadic = false) : struct_type(id, {}, variadic) {}
+    struct_type(type_id_t new_id, type_id_t id, bool variadic = false) : struct_type(new_id, id, {}, variadic) {}
 
   public:
-    struct_type(const std::vector<std::string> &field_names, const std::vector<type> &field_types,
+    struct_type(type_id_t new_id, const std::vector<std::string> &field_names, const std::vector<type> &field_types,
                 bool variadic = false)
-        : struct_type(struct_id, field_names, field_types, variadic) {}
+        : struct_type(new_id, struct_id, field_names, field_types, variadic) {}
 
-    struct_type(const std::vector<std::pair<type, std::string>> &fields, bool variadic = false)
-        : struct_type(struct_id, fields, variadic) {}
+    struct_type(type_id_t new_id, const std::vector<std::pair<type, std::string>> &fields, bool variadic = false)
+        : struct_type(new_id, struct_id, fields, variadic) {}
 
-    struct_type(bool variadic = false) : struct_type(struct_id, variadic) {}
+    struct_type(type_id_t new_id, bool variadic = false) : struct_type(new_id, struct_id, variadic) {}
 
     /** The array of the field names */
     const std::vector<std::string> &get_field_names() const { return m_field_names; }

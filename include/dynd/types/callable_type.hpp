@@ -25,8 +25,9 @@ namespace ndt {
   public:
     typedef nd::callable data_type;
 
-    callable_type(const type &ret_type, const type &pos_types, const type &kwd_types)
-        : base_type(callable_id, sizeof(void *), alignof(void *), type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
+    callable_type(type_id_t new_id, const type &ret_type, const type &pos_types, const type &kwd_types)
+        : base_type(new_id, callable_id, sizeof(void *), alignof(void *), type_flag_zeroinit | type_flag_destructor, 0,
+                    0, 0),
           m_return_type(ret_type), m_pos_tuple(pos_types), m_kwd_struct(kwd_types) {
       if (m_pos_tuple.get_id() != tuple_id) {
         std::stringstream ss;
@@ -57,19 +58,21 @@ namespace ndt {
       // for arguments that are symbolic.
     }
 
-    callable_type(const type &ret, size_t narg, const type *args, const std::vector<std::pair<type, std::string>> &kwds)
-        : callable_type(ret, make_type<tuple_type>(narg, args), make_type<struct_type>(kwds)) {}
-
-    callable_type(const type &ret, size_t narg, const type *args, bool variadic = false)
-        : callable_type(ret, make_type<tuple_type>(narg, args, variadic), make_type<struct_type>()) {}
-
-    callable_type(const type &ret, const std::vector<type> &args) : callable_type(ret, args.size(), args.data()) {}
-
-    callable_type(const type &ret, std::initializer_list<type> args,
+    callable_type(type_id_t new_id, const type &ret, size_t narg, const type *args,
                   const std::vector<std::pair<type, std::string>> &kwds)
-        : callable_type(ret, args.size(), args.begin(), kwds) {}
+        : callable_type(new_id, ret, make_type<tuple_type>(narg, args), make_type<struct_type>(kwds)) {}
 
-    callable_type(const type &ret_tp) : callable_type(ret_tp, 0, nullptr) {}
+    callable_type(type_id_t new_id, const type &ret, size_t narg, const type *args, bool variadic = false)
+        : callable_type(new_id, ret, make_type<tuple_type>(narg, args, variadic), make_type<struct_type>()) {}
+
+    callable_type(type_id_t new_id, const type &ret, const std::vector<type> &args)
+        : callable_type(new_id, ret, args.size(), args.data()) {}
+
+    callable_type(type_id_t new_id, const type &ret, std::initializer_list<type> args,
+                  const std::vector<std::pair<type, std::string>> &kwds)
+        : callable_type(new_id, ret, args.size(), args.begin(), kwds) {}
+
+    callable_type(type_id_t new_id, const type &ret_tp) : callable_type(new_id, ret_tp, 0, nullptr) {}
 
     const type &get_return_type() const { return m_return_type; }
 

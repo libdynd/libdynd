@@ -104,8 +104,8 @@ namespace ndt {
   public:
     using base_dim_type::base_dim_type;
 
-    base_fixed_dim_type(const type &element_tp = make_type<any_kind_type>())
-        : base_dim_type(fixed_dim_id, element_tp, 0, element_tp.get_data_alignment(), sizeof(size_stride_t),
+    base_fixed_dim_type(type_id_t new_id, const type &element_tp = make_type<any_kind_type>())
+        : base_dim_type(new_id, fixed_dim_id, element_tp, 0, element_tp.get_data_alignment(), sizeof(size_stride_t),
                         type_flag_symbolic, true) {
       // Propagate the inherited flags from the element
       this->flags |= (element_tp.get_flags() & (type_flags_operand_inherited | type_flags_value_inherited));
