@@ -61,5 +61,8 @@ namespace ndt {
     virtual type with_element_type(const type &element_tp) const;
   };
 
+  template <>
+  struct id_of<typevar_dim_type> : std::integral_constant<type_id_t, typevar_dim_id> {};
+
 } // namespace dynd::ndt
 } // namespace dynd

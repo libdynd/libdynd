@@ -91,6 +91,9 @@ namespace ndt {
     friend struct assign_from_commensurate_category_type;
   };
 
+  template <>
+  struct id_of<categorical_type> : std::integral_constant<type_id_t, categorical_id> {};
+
   DYND_API type factor_categorical(const nd::array &values);
 
 } // namespace dynd::ndt

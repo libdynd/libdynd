@@ -77,6 +77,9 @@ namespace ndt {
     }
   };
 
+  template <>
+  struct id_of<ellipsis_dim_type> : std::integral_constant<type_id_t, ellipsis_dim_id> {};
+
   /** Makes an ellipsis type with the specified name and element type */
   inline type make_ellipsis_dim(const std::string &name, const type &element_type) {
     return make_type<ellipsis_dim_type>(name, element_type);

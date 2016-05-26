@@ -48,5 +48,8 @@ namespace ndt {
     bool operator==(const base_type &rhs) const;
   };
 
+  template <>
+  struct id_of<adapt_type> : std::integral_constant<type_id_t, adapt_id> {};
+
 } // namespace dynd::ndt
 } // namespace dynd

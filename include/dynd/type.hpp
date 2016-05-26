@@ -783,62 +783,62 @@ namespace ndt {
    */
   template <typename T, typename... ArgTypes>
   std::enable_if_t<std::is_base_of<base_type, T>::value, type> make_type(ArgTypes &&... args) {
-    return type(new T(any_kind_id, std::forward<ArgTypes>(args)...), false);
+    return type(new T(id_of<T>::value, std::forward<ArgTypes>(args)...), false);
   }
 
   template <typename T>
   std::enable_if_t<std::is_base_of<base_type, T>::value, type> make_type(std::initializer_list<type> field_tp) {
-    return type(new T(any_kind_id, field_tp), false);
+    return type(new T(id_of<T>::value, field_tp), false);
   }
 
   template <typename T>
   std::enable_if_t<std::is_base_of<base_type, T>::value, type> make_type(std::initializer_list<type> field_tp,
                                                                          bool variadic) {
-    return type(new T(any_kind_id, field_tp, variadic), false);
+    return type(new T(id_of<T>::value, field_tp, variadic), false);
   }
 
   template <typename T>
   std::enable_if_t<std::is_base_of<base_type, T>::value, type> make_type(std::initializer_list<std::string> field_names,
                                                                          std::initializer_list<type> field_tp) {
-    return type(new T(any_kind_id, field_names, field_tp), false);
+    return type(new T(id_of<T>::value, field_names, field_tp), false);
   }
 
   template <typename T>
   std::enable_if_t<std::is_base_of<base_type, T>::value, type>
   make_type(std::initializer_list<std::pair<type, std::string>> fields) {
-    return type(new T(any_kind_id, fields), false);
+    return type(new T(id_of<T>::value, fields), false);
   }
 
   template <typename T>
   std::enable_if_t<std::is_base_of<base_type, T>::value, type>
   make_type(std::initializer_list<std::pair<type, std::string>> fields, bool variadic) {
-    return type(new T(any_kind_id, fields, variadic), false);
+    return type(new T(id_of<T>::value, fields, variadic), false);
   }
 
   template <typename T>
   std::enable_if_t<std::is_base_of<base_type, T>::value, type>
   make_type(std::initializer_list<std::string> field_names, std::initializer_list<type> field_tp, bool variadic) {
-    return type(new T(any_kind_id, field_names, field_tp, variadic), false);
+    return type(new T(id_of<T>::value, field_names, field_tp, variadic), false);
   }
 
   template <typename T>
   std::enable_if_t<std::is_base_of<base_type, T>::value, type> make_type(const type &ret_tp,
                                                                          std::initializer_list<type> arg_tp) {
-    return type(new T(any_kind_id, ret_tp, arg_tp), false);
+    return type(new T(id_of<T>::value, ret_tp, arg_tp), false);
   }
 
   template <typename T>
   std::enable_if_t<std::is_base_of<base_type, T>::value, type>
   make_type(const type &ret_tp, std::initializer_list<type> arg_tp,
             std::initializer_list<std::pair<type, std::string>> kwd_tp) {
-    return type(new T(any_kind_id, ret_tp, arg_tp, kwd_tp), false);
+    return type(new T(id_of<T>::value, ret_tp, arg_tp, kwd_tp), false);
   }
 
   template <typename T>
   std::enable_if_t<std::is_base_of<base_type, T>::value, type>
   make_type(const type &ret_tp, std::initializer_list<type> arg_tp,
             const std::vector<std::pair<type, std::string>> &kwd_tp) {
-    return type(new T(any_kind_id, ret_tp, arg_tp, kwd_tp), false);
+    return type(new T(id_of<T>::value, ret_tp, arg_tp, kwd_tp), false);
   }
 
   /*

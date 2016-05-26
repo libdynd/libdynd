@@ -64,5 +64,8 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
   };
 
+  template <>
+  struct id_of<typevar_type> : std::integral_constant<type_id_t, typevar_id> {};
+
 } // namespace dynd::ndt
 } // namespace dynd
