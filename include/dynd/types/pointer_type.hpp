@@ -36,8 +36,8 @@ namespace ndt {
     type m_target_tp;
 
   public:
-    pointer_type(type_id_t new_id, const type &target_tp = make_type<any_kind_type>())
-        : base_type(new_id, pointer_id, sizeof(char *), alignof(char *),
+    pointer_type(type_id_t id, const type &target_tp = make_type<any_kind_type>())
+        : base_type(id, sizeof(char *), alignof(char *),
                     target_tp.get_flags() | type_flag_zeroinit | type_flag_blockref,
                     target_tp.get_arrmeta_size() + sizeof(pointer_type_arrmeta), 0, 0),
           m_target_tp(target_tp) {}

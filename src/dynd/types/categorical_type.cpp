@@ -126,8 +126,8 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques, c
   return categories;
 }
 
-ndt::categorical_type::categorical_type(type_id_t new_id, const nd::array &categories, bool presorted)
-    : base_type(new_id, categorical_id, 4, 4, type_flag_none, 0, 0, 0) {
+ndt::categorical_type::categorical_type(type_id_t id, const nd::array &categories, bool presorted)
+    : base_type(id, 4, 4, type_flag_none, 0, 0, 0) {
   intptr_t category_count;
   if (presorted) {
     // This is construction shortcut, for the case when the categories are

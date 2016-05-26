@@ -37,8 +37,10 @@ namespace ndt {
      */
     bool m_variadic;
 
-    tuple_type(type_id_t new_id, type_id_t id, size_t size, const type *element_tp, bool variadic, uint32_t flags)
-        : base_type(new_id, id, 0, 1, flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
+  public:
+    tuple_type(type_id_t id, size_t size, const type *element_tp, bool variadic = false,
+               uint32_t flags = type_flag_none)
+        : base_type(id, 0, 1, flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
           m_field_count(size), m_field_types(size), m_arrmeta_offsets(size), m_variadic(variadic) {
       // Calculate the needed element alignment and arrmeta offsets
       size_t arrmeta_offset = get_field_count() * sizeof(size_t);
@@ -66,14 +68,10 @@ namespace ndt {
       this->m_metadata_size = arrmeta_offset;
     }
 
-  public:
-    tuple_type(type_id_t new_id, size_t size, const type *element_tp, bool variadic = false)
-        : tuple_type(new_id, tuple_id, size, element_tp, variadic, type_flag_none) {}
+    tuple_type(type_id_t id, std::initializer_list<type> element_tp, bool variadic = false)
+        : tuple_type(id, element_tp.size(), element_tp.begin(), variadic, type_flag_none) {}
 
-    tuple_type(type_id_t new_id, std::initializer_list<type> element_tp, bool variadic = false)
-        : tuple_type(new_id, tuple_id, element_tp.size(), element_tp.begin(), variadic, type_flag_none) {}
-
-    tuple_type(type_id_t new_id, bool variadic = false) : tuple_type(new_id, tuple_id, 0, nullptr, variadic, type_flag_none) {}
+    tuple_type(type_id_t id, bool variadic = false) : tuple_type(id, 0, nullptr, variadic, type_flag_none) {}
 
     intptr_t get_field_count() const { return m_field_count; }
     const ndt::type get_type() const { return ndt::type_for(m_field_types); }

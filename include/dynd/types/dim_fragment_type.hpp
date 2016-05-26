@@ -29,9 +29,8 @@ namespace ndt {
     dimvector m_tagged_dims;
 
   public:
-    dim_fragment_type(type_id_t new_id, intptr_t ndim, const intptr_t *tagged_dims)
-        : base_dim_type(new_id, dim_fragment_id, make_type<void>(), 0, 1, 0, type_flag_symbolic, false),
-          m_tagged_dims(ndim, tagged_dims) {
+    dim_fragment_type(type_id_t id, intptr_t ndim, const intptr_t *tagged_dims)
+        : base_dim_type(id, make_type<void>(), 0, 1, 0, type_flag_symbolic, false), m_tagged_dims(ndim, tagged_dims) {
       this->m_ndim = static_cast<uint8_t>(ndim);
     }
 

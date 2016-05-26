@@ -98,8 +98,8 @@ namespace ndt {
 
   public:
     /** Starts off the extended type instance with a use count of 1. */
-    base_type(type_id_t DYND_UNUSED(new_id), type_id_t id, size_t data_size, size_t data_alignment, uint32_t flags,
-              size_t arrmeta_size, size_t ndim, size_t strided_ndim)
+    base_type(type_id_t id, size_t data_size, size_t data_alignment, uint32_t flags, size_t arrmeta_size, size_t ndim,
+              size_t strided_ndim)
         : m_use_count(1), m_id(id), m_metadata_size(arrmeta_size), m_data_size(data_size),
           m_data_alignment(data_alignment), flags(flags), m_ndim(ndim), m_fixed_ndim(strided_ndim) {}
 

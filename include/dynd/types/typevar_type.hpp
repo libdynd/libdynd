@@ -22,8 +22,8 @@ namespace ndt {
     std::string m_name;
 
   public:
-    typevar_type(type_id_t new_id, const std::string &name)
-        : base_type(new_id, typevar_id, 0, 1, type_flag_symbolic, 0, 0, 0), m_name(name) {
+    typevar_type(type_id_t id, const std::string &name)
+        : base_type(id, 0, 1, type_flag_symbolic, 0, 0, 0), m_name(name) {
       if (m_name.empty()) {
         throw type_error("dynd typevar name cannot be null");
       } else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
