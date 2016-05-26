@@ -126,8 +126,8 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques, c
   return categories;
 }
 
-ndt::categorical_type::categorical_type(const nd::array &categories, bool presorted)
-    : base_type(categorical_id, 4, 4, type_flag_none, 0, 0, 0) {
+ndt::categorical_type::categorical_type(type_id_t new_id, const nd::array &categories, bool presorted)
+    : base_type(new_id, categorical_id, 4, 4, type_flag_none, 0, 0, 0) {
   intptr_t category_count;
   if (presorted) {
     // This is construction shortcut, for the case when the categories are
@@ -399,7 +399,7 @@ ndt::type ndt::factor_categorical(const nd::array &values) {
   // Copy the values (now sorted and unique) into a new nd::array
   nd::array categories = make_sorted_categories(uniques, el_tp, el_arrmeta);
 
-  return type(new categorical_type(categories, true), false);
+  return make_type<categorical_type>(categories, true);
 }
 
 std::map<std::string, std::pair<ndt::type, const char *>> ndt::categorical_type::get_dynamic_type_properties() const {

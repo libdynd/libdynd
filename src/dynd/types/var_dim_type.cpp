@@ -44,7 +44,7 @@ void ndt::var_dim_type::transform_child_types(type_transform_fn_t transform_fn, 
   bool was_transformed = false;
   transform_fn(m_element_tp, arrmeta_offset + sizeof(metadata_type), extra, tmp_tp, was_transformed);
   if (was_transformed) {
-    out_transformed_tp = type(new var_dim_type(tmp_tp), false);
+    out_transformed_tp = make_type<var_dim_type>(tmp_tp);
     out_was_transformed = true;
   } else {
     out_transformed_tp = type(this, true);
@@ -52,7 +52,7 @@ void ndt::var_dim_type::transform_child_types(type_transform_fn_t transform_fn, 
 }
 
 ndt::type ndt::var_dim_type::get_canonical_type() const {
-  return type(new var_dim_type(m_element_tp.get_canonical_type()), false);
+  return make_type<var_dim_type>(m_element_tp.get_canonical_type());
 }
 
 ndt::type ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i,
@@ -97,7 +97,7 @@ ndt::type ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange 
       if (indices->is_nop()) {
         // If the indexing operation does nothing, then leave things unchanged
         type edt = m_element_tp.apply_linear_index(nindices - 1, indices + 1, current_i + 1, root_tp, false);
-        return type(new var_dim_type(edt), false);
+        return make_type<var_dim_type>(edt);
       } else {
         // TODO: sliced_var_dim_type
         throw runtime_error("TODO: implement "
