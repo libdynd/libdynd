@@ -12,7 +12,7 @@ namespace ndt {
 
   class DYNDT_API categorical_kind_type : public base_type {
   public:
-    categorical_kind_type();
+    categorical_kind_type() : base_type(categorical_id, 0, 0, type_flag_symbolic, 0, 0, 0) {}
 
     size_t get_default_data_size() const;
 

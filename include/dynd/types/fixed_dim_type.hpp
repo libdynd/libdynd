@@ -27,7 +27,13 @@ namespace ndt {
   public:
     typedef size_stride_t metadata_type;
 
-    fixed_dim_type(intptr_t dim_size, const type &element_tp = ndt::make_type<ndt::any_kind_type>());
+    fixed_dim_type(intptr_t dim_size, const type &element_tp = make_type<any_kind_type>())
+        : base_fixed_dim_type(fixed_dim_id, element_tp, 0, element_tp.get_data_alignment(),
+                              sizeof(fixed_dim_type_arrmeta), type_flag_none, true),
+          m_dim_size(dim_size) {
+      // Propagate the inherited flags from the element
+      this->flags |= (element_tp.get_flags() & (type_flags_operand_inherited | type_flags_value_inherited));
+    }
 
     size_t get_default_data_size() const;
 

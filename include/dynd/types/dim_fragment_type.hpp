@@ -29,10 +29,15 @@ namespace ndt {
     dimvector m_tagged_dims;
 
   public:
-    dim_fragment_type() : dim_fragment_type(0, nullptr) {}
+    dim_fragment_type(intptr_t ndim, const intptr_t *tagged_dims)
+        : base_dim_type(dim_fragment_id, make_type<void>(), 0, 1, 0, type_flag_symbolic, false),
+          m_tagged_dims(ndim, tagged_dims) {
+      this->m_ndim = static_cast<uint8_t>(ndim);
+    }
 
-    dim_fragment_type(intptr_t ndim, const intptr_t *tagged_dims);
     dim_fragment_type(intptr_t ndim, const type &tp);
+
+    dim_fragment_type() : dim_fragment_type(0, nullptr) {}
 
     /**
      * The tagged_dims should be interpreted as an array of

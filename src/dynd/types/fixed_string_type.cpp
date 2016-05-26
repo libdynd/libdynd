@@ -13,30 +13,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::fixed_string_type::fixed_string_type(intptr_t stringsize, string_encoding_t encoding)
-    : base_string_type(fixed_string_id, 0, 1, type_flag_none, 0), m_stringsize(stringsize), m_encoding(encoding),
-      m_encoding_repr(encoding_as_string(encoding))
-{
-  switch (encoding) {
-  case string_encoding_ascii:
-  case string_encoding_utf_8:
-    this->m_data_size = m_stringsize;
-    this->m_data_alignment = 1;
-    break;
-  case string_encoding_ucs_2:
-  case string_encoding_utf_16:
-    this->m_data_size = m_stringsize * 2;
-    this->m_data_alignment = 2;
-    break;
-  case string_encoding_utf_32:
-    this->m_data_size = m_stringsize * 4;
-    this->m_data_alignment = 4;
-    break;
-  default:
-    throw runtime_error("Unrecognized string encoding in dynd fixed_string type constructor");
-  }
-}
-
 void ndt::fixed_string_type::get_string_range(const char **out_begin, const char **out_end,
                                               const char *DYND_UNUSED(arrmeta), const char *data) const
 {

@@ -10,8 +10,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::categorical_kind_type::categorical_kind_type() : base_type(categorical_id, 0, 0, type_flag_symbolic, 0, 0, 0) {}
-
 size_t ndt::categorical_kind_type::get_default_data_size() const {
   stringstream ss;
   ss << "Cannot get default data size of type " << type(this, true);

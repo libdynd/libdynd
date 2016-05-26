@@ -13,7 +13,7 @@ namespace ndt {
 
   class DYNDT_API fixed_bytes_kind_type : public base_bytes_type {
   public:
-    fixed_bytes_kind_type();
+    fixed_bytes_kind_type() : base_bytes_type(fixed_bytes_id, 0, 0, type_flag_symbolic, 0) {}
 
     size_t get_default_data_size() const;
 

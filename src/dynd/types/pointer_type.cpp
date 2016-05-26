@@ -10,12 +10,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::pointer_type::pointer_type(const type &target_tp)
-    : base_type(pointer_id, sizeof(char *), alignof(char *),
-                target_tp.get_flags() | type_flag_zeroinit | type_flag_blockref,
-                target_tp.get_arrmeta_size() + sizeof(pointer_type_arrmeta), 0, 0),
-      m_target_tp(target_tp) {}
-
 void ndt::pointer_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const {
   const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
   const char *target_data = *reinterpret_cast<const char *const *>(data) + md->offset;

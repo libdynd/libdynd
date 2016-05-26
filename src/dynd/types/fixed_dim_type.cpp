@@ -12,14 +12,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::fixed_dim_type::fixed_dim_type(intptr_t dim_size, const type &element_tp)
-    : base_fixed_dim_type(fixed_dim_id, element_tp, 0, element_tp.get_data_alignment(), sizeof(fixed_dim_type_arrmeta),
-                          type_flag_none, true),
-      m_dim_size(dim_size) {
-  // Propagate the inherited flags from the element
-  this->flags |= (element_tp.get_flags() & (type_flags_operand_inherited | type_flags_value_inherited));
-}
-
 size_t ndt::fixed_dim_type::get_default_data_size() const {
   if (!m_element_tp.is_builtin()) {
     return m_dim_size * m_element_tp.extended()->get_default_data_size();
