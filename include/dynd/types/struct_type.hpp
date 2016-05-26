@@ -16,16 +16,53 @@
 
 namespace dynd {
 namespace ndt {
+  namespace detail {
+
+    inline std::vector<std::string> names_from_fields(const std::vector<std::pair<ndt::type, std::string>> &fields) {
+      std::vector<std::string> field_names;
+      for (size_t i = 0; i < fields.size(); ++i) {
+        field_names.push_back(fields[i].second);
+      }
+
+      return field_names;
+    }
+
+    inline std::vector<ndt::type> types_from_fields(const std::vector<std::pair<ndt::type, std::string>> &fields) {
+      std::vector<ndt::type> field_types;
+      for (size_t i = 0; i < fields.size(); ++i) {
+        field_types.push_back(fields[i].first);
+      }
+
+      return field_types;
+    }
+  } // namespace dynd::ndt::detail
 
   class DYNDT_API struct_type : public tuple_type {
   protected:
     const std::vector<std::string> m_field_names;
     std::vector<std::pair<type, std::string>> m_field_tp;
 
-    struct_type(type_id_t id, const std::vector<std::string> &field_names, const std::vector<type> &field_types,
-                bool variadic = false);
+    struct_type(type_id_t DYND_UNUSED(id), const std::vector<std::string> &field_names,
+                const std::vector<type> &field_types, bool variadic = false)
+        : tuple_type(struct_id, field_types.size(), field_types.data(), variadic, type_flag_none),
+          m_field_names(field_names) {
+      // Make sure that the number of names matches
+      uintptr_t name_count = field_names.size();
+      if (name_count != (uintptr_t)m_field_count) {
+        std::stringstream ss;
+        ss << "dynd struct type requires that the number of names, " << name_count << " matches the number of types, "
+           << m_field_count;
+        throw std::invalid_argument(ss.str());
+      }
 
-    struct_type(type_id_t id, const std::vector<std::pair<type, std::string>> &fields, bool variadic = false);
+      for (intptr_t i = 0; i < m_field_count; ++i) {
+        m_field_tp.emplace_back(field_types[i], field_names[i]);
+      }
+    }
+
+    struct_type(type_id_t DYND_UNUSED(id), const std::vector<std::pair<type, std::string>> &fields,
+                bool variadic = false)
+        : struct_type(detail::names_from_fields(fields), detail::types_from_fields(fields), variadic) {}
 
     struct_type(type_id_t id, bool variadic = false) : struct_type(id, {}, variadic) {}
 

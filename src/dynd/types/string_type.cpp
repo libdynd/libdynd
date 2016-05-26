@@ -14,11 +14,6 @@
 using namespace std;
 using namespace dynd;
 
-ndt::string_type::string_type()
-    : base_string_type(string_id, sizeof(string), alignof(string), type_flag_zeroinit | type_flag_destructor, 0)
-{
-}
-
 void ndt::string_type::get_string_range(const char **out_begin, const char **out_end, const char *DYND_UNUSED(arrmeta),
                                         const char *data) const
 {
