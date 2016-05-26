@@ -22,9 +22,8 @@ namespace ndt {
   public:
     typedef bytes data_type;
 
-    bytes_type(type_id_t new_id, size_t alignment = 1)
-        : base_bytes_type(new_id, bytes_id, sizeof(bytes), alignof(bytes), type_flag_zeroinit | type_flag_destructor,
-                          0),
+    bytes_type(type_id_t id, size_t alignment = 1)
+        : base_bytes_type(id, sizeof(bytes), alignof(bytes), type_flag_zeroinit | type_flag_destructor, 0),
           m_alignment(alignment) {
       if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
         std::stringstream ss;

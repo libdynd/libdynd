@@ -12,7 +12,7 @@ namespace ndt {
 
   class bool_kind_type : public base_type {
   public:
-    bool_kind_type(type_id_t new_id) : base_type(new_id, bool_kind_id, 0, 1, type_flag_symbolic, 0, 0, 0) {}
+    bool_kind_type(type_id_t id) : base_type(id, 0, 1, type_flag_symbolic, 0, 0, 0) {}
 
     bool match(const type &candidate_tp, std::map<std::string, type> &DYND_UNUSED(tp_vars)) const {
       return candidate_tp.get_base_id() == bool_kind_id;

@@ -13,8 +13,8 @@ namespace ndt {
 
   class DYNDT_API fixed_bytes_type : public base_bytes_type {
   public:
-    fixed_bytes_type(type_id_t new_id, intptr_t data_size, intptr_t data_alignment)
-        : base_bytes_type(new_id, fixed_bytes_id, data_size, data_alignment, type_flag_none, 0) {
+    fixed_bytes_type(type_id_t id, intptr_t data_size, intptr_t data_alignment)
+        : base_bytes_type(id, data_size, data_alignment, type_flag_none, 0) {
       if (data_alignment > data_size) {
         std::stringstream ss;
         ss << "Cannot make a bytes[" << data_size << ", align=";

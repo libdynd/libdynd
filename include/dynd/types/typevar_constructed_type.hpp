@@ -19,10 +19,8 @@ namespace ndt {
     type m_arg;
 
   public:
-    typevar_constructed_type(type_id_t new_id, const std::string &name, const type &arg)
-        : base_type(new_id, typevar_constructed_id, 0, 1, type_flag_symbolic, 0, arg.get_ndim(),
-                    arg.get_strided_ndim()),
-          m_name(name), m_arg(arg) {
+    typevar_constructed_type(type_id_t id, const std::string &name, const type &arg)
+        : base_type(id, 0, 1, type_flag_symbolic, 0, arg.get_ndim(), arg.get_strided_ndim()), m_name(name), m_arg(arg) {
       //  static ndt::type args_pattern("((...), {...})");
       if (m_name.empty()) {
         throw type_error("dynd typevar name cannot be null");

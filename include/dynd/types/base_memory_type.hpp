@@ -27,10 +27,10 @@ namespace ndt {
     size_t m_storage_arrmeta_offset;
 
   public:
-    base_memory_type(type_id_t new_id, type_id_t type_id, const type &element_tp, size_t data_size, size_t alignment,
+    base_memory_type(type_id_t id, const type &element_tp, size_t data_size, size_t alignment,
                      size_t storage_arrmeta_offset, uint32_t flags)
-        : base_type(new_id, type_id, data_size, alignment, flags,
-                    storage_arrmeta_offset + element_tp.get_arrmeta_size(), element_tp.get_ndim(), 0),
+        : base_type(id, data_size, alignment, flags, storage_arrmeta_offset + element_tp.get_arrmeta_size(),
+                    element_tp.get_ndim(), 0),
           m_element_tp(element_tp), m_storage_arrmeta_offset(storage_arrmeta_offset) {
       if (element_tp.get_base_id() == memory_id) {
         std::stringstream ss;

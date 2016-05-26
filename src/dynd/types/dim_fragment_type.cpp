@@ -70,9 +70,8 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp, 
   return true;
 }
 
-ndt::dim_fragment_type::dim_fragment_type(type_id_t new_id, intptr_t ndim, const type &tp)
-    : base_dim_type(new_id, dim_fragment_id, make_type<void>(), 0, 1, 0, type_flag_symbolic, false),
-      m_tagged_dims(ndim) {
+ndt::dim_fragment_type::dim_fragment_type(type_id_t id, intptr_t ndim, const type &tp)
+    : base_dim_type(id, make_type<void>(), 0, 1, 0, type_flag_symbolic, false), m_tagged_dims(ndim) {
   if (ndim > tp.get_ndim()) {
     stringstream ss;
     ss << "Tried to make a dimension fragment from type " << tp << " with " << ndim

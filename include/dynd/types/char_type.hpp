@@ -21,9 +21,9 @@ namespace ndt {
     string_encoding_t m_encoding;
 
   public:
-    char_type(type_id_t new_id, string_encoding_t encoding = string_encoding_utf_32)
-        : base_type(new_id, char_id, string_encoding_char_size_table[encoding],
-                    string_encoding_char_size_table[encoding], type_flag_none, 0, 0, 0),
+    char_type(type_id_t id, string_encoding_t encoding = string_encoding_utf_32)
+        : base_type(id, string_encoding_char_size_table[encoding], string_encoding_char_size_table[encoding],
+                    type_flag_none, 0, 0, 0),
           m_encoding(encoding) {
       switch (encoding) {
       case string_encoding_ascii:

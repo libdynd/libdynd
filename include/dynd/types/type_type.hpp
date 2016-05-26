@@ -17,9 +17,8 @@ namespace ndt {
   public:
     typedef type data_type;
 
-    type_type(type_id_t new_id)
-        : base_type(new_id, dynd::type_id, sizeof(ndt::type), sizeof(ndt::type),
-                    type_flag_zeroinit | type_flag_destructor, 0, 0, 0) {}
+    type_type(type_id_t id)
+        : base_type(id, sizeof(ndt::type), sizeof(ndt::type), type_flag_zeroinit | type_flag_destructor, 0, 0, 0) {}
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
