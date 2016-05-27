@@ -44,7 +44,7 @@ namespace ndt {
       }
 
       for (intptr_t i = 0, i_end = get_nkwd(); i < i_end; ++i) {
-        if (m_kwd_struct.extended<tuple_type>()->get_field_type(i).get_id() == option_id) {
+        if (m_kwd_struct.extended<struct_type>()->get_field_type(i).get_id() == option_id) {
           m_opt_kwd_indices.push_back(i);
         }
       }
@@ -103,7 +103,7 @@ namespace ndt {
     size_t get_narg() const { return m_pos_tuple.extended<tuple_type>()->get_field_count(); }
 
     /** Returns the number of keyword arguments. */
-    size_t get_nkwd() const { return m_kwd_struct.extended<tuple_type>()->get_field_count(); }
+    size_t get_nkwd() const { return m_kwd_struct.extended<struct_type>()->get_field_count(); }
 
     /** Returns the number of optional arguments. */
     intptr_t get_nopt() const { return m_opt_kwd_indices.size(); }

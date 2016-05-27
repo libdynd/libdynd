@@ -24,6 +24,43 @@ intptr_t ndt::struct_type::get_field_index(const std::string &name) const {
 
 const ndt::type &ndt::struct_type::get_field_type(intptr_t i) const { return m_field_types[i]; }
 
+bool ndt::struct_type::is_expression() const {
+  for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
+    if (get_field_type(i).is_expression()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ndt::struct_type::is_unique_data_owner(const char *arrmeta) const {
+  for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
+    const type &ft = get_field_type(i);
+    if (!ft.is_builtin() && !ft.extended()->is_unique_data_owner(arrmeta + m_arrmeta_offsets[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+size_t ndt::struct_type::get_default_data_size() const {
+  intptr_t field_count = get_field_count();
+  // Default layout is to match the field order - could reorder the elements for
+  // more efficient packing
+  size_t s = 0;
+  for (intptr_t i = 0; i != field_count; ++i) {
+    const type &ft = get_field_type(i);
+    s = inc_to_alignment(s, ft.get_data_alignment());
+    if (!ft.is_builtin()) {
+      s += ft.extended()->get_default_data_size();
+    } else {
+      s += ft.get_data_size();
+    }
+  }
+  s = inc_to_alignment(s, this->m_data_alignment);
+  return s;
+}
+
 void ndt::struct_type::print_type(std::ostream &o) const {
   // Use the record datashape syntax
   o << "{";
@@ -239,8 +276,12 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::struct_type::get_
 }
 
 bool ndt::struct_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const {
+  if (candidate_tp.get_id() != struct_id) {
+    return false;
+  }
+
   intptr_t candidate_field_count = candidate_tp.extended<struct_type>()->get_field_count();
-  bool candidate_variadic = candidate_tp.extended<tuple_type>()->is_variadic();
+  bool candidate_variadic = candidate_tp.extended<struct_type>()->is_variadic();
 
   if ((m_field_count == candidate_field_count && !candidate_variadic) ||
       ((candidate_field_count >= m_field_count) && m_variadic)) {
@@ -261,4 +302,107 @@ bool ndt::struct_type::match(const type &candidate_tp, std::map<std::string, typ
   }
 
   return false;
+}
+
+void ndt::struct_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const {
+  uintptr_t *data_offsets = reinterpret_cast<uintptr_t *>(arrmeta);
+  const vector<type> &field_tps = get_field_types();
+  // If the arrmeta has data offsets, fill them in
+  if (data_offsets != NULL) {
+    fill_default_data_offsets(get_field_count(), field_tps.data(), data_offsets);
+  }
+
+  // Default construct the arrmeta for all the fields
+  for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
+    const type &tp = field_tps[i];
+    if (!tp.is_builtin()) {
+      try {
+        tp.extended()->arrmeta_default_construct(arrmeta + m_arrmeta_offsets[i], blockref_alloc);
+      } catch (...) {
+        // Since we're explicitly controlling the memory, need to manually do
+        // the cleanup too
+        for (intptr_t j = 0; j < i; ++j) {
+          const type &ft = get_field_type(j);
+          if (!ft.is_builtin()) {
+            ft.extended()->arrmeta_destruct(arrmeta + m_arrmeta_offsets[i]);
+          }
+        }
+        throw;
+      }
+    }
+  }
+}
+
+void ndt::struct_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+                                              const nd::memory_block &embedded_reference) const {
+  uintptr_t *dst_data_offsets = reinterpret_cast<uintptr_t *>(dst_arrmeta);
+  if (dst_data_offsets != 0) {
+    // Copy all the field offsets
+    memcpy(dst_data_offsets, reinterpret_cast<const uintptr_t *>(src_arrmeta), get_field_count() * sizeof(uintptr_t));
+  }
+  // Copy construct all the field's arrmeta
+  for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
+    const type &field_dt = get_field_type(i);
+    if (!field_dt.is_builtin()) {
+      field_dt.extended()->arrmeta_copy_construct(dst_arrmeta + m_arrmeta_offsets[i],
+                                                  src_arrmeta + m_arrmeta_offsets[i], embedded_reference);
+    }
+  }
+}
+
+void ndt::struct_type::arrmeta_reset_buffers(char *arrmeta) const {
+  for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
+    const type &field_dt = get_field_type(i);
+    if (field_dt.get_arrmeta_size() > 0) {
+      field_dt.extended()->arrmeta_reset_buffers(arrmeta + m_arrmeta_offsets[i]);
+    }
+  }
+}
+
+void ndt::struct_type::arrmeta_finalize_buffers(char *arrmeta) const {
+  for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
+    const type &field_dt = get_field_type(i);
+    if (!field_dt.is_builtin()) {
+      field_dt.extended()->arrmeta_finalize_buffers(arrmeta + m_arrmeta_offsets[i]);
+    }
+  }
+}
+
+void ndt::struct_type::arrmeta_destruct(char *arrmeta) const {
+  for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
+    const type &field_dt = get_field_type(i);
+    if (!field_dt.is_builtin()) {
+      field_dt.extended()->arrmeta_destruct(arrmeta + m_arrmeta_offsets[i]);
+    }
+  }
+}
+
+void ndt::struct_type::data_destruct(const char *arrmeta, char *data) const {
+  const uintptr_t *data_offsets = reinterpret_cast<const uintptr_t *>(arrmeta);
+  intptr_t field_count = get_field_count();
+  for (intptr_t i = 0; i != field_count; ++i) {
+    const type &ft = get_field_type(i);
+    if (ft.get_flags() & type_flag_destructor) {
+      ft.extended()->data_destruct(arrmeta + m_arrmeta_offsets[i], data + data_offsets[i]);
+    }
+  }
+}
+
+void ndt::struct_type::data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const {
+  const uintptr_t *data_offsets = reinterpret_cast<const uintptr_t *>(arrmeta);
+  intptr_t field_count = get_field_count();
+  // Destruct all the fields a chunk at a time, in an
+  // attempt to have some kind of locality
+  while (count > 0) {
+    size_t chunk_size = min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
+    for (intptr_t i = 0; i != field_count; ++i) {
+      const type &ft = get_field_type(i);
+      if (ft.get_flags() & type_flag_destructor) {
+        ft.extended()->data_destruct_strided(arrmeta + m_arrmeta_offsets[i], data + data_offsets[i], stride,
+                                             chunk_size);
+      }
+    }
+    data += stride * chunk_size;
+    count -= chunk_size;
+  }
 }
