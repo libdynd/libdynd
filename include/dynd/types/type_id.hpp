@@ -59,10 +59,12 @@ enum type_id_t {
   dim_kind_id,
 
   bytes_kind_id,
+  fixed_bytes_kind_id,
   fixed_bytes_id, // A bytes buffer of a fixed size
   bytes_id,       // blockref primitive types
 
   string_kind_id,
+  fixed_string_kind_id,
   fixed_string_id, // A NULL-terminated string buffer of a fixed size
   char_id,         // A single string character
   string_id,       // A variable-sized string type
@@ -97,10 +99,6 @@ enum type_id_t {
 
   // A type for state in a functional
   state_id,
-
-  // Named symbolic types
-  // "Int", matching both UInt and SInt
-  int_sym_id,
 
   // Symbolic types
   typevar_id,
@@ -388,6 +386,9 @@ template <>
 struct base_id_of<bytes_kind_id> : id_constant<scalar_kind_id> {};
 
 template <>
+struct base_id_of<fixed_bytes_kind_id> : id_constant<bytes_kind_id> {};
+
+template <>
 struct base_id_of<fixed_bytes_id> : id_constant<bytes_kind_id> {};
 
 template <>
@@ -395,6 +396,9 @@ struct base_id_of<bytes_id> : id_constant<bytes_kind_id> {};
 
 template <>
 struct base_id_of<string_kind_id> : id_constant<scalar_kind_id> {};
+
+template <>
+struct base_id_of<fixed_string_kind_id> : id_constant<string_kind_id> {};
 
 template <>
 struct base_id_of<char_id> : id_constant<string_kind_id> {};
