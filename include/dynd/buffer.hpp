@@ -82,7 +82,7 @@ namespace nd {
         if (include_ndim > 0) {
           throw too_many_indices(get_type(), include_ndim, 0);
         }
-        return ndt::type(get_type().get_id());
+        return get_type();
       } else {
         size_t ndim = get_type()->get_ndim();
         if (ndim < include_ndim) {

@@ -54,8 +54,6 @@ char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, ch
   return data;
 }
 
-ndt::type::type(type_id_t id) : type(ndt::detail::infos()[id].tp) {}
-
 ndt::type::type(const std::string &rep) { type_from_datashape(rep).swap(*this); }
 
 ndt::type::type(const char *rep_begin, const char *rep_end) { type_from_datashape(rep_begin, rep_end).swap(*this); }

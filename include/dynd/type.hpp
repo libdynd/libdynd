@@ -189,9 +189,6 @@ namespace ndt {
       */
     type() = default;
 
-    /** Construct from a type ID */
-    type(type_id_t tp_id);
-
     /** Construct from a string representation */
     explicit type(const std::string &rep);
 
@@ -725,7 +722,7 @@ namespace ndt {
 
     static const bool is_same_layout = false;
 
-    static type equivalent() { return type(id_of<void>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(void_id), false); }
   };
 
   namespace detail {
@@ -859,7 +856,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<bool1>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<bool1>::value), false); }
   };
 
   template <>
@@ -877,7 +874,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<signed char>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<signed char>::value), false); }
 
     static signed char na() { return std::numeric_limits<signed char>::min(); }
   };
@@ -888,7 +885,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<short>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<short>::value), false); }
   };
 
   template <>
@@ -897,7 +894,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<int>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<int>::value), false); }
 
     static int na() { return std::numeric_limits<int>::min(); }
   };
@@ -908,7 +905,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<long>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<long>::value), false); }
   };
 
   template <>
@@ -917,7 +914,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<long long>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<long long>::value), false); }
   };
 
   template <>
@@ -926,7 +923,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<int128>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<int128>::value), false); }
   };
 
   template <>
@@ -935,7 +932,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<unsigned char>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<unsigned char>::value), false); }
   };
 
   template <>
@@ -944,7 +941,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<unsigned short>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<unsigned short>::value), false); }
   };
 
   template <>
@@ -953,7 +950,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<unsigned int>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<unsigned int>::value), false); }
 
     static unsigned int na() { return std::numeric_limits<unsigned int>::max(); }
   };
@@ -964,7 +961,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<unsigned long>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<unsigned long>::value), false); }
   };
 
   template <>
@@ -973,7 +970,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<unsigned long long>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<unsigned long long>::value), false); }
   };
 
   template <>
@@ -982,7 +979,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<uint128>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<uint128>::value), false); }
   };
 
   template <>
@@ -991,7 +988,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<char>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<char>::value), false); }
   };
 
   template <>
@@ -1000,7 +997,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<float16>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<float16>::value), false); }
   };
 
   template <>
@@ -1009,7 +1006,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<float>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<float>::value), false); }
   };
 
   template <>
@@ -1018,7 +1015,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<double>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<double>::value), false); }
   };
 
   template <>
@@ -1027,7 +1024,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<float128>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<float128>::value), false); }
   };
 
   template <typename T>
@@ -1036,7 +1033,7 @@ namespace ndt {
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type(id_of<complex<T>>::value); }
+    static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<complex<T>>::value), false); }
   };
 
   template <typename T>
@@ -1046,42 +1043,6 @@ namespace ndt {
     static const bool is_same_layout = true;
 
     static type equivalent() { return make_type<complex<T>>(); }
-  };
-
-  template <>
-  struct traits<const char *> {
-    static const size_t ndim = 0;
-
-    static const bool is_same_layout = false;
-
-    static type equivalent() { return type(string_id); }
-  };
-
-  template <size_t N>
-  struct traits<char[N]> {
-    static const size_t ndim = 0;
-
-    static const bool is_same_layout = false;
-
-    static type equivalent() { return type(string_id); }
-  };
-
-  template <size_t N>
-  struct traits<const char[N]> {
-    static const size_t ndim = 0;
-
-    static const bool is_same_layout = false;
-
-    static type equivalent() { return type(string_id); }
-  };
-
-  template <>
-  struct traits<type> {
-    static const size_t ndim = 0;
-
-    static const bool is_same_layout = true;
-
-    static type equivalent() { return type(type_id); }
   };
 
   template <typename T>

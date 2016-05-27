@@ -77,11 +77,11 @@ namespace nd {
   DYND_API nd::array old_linspace(const ndt::type &dt, const void *startval, const void *stopval, intptr_t count);
 
   inline nd::array old_linspace(float start, float stop, intptr_t count = 50) {
-    return old_linspace(ndt::type(float32_id), &start, &stop, count);
+    return old_linspace(ndt::make_type<float>(), &start, &stop, count);
   }
 
   inline nd::array old_linspace(double start, double stop, intptr_t count = 50) {
-    return old_linspace(ndt::type(float64_id), &start, &stop, count);
+    return old_linspace(ndt::make_type<double>(), &start, &stop, count);
   }
 
   template <class T>

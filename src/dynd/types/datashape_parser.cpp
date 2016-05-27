@@ -870,7 +870,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end, map<std::str
   bool variadic = false;
 
   if (!parse_token_ds(begin, end, '{')) {
-    return ndt::type(uninitialized_id);
+    return ndt::type();
   }
   if (parse_token_ds(begin, end, '}')) {
     // Empty struct
@@ -961,7 +961,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
   bool variadic = false;
 
   if (!parse_token_ds(begin, end, '(')) {
-    return ndt::type(uninitialized_id);
+    return ndt::type();
   }
   if (!parse_token_ds(begin, end, ')')) {
     for (;;) {

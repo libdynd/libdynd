@@ -138,10 +138,12 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
       case uint_kind_id:
         return tp0_val;
       case float_kind_id:
-        return ndt::type(max(max(tp0_val.unchecked_get_builtin_id(), tp1_val.unchecked_get_builtin_id()), float32_id));
+        return ndt::type(reinterpret_cast<ndt::base_type *>(max(
+                             max(tp0_val.unchecked_get_builtin_id(), tp1_val.unchecked_get_builtin_id()), float32_id)),
+                         false);
       case complex_kind_id:
         if (tp0_val.get_id() == float64_id && tp1_val.get_id() == complex_float32_id) {
-          return ndt::type(complex_float64_id);
+          return ndt::make_type<complex<double>>();
         } else {
           return tp1_val;
         }
@@ -161,7 +163,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
       case float_kind_id:
         if (tp0_val.unchecked_get_builtin_id() == complex_float32_id &&
             tp1_val.unchecked_get_builtin_id() == float64_id) {
-          return ndt::type(complex_float64_id);
+          return ndt::make_type<complex<double>>();
         } else {
           return tp0_val;
         }
