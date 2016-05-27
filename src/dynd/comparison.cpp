@@ -78,7 +78,7 @@ nd::callable make_equal() {
                      nd::make_callable<nd::equal_callable<dynd::complex<double>, dynd::complex<double>>>()});
   dispatcher.insert({{tuple_id, tuple_id}, nd::make_callable<nd::equal_callable<ndt::tuple_type, ndt::tuple_type>>()});
   dispatcher.insert(
-      {{struct_id, struct_id}, nd::make_callable<nd::equal_callable<ndt::tuple_type, ndt::tuple_type>>()});
+      {{struct_id, struct_id}, nd::make_callable<nd::equal_callable<ndt::struct_type, ndt::struct_type>>()});
   dispatcher.insert({{type_id, type_id}, nd::make_callable<nd::equal_callable<ndt::type, ndt::type>>()});
   dispatcher.insert({{bytes_id, bytes_id}, nd::make_callable<nd::equal_callable<bytes, bytes>>()});
 
@@ -94,7 +94,7 @@ nd::callable make_not_equal() {
   dispatcher.insert(
       {{tuple_id, tuple_id}, nd::make_callable<nd::not_equal_callable<ndt::tuple_type, ndt::tuple_type>>()});
   dispatcher.insert(
-      {{struct_id, struct_id}, nd::make_callable<nd::not_equal_callable<ndt::tuple_type, ndt::tuple_type>>()});
+      {{struct_id, struct_id}, nd::make_callable<nd::not_equal_callable<ndt::struct_type, ndt::struct_type>>()});
   dispatcher.insert({{type_id, type_id}, nd::make_callable<nd::not_equal_callable<ndt::type, ndt::type>>()});
   dispatcher.insert({{bytes_id, bytes_id}, nd::make_callable<nd::not_equal_callable<bytes, bytes>>()});
 

@@ -434,7 +434,7 @@ template <>
 struct base_id_of<tuple_id> : id_constant<scalar_kind_id> {};
 
 template <>
-struct base_id_of<struct_id> : id_constant<tuple_id> {};
+struct base_id_of<struct_id> : id_constant<scalar_kind_id> {};
 
 template <>
 struct base_id_of<option_id> : id_constant<any_kind_id> {};

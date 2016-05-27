@@ -69,5 +69,8 @@ namespace nd {
     }
   };
 
+  template <>
+  struct equal_kernel<ndt::struct_type, ndt::struct_type> : equal_kernel<ndt::tuple_type, ndt::tuple_type> {};
+
 } // namespace dynd::nd
 } // namespace dynd

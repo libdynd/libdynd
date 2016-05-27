@@ -15,6 +15,10 @@
 #include <dynd/types/type_id.hpp>
 
 namespace dynd {
+namespace ndt {
+  class tuple_type;
+}
+
 namespace detail {
 
   template <typename ValueType, int NDim>

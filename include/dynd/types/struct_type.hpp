@@ -37,15 +37,47 @@ namespace ndt {
     }
   } // namespace dynd::ndt::detail
 
-  class DYNDT_API struct_type : public tuple_type {
+  class DYNDT_API struct_type : public base_type {
   protected:
+    intptr_t m_field_count;
+
     const std::vector<std::string> m_field_names;
     std::vector<std::pair<type, std::string>> m_field_tp;
+    std::vector<type> m_field_types;
+    std::vector<uintptr_t> m_arrmeta_offsets;
+
+    bool m_variadic;
 
   public:
     struct_type(type_id_t id, const std::vector<std::string> &field_names, const std::vector<type> &field_types,
                 bool variadic = false)
-        : tuple_type(id, field_types.size(), field_types.data(), variadic, type_flag_none), m_field_names(field_names) {
+        : base_type(id, 0, 1, type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
+          m_field_count(field_types.size()), m_field_names(field_names), m_field_types(field_names.size()),
+          m_arrmeta_offsets(field_names.size()), m_variadic(variadic) {
+      size_t arrmeta_offset = get_field_count() * sizeof(size_t);
+
+      this->m_data_alignment = 1;
+
+      for (intptr_t i = 0; i < m_field_count; ++i) {
+        m_field_types[i] = field_types[i];
+      }
+
+      for (intptr_t i = 0; i != m_field_count; ++i) {
+        const type &ft = get_field_type(i);
+        size_t field_alignment = ft.get_data_alignment();
+        // Accumulate the biggest field alignment as the type alignment
+        if (field_alignment > this->m_data_alignment) {
+          this->m_data_alignment = (uint8_t)field_alignment;
+        }
+        // Inherit any operand flags from the fields
+        this->flags |= (ft.get_flags() & type_flags_operand_inherited);
+        // Calculate the arrmeta offsets
+        m_arrmeta_offsets[i] = arrmeta_offset;
+        arrmeta_offset += ft.get_arrmeta_size();
+      }
+
+      this->m_metadata_size = arrmeta_offset;
+
       // Make sure that the number of names matches
       uintptr_t name_count = field_names.size();
       if (name_count != (uintptr_t)m_field_count) {
@@ -69,6 +101,17 @@ namespace ndt {
     const std::vector<std::string> &get_field_names() const { return m_field_names; }
     const std::string &get_field_name(intptr_t i) const { return m_field_names[i]; }
 
+    intptr_t get_field_count() const { return m_field_count; }
+    const ndt::type get_type() const { return ndt::type_for(m_field_types); }
+    const std::vector<type> &get_field_types() const { return m_field_types; }
+    const type *get_field_types_raw() const { return m_field_types.data(); }
+    const std::vector<uintptr_t> &get_arrmeta_offsets() const { return m_arrmeta_offsets; }
+    const uintptr_t *get_arrmeta_offsets_raw() const { return m_arrmeta_offsets.data(); }
+
+    uintptr_t get_arrmeta_offset(intptr_t i) const { return m_arrmeta_offsets[i]; }
+
+    size_t get_default_data_size() const;
+
     /**
      * Gets the field index for the given name. Returns -1 if
      * the struct doesn't have a field of the given name.
@@ -90,6 +133,11 @@ namespace ndt {
      */
     const type &get_field_type(intptr_t i) const;
 
+    bool is_expression() const;
+    bool is_unique_data_owner(const char *arrmeta) const;
+
+    bool is_variadic() const { return m_variadic; }
+
     const std::vector<std::pair<type, std::string>> &get_named_field_types() const { return m_field_tp; }
 
     void print_type(std::ostream &o) const;
@@ -104,6 +152,16 @@ namespace ndt {
 
     bool operator==(const base_type &rhs) const;
 
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+                                const nd::memory_block &embedded_reference) const;
+    void arrmeta_reset_buffers(char *arrmeta) const;
+    void arrmeta_finalize_buffers(char *arrmeta) const;
+    void arrmeta_destruct(char *arrmeta) const;
+
+    void data_destruct(const char *arrmeta, char *data) const;
+    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
+
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
     type apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i, const type &root_tp,
@@ -116,6 +174,22 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
     virtual bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
+
+    /**
+     * Fills in the array of default data offsets based on the data sizes
+     * and alignments of the types.
+     */
+    static void fill_default_data_offsets(intptr_t nfields, const type *field_tps, uintptr_t *out_data_offsets) {
+      if (nfields > 0) {
+        out_data_offsets[0] = 0;
+        size_t offs = 0;
+        for (intptr_t i = 1; i < nfields; ++i) {
+          offs += field_tps[i - 1].get_default_data_size();
+          offs = inc_to_alignment(offs, field_tps[i].get_data_alignment());
+          out_data_offsets[i] = offs;
+        }
+      }
+    }
   };
 
   template <>
