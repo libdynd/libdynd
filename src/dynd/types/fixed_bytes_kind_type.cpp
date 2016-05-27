@@ -43,11 +43,7 @@ void ndt::fixed_bytes_kind_type::get_bytes_range(const char **DYND_UNUSED(out_be
 }
 
 bool ndt::fixed_bytes_kind_type::operator==(const base_type &rhs) const {
-  if (this == &rhs) {
-    return true;
-  } else {
-    return rhs.is_symbolic() && rhs.get_id() == fixed_bytes_id;
-  }
+  return this == &rhs || rhs.get_id() == fixed_bytes_kind_id;
 }
 
 void ndt::fixed_bytes_kind_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
@@ -93,5 +89,5 @@ void ndt::fixed_bytes_kind_type::data_destruct_strided(const char *DYND_UNUSED(a
 
 bool ndt::fixed_bytes_kind_type::match(const type &candidate_tp,
                                        std::map<std::string, type> &DYND_UNUSED(tp_vars)) const {
-  return candidate_tp.get_id() == fixed_bytes_id;
+  return candidate_tp.get_id() == fixed_bytes_id || candidate_tp.get_id() == fixed_bytes_kind_id;
 }

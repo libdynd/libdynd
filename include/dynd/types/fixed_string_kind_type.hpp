@@ -48,7 +48,7 @@ namespace ndt {
   };
 
   template <>
-  struct id_of<fixed_string_kind_type> : std::integral_constant<type_id_t, fixed_string_id> {};
+  struct id_of<fixed_string_kind_type> : std::integral_constant<type_id_t, fixed_string_kind_id> {};
 
 } // namespace dynd::ndt
 } // namespace dynd
