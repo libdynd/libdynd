@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/types/any_kind_type.hpp>
-#include <dynd/types/base_fixed_dim_type.hpp>
+#include <dynd/types/fixed_dim_kind_type.hpp>
 
 namespace dynd {
 

@@ -122,7 +122,7 @@ namespace nd {
     public:
       parse_callable()
           : base_callable(ndt::make_type<ndt::callable_type>(
-                ndt::make_type<ndt::base_fixed_dim_type>(ndt::make_type<ndt::any_kind_type>()),
+                ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<ndt::any_kind_type>()),
                 {ndt::make_type<char *>(), ndt::make_type<char *>()})) {}
 
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),

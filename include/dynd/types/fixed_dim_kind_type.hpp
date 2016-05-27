@@ -100,11 +100,11 @@ public:
 
 namespace ndt {
 
-  class DYNDT_API base_fixed_dim_type : public base_dim_type {
+  class DYNDT_API fixed_dim_kind_type : public base_dim_type {
   public:
     using base_dim_type::base_dim_type;
 
-    base_fixed_dim_type(type_id_t id, const type &element_tp = make_type<any_kind_type>())
+    fixed_dim_kind_type(type_id_t id, const type &element_tp = make_type<any_kind_type>())
         : base_dim_type(id, element_tp, 0, element_tp.get_data_alignment(), sizeof(size_stride_t), type_flag_symbolic,
                         true) {
       // Propagate the inherited flags from the element
@@ -154,10 +154,8 @@ namespace ndt {
     virtual type with_element_type(const type &element_tp) const;
   };
 
-  typedef base_fixed_dim_type fixed_dim_kind_type;
-
   template <>
-  struct id_of<base_fixed_dim_type> : std::integral_constant<type_id_t, fixed_dim_kind_id> {};
+  struct id_of<fixed_dim_kind_type> : std::integral_constant<type_id_t, fixed_dim_kind_id> {};
 
   template <typename T>
   struct traits<T[]> {
