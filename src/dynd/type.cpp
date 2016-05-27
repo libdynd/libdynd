@@ -534,58 +534,6 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &
   }
 }
 
-// ndt::type ndt::type::make(type_id_t tp_id, const nd::array &args) { return registry::data[tp_id].func(tp_id, args); }
-
-DYNDT_API map<type_id_t, ndt::reg_info_t> &ndt::detail::infos() {
-  static map<type_id_t, reg_info_t> infos{
-      {any_kind_id, {make_type<any_kind_type>()}},
-      {scalar_kind_id, {make_type<scalar_kind_type>()}},
-      {bool_kind_id, {type()}},
-      {bool_id, {type(reinterpret_cast<const base_type *>(bool_id), false)}},
-      {int_kind_id, {type()}},
-      {int8_id, {type(reinterpret_cast<const base_type *>(int8_id), false)}},
-      {int16_id, {type(reinterpret_cast<const base_type *>(int16_id), false)}},
-      {int32_id, {type(reinterpret_cast<const base_type *>(int32_id), false)}},
-      {int64_id, {type(reinterpret_cast<const base_type *>(int64_id), false)}},
-      {int128_id, {type(reinterpret_cast<const base_type *>(int128_id), false)}},
-      {uint_kind_id, {type()}},
-      {uint8_id, {type(reinterpret_cast<const base_type *>(uint8_id), false)}},
-      {uint16_id, {type(reinterpret_cast<const base_type *>(uint16_id), false)}},
-      {uint32_id, {type(reinterpret_cast<const base_type *>(uint32_id), false)}},
-      {uint64_id, {type(reinterpret_cast<const base_type *>(uint64_id), false)}},
-      {uint128_id, {type(reinterpret_cast<const base_type *>(uint128_id), false)}},
-      {float_kind_id, {type()}},
-      {float16_id, {type(reinterpret_cast<const base_type *>(float16_id), false)}},
-      {float32_id, {type(reinterpret_cast<const base_type *>(float32_id), false)}},
-      {float64_id, {type(reinterpret_cast<const base_type *>(float64_id), false)}},
-      {float128_id, {type(reinterpret_cast<const base_type *>(float128_id), false)}},
-      {complex_kind_id, {type()}},
-      {complex_float32_id, {type(reinterpret_cast<const base_type *>(complex_float32_id), false)}},
-      {complex_float64_id, {type(reinterpret_cast<const base_type *>(complex_float64_id), false)}},
-      {void_id, {type(reinterpret_cast<const base_type *>(void_id), false)}},
-      {dim_kind_id, {type()}},
-      {bytes_kind_id, {type()}},
-      {fixed_bytes_id, {make_type<fixed_bytes_kind_type>()}},
-      {bytes_id, {make_type<bytes_type>()}},
-      {string_kind_id, {type()}},
-      {fixed_string_id, {make_type<fixed_string_kind_type>()}},
-      {char_id, {make_type<char_type>()}},
-      {string_id, {make_type<string_type>()}},
-      {tuple_id, {make_type<tuple_type>(true)}},
-      {struct_id, {make_type<struct_type>(true)}},
-      {fixed_dim_kind_id, {type()}},
-      {fixed_dim_id, {make_type<fixed_dim_kind_type>(make_type<any_kind_type>())}},
-      {var_dim_id, {ndt::make_type<ndt::var_dim_type>(make_type<any_kind_type>())}},
-      {categorical_id, {make_type<categorical_kind_type>()}},
-      {option_id, {make_type<option_type>(make_type<any_kind_type>())}},
-      {pointer_id, {make_type<pointer_type>(make_type<any_kind_type>())}},
-      {type_id, {make_type<type_type>()}},
-      {array_id, {type()}},
-      {callable_id, {type()}}};
-
-  return infos;
-}
-
 DYNDT_API ndt::type ndt::pow(const type &base_tp, size_t exponent) {
   switch (exponent) {
   case 0:
@@ -595,11 +543,6 @@ DYNDT_API ndt::type ndt::pow(const type &base_tp, size_t exponent) {
   default:
     return base_tp.extended<base_dim_type>()->with_element_type(pow(base_tp, exponent - 1));
   }
-}
-
-DYNDT_API void ndt::reg(type_id_t id, const ndt::type &tp) {
-  map<type_id_t, reg_info_t> &infos = detail::infos();
-  infos[id].tp = tp;
 }
 
 template <class T, class Tas>
