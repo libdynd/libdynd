@@ -21,15 +21,15 @@ struct DYNDT_API fixed_dim_type_iterdata {
 
 namespace ndt {
 
-  class DYNDT_API fixed_dim_type : public base_fixed_dim_type {
+  class DYNDT_API fixed_dim_type : public base_dim_type {
     intptr_t m_dim_size;
 
   public:
     typedef size_stride_t metadata_type;
 
     fixed_dim_type(type_id_t id, intptr_t dim_size, const type &element_tp = make_type<any_kind_type>())
-        : base_fixed_dim_type(id, element_tp, 0, element_tp.get_data_alignment(), sizeof(fixed_dim_type_arrmeta),
-                              type_flag_none, true),
+        : base_dim_type(id, element_tp, 0, element_tp.get_data_alignment(), sizeof(fixed_dim_type_arrmeta),
+                        type_flag_none, true),
           m_dim_size(dim_size) {
       // Propagate the inherited flags from the element
       this->flags |= (element_tp.get_flags() & (type_flags_operand_inherited | type_flags_value_inherited));
@@ -68,8 +68,6 @@ namespace ndt {
     intptr_t get_dim_size(const char *arrmeta, const char *data) const;
     void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
     void get_strides(size_t i, intptr_t *out_strides, const char *arrmeta) const;
-
-    bool is_sized() const { return true; }
 
     axis_order_classification_t classify_axis_order(const char *arrmeta) const;
 

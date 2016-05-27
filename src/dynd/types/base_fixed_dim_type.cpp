@@ -89,20 +89,8 @@ bool ndt::base_fixed_dim_type::is_lossless_assignment(const type &DYND_UNUSED(ds
 }
 
 bool ndt::base_fixed_dim_type::operator==(const base_type &rhs) const {
-  if (this == &rhs) {
-    return true;
-  }
-
-  if (rhs.get_id() != fixed_dim_id) {
-    return false;
-  }
-
-  if (static_cast<const base_fixed_dim_type *>(&rhs)->is_sized()) {
-    return false;
-  }
-
-  const base_fixed_dim_type *dt = static_cast<const base_fixed_dim_type *>(&rhs);
-  return m_element_tp == dt->m_element_tp;
+  return this == &rhs || (rhs.get_id() == fixed_dim_kind_id &&
+                          m_element_tp == reinterpret_cast<const base_fixed_dim_type *>(&rhs)->m_element_tp);
 }
 
 void ndt::base_fixed_dim_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
@@ -157,12 +145,10 @@ void ndt::base_fixed_dim_type::data_destruct_strided(const char *DYND_UNUSED(arr
 
 bool ndt::base_fixed_dim_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const {
   switch (candidate_tp.get_id()) {
+  case fixed_dim_kind_id:
+    return m_element_tp.match(candidate_tp.extended<base_dim_type>()->get_element_type(), tp_vars);
   case fixed_dim_id:
-    if (candidate_tp.is_symbolic()) {
-      return m_element_tp.match(candidate_tp.extended<base_fixed_dim_type>()->get_element_type(), tp_vars);
-    } else {
-      return m_element_tp.match(candidate_tp.extended<fixed_dim_type>()->get_element_type(), tp_vars);
-    }
+    return m_element_tp.match(candidate_tp.extended<base_dim_type>()->get_element_type(), tp_vars);
   default:
     return false;
   }

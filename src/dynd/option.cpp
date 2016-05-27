@@ -21,10 +21,11 @@ nd::callable make_assign_na() {
   public:
     dispatch_callable()
         : base_dispatch_callable(ndt::type("() -> ?Any")),
-          m_dispatcher(nd::callable::make_all<nd::assign_na_callable,
-                                              type_sequence<bool, int8_t, int16_t, int32_t, int64_t, int128, uint32_t,
-                                                            float, double, dynd::complex<float>, dynd::complex<double>,
-                                                            void, dynd::bytes, dynd::string, ndt::fixed_dim_type>>()) {}
+          m_dispatcher(
+              nd::callable::make_all<nd::assign_na_callable,
+                                     type_sequence<bool, int8_t, int16_t, int32_t, int64_t, int128, uint32_t, float,
+                                                   double, dynd::complex<float>, dynd::complex<double>, void,
+                                                   dynd::bytes, dynd::string, ndt::fixed_dim_kind_type>>()) {}
 
     const nd::callable &specialize(const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                                    const ndt::type *DYND_UNUSED(src_tp)) {
@@ -44,10 +45,10 @@ nd::callable make_is_na() {
   dispatcher<1, nd::callable> dispatcher = nd::callable::make_all<
       nd::is_na_callable,
       type_sequence<bool, int8_t, int16_t, int32_t, int64_t, int128, uint32_t, float, double, dynd::complex<float>,
-                    dynd::complex<double>, void, dynd::bytes, dynd::string, ndt::fixed_dim_type>>();
+                    dynd::complex<double>, void, dynd::bytes, dynd::string, ndt::fixed_dim_kind_type>>();
   dynd::dispatcher<1, nd::callable> dim_dispatcher;
 
-  for (auto tp_id : {fixed_dim_id, var_dim_id}) {
+  for (auto tp_id : {fixed_dim_kind_id, var_dim_id}) {
     dim_dispatcher.insert({{tp_id}, nd::get_elwise()});
   }
 

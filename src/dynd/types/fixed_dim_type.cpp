@@ -229,9 +229,9 @@ bool ndt::fixed_dim_type::is_lossless_assignment(const type &dst_tp, const type 
 }
 
 bool ndt::fixed_dim_type::operator==(const base_type &rhs) const {
-  return this == &rhs || (rhs.get_id() == fixed_dim_id && static_cast<const base_fixed_dim_type *>(&rhs)->is_sized() &&
-                          m_element_tp == static_cast<const fixed_dim_type *>(&rhs)->m_element_tp &&
-                          m_dim_size == static_cast<const fixed_dim_type *>(&rhs)->m_dim_size);
+  return this == &rhs ||
+         (rhs.get_id() == fixed_dim_id && m_dim_size == static_cast<const fixed_dim_type *>(&rhs)->m_dim_size &&
+          m_element_tp == static_cast<const fixed_dim_type *>(&rhs)->m_element_tp);
 }
 
 void ndt::fixed_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const {
@@ -508,14 +508,8 @@ void ndt::fixed_dim_type::reorder_default_constructed_strides(char *dst_arrmeta,
 bool ndt::fixed_dim_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const {
   switch (candidate_tp.get_id()) {
   case fixed_dim_id:
-    if (!candidate_tp.extended<base_fixed_dim_type>()->is_sized()) {
-      return false;
-    }
-    // TODO XXX If the arrmeta is not NULL, the strides should be checked too
-    return get_fixed_dim_size() == candidate_tp.extended<fixed_dim_type>()->get_fixed_dim_size() &&
-           m_element_tp.match(candidate_tp.extended<fixed_dim_type>()->m_element_tp,
-
-                              tp_vars);
+    return m_dim_size == candidate_tp.extended<fixed_dim_type>()->m_dim_size &&
+           m_element_tp.match(candidate_tp.extended<fixed_dim_type>()->m_element_tp, tp_vars);
   default:
     return false;
   }

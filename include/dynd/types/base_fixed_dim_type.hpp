@@ -132,8 +132,6 @@ namespace ndt {
 
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
-    virtual bool is_sized() const { return false; }
-
     bool operator==(const base_type &rhs) const;
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
@@ -159,7 +157,7 @@ namespace ndt {
   typedef base_fixed_dim_type fixed_dim_kind_type;
 
   template <>
-  struct id_of<base_fixed_dim_type> : std::integral_constant<type_id_t, fixed_dim_id> {};
+  struct id_of<base_fixed_dim_type> : std::integral_constant<type_id_t, fixed_dim_kind_id> {};
 
   template <typename T>
   struct traits<T[]> {

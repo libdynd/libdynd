@@ -187,30 +187,30 @@ bool ndt::pow_dimsym_type::match(const type &candidate_tp, std::map<std::string,
   // Now make sure the base_tp is repeated the right number of times
   type concrete_subtype = candidate_tp;
   switch (base_tp.get_id()) {
-  case fixed_dim_id: {
-    if (!base_tp.extended<base_fixed_dim_type>()->is_sized()) {
-      for (intptr_t i = 0; i < exponent; ++i) {
-        switch (concrete_subtype.get_id()) {
-        case fixed_dim_id:
-          concrete_subtype = concrete_subtype.extended<base_dim_type>()->get_element_type();
-          break;
-        default:
-          return false;
-        }
+  case fixed_dim_kind_id: {
+    for (intptr_t i = 0; i < exponent; ++i) {
+      switch (concrete_subtype.get_id()) {
+      case fixed_dim_kind_id:
+      case fixed_dim_id:
+        concrete_subtype = concrete_subtype.extended<base_dim_type>()->get_element_type();
+        break;
+      default:
+        return false;
       }
-      break;
-    } else {
-      intptr_t dim_size = base_tp.extended<fixed_dim_type>()->get_fixed_dim_size();
-      for (intptr_t i = 0; i < exponent; ++i) {
-        if (concrete_subtype.get_id() == fixed_dim_id &&
-            concrete_subtype.extended<fixed_dim_type>()->get_fixed_dim_size() == dim_size) {
-          concrete_subtype = concrete_subtype.extended<base_dim_type>()->get_element_type();
-        } else {
-          return false;
-        }
-      }
-      break;
     }
+    break;
+  }
+  case fixed_dim_id: {
+    intptr_t dim_size = base_tp.extended<fixed_dim_type>()->get_fixed_dim_size();
+    for (intptr_t i = 0; i < exponent; ++i) {
+      if (concrete_subtype.get_id() == fixed_dim_id &&
+          concrete_subtype.extended<fixed_dim_type>()->get_fixed_dim_size() == dim_size) {
+        concrete_subtype = concrete_subtype.extended<base_dim_type>()->get_element_type();
+      } else {
+        return false;
+      }
+    }
+    break;
   }
   case var_dim_id:
     for (intptr_t i = 0; i < exponent; ++i) {
