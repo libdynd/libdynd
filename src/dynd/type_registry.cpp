@@ -48,7 +48,7 @@ DYNDT_API vector<id_info> &detail::infos() {
                                {"void", void_id, base_ids<void_id>()},
                                {"Dim", dim_kind_id, base_ids<dim_kind_id>()},
                                {"Bytes", bytes_kind_id, base_ids<bytes_kind_id>()},
-                               {"FixedBytes", fixed_bytes_kind_id, base_ids<bytes_kind_id>()},
+                               {"FixedBytes", fixed_bytes_kind_id, base_ids<fixed_bytes_kind_id>()},
                                {"fixed_bytes", fixed_bytes_id, base_ids<fixed_bytes_id>()},
                                {"bytes", bytes_id, base_ids<bytes_id>()},
                                {"String", string_kind_id, base_ids<string_kind_id>()},

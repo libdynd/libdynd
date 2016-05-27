@@ -15,7 +15,7 @@ using namespace dynd;
 
 TEST(FixedStringKindType, Construction) {
   ndt::type tp = ndt::make_type<ndt::fixed_string_kind_type>();
-  EXPECT_EQ(fixed_string_id, tp.get_id());
+  EXPECT_EQ(fixed_string_kind_id, tp.get_id());
   EXPECT_EQ(string_kind_id, tp.get_base_id());
   EXPECT_EQ(0u, tp.get_data_alignment());
   EXPECT_EQ(0u, tp.get_data_size());
