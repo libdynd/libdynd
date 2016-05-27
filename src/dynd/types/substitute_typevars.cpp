@@ -51,21 +51,19 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
   case pointer_id:
     return ndt::make_type<ndt::pointer_type>(
         ndt::substitute(pattern.extended<pointer_type>()->get_target_type(), typevars, concrete));
-  case fixed_dim_id:
-    if (!pattern.extended<base_fixed_dim_type>()->is_sized()) {
-      if (!concrete) {
-        return ndt::make_type<ndt::fixed_dim_kind_type>(
-            ndt::substitute(pattern.extended<base_dim_type>()->get_element_type(), typevars, concrete));
-      } else {
-        throw invalid_argument("The dynd pattern type includes a symbolic "
-                               "'fixed' dimension, which is not concrete as "
-                               "requested");
-      }
+  case fixed_dim_kind_id:
+    if (!concrete) {
+      return ndt::make_type<ndt::fixed_dim_kind_type>(
+          ndt::substitute(pattern.extended<base_dim_type>()->get_element_type(), typevars, concrete));
     } else {
-      return ndt::make_fixed_dim(
-          pattern.extended<fixed_dim_type>()->get_fixed_dim_size(),
-          ndt::substitute(pattern.extended<fixed_dim_type>()->get_element_type(), typevars, concrete));
+      throw invalid_argument("The dynd pattern type includes a symbolic "
+                             "'fixed' dimension, which is not concrete as "
+                             "requested");
     }
+  case fixed_dim_id:
+    return ndt::make_fixed_dim(
+        pattern.extended<fixed_dim_type>()->get_fixed_dim_size(),
+        ndt::substitute(pattern.extended<fixed_dim_type>()->get_element_type(), typevars, concrete));
   case var_dim_id:
     return ndt::make_type<ndt::var_dim_type>(
         ndt::substitute(pattern.extended<var_dim_type>()->get_element_type(), typevars, concrete));
@@ -136,15 +134,13 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
       }
       if (!concrete || !it->second.is_symbolic()) {
         switch (it->second.get_id()) {
+        case fixed_dim_kind_id:
+          return ndt::make_type<ndt::fixed_dim_kind_type>(
+              ndt::substitute(pattern.extended<typevar_dim_type>()->get_element_type(), typevars, concrete));
         case fixed_dim_id:
-          if (!it->second.extended<base_fixed_dim_type>()->is_sized()) {
-            return ndt::make_type<ndt::fixed_dim_kind_type>(
-                ndt::substitute(pattern.extended<typevar_dim_type>()->get_element_type(), typevars, concrete));
-          } else {
-            return ndt::make_fixed_dim(
-                it->second.extended<fixed_dim_type>()->get_fixed_dim_size(),
-                ndt::substitute(pattern.extended<typevar_dim_type>()->get_element_type(), typevars, concrete));
-          }
+          return ndt::make_fixed_dim(
+              it->second.extended<fixed_dim_type>()->get_fixed_dim_size(),
+              ndt::substitute(pattern.extended<typevar_dim_type>()->get_element_type(), typevars, concrete));
         case var_dim_id:
           return ndt::make_type<ndt::var_dim_type>(
               ndt::substitute(pattern.extended<typevar_dim_type>()->get_element_type(), typevars, concrete));
@@ -231,24 +227,23 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
       return ndt::make_type<ndt::pow_dimsym_type>(base_tp, exponent_name, result);
     } else {
       switch (base_tp.get_id()) {
-      case fixed_dim_id: {
-        if (!base_tp.extended<base_fixed_dim_type>()->is_sized()) {
-          if (concrete) {
-            stringstream ss;
-            ss << "The base for a dimensional power type, 'Fixed ** " << exponent << "', is not concrete as required";
-            throw invalid_argument(ss.str());
-          }
-          for (intptr_t i = 0; i < exponent; ++i) {
-            result = ndt::make_type<ndt::fixed_dim_kind_type>(result);
-          }
-          return result;
-        } else {
-          intptr_t dim_size = base_tp.extended<fixed_dim_type>()->get_fixed_dim_size();
-          for (intptr_t i = 0; i < exponent; ++i) {
-            result = ndt::make_fixed_dim(dim_size, result);
-          }
-          return result;
+      case fixed_dim_kind_id: {
+        if (concrete) {
+          stringstream ss;
+          ss << "The base for a dimensional power type, 'Fixed ** " << exponent << "', is not concrete as required";
+          throw invalid_argument(ss.str());
         }
+        for (intptr_t i = 0; i < exponent; ++i) {
+          result = ndt::make_type<ndt::fixed_dim_kind_type>(result);
+        }
+        return result;
+      }
+      case fixed_dim_id: {
+        intptr_t dim_size = base_tp.extended<fixed_dim_type>()->get_fixed_dim_size();
+        for (intptr_t i = 0; i < exponent; ++i) {
+          result = ndt::make_fixed_dim(dim_size, result);
+        }
+        return result;
       }
       case var_dim_id:
         for (intptr_t i = 0; i < exponent; ++i) {

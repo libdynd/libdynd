@@ -175,7 +175,6 @@ set(libdyndt_SRC
     src/dynd/types/base_type.cpp
     src/dynd/types/base_dim_type.cpp
     src/dynd/types/base_expr_type.cpp
-    src/dynd/types/base_fixed_dim_type.cpp
     src/dynd/types/base_memory_type.cpp
     src/dynd/types/base_string_type.cpp
     src/dynd/types/bytes_type.cpp
@@ -192,6 +191,7 @@ set(libdyndt_SRC
     src/dynd/types/fixed_bytes_kind_type.cpp
     src/dynd/types/fixed_bytes_type.cpp
     src/dynd/types/fixed_dim_type.cpp
+    src/dynd/types/fixed_dim_kind_type.cpp
     src/dynd/types/fixed_string_kind_type.cpp
     src/dynd/types/fixed_string_type.cpp
     src/dynd/types/float_kind_type.cpp
@@ -216,7 +216,6 @@ set(libdyndt_SRC
     include/dynd/types/base_bytes_type.hpp
     include/dynd/types/base_type.hpp
     include/dynd/types/base_dim_type.hpp
-    include/dynd/types/base_fixed_dim_type.hpp
     include/dynd/types/base_string_type.hpp
     include/dynd/types/bytes_type.hpp
     include/dynd/types/char_type.hpp
@@ -224,6 +223,7 @@ set(libdyndt_SRC
     include/dynd/types/datashape_parser.hpp
     include/dynd/types/fixed_bytes_type.hpp
     include/dynd/types/fixed_dim_type.hpp
+    include/dynd/types/fixed_dim_kind_type.hpp
     include/dynd/types/sso_bytestring.hpp
     include/dynd/types/state_type.hpp
     include/dynd/types/string_type.hpp

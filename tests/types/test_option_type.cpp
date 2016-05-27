@@ -58,6 +58,7 @@ TEST(OptionType, OptionIntAssign) {
 
   // Assignment from option[S] to option[T]
   a = parse_json("2 * ?int8", "[-10, null]");
+
   b = nd::empty("2 * ?int16");
   b.vals() = a;
   EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::old_view(b, "2 * int16"));

@@ -21,7 +21,7 @@ namespace nd {
   };
 
   template <>
-  class assign_na_callable<ndt::fixed_dim_type> : public base_callable {
+  class assign_na_callable<ndt::fixed_dim_kind_type> : public base_callable {
   public:
     assign_na_callable()
         : base_callable(ndt::make_type<ndt::callable_type>(

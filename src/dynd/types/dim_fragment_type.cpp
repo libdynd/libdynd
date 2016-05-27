@@ -15,12 +15,11 @@ static inline ndt::type get_tagged_dims_from_type(intptr_t ndim, const ndt::type
   ndt::type dtp = tp.without_memory_type();
   for (int i = 0; i < ndim; ++i) {
     switch (dtp.get_id()) {
+    case fixed_dim_kind_id:
+      out_tagged_dims[i] = -2;
+      break;
     case fixed_dim_id:
-      if (dtp.is_symbolic()) {
-        out_tagged_dims[i] = -2;
-      } else {
-        out_tagged_dims[i] = dtp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
-      }
+      out_tagged_dims[i] = dtp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
       break;
     case var_dim_id:
       out_tagged_dims[i] = -1;
@@ -42,20 +41,19 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp, 
   for (intptr_t i = 0; i < ndim; ++i) {
     intptr_t tagged_dim = tagged_dims[i], dim_size;
     switch (tp.get_id()) {
-    case fixed_dim_id:
-      if (tp.is_symbolic()) {
-        if (tagged_dim < 0) {
-          out_tagged_dims[i] = -2;
-        }
-      } else {
-        dim_size = tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
-        if (tagged_dim < 0 || tagged_dim == 1) {
-          out_tagged_dims[i] = dim_size;
-        } else if (tagged_dim != dim_size && dim_size != 1) {
-          return false;
-        }
+    case fixed_dim_kind_id: {
+      if (tagged_dim < 0) {
+        out_tagged_dims[i] = -2;
       }
-      break;
+    } break;
+    case fixed_dim_id: {
+      dim_size = tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+      if (tagged_dim < 0 || tagged_dim == 1) {
+        out_tagged_dims[i] = dim_size;
+      } else if (tagged_dim != dim_size && dim_size != 1) {
+        return false;
+      }
+    } break;
     case var_dim_id:
       // All broadcasting is done dynamically for var
       break;
