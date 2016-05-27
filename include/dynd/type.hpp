@@ -1231,27 +1231,6 @@ namespace ndt {
 
   DYNDT_API std::ostream &operator<<(std::ostream &o, const type &rhs);
 
-  //  new_id("Any");
-  //  new_id("Scalar", base_id);
-
-  // base_ids(id);
-  // is_base_id_of(base_id, id)
-
-  //    reg(name, tp, parser_func) // can get id from name
-  //  reg(name, callable)
-
-  struct reg_info_t {
-    type tp;
-  };
-
-  namespace detail {
-
-    DYNDT_API std::map<type_id_t, reg_info_t> &infos();
-
-  } // namespace dynd::ndt::detail
-
-  DYNDT_API void reg(type_id_t id, const ndt::type &tp);
-
 } // namespace dynd::ndt
 
 /** Prints raw bytes as hexadecimal */
