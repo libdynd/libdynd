@@ -90,8 +90,6 @@ ostream &dynd::operator<<(ostream &o, type_id_t id)
     return o << "adapt";
   case state_id:
     return o << "State";
-  case int_sym_id:
-    return o << "int_sym";
   case expr_id:
     return o << "expr";
   case type_id:
