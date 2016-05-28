@@ -11,6 +11,7 @@
 
 #include <dynd/string_encodings.hpp>
 #include <dynd/type.hpp>
+#include <dynd/types/fixed_string_kind_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -22,7 +23,7 @@ namespace ndt {
 
   public:
     fixed_string_type(type_id_t id, intptr_t stringsize, string_encoding_t encoding = string_encoding_utf_8)
-        : base_string_type(id, fixed_string_kind_id, 0, 1, type_flag_none, 0), m_stringsize(stringsize),
+        : base_string_type(id, make_type<fixed_string_kind_type>(), 0, 1, type_flag_none, 0), m_stringsize(stringsize),
           m_encoding(encoding), m_encoding_repr(encoding_as_string(encoding)) {
       switch (encoding) {
       case string_encoding_ascii:

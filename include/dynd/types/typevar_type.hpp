@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <dynd/types/base_type.hpp>
+#include <dynd/types/scalar_kind_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -23,7 +24,7 @@ namespace ndt {
 
   public:
     typevar_type(type_id_t id, const std::string &name)
-        : base_type(id, scalar_kind_id, 0, 1, type_flag_symbolic, 0, 0, 0), m_name(name) {
+        : base_type(id, make_type<scalar_kind_type>(), 0, 1, type_flag_symbolic, 0, 0, 0), m_name(name) {
       if (m_name.empty()) {
         throw type_error("dynd typevar name cannot be null");
       } else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {

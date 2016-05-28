@@ -22,8 +22,9 @@ namespace ndt {
     const std::string m_encoding_repr{encoding_as_string(string_encoding_ascii)};
 
   public:
-    base_string_type(type_id_t id, type_id_t base_id, size_t data_size, size_t alignment, uint32_t flags, size_t arrmeta_size)
-        : base_type(id, base_id, data_size, alignment, flags, arrmeta_size, 0, 0) {}
+    base_string_type(type_id_t id, const type &base_tp, size_t data_size, size_t alignment, uint32_t flags,
+                     size_t arrmeta_size)
+        : base_type(id, base_tp, data_size, alignment, flags, arrmeta_size, 0, 0) {}
 
     /** The encoding used by the string */
     virtual string_encoding_t get_encoding() const { return m_encoding; }

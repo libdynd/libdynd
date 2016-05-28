@@ -7,13 +7,14 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_bytes_type.hpp>
+#include <dynd/types/bytes_kind_type.hpp>
 
 namespace dynd {
 namespace ndt {
 
   class DYNDT_API fixed_bytes_kind_type : public base_bytes_type {
   public:
-    fixed_bytes_kind_type(type_id_t id) : base_bytes_type(id, bytes_kind_id, 0, 0, type_flag_symbolic, 0) {}
+    fixed_bytes_kind_type(type_id_t id) : base_bytes_type(id, make_type<bytes_kind_type>(), 0, 0, type_flag_symbolic, 0) {}
 
     size_t get_default_data_size() const;
 

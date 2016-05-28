@@ -40,8 +40,8 @@ namespace ndt {
   public:
     tuple_type(type_id_t id, size_t size, const type *element_tp, bool variadic = false,
                uint32_t flags = type_flag_none)
-        : base_type(id, scalar_kind_id, 0, 1, flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0,
-                    0),
+        : base_type(id, make_type<scalar_kind_type>(), 0, 1,
+                    flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
           m_field_count(size), m_field_types(size), m_arrmeta_offsets(size), m_variadic(variadic) {
       // Calculate the needed element alignment and arrmeta offsets
       size_t arrmeta_offset = get_field_count() * sizeof(size_t);

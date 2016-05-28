@@ -7,6 +7,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_bytes_type.hpp>
+#include <dynd/types/fixed_bytes_kind_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -14,7 +15,7 @@ namespace ndt {
   class DYNDT_API fixed_bytes_type : public base_bytes_type {
   public:
     fixed_bytes_type(type_id_t id, intptr_t data_size, intptr_t data_alignment)
-        : base_bytes_type(id, fixed_bytes_kind_id, data_size, data_alignment, type_flag_none, 0) {
+        : base_bytes_type(id, make_type<fixed_bytes_kind_type>(), data_size, data_alignment, type_flag_none, 0) {
       if (data_alignment > data_size) {
         std::stringstream ss;
         ss << "Cannot make a bytes[" << data_size << ", align=";

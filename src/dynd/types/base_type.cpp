@@ -8,8 +8,17 @@
 using namespace std;
 using namespace dynd;
 
+ndt::base_type::base_type(type_id_t id, const type &base_tp, size_t data_size, size_t data_alignment, uint32_t flags,
+                          size_t arrmeta_size, size_t ndim, size_t strided_ndim)
+    : m_use_count(1), m_id(id), m_base_tp(base_tp.get()), m_metadata_size(arrmeta_size), m_data_size(data_size),
+      m_data_alignment(data_alignment), flags(flags), m_ndim(ndim), m_fixed_ndim(strided_ndim) {
+  intrusive_ptr_retain(m_base_tp);
+}
+
 // Default destructor for the extended type does nothing
-ndt::base_type::~base_type() {}
+ndt::base_type::~base_type() { intrusive_ptr_release(m_base_tp); }
+
+ndt::type ndt::base_type::get_base_type() const { return type(m_base_tp, true); }
 
 bool ndt::base_type::is_type_subarray(const type &subarray_tp) const {
   // The default implementation is to check by-value equality.

@@ -8,6 +8,7 @@
 #include <dynd/buffer.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/base_dim_type.hpp>
+#include <dynd/types/dim_kind_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -26,7 +27,7 @@ namespace ndt {
     };
 
     var_dim_type(type_id_t id, const type &element_tp = make_type<any_kind_type>())
-        : base_dim_type(id, dim_kind_id, element_tp, sizeof(data_type), alignof(data_type), sizeof(metadata_type),
+        : base_dim_type(id, make_type<dim_kind_type>(), element_tp, sizeof(data_type), alignof(data_type), sizeof(metadata_type),
                         type_flag_zeroinit | type_flag_blockref, false) {
       // NOTE: The element type may have type_flag_destructor set. In this case,
       //       the var_dim type does NOT need to also set it, because the lifetime

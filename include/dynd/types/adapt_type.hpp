@@ -7,6 +7,7 @@
 
 #include <dynd/callable.hpp>
 #include <dynd/types/base_expr_type.hpp>
+#include <dynd/types/expr_kind_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -20,7 +21,7 @@ namespace ndt {
   public:
     adapt_type(type_id_t id, const ndt::type &value_tp, const ndt::type &storage_tp, const nd::callable &forward,
                const nd::callable &inverse)
-        : base_expr_type(id, expr_kind_id, storage_tp.get_data_size(), storage_tp.get_data_alignment(), type_flag_none,
+        : base_expr_type(id, make_type<expr_kind_type>(), storage_tp.get_data_size(), storage_tp.get_data_alignment(), type_flag_none,
                          storage_tp.get_arrmeta_size(), storage_tp.get_ndim()),
           m_value_tp(value_tp), m_storage_tp(storage_tp), m_forward(forward), m_inverse(inverse) {}
 

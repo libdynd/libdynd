@@ -51,7 +51,8 @@ namespace ndt {
   public:
     struct_type(type_id_t id, const std::vector<std::string> &field_names, const std::vector<type> &field_types,
                 bool variadic = false)
-        : base_type(id, scalar_kind_id, 0, 1, type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
+        : base_type(id, make_type<scalar_kind_type>(), 0, 1, type_flag_indexable | (variadic ? type_flag_symbolic : 0),
+                    0, 0, 0),
           m_field_count(field_types.size()), m_field_names(field_names), m_field_types(field_names.size()),
           m_arrmeta_offsets(field_names.size()), m_variadic(variadic) {
       size_t arrmeta_offset = get_field_count() * sizeof(size_t);

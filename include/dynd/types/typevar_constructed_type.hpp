@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 
@@ -20,8 +21,9 @@ namespace ndt {
 
   public:
     typevar_constructed_type(type_id_t id, const std::string &name, const type &arg)
-        : base_type(id, any_kind_id, 0, 1, type_flag_symbolic, 0, arg.get_ndim(), arg.get_strided_ndim()), m_name(name),
-          m_arg(arg) {
+        : base_type(id, make_type<any_kind_type>(), 0, 1, type_flag_symbolic, 0, arg.get_ndim(),
+                    arg.get_strided_ndim()),
+          m_name(name), m_arg(arg) {
       //  static ndt::type args_pattern("((...), {...})");
       if (m_name.empty()) {
         throw type_error("dynd typevar name cannot be null");

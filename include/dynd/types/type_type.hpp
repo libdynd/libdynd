@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/type.hpp>
+#include <dynd/types/scalar_kind_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -18,8 +19,8 @@ namespace ndt {
     typedef type data_type;
 
     type_type(type_id_t id)
-        : base_type(id, scalar_kind_id, sizeof(ndt::type), sizeof(ndt::type), type_flag_zeroinit | type_flag_destructor,
-                    0, 0, 0) {}
+        : base_type(id, make_type<scalar_kind_type>(), sizeof(ndt::type), sizeof(ndt::type),
+                    type_flag_zeroinit | type_flag_destructor, 0, 0, 0) {}
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 

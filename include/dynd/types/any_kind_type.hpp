@@ -13,7 +13,7 @@ namespace ndt {
   class DYNDT_API any_kind_type : public base_type {
   public:
     any_kind_type(type_id_t id)
-        : base_type(id, uninitialized_id, 0, 1, type_flag_symbolic | type_flag_variadic, 0, 0, 0) {}
+        : base_type(id, type(), 0, 1, type_flag_symbolic | type_flag_variadic, 0, 0, 0) {}
 
     size_t get_default_data_size() const;
 
