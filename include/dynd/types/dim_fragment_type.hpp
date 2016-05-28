@@ -10,6 +10,7 @@
 
 #include <dynd/shortvector.hpp>
 #include <dynd/types/base_dim_type.hpp>
+#include <dynd/types/dim_kind_type.hpp>
 
 namespace dynd {
 
@@ -30,7 +31,8 @@ namespace ndt {
 
   public:
     dim_fragment_type(type_id_t id, intptr_t ndim, const intptr_t *tagged_dims)
-        : base_dim_type(id, make_type<void>(), 0, 1, 0, type_flag_symbolic, false), m_tagged_dims(ndim, tagged_dims) {
+        : base_dim_type(id, make_type<dim_kind_type>(), make_type<void>(), 0, 1, 0, type_flag_symbolic, false),
+          m_tagged_dims(ndim, tagged_dims) {
       this->m_ndim = static_cast<uint8_t>(ndim);
     }
 

@@ -26,7 +26,8 @@ namespace ndt {
     typedef nd::callable data_type;
 
     callable_type(type_id_t id, const type &ret_type, const type &pos_types, const type &kwd_types)
-        : base_type(id, sizeof(void *), alignof(void *), type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
+        : base_type(id, make_type<scalar_kind_type>(), sizeof(void *), alignof(void *),
+                    type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
           m_return_type(ret_type), m_pos_tuple(pos_types), m_kwd_struct(kwd_types) {
       if (m_pos_tuple.get_id() != tuple_id) {
         std::stringstream ss;

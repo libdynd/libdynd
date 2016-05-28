@@ -28,8 +28,8 @@ namespace ndt {
     typedef size_stride_t metadata_type;
 
     fixed_dim_type(type_id_t id, intptr_t dim_size, const type &element_tp = make_type<any_kind_type>())
-        : base_dim_type(id, element_tp, 0, element_tp.get_data_alignment(), sizeof(fixed_dim_type_arrmeta),
-                        type_flag_none, true),
+        : base_dim_type(id, make_type<fixed_dim_kind_type>(), element_tp, 0, element_tp.get_data_alignment(),
+                        sizeof(fixed_dim_type_arrmeta), type_flag_none, true),
           m_dim_size(dim_size) {
       // Propagate the inherited flags from the element
       this->flags |= (element_tp.get_flags() & (type_flags_operand_inherited | type_flags_value_inherited));

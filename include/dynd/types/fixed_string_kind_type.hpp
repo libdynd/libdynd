@@ -7,13 +7,14 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_string_type.hpp>
+#include <dynd/types/string_kind_type.hpp>
 
 namespace dynd {
 namespace ndt {
 
   class DYNDT_API fixed_string_kind_type : public base_string_type {
   public:
-    fixed_string_kind_type(type_id_t id) : base_string_type(id, 0, 0, type_flag_symbolic, 0) {}
+    fixed_string_kind_type(type_id_t id) : base_string_type(id, make_type<string_kind_type>(), 0, 0, type_flag_symbolic, 0) {}
 
     size_t get_default_data_size() const;
 

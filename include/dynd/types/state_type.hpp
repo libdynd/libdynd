@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/base_type.hpp>
 
 namespace dynd {
@@ -21,7 +22,7 @@ namespace ndt {
 
   class DYNDT_API state_type : public base_type {
   public:
-    state_type(type_id_t id) : base_type(id, 0, 1, type_flag_symbolic, 0, 0, 0) {}
+    state_type(type_id_t id) : base_type(id, make_type<any_kind_type>(), 0, 1, type_flag_symbolic, 0, 0, 0) {}
 
     void print_type(std::ostream &o) const;
 

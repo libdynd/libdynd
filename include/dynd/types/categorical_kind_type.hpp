@@ -6,13 +6,14 @@
 #pragma once
 
 #include <dynd/type.hpp>
+#include <dynd/types/scalar_kind_type.hpp>
 
 namespace dynd {
 namespace ndt {
 
   class DYNDT_API categorical_kind_type : public base_type {
   public:
-    categorical_kind_type(type_id_t id) : base_type(id, 0, 0, type_flag_symbolic, 0, 0, 0) {}
+    categorical_kind_type(type_id_t id) : base_type(id, make_type<scalar_kind_type>(), 0, 0, type_flag_symbolic, 0, 0, 0) {}
 
     size_t get_default_data_size() const;
 

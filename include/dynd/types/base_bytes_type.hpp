@@ -17,8 +17,9 @@ namespace ndt {
    */
   class DYNDT_API base_bytes_type : public base_type {
   public:
-    base_bytes_type(type_id_t id, size_t data_size, size_t alignment, uint32_t flags, size_t arrmeta_size)
-        : base_type(id, data_size, alignment, flags, arrmeta_size, 0, 0) {}
+    base_bytes_type(type_id_t id, const type &base_tp, size_t data_size, size_t alignment, uint32_t flags,
+                    size_t arrmeta_size)
+        : base_type(id, base_tp, data_size, alignment, flags, arrmeta_size, 0, 0) {}
 
     /** Retrieves the data range in which a bytes object is stored */
     virtual void get_bytes_range(const char **out_begin, const char **out_end, const char *arrmeta,

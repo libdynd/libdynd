@@ -359,7 +359,9 @@ namespace ndt {
      */
     type_id_t unchecked_get_builtin_id() const { return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr)); }
 
-    type_id_t get_base_id() const;
+    type get_base_type() const;
+
+    type_id_t get_base_id() const { return get_base_type().get_id(); }
 
     /** The alignment of the type */
     size_t get_data_alignment() const;

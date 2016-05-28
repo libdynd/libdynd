@@ -35,7 +35,7 @@ TEST(Type, BasicConstructor) {
   // void type
   d = ndt::make_type<void>();
   EXPECT_EQ(void_id, d.get_id());
-  EXPECT_EQ(any_kind_id, d.get_base_id());
+  EXPECT_EQ(scalar_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(0u, d.get_data_size());
   EXPECT_TRUE(d.is_builtin());

@@ -8,6 +8,7 @@
 #include <dynd/bytes.hpp>
 #include <dynd/type.hpp>
 #include <dynd/types/base_bytes_type.hpp>
+#include <dynd/types/bytes_kind_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -23,7 +24,8 @@ namespace ndt {
     typedef bytes data_type;
 
     bytes_type(type_id_t id, size_t alignment = 1)
-        : base_bytes_type(id, sizeof(bytes), alignof(bytes), type_flag_zeroinit | type_flag_destructor, 0),
+        : base_bytes_type(id, make_type<bytes_kind_type>(), sizeof(bytes), alignof(bytes),
+                          type_flag_zeroinit | type_flag_destructor, 0),
           m_alignment(alignment) {
       if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
         std::stringstream ss;

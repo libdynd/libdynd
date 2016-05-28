@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <dynd/types/base_dim_type.hpp>
+#include <dynd/types/dim_kind_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 
 namespace dynd {
@@ -20,8 +21,8 @@ namespace ndt {
 
   public:
     pow_dimsym_type(type_id_t id, const type &base_tp, const std::string &exponent, const type &element_type)
-        : base_dim_type(id, element_type, 0, 1, 0, type_flag_symbolic, false), m_base_tp(base_tp),
-          m_exponent(exponent) {
+        : base_dim_type(id, make_type<dim_kind_type>(), element_type, 0, 1, 0, type_flag_symbolic, false),
+          m_base_tp(base_tp), m_exponent(exponent) {
       if (base_tp.is_scalar() || base_tp.extended<base_dim_type>()->get_element_type().get_id() != void_id) {
         std::stringstream ss;
         ss << "dynd base type for dimensional power symbolic type is not valid: " << base_tp;

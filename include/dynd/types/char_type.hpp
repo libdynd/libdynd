@@ -11,6 +11,7 @@
 
 #include <dynd/string_encodings.hpp>
 #include <dynd/type.hpp>
+#include <dynd/types/string_kind_type.hpp>
 
 namespace dynd {
 namespace ndt {
@@ -22,8 +23,8 @@ namespace ndt {
 
   public:
     char_type(type_id_t id, string_encoding_t encoding = string_encoding_utf_32)
-        : base_type(id, string_encoding_char_size_table[encoding], string_encoding_char_size_table[encoding],
-                    type_flag_none, 0, 0, 0),
+        : base_type(id, make_type<string_kind_type>(), string_encoding_char_size_table[encoding],
+                    string_encoding_char_size_table[encoding], type_flag_none, 0, 0, 0),
           m_encoding(encoding) {
       switch (encoding) {
       case string_encoding_ascii:

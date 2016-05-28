@@ -15,9 +15,9 @@ namespace ndt {
    */
   class DYNDT_API base_expr_type : public base_type {
   public:
-    base_expr_type(type_id_t id, size_t data_size, size_t alignment, uint32_t flags, size_t arrmeta_size,
-                   size_t ndim = 0)
-        : base_type(id, data_size, alignment, flags, arrmeta_size, ndim, 0) {}
+    base_expr_type(type_id_t id, const type &base_tp, size_t data_size, size_t alignment, uint32_t flags,
+                   size_t arrmeta_size, size_t ndim = 0)
+        : base_type(id, base_tp, data_size, alignment, flags, arrmeta_size, ndim, 0) {}
 
     /**
      * Should return a reference to the type representing the value which

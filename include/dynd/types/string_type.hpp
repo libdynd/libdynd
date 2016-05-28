@@ -11,6 +11,7 @@
 #include <dynd/string_encodings.hpp>
 #include <dynd/type.hpp>
 #include <dynd/types/sso_bytestring.hpp>
+#include <dynd/types/string_kind_type.hpp>
 
 namespace dynd {
 
@@ -82,7 +83,8 @@ namespace ndt {
     typedef string data_type;
 
     string_type(type_id_t id)
-        : base_string_type(id, sizeof(string), alignof(string), type_flag_zeroinit | type_flag_destructor, 0) {}
+        : base_string_type(id, make_type<string_kind_type>(), sizeof(string), alignof(string),
+                           type_flag_zeroinit | type_flag_destructor, 0) {}
 
     string_encoding_t get_encoding() const { return m_encoding; }
 
