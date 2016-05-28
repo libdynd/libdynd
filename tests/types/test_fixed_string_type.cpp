@@ -3,11 +3,11 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include "../dynd_assertions.hpp"
+#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
-#include "../dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/string_encodings.hpp>
@@ -23,7 +23,7 @@ TEST(FixedstringDType, Create) {
   // Strings with various encodings and sizes
   d = ndt::make_type<ndt::fixed_string_type>(3, string_encoding_utf_8);
   EXPECT_EQ(fixed_string_id, d.get_id());
-  EXPECT_EQ(string_kind_id, d.get_base_id());
+  EXPECT_EQ(fixed_string_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(3u, d.get_data_size());
   EXPECT_FALSE(d.is_expression());
@@ -32,7 +32,7 @@ TEST(FixedstringDType, Create) {
 
   d = ndt::make_type<ndt::fixed_string_type>(129, string_encoding_utf_8);
   EXPECT_EQ(fixed_string_id, d.get_id());
-  EXPECT_EQ(string_kind_id, d.get_base_id());
+  EXPECT_EQ(fixed_string_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(129u, d.get_data_size());
   // Roundtripping through a string
@@ -40,7 +40,7 @@ TEST(FixedstringDType, Create) {
 
   d = ndt::make_type<ndt::fixed_string_type>(129, string_encoding_ascii);
   EXPECT_EQ(fixed_string_id, d.get_id());
-  EXPECT_EQ(string_kind_id, d.get_base_id());
+  EXPECT_EQ(fixed_string_kind_id, d.get_base_id());
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_EQ(129u, d.get_data_size());
   // Roundtripping through a string
@@ -48,7 +48,7 @@ TEST(FixedstringDType, Create) {
 
   d = ndt::make_type<ndt::fixed_string_type>(129, string_encoding_utf_16);
   EXPECT_EQ(fixed_string_id, d.get_id());
-  EXPECT_EQ(string_kind_id, d.get_base_id());
+  EXPECT_EQ(fixed_string_kind_id, d.get_base_id());
   EXPECT_EQ(2u, d.get_data_alignment());
   EXPECT_EQ(2u * 129u, d.get_data_size());
   // Roundtripping through a string
@@ -56,7 +56,7 @@ TEST(FixedstringDType, Create) {
 
   d = ndt::make_type<ndt::fixed_string_type>(129, string_encoding_utf_32);
   EXPECT_EQ(fixed_string_id, d.get_id());
-  EXPECT_EQ(string_kind_id, d.get_base_id());
+  EXPECT_EQ(fixed_string_kind_id, d.get_base_id());
   EXPECT_EQ(4u, d.get_data_alignment());
   EXPECT_EQ(4u * 129u, d.get_data_size());
   // Roundtripping through a string

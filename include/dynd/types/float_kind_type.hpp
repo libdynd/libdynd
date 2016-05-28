@@ -12,7 +12,7 @@ namespace ndt {
 
   class DYNDT_API float_kind_type : public base_type {
   public:
-    float_kind_type(type_id_t id) : base_type(id, 0, 1, type_flag_symbolic, 0, 0, 0) {}
+    float_kind_type(type_id_t id) : base_type(id, scalar_kind_id, 0, 1, type_flag_symbolic, 0, 0, 0) {}
 
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 

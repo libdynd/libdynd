@@ -21,7 +21,7 @@ namespace ndt {
 
   public:
     ellipsis_dim_type(type_id_t id, const std::string &name, const type &element_type)
-        : base_dim_type(id, element_type, 0, 1, 0, type_flag_symbolic | type_flag_variadic, false), m_name(name) {
+        : base_dim_type(id, dim_kind_id, element_type, 0, 1, 0, type_flag_symbolic | type_flag_variadic, false), m_name(name) {
       if (!m_name.empty()) {
         // Make sure name begins with a capital letter, and is an identifier
         const char *begin = m_name.c_str(), *end = m_name.c_str() + m_name.size();

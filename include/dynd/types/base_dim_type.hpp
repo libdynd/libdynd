@@ -22,9 +22,9 @@ namespace ndt {
     size_t m_element_arrmeta_offset;
 
   public:
-    base_dim_type(type_id_t id, const type &element_tp, size_t data_size, size_t data_alignment,
+    base_dim_type(type_id_t id, type_id_t base_id, const type &element_tp, size_t data_size, size_t data_alignment,
                   size_t element_arrmeta_offset, uint32_t flags, bool strided)
-        : base_type(id, data_size, data_alignment, flags | type_flag_indexable,
+        : base_type(id, base_id, data_size, data_alignment, flags | type_flag_indexable,
                     element_arrmeta_offset + element_tp.get_arrmeta_size(), 1 + element_tp.get_ndim(),
                     strided ? (1 + element_tp.get_strided_ndim()) : 0),
           m_element_tp(element_tp), m_element_arrmeta_offset(element_arrmeta_offset) {}

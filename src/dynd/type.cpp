@@ -839,7 +839,36 @@ void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *dat
   }
 }
 
-type_id_t ndt::type::get_base_id() const { return base_id(get_id()); }
+type_id_t ndt::type::get_base_id() const {
+  switch (get_id()) {
+  case bool_id:
+    return bool_kind_id;
+  case int8_id:
+  case int16_id:
+  case int32_id:
+  case int64_id:
+  case int128_id:
+    return int_kind_id;
+  case uint8_id:
+  case uint16_id:
+  case uint32_id:
+  case uint64_id:
+  case uint128_id:
+    return uint_kind_id;
+  case float16_id:
+  case float32_id:
+  case float64_id:
+  case float128_id:
+    return float_kind_id;
+  case complex_float32_id:
+  case complex_float64_id:
+    return complex_kind_id;
+  case void_id:
+    return scalar_kind_id;
+  default:
+    return m_ptr->get_base_id();
+  }
+}
 
 // Returns true if the destination type can represent *all* the values
 // of the source type, false otherwise. This is used, for example,

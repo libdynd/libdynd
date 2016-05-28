@@ -22,7 +22,7 @@ namespace ndt {
 
   public:
     char_type(type_id_t id, string_encoding_t encoding = string_encoding_utf_32)
-        : base_type(id, string_encoding_char_size_table[encoding], string_encoding_char_size_table[encoding],
+        : base_type(id, string_kind_id, string_encoding_char_size_table[encoding], string_encoding_char_size_table[encoding],
                     type_flag_none, 0, 0, 0),
           m_encoding(encoding) {
       switch (encoding) {
