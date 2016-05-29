@@ -184,8 +184,10 @@ inline std::ostream &print_ids(std::ostream &o, size_t nids, const ndt::type *tp
   return o;
 }
 
-template <size_t N, typename T, typename Map = std::map<size_t, T>>
+template <std::vector<ndt::type> (*Func)(const ndt::type &dst_tp, size_t narg, const ndt::type *src_tp), size_t N, typename T>
 class dispatcher {
+  typedef std::map<size_t, T> Map;
+
 public:
   typedef T value_type;
 

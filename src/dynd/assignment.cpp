@@ -16,6 +16,10 @@ using namespace dynd;
 
 namespace {
 
+static std::vector<ndt::type> func_ptr(const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp) {
+  return {dst_tp, src_tp[0]};
+}
+
 template <typename VariadicType, template <typename, typename, VariadicType...> class T>
 struct DYND_API _bind {
   template <typename Type0, typename Type1>
@@ -31,8 +35,8 @@ nd::callable make_assign() {
       ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<ndt::any_kind_type>()},
       {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}});
 
-  auto dispatcher =
-      nd::callable::make_all<_bind<assign_error_mode, nd::assign_callable>::type, numeric_types, numeric_types>();
+  auto dispatcher = nd::callable::make_all<func_ptr, _bind<assign_error_mode, nd::assign_callable>::type, numeric_types,
+                                           numeric_types>();
   dispatcher.insert({{ndt::make_type<ndt::string_type>(), ndt::make_type<ndt::string_type>()},
                      nd::make_callable<nd::assign_callable<dynd::string, dynd::string>>()});
   dispatcher.insert({{ndt::make_type<ndt::bytes_type>(), ndt::make_type<ndt::bytes_type>()},
@@ -134,7 +138,7 @@ nd::callable make_assign() {
       {{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::scalar_kind_type>()}, nd::get_elwise()});
   dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::dim_kind_type>()}, nd::get_elwise()});
 
-  return nd::make_callable<nd::assign_dispatch_callable>(self_tp, dispatcher);
+  return nd::make_callable<nd::assign_dispatch_callable<func_ptr>>(self_tp, dispatcher);
 }
 
 } // anonymous namespace

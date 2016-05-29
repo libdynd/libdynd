@@ -18,12 +18,17 @@ typedef type_sequence<uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, in
                       dynd::complex<float>, dynd::complex<double>>
     binop_types;
 
+static std::vector<ndt::type> func_ptr(const ndt::type &DYND_UNUSED(dst_tp), size_t DYND_UNUSED(nsrc),
+                                       const ndt::type *src_tp) {
+  return {src_tp[0], src_tp[1]};
+}
+
 template <template <typename, typename> class KernelType, template <typename, typename> class Condition,
           typename TypeSequence>
 nd::callable make_binary_arithmetic() {
   const ndt::type &tp = ndt::type("(Any, Any) -> Any");
 
-  auto dispatcher = nd::callable::make_all_if<KernelType, Condition, TypeSequence, TypeSequence>();
+  auto dispatcher = nd::callable::make_all_if<func_ptr, KernelType, Condition, TypeSequence, TypeSequence>();
   dispatcher.insert(
       {{{ndt::make_type<ndt::option_type>(), ndt::make_type<ndt::any_kind_type>()},
         nd::functional::forward_na<0>(ndt::type("Any"))},
@@ -35,7 +40,7 @@ nd::callable make_binary_arithmetic() {
        {{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::dim_kind_type>()}, nd::get_elwise()},
        {{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::dim_kind_type>()}, nd::get_elwise()}});
 
-  return nd::make_callable<nd::arithmetic_dispatch_callable<2>>(tp, dispatcher);
+  return nd::make_callable<nd::arithmetic_dispatch_callable<func_ptr, 2>>(tp, dispatcher);
 }
 
 } // anonymous namespace

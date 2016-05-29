@@ -20,8 +20,13 @@ using namespace dynd;
 
 namespace {
 
+static std::vector<ndt::type> func_ptr(const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                                       const ndt::type *DYND_UNUSED(src_tp)) {
+  return {dst_tp};
+}
+
 nd::callable make_dynamic_parse() {
-  dispatcher<1, nd::callable> dispatcher;
+  dispatcher<func_ptr, 1, nd::callable> dispatcher;
   dispatcher.insert({{ndt::make_type<bool>()}, nd::make_callable<nd::json::parse_callable<bool>>()});
   dispatcher.insert({{ndt::make_type<int8_t>()}, nd::make_callable<nd::json::parse_callable<int8_t>>()});
   dispatcher.insert({{ndt::make_type<int16_t>()}, nd::make_callable<nd::json::parse_callable<int16_t>>()});
@@ -41,7 +46,7 @@ nd::callable make_dynamic_parse() {
   dispatcher.insert(
       {{ndt::make_type<ndt::var_dim_type>()}, nd::make_callable<nd::json::parse_callable<ndt::var_dim_type>>()});
 
-  return nd::make_callable<nd::parse_dispatch_callable>(
+  return nd::make_callable<nd::parse_dispatch_callable<func_ptr>>(
       ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<dynd::string>()}),
       dispatcher);
 }

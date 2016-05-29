@@ -15,6 +15,11 @@ using namespace dynd;
 
 namespace {
 
+static std::vector<ndt::type> func_ptr(const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc),
+                                       const ndt::type *DYND_UNUSED(src_tp)) {
+  return {dst_tp};
+}
+
 template <typename GeneratorType>
 struct uniform_callable_alias {
   template <typename ReturnType>
@@ -23,8 +28,9 @@ struct uniform_callable_alias {
 
 } // unnamed namespace
 
-DYND_API nd::callable nd::random::uniform = nd::functional::elwise(nd::make_callable<nd::uniform_dispatch_callable>(
-    ndt::type("(a: ?R, b: ?R) -> R"),
-    nd::callable::make_all<uniform_callable_alias<std::default_random_engine>::type,
-                           type_sequence<int32_t, int64_t, uint32_t, uint64_t, float, double, dynd::complex<float>,
-                                         dynd::complex<double>>>()));
+DYND_API nd::callable nd::random::uniform =
+    nd::functional::elwise(nd::make_callable<nd::uniform_dispatch_callable<func_ptr>>(
+        ndt::type("(a: ?R, b: ?R) -> R"),
+        nd::callable::make_all<func_ptr, uniform_callable_alias<std::default_random_engine>::type,
+                               type_sequence<int32_t, int64_t, uint32_t, uint64_t, float, double, dynd::complex<float>,
+                                             dynd::complex<double>>>()));

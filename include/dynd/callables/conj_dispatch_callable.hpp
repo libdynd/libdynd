@@ -10,11 +10,12 @@
 namespace dynd {
 namespace nd {
 
+  template <std::vector<ndt::type> (*Func)(const ndt::type &, size_t, const ndt::type *)>
   class conj_dispatch_callable : public base_dispatch_callable {
-    dispatcher<1, callable> m_dispatcher;
+    dispatcher<Func, 1, callable> m_dispatcher;
 
   public:
-    conj_dispatch_callable(const ndt::type &tp, const dispatcher<1, callable> &dispatcher)
+    conj_dispatch_callable(const ndt::type &tp, const dispatcher<Func, 1, callable> &dispatcher)
         : base_dispatch_callable(tp), m_dispatcher(dispatcher) {}
 
     const callable &specialize(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
