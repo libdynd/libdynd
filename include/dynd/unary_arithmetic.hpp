@@ -25,8 +25,7 @@ typedef type_sequence<uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, in
 
 template <template <typename> class CallableType, template <typename> class Condition, typename TypeSequence>
 nd::callable make_unary_arithmetic() {
-  dispatcher<func_ptr, 1, nd::callable> dispatcher =
-      nd::callable::make_all_if<func_ptr, CallableType, Condition, TypeSequence>();
+  dispatcher<1, nd::callable> dispatcher = nd::callable::make_all_if<CallableType, Condition, TypeSequence>(func_ptr);
 
   const ndt::type &tp = ndt::type("(Any) -> Any");
   for (ndt::type i0 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {

@@ -35,8 +35,9 @@ nd::callable make_assign() {
       ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<ndt::any_kind_type>()},
       {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}});
 
-  auto dispatcher = nd::callable::make_all<func_ptr, _bind<assign_error_mode, nd::assign_callable>::type, numeric_types,
-                                           numeric_types>();
+  auto dispatcher =
+      nd::callable::make_all<_bind<assign_error_mode, nd::assign_callable>::type, numeric_types, numeric_types>(
+          func_ptr);
   dispatcher.insert({{ndt::make_type<ndt::string_type>(), ndt::make_type<ndt::string_type>()},
                      nd::make_callable<nd::assign_callable<dynd::string, dynd::string>>()});
   dispatcher.insert({{ndt::make_type<ndt::bytes_type>(), ndt::make_type<ndt::bytes_type>()},

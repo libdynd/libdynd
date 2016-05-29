@@ -31,6 +31,6 @@ struct uniform_callable_alias {
 DYND_API nd::callable nd::random::uniform =
     nd::functional::elwise(nd::make_callable<nd::uniform_dispatch_callable<func_ptr>>(
         ndt::type("(a: ?R, b: ?R) -> R"),
-        nd::callable::make_all<func_ptr, uniform_callable_alias<std::default_random_engine>::type,
+        nd::callable::make_all<uniform_callable_alias<std::default_random_engine>::type,
                                type_sequence<int32_t, int64_t, uint32_t, uint64_t, float, double, dynd::complex<float>,
-                                             dynd::complex<double>>>()));
+                                             dynd::complex<double>>>(func_ptr)));

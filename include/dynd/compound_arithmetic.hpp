@@ -13,9 +13,8 @@ using namespace dynd;
 
 namespace {
 
-static std::vector<ndt::type> func_ptr(const ndt::type &DYND_UNUSED(dst_tp), size_t DYND_UNUSED(nsrc),
-                                       const ndt::type *src_tp) {
-  return {src_tp[0]};
+static std::vector<ndt::type> func_ptr(const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp) {
+  return {dst_tp, src_tp[0]};
 }
 
 typedef type_sequence<uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t, float, double,
@@ -25,7 +24,7 @@ typedef type_sequence<uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, in
 template <template <typename, typename> class KernelType, typename TypeSequence>
 nd::callable make_compound_arithmetic() {
   const ndt::type &tp = ndt::type("(Any, Any) -> Any");
-  auto dispatcher = nd::callable::make_all<func_ptr, KernelType, TypeSequence, TypeSequence>();
+  auto dispatcher = nd::callable::make_all<KernelType, TypeSequence, TypeSequence>(func_ptr);
 
   static const std::vector<ndt::type> binop_ids = {ndt::make_type<uint8_t>(),
                                                    ndt::make_type<uint16_t>(),

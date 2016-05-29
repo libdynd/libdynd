@@ -37,12 +37,12 @@ DYND_API nd::callable nd::exp = nd::functional::elwise(nd::functional::apply<dou
 
 DYND_API nd::callable nd::real = nd::functional::elwise(nd::make_callable<nd::real_dispatch_callable<func_ptr>>(
     ndt::type("(Scalar) -> Scalar"),
-    nd::callable::make_all<func_ptr, nd::real_callable, type_sequence<dynd::complex<float>, dynd::complex<double>>>()));
+    nd::callable::make_all<nd::real_callable, type_sequence<dynd::complex<float>, dynd::complex<double>>>(func_ptr)));
 
 DYND_API nd::callable nd::imag = nd::functional::elwise(nd::make_callable<nd::imag_dispatch_callable<func_ptr>>(
     ndt::type("(Scalar) -> Scalar"),
-    nd::callable::make_all<func_ptr, nd::imag_callable, type_sequence<dynd::complex<float>, dynd::complex<double>>>()));
+    nd::callable::make_all<nd::imag_callable, type_sequence<dynd::complex<float>, dynd::complex<double>>>(func_ptr)));
 
 DYND_API nd::callable nd::conj = nd::functional::elwise(nd::make_callable<nd::conj_dispatch_callable<func_ptr>>(
     ndt::type("(Scalar) -> Scalar"),
-    nd::callable::make_all<func_ptr, nd::conj_callable, type_sequence<dynd::complex<float>, dynd::complex<double>>>()));
+    nd::callable::make_all<nd::conj_callable, type_sequence<dynd::complex<float>, dynd::complex<double>>>(func_ptr)));

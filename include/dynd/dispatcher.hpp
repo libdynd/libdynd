@@ -13,6 +13,8 @@
 
 namespace dynd {
 
+typedef std::vector<ndt::type> (*dispatch_t)(const ndt::type &, size_t, const ndt::type *);
+
 template <size_t N>
 bool consistent(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs) {
   for (size_t i = 0; i < lhs.size(); ++i) {
@@ -184,7 +186,7 @@ inline std::ostream &print_ids(std::ostream &o, size_t nids, const ndt::type *tp
   return o;
 }
 
-template <std::vector<ndt::type> (*Func)(const ndt::type &dst_tp, size_t narg, const ndt::type *src_tp), size_t N, typename T>
+template <size_t N, typename T>
 class dispatcher {
   typedef std::map<size_t, T> Map;
 
@@ -201,6 +203,7 @@ public:
 private:
   std::vector<new_pair_type> m_pairs;
   map_type m_map;
+  dispatch_t m_dispatch;
 
   static size_t hash_combine(size_t seed, type_id_t id) { return seed ^ (id + (seed << 6) + (seed >> 2)); }
 
@@ -221,17 +224,18 @@ private:
 public:
   dispatcher() = default;
 
-  dispatcher(const dispatcher &other) : m_pairs(other.m_pairs), m_map(other.m_map) {}
+  dispatcher(const dispatcher &other) : m_pairs(other.m_pairs), m_map(other.m_map), m_dispatch(other.m_dispatch) {}
 
   template <typename Iterator>
-  dispatcher(Iterator begin, Iterator end, const map_type &map = map_type()) : m_map(map) {
+  dispatcher(dispatch_t dispatch, Iterator begin, Iterator end, const map_type &map = map_type())
+      : m_map(map), m_dispatch(dispatch) {
     //    m_map.set_empty_key(uninitialized_id);
 
     assign(begin, end);
   }
 
-  dispatcher(std::initializer_list<new_pair_type> pairs, const map_type &map = map_type())
-      : dispatcher(pairs.begin(), pairs.end(), map) {}
+  dispatcher(dispatch_t dispatch, std::initializer_list<new_pair_type> pairs, const map_type &map = map_type())
+      : dispatcher(dispatch, pairs.begin(), pairs.end(), map) {}
 
   template <typename Iterator>
   void assign(Iterator begin, Iterator end) {

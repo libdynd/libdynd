@@ -26,7 +26,7 @@ static std::vector<ndt::type> func_ptr(const ndt::type &dst_tp, size_t DYND_UNUS
 }
 
 nd::callable make_dynamic_parse() {
-  dispatcher<func_ptr, 1, nd::callable> dispatcher;
+  dispatcher<1, nd::callable> dispatcher;
   dispatcher.insert({{ndt::make_type<bool>()}, nd::make_callable<nd::json::parse_callable<bool>>()});
   dispatcher.insert({{ndt::make_type<int8_t>()}, nd::make_callable<nd::json::parse_callable<int8_t>>()});
   dispatcher.insert({{ndt::make_type<int16_t>()}, nd::make_callable<nd::json::parse_callable<int16_t>>()});

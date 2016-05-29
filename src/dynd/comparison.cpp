@@ -26,7 +26,7 @@ static std::vector<ndt::type> func_ptr(const ndt::type &DYND_UNUSED(dst_tp), siz
 
 template <std::vector<ndt::type> (*Func)(const ndt::type &, size_t, const ndt::type *),
           template <typename...> class KernelType>
-dispatcher<Func, 2, nd::callable> make_comparison_children() {
+dispatcher<2, nd::callable> make_comparison_children() {
   typedef type_sequence<bool, int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double>
       numeric_types;
 
@@ -35,8 +35,7 @@ dispatcher<Func, 2, nd::callable> make_comparison_children() {
       ndt::make_type<int64_t>(),  ndt::make_type<uint8_t>(), ndt::make_type<uint16_t>(), ndt::make_type<uint32_t>(),
       ndt::make_type<uint64_t>(), ndt::make_type<float>(),   ndt::make_type<double>()};
 
-  dispatcher<Func, 2, nd::callable> dispatcher =
-      nd::callable::make_all<Func, KernelType, numeric_types, numeric_types>();
+  dispatcher<2, nd::callable> dispatcher = nd::callable::make_all<KernelType, numeric_types, numeric_types>(Func);
 
   for (auto i0 : numeric_dyn_types) {
     for (auto i1 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
@@ -82,7 +81,7 @@ nd::callable make_less() { return make_comparison_callable<nd::less_callable>();
 nd::callable make_less_equal() { return make_comparison_callable<nd::less_equal_callable>(); }
 
 nd::callable make_equal() {
-  dispatcher<func_ptr, 2, nd::callable> dispatcher = make_comparison_children<func_ptr, nd::equal_callable>();
+  dispatcher<2, nd::callable> dispatcher = make_comparison_children<func_ptr, nd::equal_callable>();
   dispatcher.insert({{ndt::make_type<dynd::complex<float>>(), ndt::make_type<dynd::complex<float>>()},
                      nd::make_callable<nd::equal_callable<dynd::complex<float>, dynd::complex<float>>>()});
   dispatcher.insert({{ndt::make_type<dynd::complex<double>>(), ndt::make_type<dynd::complex<double>>()},
@@ -100,7 +99,7 @@ nd::callable make_equal() {
 }
 
 nd::callable make_not_equal() {
-  dispatcher<func_ptr, 2, nd::callable> dispatcher = make_comparison_children<func_ptr, nd::not_equal_callable>();
+  dispatcher<2, nd::callable> dispatcher = make_comparison_children<func_ptr, nd::not_equal_callable>();
   dispatcher.insert({{ndt::make_type<dynd::complex<float>>(), ndt::make_type<dynd::complex<float>>()},
                      nd::make_callable<nd::not_equal_callable<dynd::complex<float>, dynd::complex<float>>>()});
   dispatcher.insert({{ndt::make_type<dynd::complex<double>>(), ndt::make_type<dynd::complex<double>>()},
@@ -124,15 +123,15 @@ nd::callable make_greater() { return make_comparison_callable<nd::greater_callab
 nd::callable make_total_order() {
   return nd::make_callable<nd::comparison_dispatch_callable<func_ptr>>(
       ndt::type("(Any, Any) -> Any"),
-      dispatcher<func_ptr, 2, nd::callable>{
-          //          {{fixed_string_id, fixed_string_id},
-          //         nd::make_callable<nd::total_order_callable<fixed_string_id, fixed_string_id>>()},
-          {{ndt::make_type<dynd::string>(), ndt::make_type<dynd::string>()},
-           nd::make_callable<nd::total_order_callable<dynd::string, dynd::string>>()},
-          {{ndt::make_type<int32_t>(), ndt::make_type<int32_t>()},
-           nd::make_callable<nd::total_order_callable<int32_t, int32_t>>()},
-          {{ndt::make_type<bool>(), ndt::make_type<bool>()},
-           nd::make_callable<nd::total_order_callable<bool, bool>>()}});
+      dispatcher<2, nd::callable>(
+          func_ptr, {//          {{fixed_string_id, fixed_string_id},
+                     //         nd::make_callable<nd::total_order_callable<fixed_string_id, fixed_string_id>>()},
+                     {{ndt::make_type<dynd::string>(), ndt::make_type<dynd::string>()},
+                      nd::make_callable<nd::total_order_callable<dynd::string, dynd::string>>()},
+                     {{ndt::make_type<int32_t>(), ndt::make_type<int32_t>()},
+                      nd::make_callable<nd::total_order_callable<int32_t, int32_t>>()},
+                     {{ndt::make_type<bool>(), ndt::make_type<bool>()},
+                      nd::make_callable<nd::total_order_callable<bool, bool>>()}}));
 }
 
 } // unnamed namespace
