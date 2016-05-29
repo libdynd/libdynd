@@ -19,12 +19,12 @@ namespace nd {
 
     void overload(const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                   const callable &value) {
-      m_dispatcher.insert({{dst_tp.get_id()}, value});
+      m_dispatcher.insert({{dst_tp}, value});
     }
 
     const callable &specialize(const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                                const ndt::type *DYND_UNUSED(src_tp)) {
-      return m_dispatcher(dst_tp.get_id());
+      return m_dispatcher(dst_tp);
     }
   };
 

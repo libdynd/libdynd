@@ -23,12 +23,12 @@ namespace nd {
 
     void overload(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                   const callable &value) {
-      m_dispatcher.insert({{src_tp[0].get_id()}, value});
+      m_dispatcher.insert({{src_tp[0]}, value});
     }
 
     const callable &specialize(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
                                const ndt::type *src_tp) {
-      return m_dispatcher(src_tp[0].get_id());
+      return m_dispatcher(src_tp[0]);
     }
   };
 
@@ -42,12 +42,12 @@ namespace nd {
 
     void overload(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                   const callable &value) {
-      m_dispatcher.insert({{src_tp[0].get_id(), src_tp[1].get_id()}, value});
+      m_dispatcher.insert({{src_tp[0], src_tp[1]}, value});
     }
 
     const callable &specialize(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
                                const ndt::type *src_tp) {
-      return m_dispatcher(src_tp[0].get_id(), src_tp[1].get_id());
+      return m_dispatcher(src_tp[0], src_tp[1]);
     }
   };
 

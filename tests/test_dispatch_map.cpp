@@ -75,6 +75,7 @@ TEST(Sort, TopologicalSort) {
   EXPECT_EQ((vector<int>{5, 4, 2, 3, 1, 0}), res);
 }
 
+/*
 TEST(Dispatcher, Unary) {
   dispatcher<1, int> dispatcher{
       {{scalar_kind_id}, 1}, {{int_kind_id}, 2}, {{int32_id}, 3}, {{float32_id}, 4}, {{float64_id}, 5}};
@@ -126,3 +127,4 @@ TEST(Dispatcher, Ternary) {
   EXPECT_EQ(1, dispatcher(int64_id, int64_id));
   EXPECT_EQ(0, dispatcher(option_id, int64_id));
 }
+*/

@@ -23,7 +23,7 @@ nd::callable make_unary_arithmetic() {
   dispatcher<1, nd::callable> dispatcher = nd::callable::make_all_if<CallableType, Condition, TypeSequence>();
 
   const ndt::type &tp = ndt::type("(Any) -> Any");
-  for (type_id_t i0 : {fixed_dim_id, var_dim_id}) {
+  for (ndt::type i0 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
     dispatcher.insert({{i0}, nd::get_elwise()});
   }
 

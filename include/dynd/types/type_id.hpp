@@ -389,7 +389,7 @@ template <>
 struct base_id_of<fixed_bytes_kind_id> : id_constant<bytes_kind_id> {};
 
 template <>
-struct base_id_of<fixed_bytes_id> : id_constant<bytes_kind_id> {};
+struct base_id_of<fixed_bytes_id> : id_constant<fixed_bytes_kind_id> {};
 
 template <>
 struct base_id_of<bytes_id> : id_constant<bytes_kind_id> {};
@@ -404,7 +404,7 @@ template <>
 struct base_id_of<char_id> : id_constant<string_kind_id> {};
 
 template <>
-struct base_id_of<fixed_string_id> : id_constant<string_kind_id> {};
+struct base_id_of<fixed_string_id> : id_constant<fixed_string_kind_id> {};
 
 template <>
 struct base_id_of<string_id> : id_constant<string_kind_id> {};

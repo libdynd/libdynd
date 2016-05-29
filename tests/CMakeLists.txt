@@ -21,7 +21,7 @@ endif()
 
 set(tests_SRC
     dynd_assertions.hpp
-    types/test_adapt_type.cpp
+#    types/test_adapt_type.cpp
     types/test_array_type.cpp
     types/test_bool_kind_type.cpp
     types/test_bytes_type.cpp

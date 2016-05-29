@@ -40,6 +40,45 @@ bool ambiguous(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, 
   return consistent(lhs, rhs) && !(supercedes(lhs, rhs) || supercedes(rhs, lhs));
 }
 
+template <size_t N>
+bool consistent(const std::array<ndt::type, N> &lhs, const std::array<ndt::type, N> &rhs) {
+  std::array<type_id_t, N> lhs_ids, rhs_ids;
+  for (size_t i = 0; i < N; ++i) {
+    lhs_ids[i] = lhs[i].get_id();
+    rhs_ids[i] = rhs[i].get_id();
+  }
+
+  for (size_t i = 0; i < lhs.size(); ++i) {
+    if (!is_base_id_of(lhs_ids[i], rhs_ids[i]) && !is_base_id_of(rhs_ids[i], lhs_ids[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+template <size_t N>
+bool supercedes(const std::array<ndt::type, N> &lhs, const std::array<ndt::type, N> &rhs) {
+  std::array<type_id_t, N> lhs_ids, rhs_ids;
+  for (size_t i = 0; i < N; ++i) {
+    lhs_ids[i] = lhs[i].get_id();
+    rhs_ids[i] = rhs[i].get_id();
+  }
+
+  for (size_t i = 0; i < lhs.size(); ++i) {
+    if (!is_base_id_of(rhs_ids[i], lhs_ids[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+template <size_t N>
+bool ambiguous(const std::array<ndt::type, N> &lhs, const std::array<ndt::type, N> &rhs) {
+  return consistent(lhs, rhs) && !(supercedes(lhs, rhs) || supercedes(rhs, lhs));
+}
+
 /*
 template <size_t N>
 bool supercedes(const type_id_t (&lhs)[N], const std::vector<type_id_t> &rhs) {
@@ -136,20 +175,29 @@ inline std::ostream &print_ids(std::ostream &o, size_t nids, const type_id_t *id
   return o;
 }
 
+inline std::ostream &print_ids(std::ostream &o, size_t nids, const ndt::type *tps) {
+  o << "(" << tps[0].get_id();
+  for (size_t i = 1; i < nids; ++i) {
+    o << ", " << tps[i].get_id();
+  }
+  o << ")";
+  return o;
+}
+
 template <size_t N, typename T, typename Map = std::map<size_t, T>>
 class dispatcher {
 public:
   typedef T value_type;
 
-  typedef std::pair<std::array<type_id_t, N>, value_type> pair_type;
+  typedef std::pair<std::array<ndt::type, N>, value_type> new_pair_type;
   typedef Map map_type;
   //  typedef google::dense_hash_map<size_t, value_type> map_type;
 
-  typedef typename std::vector<pair_type>::iterator iterator;
-  typedef typename std::vector<pair_type>::const_iterator const_iterator;
+  typedef typename std::vector<new_pair_type>::iterator iterator;
+  typedef typename std::vector<new_pair_type>::const_iterator const_iterator;
 
 private:
-  std::vector<pair_type> m_pairs;
+  std::vector<new_pair_type> m_pairs;
   map_type m_map;
 
   static size_t hash_combine(size_t seed, type_id_t id) { return seed ^ (id + (seed << 6) + (seed >> 2)); }
@@ -157,6 +205,15 @@ private:
   template <typename... IDTypes>
   static size_t hash_combine(size_t seed, type_id_t id0, IDTypes... ids) {
     return hash_combine(hash_combine(seed, id0), ids...);
+  }
+
+  template <size_t M>
+  static size_t hash_combine(size_t seed, std::array<type_id_t, M> ids) {
+    for (size_t i = 0; i < M; ++i) {
+      seed = hash_combine(seed, ids[i]);
+    }
+
+    return seed;
   }
 
 public:
@@ -171,7 +228,7 @@ public:
     assign(begin, end);
   }
 
-  dispatcher(std::initializer_list<pair_type> pairs, const map_type &map = map_type())
+  dispatcher(std::initializer_list<new_pair_type> pairs, const map_type &map = map_type())
       : dispatcher(pairs.begin(), pairs.end(), map) {}
 
   template <typename Iterator>
@@ -212,19 +269,19 @@ public:
     m_map.clear();
   }
 
-  void assign(std::initializer_list<pair_type> pairs) { assign(pairs.begin(), pairs.end()); }
+  void assign(std::initializer_list<new_pair_type> pairs) { assign(pairs.begin(), pairs.end()); }
 
   template <typename Iterator>
   void insert(Iterator begin, Iterator end) {
-    std::vector<pair_type> vertices = m_pairs;
+    std::vector<new_pair_type> vertices = m_pairs;
     vertices.insert(vertices.end(), begin, end);
 
     assign(vertices.begin(), vertices.end());
   }
 
-  void insert(const pair_type &pair) { insert(&pair, &pair + 1); }
+  void insert(const new_pair_type &pair) { insert(&pair, &pair + 1); }
 
-  void insert(std::initializer_list<pair_type> pairs) { insert(pairs.begin(), pairs.end()); }
+  void insert(std::initializer_list<new_pair_type> pairs) { insert(pairs.begin(), pairs.end()); }
 
   iterator begin() { return m_pairs.begin(); }
   const_iterator begin() const { return m_pairs.begin(); }
@@ -234,22 +291,35 @@ public:
   const_iterator end() const { return m_pairs.end(); }
   const_iterator cend() const { return m_pairs.cend(); }
 
-  template <typename... IDTypes>
-  const value_type &operator()(IDTypes... ids) {
-    size_t key = hash(ids...);
+  template <typename... Types>
+  const value_type &operator()(Types... args) {
+    std::array<ndt::type, sizeof...(Types)> tps = {args...};
+    std::array<type_id_t, sizeof...(Types)> ids;
+    for (size_t i = 0; i < sizeof...(Types); ++i) {
+      ids[i] = tps[i].get_id();
+    }
+
+    size_t key = hash(ids);
 
     const auto &it = m_map.find(key);
     if (it != m_map.end()) {
       return it->second;
     }
 
-    for (const pair_type &pair : m_pairs) {
-      if (supercedes({ids...}, pair.first)) {
+    for (const new_pair_type &pair : m_pairs) {
+      if (supercedes(tps, pair.first)) {
         return m_map[key] = pair.second;
       }
     }
 
-    throw std::out_of_range("signature not found");
+    std::stringstream ss;
+    ss << "signature not found for (";
+    for (size_t i = 0; i < sizeof...(Types); ++i) {
+      ss << tps[i] << ", ";
+    }
+    ss << ")";
+
+    throw std::out_of_range(ss.str());
   }
 
   const value_type &operator()(size_t nids, const type_id_t *ids) {
@@ -263,7 +333,7 @@ public:
       return it->second;
     }
 
-    for (const pair_type &pair : m_pairs) {
+    for (const new_pair_type &pair : m_pairs) {
       if (supercedes(nids, ids, pair.first)) {
         return m_map[key] = pair.second;
       }
@@ -285,11 +355,32 @@ public:
     return false;
   }
 
+  static bool edge(const std::array<ndt::type, N> &u, const std::array<ndt::type, N> &v) {
+    if (supercedes(u, v)) {
+      if (supercedes(v, u)) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+    return false;
+  }
+
   static size_t hash(type_id_t id) { return static_cast<size_t>(id); }
 
   template <typename... IDTypes>
   static size_t hash(type_id_t id0, IDTypes... ids) {
     return hash_combine(hash(id0), ids...);
+  }
+
+  template <size_t M>
+  static size_t hash(std::array<type_id_t, M> ids) {
+    std::array<type_id_t, M - 1> new_ids;
+    for (size_t i = 1; i < M; ++i) {
+      new_ids[i - 1] = ids[i];
+    }
+
+    return hash_combine(hash(ids[0]), new_ids);
   }
 };
 

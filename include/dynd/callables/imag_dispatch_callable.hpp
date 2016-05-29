@@ -19,7 +19,7 @@ namespace nd {
 
     const callable &specialize(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
                                const ndt::type *src_tp) {
-      return m_dispatcher(src_tp[0].get_id());
+      return m_dispatcher(src_tp[0]);
     }
   };
 

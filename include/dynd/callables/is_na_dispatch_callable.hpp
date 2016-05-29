@@ -22,9 +22,9 @@ namespace nd {
     const callable &specialize(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
                                const ndt::type *src_tp) {
       if (src_tp[0].get_id() == option_id) {
-        return m_dispatcher(src_tp[0].extended<ndt::option_type>()->get_value_type().get_id());
+        return m_dispatcher(src_tp[0].extended<ndt::option_type>()->get_value_type());
       } else {
-        return m_dim_dispatcher(src_tp[0].get_id());
+        return m_dim_dispatcher(src_tp[0]);
       }
     }
   };

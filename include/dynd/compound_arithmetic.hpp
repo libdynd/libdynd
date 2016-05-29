@@ -22,21 +22,30 @@ nd::callable make_compound_arithmetic() {
   const ndt::type &tp = ndt::type("(Any, Any) -> Any");
   auto dispatcher = nd::callable::make_all<KernelType, TypeSequence, TypeSequence>();
 
-  static const std::vector<type_id_t> binop_ids = {uint8_id,   uint16_id,  uint32_id,          uint64_id,
-                                                   int8_id,    int16_id,   int32_id,           int64_id,
-                                                   float32_id, float64_id, complex_float32_id, complex_float64_id};
+  static const std::vector<ndt::type> binop_ids = {ndt::make_type<uint8_t>(),
+                                                   ndt::make_type<uint16_t>(),
+                                                   ndt::make_type<uint32_t>(),
+                                                   ndt::make_type<uint64_t>(),
+                                                   ndt::make_type<int8_t>(),
+                                                   ndt::make_type<int16_t>(),
+                                                   ndt::make_type<int32_t>(),
+                                                   ndt::make_type<int64_t>(),
+                                                   ndt::make_type<float>(),
+                                                   ndt::make_type<double>(),
+                                                   ndt::make_type<dynd::complex<float>>(),
+                                                   ndt::make_type<dynd::complex<double>>()};
 
-  for (type_id_t i0 : binop_ids) {
-    for (type_id_t i1 : {fixed_dim_id, var_dim_id}) {
+  for (ndt::type i0 : binop_ids) {
+    for (ndt::type i1 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
       dispatcher.insert({{i0, i1}, nd::get_elwise()});
     }
   }
 
-  for (type_id_t i0 : {fixed_dim_id, var_dim_id}) {
-    for (type_id_t i1 : binop_ids) {
+  for (ndt::type i0 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
+    for (ndt::type i1 : binop_ids) {
       dispatcher.insert({{i0, i1}, nd::get_elwise()});
     }
-    for (type_id_t i1 : {fixed_dim_id, var_dim_id}) {
+    for (ndt::type i1 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
       dispatcher.insert({{i0, i1}, nd::get_elwise()});
     }
   }

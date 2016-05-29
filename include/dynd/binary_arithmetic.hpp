@@ -24,12 +24,16 @@ nd::callable make_binary_arithmetic() {
   const ndt::type &tp = ndt::type("(Any, Any) -> Any");
 
   auto dispatcher = nd::callable::make_all_if<KernelType, Condition, TypeSequence, TypeSequence>();
-  dispatcher.insert({{{option_id, any_kind_id}, nd::functional::forward_na<0>(ndt::type("Any"))},
-                     {{any_kind_id, option_id}, nd::functional::forward_na<1>(ndt::type("Any"))},
-                     {{option_id, option_id}, nd::functional::forward_na<0, 1>(ndt::type("Any"))},
-                     {{dim_kind_id, scalar_kind_id}, nd::get_elwise()},
-                     {{scalar_kind_id, dim_kind_id}, nd::get_elwise()},
-                     {{dim_kind_id, dim_kind_id}, nd::get_elwise()}});
+  dispatcher.insert(
+      {{{ndt::make_type<ndt::option_type>(), ndt::make_type<ndt::any_kind_type>()},
+        nd::functional::forward_na<0>(ndt::type("Any"))},
+       {{ndt::make_type<ndt::any_kind_type>(), ndt::make_type<ndt::option_type>()},
+        nd::functional::forward_na<1>(ndt::type("Any"))},
+       {{ndt::make_type<ndt::option_type>(), ndt::make_type<ndt::option_type>()},
+        nd::functional::forward_na<0, 1>(ndt::type("Any"))},
+       {{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::scalar_kind_type>()}, nd::get_elwise()},
+       {{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::dim_kind_type>()}, nd::get_elwise()},
+       {{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::dim_kind_type>()}, nd::get_elwise()}});
 
   return nd::make_callable<nd::arithmetic_dispatch_callable<2>>(tp, dispatcher);
 }
