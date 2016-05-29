@@ -22,20 +22,24 @@ namespace {
 
 nd::callable make_dynamic_parse() {
   dispatcher<1, nd::callable> dispatcher;
-  dispatcher.insert({{bool_id}, nd::make_callable<nd::json::parse_callable<bool>>()});
-  dispatcher.insert({{int8_id}, nd::make_callable<nd::json::parse_callable<int8_t>>()});
-  dispatcher.insert({{int16_id}, nd::make_callable<nd::json::parse_callable<int16_t>>()});
-  dispatcher.insert({{int32_id}, nd::make_callable<nd::json::parse_callable<int32_t>>()});
-  dispatcher.insert({{int64_id}, nd::make_callable<nd::json::parse_callable<int64_t>>()});
-  dispatcher.insert({{uint8_id}, nd::make_callable<nd::json::parse_callable<uint8_t>>()});
-  dispatcher.insert({{uint16_id}, nd::make_callable<nd::json::parse_callable<uint16_t>>()});
-  dispatcher.insert({{uint32_id}, nd::make_callable<nd::json::parse_callable<uint32_t>>()});
-  dispatcher.insert({{uint64_id}, nd::make_callable<nd::json::parse_callable<uint64_t>>()});
-  dispatcher.insert({{string_id}, nd::make_callable<nd::json::parse_callable<dynd::string>>()});
-  dispatcher.insert({{struct_id}, nd::make_callable<nd::json::parse_callable<ndt::struct_type>>()});
-  dispatcher.insert({{option_id}, nd::make_callable<nd::json::parse_callable<ndt::option_type>>()});
-  dispatcher.insert({{fixed_dim_id}, nd::make_callable<nd::json::parse_callable<ndt::fixed_dim_type>>()});
-  dispatcher.insert({{var_dim_id}, nd::make_callable<nd::json::parse_callable<ndt::var_dim_type>>()});
+  dispatcher.insert({{ndt::make_type<bool>()}, nd::make_callable<nd::json::parse_callable<bool>>()});
+  dispatcher.insert({{ndt::make_type<int8_t>()}, nd::make_callable<nd::json::parse_callable<int8_t>>()});
+  dispatcher.insert({{ndt::make_type<int16_t>()}, nd::make_callable<nd::json::parse_callable<int16_t>>()});
+  dispatcher.insert({{ndt::make_type<int32_t>()}, nd::make_callable<nd::json::parse_callable<int32_t>>()});
+  dispatcher.insert({{ndt::make_type<int64_t>()}, nd::make_callable<nd::json::parse_callable<int64_t>>()});
+  dispatcher.insert({{ndt::make_type<uint8_t>()}, nd::make_callable<nd::json::parse_callable<uint8_t>>()});
+  dispatcher.insert({{ndt::make_type<uint16_t>()}, nd::make_callable<nd::json::parse_callable<uint16_t>>()});
+  dispatcher.insert({{ndt::make_type<uint32_t>()}, nd::make_callable<nd::json::parse_callable<uint32_t>>()});
+  dispatcher.insert({{ndt::make_type<uint64_t>()}, nd::make_callable<nd::json::parse_callable<uint64_t>>()});
+  dispatcher.insert({{ndt::make_type<dynd::string>()}, nd::make_callable<nd::json::parse_callable<dynd::string>>()});
+  dispatcher.insert(
+      {{ndt::make_type<ndt::struct_type>()}, nd::make_callable<nd::json::parse_callable<ndt::struct_type>>()});
+  dispatcher.insert(
+      {{ndt::make_type<ndt::option_type>()}, nd::make_callable<nd::json::parse_callable<ndt::option_type>>()});
+  dispatcher.insert({{ndt::make_type<ndt::fixed_dim_kind_type>()},
+                     nd::make_callable<nd::json::parse_callable<ndt::fixed_dim_type>>()});
+  dispatcher.insert(
+      {{ndt::make_type<ndt::var_dim_type>()}, nd::make_callable<nd::json::parse_callable<ndt::var_dim_type>>()});
 
   return nd::make_callable<nd::parse_dispatch_callable>(
       ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<dynd::string>()}),

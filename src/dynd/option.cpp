@@ -31,7 +31,7 @@ nd::callable make_assign_na() {
                                    const ndt::type *DYND_UNUSED(src_tp)) {
       if (dst_tp.get_id() == option_id) {
         const ndt::type &dst_value_tp = dst_tp.extended<ndt::option_type>()->get_value_type();
-        return m_dispatcher(dst_value_tp.get_id());
+        return m_dispatcher(dst_value_tp);
       }
 
       return nd::elwise;
@@ -48,7 +48,7 @@ nd::callable make_is_na() {
                     dynd::complex<double>, void, dynd::bytes, dynd::string, ndt::fixed_dim_kind_type>>();
   dynd::dispatcher<1, nd::callable> dim_dispatcher;
 
-  for (auto tp_id : {fixed_dim_kind_id, var_dim_id}) {
+  for (auto tp_id : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
     dim_dispatcher.insert({{tp_id}, nd::get_elwise()});
   }
 

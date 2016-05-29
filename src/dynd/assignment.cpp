@@ -33,69 +33,106 @@ nd::callable make_assign() {
 
   auto dispatcher =
       nd::callable::make_all<_bind<assign_error_mode, nd::assign_callable>::type, numeric_types, numeric_types>();
-  dispatcher.insert({{string_id, string_id}, nd::make_callable<nd::assign_callable<dynd::string, dynd::string>>()});
-  dispatcher.insert({{bytes_id, bytes_id}, nd::make_callable<nd::assign_callable<dynd::bytes, dynd::bytes>>()});
-  dispatcher.insert({{fixed_bytes_id, fixed_bytes_id},
+  dispatcher.insert({{ndt::make_type<ndt::string_type>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::assign_callable<dynd::string, dynd::string>>()});
+  dispatcher.insert({{ndt::make_type<ndt::bytes_type>(), ndt::make_type<ndt::bytes_type>()},
+                     nd::make_callable<nd::assign_callable<dynd::bytes, dynd::bytes>>()});
+  dispatcher.insert({{ndt::make_type<ndt::fixed_bytes_kind_type>(), ndt::make_type<ndt::fixed_bytes_kind_type>()},
                      nd::make_callable<nd::assign_callable<ndt::fixed_bytes_type, ndt::fixed_bytes_type>>()});
-  dispatcher.insert(
-      {{char_id, char_id}, nd::make_callable<nd::assign_callable<ndt::fixed_string_type, ndt::fixed_string_type>>()});
-  dispatcher.insert({{char_id, fixed_string_id},
+  dispatcher.insert({{ndt::make_type<ndt::char_type>(), ndt::make_type<ndt::char_type>()},
                      nd::make_callable<nd::assign_callable<ndt::fixed_string_type, ndt::fixed_string_type>>()});
-  dispatcher.insert({{char_id, string_id}, nd::make_callable<nd::assign_callable<char, dynd::string>>()});
-  dispatcher.insert({{{adapt_id, any_kind_id}, nd::make_callable<nd::adapt_assign_to_callable>()},
-                     {{any_kind_id, adapt_id}, nd::make_callable<nd::adapt_assign_from_callable>()},
-                     {{adapt_id, adapt_id}, nd::make_callable<nd::adapt_assign_from_callable>()}});
-  dispatcher.insert({{fixed_string_id, char_id},
+  dispatcher.insert({{ndt::make_type<ndt::char_type>(), ndt::make_type<ndt::fixed_string_kind_type>()},
                      nd::make_callable<nd::assign_callable<ndt::fixed_string_type, ndt::fixed_string_type>>()});
-  dispatcher.insert({{string_id, char_id}, nd::make_callable<nd::assign_callable<dynd::string, char>>()});
-  dispatcher.insert({{type_id, type_id}, nd::make_callable<nd::assign_callable<ndt::type, ndt::type>>()});
-  dispatcher.insert({{string_id, int32_id}, nd::make_callable<nd::string_to_int_assign_callable<int32_t>>()});
-  dispatcher.insert({{fixed_string_id, fixed_string_id},
+  dispatcher.insert({{ndt::make_type<ndt::char_type>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::assign_callable<char, dynd::string>>()});
+  //  dispatcher.insert(
+  //    {{{adapt_id, ndt::make_type<ndt::any_kind_type>()}, nd::make_callable<nd::adapt_assign_to_callable>()},
+  //   {{ndt::make_type<ndt::any_kind_type>(), adapt_id}, nd::make_callable<nd::adapt_assign_from_callable>()},
+  // {{adapt_id, adapt_id}, nd::make_callable<nd::adapt_assign_from_callable>()}});
+  dispatcher.insert({{ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<ndt::char_type>()},
                      nd::make_callable<nd::assign_callable<ndt::fixed_string_type, ndt::fixed_string_type>>()});
+  dispatcher.insert({{ndt::make_type<ndt::string_type>(), ndt::make_type<ndt::char_type>()},
+                     nd::make_callable<nd::assign_callable<dynd::string, char>>()});
+  dispatcher.insert({{ndt::make_type<ndt::type>(), ndt::make_type<ndt::type>()},
+                     nd::make_callable<nd::assign_callable<ndt::type, ndt::type>>()});
+  dispatcher.insert({{ndt::make_type<ndt::string_type>(), ndt::make_type<int32_t>()},
+                     nd::make_callable<nd::string_to_int_assign_callable<int32_t>>()});
+  dispatcher.insert({{ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<ndt::fixed_string_kind_type>()},
+                     nd::make_callable<nd::assign_callable<ndt::fixed_string_type, ndt::fixed_string_type>>()});
+  dispatcher.insert({{ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::assign_callable<ndt::fixed_string_type, dynd::string>>()});
+  //  dispatcher.insert({{ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<uint8_t>()},
+  //  callable::make<assignment_kernel<ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<uint8_t>()>>()});
+  //  dispatcher.insert({{ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<uint16_t>()},
+  //  callable::make<assignment_kernel<ndt::make_type<ndt::fixed_string_kind_type>(),
+  //  ndt::make_type<uint16_t>()>>()});
+  // dispatcher.insert({{ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<uint32_t>()},
+  // callable::make<assignment_kernel<ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<uint32_t>()>>()});
+  //  dispatcher.insert({{ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<uint64_t>()},
+  //  callable::make<assignment_kernel<ndt::make_type<ndt::fixed_string_kind_type>(),
+  //  ndt::make_type<uint64_t>()>>()});
+  // dispatcher.insert({{ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<uint128>()},
+  // callable::make<assignment_kernel<ndt::make_type<ndt::fixed_string_kind_type>(),
+  // ndt::make_type<uint128>()>>()});
+  dispatcher.insert({{ndt::make_type<int32_t>(), ndt::make_type<ndt::fixed_string_kind_type>()},
+                     nd::make_callable<nd::int_to_string_assign_callable<int32_t>>()});
+  dispatcher.insert({{ndt::make_type<ndt::string_type>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::assign_callable<dynd::string, dynd::string>>()});
+  dispatcher.insert({{ndt::make_type<ndt::string_type>(), ndt::make_type<ndt::fixed_string_kind_type>()},
+                     nd::make_callable<nd::assign_callable<dynd::string, ndt::fixed_string_type>>()});
+  dispatcher.insert({{ndt::make_type<bool>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::assign_callable<bool1, dynd::string>>()});
+  dispatcher.insert({{{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::option_type>()},
+                      nd::make_callable<nd::option_to_value_callable>()},
+                     {{ndt::make_type<ndt::option_type>(), ndt::make_type<ndt::option_type>()},
+                      nd::make_callable<nd::assign_callable<ndt::option_type, ndt::option_type>>()},
+                     {{ndt::make_type<ndt::option_type>(), ndt::make_type<ndt::scalar_kind_type>()},
+                      nd::make_callable<nd::assignment_option_callable>()}});
+  dispatcher.insert({{ndt::make_type<ndt::option_type>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::assign_callable<ndt::option_type, dynd::string>>()});
+  dispatcher.insert({{ndt::make_type<ndt::option_type>(), ndt::make_type<double>()},
+                     nd::make_callable<nd::assign_callable<ndt::option_type, ndt::float_kind_type>>()});
+  dispatcher.insert({{ndt::make_type<ndt::string_type>(), ndt::make_type<ndt::type>()},
+                     nd::make_callable<nd::assign_callable<dynd::string, ndt::type>>()});
+  dispatcher.insert({{ndt::make_type<ndt::type>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::assign_callable<ndt::type, dynd::string>>()});
+  dispatcher.insert({{ndt::make_type<ndt::pointer_type>(), ndt::make_type<ndt::pointer_type>()},
+                     nd::make_callable<nd::assign_callable<ndt::pointer_type, ndt::pointer_type>>()});
+  dispatcher.insert({{ndt::make_type<int8_t>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::int_to_string_assign_callable<int8_t>>()});
+  dispatcher.insert({{ndt::make_type<int16_t>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::int_to_string_assign_callable<int16_t>>()});
+  dispatcher.insert({{ndt::make_type<int32_t>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::int_to_string_assign_callable<int32_t>>()});
+  dispatcher.insert({{ndt::make_type<int64_t>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::int_to_string_assign_callable<int64_t>>()});
+  //  dispatcher.insert({{ndt::make_type<uint8_t>(), ndt::make_type<ndt::string_type>()},
+  //  callable::make<assignment_kernel<ndt::make_type<uint8_t>(),
+  //  ndt::make_type<ndt::string_type>()>>()});
+  //  dispatcher.insert({{ndt::make_type<uint16_t>(), ndt::make_type<ndt::string_type>()},
+  //  callable::make<assignment_kernel<ndt::make_type<uint16_t>(),
+  //  ndt::make_type<ndt::string_type>()>>()});
+  // dispatcher.insert({{ndt::make_type<uint32_t>(), ndt::make_type<ndt::string_type>()},
+  // callable::make<assignment_kernel<ndt::make_type<uint32_t>(),
+  // ndt::make_type<ndt::string_type>()>>()});
+  // dispatcher.insert({{ndt::make_type<uint64_t>(), ndt::make_type<ndt::string_type>()},
+  // callable::make<assignment_kernel<ndt::make_type<uint64_t>(),
+  // ndt::make_type<ndt::string_type>()>>()});
+  dispatcher.insert({{ndt::make_type<float>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::assign_callable<float, dynd::string>>()});
+  dispatcher.insert({{ndt::make_type<double>(), ndt::make_type<ndt::string_type>()},
+                     nd::make_callable<nd::assign_callable<double, dynd::string>>()});
+  dispatcher.insert({{ndt::make_type<ndt::tuple_type>(), ndt::make_type<ndt::tuple_type>()},
+                     nd::make_callable<nd::assign_callable<ndt::tuple_type, ndt::tuple_type>>()});
+  dispatcher.insert({{ndt::make_type<ndt::struct_type>(), ndt::make_type<int32_t>()},
+                     nd::make_callable<nd::assign_callable<ndt::struct_type, ndt::struct_type>>()});
+  dispatcher.insert({{ndt::make_type<ndt::struct_type>(), ndt::make_type<ndt::struct_type>()},
+                     nd::make_callable<nd::assign_callable<ndt::struct_type, ndt::struct_type>>()});
   dispatcher.insert(
-      {{fixed_string_id, string_id}, nd::make_callable<nd::assign_callable<ndt::fixed_string_type, dynd::string>>()});
-  //  dispatcher.insert({{fixed_string_id, uint8_id}, callable::make<assignment_kernel<fixed_string_id, uint8_id>>()});
-  //  dispatcher.insert({{fixed_string_id, uint16_id}, callable::make<assignment_kernel<fixed_string_id,
-  //  uint16_id>>()});
-  // dispatcher.insert({{fixed_string_id, uint32_id}, callable::make<assignment_kernel<fixed_string_id, uint32_id>>()});
-  //  dispatcher.insert({{fixed_string_id, uint64_id}, callable::make<assignment_kernel<fixed_string_id,
-  //  uint64_id>>()});
-  // dispatcher.insert({{fixed_string_id, uint128_id}, callable::make<assignment_kernel<fixed_string_id,
-  // uint128_id>>()});
-  dispatcher.insert({{int32_id, fixed_string_id}, nd::make_callable<nd::int_to_string_assign_callable<int32_t>>()});
-  dispatcher.insert({{string_id, string_id}, nd::make_callable<nd::assign_callable<dynd::string, dynd::string>>()});
+      {{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::dim_kind_type>()}, nd::get_elwise()});
   dispatcher.insert(
-      {{string_id, fixed_string_id}, nd::make_callable<nd::assign_callable<dynd::string, ndt::fixed_string_type>>()});
-  dispatcher.insert({{bool_id, string_id}, nd::make_callable<nd::assign_callable<bool1, dynd::string>>()});
-  dispatcher.insert(
-      {{{scalar_kind_id, option_id}, nd::make_callable<nd::option_to_value_callable>()},
-       {{option_id, option_id}, nd::make_callable<nd::assign_callable<ndt::option_type, ndt::option_type>>()},
-       {{option_id, scalar_kind_id}, nd::make_callable<nd::assignment_option_callable>()}});
-  dispatcher.insert({{option_id, string_id}, nd::make_callable<nd::assign_callable<ndt::option_type, dynd::string>>()});
-  dispatcher.insert(
-      {{option_id, float64_id}, nd::make_callable<nd::assign_callable<ndt::option_type, ndt::float_kind_type>>()});
-  dispatcher.insert({{string_id, type_id}, nd::make_callable<nd::assign_callable<dynd::string, ndt::type>>()});
-  dispatcher.insert({{type_id, string_id}, nd::make_callable<nd::assign_callable<ndt::type, dynd::string>>()});
-  dispatcher.insert(
-      {{pointer_id, pointer_id}, nd::make_callable<nd::assign_callable<ndt::pointer_type, ndt::pointer_type>>()});
-  dispatcher.insert({{int8_id, string_id}, nd::make_callable<nd::int_to_string_assign_callable<int8_t>>()});
-  dispatcher.insert({{int16_id, string_id}, nd::make_callable<nd::int_to_string_assign_callable<int16_t>>()});
-  dispatcher.insert({{int32_id, string_id}, nd::make_callable<nd::int_to_string_assign_callable<int32_t>>()});
-  dispatcher.insert({{int64_id, string_id}, nd::make_callable<nd::int_to_string_assign_callable<int64_t>>()});
-  //  dispatcher.insert({{uint8_id, string_id}, callable::make<assignment_kernel<uint8_id, string_id>>()});
-  //  dispatcher.insert({{uint16_id, string_id}, callable::make<assignment_kernel<uint16_id, string_id>>()});
-  // dispatcher.insert({{uint32_id, string_id}, callable::make<assignment_kernel<uint32_id, string_id>>()});
-  // dispatcher.insert({{uint64_id, string_id}, callable::make<assignment_kernel<uint64_id, string_id>>()});
-  dispatcher.insert({{float32_id, string_id}, nd::make_callable<nd::assign_callable<float, dynd::string>>()});
-  dispatcher.insert({{float64_id, string_id}, nd::make_callable<nd::assign_callable<double, dynd::string>>()});
-  dispatcher.insert({{tuple_id, tuple_id}, nd::make_callable<nd::assign_callable<ndt::tuple_type, ndt::tuple_type>>()});
-  dispatcher.insert(
-      {{struct_id, int32_id}, nd::make_callable<nd::assign_callable<ndt::struct_type, ndt::struct_type>>()});
-  dispatcher.insert(
-      {{struct_id, struct_id}, nd::make_callable<nd::assign_callable<ndt::struct_type, ndt::struct_type>>()});
-  dispatcher.insert({{scalar_kind_id, dim_kind_id}, nd::get_elwise()});
-  dispatcher.insert({{dim_kind_id, scalar_kind_id}, nd::get_elwise()});
-  dispatcher.insert({{dim_kind_id, dim_kind_id}, nd::get_elwise()});
+      {{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::scalar_kind_type>()}, nd::get_elwise()});
+  dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::dim_kind_type>()}, nd::get_elwise()});
 
   return nd::make_callable<nd::assign_dispatch_callable>(self_tp, dispatcher);
 }
