@@ -49,7 +49,7 @@ nd::callable make_assign() {
   dispatcher.insert({{ndt::make_type<ndt::char_type>(), ndt::make_type<ndt::fixed_string_kind_type>()},
                      nd::make_callable<nd::assign_callable<ndt::fixed_string_type, ndt::fixed_string_type>>()});
   dispatcher.insert({{ndt::make_type<ndt::char_type>(), ndt::make_type<ndt::string_type>()},
-                     nd::make_callable<nd::assign_callable<char, dynd::string>>()});
+                     nd::make_callable<nd::assign_callable<ndt::char_type, dynd::string>>()});
   //  dispatcher.insert(
   //    {{{adapt_id, ndt::make_type<ndt::any_kind_type>()}, nd::make_callable<nd::adapt_assign_to_callable>()},
   //   {{ndt::make_type<ndt::any_kind_type>(), adapt_id}, nd::make_callable<nd::adapt_assign_from_callable>()},
@@ -57,10 +57,10 @@ nd::callable make_assign() {
   dispatcher.insert({{ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<ndt::char_type>()},
                      nd::make_callable<nd::assign_callable<ndt::fixed_string_type, ndt::fixed_string_type>>()});
   dispatcher.insert({{ndt::make_type<ndt::string_type>(), ndt::make_type<ndt::char_type>()},
-                     nd::make_callable<nd::assign_callable<dynd::string, char>>()});
+                     nd::make_callable<nd::assign_callable<dynd::string, ndt::char_type>>()});
   dispatcher.insert({{ndt::make_type<ndt::type>(), ndt::make_type<ndt::type>()},
                      nd::make_callable<nd::assign_callable<ndt::type, ndt::type>>()});
-  dispatcher.insert({{ndt::make_type<ndt::string_type>(), ndt::make_type<int32_t>()},
+  dispatcher.insert({{ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<int32_t>()},
                      nd::make_callable<nd::string_to_int_assign_callable<int32_t>>()});
   dispatcher.insert({{ndt::make_type<ndt::fixed_string_kind_type>(), ndt::make_type<ndt::fixed_string_kind_type>()},
                      nd::make_callable<nd::assign_callable<ndt::fixed_string_type, ndt::fixed_string_type>>()});
@@ -134,11 +134,11 @@ nd::callable make_assign() {
   dispatcher.insert({{ndt::make_type<ndt::struct_type>(), ndt::make_type<ndt::struct_type>()},
                      nd::make_callable<nd::assign_callable<ndt::struct_type, ndt::struct_type>>()});
   dispatcher.insert({{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::dim_kind_type>()},
-                     nd::get_elwise(ndt::type("(Scalar, Dim) -> Any"))});
+                     nd::get_elwise(ndt::type("(Dim) -> Scalar"))});
   dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::scalar_kind_type>()},
-                     nd::get_elwise(ndt::type("(Dim, Scalar) -> Any"))});
+                     nd::get_elwise(ndt::type("(Scalar) -> Dim"))});
   dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::dim_kind_type>()},
-                     nd::get_elwise(ndt::type("(Dim, Dim) -> Any"))});
+                     nd::get_elwise(ndt::type("(Dim) -> Dim"))});
 
   return nd::make_callable<nd::assign_dispatch_callable<func_ptr>>(self_tp, dispatcher);
 }

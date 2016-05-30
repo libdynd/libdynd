@@ -188,9 +188,9 @@ inline std::ostream &print_ids(std::ostream &o, size_t nids, const type_id_t *id
 }
 
 inline std::ostream &print_ids(std::ostream &o, size_t nids, const ndt::type *tps) {
-  o << "(" << tps[0].get_id();
+  o << "(" << tps[0];
   for (size_t i = 1; i < nids; ++i) {
-    o << ", " << tps[i].get_id();
+    o << ", " << tps[i];
   }
   o << ")";
   return o;
@@ -274,16 +274,14 @@ public:
             }
           }
 
-          /*
-                    if (!ok) {
-                      std::stringstream ss;
-                      print_ids(ss, begin[i].first.size(), begin[i].first.data());
-                      ss << " and ";
-                      print_ids(ss, begin[j].first.size(), begin[j].first.data());
-                      ss << " are ambiguous";
-                      throw std::runtime_error(ss.str());
-                    }
-          */
+          if (!ok) {
+            std::stringstream ss;
+            print_ids(ss, tp_i.size(), tp_i.data());
+            ss << " and ";
+            print_ids(ss, tp_j.size(), tp_j.data());
+            ss << " are ambiguous";
+            throw std::runtime_error(ss.str());
+          }
         }
 
         if (edge(tp_i, tp_j)) {
@@ -337,8 +335,12 @@ public:
     }
 
     for (const new_pair_type &pair : m_pairs) {
-      if (supercedes(tps, pair.first)) {
-        return m_map[key] = pair.second;
+      const auto &f = pair.second;
+      std::array<ndt::type, N> other_tps =
+          as_array<N>(m_dispatch(f->get_ret_type(), f->get_narg(), f->get_arg_types().data()));
+
+      if (supercedes(tps, other_tps)) {
+        return m_map[key] = f;
       }
     }
 
@@ -350,26 +352,6 @@ public:
     ss << ")";
 
     throw std::out_of_range(ss.str());
-  }
-
-  const value_type &operator()(size_t nids, const type_id_t *ids) {
-    size_t key = static_cast<size_t>(ids[0]);
-    for (size_t i = 1; i < nids; ++i) {
-      key = hash_combine(key, ids[i]);
-    }
-
-    const auto &it = m_map.find(key);
-    if (it != m_map.end()) {
-      return it->second;
-    }
-
-    for (const new_pair_type &pair : m_pairs) {
-      if (supercedes(nids, ids, pair.first)) {
-        return m_map[key] = pair.second;
-      }
-    }
-
-    throw std::out_of_range("signature not found");
   }
 
   const value_type &operator()(std::initializer_list<type_id_t> ids) { return operator()(ids.size(), ids.begin()); }
