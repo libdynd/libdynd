@@ -36,7 +36,7 @@ nd::callable make_binary_arithmetic() {
                      nd::get_elwise(ndt::type("(Scalar, Dim) -> Any")),
                      nd::get_elwise(ndt::type("(Dim, Dim) -> Any"))});
 
-  return nd::make_callable<nd::arithmetic_dispatch_callable<func_ptr, 2>>(tp, dispatcher);
+  return nd::make_callable<nd::arithmetic_dispatch_callable<2>>(tp, dispatcher);
 }
 
 } // anonymous namespace

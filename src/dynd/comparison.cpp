@@ -54,8 +54,8 @@ dispatcher<2, nd::callable> make_comparison_children() {
 
 template <template <typename...> class CallableType>
 nd::callable make_comparison_callable() {
-  return nd::make_callable<nd::comparison_dispatch_callable<func_ptr>>(
-      ndt::type("(Any, Any) -> Any"), make_comparison_children<func_ptr, CallableType>());
+  return nd::make_callable<nd::comparison_dispatch_callable>(ndt::type("(Any, Any) -> Any"),
+                                                             make_comparison_children<func_ptr, CallableType>());
 }
 
 nd::callable make_less() { return make_comparison_callable<nd::less_callable>(); }
@@ -71,7 +71,7 @@ nd::callable make_equal() {
   dispatcher.insert(nd::make_callable<nd::equal_callable<ndt::type, ndt::type>>());
   dispatcher.insert(nd::make_callable<nd::equal_callable<bytes, bytes>>());
 
-  return nd::make_callable<nd::comparison_dispatch_callable<func_ptr>>(ndt::type("(Any, Any) -> Any"), dispatcher);
+  return nd::make_callable<nd::comparison_dispatch_callable>(ndt::type("(Any, Any) -> Any"), dispatcher);
 }
 
 nd::callable make_not_equal() {
@@ -83,7 +83,7 @@ nd::callable make_not_equal() {
   dispatcher.insert(nd::make_callable<nd::not_equal_callable<ndt::type, ndt::type>>());
   dispatcher.insert(nd::make_callable<nd::not_equal_callable<bytes, bytes>>());
 
-  return nd::make_callable<nd::comparison_dispatch_callable<func_ptr>>(ndt::type("(Any, Any) -> Any"), dispatcher);
+  return nd::make_callable<nd::comparison_dispatch_callable>(ndt::type("(Any, Any) -> Any"), dispatcher);
 }
 
 nd::callable make_greater_equal() { return make_comparison_callable<nd::greater_equal_callable>(); }
@@ -91,7 +91,7 @@ nd::callable make_greater_equal() { return make_comparison_callable<nd::greater_
 nd::callable make_greater() { return make_comparison_callable<nd::greater_callable>(); }
 
 nd::callable make_total_order() {
-  return nd::make_callable<nd::comparison_dispatch_callable<func_ptr>>(
+  return nd::make_callable<nd::comparison_dispatch_callable>(
       ndt::type("(Any, Any) -> Any"),
       dispatcher<2, nd::callable>(func_ptr, {nd::make_callable<nd::total_order_callable<dynd::string, dynd::string>>(),
                                              nd::make_callable<nd::total_order_callable<int32_t, int32_t>>(),

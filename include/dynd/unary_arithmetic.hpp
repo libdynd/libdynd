@@ -31,7 +31,7 @@ nd::callable make_unary_arithmetic() {
   dispatcher.insert(nd::get_elwise(ndt::type("(Fixed * Any) -> Any")));
   dispatcher.insert(nd::get_elwise(ndt::type("(var * Any) -> Any")));
 
-  return nd::make_callable<nd::arithmetic_dispatch_callable<func_ptr, 1>>(tp, dispatcher);
+  return nd::make_callable<nd::arithmetic_dispatch_callable<1>>(tp, dispatcher);
 }
 
 } // anonymous namespace

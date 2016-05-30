@@ -21,7 +21,7 @@ static std::vector<ndt::type> func_ptr(const ndt::type &DYND_UNUSED(dst_tp), siz
 
 } // unnamed namespace
 
-DYND_API nd::callable nd::sum = nd::functional::reduction(nd::make_callable<nd::sum_dispatch_callable<func_ptr>>(
+DYND_API nd::callable nd::sum = nd::functional::reduction(nd::make_callable<nd::sum_dispatch_callable>(
     ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::scalar_kind_type>(),
                                        {ndt::make_type<ndt::scalar_kind_type>()}),
     nd::callable::make_all<nd::sum_callable,

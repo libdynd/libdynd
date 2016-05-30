@@ -10,7 +10,6 @@
 namespace dynd {
 namespace nd {
 
-  template <std::vector<ndt::type> (*Func)(const ndt::type &, size_t, const ndt::type *)>
   class sum_dispatch_callable : public base_dispatch_callable {
     dispatcher<1, callable> m_dispatcher;
 

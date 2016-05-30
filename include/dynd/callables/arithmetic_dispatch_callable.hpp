@@ -10,11 +10,11 @@
 namespace dynd {
 namespace nd {
 
-  template <std::vector<ndt::type> (*Func)(const ndt::type &, size_t, const ndt::type *), size_t N>
+  template <size_t N>
   class arithmetic_dispatch_callable;
 
-  template <std::vector<ndt::type> (*Func)(const ndt::type &, size_t, const ndt::type *)>
-  class arithmetic_dispatch_callable<Func, 1> : public base_dispatch_callable {
+  template <>
+  class arithmetic_dispatch_callable<1> : public base_dispatch_callable {
     dispatcher<1, callable> m_dispatcher;
 
   public:
@@ -32,8 +32,8 @@ namespace nd {
     }
   };
 
-  template <std::vector<ndt::type> (*Func)(const ndt::type &, size_t, const ndt::type *)>
-  class arithmetic_dispatch_callable<Func, 2> : public base_dispatch_callable {
+  template <>
+  class arithmetic_dispatch_callable<2> : public base_dispatch_callable {
     dispatcher<2, callable> m_dispatcher;
 
   public:

@@ -10,7 +10,6 @@
 namespace dynd {
 namespace nd {
 
-  template <std::vector<ndt::type> (*Func)(const ndt::type &, size_t, const ndt::type *)>
   class compound_arithmetic_dispatch_callable : public base_dispatch_callable {
     dispatcher<2, callable> m_dispatcher;
 

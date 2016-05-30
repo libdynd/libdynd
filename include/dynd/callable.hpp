@@ -122,7 +122,7 @@ namespace nd {
     static dispatcher<1, callable> make_all(dispatch_t dispatch, A &&... a) {
       std::vector<callable> callables;
       std::array<int, 1> arr;
-      for_each<I0>(detail::make_all<KernelType>(), dispatch, callables, arr, std::forward<A>(a)...);
+      for_each<I0>(detail::make_all<KernelType>(), callables, arr, std::forward<A>(a)...);
 
       return dispatcher<1, callable>(dispatch, callables.begin(), callables.end());
     }
@@ -131,7 +131,7 @@ namespace nd {
     static dispatcher<2 + sizeof...(I), callable> make_all(dispatch_t dispatch, A &&... a) {
       std::vector<callable> callables;
       std::array<int, 2 + sizeof...(I)> arr;
-      for_each<typename outer<I0, I1, I...>::type>(detail::make_all<KernelType>(), dispatch, callables, arr,
+      for_each<typename outer<I0, I1, I...>::type>(detail::make_all<KernelType>(), callables, arr,
                                                    std::forward<A>(a)...);
 
       return dispatcher<2 + sizeof...(I), callable>(dispatch, callables.begin(), callables.end());
@@ -142,8 +142,7 @@ namespace nd {
     static dispatcher<1, callable> make_all_if(dispatch_t dispatch, A &&... a) {
       std::vector<callable> callables;
       std::array<int, 1> arr;
-      for_each<Type0Sequence>(detail::make_all_if<KernelType, Condition>(), dispatch, callables, arr,
-                              std::forward<A>(a)...);
+      for_each<Type0Sequence>(detail::make_all_if<KernelType, Condition>(), callables, arr, std::forward<A>(a)...);
 
       return dispatcher<1, callable>(dispatch, callables.begin(), callables.end());
     }
@@ -154,8 +153,8 @@ namespace nd {
     static dispatcher<2 + sizeof...(I), callable> make_all_if(dispatch_t dispatch, A &&... a) {
       std::vector<callable> callables;
       std::array<int, 2 + sizeof...(I)> arr;
-      for_each<typename outer<I0, I1, I...>::type>(detail::make_all_if<KernelType, Condition>(), dispatch, callables,
-                                                   arr, std::forward<A>(a)...);
+      for_each<typename outer<I0, I1, I...>::type>(detail::make_all_if<KernelType, Condition>(), callables, arr,
+                                                   std::forward<A>(a)...);
 
       return dispatcher<2 + sizeof...(I), callable>(dispatch, callables.begin(), callables.end());
     }
@@ -246,23 +245,10 @@ namespace nd {
 
   namespace detail {
 
-    template <typename T>
-    struct as_types;
-
-    template <typename... T>
-    struct as_types<type_sequence<T...>> {
-      static std::array<ndt::type, sizeof...(T)> get() {
-        std::array<ndt::type, sizeof...(T)> a = {ndt::make_type<T>()...};
-
-        return a;
-      }
-    };
-
     template <template <typename...> class CallableType>
     struct make_all {
       template <typename Type, typename... ArgTypes>
-      void on_each(dispatch_t DYND_UNUSED(dispatch), std::vector<callable> &callables, std::array<int, 1>,
-                   ArgTypes &&... args) const {
+      void on_each(std::vector<callable> &callables, std::array<int, 1>, ArgTypes &&... args) const {
         typedef CallableType<Type> callable_type;
 
         callable f = make_callable<callable_type>(std::forward<ArgTypes>(args)...);
@@ -270,8 +256,7 @@ namespace nd {
       }
 
       template <typename TypeSequence, typename... ArgTypes>
-      void on_each(dispatch_t DYND_UNUSED(dispatch), std::vector<callable> &callables,
-                   std::array<int, TypeSequence::size()>, ArgTypes &&... args) const {
+      void on_each(std::vector<callable> &callables, std::array<int, TypeSequence::size()>, ArgTypes &&... args) const {
         typedef instantiate_t<CallableType, TypeSequence> callable_type;
         callable f = make_callable<callable_type>(std::forward<ArgTypes>(args)...);
         callables.push_back(f);
@@ -288,27 +273,24 @@ namespace nd {
     template <template <typename...> class KernelType>
     struct insert_callable_if<false, KernelType> {
       template <typename Arg0Type, typename... A>
-      static void insert(dispatch_t DYND_UNUSED(dispatch), std::vector<callable> &DYND_UNUSED(callables),
-                         std::array<int, 1>, A &&... DYND_UNUSED(a)) {}
+      static void insert(std::vector<callable> &DYND_UNUSED(callables), std::array<int, 1>, A &&... DYND_UNUSED(a)) {}
 
       template <typename TypeSequence, typename... A>
-      static void insert(dispatch_t DYND_UNUSED(dispatch), std::vector<callable> &DYND_UNUSED(callables),
-                         std::array<int, TypeSequence::size()>, A &&... DYND_UNUSED(a)) {}
+      static void insert(std::vector<callable> &DYND_UNUSED(callables), std::array<int, TypeSequence::size()>,
+                         A &&... DYND_UNUSED(a)) {}
     };
 
     template <template <typename...> class KernelType>
     struct insert_callable_if<true, KernelType> {
       template <typename Arg0Type, typename... A>
-      static void insert(dispatch_t DYND_UNUSED(dispatch), std::vector<callable> &callables, std::array<int, 1>,
-                         A &&... a) {
+      static void insert(std::vector<callable> &callables, std::array<int, 1>, A &&... a) {
         callable f = make_callable<KernelType<Arg0Type>>(std::forward<A>(a)...);
 
         callables.push_back(f);
       }
 
       template <typename TypeSequence, typename... A>
-      static void insert(dispatch_t DYND_UNUSED(dispatch), std::vector<callable> &callables,
-                         std::array<int, TypeSequence::size()>, A &&... a) {
+      static void insert(std::vector<callable> &callables, std::array<int, TypeSequence::size()>, A &&... a) {
         callable f = make_callable<instantiate_t<KernelType, TypeSequence>>(std::forward<A>(a)...);
 
         callables.push_back(f);
@@ -318,17 +300,15 @@ namespace nd {
     template <template <typename...> class KernelType, template <typename...> class Condition>
     struct make_all_if {
       template <typename Type, typename... A>
-      void on_each(dispatch_t dispatch, std::vector<callable> &callables, std::array<int, 1> arr, A &&... a) const {
-        insert_callable_if<Condition<Type>::value, KernelType>::template insert<Type, A...>(dispatch, callables, arr,
+      void on_each(std::vector<callable> &callables, std::array<int, 1> arr, A &&... a) const {
+        insert_callable_if<Condition<Type>::value, KernelType>::template insert<Type, A...>(callables, arr,
                                                                                             std::forward<A>(a)...);
       }
 
       template <typename TypeSequence, typename... A>
-      void on_each(dispatch_t dispatch, std::vector<callable> &callables, std::array<int, TypeSequence::size()> arr,
-                   A &&... a) const {
+      void on_each(std::vector<callable> &callables, std::array<int, TypeSequence::size()> arr, A &&... a) const {
         insert_callable_if<instantiate_t<Condition, TypeSequence>::value,
-                           KernelType>::template insert<TypeSequence, A...>(dispatch, callables, arr,
-                                                                            std::forward<A>(a)...);
+                           KernelType>::template insert<TypeSequence, A...>(callables, arr, std::forward<A>(a)...);
       }
     };
 

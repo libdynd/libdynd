@@ -104,7 +104,7 @@ nd::callable make_assign() {
   dispatcher.insert(nd::get_elwise(ndt::type("(Scalar) -> Dim")));
   dispatcher.insert(nd::get_elwise(ndt::type("(Dim) -> Dim")));
 
-  return nd::make_callable<nd::assign_dispatch_callable<func_ptr>>(self_tp, dispatcher);
+  return nd::make_callable<nd::assign_dispatch_callable>(self_tp, dispatcher);
 }
 
 } // anonymous namespace
