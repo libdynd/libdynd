@@ -4,7 +4,7 @@
 //
 
 #include <dynd/callables/index_callable.hpp>
-#include <dynd/callables/index_dispatch_callable.hpp>
+#include <dynd/callables/multidispatch_callable.hpp>
 #include <dynd/callables/take_dispatch_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/index.hpp>
@@ -21,7 +21,7 @@ static std::vector<ndt::type> func_ptr(const ndt::type &DYND_UNUSED(dst_tp), siz
 
 } // unnamed namespace
 
-DYND_API nd::callable nd::index = nd::make_callable<nd::index_dispatch_callable>(
+DYND_API nd::callable nd::index = nd::make_callable<nd::multidispatch_callable<1>>(
     ndt::type("(Any, i: Any) -> Any"),
     nd::callable::make_all<nd::index_callable, type_sequence<int32_t, ndt::fixed_dim_kind_type>>(func_ptr));
 

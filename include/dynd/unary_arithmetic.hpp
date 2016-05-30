@@ -4,7 +4,7 @@
 //
 
 #include <dynd/arithmetic.hpp>
-#include <dynd/callables/arithmetic_dispatch_callable.hpp>
+#include <dynd/callables/multidispatch_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/kernels/arithmetic.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
@@ -31,7 +31,7 @@ nd::callable make_unary_arithmetic() {
   dispatcher.insert(nd::get_elwise(ndt::type("(Fixed * Any) -> Any")));
   dispatcher.insert(nd::get_elwise(ndt::type("(var * Any) -> Any")));
 
-  return nd::make_callable<nd::arithmetic_dispatch_callable<1>>(tp, dispatcher);
+  return nd::make_callable<nd::multidispatch_callable<1>>(tp, dispatcher);
 }
 
 } // anonymous namespace

@@ -4,7 +4,7 @@
 //
 
 #include <dynd/arithmetic.hpp>
-#include <dynd/callables/arithmetic_dispatch_callable.hpp>
+#include <dynd/callables/multidispatch_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/kernels/arithmetic.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
@@ -36,7 +36,7 @@ nd::callable make_binary_arithmetic() {
                      nd::get_elwise(ndt::type("(Scalar, Dim) -> Any")),
                      nd::get_elwise(ndt::type("(Dim, Dim) -> Any"))});
 
-  return nd::make_callable<nd::arithmetic_dispatch_callable<2>>(tp, dispatcher);
+  return nd::make_callable<nd::multidispatch_callable<2>>(tp, dispatcher);
 }
 
 } // anonymous namespace

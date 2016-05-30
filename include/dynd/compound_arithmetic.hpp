@@ -4,7 +4,7 @@
 //
 
 #include <dynd/arithmetic.hpp>
-#include <dynd/callables/compound_arithmetic_dispatch_callable.hpp>
+#include <dynd/callables/multidispatch_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/kernels/arithmetic.hpp>
 
@@ -42,7 +42,7 @@ nd::callable make_compound_arithmetic() {
   dispatcher.insert(nd::get_elwise(ndt::type("(Dim, Scalar) -> Any")));
   dispatcher.insert(nd::get_elwise(ndt::type("(Dim, Dim) -> Any")));
 
-  return nd::make_callable<nd::compound_arithmetic_dispatch_callable>(tp, dispatcher);
+  return nd::make_callable<nd::multidispatch_callable<2>>(tp, dispatcher);
 }
 
 } // anonymous namespace

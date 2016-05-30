@@ -6,8 +6,8 @@
 #include <climits>
 #include <string>
 
+#include <dynd/callables/multidispatch_callable.hpp>
 #include <dynd/callables/parse_callable.hpp>
-#include <dynd/callables/parse_dispatch_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/kernels/parse_kernel.hpp>
 #include <dynd/parse.hpp>
@@ -42,7 +42,7 @@ nd::callable make_dynamic_parse() {
   dispatcher.insert(nd::make_callable<nd::json::parse_callable<ndt::fixed_dim_type>>());
   dispatcher.insert(nd::make_callable<nd::json::parse_callable<ndt::var_dim_type>>());
 
-  return nd::make_callable<nd::parse_dispatch_callable>(
+  return nd::make_callable<nd::multidispatch_callable<1>>(
       ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<dynd::string>()}),
       dispatcher);
 }

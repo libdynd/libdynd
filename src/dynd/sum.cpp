@@ -5,8 +5,8 @@
 
 #include <dynd/arithmetic.hpp>
 #include <dynd/callable.hpp>
+#include <dynd/callables/multidispatch_callable.hpp>
 #include <dynd/callables/sum_callable.hpp>
-#include <dynd/callables/sum_dispatch_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
 
@@ -21,7 +21,7 @@ static std::vector<ndt::type> func_ptr(const ndt::type &DYND_UNUSED(dst_tp), siz
 
 } // unnamed namespace
 
-DYND_API nd::callable nd::sum = nd::functional::reduction(nd::make_callable<nd::sum_dispatch_callable>(
+DYND_API nd::callable nd::sum = nd::functional::reduction(nd::make_callable<nd::multidispatch_callable<1>>(
     ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::scalar_kind_type>(),
                                        {ndt::make_type<ndt::scalar_kind_type>()}),
     nd::callable::make_all<nd::sum_callable,
