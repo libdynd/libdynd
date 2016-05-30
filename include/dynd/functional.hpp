@@ -15,8 +15,10 @@
 namespace dynd {
 namespace nd {
 
-  const callable &get_elwise();
+  const callable &get_elwise2();
   extern DYND_API callable elwise;
+
+  callable get_elwise(const ndt::type &ret_tp);
 
   namespace functional {
 
@@ -111,16 +113,28 @@ namespace nd {
     DYND_API ndt::type elwise_make_type(const ndt::callable_type *child_tp, bool ret_variadic);
 
     template <int... I>
-    callable forward_na(const ndt::type &ret_tp) {
-      ndt::type tp = ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::option_type>(ret_tp),
-                                                        {ndt::type("Any"), ndt::type("Any")});
+    callable forward_na(const ndt::type &ret_tp, std::initializer_list<ndt::type> arg_tp) {
+      ndt::type tp = ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::option_type>(ret_tp), arg_tp);
       return make_callable<forward_na_callable<I...>>(tp, callable());
     }
 
     template <int... I>
     callable forward_na(const callable &child) {
+      ndt::type arg0_tp = child->get_arg_types()[0];
+      ndt::type arg1_tp = child->get_arg_types()[1];
+
+      size_t ind[sizeof...(I)] = {I...};
+      for (size_t i = 0; i < sizeof...(I); ++i) {
+        if (ind[i] == 0) {
+          arg0_tp = ndt::make_type<ndt::option_type>(arg0_tp);
+        }
+        if (ind[i] == 1) {
+          arg1_tp = ndt::make_type<ndt::option_type>(arg1_tp);
+        }
+      }
+
       ndt::type tp = ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::option_type>(child->get_ret_type()),
-                                                        {ndt::type("Any"), ndt::type("Any")});
+                                                        {arg0_tp, arg1_tp});
       return make_callable<forward_na_callable<I...>>(tp, child);
     }
 

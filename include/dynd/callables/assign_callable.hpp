@@ -146,7 +146,7 @@ namespace nd {
   public:
     int_to_string_assign_callable()
         : base_callable(ndt::make_type<ndt::callable_type>(
-              ndt::make_type<IntType>(), {ndt::make_type<string>()},
+              ndt::make_type<IntType>(), {ndt::make_type<ndt::string_kind_type>()},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
@@ -183,7 +183,7 @@ namespace nd {
   public:
     string_to_int_assign_callable()
         : base_callable(ndt::make_type<ndt::callable_type>(
-              ndt::make_type<string>(), {ndt::make_type<IntType>()},
+              ndt::make_type<ndt::fixed_string_kind_type>(), {ndt::make_type<IntType>()},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
@@ -324,11 +324,11 @@ namespace nd {
   };
 
   template <>
-  class assign_callable<string, char> : public base_callable {
+  class assign_callable<string, ndt::char_type> : public base_callable {
   public:
     assign_callable()
         : base_callable(ndt::make_type<ndt::callable_type>(
-              ndt::make_type<string>(), {ndt::make_type<char>()},
+              ndt::make_type<string>(), {ndt::make_type<ndt::char_type>()},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
@@ -453,11 +453,11 @@ namespace nd {
   };
 
   template <>
-  class assign_callable<char, string> : public base_callable {
+  class assign_callable<ndt::char_type, string> : public base_callable {
   public:
     assign_callable()
         : base_callable(ndt::make_type<ndt::callable_type>(
-              ndt::make_type<char>(), {ndt::make_type<string>()},
+              ndt::make_type<ndt::char_type>(), {ndt::make_type<string>()},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,

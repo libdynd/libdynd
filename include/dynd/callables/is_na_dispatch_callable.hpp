@@ -19,12 +19,11 @@ namespace nd {
                             const dynd::dispatcher<1, callable> &dim_dispatcher)
         : base_dispatch_callable(tp), m_dispatcher(dispatcher), m_dim_dispatcher(dim_dispatcher) {}
 
-    const callable &specialize(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                               const ndt::type *src_tp) {
+    const callable &specialize(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp) {
       if (src_tp[0].get_id() == option_id) {
-        return m_dispatcher(src_tp[0].extended<ndt::option_type>()->get_value_type());
+        return m_dispatcher(dst_tp, nsrc, src_tp);
       } else {
-        return m_dim_dispatcher(src_tp[0]);
+        return m_dim_dispatcher(dst_tp, nsrc, src_tp);
       }
     }
   };

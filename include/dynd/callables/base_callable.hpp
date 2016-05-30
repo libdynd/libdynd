@@ -117,8 +117,7 @@ namespace nd {
 
     virtual array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
 
-    virtual void overload(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
-                          const ndt::type *DYND_UNUSED(arg_tp), const callable &DYND_UNUSED(value)) {
+    virtual void overload(const callable &DYND_UNUSED(value)) {
       throw std::runtime_error("callable is not overloadable");
     }
 

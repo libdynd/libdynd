@@ -20,12 +20,17 @@
 using namespace std;
 using namespace dynd;
 
-const nd::callable &nd::get_elwise() {
+nd::callable nd::get_elwise(const ndt::type &tp) {
+  callable elwise = make_callable<functional::elwise_entry_callable>(false, tp);
+  return elwise;
+}
+
+const nd::callable &nd::get_elwise2() {
   static callable elwise = make_callable<functional::elwise_entry_callable>(false);
   return elwise;
 }
 
-DYND_API nd::callable nd::elwise = nd::get_elwise();
+DYND_API nd::callable nd::elwise = nd::get_elwise2();
 
 nd::callable nd::functional::adapt(const ndt::type &value_tp, const callable &forward) {
   return make_callable<adapt_callable>(value_tp, forward);

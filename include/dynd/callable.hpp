@@ -83,13 +83,26 @@ namespace nd {
       return resolve(m_ptr->get_ret_type(), src_tp.size(), src_tp.begin(), kwds.size(), kwds.begin());
     }
 
-    void overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp, const callable &value) {
-      get()->overload(ret_tp, narg, arg_tp, value);
+    template <template <typename> class CallableType, typename I0>
+    void overload() {
+      std::vector<callable> callables;
+      std::array<int, 1> arr;
+      for_each<I0>(detail::make_all<CallableType>(), callables, arr);
+
+      for (const callable &f : callables) {
+        get()->overload(f);
+      }
     }
 
-    void overload(const ndt::type &ret_tp, const std::initializer_list<ndt::type> &arg_tp, const callable &value) {
-      overload(ret_tp, arg_tp.size(), arg_tp.begin(), value);
-    }
+    /*
+        void overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp, const callable &value) {
+          get()->overload(ret_tp, narg, arg_tp, value);
+        }
+
+        void overload(const ndt::type &ret_tp, const std::initializer_list<ndt::type> &arg_tp, const callable &value) {
+          overload(ret_tp, arg_tp.size(), arg_tp.begin(), value);
+        }
+    */
 
     const callable &specialize(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp) const {
       return get()->specialize(ret_tp, narg, arg_tp);
@@ -119,39 +132,44 @@ namespace nd {
     }
 
     template <template <typename> class KernelType, typename I0, typename... A>
-    static dispatcher<1, callable> make_all(A &&... a) {
-      std::vector<std::pair<std::array<ndt::type, 1>, callable>> callables;
-      for_each<I0>(detail::make_all<KernelType>(), callables, std::forward<A>(a)...);
+    static dispatcher<1, callable> make_all(dispatch_t dispatch, A &&... a) {
+      std::vector<callable> callables;
+      std::array<int, 1> arr;
+      for_each<I0>(detail::make_all<KernelType>(), callables, arr, std::forward<A>(a)...);
 
-      return dispatcher<1, callable>(callables.begin(), callables.end());
+      return dispatcher<1, callable>(dispatch, callables.begin(), callables.end());
     }
 
     template <template <typename...> class KernelType, typename I0, typename I1, typename... I, typename... A>
-    static dispatcher<2 + sizeof...(I), callable> make_all(A &&... a) {
-      std::vector<std::pair<std::array<ndt::type, 2 + sizeof...(I)>, callable>> callables;
-      for_each<typename outer<I0, I1, I...>::type>(detail::make_all<KernelType>(), callables, std::forward<A>(a)...);
+    static dispatcher<2 + sizeof...(I), callable> make_all(dispatch_t dispatch, A &&... a) {
+      std::vector<callable> callables;
+      std::array<int, 2 + sizeof...(I)> arr;
+      for_each<typename outer<I0, I1, I...>::type>(detail::make_all<KernelType>(), callables, arr,
+                                                   std::forward<A>(a)...);
 
-      return dispatcher<2 + sizeof...(I), callable>(callables.begin(), callables.end());
+      return dispatcher<2 + sizeof...(I), callable>(dispatch, callables.begin(), callables.end());
     }
 
     template <template <typename> class KernelType, template <typename> class Condition, typename Type0Sequence,
               typename... A>
-    static dispatcher<1, callable> make_all_if(A &&... a) {
-      std::vector<std::pair<std::array<ndt::type, 1>, callable>> callables;
-      for_each<Type0Sequence>(detail::make_all_if<KernelType, Condition>(), callables, std::forward<A>(a)...);
+    static dispatcher<1, callable> make_all_if(dispatch_t dispatch, A &&... a) {
+      std::vector<callable> callables;
+      std::array<int, 1> arr;
+      for_each<Type0Sequence>(detail::make_all_if<KernelType, Condition>(), callables, arr, std::forward<A>(a)...);
 
-      return dispatcher<1, callable>(callables.begin(), callables.end());
+      return dispatcher<1, callable>(dispatch, callables.begin(), callables.end());
     }
 
     template <template <typename, typename, typename...> class KernelType,
               template <typename, typename, typename...> class Condition, typename I0, typename I1, typename... I,
               typename... A>
-    static dispatcher<2 + sizeof...(I), callable> make_all_if(A &&... a) {
-      std::vector<std::pair<std::array<ndt::type, 2 + sizeof...(I)>, callable>> callables;
-      for_each<typename outer<I0, I1, I...>::type>(detail::make_all_if<KernelType, Condition>(), callables,
+    static dispatcher<2 + sizeof...(I), callable> make_all_if(dispatch_t dispatch, A &&... a) {
+      std::vector<callable> callables;
+      std::array<int, 2 + sizeof...(I)> arr;
+      for_each<typename outer<I0, I1, I...>::type>(detail::make_all_if<KernelType, Condition>(), callables, arr,
                                                    std::forward<A>(a)...);
 
-      return dispatcher<2 + sizeof...(I), callable>(callables.begin(), callables.end());
+      return dispatcher<2 + sizeof...(I), callable>(dispatch, callables.begin(), callables.end());
     }
   };
 
@@ -240,40 +258,18 @@ namespace nd {
 
   namespace detail {
 
-    template <typename T>
-    struct as_types;
-
-    template <typename... T>
-    struct as_types<type_sequence<T...>> {
-      static std::array<ndt::type, sizeof...(T)> get() {
-        std::array<ndt::type, sizeof...(T)> a = {ndt::make_type<T>()...};
-
-        return a;
-      }
-    };
-
     template <template <typename...> class CallableType>
     struct make_all {
       template <typename Type, typename... ArgTypes>
-      void on_each(std::vector<std::pair<std::array<ndt::type, 1>, callable>> &callables, ArgTypes &&... args) const {
-        typedef CallableType<Type> callable_type;
-
-        ndt::type tp = ndt::make_type<Type>();
-        callables.push_back({{tp}, make_callable<callable_type>(std::forward<ArgTypes>(args)...)});
+      void on_each(std::vector<callable> &callables, std::array<int, 1>, ArgTypes &&... args) const {
+        callables.push_back(make_callable<CallableType<Type>>(std::forward<ArgTypes>(args)...));
       }
 
       template <typename TypeSequence, typename... ArgTypes>
-      void on_each(std::vector<std::pair<std::array<ndt::type, TypeSequence::size()>, callable>> &callables,
-                   ArgTypes &&... args) const {
+      void on_each(std::vector<callable> &callables, std::array<int, TypeSequence::size()>, ArgTypes &&... args) const {
         typedef instantiate_t<CallableType, TypeSequence> callable_type;
-
-        std::array<type_id_t, TypeSequence::size()> ids;
-        auto tp = as_types<TypeSequence>::get();
-        for (size_t i = 0; i < tp.size(); ++i) {
-          ids[i] = tp[i].get_id();
-        }
-
-        callables.push_back({tp, make_callable<callable_type>(std::forward<ArgTypes>(args)...)});
+        callable f = make_callable<callable_type>(std::forward<ArgTypes>(args)...);
+        callables.push_back(f);
       }
     };
 
@@ -287,47 +283,42 @@ namespace nd {
     template <template <typename...> class KernelType>
     struct insert_callable_if<false, KernelType> {
       template <typename Arg0Type, typename... A>
-      static void insert(std::vector<std::pair<std::array<ndt::type, 1>, callable>> &DYND_UNUSED(callables),
-                         A &&... DYND_UNUSED(a)) {}
+      static void insert(std::vector<callable> &DYND_UNUSED(callables), std::array<int, 1>, A &&... DYND_UNUSED(a)) {}
+
       template <typename TypeSequence, typename... A>
-      static void
-      insert(std::vector<std::pair<std::array<ndt::type, TypeSequence::size()>, callable>> &DYND_UNUSED(callables),
-             A &&... DYND_UNUSED(a)) {}
+      static void insert(std::vector<callable> &DYND_UNUSED(callables), std::array<int, TypeSequence::size()>,
+                         A &&... DYND_UNUSED(a)) {}
     };
 
     template <template <typename...> class KernelType>
     struct insert_callable_if<true, KernelType> {
       template <typename Arg0Type, typename... A>
-      static void insert(std::vector<std::pair<std::array<ndt::type, 1>, callable>> &callables, A &&... a) {
-        ndt::type tp = ndt::make_type<Arg0Type>();
-        callables.push_back({{tp}, make_callable<KernelType<Arg0Type>>(std::forward<A>(a)...)});
-      }
-      template <typename TypeSequence, typename... A>
-      static void insert(std::vector<std::pair<std::array<ndt::type, TypeSequence::size()>, callable>> &callables,
-                         A &&... a) {
-        std::array<type_id_t, TypeSequence::size()> ids;
-        auto tp = as_types<TypeSequence>::get();
-        for (size_t i = 0; i < TypeSequence::size(); ++i) {
-          ids[i] = tp[i].get_id();
-        }
+      static void insert(std::vector<callable> &callables, std::array<int, 1>, A &&... a) {
+        callable f = make_callable<KernelType<Arg0Type>>(std::forward<A>(a)...);
 
-        callables.push_back({tp, make_callable<instantiate_t<KernelType, TypeSequence>>(std::forward<A>(a)...)});
+        callables.push_back(f);
+      }
+
+      template <typename TypeSequence, typename... A>
+      static void insert(std::vector<callable> &callables, std::array<int, TypeSequence::size()>, A &&... a) {
+        callable f = make_callable<instantiate_t<KernelType, TypeSequence>>(std::forward<A>(a)...);
+
+        callables.push_back(f);
       }
     };
 
     template <template <typename...> class KernelType, template <typename...> class Condition>
     struct make_all_if {
       template <typename Type, typename... A>
-      void on_each(std::vector<std::pair<std::array<ndt::type, 1>, callable>> &callables, A &&... a) const {
-        insert_callable_if<Condition<Type>::value, KernelType>::template insert<Type, A...>(callables,
+      void on_each(std::vector<callable> &callables, std::array<int, 1> arr, A &&... a) const {
+        insert_callable_if<Condition<Type>::value, KernelType>::template insert<Type, A...>(callables, arr,
                                                                                             std::forward<A>(a)...);
       }
 
       template <typename TypeSequence, typename... A>
-      void on_each(std::vector<std::pair<std::array<ndt::type, TypeSequence::size()>, callable>> &callables,
-                   A &&... a) const {
+      void on_each(std::vector<callable> &callables, std::array<int, TypeSequence::size()> arr, A &&... a) const {
         insert_callable_if<instantiate_t<Condition, TypeSequence>::value,
-                           KernelType>::template insert<TypeSequence, A...>(callables, std::forward<A>(a)...);
+                           KernelType>::template insert<TypeSequence, A...>(callables, arr, std::forward<A>(a)...);
       }
     };
 

@@ -17,8 +17,6 @@ using namespace dynd;
 namespace {
 
 class access_dispatch_callable : public nd::base_callable {
-  dispatcher<1, nd::callable> m_dispatcher;
-
 public:
   access_dispatch_callable()
       : base_callable(ndt::make_type<ndt::callable_type>(ndt::type("Any"), {ndt::type("Any")},

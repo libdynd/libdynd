@@ -1174,7 +1174,9 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       result = ndt::make_type<ndt::state_type>();
     } else if (compare_range_to_literal(nbegin, nend, "Scalar")) {
       result = ndt::make_type<ndt::scalar_kind_type>();
-    } else if (compare_range_to_literal(nbegin, nend, "Categorical")) {
+    } else if (compare_range_to_literal(nbegin, nend, "Dim")) {
+      result = ndt::make_type<ndt::dim_kind_type>();
+    } else if (compare_range_to_literal(nbegin, nend, "CategoriFcal")) {
       result = ndt::make_type<ndt::categorical_kind_type>();
     } else if (compare_range_to_literal(nbegin, nend, "FixedBytes")) {
       result = ndt::make_type<ndt::fixed_bytes_kind_type>();
