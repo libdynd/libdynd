@@ -16,6 +16,16 @@ namespace dynd {
 typedef std::vector<ndt::type> (*dispatch_t)(const ndt::type &, size_t, const ndt::type *);
 
 template <size_t N>
+std::array<ndt::type, N> as_array(const std::vector<ndt::type> &in) {
+  std::array<ndt::type, N> out;
+  for (size_t i = 0; i < N; ++i) {
+    out[i] = in[i];
+  }
+
+  return out;
+}
+
+template <size_t N>
 bool consistent(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs) {
   for (size_t i = 0; i < lhs.size(); ++i) {
     if (!is_base_id_of(lhs[i], rhs[i]) && !is_base_id_of(rhs[i], lhs[i])) {
@@ -222,7 +232,7 @@ private:
   }
 
 public:
-  dispatcher() = default;
+  dispatcher(dispatch_t dispatch) : m_dispatch(dispatch) {}
 
   dispatcher(const dispatcher &other) : m_pairs(other.m_pairs), m_map(other.m_map), m_dispatch(other.m_dispatch) {}
 
@@ -243,28 +253,42 @@ public:
 
     std::vector<std::vector<size_t>> edges(m_pairs.size());
     for (size_t i = 0; i < edges.size(); ++i) {
+      const auto &f_i = begin[i].second;
+      std::array<ndt::type, N> tp_i =
+          as_array<N>(m_dispatch(f_i->get_ret_type(), f_i->get_narg(), f_i->get_arg_types().data()));
+
       for (size_t j = i + 1; j < edges.size(); ++j) {
-        if (ambiguous(begin[i].first, begin[j].first)) {
+        const auto &f_j = begin[j].second;
+        std::array<ndt::type, N> tp_j =
+            as_array<N>(m_dispatch(f_j->get_ret_type(), f_j->get_narg(), f_j->get_arg_types().data()));
+
+        if (ambiguous(tp_i, tp_j)) {
           bool ok = false;
           for (size_t k = 0; k < edges.size(); ++k) {
-            if (supercedes(begin[k].first, begin[i].first) && supercedes(begin[k].first, begin[j].first)) {
+            const auto &f_k = begin[k].second;
+            std::array<ndt::type, N> tp_k =
+                as_array<N>(m_dispatch(f_k->get_ret_type(), f_k->get_narg(), f_k->get_arg_types().data()));
+
+            if (supercedes(tp_k, tp_i) && supercedes(tp_k, tp_j)) {
               ok = true;
             }
           }
 
-          if (!ok) {
-            std::stringstream ss;
-            print_ids(ss, begin[i].first.size(), begin[i].first.data());
-            ss << " and ";
-            print_ids(ss, begin[j].first.size(), begin[j].first.data());
-            ss << " are ambiguous";
-            throw std::runtime_error(ss.str());
-          }
+          /*
+                    if (!ok) {
+                      std::stringstream ss;
+                      print_ids(ss, begin[i].first.size(), begin[i].first.data());
+                      ss << " and ";
+                      print_ids(ss, begin[j].first.size(), begin[j].first.data());
+                      ss << " are ambiguous";
+                      throw std::runtime_error(ss.str());
+                    }
+          */
         }
 
-        if (edge(begin[i].first, begin[j].first)) {
+        if (edge(tp_i, tp_j)) {
           edges[i].push_back(j);
-        } else if (edge(begin[j].first, begin[i].first)) {
+        } else if (edge(tp_j, tp_i)) {
           edges[j].push_back(i);
         }
       }

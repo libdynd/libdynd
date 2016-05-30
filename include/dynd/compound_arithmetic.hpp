@@ -39,20 +39,12 @@ nd::callable make_compound_arithmetic() {
                                                    ndt::make_type<dynd::complex<float>>(),
                                                    ndt::make_type<dynd::complex<double>>()};
 
-  for (ndt::type i0 : binop_ids) {
-    for (ndt::type i1 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
-      dispatcher.insert({{i0, i1}, nd::get_elwise()});
-    }
-  }
-
-  for (ndt::type i0 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
-    for (ndt::type i1 : binop_ids) {
-      dispatcher.insert({{i0, i1}, nd::get_elwise()});
-    }
-    for (ndt::type i1 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
-      dispatcher.insert({{i0, i1}, nd::get_elwise()});
-    }
-  }
+  dispatcher.insert({{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::dim_kind_type>()},
+                     nd::get_elwise(ndt::type("(Scalar, Dim) -> Any"))});
+  dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::scalar_kind_type>()},
+                     nd::get_elwise(ndt::type("(Dim, Scalar) -> Any"))});
+  dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::dim_kind_type>()},
+                     nd::get_elwise(ndt::type("(Dim, Dim) -> Any"))});
 
   return nd::make_callable<nd::compound_arithmetic_dispatch_callable<func_ptr>>(tp, dispatcher);
 }

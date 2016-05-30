@@ -37,11 +37,12 @@ dispatcher<2, nd::callable> make_comparison_children() {
 
   dispatcher<2, nd::callable> dispatcher = nd::callable::make_all<KernelType, numeric_types, numeric_types>(Func);
 
-  for (auto i0 : numeric_dyn_types) {
-    for (auto i1 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
-      dispatcher.insert({{i0, i1}, nd::get_elwise()});
-    }
-  }
+  dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::scalar_kind_type>()},
+                     nd::get_elwise(ndt::type("(Dim, Scalar) -> Any"))});
+  dispatcher.insert({{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::dim_kind_type>()},
+                     nd::get_elwise(ndt::type("(Scalar, Dim) -> Any"))});
+  dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::dim_kind_type>()},
+                     nd::get_elwise(ndt::type("(Dim, Dim) -> Any"))});
 
   for (auto i : numeric_dyn_types) {
     dispatcher.insert({{ndt::make_type<ndt::option_type>(), i}, nd::functional::forward_na<0>(ndt::type("Any"))});
@@ -50,19 +51,10 @@ dispatcher<2, nd::callable> make_comparison_children() {
   dispatcher.insert({{ndt::make_type<ndt::option_type>(), ndt::make_type<ndt::option_type>()},
                      nd::functional::forward_na<0, 1>(ndt::type("Any"))});
 
-  for (auto dim_tp_id : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
-    dispatcher.insert({{dim_tp_id, ndt::make_type<ndt::option_type>()}, nd::get_elwise()});
-    dispatcher.insert({{ndt::make_type<ndt::option_type>(), dim_tp_id}, nd::get_elwise()});
-  }
-
-  for (auto i0 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
-    for (auto i1 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
-      dispatcher.insert({{i0, i1}, nd::get_elwise()});
-    }
-    for (auto i1 : numeric_dyn_types) {
-      dispatcher.insert({{i0, i1}, nd::get_elwise()});
-    }
-  }
+  dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::option_type>()},
+                     nd::get_elwise(ndt::type("(Dim, ?Any) -> Any"))});
+  dispatcher.insert({{ndt::make_type<ndt::option_type>(), ndt::make_type<ndt::dim_kind_type>()},
+                     nd::get_elwise(ndt::type("(?Any, Dim) -> Any"))});
 
   dispatcher.insert({{ndt::make_type<dynd::string>(), ndt::make_type<dynd::string>()},
                      nd::make_callable<KernelType<dynd::string, dynd::string>>()});

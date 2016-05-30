@@ -21,7 +21,8 @@ namespace nd {
       callable m_child;
       bool m_res_ignore;
 
-      elwise_entry_callable(bool res_ignore) : base_callable(ndt::type("(...) -> Any")), m_res_ignore(res_ignore) {}
+      elwise_entry_callable(bool res_ignore, const ndt::type tp = ndt::type("(...) -> Any"))
+          : base_callable(tp), m_res_ignore(res_ignore) {}
 
       elwise_entry_callable(const ndt::type &tp, const callable &child, bool res_ignore)
           : base_callable(tp), m_child(child), m_res_ignore(res_ignore) {}

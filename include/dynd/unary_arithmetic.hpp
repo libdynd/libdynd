@@ -28,9 +28,8 @@ nd::callable make_unary_arithmetic() {
   dispatcher<1, nd::callable> dispatcher = nd::callable::make_all_if<CallableType, Condition, TypeSequence>(func_ptr);
 
   const ndt::type &tp = ndt::type("(Any) -> Any");
-  for (ndt::type i0 : {ndt::make_type<ndt::fixed_dim_kind_type>(), ndt::make_type<ndt::var_dim_type>()}) {
-    dispatcher.insert({{i0}, nd::get_elwise()});
-  }
+  dispatcher.insert({{ndt::type("Fixed * Any")}, nd::get_elwise(ndt::type("(Fixed * Any) -> Any"))});
+  dispatcher.insert({{ndt::type("var * Any")}, nd::get_elwise(ndt::type("(var * Any) -> Any"))});
 
   return nd::make_callable<nd::arithmetic_dispatch_callable<func_ptr, 1>>(tp, dispatcher);
 }

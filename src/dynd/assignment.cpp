@@ -133,11 +133,12 @@ nd::callable make_assign() {
                      nd::make_callable<nd::assign_callable<ndt::struct_type, ndt::struct_type>>()});
   dispatcher.insert({{ndt::make_type<ndt::struct_type>(), ndt::make_type<ndt::struct_type>()},
                      nd::make_callable<nd::assign_callable<ndt::struct_type, ndt::struct_type>>()});
-  dispatcher.insert(
-      {{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::dim_kind_type>()}, nd::get_elwise()});
-  dispatcher.insert(
-      {{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::scalar_kind_type>()}, nd::get_elwise()});
-  dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::dim_kind_type>()}, nd::get_elwise()});
+  dispatcher.insert({{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::dim_kind_type>()},
+                     nd::get_elwise(ndt::type("(Scalar, Dim) -> Any"))});
+  dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::scalar_kind_type>()},
+                     nd::get_elwise(ndt::type("(Dim, Scalar) -> Any"))});
+  dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::dim_kind_type>()},
+                     nd::get_elwise(ndt::type("(Dim, Dim) -> Any"))});
 
   return nd::make_callable<nd::assign_dispatch_callable<func_ptr>>(self_tp, dispatcher);
 }
