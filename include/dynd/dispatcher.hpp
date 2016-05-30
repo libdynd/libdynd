@@ -210,7 +210,7 @@ public:
   typedef typename std::vector<T>::const_iterator const_iterator;
 
 private:
-  std::vector<T> m_pairs;
+  std::vector<T> m_children;
   map_type m_map;
   dispatch_t m_dispatch;
 
@@ -233,7 +233,8 @@ private:
 public:
   dispatcher(dispatch_t dispatch) : m_dispatch(dispatch) {}
 
-  dispatcher(const dispatcher &other) : m_pairs(other.m_pairs), m_map(other.m_map), m_dispatch(other.m_dispatch) {}
+  dispatcher(const dispatcher &other)
+      : m_children(other.m_children), m_map(other.m_map), m_dispatch(other.m_dispatch) {}
 
   template <typename Iterator>
   dispatcher(dispatch_t dispatch, Iterator begin, Iterator end, const map_type &map = map_type())
@@ -248,9 +249,9 @@ public:
 
   template <typename Iterator>
   void assign(Iterator begin, Iterator end) {
-    m_pairs.resize(end - begin);
+    m_children.resize(end - begin);
 
-    std::vector<std::vector<size_t>> edges(m_pairs.size());
+    std::vector<std::vector<size_t>> edges(m_children.size());
     for (size_t i = 0; i < edges.size(); ++i) {
       const auto &f_i = begin[i];
       std::array<ndt::type, N> tp_i =
@@ -291,7 +292,7 @@ public:
       }
     }
 
-    topological_sort(begin, end, edges, m_pairs.begin());
+    topological_sort(begin, end, edges, m_children.begin());
 
     m_map.clear();
   }
@@ -300,7 +301,7 @@ public:
 
   template <typename Iterator>
   void insert(Iterator begin, Iterator end) {
-    std::vector<T> vertices = m_pairs;
+    std::vector<T> vertices = m_children;
     vertices.insert(vertices.end(), begin, end);
 
     assign(vertices.begin(), vertices.end());
@@ -310,13 +311,13 @@ public:
 
   void insert(std::initializer_list<T> pairs) { insert(pairs.begin(), pairs.end()); }
 
-  iterator begin() { return m_pairs.begin(); }
-  const_iterator begin() const { return m_pairs.begin(); }
-  const_iterator cbegin() const { return m_pairs.cbegin(); }
+  iterator begin() { return m_children.begin(); }
+  const_iterator begin() const { return m_children.begin(); }
+  const_iterator cbegin() const { return m_children.cbegin(); }
 
-  iterator end() { return m_pairs.end(); }
-  const_iterator end() const { return m_pairs.end(); }
-  const_iterator cend() const { return m_pairs.cend(); }
+  iterator end() { return m_children.end(); }
+  const_iterator end() const { return m_children.end(); }
+  const_iterator cend() const { return m_children.cend(); }
 
   const value_type &operator()(const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp) {
     std::vector<ndt::type> vector_tps = m_dispatch(dst_tp, nsrc, src_tp);
@@ -335,13 +336,12 @@ public:
       return it->second;
     }
 
-    for (const T &pair : m_pairs) {
-      const auto &f = pair;
+    for (const T &child : m_children) {
       std::array<ndt::type, N> other_tps =
-          as_array<N>(m_dispatch(f->get_ret_type(), f->get_narg(), f->get_arg_types().data()));
+          as_array<N>(m_dispatch(child->get_ret_type(), child->get_narg(), child->get_arg_types().data()));
 
       if (supercedes(tps, other_tps)) {
-        return m_map[key] = f;
+        return m_map[key] = child;
       }
     }
 

@@ -249,10 +249,7 @@ namespace nd {
     struct make_all {
       template <typename Type, typename... ArgTypes>
       void on_each(std::vector<callable> &callables, std::array<int, 1>, ArgTypes &&... args) const {
-        typedef CallableType<Type> callable_type;
-
-        callable f = make_callable<callable_type>(std::forward<ArgTypes>(args)...);
-        callables.push_back(f);
+        callables.push_back(make_callable<CallableType<Type>>(std::forward<ArgTypes>(args)...));
       }
 
       template <typename TypeSequence, typename... ArgTypes>
