@@ -32,7 +32,6 @@ static std::vector<ndt::type> is_na_func_ptr(const ndt::type &DYND_UNUSED(dst_tp
   }
 }
 
-template <std::vector<ndt::type> (*Func)(const ndt::type &, size_t, const ndt::type *)>
 nd::callable make_assign_na() {
   class dispatch_callable : public nd::base_dispatch_callable {
     dispatcher<1, nd::callable> m_dispatcher;
@@ -40,11 +39,11 @@ nd::callable make_assign_na() {
   public:
     dispatch_callable()
         : base_dispatch_callable(ndt::type("() -> ?Any")),
-          m_dispatcher(
-              nd::callable::make_all<nd::assign_na_callable,
-                                     type_sequence<bool, int8_t, int16_t, int32_t, int64_t, int128, uint32_t, float,
-                                                   double, dynd::complex<float>, dynd::complex<double>, void,
-                                                   dynd::bytes, dynd::string, ndt::fixed_dim_kind_type>>(Func)) {}
+          m_dispatcher(nd::callable::make_all<nd::assign_na_callable,
+                                              type_sequence<bool, int8_t, int16_t, int32_t, int64_t, int128, uint32_t,
+                                                            float, double, dynd::complex<float>, dynd::complex<double>,
+                                                            void, dynd::bytes, dynd::string, ndt::fixed_dim_kind_type>>(
+              assign_na_func_ptr)) {}
 
     const nd::callable &specialize(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp) {
       if (dst_tp.get_id() == option_id) {
@@ -67,13 +66,12 @@ nd::callable make_is_na() {
   dim_dispatcher.insert(nd::get_elwise(ndt::type("(Fixed * Any) -> Fixed * Any")));
   dim_dispatcher.insert(nd::get_elwise(ndt::type("(var * Any) -> var * Any")));
 
-  return nd::make_callable<nd::is_na_dispatch_callable<is_na_func_ptr>>(ndt::type("(Any) -> Any"), dispatcher,
-                                                                        dim_dispatcher);
+  return nd::make_callable<nd::is_na_dispatch_callable>(ndt::type("(Any) -> Any"), dispatcher, dim_dispatcher);
 }
 
 } // unnamed namespace
 
-DYND_API nd::callable nd::assign_na = make_assign_na<assign_na_func_ptr>();
+DYND_API nd::callable nd::assign_na = make_assign_na();
 DYND_API nd::callable nd::is_na = make_is_na();
 
 void nd::old_assign_na(const ndt::type &option_tp, const char *arrmeta, char *data) {
