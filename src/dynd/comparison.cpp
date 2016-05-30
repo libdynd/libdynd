@@ -36,27 +36,18 @@ dispatcher<2, nd::callable> make_comparison_children() {
       ndt::make_type<uint64_t>(), ndt::make_type<float>(),   ndt::make_type<double>()};
 
   dispatcher<2, nd::callable> dispatcher = nd::callable::make_all<KernelType, numeric_types, numeric_types>(Func);
-  dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::scalar_kind_type>()},
-                     nd::get_elwise(ndt::type("(Dim, Scalar) -> Any"))});
-  dispatcher.insert({{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::dim_kind_type>()},
-                     nd::get_elwise(ndt::type("(Scalar, Dim) -> Any"))});
-  dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::dim_kind_type>()},
-                     nd::get_elwise(ndt::type("(Dim, Dim) -> Any"))});
+  dispatcher.insert(nd::get_elwise(ndt::type("(Dim, Scalar) -> Any")));
+  dispatcher.insert(nd::get_elwise(ndt::type("(Scalar, Dim) -> Any")));
+  dispatcher.insert(nd::get_elwise(ndt::type("(Dim, Dim) -> Any")));
 
-  dispatcher.insert({{{ndt::make_type<ndt::option_type>(), ndt::type("Any")},
-                      nd::functional::forward_na<0>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("Any")})},
-                     {{ndt::type("Any"), ndt::make_type<ndt::option_type>()},
-                      nd::functional::forward_na<1>(ndt::type("Any"), {ndt::type("Any"), ndt::type("?Any")})},
-                     {{ndt::make_type<ndt::option_type>(), ndt::make_type<ndt::option_type>()},
-                      nd::functional::forward_na<0, 1>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("?Any")})}});
+  dispatcher.insert({nd::functional::forward_na<0>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("Any")}),
+                     nd::functional::forward_na<1>(ndt::type("Any"), {ndt::type("Any"), ndt::type("?Any")}),
+                     nd::functional::forward_na<0, 1>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("?Any")})});
 
-  dispatcher.insert({{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::option_type>()},
-                     nd::get_elwise(ndt::type("(Dim, ?Any) -> Any"))});
-  dispatcher.insert({{ndt::make_type<ndt::option_type>(), ndt::make_type<ndt::dim_kind_type>()},
-                     nd::get_elwise(ndt::type("(?Any, Dim) -> Any"))});
+  dispatcher.insert(nd::get_elwise(ndt::type("(Dim, ?Any) -> Any")));
+  dispatcher.insert(nd::get_elwise(ndt::type("(?Any, Dim) -> Any")));
 
-  dispatcher.insert({{ndt::make_type<dynd::string>(), ndt::make_type<dynd::string>()},
-                     nd::make_callable<KernelType<dynd::string, dynd::string>>()});
+  dispatcher.insert(nd::make_callable<KernelType<dynd::string, dynd::string>>());
 
   return dispatcher;
 }
@@ -73,36 +64,24 @@ nd::callable make_less_equal() { return make_comparison_callable<nd::less_equal_
 
 nd::callable make_equal() {
   dispatcher<2, nd::callable> dispatcher = make_comparison_children<func_ptr, nd::equal_callable>();
-  dispatcher.insert({{ndt::make_type<dynd::complex<float>>(), ndt::make_type<dynd::complex<float>>()},
-                     nd::make_callable<nd::equal_callable<dynd::complex<float>, dynd::complex<float>>>()});
-  dispatcher.insert({{ndt::make_type<dynd::complex<double>>(), ndt::make_type<dynd::complex<double>>()},
-                     nd::make_callable<nd::equal_callable<dynd::complex<double>, dynd::complex<double>>>()});
-  dispatcher.insert({{ndt::make_type<ndt::tuple_type>(), ndt::make_type<ndt::tuple_type>()},
-                     nd::make_callable<nd::equal_callable<ndt::tuple_type, ndt::tuple_type>>()});
-  dispatcher.insert({{ndt::make_type<ndt::struct_type>(), ndt::make_type<ndt::struct_type>()},
-                     nd::make_callable<nd::equal_callable<ndt::struct_type, ndt::struct_type>>()});
-  dispatcher.insert({{ndt::make_type<ndt::type>(), ndt::make_type<ndt::type>()},
-                     nd::make_callable<nd::equal_callable<ndt::type, ndt::type>>()});
-  dispatcher.insert({{ndt::make_type<ndt::bytes_type>(), ndt::make_type<ndt::bytes_type>()},
-                     nd::make_callable<nd::equal_callable<bytes, bytes>>()});
+  dispatcher.insert(nd::make_callable<nd::equal_callable<dynd::complex<float>, dynd::complex<float>>>());
+  dispatcher.insert(nd::make_callable<nd::equal_callable<dynd::complex<double>, dynd::complex<double>>>());
+  dispatcher.insert(nd::make_callable<nd::equal_callable<ndt::tuple_type, ndt::tuple_type>>());
+  dispatcher.insert(nd::make_callable<nd::equal_callable<ndt::struct_type, ndt::struct_type>>());
+  dispatcher.insert(nd::make_callable<nd::equal_callable<ndt::type, ndt::type>>());
+  dispatcher.insert(nd::make_callable<nd::equal_callable<bytes, bytes>>());
 
   return nd::make_callable<nd::comparison_dispatch_callable<func_ptr>>(ndt::type("(Any, Any) -> Any"), dispatcher);
 }
 
 nd::callable make_not_equal() {
   dispatcher<2, nd::callable> dispatcher = make_comparison_children<func_ptr, nd::not_equal_callable>();
-  dispatcher.insert({{ndt::make_type<dynd::complex<float>>(), ndt::make_type<dynd::complex<float>>()},
-                     nd::make_callable<nd::not_equal_callable<dynd::complex<float>, dynd::complex<float>>>()});
-  dispatcher.insert({{ndt::make_type<dynd::complex<double>>(), ndt::make_type<dynd::complex<double>>()},
-                     nd::make_callable<nd::not_equal_callable<dynd::complex<double>, dynd::complex<double>>>()});
-  dispatcher.insert({{ndt::make_type<ndt::tuple_type>(), ndt::make_type<ndt::tuple_type>()},
-                     nd::make_callable<nd::not_equal_callable<ndt::tuple_type, ndt::tuple_type>>()});
-  dispatcher.insert({{ndt::make_type<ndt::struct_type>(), ndt::make_type<ndt::struct_type>()},
-                     nd::make_callable<nd::not_equal_callable<ndt::struct_type, ndt::struct_type>>()});
-  dispatcher.insert({{ndt::make_type<ndt::type>(), ndt::make_type<ndt::type>()},
-                     nd::make_callable<nd::not_equal_callable<ndt::type, ndt::type>>()});
-  dispatcher.insert({{ndt::make_type<ndt::bytes_type>(), ndt::make_type<ndt::bytes_type>()},
-                     nd::make_callable<nd::not_equal_callable<bytes, bytes>>()});
+  dispatcher.insert(nd::make_callable<nd::not_equal_callable<dynd::complex<float>, dynd::complex<float>>>());
+  dispatcher.insert(nd::make_callable<nd::not_equal_callable<dynd::complex<double>, dynd::complex<double>>>());
+  dispatcher.insert(nd::make_callable<nd::not_equal_callable<ndt::tuple_type, ndt::tuple_type>>());
+  dispatcher.insert(nd::make_callable<nd::not_equal_callable<ndt::struct_type, ndt::struct_type>>());
+  dispatcher.insert(nd::make_callable<nd::not_equal_callable<ndt::type, ndt::type>>());
+  dispatcher.insert(nd::make_callable<nd::not_equal_callable<bytes, bytes>>());
 
   return nd::make_callable<nd::comparison_dispatch_callable<func_ptr>>(ndt::type("(Any, Any) -> Any"), dispatcher);
 }
@@ -114,15 +93,9 @@ nd::callable make_greater() { return make_comparison_callable<nd::greater_callab
 nd::callable make_total_order() {
   return nd::make_callable<nd::comparison_dispatch_callable<func_ptr>>(
       ndt::type("(Any, Any) -> Any"),
-      dispatcher<2, nd::callable>(
-          func_ptr, {//          {{fixed_string_id, fixed_string_id},
-                     //         nd::make_callable<nd::total_order_callable<fixed_string_id, fixed_string_id>>()},
-                     {{ndt::make_type<dynd::string>(), ndt::make_type<dynd::string>()},
-                      nd::make_callable<nd::total_order_callable<dynd::string, dynd::string>>()},
-                     {{ndt::make_type<int32_t>(), ndt::make_type<int32_t>()},
-                      nd::make_callable<nd::total_order_callable<int32_t, int32_t>>()},
-                     {{ndt::make_type<bool>(), ndt::make_type<bool>()},
-                      nd::make_callable<nd::total_order_callable<bool, bool>>()}}));
+      dispatcher<2, nd::callable>(func_ptr, {nd::make_callable<nd::total_order_callable<dynd::string, dynd::string>>(),
+                                             nd::make_callable<nd::total_order_callable<int32_t, int32_t>>(),
+                                             nd::make_callable<nd::total_order_callable<bool, bool>>()}));
 }
 
 } // unnamed namespace

@@ -21,9 +21,9 @@ namespace nd {
     arithmetic_dispatch_callable(const ndt::type &tp, const dispatcher<1, callable> &dispatcher)
         : base_dispatch_callable(tp), m_dispatcher(dispatcher) {}
 
-    void overload(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                  const callable &value) {
-      m_dispatcher.insert({{src_tp[0]}, value});
+    void overload(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                  const ndt::type *DYND_UNUSED(src_tp), const callable &value) {
+      m_dispatcher.insert(value);
     }
 
     const callable &specialize(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
@@ -40,9 +40,9 @@ namespace nd {
     arithmetic_dispatch_callable(const ndt::type &tp, const dispatcher<2, callable> &dispatcher)
         : base_dispatch_callable(tp), m_dispatcher(dispatcher) {}
 
-    void overload(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                  const callable &value) {
-      m_dispatcher.insert({{src_tp[0], src_tp[1]}, value});
+    void overload(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                  const ndt::type *DYND_UNUSED(src_tp), const callable &value) {
+      m_dispatcher.insert(value);
     }
 
     const callable &specialize(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),

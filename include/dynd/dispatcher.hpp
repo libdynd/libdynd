@@ -203,15 +203,14 @@ class dispatcher {
 public:
   typedef T value_type;
 
-  typedef std::pair<std::array<ndt::type, N>, value_type> new_pair_type;
   typedef Map map_type;
   //  typedef google::dense_hash_map<size_t, value_type> map_type;
 
-  typedef typename std::vector<new_pair_type>::iterator iterator;
-  typedef typename std::vector<new_pair_type>::const_iterator const_iterator;
+  typedef typename std::vector<T>::iterator iterator;
+  typedef typename std::vector<T>::const_iterator const_iterator;
 
 private:
-  std::vector<new_pair_type> m_pairs;
+  std::vector<T> m_pairs;
   map_type m_map;
   dispatch_t m_dispatch;
 
@@ -244,7 +243,7 @@ public:
     assign(begin, end);
   }
 
-  dispatcher(dispatch_t dispatch, std::initializer_list<new_pair_type> pairs, const map_type &map = map_type())
+  dispatcher(dispatch_t dispatch, std::initializer_list<T> pairs, const map_type &map = map_type())
       : dispatcher(dispatch, pairs.begin(), pairs.end(), map) {}
 
   template <typename Iterator>
@@ -253,19 +252,19 @@ public:
 
     std::vector<std::vector<size_t>> edges(m_pairs.size());
     for (size_t i = 0; i < edges.size(); ++i) {
-      const auto &f_i = begin[i].second;
+      const auto &f_i = begin[i];
       std::array<ndt::type, N> tp_i =
           as_array<N>(m_dispatch(f_i->get_ret_type(), f_i->get_narg(), f_i->get_arg_types().data()));
 
       for (size_t j = i + 1; j < edges.size(); ++j) {
-        const auto &f_j = begin[j].second;
+        const auto &f_j = begin[j];
         std::array<ndt::type, N> tp_j =
             as_array<N>(m_dispatch(f_j->get_ret_type(), f_j->get_narg(), f_j->get_arg_types().data()));
 
         if (ambiguous(tp_i, tp_j)) {
           bool ok = false;
           for (size_t k = 0; k < edges.size(); ++k) {
-            const auto &f_k = begin[k].second;
+            const auto &f_k = begin[k];
             std::array<ndt::type, N> tp_k =
                 as_array<N>(m_dispatch(f_k->get_ret_type(), f_k->get_narg(), f_k->get_arg_types().data()));
 
@@ -297,19 +296,19 @@ public:
     m_map.clear();
   }
 
-  void assign(std::initializer_list<new_pair_type> pairs) { assign(pairs.begin(), pairs.end()); }
+  void assign(std::initializer_list<T> pairs) { assign(pairs.begin(), pairs.end()); }
 
   template <typename Iterator>
   void insert(Iterator begin, Iterator end) {
-    std::vector<new_pair_type> vertices = m_pairs;
+    std::vector<T> vertices = m_pairs;
     vertices.insert(vertices.end(), begin, end);
 
     assign(vertices.begin(), vertices.end());
   }
 
-  void insert(const new_pair_type &pair) { insert(&pair, &pair + 1); }
+  void insert(const T &pair) { insert(&pair, &pair + 1); }
 
-  void insert(std::initializer_list<new_pair_type> pairs) { insert(pairs.begin(), pairs.end()); }
+  void insert(std::initializer_list<T> pairs) { insert(pairs.begin(), pairs.end()); }
 
   iterator begin() { return m_pairs.begin(); }
   const_iterator begin() const { return m_pairs.begin(); }
@@ -334,8 +333,8 @@ public:
       return it->second;
     }
 
-    for (const new_pair_type &pair : m_pairs) {
-      const auto &f = pair.second;
+    for (const T &pair : m_pairs) {
+      const auto &f = pair;
       std::array<ndt::type, N> other_tps =
           as_array<N>(m_dispatch(f->get_ret_type(), f->get_narg(), f->get_arg_types().data()));
 

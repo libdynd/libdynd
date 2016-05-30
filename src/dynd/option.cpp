@@ -66,8 +66,8 @@ nd::callable make_is_na() {
       type_sequence<bool, int8_t, int16_t, int32_t, int64_t, int128, uint32_t, float, double, dynd::complex<float>,
                     dynd::complex<double>, void, dynd::bytes, dynd::string, ndt::fixed_dim_kind_type>>(is_na_func_ptr);
   dynd::dispatcher<1, nd::callable> dim_dispatcher(is_na_func_ptr);
-  dim_dispatcher.insert({{ndt::type("Fixed * Any")}, nd::get_elwise(ndt::type("(Fixed * Any) -> Fixed * Any"))});
-  dim_dispatcher.insert({{ndt::type("var * Any")}, nd::get_elwise(ndt::type("(var * Any) -> var * Any"))});
+  dim_dispatcher.insert(nd::get_elwise(ndt::type("(Fixed * Any) -> Fixed * Any")));
+  dim_dispatcher.insert(nd::get_elwise(ndt::type("(var * Any) -> var * Any")));
 
   return nd::make_callable<nd::is_na_dispatch_callable<is_na_func_ptr>>(ndt::type("(Any) -> Any"), dispatcher,
                                                                         dim_dispatcher);

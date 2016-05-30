@@ -29,18 +29,12 @@ nd::callable make_binary_arithmetic() {
   const ndt::type &tp = ndt::type("(Any, Any) -> Any");
 
   auto dispatcher = nd::callable::template make_all_if<KernelType, Condition, TypeSequence, TypeSequence>(func_ptr);
-  dispatcher.insert({{{ndt::make_type<ndt::option_type>(), ndt::make_type<ndt::any_kind_type>()},
-                      nd::functional::forward_na<0>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("Any")})},
-                     {{ndt::make_type<ndt::any_kind_type>(), ndt::make_type<ndt::option_type>()},
-                      nd::functional::forward_na<1>(ndt::type("Any"), {ndt::type("Any"), ndt::type("?Any")})},
-                     {{ndt::make_type<ndt::option_type>(), ndt::make_type<ndt::option_type>()},
-                      nd::functional::forward_na<0, 1>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("?Any")})},
-                     {{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::scalar_kind_type>()},
-                      nd::get_elwise(ndt::type("(Dim, Scalar) -> Any"))},
-                     {{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::dim_kind_type>()},
-                      nd::get_elwise(ndt::type("(Scalar, Dim) -> Any"))},
-                     {{ndt::make_type<ndt::dim_kind_type>(), ndt::make_type<ndt::dim_kind_type>()},
-                      nd::get_elwise(ndt::type("(Dim, Dim) -> Any"))}});
+  dispatcher.insert({nd::functional::forward_na<0>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("Any")}),
+                     nd::functional::forward_na<1>(ndt::type("Any"), {ndt::type("Any"), ndt::type("?Any")}),
+                     nd::functional::forward_na<0, 1>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("?Any")}),
+                     nd::get_elwise(ndt::type("(Dim, Scalar) -> Any")),
+                     nd::get_elwise(ndt::type("(Scalar, Dim) -> Any")),
+                     nd::get_elwise(ndt::type("(Dim, Dim) -> Any"))});
 
   return nd::make_callable<nd::arithmetic_dispatch_callable<func_ptr, 2>>(tp, dispatcher);
 }
