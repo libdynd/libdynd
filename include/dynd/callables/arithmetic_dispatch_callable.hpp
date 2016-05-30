@@ -26,9 +26,8 @@ namespace nd {
       m_dispatcher.insert(value);
     }
 
-    const callable &specialize(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                               const ndt::type *src_tp) {
-      return m_dispatcher(src_tp[0]);
+    const callable &specialize(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp) {
+      return m_dispatcher(dst_tp, nsrc, src_tp);
     }
   };
 
@@ -45,9 +44,8 @@ namespace nd {
       m_dispatcher.insert(value);
     }
 
-    const callable &specialize(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                               const ndt::type *src_tp) {
-      return m_dispatcher(src_tp[0], src_tp[1]);
+    const callable &specialize(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp) {
+      return m_dispatcher(dst_tp, nsrc, src_tp);
     }
   };
 

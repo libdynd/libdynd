@@ -318,11 +318,13 @@ public:
   const_iterator end() const { return m_pairs.end(); }
   const_iterator cend() const { return m_pairs.cend(); }
 
-  template <typename... Types>
-  const value_type &operator()(Types... args) {
-    std::array<ndt::type, sizeof...(Types)> tps = {args...};
-    std::array<type_id_t, sizeof...(Types)> ids;
-    for (size_t i = 0; i < sizeof...(Types); ++i) {
+  const value_type &operator()(const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp) {
+    std::vector<ndt::type> vector_tps = m_dispatch(dst_tp, nsrc, src_tp);
+    std::array<ndt::type, N> tps;
+
+    std::array<type_id_t, N> ids;
+    for (size_t i = 0; i < N; ++i) {
+      tps[i] = vector_tps[i];
       ids[i] = tps[i].get_id();
     }
 
@@ -345,7 +347,7 @@ public:
 
     std::stringstream ss;
     ss << "signature not found for (";
-    for (size_t i = 0; i < sizeof...(Types); ++i) {
+    for (size_t i = 0; i < N; ++i) {
       ss << tps[i] << ", ";
     }
     ss << ")";
@@ -353,7 +355,7 @@ public:
     throw std::out_of_range(ss.str());
   }
 
-  const value_type &operator()(std::initializer_list<type_id_t> ids) { return operator()(ids.size(), ids.begin()); }
+  //  const value_type &operator()(std::initializer_list<type_id_t> ids) { return operator()(ids.size(), ids.begin()); }
 
   static bool edge(const std::array<type_id_t, N> &u, const std::array<type_id_t, N> &v) {
     if (supercedes(u, v)) {

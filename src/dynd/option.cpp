@@ -46,11 +46,9 @@ nd::callable make_assign_na() {
                                                    double, dynd::complex<float>, dynd::complex<double>, void,
                                                    dynd::bytes, dynd::string, ndt::fixed_dim_kind_type>>(Func)) {}
 
-    const nd::callable &specialize(const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                                   const ndt::type *DYND_UNUSED(src_tp)) {
+    const nd::callable &specialize(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp) {
       if (dst_tp.get_id() == option_id) {
-        const ndt::type &dst_value_tp = dst_tp.extended<ndt::option_type>()->get_value_type();
-        return m_dispatcher(dst_value_tp);
+        return m_dispatcher(dst_tp, nsrc, src_tp);
       }
 
       return nd::elwise;

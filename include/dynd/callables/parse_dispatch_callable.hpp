@@ -10,7 +10,6 @@
 namespace dynd {
 namespace nd {
 
-  template <std::vector<ndt::type> (*Func)(const ndt::type &, size_t, const ndt::type *)>
   class parse_dispatch_callable : public base_dispatch_callable {
     dispatcher<1, callable> m_dispatcher;
 
@@ -23,9 +22,8 @@ namespace nd {
       m_dispatcher.insert(value);
     }
 
-    const callable &specialize(const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                               const ndt::type *DYND_UNUSED(src_tp)) {
-      return m_dispatcher(dst_tp);
+    const callable &specialize(const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp) {
+      return m_dispatcher(dst_tp, nsrc, src_tp);
     }
   };
 

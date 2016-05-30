@@ -42,7 +42,7 @@ nd::callable make_dynamic_parse() {
   dispatcher.insert(nd::make_callable<nd::json::parse_callable<ndt::fixed_dim_type>>());
   dispatcher.insert(nd::make_callable<nd::json::parse_callable<ndt::var_dim_type>>());
 
-  return nd::make_callable<nd::parse_dispatch_callable<func_ptr>>(
+  return nd::make_callable<nd::parse_dispatch_callable>(
       ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<dynd::string>()}),
       dispatcher);
 }
