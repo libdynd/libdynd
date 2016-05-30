@@ -83,13 +83,26 @@ namespace nd {
       return resolve(m_ptr->get_ret_type(), src_tp.size(), src_tp.begin(), kwds.size(), kwds.begin());
     }
 
-    void overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp, const callable &value) {
-      get()->overload(ret_tp, narg, arg_tp, value);
+    template <template <typename> class CallableType, typename I0>
+    void overload() {
+      std::vector<callable> callables;
+      std::array<int, 1> arr;
+      for_each<I0>(detail::make_all<CallableType>(), callables, arr);
+
+      for (const callable &f : callables) {
+        get()->overload(f);
+      }
     }
 
-    void overload(const ndt::type &ret_tp, const std::initializer_list<ndt::type> &arg_tp, const callable &value) {
-      overload(ret_tp, arg_tp.size(), arg_tp.begin(), value);
-    }
+    /*
+        void overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp, const callable &value) {
+          get()->overload(ret_tp, narg, arg_tp, value);
+        }
+
+        void overload(const ndt::type &ret_tp, const std::initializer_list<ndt::type> &arg_tp, const callable &value) {
+          overload(ret_tp, arg_tp.size(), arg_tp.begin(), value);
+        }
+    */
 
     const callable &specialize(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp) const {
       return get()->specialize(ret_tp, narg, arg_tp);

@@ -21,8 +21,7 @@ namespace nd {
     multidispatch_callable(const ndt::type &tp, const dispatcher<1, callable> &dispatcher)
         : base_dispatch_callable(tp), m_dispatcher(dispatcher) {}
 
-    void overload(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                  const ndt::type *DYND_UNUSED(src_tp), const callable &value) {
+    void overload(const callable &value) {
       m_dispatcher.insert(value);
     }
 
@@ -39,8 +38,7 @@ namespace nd {
     multidispatch_callable(const ndt::type &tp, const dispatcher<2, callable> &dispatcher)
         : base_dispatch_callable(tp), m_dispatcher(dispatcher) {}
 
-    void overload(const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                  const ndt::type *DYND_UNUSED(src_tp), const callable &value) {
+    void overload(const callable &value) {
       m_dispatcher.insert(value);
     }
 
