@@ -10,7 +10,7 @@
 namespace dynd {
 namespace ndt {
 
-  class base_abstract_type : public base_type {
+  class DYNDT_API base_abstract_type : public base_type {
   public:
     base_abstract_type(type_id_t id, const type &base_tp, uint32_t flags, size_t ndim, size_t fixed_ndim)
         : base_type(id, base_tp, 0, 1, flags | type_flag_symbolic, 0, ndim, fixed_ndim) {}
