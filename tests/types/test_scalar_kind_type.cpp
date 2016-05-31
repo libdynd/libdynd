@@ -16,13 +16,16 @@ using namespace std;
 using namespace dynd;
 
 TEST(ScalarKindType, Basic) {
-  ndt::type tp = ndt::make_type<ndt::scalar_kind_type>();
-  EXPECT_EQ(scalar_kind_id, tp.get_id());
-  EXPECT_TRUE(tp.is_scalar());
-  EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_EQ(0, tp.get_ndim());
-  EXPECT_EQ("Scalar", tp.str());
-  EXPECT_EQ(tp, ndt::type(tp.str()));
+  ndt::type scalar_kind_tp = ndt::make_type<ndt::scalar_kind_type>();
+  EXPECT_EQ(scalar_kind_id, scalar_kind_tp.get_id());
+  EXPECT_TRUE(scalar_kind_tp.is_scalar());
+  EXPECT_TRUE(scalar_kind_tp.is_symbolic());
+  EXPECT_EQ(0, scalar_kind_tp.get_ndim());
+  EXPECT_EQ("Scalar", scalar_kind_tp.str());
+  EXPECT_EQ(scalar_kind_tp, ndt::type(scalar_kind_tp.str()));
+
+  vector<ndt::type> bases{ndt::make_type<ndt::any_kind_type>()};
+  EXPECT_EQ(bases, scalar_kind_tp.bases());
 }
 
 TEST(ScalarKindType, Match) {

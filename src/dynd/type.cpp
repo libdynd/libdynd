@@ -875,6 +875,18 @@ ndt::type ndt::type::get_base_type() const {
   }
 }
 
+std::vector<ndt::type> ndt::type::bases() const {
+  std::vector<ndt::type> res;
+
+  type base_tp = get_base_type();
+  while (!base_tp.is_null()) {
+    res.push_back(base_tp);
+    base_tp = base_tp.get_base_type();
+  }
+
+  return res;
+}
+
 // Returns true if the destination type can represent *all* the values
 // of the source type, false otherwise. This is used, for example,
 // to skip any overflow checks when doing value assignments between differing
