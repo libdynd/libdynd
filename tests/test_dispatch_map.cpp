@@ -13,6 +13,7 @@
 
 #include <dynd/dispatcher.hpp>
 #include <dynd/type_registry.hpp>
+#include <dynd/types/bool_kind_type.hpp>
 
 using namespace std;
 using namespace dynd;

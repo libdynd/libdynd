@@ -380,6 +380,8 @@ namespace ndt {
       }
     }
 
+    std::vector<type> bases() const;
+
     /**
      * Returns true if the data layout (both data and arrmeta)
      * is compatible with that of 'rhs'. If this returns true,

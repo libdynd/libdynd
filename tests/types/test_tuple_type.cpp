@@ -36,6 +36,9 @@ TEST(TupleType, CreateSimple) {
   // Roundtripping through a string
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
+  vector<ndt::type> bases{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::any_kind_type>()};
+  EXPECT_EQ(bases, tp.bases());
+
   // Tuple with two fields
   tp = ndt::make_type<ndt::tuple_type>({ndt::make_type<int16_t>(), ndt::make_type<double>()});
   EXPECT_EQ(tuple_id, tp.get_id());

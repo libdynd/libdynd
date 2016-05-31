@@ -22,6 +22,9 @@ TEST(ArrayType, Constructor) {
   EXPECT_EQ(sizeof(nd::array), array_tp.get_data_alignment());
   EXPECT_FALSE(array_tp.is_expression());
   EXPECT_EQ(array_tp, ndt::type(array_tp.str())); // Round trip through a string
+
+  vector<ndt::type> bases{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::any_kind_type>()};
+  EXPECT_EQ(bases, array_tp.bases());
 }
 
 TEST(ArrayType, IDOf) { EXPECT_EQ(array_id, ndt::id_of<ndt::array_type>::value); }

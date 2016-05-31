@@ -6,20 +6,16 @@
 #pragma once
 
 #include <dynd/type.hpp>
+#include <dynd/types/base_abstract_type.hpp>
 
 namespace dynd {
 namespace ndt {
 
-  class DYNDT_API any_kind_type : public base_type {
+  class DYNDT_API any_kind_type : public base_abstract_type {
   public:
-    any_kind_type(type_id_t id)
-        : base_type(id, type(), 0, 1, type_flag_symbolic | type_flag_variadic, 0, 0, 0) {}
+    any_kind_type(type_id_t id) : base_abstract_type(id, type(), type_flag_variadic, 0, 0) {}
 
-    size_t get_default_data_size() const;
-
-    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
-
-    void print_type(std::ostream &o) const;
+    void print_type(std::ostream &o) const { o << "Any"; }
 
     bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;
@@ -36,20 +32,11 @@ namespace ndt {
 
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
-    bool operator==(const base_type &rhs) const;
+    bool operator==(const base_type &rhs) const { return this == &rhs || rhs.get_id() == any_kind_id; }
 
-    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
-    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                const nd::memory_block &embedded_reference) const;
-    void arrmeta_reset_buffers(char *arrmeta) const;
-    void arrmeta_finalize_buffers(char *arrmeta) const;
-    void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
-
-    void data_destruct(const char *arrmeta, char *data) const;
-    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
-
-    bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
+    bool match(const type &DYND_UNUSED(candidate_tp), std::map<std::string, type> &DYND_UNUSED(tp_vars)) const {
+      return true;
+    }
   };
 
   template <>
