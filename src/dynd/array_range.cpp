@@ -43,7 +43,7 @@ struct range_specialization<int128> {
   }
 };
 
-template <class T, type_id_t BaseID>
+template <class T, typename Enable = void>
 struct range_counter {
   static intptr_t count(const void *beginval, const void *endval, const void *stepval) {
     T begin = *reinterpret_cast<const T *>(beginval);
@@ -68,7 +68,7 @@ struct range_counter {
 };
 
 template <class T>
-struct range_counter<T, uint_kind_id> {
+struct range_counter<T, std::enable_if_t<is_unsigned_integral<T>::value>> {
   static intptr_t count(const void *beginval, const void *endval, const void *stepval) {
     T begin = *reinterpret_cast<const T *>(beginval);
     T end = *reinterpret_cast<const T *>(endval);
@@ -86,7 +86,7 @@ struct range_counter<T, uint_kind_id> {
 };
 
 template <class T>
-struct range_counter<T, float_kind_id> {
+struct range_counter<T, std::enable_if_t<dynd::is_floating_point<T>::value>> {
   static intptr_t count(const void *beginval, const void *endval, const void *stepval) {
     T begin = *reinterpret_cast<const T *>(beginval);
     T end = *reinterpret_cast<const T *>(endval);
@@ -118,8 +118,7 @@ nd::array dynd::nd::old_range(const ndt::type &scalar_tp, const void *beginval, 
                               const void *stepval) {
 #define ONE_ARANGE_SPECIALIZATION(type)                                                                                \
   case ndt::id_of<type>::value: {                                                                                      \
-    intptr_t dim_size =                                                                                                \
-        range_counter<type, base_id_of<ndt::id_of<type>::value>::value>::count(beginval, endval, stepval);             \
+    intptr_t dim_size = range_counter<type>::count(beginval, endval, stepval);                                         \
     nd::array result = nd::empty(dim_size, scalar_tp);                                                                 \
     range_specialization<type>::old_range(beginval, stepval, result);                                                  \
     return result;                                                                                                     \

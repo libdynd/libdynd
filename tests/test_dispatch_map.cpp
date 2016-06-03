@@ -18,6 +18,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 TEST(TypeRegistry, Bases) {
   EXPECT_EQ(vector<type_id_t>({any_kind_id}), base_ids(scalar_kind_id));
 
@@ -69,6 +70,7 @@ TEST(TypeRegistry, IsBaseIDOf) {
   EXPECT_FALSE(is_base_id_of(int8_id, int32_id));
   EXPECT_FALSE(is_base_id_of(uint_kind_id, float64_id));
 }
+*/
 
 TEST(Sort, TopologicalSort) {
   vector<int> res(6);

@@ -828,7 +828,7 @@ namespace nd {
 
   class option_to_value_callable : public base_callable {
   public:
-    option_to_value_callable() : base_callable(ndt::type("(Any) -> Any")) {}
+    option_to_value_callable() : base_callable(ndt::type("(?Any) -> Scalar")) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
@@ -924,7 +924,7 @@ namespace nd {
 
   class assignment_option_callable : public base_callable {
   public:
-    assignment_option_callable() : base_callable(ndt::type("(Any) -> ?Any")) {}
+    assignment_option_callable() : base_callable(ndt::type("(Scalar) -> ?Any")) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
