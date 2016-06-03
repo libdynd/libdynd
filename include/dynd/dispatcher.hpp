@@ -13,6 +13,21 @@
 
 namespace dynd {
 
+inline bool is_base_of(const ndt::type &lhs, const ndt::type &rhs) {
+  if (lhs.get_id() == rhs.get_id()) {
+    return true;
+  }
+
+  auto bases = rhs.bases();
+  for (auto base : bases) {
+    if (lhs.get_id() == base.get_id()) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 typedef std::vector<ndt::type> (*dispatch_t)(const ndt::type &, size_t, const ndt::type *);
 
 template <size_t N>
@@ -24,29 +39,6 @@ std::array<ndt::type, N> as_array(const std::vector<ndt::type> &in) {
 
   return out;
 }
-
-template <size_t N>
-bool consistent(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs) {
-  for (size_t i = 0; i < lhs.size(); ++i) {
-    if (!is_base_id_of(lhs[i], rhs[i]) && !is_base_id_of(rhs[i], lhs[i])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-template <size_t N>
-bool supercedes(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs) {
-  for (size_t i = 0; i < lhs.size(); ++i) {
-    if (!is_base_id_of(rhs[i], lhs[i])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 template <size_t N>
 bool ambiguous(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, N> &rhs) {
   return consistent(lhs, rhs) && !(supercedes(lhs, rhs) || supercedes(rhs, lhs));
@@ -54,14 +46,8 @@ bool ambiguous(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, 
 
 template <size_t N>
 bool consistent(const std::array<ndt::type, N> &lhs, const std::array<ndt::type, N> &rhs) {
-  std::array<type_id_t, N> lhs_ids, rhs_ids;
-  for (size_t i = 0; i < N; ++i) {
-    lhs_ids[i] = lhs[i].get_id();
-    rhs_ids[i] = rhs[i].get_id();
-  }
-
   for (size_t i = 0; i < lhs.size(); ++i) {
-    if (!is_base_id_of(lhs_ids[i], rhs_ids[i]) && !is_base_id_of(rhs_ids[i], lhs_ids[i])) {
+    if (!is_base_of(lhs[i], rhs[i]) && !is_base_of(rhs[i], lhs[i])) {
       return false;
     }
   }
@@ -71,14 +57,8 @@ bool consistent(const std::array<ndt::type, N> &lhs, const std::array<ndt::type,
 
 template <size_t N>
 bool supercedes(const std::array<ndt::type, N> &lhs, const std::array<ndt::type, N> &rhs) {
-  std::array<type_id_t, N> lhs_ids, rhs_ids;
-  for (size_t i = 0; i < N; ++i) {
-    lhs_ids[i] = lhs[i].get_id();
-    rhs_ids[i] = rhs[i].get_id();
-  }
-
   for (size_t i = 0; i < lhs.size(); ++i) {
-    if (!is_base_id_of(rhs_ids[i], lhs_ids[i])) {
+    if (!is_base_of(rhs[i], lhs[i])) {
       return false;
     }
   }
@@ -90,37 +70,6 @@ template <size_t N>
 bool ambiguous(const std::array<ndt::type, N> &lhs, const std::array<ndt::type, N> &rhs) {
   return consistent(lhs, rhs) && !(supercedes(lhs, rhs) || supercedes(rhs, lhs));
 }
-
-/*
-template <size_t N>
-bool supercedes(const type_id_t (&lhs)[N], const std::vector<type_id_t> &rhs) {
-  if (rhs.size() != N) {
-    return false;
-  }
-
-  for (size_t i = 0; i < N; ++i) {
-    if (!is_base_id_of(rhs[i], lhs[i])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-inline bool supercedes(size_t N, const type_id_t *lhs, const std::vector<type_id_t> &rhs) {
-  if (rhs.size() != N) {
-    return false;
-  }
-
-  for (size_t i = 0; i < N; ++i) {
-    if (!is_base_id_of(rhs[i], lhs[i])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-*/
 
 namespace detail {
 
