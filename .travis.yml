@@ -85,11 +85,11 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - kalakris-cmake
-            - llvm-toolchain-precise-3.5
+#            - llvm-toolchain-precise-3.5
           packages:
             - gcc-4.9
             - g++-4.9
-            - clang-3.5
+  #          - clang-3.5
             - cmake
       cache:
       directories:
