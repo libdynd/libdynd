@@ -5,8 +5,8 @@
 
 #include <dynd/assignment.hpp>
 #include <dynd/callables/assign_callable.hpp>
-#include <dynd/callables/assign_dispatch_callable.hpp>
 #include <dynd/callables/copy_callable.hpp>
+#include <dynd/callables/multidispatch_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/any_kind_type.hpp>
@@ -103,7 +103,7 @@ nd::callable make_assign() {
   dispatcher.insert({nd::get_elwise(ndt::type("(Dim) -> Scalar")), nd::get_elwise(ndt::type("(Scalar) -> Dim")),
                      nd::get_elwise(ndt::type("(Dim) -> Dim"))});
 
-  return nd::make_callable<nd::assign_dispatch_callable>(self_tp, dispatcher);
+  return nd::make_callable<nd::multidispatch_callable<2>>(self_tp, dispatcher);
 }
 
 } // anonymous namespace
