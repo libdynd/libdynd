@@ -14,13 +14,6 @@
 using namespace std;
 using namespace dynd;
 
-TEST(CallableType, Basic) {
-  const ndt::type &callable_tp = ndt::make_type<int(double, float)>();
-
-  vector<ndt::type> bases{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::any_kind_type>()};
-  EXPECT_EQ(bases, callable_tp.bases());
-}
-
 TEST(CallableType, Repr) {
   std::vector<const char *> roundtrip{
       // positional-only

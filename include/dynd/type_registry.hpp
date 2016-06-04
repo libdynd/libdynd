@@ -13,10 +13,11 @@ namespace dynd {
 
 struct id_info {
   std::string name;
+  type_id_t base_id;
 
   id_info() = default;
 
-  id_info(const char *name) : name(name) {}
+  id_info(const char *name, type_id_t base_id) : name(name), base_id(base_id) {}
 };
 
 namespace detail {
@@ -25,6 +26,6 @@ namespace detail {
 
 } // namespace dynd::detail
 
-DYNDT_API type_id_t new_id(const char *name);
+DYNDT_API type_id_t new_id(const char *name, type_id_t base_id);
 
 } // namespace dynd
