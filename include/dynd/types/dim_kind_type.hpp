@@ -15,7 +15,7 @@ namespace ndt {
     dim_kind_type(type_id_t id) : base_type(id, make_type<any_kind_type>(), 0, 1, type_flag_symbolic, 0, 0, 0) {}
 
     bool match(const type &candidate_tp, std::map<std::string, type> &DYND_UNUSED(tp_vars)) const {
-      return candidate_tp.get_base_id() == dim_kind_id;
+      return candidate_tp.get_id() == dim_kind_id || candidate_tp.get_ndim() > 0;
     }
 
     void print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),

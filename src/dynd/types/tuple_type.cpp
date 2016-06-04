@@ -388,6 +388,10 @@ void ndt::tuple_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o, 
 }
 
 bool ndt::tuple_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const {
+  if (candidate_tp.get_id() != tuple_id) {
+    return false;
+  }
+
   intptr_t candidate_field_count = candidate_tp.extended<tuple_type>()->get_field_count();
   bool candidate_variadic = candidate_tp.extended<tuple_type>()->is_variadic();
 

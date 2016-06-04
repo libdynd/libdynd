@@ -668,7 +668,7 @@ namespace nd {
   public:
     assign_callable()
         : base_callable(ndt::make_type<ndt::callable_type>(
-              ndt::make_type<ndt::tuple_type>(), {ndt::make_type<ndt::tuple_type>()},
+              ndt::make_type<ndt::tuple_type>(true), {ndt::make_type<ndt::tuple_type>(true)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
@@ -737,7 +737,7 @@ namespace nd {
   public:
     assign_callable()
         : base_callable(ndt::make_type<ndt::callable_type>(
-              ndt::make_type<ndt::struct_type>(), {ndt::make_type<ndt::struct_type>()},
+              ndt::make_type<ndt::struct_type>(true), {ndt::make_type<ndt::struct_type>(true)},
               {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,

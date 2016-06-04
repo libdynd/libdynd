@@ -29,16 +29,15 @@ template <std::vector<ndt::type> (*Func)(const ndt::type &, size_t, const ndt::t
 dispatcher<2, nd::callable> make_comparison_children() {
   typedef type_sequence<bool, int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double>
       numeric_types;
-
   static const std::vector<ndt::type> numeric_dyn_types = {
       ndt::make_type<bool>(),     ndt::make_type<int8_t>(),  ndt::make_type<int16_t>(),  ndt::make_type<int32_t>(),
       ndt::make_type<int64_t>(),  ndt::make_type<uint8_t>(), ndt::make_type<uint16_t>(), ndt::make_type<uint32_t>(),
       ndt::make_type<uint64_t>(), ndt::make_type<float>(),   ndt::make_type<double>()};
 
   dispatcher<2, nd::callable> dispatcher = nd::callable::make_all<KernelType, numeric_types, numeric_types>(Func);
-  dispatcher.insert(nd::get_elwise(ndt::type("(Dim, Scalar) -> Any")));
-  dispatcher.insert(nd::get_elwise(ndt::type("(Scalar, Dim) -> Any")));
-  dispatcher.insert(nd::get_elwise(ndt::type("(Dim, Dim) -> Any")));
+  dispatcher.insert({nd::get_elwise(ndt::type("(Dim, Scalar) -> Any")),
+                     nd::get_elwise(ndt::type("(Scalar, Dim) -> Any")),
+                     nd::get_elwise(ndt::type("(Dim, Dim) -> Any"))});
 
   dispatcher.insert({nd::functional::forward_na<0>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("Any")}),
                      nd::functional::forward_na<1>(ndt::type("Any"), {ndt::type("Any"), ndt::type("?Any")}),
