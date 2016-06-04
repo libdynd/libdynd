@@ -85,19 +85,21 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - kalakris-cmake
-            - llvm-toolchain-precise-3.6
+#            - llvm-toolchain-precise-3.5
           packages:
             - gcc-4.9
             - g++-4.9
-            - clang-3.6
+  #          - clang-3.5
             - cmake
       cache:
       directories:
         - $HOME/.cache/pip
         - $HOME/dynd-python/build
       before_install:
-        - export CC=clang-3.6
-        - export CXX=clang++-3.6
+#        - export CC=clang-3.5
+#        - export CXX=clang++-3.5
+        - export CC=gcc-4.9
+        - export CXX=g++-4.9
         - travis_retry pip install --install-option="--no-cython-compile" Cython==0.23
       before_script:
         - cd ..
