@@ -23,9 +23,6 @@ TEST(ScalarKindType, Basic) {
   EXPECT_EQ(0, scalar_kind_tp.get_ndim());
   EXPECT_EQ("Scalar", scalar_kind_tp.str());
   EXPECT_EQ(scalar_kind_tp, ndt::type(scalar_kind_tp.str()));
-
-  vector<ndt::type> bases{ndt::make_type<ndt::any_kind_type>()};
-  EXPECT_EQ(bases, scalar_kind_tp.bases());
 }
 
 TEST(ScalarKindType, Match) {

@@ -23,9 +23,6 @@ TEST(FloatKindType, Constructor) {
   EXPECT_FALSE(float_kind_tp.is_expression());
   EXPECT_TRUE(float_kind_tp.is_symbolic());
   EXPECT_EQ(float_kind_tp, ndt::type(float_kind_tp.str())); // Round trip through a string
-
-  vector<ndt::type> bases{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::any_kind_type>()};
-  EXPECT_EQ(bases, float_kind_tp.bases());
 }
 
 TEST(FloatKindType, Match) {

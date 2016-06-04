@@ -844,48 +844,7 @@ void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *dat
   }
 }
 
-ndt::type ndt::type::get_base_type() const {
-  switch (get_id()) {
-  case bool_id:
-    return make_type<bool_kind_type>();
-  case int8_id:
-  case int16_id:
-  case int32_id:
-  case int64_id:
-  case int128_id:
-    return make_type<int_kind_type>();
-  case uint8_id:
-  case uint16_id:
-  case uint32_id:
-  case uint64_id:
-  case uint128_id:
-    return make_type<uint_kind_type>();
-  case float16_id:
-  case float32_id:
-  case float64_id:
-  case float128_id:
-    return make_type<float_kind_type>();
-  case complex_float32_id:
-  case complex_float64_id:
-    return make_type<complex_kind_type>();
-  case void_id:
-    return make_type<scalar_kind_type>();
-  default:
-    return m_ptr->get_base_type();
-  }
-}
-
-std::vector<ndt::type> ndt::type::bases() const {
-  std::vector<ndt::type> res;
-
-  type base_tp = get_base_type();
-  while (!base_tp.is_null()) {
-    res.push_back(base_tp);
-    base_tp = base_tp.get_base_type();
-  }
-
-  return res;
-}
+type_id_t ndt::type::get_base_id() const { return dynd::detail::infos()[get_id()].base_id; }
 
 // Returns true if the destination type can represent *all* the values
 // of the source type, false otherwise. This is used, for example,

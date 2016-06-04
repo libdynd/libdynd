@@ -23,9 +23,6 @@ TEST(ComplexKindType, Constructor) {
   EXPECT_FALSE(complex_kind_tp.is_expression());
   EXPECT_TRUE(complex_kind_tp.is_symbolic());
   EXPECT_EQ(complex_kind_tp, ndt::type(complex_kind_tp.str())); // Round trip through a string
-
-  vector<ndt::type> bases{ndt::make_type<ndt::scalar_kind_type>(), ndt::make_type<ndt::any_kind_type>()};
-  EXPECT_EQ(bases, complex_kind_tp.bases());
 }
 
 TEST(ComplexKindType, Match) {

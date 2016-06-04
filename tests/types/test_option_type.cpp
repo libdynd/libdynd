@@ -34,9 +34,6 @@ TEST(OptionType, Create) {
   EXPECT_EQ(d, ndt::type("?int16"));
   EXPECT_EQ(d, ndt::type("option[int16]"));
 
-  vector<ndt::type> bases{ndt::make_type<ndt::any_kind_type>()};
-  EXPECT_EQ(bases, d.bases());
-
   d = ndt::make_type<ndt::option_type>(ndt::make_type<ndt::string_type>());
   EXPECT_EQ(option_id, d.get_id());
   EXPECT_EQ(any_kind_id, d.get_base_id());

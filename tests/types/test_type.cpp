@@ -207,11 +207,3 @@ TEST(Fundamental, IDOf) {
     EXPECT_EQ(ndt::make_type<ndt::pointer_type>(ndt::make_type<ndt::any_kind_type>()), ndt::type(pointer_id));
   */
 }
-
-TEST(BoolType, Constructor) {
-  const ndt::type &bool_tp = ndt::make_type<bool>();
-
-  vector<ndt::type> bases{ndt::make_type<ndt::bool_kind_type>(), ndt::make_type<ndt::scalar_kind_type>(),
-                          ndt::make_type<ndt::any_kind_type>()};
-  EXPECT_EQ(bases, bool_tp.bases());
-}

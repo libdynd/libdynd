@@ -89,7 +89,6 @@ namespace ndt {
 
   protected:
     type_id_t m_id;          // The type id
-    const base_type *m_base_tp;    // The base type id
     size_t m_metadata_size;  // The size of a arrmeta instance for the type.
     size_t m_data_size;      // The size of one instance of the type, or 0 if there is not one fixed size.
     size_t m_data_alignment; // The data alignment
@@ -99,8 +98,10 @@ namespace ndt {
 
   public:
     /** Starts off the extended type instance with a use count of 1. */
-    base_type(type_id_t id, const type &base_tp, size_t data_size, size_t data_alignment, uint32_t flags,
-              size_t arrmeta_size, size_t ndim, size_t strided_ndim);
+    base_type(type_id_t id, const type &DYND_UNUSED(base_tp), size_t data_size, size_t data_alignment, uint32_t flags,
+              size_t arrmeta_size, size_t ndim, size_t strided_ndim)
+        : m_use_count(1), m_id(id), m_metadata_size(arrmeta_size), m_data_size(data_size),
+          m_data_alignment(data_alignment), flags(flags), m_ndim(ndim), m_fixed_ndim(strided_ndim) {}
 
     virtual ~base_type();
 
