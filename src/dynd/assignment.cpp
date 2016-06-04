@@ -44,6 +44,7 @@ nd::callable make_assign() {
   dispatcher.insert(nd::make_callable<nd::assign_callable<ndt::fixed_string_type, ndt::fixed_string_type>>());
   dispatcher.insert(nd::make_callable<nd::assign_callable<ndt::fixed_string_type, ndt::fixed_string_type>>());
   dispatcher.insert(nd::make_callable<nd::assign_callable<ndt::char_type, dynd::string>>());
+
   //  dispatcher.insert(
   //    {{{adapt_id, ndt::make_type<ndt::any_kind_type>()}, nd::make_callable<nd::adapt_assign_to_callable>()},
   //   {{ndt::make_type<ndt::any_kind_type>(), adapt_id}, nd::make_callable<nd::adapt_assign_from_callable>()},
@@ -99,10 +100,8 @@ nd::callable make_assign() {
   dispatcher.insert(nd::make_callable<nd::assign_callable<double, dynd::string>>());
   dispatcher.insert(nd::make_callable<nd::assign_callable<ndt::tuple_type, ndt::tuple_type>>());
   dispatcher.insert(nd::make_callable<nd::assign_callable<ndt::struct_type, ndt::struct_type>>());
-  dispatcher.insert(nd::make_callable<nd::assign_callable<ndt::struct_type, ndt::struct_type>>());
-  dispatcher.insert(nd::get_elwise(ndt::type("(Dim) -> Scalar")));
-  dispatcher.insert(nd::get_elwise(ndt::type("(Scalar) -> Dim")));
-  dispatcher.insert(nd::get_elwise(ndt::type("(Dim) -> Dim")));
+  dispatcher.insert({nd::get_elwise(ndt::type("(Dim) -> Scalar")), nd::get_elwise(ndt::type("(Scalar) -> Dim")),
+                     nd::get_elwise(ndt::type("(Dim) -> Dim"))});
 
   return nd::make_callable<nd::assign_dispatch_callable>(self_tp, dispatcher);
 }

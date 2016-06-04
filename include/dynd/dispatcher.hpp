@@ -13,21 +13,6 @@
 
 namespace dynd {
 
-inline bool is_base_of(const ndt::type &lhs, const ndt::type &rhs) {
-  if (lhs.get_id() == rhs.get_id()) {
-    return true;
-  }
-
-  auto bases = rhs.bases();
-  for (auto base : bases) {
-    if (lhs.get_id() == base.get_id()) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 typedef std::vector<ndt::type> (*dispatch_t)(const ndt::type &, size_t, const ndt::type *);
 
 template <size_t N>
@@ -47,7 +32,7 @@ bool ambiguous(const std::array<type_id_t, N> &lhs, const std::array<type_id_t, 
 template <size_t N>
 bool consistent(const std::array<ndt::type, N> &lhs, const std::array<ndt::type, N> &rhs) {
   for (size_t i = 0; i < lhs.size(); ++i) {
-    if (!is_base_of(lhs[i], rhs[i]) && !is_base_of(rhs[i], lhs[i])) {
+    if (!lhs[i].match(rhs[i]) && !rhs[i].match(lhs[i])) {
       return false;
     }
   }
@@ -58,7 +43,7 @@ bool consistent(const std::array<ndt::type, N> &lhs, const std::array<ndt::type,
 template <size_t N>
 bool supercedes(const std::array<ndt::type, N> &lhs, const std::array<ndt::type, N> &rhs) {
   for (size_t i = 0; i < lhs.size(); ++i) {
-    if (!is_base_of(rhs[i], lhs[i])) {
+    if (!rhs[i].match(lhs[i])) {
       return false;
     }
   }
@@ -160,7 +145,7 @@ public:
 
 private:
   std::vector<T> m_children;
-  map_type m_map;
+  //  map_type m_map;
   dispatch_t m_dispatch;
 
   static size_t hash_combine(size_t seed, type_id_t id) { return seed ^ (id + (seed << 6) + (seed >> 2)); }
@@ -182,19 +167,16 @@ private:
 public:
   dispatcher(dispatch_t dispatch) : m_dispatch(dispatch) {}
 
-  dispatcher(const dispatcher &other)
-      : m_children(other.m_children), m_map(other.m_map), m_dispatch(other.m_dispatch) {}
+  dispatcher(const dispatcher &other) : m_children(other.m_children), m_dispatch(other.m_dispatch) {}
 
   template <typename Iterator>
-  dispatcher(dispatch_t dispatch, Iterator begin, Iterator end, const map_type &map = map_type())
-      : m_map(map), m_dispatch(dispatch) {
+  dispatcher(dispatch_t dispatch, Iterator begin, Iterator end) : m_dispatch(dispatch) {
     //    m_map.set_empty_key(uninitialized_id);
 
     assign(begin, end);
   }
 
-  dispatcher(dispatch_t dispatch, std::initializer_list<T> pairs, const map_type &map = map_type())
-      : dispatcher(dispatch, pairs.begin(), pairs.end(), map) {}
+  dispatcher(dispatch_t dispatch, std::initializer_list<T> pairs) : dispatcher(dispatch, pairs.begin(), pairs.end()) {}
 
   template <typename Iterator>
   void assign(Iterator begin, Iterator end) {
@@ -243,7 +225,7 @@ public:
 
     topological_sort(begin, end, edges, m_children.begin());
 
-    m_map.clear();
+    //    m_map.clear();
   }
 
   void assign(std::initializer_list<T> pairs) { assign(pairs.begin(), pairs.end()); }
@@ -278,19 +260,21 @@ public:
       ids[i] = tps[i].get_id();
     }
 
-    size_t key = hash(ids);
+    //    size_t key = hash(ids);
 
-    const auto &it = m_map.find(key);
-    if (it != m_map.end()) {
-      return it->second;
-    }
+    /*
+        const auto &it = m_map.find(key);
+        if (it != m_map.end()) {
+          return it->second;
+        }
+    */
 
     for (const T &child : m_children) {
       std::array<ndt::type, N> other_tps =
           as_array<N>(m_dispatch(child->get_ret_type(), child->get_narg(), child->get_arg_types().data()));
 
       if (supercedes(tps, other_tps)) {
-        return m_map[key] = child;
+        return child;
       }
     }
 
