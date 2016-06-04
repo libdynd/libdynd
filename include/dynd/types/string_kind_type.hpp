@@ -12,7 +12,7 @@ namespace ndt {
 
   class string_kind_type : public base_type {
   public:
-    string_kind_type(type_id_t id) : base_type(id, make_type<scalar_kind_type>(), 0, 1, type_flag_symbolic, 0, 0, 0) {}
+    string_kind_type(type_id_t id) : base_type(id, 0, 1, type_flag_symbolic, 0, 0, 0) {}
 
     bool match(const type &candidate_tp, std::map<std::string, type> &DYND_UNUSED(tp_vars)) const {
       return candidate_tp.get_id() == string_id || candidate_tp.get_id() == fixed_string_id ||

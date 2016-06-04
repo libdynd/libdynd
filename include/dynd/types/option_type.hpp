@@ -55,7 +55,7 @@ namespace ndt {
     typedef any_kind_type base;
 
     option_type(type_id_t id, const type &value_tp = make_type<any_kind_type>())
-        : base_type(id, make_type<any_kind_type>(), value_tp.get_data_size(), value_tp.get_data_alignment(),
+        : base_type(id, value_tp.get_data_size(), value_tp.get_data_alignment(),
                     value_tp.get_flags() & (type_flags_value_inherited | type_flags_operand_inherited),
                     value_tp.get_arrmeta_size(), value_tp.get_ndim(), 0),
           m_value_tp(value_tp) {

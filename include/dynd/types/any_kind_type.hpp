@@ -13,7 +13,7 @@ namespace ndt {
 
   class DYNDT_API any_kind_type : public base_abstract_type {
   public:
-    any_kind_type(type_id_t id) : base_abstract_type(id, type(), type_flag_variadic, 0, 0) {}
+    any_kind_type(type_id_t id) : base_abstract_type(id, type_flag_variadic, 0, 0) {}
 
     void print_type(std::ostream &o) const { o << "Any"; }
 
