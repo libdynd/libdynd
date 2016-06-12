@@ -972,7 +972,7 @@ namespace ndt {
 
     static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<double>::value), false); }
 
-    static double na() { return 0x7ff00000000007a2ULL; }
+//    static double na() { return 0x7ff00000000007a2ULL; }
   };
 
   template <>
