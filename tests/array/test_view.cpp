@@ -3,26 +3,25 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
-#include "inc_gtest.hpp"
 #include "../dynd_assertions.hpp"
 #include "../test_memory.hpp"
+#include "inc_gtest.hpp"
 
 #include <dynd/array_range.hpp>
+#include <dynd/json_parser.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/json_parser.hpp>
 #include <dynd/view.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(View, SameType)
-{
+TEST(View, SameType) {
   // When the type is the same, nd::old_view should return the
   // exact same array
   nd::array a = nd::empty("5 * 3 * int32");
@@ -43,8 +42,7 @@ TEST(View, SameType)
   EXPECT_EQ(a.get(), b.get());
 }
 
-TEST(View, Errors)
-{
+TEST(View, Errors) {
   nd::array a = nd::empty("5 * 3 * int32");
 
   // Shape mismatches
@@ -216,8 +214,7 @@ TEST(View, StringAsBytes)
 }
 */
 
-TEST(View, NewAxis)
-{
+TEST(View, NewAxis) {
   nd::array a;
 
   a = parse_json("int", "1");
@@ -250,4 +247,61 @@ TEST(View, NewAxis)
   EXPECT_JSON_EQ_ARR("[[[[0], [1]], [[2], [3]], [[4], [5]]], [[[6], [7]], [[8], [9]], [[10], [11]]],"
                      "[[[12], [13]], [[14], [15]], [[16], [17]]], [[[18], [19]], [[20], [21]], [[22], [23]]]]",
                      a.new_axis(3));
+}
+
+TEST(View, FixedDim) {
+  nd::array a{0, 1, 2, 3, 4};
+
+  const fixed_dim<int> &vals = a.view<fixed_dim<int>>();
+  EXPECT_EQ(0, vals[0]);
+  EXPECT_EQ(1, vals[1]);
+  EXPECT_EQ(2, vals[2]);
+  EXPECT_EQ(3, vals[3]);
+  EXPECT_EQ(4, vals[4]);
+
+  int i = 0;
+  for (const double &val : vals) {
+    EXPECT_EQ(val, vals[i]);
+    ++i;
+  }
+}
+
+TEST(View, FixedDimFixedDim) {
+  nd::array a = {{0, 1}, {2, 3}};
+
+  const fixed_dim<fixed_dim<int>> &vals = a.view<fixed_dim<fixed_dim<int>>>();
+  EXPECT_EQ(0, vals[0][0]);
+  EXPECT_EQ(1, vals[0][1]);
+  EXPECT_EQ(2, vals[1][0]);
+  EXPECT_EQ(3, vals[1][1]);
+
+  int i = 0;
+  for (const fixed_dim<int> &val : vals) {
+    EXPECT_EQ(vals[i][0], val[0]);
+    EXPECT_EQ(vals[i][1], val[1]);
+    ++i;
+  }
+}
+
+TEST(View, FixedDimFixedDimFixedDim) {
+  nd::array a = {{{0, 1}, {2, 3}}, {{4, 5}, {6, 7}}};
+
+  const fixed_dim<fixed_dim<fixed_dim<int>>> &vals = a.view<fixed_dim<fixed_dim<fixed_dim<int>>>>();
+  EXPECT_EQ(0, vals[0][0][0]);
+  EXPECT_EQ(1, vals[0][0][1]);
+  EXPECT_EQ(2, vals[0][1][0]);
+  EXPECT_EQ(3, vals[0][1][1]);
+  EXPECT_EQ(4, vals[1][0][0]);
+  EXPECT_EQ(5, vals[1][0][1]);
+  EXPECT_EQ(6, vals[1][1][0]);
+  EXPECT_EQ(7, vals[1][1][1]);
+
+  int i = 0;
+  for (const fixed_dim<fixed_dim<int>> &val : vals) {
+    EXPECT_EQ(vals[i][0][0], val[0][0]);
+    EXPECT_EQ(vals[i][0][1], val[0][1]);
+    EXPECT_EQ(vals[i][1][0], val[1][0]);
+    EXPECT_EQ(vals[i][1][1], val[1][1]);
+    ++i;
+  }
 }
