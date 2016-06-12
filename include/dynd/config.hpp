@@ -970,6 +970,8 @@ using std::isnan;
 
 DYNDT_API void load(const std::string &path);
 
+typedef intptr_t index_t;
+
 namespace ndt {
 
   class type;

@@ -19,59 +19,6 @@ namespace ndt {
   class tuple_type;
 }
 
-namespace detail {
-
-  template <typename ValueType, int NDim>
-  class scalar_wrapper_iterator;
-
-  template <typename ValueType>
-  class scalar_wrapper {
-  protected:
-    const char *m_metadata;
-    char *m_data;
-
-  public:
-    typedef ValueType data_type;
-    static const intptr_t ndim = 0;
-
-    template <int NDim>
-    class iterator_type : public scalar_wrapper_iterator<ValueType, NDim> {
-    public:
-      iterator_type(const char *metadata, char *data) : scalar_wrapper_iterator<ValueType, NDim>(metadata, data) {}
-    };
-
-    scalar_wrapper(const char *metadata, char *data) : m_metadata(metadata), m_data(data) {}
-
-    data_type &operator()(const char *DYND_UNUSED(metadata), char *data) {
-      return *reinterpret_cast<data_type *>(data);
-    }
-  };
-
-  template <typename ValueType>
-  class scalar_wrapper_iterator<ValueType, 0> {
-  protected:
-    char *m_data;
-
-  public:
-    scalar_wrapper_iterator(const char *DYND_UNUSED(metadata), char *data) : m_data(data) {}
-
-    ValueType &operator*() { return *reinterpret_cast<ValueType *>(m_data); }
-
-    bool operator==(const scalar_wrapper_iterator &rhs) const { return m_data == rhs.m_data; }
-
-    bool operator!=(const scalar_wrapper_iterator &rhs) const { return m_data != rhs.m_data; }
-  };
-
-} // namespace dynd::detail
-
-template <typename T>
-using identity_t = T;
-
-template <typename T>
-using as_t = typename conditional_make<!std::is_fundamental<typename std::remove_cv<T>::type>::value &&
-                                           !std::is_same<typename std::remove_cv<T>::type, ndt::type>::value,
-                                       identity_t, detail::scalar_wrapper, T>::type;
-
 /**
  * Increments the offset value so that it is aligned to the requested alignment
  * NOTE: The alignment must be a power of two.
@@ -910,6 +857,8 @@ namespace ndt {
     static const bool is_same_layout = true;
 
     static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<long>::value), false); }
+
+    static long na() { return std::numeric_limits<long>::min(); }
   };
 
   template <>
@@ -919,6 +868,8 @@ namespace ndt {
     static const bool is_same_layout = true;
 
     static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<long long>::value), false); }
+
+    static long long na() { return std::numeric_limits<long long>::min(); }
   };
 
   template <>
@@ -1020,6 +971,8 @@ namespace ndt {
     static const bool is_same_layout = true;
 
     static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<double>::value), false); }
+
+    static double na() { return 0x7ff00000000007a2ULL; }
   };
 
   template <>

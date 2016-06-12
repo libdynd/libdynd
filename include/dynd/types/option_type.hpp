@@ -22,22 +22,43 @@
 namespace dynd {
 
 template <typename ValueType>
-struct option {
-  ValueType value;
+class optional {
+  ValueType m_value;
 
-  option() : value(ndt::traits<ValueType>::na()) {}
+public:
+  optional(ValueType value) : m_value(value) {}
 
-  option(ValueType value) : value(value) {}
+  optional() : optional(ndt::traits<ValueType>::na()) {}
+
+  void assign_na() { m_value = ndt::traits<ValueType>::na(); }
+
+  bool is_na() const { return m_value == ndt::traits<ValueType>::na(); }
+
+  const ValueType &value() const { return m_value; }
+
+  optional<ValueType> &operator=(ValueType value) {
+    m_value = value;
+    return *this;
+  }
 };
 
 template <typename ValueType>
-option<ValueType> opt() {
-  return option<ValueType>();
+std::ostream &operator<<(std::ostream &o, const optional<ValueType> &rhs) {
+  if (rhs.is_na()) {
+    return o << "NA";
+  }
+
+  return o << rhs.value();
 }
 
 template <typename ValueType>
-option<ValueType> opt(ValueType value) {
-  return option<ValueType>(value);
+optional<ValueType> opt() {
+  return optional<ValueType>();
+}
+
+template <typename ValueType>
+optional<ValueType> opt(ValueType value) {
+  return optional<ValueType>(value);
 }
 
 DYNDT_API void assign_na_builtin(type_id_t value_id, char *data);
@@ -107,7 +128,9 @@ namespace ndt {
   struct id_of<option_type> : std::integral_constant<type_id_t, option_id> {};
 
   template <typename ValueType>
-  struct traits<option<ValueType>> {
+  struct traits<optional<ValueType>> {
+    static const size_t ndim = 0;
+
     static const bool is_same_layout = true;
 
     static type equivalent() { return make_type<option_type>(make_type<ValueType>()); }
