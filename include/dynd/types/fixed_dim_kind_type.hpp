@@ -28,7 +28,7 @@ public:
     iterator(const char *metadata, char *data)
         : m_stride(reinterpret_cast<const size_stride_t *>(metadata)->stride), m_data(data) {}
 
-    ElementType operator*() { return *reinterpret_cast<ElementType *>(m_data); }
+    ElementType &operator*() { return *reinterpret_cast<ElementType *>(m_data); }
 
     iterator &operator++() {
       m_data += m_stride;
