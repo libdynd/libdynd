@@ -16,3 +16,4 @@ See [The DyND Library Documentation](../docs/index.md) if you want to use DyND a
    * [Serialization](serialization-design.md)
    * [Merkle DAG Features](merkledag-design.md)
    * [Arithmetic](arithmetic-design.md)
+   * [Callable Multidispatch](callable-multidispatch-design.md]

@@ -1,4 +1,4 @@
-﻿# Date/Time/DateTime
+# Date/Time/DateTime
 
 DyND needs good date/time support for dates and
 datetimes to support time series. This document
