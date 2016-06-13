@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/callables/base_callable.hpp>
+#include <dynd/callables/base_apply_callable.hpp>
 #include <dynd/kernels/construct_then_apply_callable_kernel.hpp>
 
 namespace dynd {
@@ -13,12 +13,12 @@ namespace nd {
   namespace functional {
 
     template <typename func_type, typename... KwdTypes>
-    class construct_then_apply_callable_callable : public base_callable {
+    class construct_then_apply_callable_callable
+        : public base_apply_callable<typename funcproto_of<func_type, KwdTypes...>::type> {
     public:
       template <typename... T>
       construct_then_apply_callable_callable(T &&... names)
-          : base_callable(
-                ndt::make_type<typename funcproto_of<func_type, KwdTypes...>::type>(std::forward<T>(names)...)) {}
+          : base_apply_callable<typename funcproto_of<func_type, KwdTypes...>::type>(std::forward<T>(names)...) {}
 
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                         const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),

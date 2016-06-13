@@ -93,6 +93,12 @@ namespace nd {
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
+
+template <typename T>
+struct return_wrapper : nd::functional::apply_arg<T, 0> {
+  using nd::functional::apply_arg<T, 0>::apply_arg;
+};
+
 } // namespace dynd
 
 #include <dynd/kernels/apply_callable_kernel.hpp>

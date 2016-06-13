@@ -54,6 +54,25 @@ namespace nd {
         }
       };
 
+      template <typename func_type, func_type func, typename A0, typename... A, size_t... I, typename... K, size_t... J>
+      struct apply_function_kernel<func_type, func, void, type_sequence<return_wrapper<A0>, A...>,
+                                   std::index_sequence<I...>, type_sequence<K...>, std::index_sequence<J...>>
+          : base_strided_kernel<
+                apply_function_kernel<func_type, func, void, type_sequence<return_wrapper<A0>, A...>,
+                                      std::index_sequence<I...>, type_sequence<K...>, std::index_sequence<J...>>,
+                sizeof...(A)>,
+            apply_args<type_sequence<return_wrapper<A0>, A...>, std::index_sequence<I...>>,
+            apply_kwds<type_sequence<K...>, std::index_sequence<J...>> {
+        typedef apply_args<type_sequence<return_wrapper<A0>, A...>, std::index_sequence<I...>> args_type;
+        typedef apply_kwds<type_sequence<K...>, std::index_sequence<J...>> kwds_type;
+
+        apply_function_kernel(args_type args, kwds_type kwds) : args_type(args), kwds_type(kwds) {}
+
+        void single(char *dst, char *const *DYND_IGNORE_UNUSED(src)) {
+          func(return_wrapper<A0>::get(dst), apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
+        }
+      };
+
     } // namespace dynd::nd::functional::detail
 
     template <typename func_type, func_type func, int N = arity_of<func_type>::value>
