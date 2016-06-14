@@ -15,7 +15,7 @@ namespace nd {
     template <typename FuncType, FuncType func, size_t NArg = arity_of<FuncType>::value>
     class apply_function_callable : public base_apply_callable<FuncType> {
     public:
-      using base_apply_callable<FuncType>::base_apply_callable;
+      using detail::base_apply_callable<typename funcproto_of<FuncType>::type>::base_apply_callable;
 
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                         const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
