@@ -467,7 +467,7 @@ ndt::type resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)
 TEST(Apply, ReturnWrapper) {
   nd::callable f([](return_wrapper<fixed_dim<int>, resolve> wrapper) {
     fixed_dim<int> &res = wrapper.get();
-    size_t i = 0;
+    int i = 0;
     for (int &val : res) {
       val = i;
       ++i;
@@ -477,7 +477,7 @@ TEST(Apply, ReturnWrapper) {
 
   f = [](return_wrapper<fixed_dim<int>, resolve> wrapper, int i) {
     fixed_dim<int> &res = wrapper.get();
-    size_t j = 0;
+    int j = 0;
     for (int &val : res) {
       val = i + j;
       ++j;
