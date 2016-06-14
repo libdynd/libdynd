@@ -15,10 +15,9 @@ namespace nd {
 
       template <typename CallableType, typename ArgSequence, typename... KwdTypes>
       class construct_then_apply_callable_callable
-          : public functional::base_apply_callable<typename funcproto_of<CallableType, KwdTypes...>::type> {
+          : public base_apply_callable<typename funcproto_of<CallableType, KwdTypes...>::type> {
       public:
-        using functional::base_apply_callable<
-            typename funcproto_of<CallableType, KwdTypes...>::type>::base_apply_callable;
+        using base_apply_callable<typename funcproto_of<CallableType, KwdTypes...>::type>::base_apply_callable;
 
         ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                           const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
