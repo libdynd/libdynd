@@ -15,14 +15,14 @@ namespace nd {
 
       template <typename T, typename mem_func_type, typename ReturnType, typename ArgSequence, typename KwdSequence,
                 int N>
-      class apply_member_function_callable : public functional::base_apply_callable<mem_func_type> {
+      class apply_member_function_callable : public base_apply_callable<ReturnType, ArgSequence, KwdSequence> {
         T m_obj;
         mem_func_type m_mem_func;
 
       public:
         template <typename... S>
         apply_member_function_callable(T obj, mem_func_type mem_func, S &&... names)
-            : functional::base_apply_callable<mem_func_type>(std::forward<S>(names)...), m_obj(obj),
+            : base_apply_callable<ReturnType, ArgSequence, KwdSequence>(std::forward<S>(names)...), m_obj(obj),
               m_mem_func(mem_func) {}
 
         ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
