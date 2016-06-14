@@ -10,6 +10,20 @@
 #include <dynd/types/state_type.hpp>
 
 namespace dynd {
+
+typedef ndt::type (*resolve_t)(size_t, const ndt::type *);
+
+template <typename ReturnType, resolve_t Resolve>
+struct return_wrapper {
+  ReturnType *ptr;
+
+  return_wrapper(ReturnType &ref) : ptr(&ref) {}
+
+  return_wrapper(const return_wrapper &other) = default;
+
+  ReturnType &get() { return *ptr; }
+};
+
 namespace nd {
   namespace functional {
 
@@ -17,7 +31,7 @@ namespace nd {
     struct apply_arg {
       apply_arg(char *DYND_UNUSED(data), const char *DYND_UNUSED(arrmeta)) {}
 
-      A &get(char *data) { return *reinterpret_cast<A *>(data); }
+      A &assign(char *data) { return *reinterpret_cast<A *>(data); }
     };
 
     template <typename ElementType, size_t I>
@@ -26,10 +40,17 @@ namespace nd {
 
       apply_arg(char *DYND_UNUSED(data), const char *arrmeta) : value(arrmeta, NULL) {}
 
-      fixed_dim<ElementType> &get(char *data) {
+      fixed_dim<ElementType> &assign(char *data) {
         value.set_data(data);
         return value;
       }
+    };
+
+    template <typename ReturnType, resolve_t Resolve, size_t I>
+    struct apply_arg<return_wrapper<ReturnType, Resolve>, I> : apply_arg<ReturnType, I> {
+      using apply_arg<ReturnType, I>::apply_arg;
+
+      return_wrapper<ReturnType, Resolve> assign(char *data) { return apply_arg<ReturnType, I>::assign(data); }
     };
 
     template <size_t I>
@@ -38,7 +59,7 @@ namespace nd {
 
       apply_arg(char *data, const char *DYND_UNUSED(arrmeta)) : it(*reinterpret_cast<size_t *>(data)) {}
 
-      state &get(char *data) { return *reinterpret_cast<state *>(data); }
+      state &assign(char *data) { return *reinterpret_cast<state *>(data); }
 
       size_t &begin() {
         it = 0;
@@ -59,8 +80,20 @@ namespace nd {
 
     template <typename... A, size_t... I>
     struct apply_args<type_sequence<A...>, std::index_sequence<I...>> : apply_arg<A, I>... {
-      apply_args(char *DYND_IGNORE_UNUSED(data), const char *const *DYND_IGNORE_UNUSED(src_arrmeta))
+      apply_args(char *DYND_IGNORE_UNUSED(data), const char *DYND_UNUSED(dst_arrmeta),
+                 const char *const *DYND_IGNORE_UNUSED(src_arrmeta))
           : apply_arg<A, I>(data, src_arrmeta[I])... {}
+
+      apply_args(const apply_args &) = default;
+    };
+
+    template <typename R, resolve_t Resolve, typename... A, size_t I0, size_t... I>
+    struct apply_args<type_sequence<return_wrapper<R, Resolve>, A...>, std::index_sequence<I0, I...>>
+        : apply_arg<return_wrapper<R, Resolve>, I0>, apply_arg<A, I>... {
+      apply_args(char *DYND_IGNORE_UNUSED(data), const char *dst_arrmeta,
+                 const char *const *DYND_IGNORE_UNUSED(src_arrmeta))
+          : apply_arg<return_wrapper<R, Resolve>, I0>(data, dst_arrmeta), apply_arg<A, I>(data, src_arrmeta[I - 1])... {
+      }
 
       apply_args(const apply_args &) = default;
     };
@@ -93,12 +126,6 @@ namespace nd {
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
-
-template <typename T>
-struct return_wrapper : nd::functional::apply_arg<T, 0> {
-  using nd::functional::apply_arg<T, 0>::apply_arg;
-};
-
 } // namespace dynd
 
 #include <dynd/kernels/apply_callable_kernel.hpp>

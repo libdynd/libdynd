@@ -460,14 +460,32 @@ TYPED_TEST_P(Apply, CallableWithKeywords) {
   EXPECT_ARRAY_EQ(8, af({5, 3}, {{"z", 4}}));
 }
 
-/*
-TEST(Apply, ReturnWrapper) {
-  nd::callable f([](return_wrapper<fixed_dim<int>> &, int x) { return x; });
-  std::cout << f << std::endl;
-
-  std::exit(-1);
+ndt::type resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) {
+  return ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<int>());
 }
-*/
+
+TEST(Apply, ReturnWrapper) {
+  nd::callable f([](return_wrapper<fixed_dim<int>, resolve> wrapper) {
+    fixed_dim<int> &res = wrapper.get();
+    size_t i = 0;
+    for (int &val : res) {
+      val = i;
+      ++i;
+    }
+  });
+
+  EXPECT_ARRAY_EQ(nd::array({0, 1, 2, 3, 4}), f());
+
+  f = [](return_wrapper<fixed_dim<int>, resolve> wrapper, int i) {
+    fixed_dim<int> &res = wrapper.get();
+    size_t j = 0;
+    for (int &val : res) {
+      val = i + j;
+      ++j;
+    }
+  };
+  EXPECT_ARRAY_EQ(nd::array({5, 6, 7, 8, 9}), f(5));
+}
 
 REGISTER_TYPED_TEST_CASE_P(Apply, Callable, CallableWithKeywords);
 

@@ -34,7 +34,7 @@ namespace nd {
         : args_type(args), func(kwds.apply_kwd<K, J>::get()...) {}                                                     \
                                                                                                                        \
     void single(char *dst, char *const *DYND_IGNORE_UNUSED(src)) {                                                     \
-      *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])...);                                             \
+      *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::assign(src[I])...);                                          \
     }                                                                                                                  \
   };                                                                                                                   \
                                                                                                                        \
@@ -55,7 +55,7 @@ namespace nd {
         : args_type(args), func(kwds.apply_kwd<K, J>::get()...) {}                                                     \
                                                                                                                        \
     void single(char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src)) {                                        \
-      func(apply_arg<A, I>::get(src[I])...);                                                                           \
+      func(apply_arg<A, I>::assign(src[I])...);                                                                        \
     }                                                                                                                  \
   }
 

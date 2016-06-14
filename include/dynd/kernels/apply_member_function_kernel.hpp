@@ -36,7 +36,7 @@ namespace nd {
             : args_type(args), kwds_type(kwds), obj(obj), mem_func(mem_func) {}
 
         void single(char *dst, char *const *DYND_IGNORE_UNUSED(src)) {
-          *reinterpret_cast<R *>(dst) = (obj->*mem_func)(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
+          *reinterpret_cast<R *>(dst) = (obj->*mem_func)(apply_arg<A, I>::assign(src[I])..., apply_kwd<K, J>::get()...);
         }
       };
 
@@ -60,7 +60,7 @@ namespace nd {
             : args_type(args), kwds_type(kwds), obj(obj), mem_func(mem_func) {}
 
         void single(char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src)) {
-          (obj->*mem_func)(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
+          (obj->*mem_func)(apply_arg<A, I>::assign(src[I])..., apply_kwd<K, J>::get()...);
         }
       };
 
