@@ -13,7 +13,8 @@ namespace nd {
   namespace functional {
     namespace detail {
 
-      template <typename CallableType, typename ArgSequence, typename... KwdTypes>
+      template <typename CallableType, typename ReturnType, typename ArgSequence, typename KwdSequence,
+                typename... KwdTypes>
       class construct_then_apply_callable_callable
           : public base_apply_callable<typename funcproto_of<CallableType, KwdTypes...>::type> {
       public:
@@ -38,8 +39,10 @@ namespace nd {
     } // namespace dynd::nd::functional::detail
 
     template <typename CallableType, typename... KwdTypes>
-    using construct_then_apply_callable_callable = detail::construct_then_apply_callable_callable<
-        CallableType, args_for<CallableType, arity_of<CallableType>::value>, KwdTypes...>;
+    using construct_then_apply_callable_callable =
+        detail::construct_then_apply_callable_callable<CallableType, typename return_of<CallableType>::type,
+                                                       args_for<CallableType, arity_of<CallableType>::value>,
+                                                       type_sequence<KwdTypes...>, KwdTypes...>;
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

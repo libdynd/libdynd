@@ -13,7 +13,8 @@ namespace nd {
   namespace functional {
     namespace detail {
 
-      template <typename T, typename mem_func_type, typename ArgSequence, int N>
+      template <typename T, typename mem_func_type, typename ReturnType, typename ArgSequence, typename KwdSequence,
+                int N>
       class apply_member_function_callable : public functional::base_apply_callable<mem_func_type> {
         T m_obj;
         mem_func_type m_mem_func;
@@ -44,7 +45,8 @@ namespace nd {
 
     template <typename T, typename mem_func_type, int N>
     using apply_member_function_callable =
-        detail::apply_member_function_callable<T, mem_func_type, args_for<mem_func_type, N>, N>;
+        detail::apply_member_function_callable<T, mem_func_type, typename return_of<mem_func_type>::type,
+                                               args_for<mem_func_type, N>, as_apply_kwd_sequence<mem_func_type, N>, N>;
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

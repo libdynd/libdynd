@@ -13,7 +13,8 @@ namespace nd {
   namespace functional {
     namespace detail {
 
-      template <typename FuncType, FuncType func, typename ArgSequence, size_t NArg = arity_of<FuncType>::value>
+      template <typename FuncType, FuncType func, typename ReturnType, typename ArgSequence, typename KwdSequence,
+                size_t NArg = arity_of<FuncType>::value>
       class apply_function_callable : public functional::base_apply_callable<FuncType> {
       public:
         using detail::base_apply_callable<typename funcproto_of<FuncType>::type>::base_apply_callable;
@@ -37,7 +38,9 @@ namespace nd {
     } // namespace dynd::nd::functional::detail
 
     template <typename FuncType, FuncType Func, size_t NArg = arity_of<FuncType>::value>
-    using apply_function_callable = detail::apply_function_callable<FuncType, Func, args_for<FuncType, NArg>, NArg>;
+    using apply_function_callable =
+        detail::apply_function_callable<FuncType, Func, typename return_of<FuncType>::type, args_for<FuncType, NArg>,
+                                        as_apply_kwd_sequence<FuncType, NArg>, NArg>;
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

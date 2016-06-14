@@ -14,7 +14,7 @@ namespace nd {
   namespace functional {
     namespace detail {
 
-      template <typename func_type, typename ArgSequence, int N>
+      template <typename func_type, typename ReturnType, typename ArgSequence, int N>
       class apply_callable_callable : public functional::base_apply_callable<func_type> {
         func_type m_func;
 
@@ -42,7 +42,8 @@ namespace nd {
     } // namespace dynd::nd::functional::detail
 
     template <typename FuncType, int N>
-    using apply_callable_callable = detail::apply_callable_callable<FuncType, args_for<FuncType, N>, N>;
+    using apply_callable_callable =
+        detail::apply_callable_callable<FuncType, typename return_of<FuncType>::type, args_for<FuncType, N>, N>;
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
