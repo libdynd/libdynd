@@ -116,9 +116,8 @@ namespace nd {
 
     template <typename func_type, int N>
     using apply_callable_kernel =
-        detail::apply_callable_kernel<func_type, typename return_of<func_type>::type,
-                                      as_apply_arg_sequence<func_type, N>, std::make_index_sequence<N>,
-                                      as_apply_kwd_sequence<func_type, N>,
+        detail::apply_callable_kernel<func_type, typename return_of<func_type>::type, args_for<func_type, N>,
+                                      std::make_index_sequence<N>, as_apply_kwd_sequence<func_type, N>,
                                       std::make_index_sequence<arity_of<func_type>::value - N>>;
 
   } // namespace dynd::nd::functional

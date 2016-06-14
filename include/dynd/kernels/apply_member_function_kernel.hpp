@@ -69,7 +69,7 @@ namespace nd {
     template <typename T, typename mem_func_type, int N>
     using apply_member_function_kernel =
         detail::apply_member_function_kernel<T, mem_func_type, typename return_of<mem_func_type>::type,
-                                             as_apply_arg_sequence<mem_func_type, N>, std::make_index_sequence<N>,
+                                             args_for<mem_func_type, N>, std::make_index_sequence<N>,
                                              as_apply_kwd_sequence<mem_func_type, N>,
                                              std::make_index_sequence<arity_of<mem_func_type>::value - N>>;
 

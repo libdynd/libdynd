@@ -73,7 +73,7 @@ namespace nd {
     };
 
     template <typename func_type, int N = args_of<typename funcproto_of<func_type>::type>::type::size>
-    using as_apply_arg_sequence = typename to<typename args_of<typename funcproto_of<func_type>::type>::type, N>::type;
+    using args_for = typename to<typename args_of<typename funcproto_of<func_type>::type>::type, N>::type;
 
     template <typename A, typename I = std::make_index_sequence<A::size>>
     struct apply_args;

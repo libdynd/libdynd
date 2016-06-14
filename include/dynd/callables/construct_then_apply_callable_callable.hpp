@@ -12,18 +12,16 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    template <typename func_type, typename... KwdTypes>
+    template <typename CallableType, typename... KwdTypes>
     class construct_then_apply_callable_callable
-        : public base_apply_callable<typename funcproto_of<func_type, KwdTypes...>::type> {
+        : public base_apply_callable<typename funcproto_of<CallableType, KwdTypes...>::type> {
     public:
-      template <typename... T>
-      construct_then_apply_callable_callable(T &&... names)
-          : base_apply_callable<typename funcproto_of<func_type, KwdTypes...>::type>(std::forward<T>(names)...) {}
+      using base_apply_callable<typename funcproto_of<CallableType, KwdTypes...>::type>::base_apply_callable;
 
       ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                         const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,
                         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) {
-        typedef construct_then_apply_callable_kernel<func_type, KwdTypes...> kernel_type;
+        typedef construct_then_apply_callable_kernel<CallableType, KwdTypes...> kernel_type;
 
         cg.emplace_back([kwds = typename kernel_type::kwds_type(nkwd, kwds)](
             kernel_builder & kb, kernel_request_t kernreq, char *data, const char *dst_arrmeta,
