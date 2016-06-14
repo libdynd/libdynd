@@ -473,7 +473,6 @@ TEST(Apply, ReturnWrapper) {
       ++i;
     }
   });
-
   EXPECT_ARRAY_EQ(nd::array({0, 1, 2, 3, 4}), f());
 
   f = [](return_wrapper<fixed_dim<int>, resolve> wrapper, int i) {

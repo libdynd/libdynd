@@ -13,11 +13,11 @@ namespace nd {
   namespace functional {
     namespace detail {
 
-      template <typename Signature, typename Enable = void>
+      template <typename Signature>
       class base_apply_callable;
 
       template <typename Signature>
-      class base_apply_callable<Signature> : public base_callable {
+      class base_apply_callable : public base_callable {
       public:
         template <typename... S>
         base_apply_callable(S &&... names) : base_callable(ndt::make_type<Signature>(std::forward<S>(names)...)) {}
