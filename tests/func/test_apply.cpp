@@ -3,14 +3,14 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
 #include "../test_memory_new.hpp"
+#include "dynd_assertions.hpp"
+#include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/callable.hpp>
@@ -180,7 +180,7 @@ CUDA_DEVICE_FUNC_AS_CALLABLE(func1);
 
 #endif
 
-float func2(const float(&x)[3]) { return x[0] + x[1] + x[2]; }
+float func2(const float (&x)[3]) { return x[0] + x[1] + x[2]; }
 
 GET_CUDA_HOST_DEVICE_FUNC(func2)
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func2);
@@ -190,12 +190,12 @@ unsigned int func3() { return 12U; }
 GET_CUDA_HOST_DEVICE_FUNC(func3)
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func3);
 
-double func4(const double(&x)[3], const double(&y)[3]) { return x[0] * y[0] + x[1] * y[1] + x[2] * y[2]; }
+double func4(const double (&x)[3], const double (&y)[3]) { return x[0] * y[0] + x[1] * y[1] + x[2] * y[2]; }
 
 GET_CUDA_HOST_DEVICE_FUNC(func4);
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func4);
 
-long func5(const long(&x)[2][3]) { return x[0][0] + x[0][1] + x[1][2]; }
+long func5(const long (&x)[2][3]) { return x[0][0] + x[0][1] + x[1][2]; }
 
 GET_CUDA_HOST_DEVICE_FUNC(func5);
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func5);
@@ -458,6 +458,42 @@ TYPED_TEST_P(Apply, CallableWithKeywords) {
 
   af = nd::functional::apply<callable2<TestFixture::KernelRequest>, int>("z");
   EXPECT_ARRAY_EQ(8, af({5, 3}, {{"z", 4}}));
+}
+
+ndt::type resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) {
+  return ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<int>());
+}
+
+TEST(Apply, ReturnWrapper) {
+  nd::callable f([](const return_wrapper<int[5]> &wrapper) {
+    int(&res)[5] = wrapper;
+    int i = 0;
+    for (int &val : res) {
+      val = i;
+      ++i;
+    }
+  });
+  EXPECT_ARRAY_EQ(nd::array({0, 1, 2, 3, 4}), f());
+
+  f = [](const return_wrapper<fixed_dim<int>, resolve> &wrapper) {
+    fixed_dim<int> &res = wrapper;
+    int i = 0;
+    for (int &val : res) {
+      val = i;
+      ++i;
+    }
+  };
+  EXPECT_ARRAY_EQ(nd::array({0, 1, 2, 3, 4}), f());
+
+  f = [](const return_wrapper<fixed_dim<int>, resolve> &wrapper, int i) {
+    fixed_dim<int> &res = wrapper;
+    int j = 0;
+    for (int &val : res) {
+      val = i + j;
+      ++j;
+    }
+  };
+  EXPECT_ARRAY_EQ(nd::array({5, 6, 7, 8, 9}), f(5));
 }
 
 REGISTER_TYPED_TEST_CASE_P(Apply, Callable, CallableWithKeywords);

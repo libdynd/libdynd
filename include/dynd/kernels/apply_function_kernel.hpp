@@ -31,7 +31,7 @@ namespace nd {
         apply_function_kernel(args_type args, kwds_type kwds) : args_type(args), kwds_type(kwds) {}
 
         void single(char *dst, char *const *DYND_IGNORE_UNUSED(src)) {
-          *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
+          *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::assign(src[I])..., apply_kwd<K, J>::get()...);
         }
       };
 
@@ -50,7 +50,7 @@ namespace nd {
         apply_function_kernel(args_type args, kwds_type kwds) : args_type(args), kwds_type(kwds) {}
 
         void single(char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src)) {
-          func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);
+          func(apply_arg<A, I>::assign(src[I])..., apply_kwd<K, J>::get()...);
         }
       };
 
@@ -58,9 +58,8 @@ namespace nd {
 
     template <typename func_type, func_type func, int N = arity_of<func_type>::value>
     using apply_function_kernel =
-        detail::apply_function_kernel<func_type, func, typename return_of<func_type>::type,
-                                      as_apply_arg_sequence<func_type, N>, std::make_index_sequence<N>,
-                                      as_apply_kwd_sequence<func_type, N>,
+        detail::apply_function_kernel<func_type, func, typename return_of<func_type>::type, args_for<func_type, N>,
+                                      std::make_index_sequence<N>, as_apply_kwd_sequence<func_type, N>,
                                       std::make_index_sequence<arity_of<func_type>::value - N>>;
 
   } // namespace dynd::nd::functional

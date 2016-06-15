@@ -34,7 +34,7 @@ namespace nd {
         : args_type(args), func(kwds.apply_kwd<K, J>::get()...) {}                                                     \
                                                                                                                        \
     void single(char *dst, char *const *DYND_IGNORE_UNUSED(src)) {                                                     \
-      *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])...);                                             \
+      *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::assign(src[I])...);                                          \
     }                                                                                                                  \
   };                                                                                                                   \
                                                                                                                        \
@@ -55,7 +55,7 @@ namespace nd {
         : args_type(args), func(kwds.apply_kwd<K, J>::get()...) {}                                                     \
                                                                                                                        \
     void single(char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src)) {                                        \
-      func(apply_arg<A, I>::get(src[I])...);                                                                           \
+      func(apply_arg<A, I>::assign(src[I])...);                                                                        \
     }                                                                                                                  \
   }
 
@@ -68,7 +68,7 @@ namespace nd {
     template <typename func_type, typename... K>
     using construct_then_apply_callable_kernel =
         detail::construct_then_apply_callable_kernel<func_type, typename return_of<func_type>::type,
-                                                     as_apply_arg_sequence<func_type, arity_of<func_type>::value>,
+                                                     args_for<func_type, arity_of<func_type>::value>,
                                                      std::make_index_sequence<arity_of<func_type>::value>,
                                                      type_sequence<K...>, std::make_index_sequence<sizeof...(K)>>;
 

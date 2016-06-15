@@ -466,7 +466,7 @@ struct args_of {
 
 template <typename R, typename... A>
 struct args_of<R(A...)> {
-  typedef type_sequence<A...> type;
+  typedef type_sequence<remove_reference_then_cv_t<A>...> type;
 };
 
 template <typename func_type>
