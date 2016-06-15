@@ -57,7 +57,9 @@ namespace nd {
     struct apply_arg<return_wrapper<ReturnType, Resolve>, I> : apply_arg<ReturnType, I> {
       using apply_arg<ReturnType, I>::apply_arg;
 
-      return_wrapper<ReturnType, Resolve> assign(char *data) { return apply_arg<ReturnType, I>::assign(data); }
+      return_wrapper<ReturnType, Resolve> assign(char *data) {
+        return return_wrapper<ReturnType, Resolve>(apply_arg<ReturnType, I>::assign(data));
+      }
     };
 
     template <size_t I>
