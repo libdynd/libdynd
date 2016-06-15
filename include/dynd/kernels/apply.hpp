@@ -42,15 +42,12 @@ namespace nd {
     };
 
     template <typename ElementType, size_t I>
-    struct apply_arg<fixed_dim<ElementType>, I> {
-      fixed_dim<ElementType> value;
+    struct apply_arg<fixed<ElementType>, I> {
+      fixed<ElementType> value;
 
       apply_arg(char *DYND_UNUSED(data), const char *arrmeta) : value(arrmeta, NULL) {}
 
-      fixed_dim<ElementType> &assign(char *data) {
-        value.set_data(data);
-        return value;
-      }
+      fixed<ElementType> &assign(char *data) { return value.assign(data); }
     };
 
     template <typename ReturnType, resolve_t Resolve, size_t I>

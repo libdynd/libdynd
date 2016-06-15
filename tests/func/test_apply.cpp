@@ -475,8 +475,8 @@ TEST(Apply, ReturnWrapper) {
   });
   EXPECT_ARRAY_EQ(nd::array({0, 1, 2, 3, 4}), f());
 
-  f = [](const return_wrapper<fixed_dim<int>, resolve> &wrapper) {
-    fixed_dim<int> &res = wrapper;
+  f = [](const return_wrapper<fixed<int>, resolve> &wrapper) {
+    fixed<int> &res = wrapper;
     int i = 0;
     for (int &val : res) {
       val = i;
@@ -485,8 +485,8 @@ TEST(Apply, ReturnWrapper) {
   };
   EXPECT_ARRAY_EQ(nd::array({0, 1, 2, 3, 4}), f());
 
-  f = [](const return_wrapper<fixed_dim<int>, resolve> &wrapper, int i) {
-    fixed_dim<int> &res = wrapper;
+  f = [](const return_wrapper<fixed<int>, resolve> &wrapper, int i) {
+    fixed<int> &res = wrapper;
     int j = 0;
     for (int &val : res) {
       val = i + j;

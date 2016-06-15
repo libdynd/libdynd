@@ -12,10 +12,10 @@
 namespace dynd {
 
 template <typename ElementType, typename Enable = void>
-class fixed_dim;
+class fixed;
 
 template <typename ElementType>
-class fixed_dim<ElementType, std::enable_if_t<ndt::traits<ElementType>::is_same_layout>> {
+class fixed<ElementType, std::enable_if_t<ndt::traits<ElementType>::is_same_layout>> {
   const char *m_metadata;
   char *m_data;
 
@@ -46,12 +46,15 @@ public:
     bool operator!=(const iterator &rhs) const { return m_data != rhs.m_data; }
   };
 
-  fixed_dim(const char *metadata, char *data) : m_metadata(metadata), m_data(data) {}
+  fixed(const char *metadata, char *data) : m_metadata(metadata), m_data(data) {}
 
   char *data() const { return m_data; }
   size_t size() const { return reinterpret_cast<const size_stride_t *>(this->m_metadata)->dim_size; }
 
-  void set_data(char *data) { this->m_data = data; }
+  fixed &assign(char *data) {
+    m_data = data;
+    return *this;
+  }
 
   const ElementType &operator[](size_t i) const {
     return *reinterpret_cast<const ElementType *>(
@@ -73,7 +76,7 @@ public:
 };
 
 template <typename ElementType>
-class fixed_dim<ElementType, std::enable_if_t<!ndt::traits<ElementType>::is_same_layout>> {
+class fixed<ElementType, std::enable_if_t<!ndt::traits<ElementType>::is_same_layout>> {
   const char *m_metadata;
   char *m_data;
 
@@ -94,7 +97,7 @@ public:
     ElementType operator*() { return m_current; }
 
     iterator &operator++() {
-      m_current.set_data(m_current.data() + m_stride);
+      m_current.assign(m_current.data() + m_stride);
       return *this;
     }
 
@@ -109,13 +112,16 @@ public:
     bool operator!=(const iterator &rhs) const { return m_current.data() != rhs.m_current.data(); }
   };
 
-  fixed_dim(const char *metadata, char *data) : m_metadata(metadata), m_data(data) {}
+  fixed(const char *metadata, char *data) : m_metadata(metadata), m_data(data) {}
 
   char *data() const { return m_data; }
   size_t size() const { return reinterpret_cast<const size_stride_t *>(m_metadata)->dim_size; }
   intptr_t stride() const { return reinterpret_cast<const size_stride_t *>(m_metadata)->stride; }
 
-  void set_data(char *data) { this->m_data = data; }
+  fixed &assign(char *data) {
+    m_data = data;
+    return *this;
+  }
 
   ElementType operator[](size_t i) const {
     return ElementType(m_metadata + sizeof(size_stride_t),
@@ -207,7 +213,7 @@ namespace ndt {
   };
 
   template <typename ElementType>
-  struct traits<fixed_dim<ElementType>> {
+  struct traits<fixed<ElementType>> {
     static const size_t ndim = 1 + traits<ElementType>::ndim;
 
     static const bool is_same_layout = false;
