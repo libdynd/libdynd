@@ -465,6 +465,8 @@ ndt::type resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)
 }
 
 TEST(Apply, ReturnWrapper) {
+  using dynd::fixed;
+
   nd::callable f([](const return_wrapper<int[5]> &wrapper) {
     int(&res)[5] = wrapper;
     int i = 0;

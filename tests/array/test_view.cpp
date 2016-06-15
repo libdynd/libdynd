@@ -250,6 +250,8 @@ TEST(View, NewAxis) {
 }
 
 TEST(View, Fixed) {
+  using dynd::fixed;
+
   nd::array a{0, 1, 2, 3, 4};
 
   const fixed<int> &vals = a.view<fixed<int>>();
@@ -267,6 +269,8 @@ TEST(View, Fixed) {
 }
 
 TEST(View, FixedFixed) {
+  using dynd::fixed;
+
   nd::array a = {{0, 1}, {2, 3}};
 
   const fixed<fixed<int>> &vals = a.view<fixed<fixed<int>>>();
@@ -284,6 +288,8 @@ TEST(View, FixedFixed) {
 }
 
 TEST(View, FixedFixedFixed) {
+  using dynd::fixed;
+
   nd::array a = {{{0, 1}, {2, 3}}, {{4, 5}, {6, 7}}};
 
   const fixed<fixed<fixed<int>>> &vals = a.view<fixed<fixed<fixed<int>>>>();
