@@ -465,8 +465,8 @@ ndt::type resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)
 }
 
 TEST(Apply, ReturnWrapper) {
-  nd::callable f([](return_wrapper<fixed_dim<int>, resolve> wrapper) {
-    fixed_dim<int> &res = wrapper.get();
+  nd::callable f([](const return_wrapper<int[5]> &wrapper) {
+    int(&res)[5] = wrapper;
     int i = 0;
     for (int &val : res) {
       val = i;
@@ -475,8 +475,18 @@ TEST(Apply, ReturnWrapper) {
   });
   EXPECT_ARRAY_EQ(nd::array({0, 1, 2, 3, 4}), f());
 
-  f = [](return_wrapper<fixed_dim<int>, resolve> wrapper, int i) {
-    fixed_dim<int> &res = wrapper.get();
+  f = [](const return_wrapper<fixed_dim<int>, resolve> &wrapper) {
+    fixed_dim<int> &res = wrapper;
+    int i = 0;
+    for (int &val : res) {
+      val = i;
+      ++i;
+    }
+  };
+  EXPECT_ARRAY_EQ(nd::array({0, 1, 2, 3, 4}), f());
+
+  f = [](const return_wrapper<fixed_dim<int>, resolve> &wrapper, int i) {
+    fixed_dim<int> &res = wrapper;
     int j = 0;
     for (int &val : res) {
       val = i + j;

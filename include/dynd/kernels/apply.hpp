@@ -13,38 +13,22 @@ namespace dynd {
 
 typedef ndt::type (*resolve_t)(size_t, const ndt::type *);
 
-template <typename ReturnType, resolve_t Resolve>
-struct return_wrapper {
-  typedef ReturnType type;
-  static constexpr resolve_t resolve = Resolve;
+template <typename ReturnType>
+ndt::type default_resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) {
+  return ndt::make_type<ReturnType>();
+}
 
+template <typename ReturnType, resolve_t Resolve = default_resolve<ReturnType>>
+struct return_wrapper {
   ReturnType *ptr;
 
   return_wrapper(ReturnType &ref) : ptr(&ref) {}
 
   return_wrapper(const return_wrapper &other) = default;
 
-  ReturnType &get() { return *ptr; }
-};
+  ReturnType &get() const { return *ptr; }
 
-template <typename T>
-struct is_return_wrapper {
-  static const bool value = false;
-};
-
-template <typename ReturnType, resolve_t Resolve>
-struct is_return_wrapper<return_wrapper<ReturnType, Resolve>> {
-  static const bool value = true;
-};
-
-template <typename... T>
-struct has_return_wrapper {
-  static const bool value = false;
-};
-
-template <typename T0, typename... T>
-struct has_return_wrapper<T0, T...> {
-  static const bool value = is_return_wrapper<remove_reference_then_cv_t<T0>>::value;
+  operator ReturnType &() const { return *ptr; }
 };
 
 namespace nd {

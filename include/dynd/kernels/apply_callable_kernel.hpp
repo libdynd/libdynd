@@ -38,7 +38,7 @@ namespace nd {
         base_apply_kernel(ArgsType args) : ArgsType(args) {}
       };
 
-      template <typename func_type, typename R, typename A, typename I, typename K, typename J>
+      template <typename func_type, typename R, typename A, typename I, typename K, typename J, typename Enable = void>
       struct apply_callable_kernel;
 
       template <typename func_type, typename R, typename... A, size_t... I, typename... K, size_t... J>
