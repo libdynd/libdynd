@@ -249,10 +249,12 @@ TEST(View, NewAxis) {
                      a.new_axis(3));
 }
 
-TEST(View, FixedDim) {
+TEST(View, Fixed) {
+  using dynd::fixed;
+
   nd::array a{0, 1, 2, 3, 4};
 
-  const fixed_dim<int> &vals = a.view<fixed_dim<int>>();
+  const fixed<int> &vals = a.view<fixed<int>>();
   EXPECT_EQ(0, vals[0]);
   EXPECT_EQ(1, vals[1]);
   EXPECT_EQ(2, vals[2]);
@@ -266,27 +268,31 @@ TEST(View, FixedDim) {
   }
 }
 
-TEST(View, FixedDimFixedDim) {
+TEST(View, FixedFixed) {
+  using dynd::fixed;
+
   nd::array a = {{0, 1}, {2, 3}};
 
-  const fixed_dim<fixed_dim<int>> &vals = a.view<fixed_dim<fixed_dim<int>>>();
+  const fixed<fixed<int>> &vals = a.view<fixed<fixed<int>>>();
   EXPECT_EQ(0, vals[0][0]);
   EXPECT_EQ(1, vals[0][1]);
   EXPECT_EQ(2, vals[1][0]);
   EXPECT_EQ(3, vals[1][1]);
 
   int i = 0;
-  for (const fixed_dim<int> &val : vals) {
+  for (const fixed<int> &val : vals) {
     EXPECT_EQ(vals[i][0], val[0]);
     EXPECT_EQ(vals[i][1], val[1]);
     ++i;
   }
 }
 
-TEST(View, FixedDimFixedDimFixedDim) {
+TEST(View, FixedFixedFixed) {
+  using dynd::fixed;
+
   nd::array a = {{{0, 1}, {2, 3}}, {{4, 5}, {6, 7}}};
 
-  const fixed_dim<fixed_dim<fixed_dim<int>>> &vals = a.view<fixed_dim<fixed_dim<fixed_dim<int>>>>();
+  const fixed<fixed<fixed<int>>> &vals = a.view<fixed<fixed<fixed<int>>>>();
   EXPECT_EQ(0, vals[0][0][0]);
   EXPECT_EQ(1, vals[0][0][1]);
   EXPECT_EQ(2, vals[0][1][0]);
@@ -297,7 +303,7 @@ TEST(View, FixedDimFixedDimFixedDim) {
   EXPECT_EQ(7, vals[1][1][1]);
 
   int i = 0;
-  for (const fixed_dim<fixed_dim<int>> &val : vals) {
+  for (const fixed<fixed<int>> &val : vals) {
     EXPECT_EQ(vals[i][0][0], val[0][0]);
     EXPECT_EQ(vals[i][0][1], val[0][1]);
     EXPECT_EQ(vals[i][1][0], val[1][0]);
