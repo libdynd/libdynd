@@ -175,6 +175,8 @@ namespace ndt {
 
     virtual bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
+
     /**
      * Fills in the array of default data offsets based on the data sizes
      * and alignments of the types.
