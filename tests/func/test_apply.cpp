@@ -14,6 +14,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/callable.hpp>
+#include <dynd/types/tuple_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -462,6 +463,16 @@ TYPED_TEST_P(Apply, CallableWithKeywords) {
 
 ndt::type resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) {
   return ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<int>());
+}
+
+TEST(Apply, Tuple) {
+  using dynd::tuple;
+
+  nd::callable f([](tuple<int, double> x) {
+    EXPECT_EQ(3, get<0>(x));
+    EXPECT_EQ(7.5, get<1>(x));
+  });
+  f(nd::tuple({3, 7.5}));
 }
 
 TEST(Apply, ReturnWrapper) {

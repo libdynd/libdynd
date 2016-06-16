@@ -12,6 +12,50 @@
 #include <dynd/types/fixed_dim_type.hpp>
 
 namespace dynd {
+
+template <typename... T>
+struct tuple {
+  uintptr_t offsets[sizeof...(T)];
+  char *m_data;
+
+  tuple(const char *metadata, char *data) : m_data(data) {
+    memcpy(offsets, metadata, sizeof...(T) * sizeof(uintptr_t));
+  }
+
+  char *data() const { return m_data; }
+
+  tuple &assign(char *data) {
+    m_data = data;
+    return *this;
+  }
+};
+
+template <size_t I, typename T>
+struct tuple_element;
+
+template <size_t I, typename T0, typename... T>
+struct tuple_element<I, tuple<T0, T...>> : tuple_element<I - 1, tuple<T...>> {};
+
+template <typename T0, typename... T>
+struct tuple_element<0, tuple<T0, T...>> {
+  typedef T0 type;
+};
+
+template <size_t I, typename T>
+using tuple_element_t = typename tuple_element<I, T>::type;
+
+template <size_t I, typename... T>
+std::enable_if_t<ndt::traits<tuple_element_t<I, tuple<T...>>>::is_same_layout, tuple_element_t<I, tuple<T...>>>
+get(tuple<T...> &val) {
+  return *reinterpret_cast<tuple_element_t<I, tuple<T...>> *>(val.data() + val.offsets[I]);
+}
+
+template <size_t I, typename... T>
+std::enable_if_t<!ndt::traits<tuple_element_t<I, tuple<T...>>>::is_same_layout, tuple_element_t<I, tuple<T...>>>
+get(tuple<T...> &val) {
+  return tuple_element_t<I, tuple<T...>>(NULL, val.data());
+}
+
 namespace ndt {
 
   class DYNDT_API tuple_type : public base_type {
@@ -149,6 +193,13 @@ namespace ndt {
 
   template <>
   struct id_of<tuple_type> : std::integral_constant<type_id_t, tuple_id> {};
+
+  template <typename... T>
+  struct traits<tuple<T...>> {
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return make_type<tuple_type>({make_type<T>()...}); }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd
