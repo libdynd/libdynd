@@ -461,18 +461,34 @@ TYPED_TEST_P(Apply, CallableWithKeywords) {
   EXPECT_ARRAY_EQ(8, af({5, 3}, {{"z", 4}}));
 }
 
-ndt::type resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) {
-  return ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<int>());
-}
-
 TEST(Apply, Tuple) {
   using dynd::tuple;
 
-  nd::callable f([](tuple<int, double> x) {
+  nd::callable f([](tuple<int> x) { EXPECT_EQ(1, get<0>(x)); });
+  f(nd::tuple({1}));
+
+  f = [](tuple<int, double> x) {
     EXPECT_EQ(3, get<0>(x));
     EXPECT_EQ(7.5, get<1>(x));
-  });
+  };
   f(nd::tuple({3, 7.5}));
+}
+
+TEST(Apply, Fixed) {
+  using dynd::fixed;
+
+  nd::callable f([](fixed<int> x) {
+    EXPECT_EQ(0, x[0]);
+    EXPECT_EQ(1, x[1]);
+    EXPECT_EQ(2, x[2]);
+    EXPECT_EQ(3, x[3]);
+    EXPECT_EQ(4, x[4]);
+  });
+  f(nd::array{0, 1, 2, 3, 4});
+}
+
+ndt::type resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) {
+  return ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<int>());
 }
 
 TEST(Apply, ReturnWrapper) {

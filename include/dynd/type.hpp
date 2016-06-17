@@ -842,6 +842,7 @@ namespace ndt {
   template <>
   struct traits<int> {
     static const size_t ndim = 0;
+    static const size_t metadata_size = 0;
 
     static const bool is_same_layout = true;
 
@@ -967,6 +968,7 @@ namespace ndt {
   template <>
   struct traits<double> {
     static const size_t ndim = 0;
+    static const size_t metadata_size = 0;
 
     static const bool is_same_layout = true;
 

@@ -972,6 +972,52 @@ DYNDT_API void load(const std::string &path);
 
 typedef intptr_t index_t;
 
+template <typename T, typename BinaryFunction>
+struct identity_element;
+
+template <typename T, typename BinaryFunction>
+struct left_identity_element : identity_element<T, BinaryFunction> {};
+
+template <typename T, typename BinaryFunction>
+struct right_identity_element : identity_element<T, BinaryFunction> {};
+
+template <typename BinaryFunction>
+struct empty_lfold {
+  template <typename T>
+  constexpr operator T() const {
+    return left_identity_element<T, BinaryFunction>::value;
+  }
+};
+
+template <typename BinaryFunction>
+struct empty_rfold {
+  template <typename T>
+  constexpr operator T() const {
+    return right_identity_element<T, BinaryFunction>::value;
+  }
+};
+
+template <typename BinaryFunction>
+auto lfold() -> empty_lfold<BinaryFunction> {
+  return {};
+}
+
+template <typename BinaryFunction, typename First>
+constexpr auto lfold(const First &first) -> First {
+  return first;
+}
+
+template <typename BinaryFunction, typename First, typename Second>
+auto lfold(First &&first, Second &&second) -> decltype(auto) {
+  return BinaryFunction{}(std::forward<First>(first), std::forward<Second>(second));
+}
+
+template <typename BinaryFunction, typename First, typename Second, typename... Tail>
+auto lfold(First &&first, Second &&second, Tail &&... tail) -> decltype(auto) {
+  return lfold<BinaryFunction>(BinaryFunction{}(std::forward<First>(first), std::forward<Second>(second)),
+                               std::forward<Tail>(tail)...);
+}
+
 namespace ndt {
 
   class type;
