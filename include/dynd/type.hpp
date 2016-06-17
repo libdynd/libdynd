@@ -848,6 +848,8 @@ namespace ndt {
 
     static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<int>::value), false); }
 
+    static void metadata_copy_construct(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src)) {}
+
     static int na() { return std::numeric_limits<int>::min(); }
   };
 
@@ -974,7 +976,9 @@ namespace ndt {
 
     static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<double>::value), false); }
 
-//    static double na() { return 0x7ff00000000007a2ULL; }
+    static void metadata_copy_construct(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src)) {}
+
+    //    static double na() { return 0x7ff00000000007a2ULL; }
   };
 
   template <>

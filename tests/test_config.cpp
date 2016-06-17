@@ -79,7 +79,7 @@ TEST(Config, HasMember) {
 }
 
 struct X {
-  static const int value = lfold<std::plus<int>>(0);
+  static const int value = lfold<std::plus<int>>(0, 1, 2, 3, 4);
 };
 
 TEST(Config, Fold) {

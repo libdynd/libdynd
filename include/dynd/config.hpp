@@ -1008,12 +1008,12 @@ constexpr auto lfold(const First &first) -> First {
 }
 
 template <typename BinaryFunction, typename First, typename Second>
-auto lfold(First &&first, Second &&second) -> decltype(auto) {
+constexpr auto lfold(First &&first, Second &&second) -> decltype(auto) {
   return BinaryFunction{}(std::forward<First>(first), std::forward<Second>(second));
 }
 
 template <typename BinaryFunction, typename First, typename Second, typename... Tail>
-auto lfold(First &&first, Second &&second, Tail &&... tail) -> decltype(auto) {
+constexpr auto lfold(First &&first, Second &&second, Tail &&... tail) -> decltype(auto) {
   return lfold<BinaryFunction>(BinaryFunction{}(std::forward<First>(first), std::forward<Second>(second)),
                                std::forward<Tail>(tail)...);
 }
