@@ -78,10 +78,6 @@ TEST(Config, HasMember) {
   EXPECT_FALSE((has_member_func<func_wrapper, int()>::value));
 }
 
-struct X {
-  static const int value = lfold<std::plus<int>>(0, 1, 2, 3, 4);
-};
-
 TEST(Config, Fold) {
   EXPECT_EQ(10, lfold<std::plus<int>>(0, 1, 2, 3, 4));
   EXPECT_EQ(24, lfold<std::multiplies<int>>(1, 2, 3, 4));

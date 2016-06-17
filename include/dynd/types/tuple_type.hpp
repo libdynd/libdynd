@@ -14,10 +14,11 @@
 namespace dynd {
 
 template <typename... T>
-struct tuple {
+class tuple {
   char m_metadata[ndt::traits<tuple<T...>>::metadata_size];
   char *m_data;
 
+public:
   tuple(const char *metadata, char *data) : m_data(data) {
     ndt::traits<tuple<T...>>::metadata_copy_construct(m_metadata, metadata);
   }
@@ -202,27 +203,16 @@ namespace ndt {
   template <typename... T>
   struct traits<tuple<T...>> {
     static const size_t metadata_size =
-        sizeof...(T) * sizeof(uintptr_t) + lfold<std::plus<size_t>>(traits<T>::metadata_size...);
+        sizeof...(T) * sizeof(uintptr_t) + xfold(std::plus<size_t>(), traits<T>::metadata_size...);
 
     static const bool is_same_layout = false;
 
     static type equivalent() { return make_type<tuple_type>({make_type<T>()...}); }
 
     static void metadata_copy_construct(char *dst, const char *src) {
-      //      struct X {
-      //      size_t operator()(size_t x, size_t y) {
-      //      return x + y;
-      //}
-      //    };
-
-      //      typedef void (*func_t)(char *, const char *);
-      //    static const func_t x[sizeof...(T)] = {ndt::traits<T>::metadata_copy_construct...};
       memcpy(dst, src, sizeof...(T) * sizeof(uintptr_t));
       dst += sizeof...(T) * sizeof(uintptr_t);
       src += sizeof...(T) * sizeof(uintptr_t);
-
-      //      for (size_t i = 0; i < sizeof...(T); ++i) {
-      //}
     }
   };
 
