@@ -22,6 +22,11 @@ struct tuple {
     ndt::traits<tuple<T...>>::metadata_copy_construct(m_metadata, metadata);
   }
 
+  template <size_t I>
+  uintptr_t offset() const {
+    return *reinterpret_cast<const uintptr_t *>(m_metadata + I * sizeof(uintptr_t));
+  }
+
   char *data() const { return m_data; }
 
   tuple &assign(char *data) {
@@ -47,8 +52,7 @@ using tuple_element_t = typename tuple_element<I, T>::type;
 template <size_t I, typename... T>
 std::enable_if_t<ndt::traits<tuple_element_t<I, tuple<T...>>>::is_same_layout, tuple_element_t<I, tuple<T...>>>
 get(tuple<T...> &val) {
-  return *reinterpret_cast<tuple_element_t<I, tuple<T...>> *>(val.data() +
-                                                              reinterpret_cast<uintptr_t *>(val.m_metadata)[I]);
+  return *reinterpret_cast<tuple_element_t<I, tuple<T...>> *>(val.data() + val.template offset<I>());
 }
 
 template <size_t I, typename... T>
@@ -198,16 +202,27 @@ namespace ndt {
   template <typename... T>
   struct traits<tuple<T...>> {
     static const size_t metadata_size =
-        sizeof...(T) * sizeof(uintptr_t) + lfold<std::plus<int>>(traits<T>::metadata_size...);
+        sizeof...(T) * sizeof(uintptr_t) + lfold<std::plus<size_t>>(traits<T>::metadata_size...);
 
     static const bool is_same_layout = false;
 
     static type equivalent() { return make_type<tuple_type>({make_type<T>()...}); }
 
     static void metadata_copy_construct(char *dst, const char *src) {
+      //      struct X {
+      //      size_t operator()(size_t x, size_t y) {
+      //      return x + y;
+      //}
+      //    };
+
       //      typedef void (*func_t)(char *, const char *);
       //    static const func_t x[sizeof...(T)] = {ndt::traits<T>::metadata_copy_construct...};
       memcpy(dst, src, sizeof...(T) * sizeof(uintptr_t));
+      dst += sizeof...(T) * sizeof(uintptr_t);
+      src += sizeof...(T) * sizeof(uintptr_t);
+
+      //      for (size_t i = 0; i < sizeof...(T); ++i) {
+      //}
     }
   };
 
