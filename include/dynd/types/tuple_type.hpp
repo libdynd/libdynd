@@ -200,10 +200,14 @@ namespace ndt {
   template <>
   struct id_of<tuple_type> : std::integral_constant<type_id_t, tuple_id> {};
 
+  struct my_plus {
+    constexpr size_t operator()(size_t x, size_t y) const { return x + y; }
+  };
+
   template <typename... T>
   struct traits<tuple<T...>> {
     static const size_t metadata_size =
-        sizeof...(T) * sizeof(uintptr_t) + xfold(std::plus<size_t>(), traits<T>::metadata_size...);
+        sizeof...(T) * sizeof(uintptr_t) + xfold(my_plus(), traits<T>::metadata_size...);
 
     static const bool is_same_layout = false;
 
@@ -213,13 +217,15 @@ namespace ndt {
       memcpy(dst, src, sizeof...(T) * sizeof(uintptr_t));
       dst += sizeof...(T) * sizeof(uintptr_t);
       src += sizeof...(T) * sizeof(uintptr_t);
+
+      for (const auto &pair : zip({traits<T>::metadata_copy_construct...}, {traits<T>::metadata_size...})) {
+        pair.first(dst, src);
+
+        dst += pair.second;
+        src += pair.second;
+      }
     }
   };
-
-  //  template <typename... T>
-  // const size_t traits<tuple<T...>>::metadata_size = (std::partial_sum(metadata_sizes, metadata_sizes + sizeof...(T),
-  //                                                                  metadata_offsets),
-  //                                                     sizeof(uintptr_t[sizeof...(T)]));
 
 } // namespace dynd::ndt
 } // namespace dynd

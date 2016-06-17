@@ -83,6 +83,18 @@ TEST(Config, Fold) {
   EXPECT_EQ(24, lfold<std::multiplies<int>>(1, 2, 3, 4));
 }
 
+TEST(Config, Zip) {
+  int i = 0;
+  int j = 3;
+  for (auto pair : zip({0, 1, 2}, {3, 4, 5})) {
+    EXPECT_EQ(i, pair.first);
+    EXPECT_EQ(j, pair.second);
+
+    ++i;
+    ++j;
+  }
+}
+
 TEST(Config, Outer) {
   struct type0;
   struct type1;

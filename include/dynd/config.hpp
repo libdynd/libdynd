@@ -1033,6 +1033,58 @@ constexpr auto lfold(First &&first, Second &&second, Tail &&... tail) -> decltyp
                                std::forward<Tail>(tail)...);
 }
 
+template <typename... ArgTypes>
+decltype(auto) zip(ArgTypes &&... args);
+
+template <typename T0, typename T1>
+struct zip_iterator {
+  T0 first;
+  T1 second;
+
+  zip_iterator(T0 t0, T1 t1) : first(std::forward<T0>(t0)), second(std::forward<T1>(t1)) {}
+
+  struct iterator {
+    typename remove_reference_then_cv_t<T0>::iterator iter0;
+    typename remove_reference_then_cv_t<T1>::iterator iter1;
+
+    decltype(auto) operator*() { return zip(*iter0, *iter1); }
+
+    iterator &operator++() {
+      iter0++;
+      iter1++;
+      return *this;
+    }
+
+    iterator operator++(int) {
+      iterator tmp(*this);
+      operator++();
+      return tmp;
+    }
+
+    bool operator==(const iterator &rhs) const { return iter0 == rhs.iter0 && iter1 == rhs.iter1; }
+
+    bool operator!=(const iterator &rhs) const { return iter0 != rhs.iter0 || iter1 != rhs.iter1; }
+
+    iterator(typename remove_reference_then_cv_t<T0>::iterator iter0,
+             typename remove_reference_then_cv_t<T1>::iterator iter1)
+        : iter0(iter0), iter1(iter1) {}
+  };
+
+  iterator begin() const { return iterator(first.begin(), second.begin()); }
+
+  iterator end() const { return iterator(first.end(), second.end()); }
+};
+
+template <typename... ArgTypes>
+decltype(auto) zip(ArgTypes &&... args) {
+  return zip_iterator<ArgTypes...>(std::forward<ArgTypes>(args)...);
+}
+
+template <typename T, typename U>
+decltype(auto) zip(std::initializer_list<T> t, std::initializer_list<U> u) {
+  return zip_iterator<std::initializer_list<T>, std::initializer_list<U>>(t, u);
+}
+
 namespace ndt {
 
   class type;
