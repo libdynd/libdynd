@@ -1037,11 +1037,11 @@ template <typename... ArgTypes>
 decltype(auto) zip(ArgTypes &&... args);
 
 template <typename T0, typename T1>
-struct zip_iterator {
+struct zip_pair {
   T0 first;
   T1 second;
 
-  zip_iterator(T0 t0, T1 t1) : first(std::forward<T0>(t0)), second(std::forward<T1>(t1)) {}
+  zip_pair(T0 t0, T1 t1) : first(t0), second(t1) {}
 
   struct iterator {
     typename remove_reference_then_cv_t<T0>::iterator iter0;
@@ -1077,12 +1077,12 @@ struct zip_iterator {
 
 template <typename... ArgTypes>
 decltype(auto) zip(ArgTypes &&... args) {
-  return zip_iterator<ArgTypes...>(std::forward<ArgTypes>(args)...);
+  return zip_pair<ArgTypes...>(std::forward<ArgTypes>(args)...);
 }
 
-template <typename T, typename U>
-decltype(auto) zip(std::initializer_list<T> t, std::initializer_list<U> u) {
-  return zip_iterator<std::initializer_list<T>, std::initializer_list<U>>(t, u);
+template <typename... ValueType>
+decltype(auto) zip(const std::initializer_list<ValueType> &... args) {
+  return zip_pair<const std::initializer_list<ValueType> &...>(args...);
 }
 
 namespace ndt {
