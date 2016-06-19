@@ -84,9 +84,12 @@ TEST(Config, Fold) {
 }
 
 TEST(Config, Zip) {
+  array<int, 3> x{0, 1, 2};
+  array<int, 3> y{3, 4, 5};
+
   int i = 0;
   int j = 3;
-  for (auto pair : zip({0, 1, 2}, {3, 4, 5})) {
+  for (auto pair : zip(x, y)) {
     EXPECT_EQ(i, pair.first);
     EXPECT_EQ(j, pair.second);
 
