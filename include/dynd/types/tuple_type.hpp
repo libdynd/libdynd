@@ -15,7 +15,10 @@ namespace dynd {
 
 template <typename... T>
 class tuple {
-  char m_metadata[ndt::traits<tuple<T...>>::metadata_size];
+  union {
+    uintptr_t m_offsets[sizeof...(T)];
+    char m_metadata[ndt::traits<tuple<T...>>::metadata_size];
+  };
   char *m_data;
 
 public:
@@ -25,7 +28,7 @@ public:
 
   template <size_t I>
   uintptr_t offset() const {
-    return *reinterpret_cast<const uintptr_t *>(m_metadata + I * sizeof(uintptr_t));
+    return m_offsets[I];
   }
 
   char *data() const { return m_data; }
