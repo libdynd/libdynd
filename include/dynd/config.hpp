@@ -1093,11 +1093,80 @@ struct zip_pair {
     const_iterator(typename T0::const_iterator iter0, typename T1::const_iterator iter1) : iter0(iter0), iter1(iter1) {}
   };
 
-  const_iterator begin() const { return const_iterator(first.begin(), second.begin()); }
-  iterator begin() { return iterator(first.begin(), second.begin()); }
+  const_iterator begin() const { return const_iterator(std::begin(first), std::begin(second)); }
+  iterator begin() { return iterator(std::begin(first), std::begin(second)); }
 
-  const_iterator end() const { return const_iterator(first.end(), second.end()); }
-  iterator end() { return iterator(first.end(), second.end()); }
+  const_iterator end() const { return const_iterator(std::end(first), std::end(second)); }
+  iterator end() { return iterator(std::end(first), std::end(second)); }
+};
+
+template <typename ValueType0, typename ValueType1>
+struct zip_pair<std::initializer_list<ValueType0>, std::initializer_list<ValueType1>> {
+  const ValueType0 *first;
+  size_t size0;
+  const ValueType1 *second;
+  size_t size1;
+
+  typedef std::initializer_list<ValueType0> T0;
+  typedef std::initializer_list<ValueType1> T1;
+
+  zip_pair(T0 t0, T1 t1) : first(t0.begin()), size0(t0.size()), second(t1.begin()), size1(t1.size()) {}
+
+  struct iterator {
+    typename T0::iterator iter0;
+    typename T1::iterator iter1;
+
+    decltype(auto) operator*() { return zip(*iter0, *iter1); }
+
+    iterator &operator++() {
+      iter0++;
+      iter1++;
+      return *this;
+    }
+
+    iterator operator++(int) {
+      iterator tmp(*this);
+      operator++();
+      return tmp;
+    }
+
+    bool operator==(const iterator &rhs) const { return iter0 == rhs.iter0 && iter1 == rhs.iter1; }
+
+    bool operator!=(const iterator &rhs) const { return iter0 != rhs.iter0 || iter1 != rhs.iter1; }
+
+    iterator(typename T0::iterator iter0, typename T1::iterator iter1) : iter0(iter0), iter1(iter1) {}
+  };
+
+  struct const_iterator {
+    typename T0::const_iterator iter0;
+    typename T1::const_iterator iter1;
+
+    decltype(auto) operator*() { return zip(*iter0, *iter1); }
+
+    const_iterator &operator++() {
+      iter0++;
+      iter1++;
+      return *this;
+    }
+
+    const_iterator operator++(int) {
+      const_iterator tmp(*this);
+      operator++();
+      return tmp;
+    }
+
+    bool operator==(const const_iterator &rhs) const { return iter0 == rhs.iter0 && iter1 == rhs.iter1; }
+
+    bool operator!=(const const_iterator &rhs) const { return iter0 != rhs.iter0 || iter1 != rhs.iter1; }
+
+    const_iterator(typename T0::const_iterator iter0, typename T1::const_iterator iter1) : iter0(iter0), iter1(iter1) {}
+  };
+
+  const_iterator begin() const { return const_iterator(first, second); }
+  iterator begin() { return iterator(first, second); }
+
+  const_iterator end() const { return const_iterator(first + size0, second + size0); }
+  iterator end() { return iterator(first + size0, second + size0); }
 };
 
 template <typename... ArgTypes>
