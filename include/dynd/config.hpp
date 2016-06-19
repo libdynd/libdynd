@@ -1121,7 +1121,12 @@ struct zip_pair<std::initializer_list<ValueType0>, std::initializer_list<ValueTy
     typename T0::iterator iter0;
     typename T1::iterator iter1;
 
-    decltype(auto) operator*() { return zip(*iter0, *iter1); }
+    decltype(auto) operator*() {
+      std::cout << "*iter0 = " << *iter0 << std::endl;
+      std::cout << "*iter1 = " << *iter1 << std::endl;
+
+      return zip(*iter0, *iter1);
+    }
 
     iterator &operator++() {
       iter0++;
