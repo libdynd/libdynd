@@ -1122,8 +1122,8 @@ struct zip_pair<std::initializer_list<ValueType0>, std::initializer_list<ValueTy
     typename T1::iterator iter1;
 
     decltype(auto) operator*() {
-      std::cout << "*iter0 = " << *iter0 << std::endl;
-      std::cout << "*iter1 = " << *iter1 << std::endl;
+      //      std::cout << "*iter0 = " << *iter0 << std::endl;
+      //    std::cout << "*iter1 = " << *iter1 << std::endl;
 
       return zip(*iter0, *iter1);
     }
@@ -1181,7 +1181,14 @@ struct zip_pair<std::initializer_list<ValueType0>, std::initializer_list<ValueTy
     return const_iterator(first, second);
   }
 
-  iterator begin() { return iterator(first, second); }
+  iterator begin() {
+    std::cout << "zip_pair::begin" << std::endl;
+    for (size_t i = 0; i < size0; ++i) {
+      std::cout << "first[" << i << "] = " << first[i] << std::endl;
+    }
+
+    return iterator(first, second);
+  }
 
   const_iterator end() const { return const_iterator(first + size0, second + size0); }
   iterator end() { return iterator(first + size0, second + size0); }
