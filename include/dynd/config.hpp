@@ -1044,8 +1044,8 @@ struct zip_pair {
   zip_pair(T0 t0, T1 t1) : first(t0), second(t1) {}
 
   struct iterator {
-    typename remove_reference_then_cv_t<T0>::iterator iter0;
-    typename remove_reference_then_cv_t<T1>::iterator iter1;
+    typename T0::iterator iter0;
+    typename T1::iterator iter1;
 
     decltype(auto) operator*() { return zip(*iter0, *iter1); }
 
@@ -1065,24 +1065,49 @@ struct zip_pair {
 
     bool operator!=(const iterator &rhs) const { return iter0 != rhs.iter0 || iter1 != rhs.iter1; }
 
-    iterator(typename remove_reference_then_cv_t<T0>::iterator iter0,
-             typename remove_reference_then_cv_t<T1>::iterator iter1)
-        : iter0(iter0), iter1(iter1) {}
+    iterator(typename T0::iterator iter0, typename T1::iterator iter1) : iter0(iter0), iter1(iter1) {}
   };
 
-  iterator begin() const { return iterator(first.begin(), second.begin()); }
+  struct const_iterator {
+    typename T0::const_iterator iter0;
+    typename T1::const_iterator iter1;
 
-  iterator end() const { return iterator(first.end(), second.end()); }
+    decltype(auto) operator*() { return zip(*iter0, *iter1); }
+
+    const_iterator &operator++() {
+      iter0++;
+      iter1++;
+      return *this;
+    }
+
+    const_iterator operator++(int) {
+      const_iterator tmp(*this);
+      operator++();
+      return tmp;
+    }
+
+    bool operator==(const const_iterator &rhs) const { return iter0 == rhs.iter0 && iter1 == rhs.iter1; }
+
+    bool operator!=(const const_iterator &rhs) const { return iter0 != rhs.iter0 || iter1 != rhs.iter1; }
+
+    const_iterator(typename T0::const_iterator iter0, typename T1::const_iterator iter1) : iter0(iter0), iter1(iter1) {}
+  };
+
+  const_iterator begin() const { return const_iterator(first.begin(), second.begin()); }
+  iterator begin() { return iterator(first.begin(), second.begin()); }
+
+  const_iterator end() const { return const_iterator(first.end(), second.end()); }
+  iterator end() { return iterator(first.end(), second.end()); }
 };
 
 template <typename... ArgTypes>
 decltype(auto) zip(ArgTypes &&... args) {
-  return zip_pair<ArgTypes...>(std::forward<ArgTypes>(args)...);
+  return zip_pair<std::decay_t<ArgTypes>...>(std::forward<ArgTypes>(args)...);
 }
 
 template <typename... ValueType>
-decltype(auto) zip(const std::initializer_list<ValueType> &... args) {
-  return zip_pair<const std::initializer_list<ValueType> &...>(args...);
+decltype(auto) zip(std::initializer_list<ValueType> &&... args) {
+  return zip_pair<std::initializer_list<ValueType>...>(args...);
 }
 
 namespace ndt {
