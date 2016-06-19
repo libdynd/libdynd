@@ -1110,7 +1110,12 @@ struct zip_pair<std::initializer_list<ValueType0>, std::initializer_list<ValueTy
   typedef std::initializer_list<ValueType0> T0;
   typedef std::initializer_list<ValueType1> T1;
 
-  zip_pair(T0 t0, T1 t1) : first(t0.begin()), size0(t0.size()), second(t1.begin()), size1(t1.size()) {}
+  zip_pair(T0 t0, T1 t1) : first(t0.begin()), size0(t0.size()), second(t1.begin()), size1(t1.size()) {
+    std::cout << "zip_pair::zip_pair" << std::endl;
+    for (size_t i = 0; i < t0.size(); ++i) {
+      std::cout << "t0[" << i << "] = " << t0.begin()[i] << std::endl;
+    }
+  }
 
   struct iterator {
     typename T0::iterator iter0;
@@ -1162,7 +1167,15 @@ struct zip_pair<std::initializer_list<ValueType0>, std::initializer_list<ValueTy
     const_iterator(typename T0::const_iterator iter0, typename T1::const_iterator iter1) : iter0(iter0), iter1(iter1) {}
   };
 
-  const_iterator begin() const { return const_iterator(first, second); }
+  const_iterator begin() const {
+    std::cout << "zip_pair::begin" << std::endl;
+    for (size_t i = 0; i < size0; ++i) {
+      std::cout << "first[" << i << "] = " << first[i] << std::endl;
+    }
+
+    return const_iterator(first, second);
+  }
+
   iterator begin() { return iterator(first, second); }
 
   const_iterator end() const { return const_iterator(first + size0, second + size0); }
