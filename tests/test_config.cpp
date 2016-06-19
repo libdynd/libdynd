@@ -98,6 +98,7 @@ TEST(Config, Zip) {
   }
 }
 
+/*
 TEST(Config, Zip2) {
   int i = 0;
   int j = 3;
@@ -109,6 +110,7 @@ TEST(Config, Zip2) {
     ++j;
   }
 }
+*/
 
 TEST(Config, Outer) {
   struct type0;

@@ -461,7 +461,6 @@ TYPED_TEST_P(Apply, CallableWithKeywords) {
   EXPECT_ARRAY_EQ(8, af({5, 3}, {{"z", 4}}));
 }
 
-/*
 TEST(Apply, Tuple) {
   using dynd::tuple;
 
@@ -474,7 +473,6 @@ TEST(Apply, Tuple) {
   };
   f(nd::tuple({3, 7.5}));
 }
-*/
 
 TEST(Apply, Fixed) {
   using dynd::fixed;

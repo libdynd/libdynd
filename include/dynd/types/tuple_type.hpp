@@ -218,13 +218,19 @@ namespace ndt {
       dst += sizeof...(T) * sizeof(uintptr_t);
       src += sizeof...(T) * sizeof(uintptr_t);
 
-      for (const auto &pair : zip({traits<T>::metadata_copy_construct...}, {traits<T>::metadata_size...})) {
-        pair.first(dst, src);
-
-        dst += pair.second;
-        src += pair.second;
-      }
+      for_each<type_sequence<T...>>(element_metadata_copy_construct(), dst, src);
     }
+
+  private:
+    struct element_metadata_copy_construct {
+      template <typename ElementType>
+      void on_each(char *&dst, const char *&src) {
+        traits<ElementType>::metadata_copy_construct(dst, src);
+
+        dst += traits<ElementType>::metadata_size;
+        src += traits<ElementType>::metadata_size;
+      }
+    };
   };
 
 } // namespace dynd::ndt
