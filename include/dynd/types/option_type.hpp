@@ -130,10 +130,13 @@ namespace ndt {
   template <typename ValueType>
   struct traits<optional<ValueType>> {
     static const size_t ndim = 0;
+    static const size_t metadata_size = 0;
 
     static const bool is_same_layout = true;
 
     static type equivalent() { return make_type<option_type>(make_type<ValueType>()); }
+
+    static void metadata_copy_construct(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src)) {}
   };
 
 } // namespace dynd::ndt

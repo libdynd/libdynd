@@ -35,7 +35,7 @@ namespace nd {
                                          kwds);
           });
 
-          return this->resolve_return_type(dst_tp, nsrc, src_tp);
+          return this->resolve_return_type(dst_tp, nsrc, src_tp, nkwd, kwds);
         }
       };
 
