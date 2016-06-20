@@ -56,7 +56,7 @@ template <size_t I, typename T>
 using tuple_element_t = typename tuple_element<I, T>::type;
 
 template <size_t I, typename... T>
-std::enable_if_t<ndt::traits<tuple_element_t<I, tuple<T...>>>::is_same_layout, tuple_element_t<I, tuple<T...>>>
+std::enable_if_t<ndt::traits<tuple_element_t<I, tuple<T...>>>::is_same_layout, tuple_element_t<I, tuple<T...>> &>
 get(const tuple<T...> &val) {
   return *reinterpret_cast<tuple_element_t<I, tuple<T...>> *>(val.data() + val.template offset<I>());
 }

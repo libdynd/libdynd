@@ -11,10 +11,11 @@
 
 namespace dynd {
 
-typedef ndt::type (*resolve_t)(size_t, const ndt::type *);
+typedef ndt::type (*resolve_t)(size_t, const ndt::type *, size_t, const nd::array *);
 
 template <typename ReturnType>
-ndt::type default_resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) {
+ndt::type default_resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                          const nd::array *DYND_UNUSED(kwds)) {
   return ndt::make_type<ReturnType>();
 }
 

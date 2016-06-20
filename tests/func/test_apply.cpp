@@ -498,7 +498,8 @@ TEST(Apply, Tuple) {
   f(nd::tuple({{0, 1, 2}, 7.5}));
 }
 
-ndt::type resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) {
+ndt::type resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), size_t DYND_UNUSED(nkwd),
+                  const nd::array *DYND_UNUSED(kwds)) {
   return ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<int>());
 }
 

@@ -55,6 +55,7 @@ public:
 
   char *data() const { return m_data; }
   size_t size() const { return m_size_stride.dim_size; }
+  intptr_t stride() const { return m_size_stride.stride; }
 
   fixed &assign(char *data) {
     m_data = data;

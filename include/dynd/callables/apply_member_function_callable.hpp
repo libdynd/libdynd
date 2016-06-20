@@ -37,7 +37,7 @@ namespace nd {
                                          typename kernel_type::args_type(data, dst_arrmeta, src_arrmeta), kwds);
           });
 
-          return this->resolve_return_type(dst_tp, nsrc, src_tp);
+          return this->resolve_return_type(dst_tp, nsrc, src_tp, nkwd, kwds);
         }
       };
 

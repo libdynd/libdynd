@@ -856,12 +856,15 @@ namespace ndt {
   template <>
   struct traits<long> {
     static const size_t ndim = 0;
+    static const size_t metadata_size = 0;
 
     static const bool is_same_layout = true;
 
     static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<long>::value), false); }
 
     static long na() { return std::numeric_limits<long>::min(); }
+
+    static void metadata_copy_construct(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src)) {}
   };
 
   template <>
