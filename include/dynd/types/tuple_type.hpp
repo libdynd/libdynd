@@ -212,6 +212,7 @@ namespace ndt {
 
   template <typename... T>
   struct traits<tuple<T...>> {
+    static const size_t ndim = 0;
     static const size_t metadata_size =
         sizeof...(T) * sizeof(uintptr_t) + xfold(my_plus(), traits<T>::metadata_size...);
 
