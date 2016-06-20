@@ -102,7 +102,7 @@ TYPED_TEST_P(Array, OneDimConstructor) {
   EXPECT_EQ(1, a.get_shape()[0]);
   EXPECT_EQ(1, a.get_dim_size(0));
   EXPECT_EQ(1u, a.get_strides().size());
-  EXPECT_EQ(0, a.get_strides()[0]);
+  EXPECT_EQ(static_cast<intptr_t>(sizeof(float)), a.get_strides()[0]);
 
   // One-dimensional nd::array
   a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_type<float>())));
@@ -131,7 +131,7 @@ TYPED_TEST_P(Array, TwoDimConstructor) {
   EXPECT_EQ(1, a.get_dim_size(1));
   EXPECT_EQ(2u, a.get_strides().size());
   EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[0]);
-  EXPECT_EQ(0, a.get_strides()[1]);
+  EXPECT_EQ(static_cast<intptr_t>(sizeof(float)), a.get_strides()[1]);
 
   // Two-dimensional nd::array with a size-one dimension
   a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(1, ndt::make_fixed_dim(3, ndt::make_type<float>()))));
@@ -145,7 +145,7 @@ TYPED_TEST_P(Array, TwoDimConstructor) {
   EXPECT_EQ(3, a.get_shape()[1]);
   EXPECT_EQ(3, a.get_dim_size(1));
   EXPECT_EQ(2u, a.get_strides().size());
-  EXPECT_EQ(0, a.get_strides()[0]);
+  EXPECT_EQ(static_cast<intptr_t>(3 * sizeof(float)), a.get_strides()[0]);
   EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[1]);
 
   // Two-dimensional nd::array
@@ -182,7 +182,7 @@ TYPED_TEST_P(Array, ThreeDimConstructor) {
   EXPECT_EQ(4, a.get_shape()[2]);
   EXPECT_EQ(4, a.get_dim_size(2));
   EXPECT_EQ(3u, a.get_strides().size());
-  EXPECT_EQ(0, a.get_strides()[0]);
+  EXPECT_EQ(static_cast<intptr_t>(20 * sizeof(float)), a.get_strides()[0]);
   EXPECT_EQ(4 * sizeof(float), (unsigned)a.get_strides()[1]);
   EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[2]);
 
@@ -204,7 +204,7 @@ TYPED_TEST_P(Array, ThreeDimConstructor) {
   EXPECT_EQ(4, a.get_dim_size(2));
   EXPECT_EQ(3u, a.get_strides().size());
   EXPECT_EQ(4 * sizeof(float), (unsigned)a.get_strides()[0]);
-  EXPECT_EQ(0, a.get_strides()[1]);
+  EXPECT_EQ(static_cast<intptr_t>(4 * sizeof(float)), a.get_strides()[1]);
   EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[2]);
 
   // Three-dimensional nd::array with size-one dimension
@@ -226,7 +226,7 @@ TYPED_TEST_P(Array, ThreeDimConstructor) {
   EXPECT_EQ(3u, a.get_strides().size());
   EXPECT_EQ(5 * sizeof(float), (unsigned)a.get_strides()[0]);
   EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[1]);
-  EXPECT_EQ(0, a.get_strides()[2]);
+  EXPECT_EQ(static_cast<intptr_t>(sizeof(float)), a.get_strides()[2]);
 
   // Three-dimensional nd::array
   a = nd::empty(TestFixture::MakeType(
@@ -359,7 +359,7 @@ TEST(Array, StdVectorConstructor) {
   EXPECT_EQ(0, a.get_shape()[0]);
   EXPECT_EQ(0, a.get_dim_size(0));
   EXPECT_EQ(1u, a.get_strides().size());
-  EXPECT_EQ(0, a.get_strides()[0]);
+  EXPECT_EQ(static_cast<intptr_t>(sizeof(float)), a.get_strides()[0]);
 
   // Size-10 vector
   for (int i = 0; i < 10; ++i) {
@@ -390,7 +390,7 @@ TEST(Array, StdVectorStringConstructor) {
   EXPECT_EQ(0, a.get_shape()[0]);
   EXPECT_EQ(0, a.get_dim_size(0));
   EXPECT_EQ(1u, a.get_strides().size());
-  EXPECT_EQ(0, a.get_strides()[0]);
+  EXPECT_EQ(static_cast<intptr_t>(sizeof(dynd::string)), a.get_strides()[0]);
 
   // Size-5 vector
   v.push_back("this");

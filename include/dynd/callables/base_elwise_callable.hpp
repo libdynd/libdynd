@@ -63,6 +63,9 @@ namespace nd {
             arg_element_tp[i] = arg_tp[i];
           } else {
             arg_size[i] = arg_tp[i].extended<ndt::base_dim_type>()->get_dim_size();
+            if (arg_size[i] == 1) {
+              data.arg_broadcast[i] = true;
+            }
             arg_element_tp[i] = arg_tp[i].extended<ndt::base_dim_type>()->get_element_type();
           }
         }

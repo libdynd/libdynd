@@ -240,7 +240,8 @@ void ndt::fixed_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref
 
   fixed_dim_type_arrmeta *md = reinterpret_cast<fixed_dim_type_arrmeta *>(arrmeta);
   md->dim_size = get_fixed_dim_size();
-  md->stride = m_dim_size > 1 ? element_size : 0;
+  md->stride = element_size;
+
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_default_construct(arrmeta + sizeof(fixed_dim_type_arrmeta), blockref_alloc);
   }
