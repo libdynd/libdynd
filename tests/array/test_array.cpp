@@ -359,7 +359,7 @@ TEST(Array, StdVectorConstructor) {
   EXPECT_EQ(0, a.get_shape()[0]);
   EXPECT_EQ(0, a.get_dim_size(0));
   EXPECT_EQ(1u, a.get_strides().size());
-  EXPECT_EQ(0, a.get_strides()[0]);
+  EXPECT_EQ(static_cast<intptr_t>(sizeof(float)), a.get_strides()[0]);
 
   // Size-10 vector
   for (int i = 0; i < 10; ++i) {
@@ -390,7 +390,7 @@ TEST(Array, StdVectorStringConstructor) {
   EXPECT_EQ(0, a.get_shape()[0]);
   EXPECT_EQ(0, a.get_dim_size(0));
   EXPECT_EQ(1u, a.get_strides().size());
-  EXPECT_EQ(0, a.get_strides()[0]);
+  EXPECT_EQ(static_cast<intptr_t>(sizeof(dynd::string)), a.get_strides()[0]);
 
   // Size-5 vector
   v.push_back("this");
