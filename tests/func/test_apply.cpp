@@ -14,6 +14,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/callable.hpp>
+#include <dynd/types/tuple_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -458,6 +459,43 @@ TYPED_TEST_P(Apply, CallableWithKeywords) {
 
   af = nd::functional::apply<callable2<TestFixture::KernelRequest>, int>("z");
   EXPECT_ARRAY_EQ(8, af({5, 3}, {{"z", 4}}));
+}
+
+TEST(Apply, Fixed) {
+  using dynd::fixed;
+
+  nd::callable f([](fixed<int> x) {
+    EXPECT_EQ(0, x[0]);
+    EXPECT_EQ(1, x[1]);
+    EXPECT_EQ(2, x[2]);
+    EXPECT_EQ(3, x[3]);
+    EXPECT_EQ(4, x[4]);
+  });
+  f(nd::array{0, 1, 2, 3, 4});
+}
+
+TEST(Apply, Tuple) {
+  using dynd::fixed;
+  using dynd::tuple;
+
+  nd::callable f([](const tuple<int> &x) { EXPECT_EQ(1, get<0>(x)); });
+  f(nd::tuple({1}));
+
+  f = [](const tuple<int, double> &x) {
+    EXPECT_EQ(3, get<0>(x));
+    EXPECT_EQ(7.5, get<1>(x));
+  };
+  f(nd::tuple({3, 7.5}));
+
+  f = [](const tuple<fixed<int>, double> &x) {
+    const fixed<int> &y = get<0>(x);
+    EXPECT_EQ(0, y[0]);
+    EXPECT_EQ(1, y[1]);
+    EXPECT_EQ(2, y[2]);
+
+    EXPECT_EQ(7.5, get<1>(x));
+  };
+  f(nd::tuple({{0, 1, 2}, 7.5}));
 }
 
 ndt::type resolve(size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) {

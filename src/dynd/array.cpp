@@ -760,6 +760,20 @@ std::ostream &nd::operator<<(std::ostream &o, const array &rhs) {
   return o;
 }
 
+nd::array nd::tuple(size_t size, const array *vals) {
+  std::vector<ndt::type> types(size);
+  for (size_t i = 0; i < size; ++i) {
+    types[i] = vals[i].get_type();
+  }
+
+  array res = empty(ndt::make_type<ndt::tuple_type>(size, types.data()));
+  for (size_t i = 0; i < size; ++i) {
+    res(i).assign(vals[i]);
+  }
+
+  return res;
+}
+
 nd::array nd::as_struct(size_t size, const pair<const char *, array> *pairs) {
   std::vector<std::string> names(size);
   std::vector<ndt::type> types(size);

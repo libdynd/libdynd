@@ -842,10 +842,13 @@ namespace ndt {
   template <>
   struct traits<int> {
     static const size_t ndim = 0;
+    static const size_t metadata_size = 0;
 
     static const bool is_same_layout = true;
 
     static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<int>::value), false); }
+
+    static void metadata_copy_construct(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src)) {}
 
     static int na() { return std::numeric_limits<int>::min(); }
   };
@@ -967,12 +970,15 @@ namespace ndt {
   template <>
   struct traits<double> {
     static const size_t ndim = 0;
+    static const size_t metadata_size = 0;
 
     static const bool is_same_layout = true;
 
     static type equivalent() { return type(reinterpret_cast<base_type *>(id_of<double>::value), false); }
 
-//    static double na() { return 0x7ff00000000007a2ULL; }
+    static void metadata_copy_construct(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src)) {}
+
+    //    static double na() { return 0x7ff00000000007a2ULL; }
   };
 
   template <>

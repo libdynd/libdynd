@@ -490,6 +490,10 @@ namespace nd {
     friend class array_vals_at;
   };
 
+  DYND_API array tuple(size_t size, const array *vals);
+
+  inline array tuple(std::initializer_list<array> vals) { return tuple(vals.size(), vals.begin()); }
+
   DYND_API array as_struct(size_t size, const std::pair<const char *, array> *pairs);
 
   inline array as_struct(const std::initializer_list<std::pair<const char *, array>> &pairs) {

@@ -34,20 +34,23 @@ struct return_wrapper {
 namespace nd {
   namespace functional {
 
+    template <typename ArgType, size_t I, typename Enable = void>
+    struct apply_arg;
+
     template <typename A, size_t I>
-    struct apply_arg {
+    struct apply_arg<A, I, std::enable_if_t<ndt::traits<A>::is_same_layout>> {
       apply_arg(char *DYND_UNUSED(data), const char *DYND_UNUSED(arrmeta)) {}
 
       A &assign(char *data) { return *reinterpret_cast<A *>(data); }
     };
 
-    template <typename ElementType, size_t I>
-    struct apply_arg<fixed<ElementType>, I> {
-      fixed<ElementType> value;
+    template <typename ArgType, size_t I>
+    struct apply_arg<ArgType, I, std::enable_if_t<!ndt::traits<ArgType>::is_same_layout>> {
+      ArgType value;
 
       apply_arg(char *DYND_UNUSED(data), const char *arrmeta) : value(arrmeta, NULL) {}
 
-      fixed<ElementType> &assign(char *data) { return value.assign(data); }
+      ArgType &assign(char *data) { return value.assign(data); }
     };
 
     template <typename ReturnType, resolve_t Resolve, size_t I>

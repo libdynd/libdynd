@@ -13,6 +13,18 @@
 using namespace std;
 using namespace dynd;
 
+void ndt::struct_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const {
+  const uintptr_t *data_offsets = reinterpret_cast<const uintptr_t *>(arrmeta);
+  o << "[";
+  for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
+    get_field_type(i).print_data(o, arrmeta + m_arrmeta_offsets[i], data + data_offsets[i]);
+    if (i != i_end - 1) {
+      o << ", ";
+    }
+  }
+  o << "]";
+}
+
 intptr_t ndt::struct_type::get_field_index(const std::string &name) const {
   auto it = std::find(m_field_names.begin(), m_field_names.end(), name);
   if (it != m_field_names.end()) {

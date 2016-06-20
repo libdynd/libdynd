@@ -12,6 +12,62 @@
 #include <dynd/types/fixed_dim_type.hpp>
 
 namespace dynd {
+
+template <typename... T>
+class tuple {
+  union {
+    uintptr_t m_offsets[sizeof...(T)];
+    char m_metadata[ndt::traits<tuple<T...>>::metadata_size];
+  };
+  char *m_data;
+
+public:
+  tuple(const char *metadata, char *data) : m_data(data) {
+    ndt::traits<tuple<T...>>::metadata_copy_construct(m_metadata, metadata);
+  }
+
+  template <size_t I>
+  uintptr_t offset() const {
+    return m_offsets[I];
+  }
+
+  const char *metadata() const { return m_metadata; }
+
+  char *data() const { return m_data; }
+
+  tuple &assign(char *data) {
+    m_data = data;
+    return *this;
+  }
+};
+
+template <size_t I, typename T>
+struct tuple_element;
+
+template <size_t I, typename T0, typename... T>
+struct tuple_element<I, tuple<T0, T...>> : tuple_element<I - 1, tuple<T...>> {};
+
+template <typename T0, typename... T>
+struct tuple_element<0, tuple<T0, T...>> {
+  typedef T0 type;
+};
+
+template <size_t I, typename T>
+using tuple_element_t = typename tuple_element<I, T>::type;
+
+template <size_t I, typename... T>
+std::enable_if_t<ndt::traits<tuple_element_t<I, tuple<T...>>>::is_same_layout, tuple_element_t<I, tuple<T...>>>
+get(const tuple<T...> &val) {
+  return *reinterpret_cast<tuple_element_t<I, tuple<T...>> *>(val.data() + val.template offset<I>());
+}
+
+template <size_t I, typename... T>
+std::enable_if_t<!ndt::traits<tuple_element_t<I, tuple<T...>>>::is_same_layout, tuple_element_t<I, tuple<T...>>>
+get(const tuple<T...> &val) {
+  return tuple_element_t<I, tuple<T...>>(val.metadata() + sizeof...(T) * sizeof(uintptr_t),
+                                         val.data() + val.template offset<I>());
+}
+
 namespace ndt {
 
   class DYNDT_API tuple_type : public base_type {
@@ -149,6 +205,39 @@ namespace ndt {
 
   template <>
   struct id_of<tuple_type> : std::integral_constant<type_id_t, tuple_id> {};
+
+  struct my_plus {
+    constexpr size_t operator()(size_t x, size_t y) const { return x + y; }
+  };
+
+  template <typename... T>
+  struct traits<tuple<T...>> {
+    static const size_t metadata_size =
+        sizeof...(T) * sizeof(uintptr_t) + xfold(my_plus(), traits<T>::metadata_size...);
+
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return make_type<tuple_type>({make_type<T>()...}); }
+
+    static void metadata_copy_construct(char *dst, const char *src) {
+      memcpy(dst, src, sizeof...(T) * sizeof(uintptr_t));
+      dst += sizeof...(T) * sizeof(uintptr_t);
+      src += sizeof...(T) * sizeof(uintptr_t);
+
+      for_each<type_sequence<T...>>(element_metadata_copy_construct(), dst, src);
+    }
+
+  private:
+    struct element_metadata_copy_construct {
+      template <typename ElementType>
+      void on_each(char *&dst, const char *&src) {
+        traits<ElementType>::metadata_copy_construct(dst, src);
+
+        dst += traits<ElementType>::metadata_size;
+        src += traits<ElementType>::metadata_size;
+      }
+    };
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

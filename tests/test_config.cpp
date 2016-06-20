@@ -78,6 +78,40 @@ TEST(Config, HasMember) {
   EXPECT_FALSE((has_member_func<func_wrapper, int()>::value));
 }
 
+TEST(Config, Fold) {
+  EXPECT_EQ(10, lfold<std::plus<int>>(0, 1, 2, 3, 4));
+  EXPECT_EQ(24, lfold<std::multiplies<int>>(1, 2, 3, 4));
+}
+
+TEST(Config, Zip) {
+  array<int, 3> x{0, 1, 2};
+  array<int, 3> y{3, 4, 5};
+
+  int i = 0;
+  int j = 3;
+  for (auto pair : zip(x, y)) {
+    EXPECT_EQ(i, pair.first);
+    EXPECT_EQ(j, pair.second);
+
+    ++i;
+    ++j;
+  }
+}
+
+/*
+TEST(Config, Zip2) {
+  int i = 0;
+  int j = 3;
+  for (auto pair : zip({0, 1, 2}, {3, 4, 5})) {
+    EXPECT_EQ(i, pair.first);
+    EXPECT_EQ(j, pair.second);
+
+    ++i;
+    ++j;
+  }
+}
+*/
+
 TEST(Config, Outer) {
   struct type0;
   struct type1;

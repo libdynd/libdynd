@@ -16,7 +16,10 @@ class fixed;
 
 template <typename ElementType>
 class fixed<ElementType, std::enable_if_t<ndt::traits<ElementType>::is_same_layout>> {
-  const char *m_metadata;
+  union {
+    size_stride_t m_size_stride;
+    char m_metadata[ndt::traits<fixed<ElementType>>::metadata_size];
+  };
   char *m_data;
 
 public:
@@ -46,10 +49,12 @@ public:
     bool operator!=(const iterator &rhs) const { return m_data != rhs.m_data; }
   };
 
-  fixed(const char *metadata, char *data) : m_metadata(metadata), m_data(data) {}
+  fixed(const char *metadata, char *data) : m_data(data) {
+    ndt::traits<fixed<ElementType>>::metadata_copy_construct(m_metadata, metadata);
+  }
 
   char *data() const { return m_data; }
-  size_t size() const { return reinterpret_cast<const size_stride_t *>(this->m_metadata)->dim_size; }
+  size_t size() const { return m_size_stride.dim_size; }
 
   fixed &assign(char *data) {
     m_data = data;
@@ -57,27 +62,26 @@ public:
   }
 
   const ElementType &operator[](size_t i) const {
-    return *reinterpret_cast<const ElementType *>(
-        this->m_data + i * reinterpret_cast<const size_stride_t *>(this->m_metadata)->stride);
+    return *reinterpret_cast<const ElementType *>(this->m_data + i * m_size_stride.stride);
   }
 
   ElementType &operator[](size_t i) {
-    return *reinterpret_cast<ElementType *>(this->m_data +
-                                            i * reinterpret_cast<const size_stride_t *>(this->m_metadata)->stride);
+    return *reinterpret_cast<ElementType *>(this->m_data + i * m_size_stride.stride);
   }
 
   iterator begin() const { return iterator(this->m_metadata, this->m_data); }
 
   iterator end() const {
-    return iterator(this->m_metadata, this->m_data +
-                                          reinterpret_cast<const size_stride_t *>(this->m_metadata)->dim_size *
-                                              reinterpret_cast<const size_stride_t *>(this->m_metadata)->stride);
+    return iterator(this->m_metadata, this->m_data + m_size_stride.dim_size * m_size_stride.stride);
   }
 };
 
 template <typename ElementType>
 class fixed<ElementType, std::enable_if_t<!ndt::traits<ElementType>::is_same_layout>> {
-  const char *m_metadata;
+  union {
+    size_stride_t m_size_stride;
+    char m_metadata[ndt::traits<fixed<ElementType>>::metadata_size];
+  };
   char *m_data;
 
 public:
@@ -112,11 +116,13 @@ public:
     bool operator!=(const iterator &rhs) const { return m_current.data() != rhs.m_current.data(); }
   };
 
-  fixed(const char *metadata, char *data) : m_metadata(metadata), m_data(data) {}
+  fixed(const char *metadata, char *data) : m_data(data) {
+    ndt::traits<fixed<ElementType>>::metadata_copy_construct(m_metadata, metadata);
+  }
 
   char *data() const { return m_data; }
-  size_t size() const { return reinterpret_cast<const size_stride_t *>(m_metadata)->dim_size; }
-  intptr_t stride() const { return reinterpret_cast<const size_stride_t *>(m_metadata)->stride; }
+  size_t size() const { return m_size_stride.dim_size; }
+  intptr_t stride() const { return m_size_stride.stride; }
 
   fixed &assign(char *data) {
     m_data = data;
@@ -124,22 +130,16 @@ public:
   }
 
   ElementType operator[](size_t i) const {
-    return ElementType(m_metadata + sizeof(size_stride_t),
-                       m_data + i * reinterpret_cast<const size_stride_t *>(m_metadata)->stride);
+    return ElementType(m_metadata + sizeof(size_stride_t), m_data + i * m_size_stride.stride);
   }
 
   ElementType operator[](size_t i) {
-    return ElementType(m_metadata + sizeof(size_stride_t),
-                       m_data + i * reinterpret_cast<const size_stride_t *>(m_metadata)->stride);
+    return ElementType(m_metadata + sizeof(size_stride_t), m_data + i * m_size_stride.stride);
   }
 
   iterator begin() const { return iterator(m_metadata, m_data); }
 
-  iterator end() const {
-    return iterator(m_metadata, m_data +
-                                    reinterpret_cast<const size_stride_t *>(m_metadata)->dim_size *
-                                        reinterpret_cast<const size_stride_t *>(m_metadata)->stride);
-  }
+  iterator end() const { return iterator(m_metadata, m_data + m_size_stride.dim_size * m_size_stride.stride); }
 };
 
 namespace ndt {
@@ -214,11 +214,19 @@ namespace ndt {
 
   template <typename ElementType>
   struct traits<fixed<ElementType>> {
+    static const size_t metadata_size = sizeof(size_stride_t) + traits<ElementType>::metadata_size;
     static const size_t ndim = 1 + traits<ElementType>::ndim;
 
     static const bool is_same_layout = false;
 
     static type equivalent() { return make_type<fixed_dim_kind_type>(make_type<ElementType>()); }
+
+    static void metadata_copy_construct(char *dst, const char *src) {
+      reinterpret_cast<size_stride_t *>(dst)->dim_size = reinterpret_cast<const size_stride_t *>(src)->dim_size;
+      reinterpret_cast<size_stride_t *>(dst)->stride = reinterpret_cast<const size_stride_t *>(src)->stride;
+
+      traits<ElementType>::metadata_copy_construct(dst + sizeof(size_stride_t), src + sizeof(size_stride_t));
+    }
   };
 
 } // namespace dynd::ndt

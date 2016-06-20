@@ -972,6 +972,214 @@ DYNDT_API void load(const std::string &path);
 
 typedef intptr_t index_t;
 
+template <typename T, typename BinaryFunction>
+struct identity_element;
+
+template <typename T, typename BinaryFunction>
+struct left_identity_element : identity_element<T, BinaryFunction> {};
+
+template <typename T, typename BinaryFunction>
+struct right_identity_element : identity_element<T, BinaryFunction> {};
+
+template <typename BinaryFunction>
+struct empty_lfold {
+  template <typename T>
+  constexpr operator T() const {
+    return left_identity_element<T, BinaryFunction>::value;
+  }
+};
+
+template <typename BinaryFunction>
+struct empty_rfold {
+  template <typename T>
+  constexpr operator T() const {
+    return right_identity_element<T, BinaryFunction>::value;
+  }
+};
+
+template <typename BinaryFunction>
+auto lfold() -> empty_lfold<BinaryFunction> {
+  return {};
+}
+
+template <typename BinaryFunction, typename First>
+constexpr auto xfold(BinaryFunction, const First &first) -> First {
+  return first;
+}
+
+template <typename BinaryFunction, typename First, typename Second>
+constexpr auto xfold(BinaryFunction f, First &&first, Second &&second) -> decltype(auto) {
+  return f(std::forward<First>(first), std::forward<Second>(second));
+}
+
+template <typename BinaryFunction, typename First, typename Second, typename... Tail>
+constexpr auto xfold(BinaryFunction f, First &&first, Second &&second, Tail &&... tail) -> decltype(auto) {
+  return xfold(f, f(std::forward<First>(first), std::forward<Second>(second)), std::forward<Tail>(tail)...);
+}
+
+template <typename BinaryFunction, typename First>
+constexpr auto lfold(const First &first) -> First {
+  return first;
+}
+
+template <typename BinaryFunction, typename First, typename Second>
+constexpr auto lfold(First &&first, Second &&second) -> decltype(auto) {
+  return BinaryFunction{}(std::forward<First>(first), std::forward<Second>(second));
+}
+
+template <typename BinaryFunction, typename First, typename Second, typename... Tail>
+constexpr auto lfold(First &&first, Second &&second, Tail &&... tail) -> decltype(auto) {
+  return lfold<BinaryFunction>(BinaryFunction{}(std::forward<First>(first), std::forward<Second>(second)),
+                               std::forward<Tail>(tail)...);
+}
+
+template <typename... ArgTypes>
+decltype(auto) zip(ArgTypes &&... args);
+
+template <typename T0, typename T1>
+struct zip_pair {
+  T0 first;
+  T1 second;
+
+  zip_pair(T0 t0, T1 t1) : first(t0), second(t1) {}
+
+  struct iterator {
+    typename T0::iterator iter0;
+    typename T1::iterator iter1;
+
+    decltype(auto) operator*() { return zip(*iter0, *iter1); }
+
+    iterator &operator++() {
+      iter0++;
+      iter1++;
+      return *this;
+    }
+
+    iterator operator++(int) {
+      iterator tmp(*this);
+      operator++();
+      return tmp;
+    }
+
+    bool operator==(const iterator &rhs) const { return iter0 == rhs.iter0 && iter1 == rhs.iter1; }
+
+    bool operator!=(const iterator &rhs) const { return iter0 != rhs.iter0 || iter1 != rhs.iter1; }
+
+    iterator(typename T0::iterator iter0, typename T1::iterator iter1) : iter0(iter0), iter1(iter1) {}
+  };
+
+  struct const_iterator {
+    typename T0::const_iterator iter0;
+    typename T1::const_iterator iter1;
+
+    decltype(auto) operator*() { return zip(*iter0, *iter1); }
+
+    const_iterator &operator++() {
+      iter0++;
+      iter1++;
+      return *this;
+    }
+
+    const_iterator operator++(int) {
+      const_iterator tmp(*this);
+      operator++();
+      return tmp;
+    }
+
+    bool operator==(const const_iterator &rhs) const { return iter0 == rhs.iter0 && iter1 == rhs.iter1; }
+
+    bool operator!=(const const_iterator &rhs) const { return iter0 != rhs.iter0 || iter1 != rhs.iter1; }
+
+    const_iterator(typename T0::const_iterator iter0, typename T1::const_iterator iter1) : iter0(iter0), iter1(iter1) {}
+  };
+
+  const_iterator begin() const { return const_iterator(std::begin(first), std::begin(second)); }
+  iterator begin() { return iterator(std::begin(first), std::begin(second)); }
+
+  const_iterator end() const { return const_iterator(std::end(first), std::end(second)); }
+  iterator end() { return iterator(std::end(first), std::end(second)); }
+};
+
+template <typename ValueType0, typename ValueType1>
+struct zip_pair<std::initializer_list<ValueType0>, std::initializer_list<ValueType1>> {
+  const ValueType0 *first;
+  size_t size0;
+  const ValueType1 *second;
+  size_t size1;
+
+  typedef std::initializer_list<ValueType0> T0;
+  typedef std::initializer_list<ValueType1> T1;
+
+  zip_pair(T0 t0, T1 t1) : first(t0.begin()), size0(t0.size()), second(t1.begin()), size1(t1.size()) {}
+
+  struct iterator {
+    typename T0::iterator iter0;
+    typename T1::iterator iter1;
+
+    decltype(auto) operator*() { return zip(*iter0, *iter1); }
+
+    iterator &operator++() {
+      iter0++;
+      iter1++;
+      return *this;
+    }
+
+    iterator operator++(int) {
+      iterator tmp(*this);
+      operator++();
+      return tmp;
+    }
+
+    bool operator==(const iterator &rhs) const { return iter0 == rhs.iter0 && iter1 == rhs.iter1; }
+
+    bool operator!=(const iterator &rhs) const { return iter0 != rhs.iter0 || iter1 != rhs.iter1; }
+
+    iterator(typename T0::iterator iter0, typename T1::iterator iter1) : iter0(iter0), iter1(iter1) {}
+  };
+
+  struct const_iterator {
+    typename T0::const_iterator iter0;
+    typename T1::const_iterator iter1;
+
+    decltype(auto) operator*() { return zip(*iter0, *iter1); }
+
+    const_iterator &operator++() {
+      iter0++;
+      iter1++;
+      return *this;
+    }
+
+    const_iterator operator++(int) {
+      const_iterator tmp(*this);
+      operator++();
+      return tmp;
+    }
+
+    bool operator==(const const_iterator &rhs) const { return iter0 == rhs.iter0 && iter1 == rhs.iter1; }
+
+    bool operator!=(const const_iterator &rhs) const { return iter0 != rhs.iter0 || iter1 != rhs.iter1; }
+
+    const_iterator(typename T0::const_iterator iter0, typename T1::const_iterator iter1) : iter0(iter0), iter1(iter1) {}
+  };
+
+  const_iterator begin() const { return const_iterator(first, second); }
+
+  iterator begin() { return iterator(first, second); }
+
+  const_iterator end() const { return const_iterator(first + size0, second + size0); }
+  iterator end() { return iterator(first + size0, second + size0); }
+};
+
+template <typename... ArgTypes>
+decltype(auto) zip(ArgTypes &&... args) {
+  return zip_pair<std::decay_t<ArgTypes>...>(std::forward<ArgTypes>(args)...);
+}
+
+template <typename... ValueType>
+decltype(auto) zip(std::initializer_list<ValueType> &&... args) {
+  return zip_pair<std::initializer_list<ValueType>...>(args...);
+}
+
 namespace ndt {
 
   class type;
