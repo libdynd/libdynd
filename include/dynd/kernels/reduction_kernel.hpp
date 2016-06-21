@@ -365,7 +365,8 @@ namespace nd {
     struct reduction_kernel<ndt::fixed_dim_type, true, false, NArg>
         : base_reduction_kernel<reduction_kernel<ndt::fixed_dim_type, true, false, NArg>, NArg> {
       intptr_t _size;
-      intptr_t dst_stride, src_stride;
+      intptr_t dst_stride;
+      intptr_t src_stride;
 
       reduction_kernel(std::intptr_t size, std::intptr_t dst_stride, std::intptr_t src_stride)
           : _size(size), dst_stride(dst_stride), src_stride(src_stride) {}
@@ -440,14 +441,15 @@ namespace nd {
         : base_reduction_kernel<reduction_kernel<ndt::fixed_dim_type, true, true, NArg>, NArg> {
       // The code assumes that size >= 1
       intptr_t _size;
-      intptr_t dst_stride, src_stride;
+      intptr_t dst_stride;
+      intptr_t src_stride[NArg];
       size_t dst_init_kernel_offset;
 
       intptr_t size_first;
       intptr_t dst_stride_first;
-      intptr_t src_stride_first;
+      intptr_t src_stride_first[NArg];
 
-      reduction_kernel(intptr_t dst_stride, intptr_t src_stride) : dst_stride(dst_stride), src_stride(src_stride) {}
+      reduction_kernel(intptr_t dst_stride, intptr_t src_stride) : dst_stride(dst_stride), src_stride{src_stride} {}
 
       ~reduction_kernel() {
         // The reduction kernel
@@ -458,10 +460,10 @@ namespace nd {
 
       void single_first(char *dst, char *const *src) {
         // Initialize the dst values
-        this->get_child(dst_init_kernel_offset)->strided(dst, dst_stride, src, &src_stride_first, _size);
-        if (src_stride_first == 0) {
+        this->get_child(dst_init_kernel_offset)->strided(dst, dst_stride, src, src_stride_first, _size);
+        if (src_stride_first[0] == 0) {
           // Then do the accumulation
-          this->get_child()->strided(dst, dst_stride, src, &src_stride, _size);
+          this->get_child()->strided(dst, dst_stride, src, src_stride, _size);
         }
       }
 
@@ -469,49 +471,57 @@ namespace nd {
         kernel_prefix *init_child = this->get_child(dst_init_kernel_offset);
         kernel_prefix *reduction_child = this->get_child();
 
-        intptr_t inner_size = this->_size;
-        intptr_t inner_dst_stride = this->dst_stride;
-        intptr_t inner_src_stride = this->src_stride;
-        char *src0 = src[0];
-        intptr_t src0_stride = src_stride[0];
+        char *child_src[NArg] = {src[0]};
         if (dst_stride == 0) {
           // With a zero stride, we initialize "dst" once, then do many
           // accumulations
-          init_child->strided(dst, inner_dst_stride, &src0, &this->src_stride_first, inner_size);
+          init_child->strided(dst, this->dst_stride, child_src, this->src_stride_first, this->_size);
+
           dst += dst_stride_first;
-          src0 += src_stride_first;
+          for (size_t j = 0; j < NArg; ++j) {
+            child_src[j] += src_stride_first[j];
+          }
+
           for (size_t i = 1; i != count; ++i) {
-            reduction_child->strided(dst, inner_dst_stride, &src0, &inner_src_stride, inner_size);
-            src0 += src0_stride;
+            reduction_child->strided(dst, this->dst_stride, child_src, this->src_stride, this->_size);
+
+            for (size_t j = 0; j < NArg; ++j) {
+              child_src[j] += src_stride[j];
+            }
           }
         } else {
           // With a non-zero stride, every iteration is an initialization
           for (size_t i = 0; i != count; ++i) {
-            init_child->strided(dst, inner_dst_stride, &src0, &src_stride_first, _size);
-            if (src_stride_first == 0) {
-              reduction_child->strided(dst, inner_dst_stride, &src0, &inner_src_stride, _size);
+            init_child->strided(dst, this->dst_stride, child_src, src_stride_first, _size);
+            if (src_stride_first[0] == 0) {
+              reduction_child->strided(dst, this->dst_stride, child_src, this->src_stride, _size);
             }
 
             dst += dst_stride;
-            src0 += src0_stride;
+            for (size_t j = 0; j < NArg; ++j) {
+              child_src[j] += src_stride[j];
+            }
           }
         }
       }
 
       void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride,
                             size_t count) {
-        kernel_prefix *echild_reduce = this->get_child();
         // No initialization, all reduction
-        kernel_strided_t opchild_reduce = echild_reduce->get_function<kernel_strided_t>();
-        intptr_t inner_size = this->_size;
-        intptr_t inner_dst_stride = this->dst_stride;
-        intptr_t inner_src_stride = this->src_stride;
-        char *src0 = src[0];
-        intptr_t src0_stride = src_stride[0];
+        kernel_prefix *child = this->get_child();
+
+        char *child_src[NArg];
+        for (size_t j = 0; j < NArg; ++j) {
+          child_src[j] = src[j];
+        }
+
         for (size_t i = 0; i != count; ++i) {
-          opchild_reduce(echild_reduce, dst, inner_dst_stride, &src0, &inner_src_stride, inner_size);
+          child->strided(dst, this->dst_stride, child_src, this->src_stride, this->_size);
+
           dst += dst_stride;
-          src0 += src0_stride;
+          for (size_t j = 0; j < NArg; ++j) {
+            child_src[j] += src_stride[j];
+          }
         }
       }
     };

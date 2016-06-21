@@ -162,11 +162,15 @@ namespace nd {
               if (!identity) { // identity is null
                 self_k->size_first = self_k->_size - 1;
                 self_k->dst_stride_first = self_k->dst_stride;
-                self_k->src_stride_first = self_k->src_stride;
+                for (size_t i = 0; i < 1; ++i) {
+                  self_k->src_stride_first[i] = self_k->src_stride[i];
+                }
               } else {
                 self_k->size_first = self_k->_size;
                 self_k->dst_stride_first = 0;
-                self_k->src_stride_first = 0;
+                for (size_t i = 0; i < 1; ++i) {
+                  self_k->src_stride_first[i] = 0;
+                }
               }
 
               kb(kernel_request_strided, nullptr, dst_element_arrmeta, nsrc, &src0_element_arrmeta);

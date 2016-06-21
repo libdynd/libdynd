@@ -177,18 +177,6 @@ nd::callable nd::functional::reduction(const callable &child) {
     throw invalid_argument("'child' cannot be null");
   }
 
-  switch (child->get_narg()) {
-  case 1:
-    break;
-  case 2:
-    return reduction((child.get_flags() | right_associative) ? left_compound(child) : right_compound(child));
-  default: {
-    stringstream ss;
-    ss << "'child' must be a unary callable, but its signature is " << child->get_type();
-    throw invalid_argument(ss.str());
-  }
-  }
-
   return make_callable<reduction_dispatch_callable>(
       ndt::make_type<ndt::callable_type>(ndt::ellipsis_dim_type::make_if_not_variadic(child->get_ret_type()),
                                          {ndt::ellipsis_dim_type::make_if_not_variadic(child->get_arg_types()[0])},
