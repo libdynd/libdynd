@@ -66,3 +66,13 @@ TEST(Comparison, OptionArray) {
   EXPECT_ARRAY_EQ(nd::is_na(data == data), expected);
   EXPECT_ARRAY_EQ(nd::is_na(data != data), expected);
 }
+
+/*
+TEST(Equals, Tuple) {
+  nd::array a = nd::tuple({{0, 1, 2}, 6, 7});
+  nd::array b = nd::tuple({{0, 1, 2}, 8, 9});
+
+  std::cout << (a == b) << std::endl;
+  std::exit(-1);
+}
+*/
