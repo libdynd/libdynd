@@ -9,8 +9,8 @@
 
 #include <dynd/callables/base_callable.hpp>
 #include <dynd/kernels/reduction_kernel.hpp>
-#include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -117,7 +117,7 @@ namespace nd {
               intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
               intptr_t src_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
 
-              typedef reduction_kernel<fixed_dim_id, false, true> self_type;
+              typedef reduction_kernel<ndt::fixed_dim_type, false, true, 1> self_type;
               intptr_t root_ckb_offset = kb.size();
               kb.emplace_back<self_type>(kernreq);
               self_type *e = kb.get_at<self_type>(root_ckb_offset);
@@ -150,7 +150,7 @@ namespace nd {
 
               const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
 
-              typedef reduction_kernel<fixed_dim_id, true, true> self_type;
+              typedef reduction_kernel<ndt::fixed_dim_type, true, true, 1> self_type;
               intptr_t root_ckb_offset = kb.size();
               kb.emplace_back<self_type>(kernreq, dst_stride, src_stride);
 
@@ -184,11 +184,11 @@ namespace nd {
             intptr_t src_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
 
             if (broadcast) {
-              kb.emplace_back<reduction_kernel<fixed_dim_id, true, false>>(
+              kb.emplace_back<reduction_kernel<ndt::fixed_dim_type, true, false, 1>>(
                   kernreq, src_size, reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride, src_stride);
               kernreq = kernel_request_strided;
             } else {
-              kb.emplace_back<reduction_kernel<fixed_dim_id, false, false>>(kernreq, src_size, src_stride);
+              kb.emplace_back<reduction_kernel<ndt::fixed_dim_type, false, false, 1>>(kernreq, src_size, src_stride);
               kernreq = kernel_request_single;
             }
 
@@ -209,7 +209,7 @@ namespace nd {
         cg.emplace_back([inner, broadcast, keepdim, identity](kernel_builder &kb, kernel_request_t kernreq,
                                                               char *DYND_UNUSED(data), const char *dst_arrmeta,
                                                               size_t nsrc, const char *const *src_arrmeta) {
-          typedef reduction_kernel<var_dim_id, false, true> self_type;
+          typedef reduction_kernel<ndt::var_dim_type, false, true, 1> self_type;
           intptr_t root_ckb_offset = kb.size();
           kb.emplace_back<self_type>(
               kernreq, reinterpret_cast<const ndt::var_dim_type::metadata_type *>(src_arrmeta[0])->stride);
