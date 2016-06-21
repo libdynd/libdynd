@@ -43,6 +43,20 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
   EXPECT_ARRAY_EQ(3.75, f(nd::array{3.75}));
 }
 
+/*
+TEST(Reduction, BuiltinSum_Lift1D_NoIdentity_2Args) {
+  nd::callable f0 = [](const return_wrapper<double> &res, double x, double y) { res += x + y; };
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x, double y) { res += x + y; });
+
+  std::cout << f << std::endl;
+//  std::cout << f(nd::array{0.0, 1.0, 2.0, 3.0, 4.0}) << std::endl;
+  std::exit(-1);
+
+//  EXPECT_ARRAY_EQ(1.5 - 22.0 + 3.75 + 1.125 - 3.375, f(nd::array{1.5, -22.0, 3.75, 1.125, -3.375}));
+  //EXPECT_ARRAY_EQ(3.75, f(nd::array{3.75}));
+}
+*/
+
 TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
   nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
 

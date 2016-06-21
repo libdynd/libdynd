@@ -160,5 +160,5 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::ellipsis_dim_type
 }
 
 ndt::type ndt::ellipsis_dim_type::with_element_type(const type &element_tp) const {
-  return make_ellipsis_dim(m_name, element_tp);
+  return make_type<ellipsis_dim_type>(m_name, element_tp);
 }

@@ -285,7 +285,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
           ss << "No substitution type for dynd typevar " << pattern << " was available";
           throw invalid_argument(ss.str());
         } else {
-          return ndt::make_ellipsis_dim(
+          return ndt::make_type<ellipsis_dim_type>(
               pattern.extended<ellipsis_dim_type>()->get_name(),
               ndt::substitute(pattern.extended<ellipsis_dim_type>()->get_element_type(), typevars, concrete));
         }

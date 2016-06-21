@@ -140,7 +140,7 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
   const ndt::ellipsis_dim_type *et;
 
   // Named Ellipsis Dimension
-  tp = ndt::make_ellipsis_dim("Blah", ndt::make_type<int>());
+  tp = ndt::make_type<ndt::ellipsis_dim_type>("Blah", ndt::make_type<int>());
   EXPECT_EQ(ellipsis_dim_id, tp.get_id());
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_EQ(1u, tp.get_data_alignment());
@@ -159,7 +159,7 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
   //  EXPECT_EQ("Blah", tp.p("name").as<std::string>());
 
   // Unnamed Ellipsis Dimension
-  tp = ndt::make_ellipsis_dim(ndt::make_type<int>());
+  tp = ndt::make_type<ndt::ellipsis_dim_type>(ndt::make_type<int>());
   EXPECT_EQ(ellipsis_dim_id, tp.get_id());
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_EQ(1u, tp.get_data_alignment());
@@ -173,7 +173,7 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
   EXPECT_EQ(tp, ndt::type(tp.str()));
   EXPECT_EQ("... * int32", tp.str());
   // Construction from empty string is ok
-  EXPECT_EQ(tp, ndt::make_ellipsis_dim("", ndt::make_type<int>()));
+  EXPECT_EQ(tp, ndt::make_type<ndt::ellipsis_dim_type>("", ndt::make_type<int>()));
 
   // Dynamic type properties
   //  Todo: Fix this
@@ -181,10 +181,10 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
 
   // The ellipsis name must start with a capital
   // and look like an identifier
-  EXPECT_THROW(ndt::make_ellipsis_dim("blah", ndt::make_type<int>()), type_error);
-  EXPECT_THROW(ndt::make_ellipsis_dim("T ", ndt::make_type<int>()), type_error);
-  EXPECT_THROW(ndt::make_ellipsis_dim("123", ndt::make_type<int>()), type_error);
-  EXPECT_THROW(ndt::make_ellipsis_dim("Two+", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::ellipsis_dim_type>("blah", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::ellipsis_dim_type>("T ", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::ellipsis_dim_type>("123", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::ellipsis_dim_type>("Two+", ndt::make_type<int>()), type_error);
 }
 
 TEST(SymbolicTypes, VariadicTuple) {

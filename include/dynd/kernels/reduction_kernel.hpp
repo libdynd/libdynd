@@ -366,46 +366,57 @@ namespace nd {
         : base_reduction_kernel<reduction_kernel<ndt::fixed_dim_type, true, false, NArg>, NArg> {
       intptr_t _size;
       intptr_t dst_stride;
-      intptr_t src_stride;
+      intptr_t src_stride[NArg];
 
       reduction_kernel(std::intptr_t size, std::intptr_t dst_stride, std::intptr_t src_stride)
-          : _size(size), dst_stride(dst_stride), src_stride(src_stride) {}
+          : _size(size), dst_stride(dst_stride), src_stride{src_stride} {}
 
       ~reduction_kernel() { this->get_child()->destroy(); }
 
       void single_first(char *dst, char *const *src) {
         reduction_kernel_prefix *child = this->get_reduction_child();
-        child->strided_first(dst, dst_stride, src, &src_stride, _size);
+        child->strided_first(dst, dst_stride, src, src_stride, _size);
       }
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count) {
         reduction_kernel_prefix *echild = reinterpret_cast<reduction_kernel_prefix *>(this->get_child());
         kernel_strided_t opchild_first_call = echild->get_first_call_function<kernel_strided_t>();
         kernel_strided_t opchild_followup_call = echild->get_followup_call_function();
-        intptr_t inner_size = this->_size;
-        intptr_t inner_dst_stride = this->dst_stride;
-        intptr_t inner_src_stride = this->src_stride;
-        char *src0 = src[0];
-        intptr_t src0_stride = src_stride[0];
+
+        char *child_src[NArg];
+        for (size_t j = 0; j < NArg; ++j) {
+          child_src[j] = src[j];
+        }
+
         if (dst_stride == 0) {
           // With a zero stride, we have one "first", followed by many
           // "followup"
           // calls
-          opchild_first_call(echild, dst, inner_dst_stride, &src0, &inner_src_stride, inner_size);
+          opchild_first_call(echild, dst, this->dst_stride, child_src, this->src_stride, this->_size);
+
           dst += dst_stride;
-          src0 += src0_stride;
+          for (size_t j = 0; j < NArg; ++j) {
+            child_src[j] += src_stride[j];
+          }
+
           for (intptr_t i = 1; i < (intptr_t)count; ++i) {
-            opchild_followup_call(echild, dst, inner_dst_stride, &src0, &inner_src_stride, inner_size);
+            opchild_followup_call(echild, dst, this->dst_stride, child_src, this->src_stride, this->_size);
+
             dst += dst_stride;
-            src0 += src0_stride;
+            for (size_t j = 0; j < NArg; ++j) {
+              child_src[j] += src_stride[j];
+            }
           }
         } else {
           // With a non-zero stride, each iteration of the outer loop is
           // "first"
           for (size_t i = 0; i != count; ++i) {
-            opchild_first_call(echild, dst, inner_dst_stride, &src0, &inner_src_stride, inner_size);
+            opchild_first_call(echild, dst, this->dst_stride, child_src, this->src_stride, this->_size);
+
             dst += dst_stride;
-            src0 += src0_stride;
+            for (size_t j = 0; j < NArg; ++j) {
+              child_src[j] += src_stride[j];
+            }
           }
         }
       }
@@ -414,11 +425,18 @@ namespace nd {
                             size_t count) {
         reduction_kernel_prefix *reduction_child = this->get_reduction_child();
 
-        char *src0 = src[0];
+        char *child_src[NArg];
+        for (size_t j = 0; j < NArg; ++j) {
+          child_src[j] = src[j];
+        }
+
         for (size_t i = 0; i != count; ++i) {
-          reduction_child->strided_followup(dst, this->dst_stride, &src0, &this->src_stride, this->_size);
+          reduction_child->strided_followup(dst, this->dst_stride, child_src, this->src_stride, this->_size);
+
           dst += dst_stride;
-          src0 += src_stride[0];
+          for (size_t j = 0; j < NArg; ++j) {
+            child_src[j] += src_stride[j];
+          }
         }
       }
     };

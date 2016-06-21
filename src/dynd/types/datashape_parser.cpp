@@ -1140,7 +1140,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
         if (element_tp.is_null()) {
           throw datashape_parse_error(begin, "expected a dynd type");
         }
-        result = ndt::make_ellipsis_dim(std::string(nbegin, nend), element_tp);
+        result = ndt::make_type<ndt::ellipsis_dim_type>(std::string(nbegin, nend), element_tp);
       } else {
         throw datashape_parse_error(begin, "expected a '*'");
       }
@@ -1228,7 +1228,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       if (element_type.is_null()) {
         throw datashape_parse_error(begin, "expected a dynd type");
       }
-      result = ndt::make_ellipsis_dim(element_type);
+      result = ndt::make_type<ndt::ellipsis_dim_type>(element_type);
     } else {
       throw datashape_parse_error(begin, "expected a '*'");
     }
