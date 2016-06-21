@@ -20,6 +20,7 @@ namespace nd {
     public:
       struct data_type {
         callable child;
+        callable init_child;
         bool keepdims;
         size_t naxis;
         const int *axes;
@@ -45,6 +46,7 @@ namespace nd {
         node_type node;
 
         callable &child = reinterpret_cast<data_type *>(data)->child;
+        callable &init_child = reinterpret_cast<data_type *>(data)->init_child;
         const ndt::type &child_ret_tp = child->get_ret_type();
 
         bool reduce = reinterpret_cast<data_type *>(data)->axes == NULL;
@@ -73,12 +75,16 @@ namespace nd {
           ret_element_tp =
               child->resolve(this, nullptr, cg, child_ret_tp, nsrc, arg_element_tp, nkwd - 3, kwds + 3, tp_vars);
 
-          if (reinterpret_cast<data_type *>(data)->identity.is_na()) {
-            nd::array error_mode = eval::default_eval_context.errmode;
-            assign->resolve(this, nullptr, cg, ret_element_tp, 1, arg_element_tp, 1, &error_mode, tp_vars);
+          if (init_child.is_null()) {
+            if (reinterpret_cast<data_type *>(data)->identity.is_na()) {
+              nd::array error_mode = eval::default_eval_context.errmode;
+              assign->resolve(this, nullptr, cg, ret_element_tp, 1, arg_element_tp, 1, &error_mode, tp_vars);
+            } else {
+              nd::callable constant = functional::constant(reinterpret_cast<data_type *>(data)->identity);
+              constant->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+            }
           } else {
-            nd::callable constant = functional::constant(reinterpret_cast<data_type *>(data)->identity);
-            constant->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+            init_child->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
           }
         } else {
           node.inner = false;
