@@ -109,6 +109,7 @@ namespace nd {
         bool broadcast = reinterpret_cast<node_type *>(data)->broadcast;
         bool keepdim = reinterpret_cast<node_type *>(data)->keepdim;
         bool identity = reinterpret_cast<node_type *>(data)->identity;
+
         cg.emplace_back([inner, broadcast, keepdim, identity](kernel_builder &kb, kernel_request_t kernreq,
                                                               char *DYND_UNUSED(data), const char *dst_arrmeta,
                                                               size_t nsrc, const char *const *src_arrmeta) {
@@ -137,12 +138,15 @@ namespace nd {
                 }
               }
 
-              const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
+              const char *src_element_arrmeta[NArg];
+              for (size_t i = 0; i < NArg; ++i) {
+                src_element_arrmeta[i] = src_arrmeta[i] + sizeof(size_stride_t);
+              }
 
-              kb(kernel_request_strided, nullptr, dst_arrmeta + sizeof(size_stride_t), nsrc, &src0_element_arrmeta);
+              kb(kernel_request_strided, nullptr, dst_arrmeta + sizeof(size_stride_t), nsrc, src_element_arrmeta);
 
               intptr_t init_offset = kb.size();
-              kb(kernel_request_single, nullptr, dst_arrmeta + sizeof(size_stride_t), nsrc, &src0_element_arrmeta);
+              kb(kernel_request_single, nullptr, dst_arrmeta + sizeof(size_stride_t), nsrc, src_element_arrmeta);
 
               e = kb.get_at<self_type>(root_ckb_offset);
               e->init_offset = init_offset - root_ckb_offset;
@@ -173,7 +177,7 @@ namespace nd {
               } else {
                 self_k->size_first = self_k->_size;
                 self_k->dst_stride_first = 0;
-                for (size_t i = 0; i < 1; ++i) {
+                for (size_t i = 0; i < NArg; ++i) {
                   self_k->src_stride_first[i] = 0;
                 }
               }
@@ -187,22 +191,26 @@ namespace nd {
               self_k->dst_init_kernel_offset = init_offset - root_ckb_offset;
             }
           } else {
-            const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
+            const char *src_element_arrmeta[NArg];
+            for (size_t j = 0; j < NArg; ++j) {
+              src_element_arrmeta[j] = src_arrmeta[j] + sizeof(size_stride_t);
+            }
 
             intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
             intptr_t src_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
 
             if (broadcast) {
-              kb.emplace_back<reduction_kernel<ndt::fixed_dim_type, true, false, 1>>(
+              kb.emplace_back<reduction_kernel<ndt::fixed_dim_type, true, false, NArg>>(
                   kernreq, src_size, reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride, src_stride);
               kernreq = kernel_request_strided;
             } else {
-              kb.emplace_back<reduction_kernel<ndt::fixed_dim_type, false, false, 1>>(kernreq, src_size, src_stride);
+              kb.emplace_back<reduction_kernel<ndt::fixed_dim_type, false, false, NArg>>(kernreq, src_size,
+                                                                                         src_arrmeta);
               kernreq = kernel_request_single;
             }
 
             kb(kernreq, nullptr, keepdim ? (dst_arrmeta + sizeof(size_stride_t)) : dst_arrmeta, nsrc,
-               &src0_element_arrmeta);
+               src_element_arrmeta);
           }
         });
       }

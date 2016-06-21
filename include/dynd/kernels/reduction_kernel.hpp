@@ -115,8 +115,12 @@ namespace nd {
       intptr_t src0_element_size;
       intptr_t src_element_stride[NArg];
 
-      reduction_kernel(std::intptr_t src0_element_size, std::intptr_t src_stride)
-          : src0_element_size(src0_element_size), src_element_stride{src_stride} {}
+      reduction_kernel(std::intptr_t src0_element_size, const char *const *src_arrmeta)
+          : src0_element_size(src0_element_size) {
+        for (size_t j = 0; j < NArg; ++j) {
+          src_element_stride[j] = reinterpret_cast<const size_stride_t *>(src_arrmeta[j])->stride;
+        }
+      }
 
       ~reduction_kernel() { this->get_child()->destroy(); }
 
@@ -126,8 +130,12 @@ namespace nd {
         child->single_first(dst, src);
         if (src0_element_size > 1) {
           // All the followup calls at the "dst" address
-          char *src_second = src[0] + src_element_stride[0];
-          child->strided_followup(dst, 0, &src_second, src_element_stride, src0_element_size - 1);
+          char *src_second[NArg];
+          for (size_t j = 0; j < NArg; ++j) {
+            src_second[j] = src[j] + src_element_stride[j];
+          }
+
+          child->strided_followup(dst, 0, src_second, src_element_stride, src0_element_size - 1);
         }
       }
 
@@ -144,8 +152,11 @@ namespace nd {
           // "followup" calls
           child->single_first(dst, child_src);
           if (src0_element_size > 1) {
-            char *inner_src_second = child_src[0] + src_element_stride[0];
-            child->strided_followup(dst, 0, &inner_src_second, src_element_stride, src0_element_size - 1);
+            char *inner_src_second[NArg];
+            for (size_t j = 0; j < NArg; ++j) {
+              inner_src_second[j] = child_src[j] + src_element_stride[j];
+            }
+            child->strided_followup(dst, 0, inner_src_second, src_element_stride, src0_element_size - 1);
           }
           for (size_t i = 0; i < NArg; ++i) {
             child_src[i] += src_stride[i];
@@ -274,11 +285,18 @@ namespace nd {
         kernel_prefix *reduce_child = this->get_child();
 
         // No initialization, all reduction
-        char *src0 = src[0];
+        char *child_src[NArg];
+        for (size_t j = 0; j < NArg; ++j) {
+          child_src[j] = src[j];
+        }
+
         for (size_t i = 0; i != count; ++i) {
-          reduce_child->strided(dst, 0, &src0, this->src_stride, _size);
+          reduce_child->strided(dst, 0, child_src, this->src_stride, _size);
+
           dst += dst_stride;
-          src0 += src_stride[0];
+          for (size_t j = 0; j < NArg; ++j) {
+            child_src[j] += src_stride[j];
+          }
         }
       }
     };

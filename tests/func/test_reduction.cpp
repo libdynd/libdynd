@@ -42,22 +42,31 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
   EXPECT_ARRAY_EQ(3.75, f(nd::array{3.75}));
 
   f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
-//  EXPECT_ARRAY_EQ(1, f(nd::array{0}, nd::array{1}));
   EXPECT_ARRAY_EQ(39, f(nd::array{4, -1, 7, 9, 2}, nd::array{3, 8, 0, 5, 11}));
 }
 
 TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
   nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
-
   EXPECT_ARRAY_EQ(100.0 + 1.5 - 22.0 + 3.75 + 1.125 - 3.375,
                   f({{1.5, -22., 3.75, 1.125, -3.375}}, {{"identity", 100.0}}));
+
+  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
+  EXPECT_ARRAY_EQ(139, f({nd::array{4, -1, 7, 9, 2}, nd::array{3, 8, 0, 5, 11}}, {{"identity", 100}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
   nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
-
   EXPECT_ARRAY_EQ(1.5 + 2.0 + 7.0 - 2.25 + 7.0 + 2.125, f(nd::array{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}));
   EXPECT_ARRAY_EQ(1.5 - 2.0, f(nd::array{{1.5, -2.0}}));
+
+  /*
+    f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) {
+      std::cout << "res = " << res << std::endl;
+      std::cout << "x, y = " << x << ", " << y << std::endl;
+      res += max(x, y);
+    });
+    EXPECT_ARRAY_EQ(36, f(nd::array{{4, -1, 7}, {8, 0, 5}}, nd::array{{9, -3, -5}, {0, 2, 11}}));
+  */
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
