@@ -211,9 +211,9 @@ namespace nd {
         : base_reduction_kernel<reduction_kernel<ndt::fixed_dim_type, false, true, NArg>, NArg> {
       // The code assumes that size >= 1
       intptr_t size_first;
-      intptr_t src_stride_first;
+      intptr_t src_stride_first[NArg];
       intptr_t _size;
-      intptr_t src_stride;
+      intptr_t src_stride[NArg];
       size_t init_offset;
 
       ~reduction_kernel() {
@@ -222,14 +222,19 @@ namespace nd {
       }
 
       void single_first(char *dst, char *const *src) {
-        char *src0 = src[0];
+        char *child_src[NArg];
+        for (size_t i = 0; i < NArg; ++i) {
+          child_src[i] = src[i];
+        }
 
         // Initialize the dst values
         this->get_child(init_offset)->single(dst, src);
-        src0 += src_stride_first;
+        for (size_t i = 0; i < NArg; ++i) {
+          child_src[i] += src_stride_first[i];
+        }
 
         // Do the reduction
-        this->get_child()->strided(dst, 0, &src0, &src_stride, size_first);
+        this->get_child()->strided(dst, 0, child_src, src_stride, size_first);
       }
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count) {
@@ -241,12 +246,12 @@ namespace nd {
           // With a zero stride, we initialize "dst" once, then do many
           // accumulations
           init_child->single(dst, &src0);
-          src0 += src_stride_first;
+          src0 += src_stride_first[0];
 
-          reduction_child->strided(dst, 0, &src0, &this->src_stride, size_first);
+          reduction_child->strided(dst, 0, &src0, this->src_stride, size_first);
 
           for (std::size_t i = 1; i != count; ++i) {
-            reduction_child->strided(dst, 0, &src0, &this->src_stride, size_first);
+            reduction_child->strided(dst, 0, &src0, this->src_stride, size_first);
             dst += dst_stride;
             src0 += src_stride[0];
           }
@@ -256,8 +261,8 @@ namespace nd {
           for (size_t i = 0; i != count; ++i) {
             init_child->single(dst, &src0);
 
-            char *inner_child_src = src0 + src_stride_first;
-            reduction_child->strided(dst, 0, &inner_child_src, &this->src_stride, size_first);
+            char *inner_child_src = src0 + src_stride_first[0];
+            reduction_child->strided(dst, 0, &inner_child_src, this->src_stride, size_first);
             dst += dst_stride;
             src0 += src_stride[0];
           }
@@ -271,7 +276,7 @@ namespace nd {
         // No initialization, all reduction
         char *src0 = src[0];
         for (size_t i = 0; i != count; ++i) {
-          reduce_child->strided(dst, 0, &src0, &this->src_stride, _size);
+          reduce_child->strided(dst, 0, &src0, this->src_stride, _size);
           dst += dst_stride;
           src0 += src_stride[0];
         }

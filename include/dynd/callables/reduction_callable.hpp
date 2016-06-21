@@ -51,10 +51,11 @@ namespace nd {
         }
 
         if (src_tp[0].get_id() == fixed_dim_id) {
-          static callable f = make_callable<reduction_callable<fixed_dim_id>>();
-          return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          static callable f[2] = {make_callable<reduction_callable<fixed_dim_id, 1>>(),
+                                  make_callable<reduction_callable<fixed_dim_id, 2>>()};
+          return f[nsrc - 1]->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else {
-          static callable f = make_callable<reduction_callable<var_dim_id>>();
+          static callable f = make_callable<reduction_callable<var_dim_id, 1>>();
           return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         }
       }

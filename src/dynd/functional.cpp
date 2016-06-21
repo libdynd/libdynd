@@ -177,12 +177,19 @@ nd::callable nd::functional::reduction(const callable &child) {
     throw invalid_argument("'child' cannot be null");
   }
 
+  vector<ndt::type> arg_tp;
+  for (auto tp : child->get_arg_types()) {
+    arg_tp.push_back(ndt::make_type<ndt::ellipsis_dim_type>("Dims", tp));
+  }
+
+  std::vector<std::pair<ndt::type, std::string>> kwds{
+      {ndt::make_type<ndt::option_type>(ndt::type("Fixed * int32")), "axes"},
+      {ndt::make_type<ndt::option_type>(child->get_ret_type()), "identity"},
+      {ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "keepdims"}};
+
   return make_callable<reduction_dispatch_callable>(
       ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::ellipsis_dim_type>("Dims", child->get_ret_type()),
-                                         {ndt::make_type<ndt::ellipsis_dim_type>("Dims", child->get_arg_types()[0])},
-                                         {{ndt::make_type<ndt::option_type>(ndt::type("Fixed * int32")), "axes"},
-                                          {ndt::make_type<ndt::option_type>(child->get_ret_type()), "identity"},
-                                          {ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "keepdims"}}),
+                                         arg_tp.size(), arg_tp.data(), kwds),
       child);
 }
 

@@ -99,11 +99,11 @@ namespace nd {
       }
     };
 
-    template <type_id_t Arg0ID>
+    template <type_id_t Arg0ID, size_t NArg>
     class reduction_callable;
 
-    template <>
-    class reduction_callable<fixed_dim_id> : public base_reduction_callable {
+    template <size_t NArg>
+    class reduction_callable<fixed_dim_id, NArg> : public base_reduction_callable {
       void resolve(call_graph &cg, char *data) {
         bool inner = reinterpret_cast<node_type *>(data)->inner;
         bool broadcast = reinterpret_cast<node_type *>(data)->broadcast;
@@ -115,21 +115,26 @@ namespace nd {
           if (inner) {
             if (!broadcast) {
               intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
-              intptr_t src_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
 
-              typedef reduction_kernel<ndt::fixed_dim_type, false, true, 1> self_type;
+              typedef reduction_kernel<ndt::fixed_dim_type, false, true, NArg> self_type;
               intptr_t root_ckb_offset = kb.size();
               kb.emplace_back<self_type>(kernreq);
               self_type *e = kb.get_at<self_type>(root_ckb_offset);
-              e->src_stride = src_stride;
+              for (size_t i = 0; i < NArg; ++i) {
+                e->src_stride[i] = reinterpret_cast<const size_stride_t *>(src_arrmeta[i])->stride;
+              }
               e->_size = src_size;
 
               if (!identity) { // identity is null
                 e->size_first = e->_size - 1;
-                e->src_stride_first = e->src_stride;
+                for (size_t i = 0; i < NArg; ++i) {
+                  e->src_stride_first[i] = e->src_stride[i];
+                }
               } else {
                 e->size_first = e->_size;
-                e->src_stride_first = 0;
+                for (size_t i = 0; i < NArg; ++i) {
+                  e->src_stride_first[i] = 0;
+                }
               }
 
               const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
@@ -203,8 +208,8 @@ namespace nd {
       }
     };
 
-    template <>
-    class reduction_callable<var_dim_id> : public base_reduction_callable {
+    template <size_t NArg>
+    class reduction_callable<var_dim_id, NArg> : public base_reduction_callable {
       void resolve(call_graph &cg, char *data) {
         bool inner = reinterpret_cast<node_type *>(data)->inner;
         bool broadcast = reinterpret_cast<node_type *>(data)->broadcast;
