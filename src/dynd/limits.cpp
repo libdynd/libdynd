@@ -17,4 +17,5 @@ static std::vector<ndt::type> func_ptr(const ndt::type &dst_tp, size_t DYND_UNUS
 
 DYND_API nd::callable nd::limits::min = nd::make_callable<nd::multidispatch_callable<1>>(
     ndt::type("() -> Any"),
-    nd::callable::make_all<nd::limits::min_callable, type_sequence<int, float, double>>(func_ptr));
+    nd::callable::make_all<nd::limits::min_callable, type_sequence<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t,
+                                                                   uint32_t, uint64_t, float, double>>(func_ptr));
