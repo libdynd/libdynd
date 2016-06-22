@@ -116,6 +116,11 @@ namespace nd {
         bool keepdim = reinterpret_cast<node_type *>(data)->keepdim;
         bool identity = reinterpret_cast<node_type *>(data)->identity;
 
+        std::cout << "inner = " << inner << std::endl;
+        std::cout << "broadcast = " << broadcast << std::endl;
+        std::cout << "keepdim = " << keepdim << std::endl;
+        std::cout << "identity = " << identity << std::endl;
+
         cg.emplace_back([inner, broadcast, keepdim, identity](kernel_builder &kb, kernel_request_t kernreq,
                                                               char *DYND_UNUSED(data), const char *dst_arrmeta,
                                                               size_t nsrc, const char *const *src_arrmeta) {
@@ -160,14 +165,13 @@ namespace nd {
               const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(size_stride_t);
 
               intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
-              intptr_t src_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
               intptr_t dst_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
 
               const char *dst_element_arrmeta = dst_arrmeta + sizeof(size_stride_t);
 
-              typedef reduction_kernel<ndt::fixed_dim_type, true, true, 1> self_type;
+              typedef reduction_kernel<ndt::fixed_dim_type, true, true, NArg> self_type;
               intptr_t root_ckb_offset = kb.size();
-              kb.emplace_back<self_type>(kernreq, dst_stride, src_stride);
+              kb.emplace_back<self_type>(kernreq, dst_stride, src_arrmeta);
 
               self_type *self_k = kb.get_at<self_type>(root_ckb_offset);
 
@@ -177,7 +181,7 @@ namespace nd {
               if (!identity) { // identity is null
                 self_k->size_first = self_k->_size - 1;
                 self_k->dst_stride_first = self_k->dst_stride;
-                for (size_t i = 0; i < 1; ++i) {
+                for (size_t i = 0; i < NArg; ++i) {
                   self_k->src_stride_first[i] = self_k->src_stride[i];
                 }
               } else {
@@ -203,11 +207,10 @@ namespace nd {
             }
 
             intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
-            intptr_t src_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->stride;
 
             if (broadcast) {
-              kb.emplace_back<reduction_kernel<ndt::fixed_dim_type, true, false, NArg>>(
-                  kernreq, src_size, reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride, src_stride);
+              kb.emplace_back<reduction_kernel<ndt::fixed_dim_type, true, false, NArg>>(kernreq, src_size, dst_arrmeta,
+                                                                                        src_arrmeta);
               kernreq = kernel_request_strided;
             } else {
               kb.emplace_back<reduction_kernel<ndt::fixed_dim_type, false, false, NArg>>(kernreq, src_size,

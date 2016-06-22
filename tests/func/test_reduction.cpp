@@ -37,11 +37,13 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
 */
 
 TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
-  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res = x; },
+                                             [](const return_wrapper<double> &res, double x) { res += x; });
   EXPECT_ARRAY_EQ(1.5 - 22.0 + 3.75 + 1.125 - 3.375, f(nd::array{1.5, -22.0, 3.75, 1.125, -3.375}));
   EXPECT_ARRAY_EQ(3.75, f(nd::array{3.75}));
 
-  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
+  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res = max(x, y); },
+                                [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
   EXPECT_ARRAY_EQ(39, f(nd::array{4, -1, 7, 9, 2}, nd::array{3, 8, 0, 5, 11}));
 }
 
@@ -55,56 +57,81 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
-  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; },
-                                             [](const return_wrapper<double> &res, double x) { res = x; });
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res = x; },
+                                             [](const return_wrapper<double> &res, double x) { res += x; });
   EXPECT_ARRAY_EQ(1.5 + 2.0 + 7.0 - 2.25 + 7.0 + 2.125, f(nd::array{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}));
   EXPECT_ARRAY_EQ(1.5 - 2.0, f(nd::array{{1.5, -2.0}}));
 
-  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res += max(x, y); },
-                                [](const return_wrapper<int> &res, int x, int y) { res = max(x, y); });
+  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res = max(x, y); },
+                                [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
   EXPECT_ARRAY_EQ(36, f(nd::array{{4, -1, 7}, {8, 0, 5}}, nd::array{{9, -3, -5}, {0, 2, 11}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
-  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
-
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res = x; },
+                                             [](const return_wrapper<double> &res, double x) { res += x; });
   EXPECT_ARRAY_EQ(nd::array({{1.5 + 2.0 + 7.0 - 2.25 + 7.0 + 2.125}}),
                   f({{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}}, {{"keepdims", true}}));
+
+  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res = max(x, y); },
+                                [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
+  EXPECT_ARRAY_EQ(nd::array({{36}}),
+                  f({nd::array{{4, -1, 7}, {8, 0, 5}}, nd::array{{9, -3, -5}, {0, 2, 11}}}, {{"keepdims", true}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
-  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
-
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res = x; },
+                                             [](const return_wrapper<double> &res, double x) { res += x; });
   EXPECT_ARRAY_EQ((nd::array{1.5 + 2.0 + 7.0, -2.25 + 7.0 + 2.125}),
-                  f({nd::array{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}}, {{"axes", nd::array{1}}}));
-  EXPECT_ARRAY_EQ(nd::array{1.5 - 2.0}, f({nd::array{{1.5, -2.0}}}, {{"axes", nd::array{1}}}));
+                  f({nd::array{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}}, {{"axes", {1}}}));
+  EXPECT_ARRAY_EQ(nd::array{1.5 - 2.0}, f({nd::array{{1.5, -2.0}}}, {{"axes", {1}}}));
+
+  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res = max(x, y); },
+                                [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
+  EXPECT_ARRAY_EQ(nd::array({15, 21}),
+                  f({nd::array{{4, -1, 7}, {8, 0, 5}}, nd::array{{9, -3, -5}, {0, 2, 11}}}, {{"axes", {1}}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
-  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
-
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res = x; },
+                                             [](const return_wrapper<double> &res, double x) { res += x; });
   EXPECT_ARRAY_EQ(nd::array({{1.5 + 2.0 + 7.0}, {-2.25 + 7.0 + 2.125}}),
                   f({{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}}, {{"axes", {1}}, {"keepdims", true}}));
+
+  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res = max(x, y); },
+                                [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
+  EXPECT_ARRAY_EQ(nd::array({{15}, {21}}), f({nd::array{{4, -1, 7}, {8, 0, 5}}, nd::array{{9, -3, -5}, {0, 2, 11}}},
+                                             {{"axes", {1}}, {"keepdims", true}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
-  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
-
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res = x; },
+                                             [](const return_wrapper<double> &res, double x) { res += x; });
   EXPECT_ARRAY_EQ((nd::array{1.5 - 2.25, 2.0 + 7.0, 7.0 + 2.125}),
                   f({nd::array{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}}, {{"axes", {0}}}));
   EXPECT_ARRAY_EQ(nd::array({1.5, -2.0}), f({nd::array{{1.5, -2.0}}}, {{"axes", {0}}}));
+
+  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res = max(x, y); },
+                                [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
+  EXPECT_ARRAY_EQ(nd::array({17, 1, 18}),
+                  f({nd::array{{4, -1, 7}, {8, 0, 5}}, nd::array{{9, -3, -5}, {0, 2, 11}}}, {{"axes", {0}}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
-  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res = x; },
+                                             [](const return_wrapper<double> &res, double x) { res += x; });
+  EXPECT_ARRAY_EQ((nd::array{{1.5 - 2.25, 2.0 + 7.0, 7.0 + 2.125}}),
+                  f({{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}}, {{"axes", {0}}, {"keepdims", true}}));
 
-  EXPECT_ARRAY_EQ((initializer_list<initializer_list<double>>{{1.5 - 2.25, 2.0 + 7.0, 7.0 + 2.125}}),
-                  f({initializer_list<initializer_list<double>>{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}},
-                    {{"axes", nd::array(initializer_list<int>{0})}, {"keepdims", true}}));
+  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res = max(x, y); },
+                                [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
+  EXPECT_ARRAY_EQ(nd::array({{17, 1, 18}}), f({nd::array{{4, -1, 7}, {8, 0, 5}}, nd::array{{9, -3, -5}, {0, 2, 11}}},
+                                              {{"axes", {0}}, {"keepdims", true}}));
 }
 
 TEST(Reduction, FixedVar) {
-  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res = x; },
+                                             [](const return_wrapper<double> &res, double x) { res += x; });
 
   nd::array a = nd::empty("3 * var * float64");
   a(0).vals() = {1, 2};
@@ -115,7 +142,8 @@ TEST(Reduction, FixedVar) {
 }
 
 TEST(Reduction, FixedVarWithAxes) {
-  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res = x; },
+                                             [](const return_wrapper<double> &res, double x) { res += x; });
 
   nd::array a = nd::empty("3 * var * float64");
   a(0).vals() = {1, 2};
@@ -126,24 +154,24 @@ TEST(Reduction, FixedVarWithAxes) {
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
-  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
-
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res = x; },
+                                             [](const return_wrapper<double> &res, double x) { res += x; });
   EXPECT_ARRAY_EQ(1.5 - 2.375 + 2.0 + 1.25 + 7.0 - 0.5 - 2.25 + 1.0 + 7.0 + 2.125 + 0.25,
                   f(initializer_list<initializer_list<initializer_list<double>>>{{{1.5, -2.375}, {2, 1.25}, {7, -0.5}},
                                                                                  {{-2.25, 1}, {7, 0}, {2.125, 0.25}}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
-  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
-
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res = x; },
+                                             [](const return_wrapper<double> &res, double x) { res += x; });
   EXPECT_ARRAY_EQ((nd::array{1.5 - 2.375 + 2.0 + 1.25 + 7.0 - 0.5, -2.25 + 1.0 + 7.0 + 2.125 + 0.25}),
                   f({nd::array{{{1.5, -2.375}, {2.0, 1.25}, {7.0, -0.5}}, {{-2.25, 1.0}, {7.0, 0.0}, {2.125, 0.25}}}},
                     {{"axes", {1, 2}}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
-  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
-
+  nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res = x; },
+                                             [](const return_wrapper<double> &res, double x) { res += x; });
   EXPECT_ARRAY_EQ(
       (nd::array{1.5 - 2.375 - 2.25 + 1.0, 2.0 + 1.25 + 7.0, 7.0 - 0.5 + 2.125 + 0.25}),
       f({{{{1.5, -2.375}, {2.0, 1.25}, {7.0, -0.5}}, {{-2.25, 1.0}, {7.0, 0.0}, {2.125, 0.25}}}}, {{"axes", {0, 2}}}));

@@ -172,7 +172,7 @@ nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const
       neighborhood_op, boundary_child);
 }
 
-nd::callable nd::functional::reduction(const callable &child, const callable &init_child) {
+nd::callable nd::functional::reduction(const callable &init_child, const callable &child) {
   if (child.is_null()) {
     throw invalid_argument("'child' cannot be null");
   }

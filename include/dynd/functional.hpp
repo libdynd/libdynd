@@ -159,7 +159,9 @@ namespace nd {
      * Lifts the provided callable, broadcasting it as necessary to execute
      * across the additional dimensions in the ``lifted_types`` array.
      */
-    DYND_API callable reduction(const callable &child, const callable &init_child = callable());
+    DYND_API callable reduction(const callable &first_child, const callable &body_child);
+
+    inline callable reduction(const callable &child) { return reduction(callable(), child); }
 
     DYND_API callable reduction(const callable &child,
                                 const std::initializer_list<std::pair<const char *, array>> &kwds);
