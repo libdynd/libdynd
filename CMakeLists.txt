@@ -345,6 +345,7 @@ set(libdynd_SRC
     src/dynd/json_formatter.cpp
     src/dynd/json_parser.cpp
     src/dynd/left_shift.cpp
+    src/dynd/limits.cpp
     src/dynd/logic.cpp
     src/dynd/logical_and.cpp
     src/dynd/logical_not.cpp

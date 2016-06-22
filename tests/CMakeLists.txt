@@ -107,6 +107,7 @@ set(tests_SRC
     test_float16.cpp
     test_io.cpp
     test_iterator.cpp
+    test_limits.cpp
 #    test_mkl.cpp
     test_range.cpp
     test_shape_tools.cpp
