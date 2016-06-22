@@ -27,6 +27,7 @@ namespace nd {
         int axis;
         intptr_t ndim;
         array identity;
+        array saved_identity;
       };
 
       struct node_type {
@@ -67,7 +68,8 @@ namespace nd {
         ++reinterpret_cast<data_type *>(data)->axis;
 
         ndt::type ret_element_tp;
-        node.identity = !reinterpret_cast<data_type *>(data)->identity.is_na();
+        node.identity = !reinterpret_cast<data_type *>(data)->identity.is_na() ||
+                        !reinterpret_cast<data_type *>(data)->saved_identity.is_null();
         if (reinterpret_cast<data_type *>(data)->axis == reinterpret_cast<data_type *>(data)->ndim) {
           node.inner = true;
           resolve(cg, reinterpret_cast<char *>(&node));
@@ -76,12 +78,18 @@ namespace nd {
               child->resolve(this, nullptr, cg, child_ret_tp, nsrc, arg_element_tp, nkwd - 3, kwds + 3, tp_vars);
 
           if (init_child.is_null()) {
-            if (reinterpret_cast<data_type *>(data)->identity.is_na()) {
+            if (reinterpret_cast<data_type *>(data)->identity.is_na() &&
+                reinterpret_cast<data_type *>(data)->saved_identity.is_null()) {
               nd::array error_mode = eval::default_eval_context.errmode;
               assign->resolve(this, nullptr, cg, ret_element_tp, 1, arg_element_tp, 1, &error_mode, tp_vars);
             } else {
-              nd::callable constant = functional::constant(reinterpret_cast<data_type *>(data)->identity);
-              constant->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+              if (reinterpret_cast<data_type *>(data)->saved_identity.is_null()) {
+                nd::callable constant = functional::constant(reinterpret_cast<data_type *>(data)->identity);
+                constant->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+              } else {
+                nd::callable constant = functional::constant(reinterpret_cast<data_type *>(data)->saved_identity);
+                constant->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+              }
             }
           } else {
             init_child->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
