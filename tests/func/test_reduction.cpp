@@ -159,6 +159,11 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
   EXPECT_ARRAY_EQ(1.5 - 2.375 + 2.0 + 1.25 + 7.0 - 0.5 - 2.25 + 1.0 + 7.0 + 2.125 + 0.25,
                   f(initializer_list<initializer_list<initializer_list<double>>>{{{1.5, -2.375}, {2, 1.25}, {7, -0.5}},
                                                                                  {{-2.25, 1}, {7, 0}, {2.125, 0.25}}}));
+
+  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res = max(x, y); },
+                                [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
+  EXPECT_ARRAY_EQ(62, f(nd::array{{{4, -1}, {7, 8}, {0, 5}}, {{-2, 1}, {3, -4}, {-9, 6}}},
+                        nd::array{{{9, -3}, {-5, 0}, {2, 11}}, {{7, -14}, {10, 2}, {0, 5}}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
@@ -167,6 +172,12 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
   EXPECT_ARRAY_EQ((nd::array{1.5 - 2.375 + 2.0 + 1.25 + 7.0 - 0.5, -2.25 + 1.0 + 7.0 + 2.125 + 0.25}),
                   f({nd::array{{{1.5, -2.375}, {2.0, 1.25}, {7.0, -0.5}}, {{-2.25, 1.0}, {7.0, 0.0}, {2.125, 0.25}}}},
                     {{"axes", {1, 2}}}));
+
+  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res = max(x, y); },
+                                [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
+  EXPECT_ARRAY_EQ(nd::array({36, 26}), f({nd::array{{{4, -1}, {7, 8}, {0, 5}}, {{-2, 1}, {3, -4}, {-9, 6}}},
+                                          nd::array{{{9, -3}, {-5, 0}, {2, 11}}, {{7, -14}, {10, 2}, {0, 5}}}},
+                                         {{"axes", {1, 2}}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
@@ -175,6 +186,12 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
   EXPECT_ARRAY_EQ(
       (nd::array{1.5 - 2.375 - 2.25 + 1.0, 2.0 + 1.25 + 7.0, 7.0 - 0.5 + 2.125 + 0.25}),
       f({{{{1.5, -2.375}, {2.0, 1.25}, {7.0, -0.5}}, {{-2.25, 1.0}, {7.0, 0.0}, {2.125, 0.25}}}}, {{"axes", {0, 2}}}));
+
+  f = nd::functional::reduction([](const return_wrapper<int> &res, int x, int y) { res = max(x, y); },
+                                [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
+  EXPECT_ARRAY_EQ(nd::array({16, 27, 19}), f({nd::array{{{4, -1}, {7, 8}, {0, 5}}, {{-2, 1}, {3, -4}, {-9, 6}}},
+                                              nd::array{{{9, -3}, {-5, 0}, {2, 11}}, {{7, -14}, {10, 2}, {0, 5}}}},
+                                             {{"axes", {0, 2}}}));
 }
 
 TEST(Reduction, Except) {

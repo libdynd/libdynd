@@ -125,8 +125,6 @@ namespace nd {
       ~reduction_kernel() { this->get_child()->destroy(); }
 
       void single_first(char *dst, char *const *src) {
-        std::cout << "reduction_kernel<false, false>::single_first" << std::endl;
-
         reduction_kernel_prefix *child = this->get_reduction_child();
         // The first call at the "dst" address
         child->single_first(dst, src);
@@ -142,8 +140,6 @@ namespace nd {
       }
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count) {
-        std::cout << "reduction_kernel<false, false>::strided_first" << std::endl;
-
         reduction_kernel_prefix *child = this->get_reduction_child();
 
         char *child_src[NArg];
@@ -177,8 +173,11 @@ namespace nd {
           for (size_t i = 0; i != count; ++i) {
             child->single_first(dst, child_src);
             if (src0_element_size > 1) {
-              char *inner_src_second = child_src[0] + src_element_stride[0];
-              child->strided_followup(dst, 0, &inner_src_second, src_element_stride, src0_element_size - 1);
+              char *inner_src_second[NArg];
+              for (size_t j = 0; j < NArg; ++j) {
+                inner_src_second[j] = child_src[j] + src_element_stride[j];
+              }
+              child->strided_followup(dst, 0, inner_src_second, src_element_stride, src0_element_size - 1);
             }
             dst += dst_stride;
             for (size_t i = 0; i < NArg; ++i) {
@@ -190,8 +189,6 @@ namespace nd {
 
       void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride,
                             size_t count) {
-        std::cout << "reduction_kernel<false, false>::strided_followup" << std::endl;
-
         reduction_kernel_prefix *child = this->get_reduction_child();
 
         char *child_src[NArg];
@@ -239,8 +236,6 @@ namespace nd {
       }
 
       void single_first(char *dst, char *const *src) {
-        std::cout << "reduction_kernel<false, true>::single_first" << std::endl;
-
         char *child_src[NArg];
         for (size_t i = 0; i < NArg; ++i) {
           child_src[i] = src[i];
@@ -257,8 +252,6 @@ namespace nd {
       }
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count) {
-        std::cout << "reduction_kernel<false, true>::strided_first" << std::endl;
-
         kernel_prefix *init_child = this->get_child(init_offset);
         kernel_prefix *reduction_child = this->get_child();
 
@@ -307,8 +300,6 @@ namespace nd {
 
       void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride,
                             size_t count) {
-        std::cout << "reduction_kernel<false, true>::strided_followup" << std::endl;
-
         kernel_prefix *reduce_child = this->get_child();
 
         // No initialization, all reduction
@@ -428,15 +419,11 @@ namespace nd {
       ~reduction_kernel() { this->get_child()->destroy(); }
 
       void single_first(char *dst, char *const *src) {
-        std::cout << "reduction_kernel<true, false>::single_first" << std::endl;
-
         reduction_kernel_prefix *child = this->get_reduction_child();
         child->strided_first(dst, dst_stride, src, src_stride, _size);
       }
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count) {
-        std::cout << "reduction_kernel<true, false>::strided_first" << std::endl;
-
         reduction_kernel_prefix *echild = reinterpret_cast<reduction_kernel_prefix *>(this->get_child());
         kernel_strided_t opchild_first_call = echild->get_first_call_function<kernel_strided_t>();
         kernel_strided_t opchild_followup_call = echild->get_followup_call_function();
@@ -481,8 +468,6 @@ namespace nd {
 
       void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride,
                             size_t count) {
-        std::cout << "reduction_kernel<true, false>::strided_followup" << std::endl;
-
         reduction_kernel_prefix *reduction_child = this->get_reduction_child();
 
         char *child_src[NArg];
@@ -541,8 +526,6 @@ namespace nd {
       }
 
       void single_first(char *dst, char *const *src) {
-        std::cout << "reduction_kernel<true, true>::single_first" << std::endl;
-
         // Initialize the dst values
         this->get_child(dst_init_kernel_offset)->strided(dst, dst_stride, src, src_stride_first, _size);
         if (src_stride_first[0] == 0) {
@@ -552,8 +535,6 @@ namespace nd {
       }
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count) {
-        std::cout << "reduction_kernel<true, true>::strided_first" << std::endl;
-
         kernel_prefix *init_child = this->get_child(dst_init_kernel_offset);
         kernel_prefix *reduction_child = this->get_child();
 
@@ -593,8 +574,6 @@ namespace nd {
 
       void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride,
                             size_t count) {
-        std::cout << "reduction_kernel<true, true>::strided_followup" << std::endl;
-
         // No initialization, all reduction
         kernel_prefix *child = this->get_child();
 
