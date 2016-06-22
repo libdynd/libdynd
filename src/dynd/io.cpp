@@ -11,4 +11,4 @@ using namespace std;
 using namespace dynd;
 
 DYND_API nd::callable nd::serialize =
-    nd::functional::reduction(nd::make_callable<nd::serialize_callable<ndt::scalar_kind_type>>());
+    nd::functional::reduction(bytes(), nd::make_callable<nd::serialize_callable<ndt::scalar_kind_type>>());

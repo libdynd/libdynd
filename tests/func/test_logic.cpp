@@ -32,6 +32,7 @@ TEST(All, FixedDimFixedDim)
   EXPECT_ARRAY_EQ(false, nd::all(nd::array{{true, false}, {true, false}, {false, true}}));
 }
 
+/*
 TEST(All, FixedDimVarDim)
 {
   EXPECT_ARRAY_EQ(true, nd::all(nd::array{{true}, {true, true}}));
@@ -40,3 +41,4 @@ TEST(All, FixedDimVarDim)
   EXPECT_ARRAY_EQ(false, nd::all(nd::array{{false}, {true, true}, {true, true, true}}));
   EXPECT_ARRAY_EQ(false, nd::all(nd::array{{false}, {true, false}, {true, false, true}}));
 }
+*/

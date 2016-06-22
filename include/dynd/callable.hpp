@@ -47,6 +47,13 @@ namespace nd {
 
   } // namespace dynd::nd::detail
 
+  template <typename T, typename = void>
+  struct is_callable : std::is_function<T> {};
+
+  template <typename T>
+  struct is_callable<T, typename std::enable_if<std::is_same<decltype(void(&T::operator())), void>::value>::type>
+      : std::true_type {};
+
   /**
    * Holds a single instance of a callable in an nd::array,
    * providing some more direct convenient interface.
@@ -57,7 +64,8 @@ namespace nd {
 
     callable() = default;
 
-    template <typename CallableType, typename... T, typename = std::enable_if_t<all_char_string_params<T...>::value>>
+    template <typename CallableType, typename... T,
+              typename = std::enable_if_t<is_callable<CallableType>::value && all_char_string_params<T...>::value>>
     callable(CallableType f, T &&... names)
         : callable(new functional::apply_callable_callable<CallableType, arity_of<CallableType>::value - sizeof...(T)>(
                        f, std::forward<T>(names)...),

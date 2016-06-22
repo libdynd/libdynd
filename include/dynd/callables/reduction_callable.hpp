@@ -14,14 +14,12 @@ namespace nd {
   namespace functional {
 
     class reduction_dispatch_callable : public base_callable {
-      callable m_first_child;
+      callable m_identity;
       callable m_child;
-      array m_identity;
 
     public:
-      reduction_dispatch_callable(const ndt::type &tp, const callable &first_child, const callable &child,
-                                  const array &identity)
-          : base_callable(tp), m_first_child(first_child), m_child(child), m_identity(identity) {}
+      reduction_dispatch_callable(const ndt::type &tp, const callable &identity, const callable &child)
+          : base_callable(tp), m_identity(identity), m_child(child) {}
 
       typedef typename base_reduction_callable::data_type new_data_type;
 
@@ -31,7 +29,6 @@ namespace nd {
         new_data_type new_data;
         if (data == nullptr) {
           new_data.child = m_child;
-          new_data.init_child = m_first_child;
           new_data.saved_identity = m_identity;
           if (kwds[0].is_na()) {
             new_data.naxis = src_tp[0].get_ndim() - m_child->get_ret_type().get_ndim();

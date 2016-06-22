@@ -172,7 +172,7 @@ nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const
       neighborhood_op, boundary_child);
 }
 
-nd::callable nd::functional::reduction(const array &identity, const callable &child) {
+nd::callable nd::functional::reduction(const callable &identity, const callable &child) {
   if (child.is_null()) {
     throw invalid_argument("'child' cannot be null");
   }
@@ -190,7 +190,7 @@ nd::callable nd::functional::reduction(const array &identity, const callable &ch
   return make_callable<reduction_dispatch_callable>(
       ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::ellipsis_dim_type>("Dims", child->get_ret_type()),
                                          arg_tp.size(), arg_tp.data(), kwds),
-      callable(), child, identity);
+      identity, child);
 }
 
 nd::callable nd::functional::where(const callable &child) { return elwise(make_callable<where_callable>(child), true); }

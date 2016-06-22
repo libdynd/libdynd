@@ -115,6 +115,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
                                               {{"axes", {0}}, {"keepdims", true}}));
 }
 
+/*
 TEST(Reduction, FixedVar) {
   nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
 
@@ -125,7 +126,9 @@ TEST(Reduction, FixedVar) {
 
   EXPECT_ARRAY_EQ(45.0, f(a));
 }
+*/
 
+/*
 TEST(Reduction, FixedVarWithAxes) {
   nd::callable f = nd::functional::reduction([](const return_wrapper<double> &res, double x) { res += x; });
 
@@ -134,8 +137,9 @@ TEST(Reduction, FixedVarWithAxes) {
   a(1).vals() = {3, 4, 5};
   a(2).vals() = {6, 7, 8, 9};
 
-  EXPECT_ARRAY_EQ((nd::array{3.0, 12.0, 30.0}), f({a}, {{"axes", nd::array{1}}}));
+EXPECT_ARRAY_EQ((nd::array{3.0, 12.0, 30.0}), f({a}, {{"axes", nd::array{1}}}));
 }
+*/
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
   nd::callable f = nd::functional::reduction(0.0, [](const return_wrapper<double> &res, double x) { res += x; });
