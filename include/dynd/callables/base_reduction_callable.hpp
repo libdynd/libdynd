@@ -55,11 +55,13 @@ namespace nd {
         node.broadcast = !reduce;
         node.keepdim = reinterpret_cast<data_type *>(data)->keepdims;
 
-        ndt::type arg_element_tp[1];
-        if (reduce) {
-          arg_element_tp[0] = src_tp[0].extended<ndt::base_dim_type>()->get_element_type();
-        } else {
-          arg_element_tp[0] = src_tp[0].extended<ndt::base_dim_type>()->get_element_type();
+        std::vector<ndt::type> arg_element_tp(2);
+        for (size_t i = 0; i < nsrc; ++i) {
+          if (reduce) {
+            arg_element_tp[i] = src_tp[i].extended<ndt::base_dim_type>()->get_element_type();
+          } else {
+            arg_element_tp[i] = src_tp[i].extended<ndt::base_dim_type>()->get_element_type();
+          }
         }
         ++reinterpret_cast<data_type *>(data)->axis;
 
@@ -69,7 +71,7 @@ namespace nd {
           resolve(cg, reinterpret_cast<char *>(&node));
 
           ret_element_tp =
-              child->resolve(this, nullptr, cg, child_ret_tp, nsrc, arg_element_tp, nkwd - 2, kwds + 2, tp_vars);
+              child->resolve(this, nullptr, cg, child_ret_tp, nsrc, arg_element_tp.data(), nkwd - 2, kwds + 2, tp_vars);
 
           nd::callable constant = reinterpret_cast<data_type *>(data)->identity;
           constant->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
@@ -77,7 +79,7 @@ namespace nd {
           node.inner = false;
           resolve(cg, reinterpret_cast<char *>(&node));
 
-          ret_element_tp = caller->resolve(this, data, cg, res_tp, nsrc, arg_element_tp, nkwd, kwds, tp_vars);
+          ret_element_tp = caller->resolve(this, data, cg, res_tp, nsrc, arg_element_tp.data(), nkwd, kwds, tp_vars);
         }
 
         if (reduce) {

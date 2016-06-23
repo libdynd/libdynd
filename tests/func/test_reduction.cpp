@@ -17,24 +17,25 @@
 using namespace std;
 using namespace dynd;
 
-/*
-TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
-{
-  nd::callable f = nd::functional::reduction(nd::functional::apply([](double x, double y) { return x + y; }));
-
+TEST(Reduction, BuiltinSum_Lift0D_NoIdentity) {
+  nd::callable f =
+      nd::functional::reduction([] { return 0.0; }, [](const return_wrapper<double> &res, double x) { res += x; });
   EXPECT_ARRAY_EQ(1.25, f(1.25));
-}
-*/
 
-/*
-TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
-{
-  nd::callable f = nd::functional::reduction(
-      nd::functional::apply([](double x, double y) { return x + y; }));
-
-  EXPECT_ARRAY_EQ(100.0 + 1.25, f({1.25}, {{"identity", 100.0}}));
+  f = nd::functional::reduction([] { return 0; },
+                                [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
+  EXPECT_ARRAY_EQ(3, f(1, 3));
 }
-*/
+
+TEST(Reduction, BuiltinSum_Lift0D_Identity) {
+  nd::callable f =
+      nd::functional::reduction([] { return 100.0; }, [](const return_wrapper<double> &res, double x) { res += x; });
+  EXPECT_ARRAY_EQ(101.25, f(1.25));
+
+  f = nd::functional::reduction([] { return 100; },
+                                [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
+  EXPECT_ARRAY_EQ(103, f(1, 3));
+}
 
 TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
   nd::callable f =
@@ -133,25 +134,14 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
 TEST(Reduction, FixedVar) {
   nd::callable f =
       nd::functional::reduction([] { return 0.0; }, [](const return_wrapper<double> &res, double x) { res += x; });
-
-  nd::array a = nd::empty("3 * var * float64");
-  a(0).vals() = {1, 2};
-  a(1).vals() = {3, 4, 5};
-  a(2).vals() = {6, 7, 8, 9};
-
-  EXPECT_ARRAY_EQ(45.0, f(a));
+  EXPECT_ARRAY_EQ(45.0, f(nd::array{{1.0, 2.0}, {3.0, 4.0, 5.0}, {6.0, 7.0, 8.0, 9.0}}));
 }
 
 TEST(Reduction, FixedVarWithAxes) {
   nd::callable f =
       nd::functional::reduction([] { return 0.0; }, [](const return_wrapper<double> &res, double x) { res += x; });
-
-  nd::array a = nd::empty("3 * var * float64");
-  a(0).vals() = {1, 2};
-  a(1).vals() = {3, 4, 5};
-  a(2).vals() = {6, 7, 8, 9};
-
-  EXPECT_ARRAY_EQ((nd::array{3.0, 12.0, 30.0}), f({a}, {{"axes", nd::array{1}}}));
+  EXPECT_ARRAY_EQ((nd::array{3.0, 12.0, 30.0}),
+                  f({{{1.0, 2.0}, {3.0, 4.0, 5.0}, {6.0, 7.0, 8.0, 9.0}}}, {{"axes", {1}}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {

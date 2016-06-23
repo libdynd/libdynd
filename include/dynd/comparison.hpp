@@ -16,5 +16,7 @@ namespace nd {
   extern DYND_API callable greater;
   extern DYND_API callable total_order;
 
+  extern DYND_API callable all_equal;
+
 } // namespace dynd::nd
 } // namespace dynd

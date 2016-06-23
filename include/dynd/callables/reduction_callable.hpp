@@ -51,6 +51,50 @@ namespace nd {
           data = reinterpret_cast<char *>(&new_data);
         }
 
+        if (src_tp[0].is_scalar()) {
+          cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data),
+                             const char *dst_arrmeta, size_t nsrc, const char *const *src_arrmeta) {
+            intptr_t root_ckb_offset = kb.size();
+            switch (nsrc) {
+            case 1:
+              kb.emplace_back<scalar_reduction_kernel<1>>(kernreq);
+              break;
+            case 2:
+              kb.emplace_back<scalar_reduction_kernel<2>>(kernreq);
+              break;
+            default:
+              throw std::runtime_error("unsupported number of arguments");
+            }
+
+            kb(kernel_request_single, nullptr, dst_arrmeta, nsrc, src_arrmeta);
+
+            intptr_t init_offset = kb.size();
+            kb(kernel_request_single, nullptr, dst_arrmeta, nsrc, nullptr);
+
+            switch (nsrc) {
+            case 1: {
+              scalar_reduction_kernel<1> *e = kb.get_at<scalar_reduction_kernel<1>>(root_ckb_offset);
+              e->init_offset = init_offset - root_ckb_offset;
+              break;
+            }
+            case 2: {
+              scalar_reduction_kernel<2> *e = kb.get_at<scalar_reduction_kernel<2>>(root_ckb_offset);
+              e->init_offset = init_offset - root_ckb_offset;
+              break;
+            }
+            default:
+              throw std::runtime_error("unsupported number of arguments");
+            };
+
+          });
+
+          ndt::type ret_tp = m_child->resolve(this, nullptr, cg, dst_tp, nsrc, src_tp, nkwd - 2, kwds + 2, tp_vars);
+
+          m_identity->resolve(this, nullptr, cg, ret_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+
+          return ret_tp;
+        }
+
         if (src_tp[0].get_id() == fixed_dim_id) {
           static callable f[2] = {make_callable<reduction_callable<fixed_dim_id, 1>>(),
                                   make_callable<reduction_callable<fixed_dim_id, 2>>()};

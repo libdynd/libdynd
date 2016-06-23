@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/callables/all_equal_callable.hpp>
 #include <dynd/callables/equal_callable.hpp>
 #include <dynd/callables/greater_callable.hpp>
 #include <dynd/callables/greater_equal_callable.hpp>
@@ -19,6 +20,9 @@ using namespace dynd;
 
 namespace {
 
+typedef type_sequence<bool, int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double>
+    numeric_types;
+
 static std::vector<ndt::type> func_ptr(const ndt::type &DYND_UNUSED(dst_tp), size_t DYND_UNUSED(nsrc),
                                        const ndt::type *src_tp) {
   return {src_tp[0], src_tp[1]};
@@ -27,8 +31,6 @@ static std::vector<ndt::type> func_ptr(const ndt::type &DYND_UNUSED(dst_tp), siz
 template <std::vector<ndt::type> (*Func)(const ndt::type &, size_t, const ndt::type *),
           template <typename...> class KernelType>
 dispatcher<2, nd::callable> make_comparison_children() {
-  typedef type_sequence<bool, int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double>
-      numeric_types;
   static const std::vector<ndt::type> numeric_dyn_types = {
       ndt::make_type<bool>(),     ndt::make_type<int8_t>(),  ndt::make_type<int16_t>(),  ndt::make_type<int32_t>(),
       ndt::make_type<int64_t>(),  ndt::make_type<uint8_t>(), ndt::make_type<uint16_t>(), ndt::make_type<uint32_t>(),
@@ -97,6 +99,14 @@ nd::callable make_total_order() {
                                              nd::make_callable<nd::total_order_callable<bool, bool>>()}));
 }
 
+nd::callable make_all_equal() {
+  dispatcher<2, nd::callable> dispatcher =
+      nd::callable::make_all<nd::all_equal_callable, numeric_types, numeric_types>(func_ptr);
+
+  return nd::functional::reduction([] { return true; }, nd::make_callable<nd::multidispatch_callable<2>>(
+                                                            ndt::type("(Scalar, Scalar) -> bool"), dispatcher));
+}
+
 } // unnamed namespace
 
 DYND_API nd::callable nd::less = make_less();
@@ -106,3 +116,5 @@ DYND_API nd::callable nd::not_equal = make_not_equal();
 DYND_API nd::callable nd::greater_equal = make_greater_equal();
 DYND_API nd::callable nd::greater = make_greater();
 DYND_API nd::callable nd::total_order = make_total_order();
+
+DYND_API nd::callable nd::all_equal = make_all_equal();
