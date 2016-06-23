@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
 #include "inc_gtest.hpp"
 
@@ -17,28 +17,22 @@
 using namespace std;
 using namespace dynd;
 
-
-TEST(All, FixedDim)
-{
+TEST(All, FixedDim) {
   EXPECT_ARRAY_EQ(true, nd::all(nd::array{true, true, true, true}));
   EXPECT_ARRAY_EQ(false, nd::all(nd::array{true, false, true, false}));
   EXPECT_ARRAY_EQ(false, nd::all(nd::array{false, false, false, false}));
 }
 
-TEST(All, FixedDimFixedDim)
-{
+TEST(All, FixedDimFixedDim) {
   EXPECT_ARRAY_EQ(true, nd::all(nd::array{{true, true}, {true, true}}));
   EXPECT_ARRAY_EQ(false, nd::all(nd::array{{true, false}, {true, false}}));
   EXPECT_ARRAY_EQ(false, nd::all(nd::array{{true, false}, {true, false}, {false, true}}));
 }
 
-/*
-TEST(All, FixedDimVarDim)
-{
+TEST(All, FixedDimVarDim) {
   EXPECT_ARRAY_EQ(true, nd::all(nd::array{{true}, {true, true}}));
   EXPECT_ARRAY_EQ(true, nd::all(nd::array{{true, true}, {true}}));
   EXPECT_ARRAY_EQ(true, nd::all(nd::array{{true}, {true, true}, {true, true, true}}));
   EXPECT_ARRAY_EQ(false, nd::all(nd::array{{false}, {true, true}, {true, true, true}}));
   EXPECT_ARRAY_EQ(false, nd::all(nd::array{{false}, {true, false}, {true, false, true}}));
 }
-*/
