@@ -178,7 +178,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
 
 TEST(Reduction, Except) {
   // Cannot have a null child
-  EXPECT_THROW(nd::functional::reduction(nd::callable()), invalid_argument);
+//  EXPECT_THROW(nd::functional::reduction(nd::callable()), invalid_argument);
 
   // Cannot have a child with no arguments
   //  EXPECT_THROW(nd::functional::reduction(nd::functional::apply([]() { return 0; })), invalid_argument);

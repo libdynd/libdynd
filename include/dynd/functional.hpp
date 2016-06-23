@@ -165,8 +165,6 @@ namespace nd {
       return reduction(identity.is_null() ? callable() : constant(identity), child);
     }
 
-    inline callable reduction(const callable &child) { return reduction(array(), child); }
-
     DYND_API callable reduction(const callable &child,
                                 const std::initializer_list<std::pair<const char *, array>> &kwds);
 

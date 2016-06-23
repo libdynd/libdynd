@@ -11,6 +11,7 @@ namespace dynd {
 namespace nd {
   namespace limits {
 
+    extern DYND_API callable max;
     extern DYND_API callable min;
 
   } // namespace dynd::nd::limits
