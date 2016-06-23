@@ -197,15 +197,12 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
 
 TEST(Reduction, Except) {
   // Cannot have a null child
-  //  EXPECT_THROW(nd::functional::reduction(nd::callable()), invalid_argument);
+  EXPECT_THROW(nd::functional::reduction([] { return 0; }, nd::callable()), invalid_argument);
+
+  // Cannot have a null identity
+  EXPECT_THROW(nd::functional::reduction(nd::callable(), [](const return_wrapper<int> &res, int x) { res += x; }),
+               invalid_argument);
 
   // Cannot have a child with no arguments
   //  EXPECT_THROW(nd::functional::reduction(nd::functional::apply([]() { return 0; })), invalid_argument);
-
-  // Cannot have a child with more than two arguments
-  //  EXPECT_THROW(nd::functional::reduction(nd::functional::apply([](int x, int y, int z) { return x ? y : z; })),
-  //             invalid_argument);
-  //  EXPECT_THROW(nd::functional::reduction(nd::functional::apply([](int x, double y, double z) { return x ? y : z;
-  //  })),
-  //             invalid_argument);
 }

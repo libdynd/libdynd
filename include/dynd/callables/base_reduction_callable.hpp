@@ -69,7 +69,7 @@ namespace nd {
           resolve(cg, reinterpret_cast<char *>(&node));
 
           ret_element_tp =
-              child->resolve(this, nullptr, cg, child_ret_tp, nsrc, arg_element_tp, nkwd - 3, kwds + 3, tp_vars);
+              child->resolve(this, nullptr, cg, child_ret_tp, nsrc, arg_element_tp, nkwd - 2, kwds + 2, tp_vars);
 
           nd::callable constant = reinterpret_cast<data_type *>(data)->identity;
           constant->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);

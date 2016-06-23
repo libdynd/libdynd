@@ -173,6 +173,10 @@ nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const
 }
 
 nd::callable nd::functional::reduction(const callable &identity, const callable &child) {
+  if (identity.is_null()) {
+    throw invalid_argument("'identity' cannot be null");
+  }
+
   if (child.is_null()) {
     throw invalid_argument("'child' cannot be null");
   }

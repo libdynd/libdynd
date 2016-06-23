@@ -161,9 +161,6 @@ namespace nd {
      */
     DYND_API callable reduction(const callable &identity, const callable &child);
 
-    DYND_API callable reduction(const callable &child,
-                                const std::initializer_list<std::pair<const char *, array>> &kwds);
-
     DYND_API callable where(const callable &child);
 
   } // namespace dynd::nd::functional
