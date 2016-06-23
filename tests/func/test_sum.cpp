@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
 #include "inc_gtest.hpp"
 
@@ -18,6 +18,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 TEST(Sum, 1D)
 {
   // int32
@@ -56,6 +57,7 @@ TEST(Sum, 1D)
                   nd::sum(nd::array{dynd::complex<double>(1.25, -2.125), dynd::complex<double>(-2.5, 1.0),
                                     dynd::complex<double>(12.125, 12345.0)}));
 }
+*/
 
 /*
 TEST(Sum, 2D)

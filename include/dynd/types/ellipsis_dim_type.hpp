@@ -15,8 +15,6 @@
 namespace dynd {
 namespace ndt {
 
-  type make_ellipsis_dim(const std::string &name, const type &element_type);
-
   class DYNDT_API ellipsis_dim_type : public base_dim_type {
     std::string m_name;
 
@@ -38,6 +36,8 @@ namespace ndt {
         }
       }
     }
+
+    ellipsis_dim_type(type_id_t id, const type &element_tp) : ellipsis_dim_type(id, "", element_tp) {}
 
     const std::string &get_name() const { return m_name; }
 
@@ -67,26 +67,10 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
     virtual type with_element_type(const type &element_tp) const;
-
-    static type make_if_not_variadic(const type &element_tp) {
-      if (element_tp.is_variadic()) {
-        return element_tp;
-      }
-
-      return make_ellipsis_dim("Dims", element_tp);
-    }
   };
 
   template <>
   struct id_of<ellipsis_dim_type> : std::integral_constant<type_id_t, ellipsis_dim_id> {};
-
-  /** Makes an ellipsis type with the specified name and element type */
-  inline type make_ellipsis_dim(const std::string &name, const type &element_type) {
-    return make_type<ellipsis_dim_type>(name, element_type);
-  }
-
-  /** Make an unnamed ellipsis type */
-  inline type make_ellipsis_dim(const type &element_type) { return make_type<ellipsis_dim_type>("", element_type); }
 
 } // namespace dynd::ndt
 } // namespace dynd

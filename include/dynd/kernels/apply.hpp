@@ -30,6 +30,11 @@ struct return_wrapper {
   ReturnType &get() const { return *ptr; }
 
   operator ReturnType &() const { return *ptr; }
+
+  const return_wrapper &operator=(const ReturnType &value) const {
+    *ptr = value;
+    return *this;
+  }
 };
 
 namespace nd {

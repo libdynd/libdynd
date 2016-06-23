@@ -14,10 +14,12 @@ namespace nd {
   namespace functional {
 
     class reduction_dispatch_callable : public base_callable {
+      callable m_identity;
       callable m_child;
 
     public:
-      reduction_dispatch_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
+      reduction_dispatch_callable(const ndt::type &tp, const callable &identity, const callable &child)
+          : base_callable(tp), m_identity(identity), m_child(child) {}
 
       typedef typename base_reduction_callable::data_type new_data_type;
 
@@ -26,6 +28,7 @@ namespace nd {
                         const std::map<std::string, ndt::type> &tp_vars) {
         new_data_type new_data;
         if (data == nullptr) {
+          new_data.identity = m_identity;
           new_data.child = m_child;
           if (kwds[0].is_na()) {
             new_data.naxis = src_tp[0].get_ndim() - m_child->get_ret_type().get_ndim();
@@ -35,12 +38,10 @@ namespace nd {
             new_data.axes = reinterpret_cast<const int *>(kwds[0].cdata());
           }
 
-          new_data.identity = kwds[1];
-
-          if (kwds[2].is_na()) {
+          if (kwds[1].is_na()) {
             new_data.keepdims = false;
           } else {
-            new_data.keepdims = kwds[2].as<bool>();
+            new_data.keepdims = kwds[1].as<bool>();
           }
 
           intptr_t ndim = src_tp[0].get_ndim() - m_child->get_ret_type().get_ndim();
@@ -51,10 +52,11 @@ namespace nd {
         }
 
         if (src_tp[0].get_id() == fixed_dim_id) {
-          static callable f = make_callable<reduction_callable<fixed_dim_id>>();
-          return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          static callable f[2] = {make_callable<reduction_callable<fixed_dim_id, 1>>(),
+                                  make_callable<reduction_callable<fixed_dim_id, 2>>()};
+          return f[nsrc - 1]->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else {
-          static callable f = make_callable<reduction_callable<var_dim_id>>();
+          static callable f = make_callable<reduction_callable<var_dim_id, 1>>();
           return f->resolve(this, data, cg, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         }
       }

@@ -90,7 +90,7 @@ ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp, b
   std::string dimsname("Dims");
 
   for (const ndt::type &t : param_types) {
-    out_param_types.push_back(ndt::make_ellipsis_dim(dimsname, t));
+    out_param_types.push_back(ndt::make_type<ndt::ellipsis_dim_type>(dimsname, t));
   }
 
   ndt::type kwd_tp = child_tp->get_kwd_struct();
@@ -98,7 +98,7 @@ ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp, b
   const ndt::type &ret_tp = child_tp->get_return_type();
   if (ret_variadic) {
     return ndt::make_type<ndt::callable_type>(
-        ndt::make_ellipsis_dim(dimsname, ret_tp),
+        ndt::make_type<ndt::ellipsis_dim_type>(dimsname, ret_tp),
         ndt::make_type<ndt::tuple_type>(out_param_types.size(), out_param_types.data()), kwd_tp);
   }
 
@@ -144,13 +144,13 @@ ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp) {
 
   for (intptr_t i = 0, i_end = child_tp->get_narg(); i != i_end; ++i) {
     std::string dimsname("Dims" + std::to_string(i));
-    out_param_types.push_back(ndt::make_ellipsis_dim(dimsname, param_types[i]));
+    out_param_types.push_back(ndt::make_type<ndt::ellipsis_dim_type>(dimsname, param_types[i]));
   }
 
   ndt::type kwd_tp = child_tp->get_kwd_struct();
 
   ndt::type ret_tp = child_tp->get_return_type();
-  ret_tp = ndt::make_ellipsis_dim("Dims", child_tp->get_return_type());
+  ret_tp = ndt::make_type<ndt::ellipsis_dim_type>("Dims", child_tp->get_return_type());
 
   return ndt::make_type<ndt::callable_type>(
       ret_tp, ndt::make_type<ndt::tuple_type>(out_param_types.size(), out_param_types.data()), kwd_tp);
@@ -172,30 +172,28 @@ nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const
       neighborhood_op, boundary_child);
 }
 
-nd::callable nd::functional::reduction(const callable &child) {
+nd::callable nd::functional::reduction(const callable &identity, const callable &child) {
+  if (identity.is_null()) {
+    throw invalid_argument("'identity' cannot be null");
+  }
+
   if (child.is_null()) {
     throw invalid_argument("'child' cannot be null");
   }
 
-  switch (child->get_narg()) {
-  case 1:
-    break;
-  case 2:
-    return reduction((child.get_flags() | right_associative) ? left_compound(child) : right_compound(child));
-  default: {
-    stringstream ss;
-    ss << "'child' must be a unary callable, but its signature is " << child->get_type();
-    throw invalid_argument(ss.str());
-  }
+  vector<ndt::type> arg_tp;
+  for (auto tp : child->get_arg_types()) {
+    arg_tp.push_back(ndt::make_type<ndt::ellipsis_dim_type>("Dims", tp));
   }
 
+  std::vector<std::pair<ndt::type, std::string>> kwds{
+      {ndt::make_type<ndt::option_type>(ndt::type("Fixed * int32")), "axes"},
+      {ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "keepdims"}};
+
   return make_callable<reduction_dispatch_callable>(
-      ndt::make_type<ndt::callable_type>(ndt::ellipsis_dim_type::make_if_not_variadic(child->get_ret_type()),
-                                         {ndt::ellipsis_dim_type::make_if_not_variadic(child->get_arg_types()[0])},
-                                         {{ndt::make_type<ndt::option_type>(ndt::type("Fixed * int32")), "axes"},
-                                          {ndt::make_type<ndt::option_type>(child->get_ret_type()), "identity"},
-                                          {ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "keepdims"}}),
-      child);
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::ellipsis_dim_type>("Dims", child->get_ret_type()),
+                                         arg_tp.size(), arg_tp.data(), kwds),
+      identity, child);
 }
 
 nd::callable nd::functional::where(const callable &child) { return elwise(make_callable<where_callable>(child), true); }

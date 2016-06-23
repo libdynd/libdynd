@@ -38,14 +38,12 @@ namespace nd {
     kernel_prefix *get_child() { return kernel_prefix::get_child(reinterpret_cast<SelfType *>(this)->size()); }
 
     template <size_t I>
-    std::enable_if_t<I == 0, kernel_prefix *> get_child()
-    {
+    std::enable_if_t<I == 0, kernel_prefix *> get_child() {
       return get_child();
     }
 
     template <size_t I>
-    std::enable_if_t<(I > 0), kernel_prefix *> get_child()
-    {
+    std::enable_if_t<(I > 0), kernel_prefix *> get_child() {
       const size_t *offsets = this->get_offsets();
       return kernel_prefix::get_child(offsets[I - 1]);
     }
@@ -54,8 +52,7 @@ namespace nd {
 
     /** Initializes just the kernel_prefix function member. */
     template <typename... ArgTypes>
-    static void init(SelfType *self, kernel_request_t kernreq, ArgTypes &&... args)
-    {
+    static void init(SelfType *self, kernel_request_t kernreq, ArgTypes &&... args) {
       new (self) SelfType(std::forward<ArgTypes>(args)...);
 
       self->destructor = SelfType::destruct;
@@ -78,27 +75,23 @@ namespace nd {
      */
     static void destruct(kernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }
 
-    void call(array *DYND_UNUSED(dst), const array *DYND_UNUSED(src))
-    {
+    void call(array *DYND_UNUSED(dst), const array *DYND_UNUSED(src)) {
       std::stringstream ss;
       ss << "void call(array *dst, const array *src) is not implemented in " << typeid(SelfType).name();
       throw std::runtime_error(ss.str());
     }
 
-    static void call_wrapper(kernel_prefix *self, array *dst, const array *src)
-    {
+    static void call_wrapper(kernel_prefix *self, array *dst, const array *src) {
       reinterpret_cast<SelfType *>(self)->call(dst, src);
     }
 
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-    {
+    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {
       std::stringstream ss;
       ss << "void single(char *dst, char *const *src) is not implemented in " << typeid(SelfType).name();
       throw std::runtime_error(ss.str());
     }
 
-    static void DYND_EMIT_LLVM(single_wrapper)(kernel_prefix *self, char *dst, char *const *src)
-    {
+    static void DYND_EMIT_LLVM(single_wrapper)(kernel_prefix *self, char *dst, char *const *src) {
       reinterpret_cast<SelfType *>(self)->single(dst, src);
     }
 
@@ -109,8 +102,7 @@ namespace nd {
   const volatile char *DYND_USED((base_kernel<PrefixType, SelfType>::ir)) = NULL;
 
   template <typename SelfType>
-  struct base_kernel<SelfType> : base_kernel<kernel_prefix, SelfType> {
-  };
+  struct base_kernel<SelfType> : base_kernel<kernel_prefix, SelfType> {};
 
 } // namespace dynd::nd
 } // namespace dynd
