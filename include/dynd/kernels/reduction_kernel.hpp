@@ -370,6 +370,54 @@ namespace nd {
       }
     };
 
+    template <size_t NArg>
+    struct scalar_reduction_kernel : base_strided_kernel<scalar_reduction_kernel<NArg>, NArg> {
+      intptr_t init_offset;
+
+      ~scalar_reduction_kernel() {
+        this->get_child(init_offset)->destroy();
+        this->get_child()->destroy();
+      }
+
+      void single(char *dst, char *const *src) {
+        this->get_child(init_offset)->single(dst, src);
+        this->get_child()->single(dst, src);
+      }
+
+      /*
+            void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t
+         count) {
+              kernel_prefix *init_child = this->get_child(init_offset);
+              kernel_prefix *reduction_child = this->get_child();
+
+              char *src0 = src[0];
+              for (size_t i = 0; i != count; ++i) {
+                char *src0_data = reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->begin;
+                init_child->single(dst, &src0_data);
+
+                reduction_child->strided(dst, 0, &src0_data, &src0_inner_stride,
+                                         reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->size);
+                dst += dst_stride;
+                src0 += src_stride[0];
+              }
+            }
+
+            void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t
+         size) {
+              kernel_prefix *child = this->get_child();
+
+              char *src0 = src[0];
+              for (size_t i = 0; i != size; ++i) {
+                child->strided(dst, 0, &reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->begin,
+         &src0_inner_stride,
+                               reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->size);
+                dst += dst_stride;
+                src0 += src_stride[0];
+              }
+            }
+      */
+    };
+
     /**
      * STRIDED INITIAL BROADCAST DIMENSION
      * This ckernel handles one dimension of the reduction processing,

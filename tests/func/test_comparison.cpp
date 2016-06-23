@@ -76,3 +76,13 @@ TEST(Equals, Tuple) {
   std::exit(-1);
 }
 */
+
+TEST(AllEqual, Int) {
+  EXPECT_ARRAY_EQ(true, nd::all_equal(4, 4));
+  EXPECT_ARRAY_EQ(true, nd::all_equal(1, 1));
+}
+
+TEST(AllEqual, Fixed) {
+  EXPECT_ARRAY_EQ(true, nd::all_equal(nd::array{0, 1, 2}, nd::array{0, 1, 2}));
+  EXPECT_ARRAY_EQ(false, nd::all_equal(nd::array{0, 1, 2}, nd::array{0, 1, 3}));
+}
