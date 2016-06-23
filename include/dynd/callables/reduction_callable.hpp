@@ -28,8 +28,8 @@ namespace nd {
                         const std::map<std::string, ndt::type> &tp_vars) {
         new_data_type new_data;
         if (data == nullptr) {
+          new_data.identity = m_identity;
           new_data.child = m_child;
-          new_data.saved_identity = m_identity;
           if (kwds[0].is_na()) {
             new_data.naxis = src_tp[0].get_ndim() - m_child->get_ret_type().get_ndim();
             new_data.axes = NULL;
@@ -38,12 +38,10 @@ namespace nd {
             new_data.axes = reinterpret_cast<const int *>(kwds[0].cdata());
           }
 
-          new_data.identity = kwds[1];
-
-          if (kwds[2].is_na()) {
+          if (kwds[1].is_na()) {
             new_data.keepdims = false;
           } else {
-            new_data.keepdims = kwds[2].as<bool>();
+            new_data.keepdims = kwds[1].as<bool>();
           }
 
           intptr_t ndim = src_tp[0].get_ndim() - m_child->get_ret_type().get_ndim();

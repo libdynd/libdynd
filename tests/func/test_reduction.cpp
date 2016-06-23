@@ -47,11 +47,10 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
 
 TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
   nd::callable f = nd::functional::reduction(100.0, [](const return_wrapper<double> &res, double x) { res += x; });
-  EXPECT_ARRAY_EQ(100.0 + 1.5 - 22.0 + 3.75 + 1.125 - 3.375,
-                  f({{1.5, -22., 3.75, 1.125, -3.375}}, {{"identity", 100.0}}));
+  EXPECT_ARRAY_EQ(100.0 + 1.5 - 22.0 + 3.75 + 1.125 - 3.375, f(nd::array{1.5, -22., 3.75, 1.125, -3.375}));
 
   f = nd::functional::reduction(100, [](const return_wrapper<int> &res, int x, int y) { res += max(x, y); });
-  EXPECT_ARRAY_EQ(139, f({nd::array{4, -1, 7, 9, 2}, nd::array{3, 8, 0, 5, 11}}, {{"identity", 100}}));
+  EXPECT_ARRAY_EQ(139, f(nd::array{4, -1, 7, 9, 2}, nd::array{3, 8, 0, 5, 11}));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
@@ -178,7 +177,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
 
 TEST(Reduction, Except) {
   // Cannot have a null child
-//  EXPECT_THROW(nd::functional::reduction(nd::callable()), invalid_argument);
+  //  EXPECT_THROW(nd::functional::reduction(nd::callable()), invalid_argument);
 
   // Cannot have a child with no arguments
   //  EXPECT_THROW(nd::functional::reduction(nd::functional::apply([]() { return 0; })), invalid_argument);

@@ -184,7 +184,6 @@ nd::callable nd::functional::reduction(const callable &identity, const callable 
 
   std::vector<std::pair<ndt::type, std::string>> kwds{
       {ndt::make_type<ndt::option_type>(ndt::type("Fixed * int32")), "axes"},
-      {ndt::make_type<ndt::option_type>(child->get_ret_type()), "identity"},
       {ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "keepdims"}};
 
   return make_callable<reduction_dispatch_callable>(

@@ -18,10 +18,10 @@ using namespace dynd;
 
 TEST(Serialize, FixedDim) {
   EXPECT_ARRAY_EQ(bytes("\x00\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00"),
-                  nd::serialize({{0, 1, 2, 3, 4}}, {{"identity", nd::empty(ndt::type("bytes"))}}));
+                  nd::serialize(nd::array{0, 1, 2, 3, 4}));
 }
 
 TEST(Serialize, FixedDimFixedDim) {
   EXPECT_ARRAY_EQ(bytes("\x00\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"),
-                  nd::serialize({{{0, 1}, {2, 3}}}, {{"identity", nd::empty(ndt::type("bytes"))}}));
+                  nd::serialize(nd::array{{0, 1}, {2, 3}}));
 }

@@ -19,21 +19,19 @@ namespace nd {
     class base_reduction_callable : public base_callable {
     public:
       struct data_type {
+        callable identity;
         callable child;
         bool keepdims;
         size_t naxis;
         const int *axes;
         int axis;
         intptr_t ndim;
-        array identity;
-        callable saved_identity;
       };
 
       struct node_type {
         bool inner;
         bool broadcast;
         bool keepdim;
-        bool identity;
       };
 
       base_reduction_callable() : base_callable(ndt::type()) {}
@@ -66,8 +64,6 @@ namespace nd {
         ++reinterpret_cast<data_type *>(data)->axis;
 
         ndt::type ret_element_tp;
-        node.identity = !reinterpret_cast<data_type *>(data)->identity.is_na() ||
-                        !reinterpret_cast<data_type *>(data)->saved_identity.is_null();
         if (reinterpret_cast<data_type *>(data)->axis == reinterpret_cast<data_type *>(data)->ndim) {
           node.inner = true;
           resolve(cg, reinterpret_cast<char *>(&node));
@@ -75,19 +71,8 @@ namespace nd {
           ret_element_tp =
               child->resolve(this, nullptr, cg, child_ret_tp, nsrc, arg_element_tp, nkwd - 3, kwds + 3, tp_vars);
 
-          if (reinterpret_cast<data_type *>(data)->identity.is_na() &&
-              reinterpret_cast<data_type *>(data)->saved_identity.is_null()) {
-            nd::array error_mode = eval::default_eval_context.errmode;
-            assign->resolve(this, nullptr, cg, ret_element_tp, 1, arg_element_tp, 1, &error_mode, tp_vars);
-          } else {
-            if (reinterpret_cast<data_type *>(data)->saved_identity.is_null()) {
-              nd::callable constant = functional::constant(reinterpret_cast<data_type *>(data)->identity);
-              constant->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-            } else {
-              nd::callable constant = reinterpret_cast<data_type *>(data)->saved_identity;
-              constant->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-            }
-          }
+          nd::callable constant = reinterpret_cast<data_type *>(data)->identity;
+          constant->resolve(this, nullptr, cg, ret_element_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else {
           node.inner = false;
           resolve(cg, reinterpret_cast<char *>(&node));
@@ -116,11 +101,10 @@ namespace nd {
         bool inner = reinterpret_cast<node_type *>(data)->inner;
         bool broadcast = reinterpret_cast<node_type *>(data)->broadcast;
         bool keepdim = reinterpret_cast<node_type *>(data)->keepdim;
-        bool identity = reinterpret_cast<node_type *>(data)->identity;
 
-        cg.emplace_back([inner, broadcast, keepdim, identity](kernel_builder &kb, kernel_request_t kernreq,
-                                                              char *DYND_UNUSED(data), const char *dst_arrmeta,
-                                                              size_t nsrc, const char *const *src_arrmeta) {
+        cg.emplace_back([inner, broadcast, keepdim](kernel_builder &kb, kernel_request_t kernreq,
+                                                    char *DYND_UNUSED(data), const char *dst_arrmeta, size_t nsrc,
+                                                    const char *const *src_arrmeta) {
           if (inner) {
             if (!broadcast) {
               intptr_t src_size = reinterpret_cast<const size_stride_t *>(src_arrmeta[0])->dim_size;
@@ -134,16 +118,9 @@ namespace nd {
               }
               e->_size = src_size;
 
-              if (!identity) { // identity is null
-                e->size_first = e->_size - 1;
-                for (size_t i = 0; i < NArg; ++i) {
-                  e->src_stride_first[i] = e->src_stride[i];
-                }
-              } else {
-                e->size_first = e->_size;
-                for (size_t i = 0; i < NArg; ++i) {
-                  e->src_stride_first[i] = 0;
-                }
+              e->size_first = e->_size;
+              for (size_t i = 0; i < NArg; ++i) {
+                e->src_stride_first[i] = 0;
               }
 
               const char *src_element_arrmeta[NArg];
@@ -178,18 +155,10 @@ namespace nd {
               // The striding parameters
               self_k->_size = src_size;
               // Need to retrieve 'e' again because it may have moved
-              if (!identity) { // identity is null
-                self_k->size_first = self_k->_size - 1;
-                self_k->dst_stride_first = self_k->dst_stride;
-                for (size_t i = 0; i < NArg; ++i) {
-                  self_k->src_stride_first[i] = self_k->src_stride[i];
-                }
-              } else {
-                self_k->size_first = self_k->_size;
-                self_k->dst_stride_first = 0;
-                for (size_t i = 0; i < NArg; ++i) {
-                  self_k->src_stride_first[i] = 0;
-                }
+              self_k->size_first = self_k->_size;
+              self_k->dst_stride_first = 0;
+              for (size_t i = 0; i < NArg; ++i) {
+                self_k->src_stride_first[i] = 0;
               }
 
               kb(kernel_request_strided, nullptr, dst_element_arrmeta, nsrc, src_element_arrmeta);
@@ -231,10 +200,9 @@ namespace nd {
         bool inner = reinterpret_cast<node_type *>(data)->inner;
         bool broadcast = reinterpret_cast<node_type *>(data)->broadcast;
         bool keepdim = reinterpret_cast<node_type *>(data)->keepdim;
-        bool identity = reinterpret_cast<node_type *>(data)->identity;
-        cg.emplace_back([inner, broadcast, keepdim, identity](kernel_builder &kb, kernel_request_t kernreq,
-                                                              char *DYND_UNUSED(data), const char *dst_arrmeta,
-                                                              size_t nsrc, const char *const *src_arrmeta) {
+        cg.emplace_back([inner, broadcast, keepdim](kernel_builder &kb, kernel_request_t kernreq,
+                                                    char *DYND_UNUSED(data), const char *dst_arrmeta, size_t nsrc,
+                                                    const char *const *src_arrmeta) {
           typedef reduction_kernel<ndt::var_dim_type, false, true, NArg> self_type;
           intptr_t root_ckb_offset = kb.size();
           kb.emplace_back<self_type>(
