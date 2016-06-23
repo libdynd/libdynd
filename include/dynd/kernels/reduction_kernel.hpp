@@ -326,7 +326,7 @@ namespace nd {
       intptr_t src0_inner_stride_first;
       intptr_t init_offset;
 
-      reduction_kernel(std::intptr_t src0_inner_stride, bool with_identity = false)
+      reduction_kernel(std::intptr_t src0_inner_stride, bool with_identity = true)
           : src0_inner_stride(src0_inner_stride) {
         if (with_identity) {
           src0_inner_stride_first = 0;
@@ -341,6 +341,8 @@ namespace nd {
       }
 
       void single_first(char *dst, char *const *src) {
+        std::cout << "single_first" << std::endl;
+
         size_t inner_size = reinterpret_cast<ndt::var_dim_type::data_type *>(src[0])->size;
         if (src0_inner_stride_first != 0) {
           --inner_size;
@@ -354,6 +356,8 @@ namespace nd {
       }
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count) {
+        std::cout << "strided_first" << std::endl;
+
         kernel_prefix *init_child = this->get_child(init_offset);
         kernel_prefix *reduction_child = this->get_child();
 
@@ -362,14 +366,9 @@ namespace nd {
           char *src0_data = reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->begin;
           init_child->single(dst, &src0_data);
 
-          size_t inner_size = reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->size;
-          if (src0_inner_stride_first != 0) {
-            --inner_size;
-          }
-
           src0_data += src0_inner_stride_first;
           reduction_child->strided(dst, 0, &src0_data, &src0_inner_stride,
-                                   reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->size - 1);
+                                   reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->size);
           dst += dst_stride;
           src0 += src_stride[0];
         }
