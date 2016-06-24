@@ -76,24 +76,24 @@ matrix:
         - conda build conda.recipe
     - language: python
       env: DYND_FFTW=OFF VERBOSE=1
-      compiler: clang
+      compiler: gcc
       python: 3.5
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
             - kalakris-cmake
-            - llvm-toolchain-precise-3.8
+            - ubuntu-toolchain-r-test
           packages:
-            - clang-3.8
+            - gcc-6
+            - g++-6
             - cmake
       cache:
       directories:
         - $HOME/.cache/pip
         - $HOME/dynd-python/build
       before_install:
-        - export CC=clang-3.8
-        - export CXX=clang++-3.8
+        - export CC=gcc-6
+        - export CXX=g++-6
         - travis_retry pip install --install-option="--no-cython-compile" Cython==0.24
       before_script:
         - cd ..
