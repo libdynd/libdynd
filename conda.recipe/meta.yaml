@@ -5,14 +5,12 @@ package:
 requirements:
   build:
     - cmake
-    - python
+  run:
+    - libgcc >=5.2     # [linux]
 
 build:
   number: {{environ.get('TRAVIS_BUILD_NUMBER', 0)}}    # [unix]
   number: {{environ.get('APPVEYOR_BUILD_NUMBER', 0)}}  # [win]
-  script_env:
-    - CC [linux]
-    - CXX [linux]
 
 test:
   commands:
