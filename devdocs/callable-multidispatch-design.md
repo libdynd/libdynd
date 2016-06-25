@@ -127,12 +127,24 @@ some point in the future.
 
 ### How We Build the Decision Tree
 
+To build the decision tree, we explicitly track `S_working`, information about the state of all the working
+vectors, and a symbolic version of the working vectors for every signature in `S_working`. We create a
+set of candidate decision criteria, for example a type id test for every type available to test, and
+other tests based on heuristics like a type variable `A` being exposed in two different `TWorking`
+positions suggests an equality comparison between them. A score is evaluated for each of these candidate
+decision criteria, and the highest-score decision is used to define the node. For each possible
+decision, the node is evaluated symbolically on every element of `S_working`, updating the symbolic working
+vectors corresponding to the signature, and then this whole procedure is recursively applied.
 
+For each signature, we also track an array of symbolic arguments which represent the knowledge we've
+gained about them. Initially they start as a copy of the signature's positional arguments, and as we gain
+information about the arguments, we do substitutions of concrete types into them.
 
+### Examples
+
+Let's try a few examples, to see what happens.
 
 ### Example 1
-
-Let's start with an operation with a few concrete signatures.
 
 ```
 A: (int8, int8) -> int8
@@ -140,12 +152,149 @@ B: (int16, int16) -> int16
 C: (float32, float32) -> float32
 ```
 
+#### Node 0
+
+```
+S_working = {A, B, C}
+Symbolic_args = [[int8, int8], [int16, int16], [float32, float32]]
+Candidate 1: hash-map of TInp[0].typeid
+S_working hash-map: {int8: {A}, int16: {B}, float32: {C}, <default>: {}}
+Candidate 2: hash-map of TInp[1].typeid
+S_working hash-map: {int8: {A}, int16: {B}, float32: {C}, <default>: {}}
+```
+
+The scores of both are equal (they produce the exact same discrimination between signatures), so
+we go with candidate 1. The decision tree is done, because all signatures were discriminated, just
+an additional double-check match is needed.
 
 ### Example 2
 
+We add a slight wrinkle which example 1's decision tree no longer works for.
+
+```
+A: (int8, int8) -> int8
+B: (int16, int16) -> int16
+C: (float32, float32) -> float32
+D: (int16, float32) -> float32
+```
+
+#### Node 0
+
+```
+S_working = {A, B, C, D}
+Symbolic_args = [[int8, int8], [int16, int16], [float32, float32], [int16, float32]]
+Candidate 1: hash-map of TInp[0].typeid
+S_working hash-map: {int8: {A}, int16: {B, D}, float32: {C}, <default>: {}}
+Candidate 2: hash-map of TInp[1].typeid
+S_working hash-map: {int8: {A}, int16: {B}, float32: {C, D}, <default>: {}}
+```
+
+Once again, the scores are equal, so we choose candidate 1. The `int16` branch is still ambiguous,
+so we link it to Node 1, and recursively apply our algorithm. Since we already checked the type id
+of `TInp[0]`, it was marked as finished, and there is only one candidate left.
+
+#### Node 1 <int16< Node 0
+
+```
+S_working = {B, D}
+Symbolic_args = [culled, [int16, int16], culled, [int16, float32]]
+Candidate 1: hash-map of TInp[1].typeid
+S_working hash-map: {int16: {B}, float32: {D}, <default:> {}}
+```
+
+### Example 3
+
+Let's add two symbolic signatures so the partial ordering isn't just independent elements anymore.
+
+```
+A: (int8, int8) -> int8
+B: (int16, int16) -> int16
+C: (float32, float32) -> float32
+D: (int16, float32) -> float32
+E: (T, T) -> T
+F: (S, T) -> S
+```
+
+The existence of `T` twice in the `E` signature triggers another candidate, comparing the types
+of `TInp[0]` and `TInp[1]`.
+
+#### Node 0
+
+```
+S_working = {A, B, C, D, E, F}
+Symbolic_args = [[int8, int8], [int16, int16], [float32, float32], [int16, float32], [T, T], [S, T]]
+Candidate 1: hash-map of TInp[0].typeid
+S_working hash-map: {int8: {A, E, F}, int16: {B, D, E, F}, float32: {C, E, F}, <default>: {E, F}}
+Candidate 2: hash-map of TInp[1].typeid
+S_working hash-map: {int8: {A, E, F}, int16: {B, E, F}, float32: {C, D, E, F}, <default>: {E, F}}
+Candidate 3: TInp[0] == TInp[1]
+S_working yes: {A, B, C, E (not F, it's strictly more general than E)}, no: {D, F}
+```
+
+The scores of candidates 1 and 2 are equal, but higher than 3. We proceed with candidate 1,
+and consider the `int8` branch first.
+
+#### Node 1 <int8< Node 0
+
+Notice the substitutions into the first argument of the two symbolic signatures. Because `T` is substitued,
+both the first and second argument of `E` turn into `int8`. This is what allows us to eliminate
+it from the default case in candidate 1.
+
+```
+S_working = {A, E, F}
+Symbolic_args = [[int8, int8], culled, culled, culled, [int8, int8], [int8, T]]
+Candidate 1: hash-map of TInp[1]
+S_working hash-map: {int8: {A (exact match)}, <default:> {F}}
+Candidate 2: TInp[0] == TInp[1]
+S_working yes: {A, E (not F, it's strictly more general than E)}, no: {F}
+```
+
+Candidate 1 clearly wins.
+
+#### Node 2 <int16< Node 0
+
+```
+S_working = {B, D, E, F}
+Symbolic_args = [culled, [int16, int16], culled, [int16, float32], [int16, int16], [int16, T]]
+Candidate 1: hash-map of TInp[1].typeid
+S_working hash-map: {int16: {B}, float32: {D}, <default>: {F}}
+Candidate 2: TInp[0] == TInp[1]
+S_working yes: {B, E (not F, it's strictly more general than E)}, no: {D, F}
+```
+
+Candidate 1 is a clear winner.
+
+#### Node 3 <float32< Node 0
+
+```
+S_working = {C, E, F}
+Symbolic_args = [culled, culled, [float32, float32], culled, [float32, float32], [float32, T]]
+Candidate 1: hash-map of TInp[1].typeid
+S_working hash-map: {float32: {C}, <default>: {F}}
+Candidate 2: TInp[0] == TInp[1]
+S_working yes: {C, E (not F, it's strictly more general than E)}, no: {F}
+```
+
+Once again, candidate 1 clearly wins.
+
+#### Node 4 <default< Node 0
+
+```
+S_working = {E, F}
+Symbolic_args = [culled, culled, culled, culled, [T, T], [S, T]]
+Candidate 1: TInp[0] == TInp[1]
+S_working yes: {E (not F, it's strictly more general than E)}, no: {F}
+```
+
+This business of seeing that `F` should be excluded on the yes side is clear by inspection, but
+how to translate that into code will require some further determination.
+
+### Example 4
+
 Let's do a gradient function.
 
+```
 A: (N * float32) -> N * float32
 B: (M * N * float32) -> M * N * 2 * float32
 C: (Fixed ** N * float32) -> Fixed ** N * N * float32
-
+```
