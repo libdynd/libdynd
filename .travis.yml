@@ -58,7 +58,6 @@ matrix:
       before_script:
         - export CC="gcc-4.9"
         - export CXX="g++-4.9"
-        - export SHORT_COMMIT="$(git rev-parse --short $TRAVIS_COMMIT)"
       script:
         - conda build conda.recipe
     - language: objective-c
@@ -68,7 +67,6 @@ matrix:
       env: CONDA=true
       addons:
       before_script:
-        - export SHORT_COMMIT="$(git rev-parse --short $TRAVIS_COMMIT)"
       before_install:
         - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
         - bash Miniconda-latest-MacOSX-x86_64.sh -b
@@ -78,29 +76,25 @@ matrix:
         - conda build conda.recipe
     - language: python
       env: DYND_FFTW=OFF VERBOSE=1
-      compiler: clang
+      compiler: gcc
       python: 3.5
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
             - kalakris-cmake
-#            - llvm-toolchain-precise-3.5
+            - ubuntu-toolchain-r-test
           packages:
-            - gcc-4.9
-            - g++-4.9
-  #          - clang-3.5
+            - gcc-6
+            - g++-6
             - cmake
       cache:
       directories:
         - $HOME/.cache/pip
         - $HOME/dynd-python/build
       before_install:
-#        - export CC=clang-3.5
-#        - export CXX=clang++-3.5
-        - export CC=gcc-4.9
-        - export CXX=g++-4.9
-        - travis_retry pip install --install-option="--no-cython-compile" Cython==0.23
+        - export CC=gcc-6
+        - export CXX=g++-6
+        - travis_retry pip install --install-option="--no-cython-compile" Cython==0.24
       before_script:
         - cd ..
         - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
@@ -111,7 +105,6 @@ matrix:
         - cd ..
         - python -c "import dynd; dynd.test(verbosity=2, exit=True)"
       after_script:
-        - cd .
     - compiler: gcc
       env: DYND_FFTW=ON DYND_COVERAGE=ON
       addons:
@@ -120,19 +113,19 @@ matrix:
             - ubuntu-toolchain-r-test
             - kalakris-cmake
           packages:
-            - gcc-5
-            - g++-5
+            - gcc-6
+            - g++-6
             - cmake
             - lcov
             - libfftw3-dev
       before_install:
-        - export CC="gcc-5"
-        - export CXX="g++-5"
+        - export CC="gcc-6"
+        - export CXX="g++-6"
         - gem install coveralls-lcov
         - wget https://github.com/linux-test-project/lcov/archive/v1.12.zip
         - unzip v1.12.zip
         - export PATH=${PWD}/lcov-1.12/bin:$PATH
-        - cp /usr/bin/gcov-5 ${PWD}/lcov-1.12/bin/gcov
+        - cp /usr/bin/gcov-6 ${PWD}/lcov-1.12/bin/gcov
       before_script:
         - mkdir build
         - pushd build
@@ -177,7 +170,6 @@ deploy:
 
 notifications:
   email: false
-  flowdock: b08b3ba4fb86fa48121e90b5f67ccb75
   on_success: change
   on_failure: always
 
