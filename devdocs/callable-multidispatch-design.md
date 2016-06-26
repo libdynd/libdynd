@@ -37,8 +37,9 @@ The a set `M` of resolved signatures is defined as follows. Specifically, the `m
 allows us to define whether one match is more specific than another, and we use that to limit `M`.
 
 ```
-# All the signatures which match the input arguments
-M_candidate = {S in S_all | T matches S}
+# All the signatures which match the input arguments (where A is the input arguments)
+# NOTE: X.matches(Y) means that Y is a match to the possibly symbolic type X
+M_candidate = {S in S_all | S.matches(A)}
 # Only the most specific ones, i.e. signatures which don't have a more specific one in the set
 M = {S in M_candidate | for all S' in M_candidate, not (S' matches S and not S matches S') }
 ```
@@ -86,8 +87,7 @@ is `m`, restricting to the subset of signatures with `m` positional arguments. T
 `S_working` of `S_all` as the starting point for the meat of the algorithm, which works recursively.
 
 In addition to the array of `m` input types, which will remain untouched, the decision tree will track
-a vector `
-` of borrowed type references (stored as `ndt::type *` or potentially the more efficient
+a vector `TWork` of borrowed type references (stored as `ndt::type *` or potentially the more efficient
 `base_type *`). The original array has ownership of the types, so there's no reason to aquire any
 references of type subcomponents.
 
@@ -143,7 +143,10 @@ information about the arguments, we do substitutions of concrete types into them
 
 Let's try a few examples, to see what happens.
 
-### Example 1
+### Example 1 Decision Tree Creation
+
+In this example, we'll take a very simple set of signatures, and work out a full decision tree
+that definitely resolves or rejects.
 
 ```
 A: (int8, int8) -> int8
@@ -156,6 +159,8 @@ C: (float32, float32) -> float32
 ```
 S_working = {A, B, C}
 Symbolic_args = [[int8, int8], [int16, int16], [float32, float32]]
+Matched_args = [False, False]
+
 Candidate 1: hash-map of TInp[0].typeid
 S_working hash-map: {int8: {A}, int16: {B}, float32: {C}, <default>: {}}
 Candidate 2: hash-map of TInp[1].typeid
@@ -163,8 +168,139 @@ S_working hash-map: {int8: {A}, int16: {B}, float32: {C}, <default>: {}}
 ```
 
 The scores of both are equal (they produce the exact same discrimination between signatures), so
-we go with candidate 1. The decision tree is done, because all signatures were discriminated, just
-an additional double-check match is needed.
+we go with candidate 1. We must continue, because the match is not yet conclusive.
+
+#### Node 1 <int8< Node 0
+
+All but one signature has been culled, and the first argument is marked as completed because there is
+no component of it in any of the working vectors marked as incomplete anymore. There is only one
+more possible candidate to check, the type id of the second argument.
+
+```
+S_working = {A}
+Symbolic_args = [[int8, int8], culled, culled]
+Matched_args = [True, False]
+
+Candidate 1: hash-map of TInp[1].typeid
+S_working hash-map: {int8: {A}, <default>: {}}
+```
+
+#### Node 2 <int8< Node 1
+
+```
+S_working = {A}
+Symbolic_args = [[int8, int8], culled, culled]
+Matched_args = [True, True]
+```
+
+All arguments are matched, so we return `A` as a successful match.
+
+#### Node 3 <int16< Node 0
+
+```
+S_working = {B}
+Symbolic_args = [culled, [int16, int16], culled]
+Matched_args = [True, False]
+
+Candidate 1: hash-map of TInp[1].typeid
+S_working hash-map: {int16: {B}, <default>: {}}
+```
+
+#### Node 4 <int16< Node 3
+
+```
+S_working = {B}
+Symbolic_args = [culled, [int16, int16], culled]
+Matched_args = [True, True]
+```
+
+We return `B` as a successful match.
+
+#### Node 5 <float32< Node 0
+
+```
+S_working = {C}
+Symbolic_args = [culled, culled, [float32, float32]]
+Matched_args = [True, False]
+
+Candidate 1: hash-map of TInp[1].typeid
+S_working hash-map: {int16: {B}, <default>: {}}
+```
+
+#### Node 6 <float32< Node 5
+
+```
+S_working = {C}
+Symbolic_args = [culled, culled, [float32, float32]]
+Matched_args = [True, True]
+```
+
+We return `C` as a successful match.
+
+#### Node 7 << From any empty set
+
+We return "no match".
+
+### Example 1 Resulting Decision Tree Code
+
+Once the decision tree is completed, it needs to be turned into something that
+can be executed, likely a simple byte code. Here's the sequence of instructions
+that the decision tree produces.
+
+```python
+Node0:
+    goto {int8: Node1, int16: Node3, float32: Node5}
+         .get(TInp[0].typeid, Node7)
+Node1:
+    goto {int8: Node2}
+         .get(TInp[1].typeid, Node7)
+Node2:
+    return MatchSuccess(0) # Signature A
+Node3:
+    goto {int16: Node4}
+         .get(TInp[1].typeid, Node7)
+Node4:
+    return MatchSuccess(1) # Signature B
+Node5:
+    goto {float32: Node6}
+         .get(TInp[1].typeid, Node7)
+Node6:
+    return MatchSuccess(2) # Signature C
+Node7:
+    return MatchFailure()
+```
+
+### Example 1 Decision Tree Execution Traces
+
+Signature `(int8, int16)`
+
+```
+Node0:
+    goto {int8: Node1, int16: Node3, float32: Node5}
+         .get(TInp[0].typeid, Node7) # int8
+ => goto Node1
+Node1:
+    goto {int8: Node2}
+         .get(TInp[1].typeid, Node7) # int16
+ => goto Node7
+Node7:
+    return MatchFailure()
+```
+
+Signature `(float32, float32)`
+
+```
+Node0:
+    goto {int8: Node1, int16: Node3, float32: Node5}
+         .get(TInp[0].typeid, Node7) # float32
+ => goto Node5
+Node5:
+    goto {float32: Node6}
+         .get(TInp[1].typeid, Node7) # float32
+ => goto Node6
+Node6:
+    return MatchSuccess(2) # Signature C
+```
 
 ### Example 2
 
@@ -192,13 +328,43 @@ Once again, the scores are equal, so we choose candidate 1. The `int16` branch i
 so we link it to Node 1, and recursively apply our algorithm. Since we already checked the type id
 of `TInp[0]`, it was marked as finished, and there is only one candidate left.
 
-#### Node 1 <int16< Node 0
+#### Node 3 <int16< Node 0
 
 ```
 S_working = {B, D}
 Symbolic_args = [culled, [int16, int16], culled, [int16, float32]]
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int16: {B}, float32: {D}, <default:> {}}
+```
+
+### Example 2 Resulting Decision Tree Code
+
+We haven't worked out the full decision tree explicitly, but let's turn what we would generate
+into code as we did for example 1.
+
+```python
+Node0:
+    goto {int8: Node1, int16: Node3, float32: Node6}
+         .get(TInp[0].typeid, Node8)
+Node1:
+    goto {int8: Node2}
+         .get(TInp[1].typeid, Node8)
+Node2:
+    return MatchSuccess(0) # Signature A
+Node3:
+    goto {int16: Node4, float32: Node5}
+         .get(TInp[1].typeid, Node8)
+Node4:
+    return MatchSuccess(1) # Signature B
+Node5:
+    return MatchSuccess(3) # Signature D
+Node6:
+    goto {float32: Node7}
+         .get(TInp[1].typeid, Node8)
+Node7:
+    return MatchSuccess(2) # Signature C
+Node8:
+    return MatchFailure()
 ```
 
 ### Example 3
