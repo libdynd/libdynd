@@ -86,7 +86,8 @@ is `m`, restricting to the subset of signatures with `m` positional arguments. T
 `S_working` of `S_all` as the starting point for the meat of the algorithm, which works recursively.
 
 In addition to the array of `m` input types, which will remain untouched, the decision tree will track
-a vector `TWork` of borrowed type references (stored as `ndt::type *` or potentially the more efficient
+a vector `
+` of borrowed type references (stored as `ndt::type *` or potentially the more efficient
 `base_type *`). The original array has ownership of the types, so there's no reason to aquire any
 references of type subcomponents.
 
@@ -130,7 +131,7 @@ some point in the future.
 To build the decision tree, we explicitly track `S_working`, information about the state of all the working
 vectors, and a symbolic version of the working vectors for every signature in `S_working`. We create a
 set of candidate decision criteria, for example a type id test for every type available to test, and
-other tests based on heuristics like a type variable `A` being exposed in two different `TWorking`
+other tests based on heuristics like a type variable `A` being exposed in two different `TWork`
 positions suggests an equality comparison between them. A score is evaluated for each of these candidate
 decision criteria, and the highest-score decision is used to define the node. For each possible
 decision, the node is evaluated symbolically on every element of `S_working`, updating the symbolic working
@@ -139,8 +140,6 @@ vectors corresponding to the signature, and then this whole procedure is recursi
 For each signature, we also track an array of symbolic arguments which represent the knowledge we've
 gained about them. Initially they start as a copy of the signature's positional arguments, and as we gain
 information about the arguments, we do substitutions of concrete types into them.
-
-### Examples
 
 Let's try a few examples, to see what happens.
 
@@ -291,10 +290,170 @@ how to translate that into code will require some further determination.
 
 ### Example 4
 
+Let's add in some optional types and a single dimension ellipsis to require usage of `TWork`.
+
+```
+A: (int8, int8) -> int8
+B: (int8, int16) -> int16
+C: (int8, int32) -> int32
+D: (?int8, int8) -> ?int8
+E: (?int8, int16) -> ?int16
+F: (?int8, int32) -> ?int32
+G: (Dims... * ?int8, int8) -> ?int8
+```
+
+#### Node 0
+
+```
+S_working = {A, B, C, D, E, F, G}
+Symbolic_args = [[int8, int8], [int8, int16], [int8, int32],
+                 [?int8, int8], [?int8, int16], [?int8, int32],
+                 [Dims... * ?int8, int8]]
+Candidate 1: hash-map of TInp[0].typeid
+S_working hash-map: {int8: {A, B, C}, option: {D, E, F}, <dim>: {G}, <default>: {}}
+Candidate 2: hash-map of TInp[1].typeid
+S_working hash-map: {int8: {A, D, G}, int16: {B, E}, int32: {C, F}, <default>: {}}
+```
+
+While `G` matches when `option` is seen in candidate 1, the symbolic substition of no dimensions
+into its signature produces `[?int8, int8]` which exactly matches a  more specific signature. Therefore
+it is removed from that set.
+
+Candidate 1 can instantly narrow one case down to a singleton set `G`, so it probably deserves
+a higher score than candidate 2.
+
+#### Node 1 <int8< Node 0
+
+```
+S_working = {A, B, C}
+Symbolic_args = [[int8, int8], [int8, int16], [int8, int32],
+                 culled, culled, culled,
+                 culled]
+Candidate 1: hash-map of TInp[1].typeid
+S_working hash-map: {int8: {A}, int16: {B}, int32: {C}, <default>: {}}
+```
+
+Only one choice here, which fully resolves the signature.
+
+#### Node 2 <option< Node 0
+
+As part of traversing an `option` link, the type contained in the `option` is appended to
+`TWork`. During execution of the decision tree, this is done as an operation when arriving at
+node 2.
+
+```
+S_working = {D, E, F}
+Symbolic_args = [culled, culled, culled,
+                 [?int8, int8] + TWork [int8], [?int8, int16] + TWork [int8], [?int8, int32] + TWork [int8],
+                 culled]
+Candidate 1: hash-map of TInp[1].typeid
+S_working hash-map: {int8: {D}, int16: {E}, int32: {F}, <default>: {}}
+Candidate 2: hash-map of TWork[0].typeid
+S_working hash-map: {int8: {D, E, F}, <default>: {}}
+```
+
+Candidate 1 exactly discriminates the signatures, while candidate 2 provides no additional information.
+
+### Example 5
+
 Let's do a gradient function.
 
 ```
-A: (N * float32) -> N * float32
-B: (M * N * float32) -> M * N * 2 * float32
-C: (Fixed ** N * float32) -> Fixed ** N * N * float32
+A: (D0 * float32) -> D0 * float32
+B: (D1 * D0 * float32) -> D1 * D0 * 2 * float32
+C: (Fixed**N * float32) -> Fixed**N * N * float32
 ```
+
+#### Node 0
+
+```
+S_working = {A, B, C}
+Symbolic_args = [[D0 * float32], [D1 * D0 * float32], [Fixed**N * float32]]
+Candidate 1: hash-map of TInp[0].typeid
+S_working hash-map: {fixed: {A, B, C}, <default>: {}}
+```
+
+The candidate doesn't shrink any signature subsets, but does produce more information.
+
+#### Node 1 <fixed< Node 0
+
+The first fixed dimension gets stripped off the argument, and its size gets appended to the
+`IWork` vector while its element type gets appended to `TWork`. The representation of `IWork`
+for each signature keeps track of the type variable it belongs to.
+
+```
+S_working = {A, B, C}
+Symbolic_args = [[D0 * float32] + IWork [D0] + TWork [float32],
+                 [D1 * D0 * float32] + IWork [D1] + TWork [D0 * float32],
+                 [Fixed**N * float32] + IWork [??] + TWork [Fixed**(N-1) * float32]]
+Candidate 1: hash-map of TWork[0].typeid
+S_working hash-map: {float32: {A}, fixed: {B, C}, <default>: {}}
+Candidate 2: hash-map of IWork[0]
+S_working hash-map: {<default>: {A, B, C}}
+```
+
+Candidate 1 clearly wins.
+
+#### Node 2 <fixed< Node 1
+
+The first fixed dimension gets appended to `IWork` and `TWork` as in Node 1.
+
+```
+S_working = {B, C}
+Symbolic_args = [culled,
+                 [D1 * D0 * float32] + IWork [D1, D0] + TWork [D0 * float32, float32],
+                 [Fixed**N * float32] + IWork [??, ??] + TWork [Fixed**(N-1) * float32, Fixed**(N-2) * float32]]
+Candidate 1: hash-map of TWork[1].typeid
+S_working hash-map: {float32: {B}, fixed: {C}, <default>: {}}
+Candidate 2: hash-map of IWork[0]
+S_working hash-map: {<default>: {A, B, C}}
+Candidate 3: hash-map of IWork[1]
+S_working hash-map: {<default>: {A, B, C}}
+```
+
+Candidate 1 fully distinguishes the signatures, so we're done.
+
+### Example 5
+
+A simple broadcasting ufunc.
+
+```
+A: (Dims... * int8, Dims... * int16) -> Dims... * int8
+B: (Dims... * int16, Dims... * int32) -> Dims... * int16
+```
+
+#### Node 0
+
+```
+S_working = {A, B}
+Symbolic_args = [[Dims... * int8, Dims... * int16],
+                 [Dims... * int16, Dims... * int32]]
+Candidate 1: hash-map of TInp[0].typeid
+S_working hash-map: {any dim: {A, B}, int8: {A}, int16: {B}, <default>: {}}
+Candidate 2: hash-map of TInp[1].typeid
+S_working hash-map: {any dim: {A, B}, int16: {A}, int32: {B}, <default>: {}}
+```
+
+Both candidates produce the same level of discrimination, so we take the first one.
+
+#### Node 1 <any dim< Node 0
+
+Since all the symbolic args are `Dims...`, an ellipsis, all dimensions get consumed, and
+the resulting dim fragment is saved in `TWork` along with the scalar type after the dimensions.
+
+```
+S_working = {A, B}
+Symbolic_args = [[Dims... * int8, Dims... * int16] + TWork [Dims..., int8],
+                 [Dims... * int16, Dims... * int32] + TWork [Dims..., int16]]
+Candidate 1: hash-map of TInp[1].typeid
+S_working hash-map: {fixed: {A, B}, int16: {A}, int32: {B}, <default>: {}}
+Candidate 2: hash-map of TWork[1].typeid
+S_working hash-map: {int8: {A}, int16: {B}, <default>: {}}
+```
+
+If we had to keep going to distinguish between the signatures, we would consume the `Dims...` for the
+second argument, and then confirm that it broadcasts against what was already found for `Dims...` in
+`TWork[0]`. To track this information, the symbolic information for each signature needs to also be tracking
+a type variable symbol table, which maps each symbol name to its location in the various working vectors.
+This allows for confirming that ellipsis type variables match dims, and that regular type variables match
+across the arguments.
