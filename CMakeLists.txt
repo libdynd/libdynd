@@ -214,6 +214,7 @@ set(libdyndt_SRC
     include/dynd/types/base_dim_type.hpp
     include/dynd/types/base_string_type.hpp
     include/dynd/types/bytes_type.hpp
+    include/dynd/types/callable_type.hpp
     include/dynd/types/char_type.hpp
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
