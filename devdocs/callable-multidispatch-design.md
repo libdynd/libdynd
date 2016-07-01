@@ -173,7 +173,7 @@ C: (float32, float32) -> float32
 S_working = {A, B, C}
 Symbolic_args = [[int8, int8], [int16, int16], [float32, float32]]
 Equations = [S.TInp[0].matches(TInp[0]),
-             S.TInp[1].matches(TInp[1]]
+             S.TInp[1].matches(TInp[1])]
 
 Candidate 1: hash-map of TInp[0].typeid
 S_working hash-map: {int8: {A}, int16: {B}, float32: {C}, <default>: {}}
@@ -193,7 +193,7 @@ for the second argument's type.
 ```
 S_working = {A}
 Symbolic_args = [[int8, int8], culled, culled]
-Equations = [S.TInp[1].matches(TInp[1]]
+Equations = [S.TInp[1].matches(TInp[1])]
 
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int8: {A}, <default>: {}}
@@ -214,7 +214,7 @@ No equations are left, so we return `A` as a successful match.
 ```
 S_working = {B}
 Symbolic_args = [culled, [int16, int16], culled]
-Equations = [S.TInp[1].matches(TInp[1]]
+Equations = [S.TInp[1].matches(TInp[1])]
 
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int16: {B}, <default>: {}}
@@ -235,7 +235,7 @@ We return `B` as a successful match.
 ```
 S_working = {C}
 Symbolic_args = [culled, culled, [float32, float32]]
-Equations = [S.TInp[1].matches(TInp[1]]
+Equations = [S.TInp[1].matches(TInp[1])]
 
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int16: {B}, <default>: {}}
@@ -333,7 +333,7 @@ D: (int16, float32) -> float32
 S_working = {A, B, C, D}
 Symbolic_args = [[int8, int8], [int16, int16], [float32, float32], [int16, float32]]
 Equations = [S.TInp[0].matches(TInp[0]),
-             S.TInp[1].matches(TInp[1]]
+             S.TInp[1].matches(TInp[1])]
 
 Candidate 1: hash-map of TInp[0].typeid
 S_working hash-map: {int8: {A}, int16: {B, D}, float32: {C}, <default>: {}}
@@ -350,7 +350,7 @@ of `TInp[0]`, it was marked as finished, and there is only one candidate left.
 ```
 S_working = {B, D}
 Symbolic_args = [culled, [int16, int16], culled, [int16, float32]]
-Equations = [S.TInp[1].matches(TInp[1]]
+Equations = [S.TInp[1].matches(TInp[1])]
 
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int16: {B}, float32: {D}, <default:> {}}
@@ -405,7 +405,7 @@ F: (S, T) -> S
 S_working = {A, B, C, D, E, F}
 Symbolic_args = [[int8, int8], [int16, int16], [float32, float32], [int16, float32], [T, T], [S, T]]
 Equations = [S.TInp[0].matches(TInp[0]),
-             S.TInp[1].matches(TInp[1]]
+             S.TInp[1].matches(TInp[1])]
 
 Candidate 1: hash-map of TInp[0].typeid
 S_working hash-map: {int8: {A, E, F}, int16: {B, D, E, F}, float32: {C, E, F}, <default>: {E, F}}
@@ -433,7 +433,7 @@ type needs to be done at decision tree evaluation time.
 ```
 S_working = {A, E, F}
 Symbolic_args = [[int8, int8], culled, culled, culled, [int8, int8], [int8, T]]
-Equations = [S.TInp[1].matches(TInp[1]]
+Equations = [S.TInp[1].matches(TInp[1])]
 
 Candidate 1: hash-map of TInp[1]
 S_working hash-map: {int8: {A}, <default:> {F}}
@@ -446,7 +446,7 @@ Note that signatures `E` and `F` are eliminated from the `int8` edge due to `mat
 ```
 S_working = {B, D, E, F}
 Symbolic_args = [culled, [int16, int16], culled, [int16, float32], [int16, int16], [int16, T]]
-Equations = [S.TInp[1].matches(TInp[1]]
+Equations = [S.TInp[1].matches(TInp[1])]
 
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int16: {B}, float32: {D}, <default>: {F}}
@@ -460,7 +460,7 @@ constraints, and signature `F` is eliminated from the `float23` edge for the sam
 ```
 S_working = {C, E, F}
 Symbolic_args = [culled, culled, [float32, float32], culled, [float32, float32], [float32, T]]
-Equations = [S.TInp[1].matches(TInp[1]]
+Equations = [S.TInp[1].matches(TInp[1])]
 
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {float32: {C}, <default>: {F}}
@@ -474,9 +474,9 @@ signature with a type variable at that position.
 ```
 S_working = {E, F}
 Symbolic_args = [culled, culled, culled, culled,
-                 [T, T], {T: TWork[0]},
-                 [S, T], {S: TWork[0]}]
-Equations = [S.TInp[1].matches(TInp[1]]
+                 [T, T] SymTable {T: TWork[0]},
+                 [S, T] SymTable {S: TWork[0]}]
+Equations = [S.TInp[1].matches(TInp[1])]
 
 Candidate 1: TInp[1] == TWork[0]
 S_working yes: {E}, no: {F}
@@ -505,6 +505,9 @@ S_working = {A, B, C, D, E, F, G}
 Symbolic_args = [[int8, int8], [int8, int16], [int8, int32],
                  [?int8, int8], [?int8, int16], [?int8, int32],
                  [Dims... * ?int8, int8]]
+Equations = [S.TInp[0].matches(TInp[0]),
+             S.TInp[1].matches(TInp[1])]
+
 Candidate 1: hash-map of TInp[0].typeid
 S_working hash-map: {int8: {A, B, C}, option: {D, E, F}, <dim>: {G}, <default>: {}}
 Candidate 2: hash-map of TInp[1].typeid
@@ -525,6 +528,8 @@ S_working = {A, B, C}
 Symbolic_args = [[int8, int8], [int8, int16], [int8, int32],
                  culled, culled, culled,
                  culled]
+Equations = [S.TInp[1].matches(TInp[1])]
+
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int8: {A}, int16: {B}, int32: {C}, <default>: {}}
 ```
@@ -534,14 +539,17 @@ Only one choice here, which fully resolves the signature.
 #### Node 2 <option< Node 0
 
 As part of traversing an `option` link, the type contained in the `option` is appended to
-`TWork`. During execution of the decision tree, this is done as an operation when arriving at
-node 2.
+`TWork`, and a new type matchine equation is added. During execution of the decision tree,
+this is done as an operation when arriving at node 2.
 
 ```
 S_working = {D, E, F}
 Symbolic_args = [culled, culled, culled,
                  [?int8, int8] + TWork [int8], [?int8, int16] + TWork [int8], [?int8, int32] + TWork [int8],
                  culled]
+Equations = [S.TInp[1].matches(TInp[1])
+             S.TWork[0].matches(TWork[0])]
+
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int8: {D}, int16: {E}, int32: {F}, <default>: {}}
 Candidate 2: hash-map of TWork[0].typeid
@@ -565,6 +573,8 @@ C: (Fixed**N * float32) -> Fixed**N * N * float32
 ```
 S_working = {A, B, C}
 Symbolic_args = [[D0 * float32], [D1 * D0 * float32], [Fixed**N * float32]]
+Equations = [S.TInp[0].matches(TInp[0])]
+
 Candidate 1: hash-map of TInp[0].typeid
 S_working hash-map: {fixed: {A, B, C}, <default>: {}}
 ```
@@ -575,13 +585,17 @@ The candidate doesn't shrink any signature subsets, but does produce more inform
 
 The first fixed dimension gets stripped off the argument, and its size gets appended to the
 `IWork` vector while its element type gets appended to `TWork`. The representation of `IWork`
-for each signature keeps track of the type variable it belongs to.
+for each signature keeps track of the type variable it belongs to. Two equations get added,
+to match the dimension size and the element type.
 
 ```
 S_working = {A, B, C}
 Symbolic_args = [[D0 * float32] + IWork [D0] + TWork [float32],
                  [D1 * D0 * float32] + IWork [D1] + TWork [D0 * float32],
                  [Fixed**N * float32] + IWork [??] + TWork [Fixed**(N-1) * float32]]
+Equations = [S.TWork[0].matches(TWork[0]),
+             S.IWork[0] == IWork[0]]
+
 Candidate 1: hash-map of TWork[0].typeid
 S_working hash-map: {float32: {A}, fixed: {B, C}, <default>: {}}
 Candidate 2: hash-map of IWork[0]
@@ -599,15 +613,19 @@ S_working = {B, C}
 Symbolic_args = [culled,
                  [D1 * D0 * float32] + IWork [D1, D0] + TWork [D0 * float32, float32],
                  [Fixed**N * float32] + IWork [??, ??] + TWork [Fixed**(N-1) * float32, Fixed**(N-2) * float32]]
-Candidate 1: hash-map of TWork[1].typeid
-S_working hash-map: {float32: {B}, fixed: {C}, <default>: {}}
-Candidate 2: hash-map of IWork[0]
+Equations = [S.IWork[0] == IWork[0],
+             S.TWork[1].matches(TWork[1]),
+             S.IWork[1] == IWork[1]]
+
+Candidate 1: hash-map of IWork[0]
 S_working hash-map: {<default>: {A, B, C}}
+Candidate 2: hash-map of TWork[1].typeid
+S_working hash-map: {float32: {B}, fixed: {C}, <default>: {}}
 Candidate 3: hash-map of IWork[1]
 S_working hash-map: {<default>: {A, B, C}}
 ```
 
-Candidate 1 fully distinguishes the signatures, so we're done.
+Candidate 2 fully distinguishes the signatures, so we're done.
 
 ### Example 5
 
@@ -624,6 +642,9 @@ B: (Dims... * int16, Dims... * int32) -> Dims... * int16
 S_working = {A, B}
 Symbolic_args = [[Dims... * int8, Dims... * int16],
                  [Dims... * int16, Dims... * int32]]
+Equations = [S.TInp[0].matches(TInp[0]),
+             S.TInp[1].matches(TInp[1])]
+
 Candidate 1: hash-map of TInp[0].typeid
 S_working hash-map: {any dim: {A, B}, int8: {A}, int16: {B}, <default>: {}}
 Candidate 2: hash-map of TInp[1].typeid
@@ -634,13 +655,16 @@ Both candidates produce the same level of discrimination, so we take the first o
 
 #### Node 1 <any dim< Node 0
 
-Since all the symbolic args are `Dims...`, an ellipsis, all dimensions get consumed, and
-the resulting dim fragment is saved in `TWork` along with the scalar type after the dimensions.
+Since all the symbolic args are the ellipsis `Dims...`, all dimensions get consumed, and
+the resulting dim fragment is saved in `TWork` alongside the scalar type after the dimensions.
 
 ```
 S_working = {A, B}
-Symbolic_args = [[Dims... * int8, Dims... * int16] + TWork [Dims..., int8],
-                 [Dims... * int16, Dims... * int32] + TWork [Dims..., int16]]
+Symbolic_args = [[Dims... * int8, Dims... * int16] + TWork [??, int8] + SymTable {Dims...: TWork[0]},
+                 [Dims... * int16, Dims... * int32] + TWork [??, int16] + SymTable {Dims...: TWork[0]}]
+Equations = [S.TInp[1].matches(TInp[1]),
+             S.TWork[1].matches(TWork[1])]
+
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {fixed: {A, B}, int16: {A}, int32: {B}, <default>: {}}
 Candidate 2: hash-map of TWork[1].typeid
@@ -649,10 +673,7 @@ S_working hash-map: {int8: {A}, int16: {B}, <default>: {}}
 
 If we had to keep going to distinguish between the signatures, we would consume the `Dims...` for the
 second argument, and then confirm that it broadcasts against what was already found for `Dims...` in
-`TWork[0]`. To track this information, the symbolic information for each signature needs to also be tracking
-a type variable symbol table, which maps each symbol name to its location in the various working vectors.
-This allows for confirming that ellipsis type variables match dims, and that regular type variables match
-across the arguments.
+`TWork[0]`.
 
 ### Example 6
 
@@ -673,6 +694,9 @@ Symbolic_args = [[3 * (int8), (int8, int16)],
                  [3 * (int8, int8), (int16, int16)],
                  [3 * (int8, int8, int8), (int16, int32)],
                  [N * (int8, int8), (int16, int16)]]
+Equations = [S.TInp[0].matches(TInp[0]),
+             S.TInp[1].matches(TInp[1])]
+
 Candidate 1: hash-map of TInp[0].typeid
 S_working hash-map: {fixed: {A, B, C, D}, <default>: {}}
 Candidate 2: hash-map of TInp[1].typeid
@@ -692,16 +716,20 @@ S_working = {A, B, C, D}
 Symbolic_args = [[3 * (int8), (int8, int16)] + IWork [3] + TWork [(int8)],
                  [3 * (int8, int8), (int16, int16)] + IWork [3] + TWork [(int8, int8)],
                  [3 * (int8, int8, int8), (int16, int32)] + IWork [3] + TWork [(int8, int8, int8)],
-                 [N * (int8, int8), (int16, int16)] + IWork [N] + TWork [(int8, int8)]]
-Candidate 1: hash-map of IWork[0]
-S_working hash-map: {3: {A, B, C}, <default>: {D}}
+                 [N * (int8, int8), (int16, int16)] + IWork [??] + TWork [(int8, int8)] + SymTable {N: IWork[0]}]
+Equations = [S.TInp[1].matches(TInp[1]),
+             S.TWork[0].matches(TWork[0]),
+             S.IWork[0] == IWork[0]]
+
+Candidate 1: hash-map of TInp[1].typeid
+S_working hash-map: {tuple: {A, B, C, D}, <default>: {}}
 Candidate 2: hash-map of TWork[0].typeid
 S_working hash-map: {tuple: {A, B, C, D}, <default>: {}}
-Candidate 3: hash-map of TInp[1].typeid
-S_working hash-map: {tuple: {A, B, C, D}, <default>: {}}
+Candidate 3: hash-map of IWork[0]
+S_working hash-map: {3: {A, B, C}, <default>: {D}}
 ```
 
-Candidate 1 is doing the most discrimination here. Notice that `D` got culled from the 3 case due
+Candidate 3 is doing the most discrimination here. Notice that `D` got culled from the 3 case due
 to `matches` partial ordering.
 
 #### Node 2 <3< Node 1
@@ -712,14 +740,17 @@ Symbolic_args = [[3 * (int8), (int8, int16)] + IWork [3] + TWork [(int8)],
                  [3 * (int8, int8), (int16, int16)] + IWork [3] + TWork [(int8, int8)],
                  [3 * (int8, int8, int8), (int16, int32)] + IWork [3] + TWork [(int8, int8, int8)],
                  culled]
-Candidate 1: hash-map of TWork[0].typeid
+Equations = [S.TInp[1].matches(TInp[1]),
+             S.TWork[0].matches(TWork[0])]
+
+Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {tuple: {A, B, C}, <default>: {}}
-Candidate 2: hash-map of TInp[1].typeid
+Candidate 2: hash-map of TWork[0].typeid
 S_working hash-map: {tuple: {A, B, C}, <default>: {}}
 ```
 
 No additional candidates were generated by the last choice, so we're once again left with no
-distiguishing features at the level where we make the choice. Continue with candidate 1.
+distiguishing features at the level where we make the choice. Continue with candidate 2.
 
 #### Node 1 <tuple< Node 2
 
@@ -732,10 +763,14 @@ Symbolic_args = [[3 * (int8), (int8, int16)] + IWork [3, 1] + TWork [(int8), int
                  [3 * (int8, int8, int8), (int16, int32)] + IWork [3, 3] +
                                                             TWork [(int8, int8, int8), int8, int8, int8],
                  culled]
-Candidate 1: hash-map of IWork[1]
-S_working hash-map: {1: {A}, 2: {B}, 3: {C}, <default>: {}}
-Candidate 2: hash-map of TInp[1].typeid
+Equations = [S.TInp[1].matches(TInp[1]),
+             S.IWork[1] == IWork[1],
+             <all the tuple types match>]
+
+Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {tuple: {A, B, C}, <default>: {}}
+Candidate 2: hash-map of IWork[1]
+S_working hash-map: {1: {A}, 2: {B}, 3: {C}, <default>: {}}
 ```
 
 The freshly expanded types in `TWork` can't be relied upon until their count is locked down, which means
