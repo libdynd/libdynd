@@ -148,6 +148,12 @@ This is done for each signature in `S_working`, and for each candidate we produc
 The candidate with the best score is used to create the decision tree node, and then this whole procedure
 is applied recursively with the new symbolic state and set of equations.
 
+When matching against type variables in the signature, an additional symbol table may be tracked to
+ensure consistency between all usages of the same variable. When a decision tree edge fully determines
+the type variable's value, we simply substitute that value into all the symbolic state for that signature.
+In all other cases, we append the working type on `TWork`, and track the type variable to `TWork` index
+for each signature separately.
+
 Let's try a few examples, to see what happens.
 
 ### Example 1 Decision Tree Creation
@@ -393,79 +399,90 @@ E: (T, T) -> T
 F: (S, T) -> S
 ```
 
-The existence of `T` twice in the `E` signature triggers another candidate, comparing the types
-of `TInp[0]` and `TInp[1]`.
-
 #### Node 0
 
 ```
 S_working = {A, B, C, D, E, F}
 Symbolic_args = [[int8, int8], [int16, int16], [float32, float32], [int16, float32], [T, T], [S, T]]
+Equations = [S.TInp[0].matches(TInp[0]),
+             S.TInp[1].matches(TInp[1]]
+
 Candidate 1: hash-map of TInp[0].typeid
 S_working hash-map: {int8: {A, E, F}, int16: {B, D, E, F}, float32: {C, E, F}, <default>: {E, F}}
 Candidate 2: hash-map of TInp[1].typeid
 S_working hash-map: {int8: {A, E, F}, int16: {B, E, F}, float32: {C, D, E, F}, <default>: {E, F}}
-Candidate 3: TInp[0] == TInp[1]
-S_working yes: {A, B, C, E (not F, it's strictly more general than E)}, no: {D, F}
 ```
 
-The scores of candidates 1 and 2 are equal, but higher than 3. We proceed with candidate 1,
+The scores of candidates 1 and 2 are equal, so we'll proceed with candidate 1,
 and consider the `int8` branch first.
 
 #### Node 1 <int8< Node 0
 
-Notice the substitutions into the first argument of the two symbolic signatures. Because `T` is substitued,
-both the first and second argument of `E` turn into `int8`. This is what allows us to eliminate
-it from the default case in candidate 1.
+When a type variable in a signature is processed, we need to handle things specially so that the
+type variable is matched consistently across all the types in that signature.
+One possibility is that the edge we took fully determines the type variable, in which case
+we can substitute that type variable in our symbolic representation which causes further matches
+against it to be treated concretely. The other is that the edge we took expands out new parameters,
+in which case we need to save the type we say into a working vector and keep track of it in a symbol
+table.
+
+By taking the `int8` edge, we fully know the type of `T` in signature `E` and the type of `S` in
+signature `F`. Thus those can be substituted fully in the symbolic args, and no tracking of the
+type needs to be done at decision tree evaluation time.
 
 ```
 S_working = {A, E, F}
 Symbolic_args = [[int8, int8], culled, culled, culled, [int8, int8], [int8, T]]
+Equations = [S.TInp[1].matches(TInp[1]]
+
 Candidate 1: hash-map of TInp[1]
-S_working hash-map: {int8: {A (exact match)}, <default:> {F}}
-Candidate 2: TInp[0] == TInp[1]
-S_working yes: {A, E (not F, it's strictly more general than E)}, no: {F}
+S_working hash-map: {int8: {A}, <default:> {F}}
 ```
 
-Candidate 1 clearly wins.
+Note that signatures `E` and `F` are eliminated from the `int8` edge due to `matches` partial ordering constraints.
 
 #### Node 2 <int16< Node 0
 
 ```
 S_working = {B, D, E, F}
 Symbolic_args = [culled, [int16, int16], culled, [int16, float32], [int16, int16], [int16, T]]
+Equations = [S.TInp[1].matches(TInp[1]]
+
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int16: {B}, float32: {D}, <default>: {F}}
-Candidate 2: TInp[0] == TInp[1]
-S_working yes: {B, E (not F, it's strictly more general than E)}, no: {D, F}
 ```
 
-Candidate 1 is a clear winner.
+Once again, signatures `E` and `F` are eliminated from the `int16` edge due to `matches` partial ordering
+constraints, and signature `F` is eliminated from the `float23` edge for the same reason.
 
 #### Node 3 <float32< Node 0
 
 ```
 S_working = {C, E, F}
 Symbolic_args = [culled, culled, [float32, float32], culled, [float32, float32], [float32, T]]
+Equations = [S.TInp[1].matches(TInp[1]]
+
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {float32: {C}, <default>: {F}}
-Candidate 2: TInp[0] == TInp[1]
-S_working yes: {C, E (not F, it's strictly more general than E)}, no: {F}
 ```
-
-Once again, candidate 1 clearly wins.
 
 #### Node 4 <default< Node 0
 
+In taking this edge, `TInp[0]` is appended to `TWork`, and a symbol correspondence is set up in each
+signature with a type variable at that position.
+
 ```
 S_working = {E, F}
-Symbolic_args = [culled, culled, culled, culled, [T, T], [S, T]]
-Candidate 1: TInp[0] == TInp[1]
-S_working yes: {E (not F, it's strictly more general than E)}, no: {F}
+Symbolic_args = [culled, culled, culled, culled,
+                 [T, T], {T: TWork[0]},
+                 [S, T], {S: TWork[0]}]
+Equations = [S.TInp[1].matches(TInp[1]]
+
+Candidate 1: TInp[1] == TWork[0]
+S_working yes: {E}, no: {F}
 ```
 
-This business of seeing that `F` should be excluded on the yes side is clear by inspection, but
-how to translate that into code will require some further determination.
+The `matches` partial ordering eliminates signature `F` from the `yes` edge.
 
 ### Example 4
 
