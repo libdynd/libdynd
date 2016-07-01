@@ -129,17 +129,24 @@ some point in the future.
 ### How We Build the Decision Tree
 
 To build the decision tree, we explicitly track `S_working`, information about the state of all the working
-vectors, and a symbolic version of the working vectors for every signature in `S_working`. We create a
-set of candidate decision criteria, for example a type id test for every type available to test, and
-other tests based on heuristics like a type variable `A` being exposed in two different `TWork`
-positions suggests an equality comparison between them. A score is evaluated for each of these candidate
-decision criteria, and the highest-score decision is used to define the node. For each possible
-decision, the node is evaluated symbolically on every element of `S_working`, updating the symbolic working
-vectors corresponding to the signature, and then this whole procedure is recursively applied.
+vectors, a symbolic version of the working vectors for every signature in `S_working`, and a set of equations
+that remain to be checked before we can declare a match. Each node in the decision tree is based on one of
+these equations, and following an edge to a child node involves removing that equation, applying the knowledge
+gained to the existing symbolic representations, and adding zero or more new equations. Let's refer to
+the symbolic state of the input with the names `TInp`, `TWork`, etc, and the symbolic state of a candidate
+signature `S` as `S.TInp`, `S.TWork`, etc.
 
-For each signature, we also track an array of symbolic arguments which represent the knowledge we've
-gained about them. Initially they start as a copy of the signature's positional arguments, and as we gain
-information about the arguments, we do substitutions of concrete types into them.
+After branching based on the number of arguments, the equations we have are `matches` between the
+input argument types and the signature parameter types. They are of the form `S.TInp[i].matches(TInp[i])`.
+In the case of a `matches` equation, we generate a candidate type id test, which selects an edge based on
+`TInp[i].typeid`. For types fully identified with their type id, like `int32`, no new equations need to get
+added, but for types with parameters, those parameters get placed into the work vectors, and new equations
+in terms of those work vectors are added. These new equations are such that they and the decision tree node
+are all satisfied if and only if the original matches equation was satisfied.
+
+This is done for each signature in `S_working`, and for each candidate we produce a heuristic score.
+The candidate with the best score is used to create the decision tree node, and then this whole procedure
+is applied recursively with the new symbolic state and set of equations.
 
 Let's try a few examples, to see what happens.
 
@@ -159,7 +166,8 @@ C: (float32, float32) -> float32
 ```
 S_working = {A, B, C}
 Symbolic_args = [[int8, int8], [int16, int16], [float32, float32]]
-Matched_args = [False, False]
+Equations = [S.TInp[0].matches(TInp[0]),
+             S.TInp[1].matches(TInp[1]]
 
 Candidate 1: hash-map of TInp[0].typeid
 S_working hash-map: {int8: {A}, int16: {B}, float32: {C}, <default>: {}}
@@ -168,18 +176,18 @@ S_working hash-map: {int8: {A}, int16: {B}, float32: {C}, <default>: {}}
 ```
 
 The scores of both are equal (they produce the exact same discrimination between signatures), so
-we go with candidate 1. We must continue, because the match is not yet conclusive.
+we go with candidate 1. No new equations are generated, so that leaves us with just one more equation
+to process.
 
 #### Node 1 <int8< Node 0
 
-All but one signature has been culled, and the first argument is marked as completed because there is
-no component of it in any of the working vectors marked as incomplete anymore. There is only one
-more possible candidate to check, the type id of the second argument.
+All but one signature has been culled. There is only one more possible candidate to check, the equation
+for the second argument's type.
 
 ```
 S_working = {A}
 Symbolic_args = [[int8, int8], culled, culled]
-Matched_args = [True, False]
+Equations = [S.TInp[1].matches(TInp[1]]
 
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int8: {A}, <default>: {}}
@@ -190,17 +198,17 @@ S_working hash-map: {int8: {A}, <default>: {}}
 ```
 S_working = {A}
 Symbolic_args = [[int8, int8], culled, culled]
-Matched_args = [True, True]
+Equations = []
 ```
 
-All arguments are matched, so we return `A` as a successful match.
+No equations are left, so we return `A` as a successful match.
 
 #### Node 3 <int16< Node 0
 
 ```
 S_working = {B}
 Symbolic_args = [culled, [int16, int16], culled]
-Matched_args = [True, False]
+Equations = [S.TInp[1].matches(TInp[1]]
 
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int16: {B}, <default>: {}}
@@ -211,7 +219,7 @@ S_working hash-map: {int16: {B}, <default>: {}}
 ```
 S_working = {B}
 Symbolic_args = [culled, [int16, int16], culled]
-Matched_args = [True, True]
+Equations = []
 ```
 
 We return `B` as a successful match.
@@ -221,7 +229,7 @@ We return `B` as a successful match.
 ```
 S_working = {C}
 Symbolic_args = [culled, culled, [float32, float32]]
-Matched_args = [True, False]
+Equations = [S.TInp[1].matches(TInp[1]]
 
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int16: {B}, <default>: {}}
@@ -232,7 +240,7 @@ S_working hash-map: {int16: {B}, <default>: {}}
 ```
 S_working = {C}
 Symbolic_args = [culled, culled, [float32, float32]]
-Matched_args = [True, True]
+Equations = []
 ```
 
 We return `C` as a successful match.
@@ -318,6 +326,9 @@ D: (int16, float32) -> float32
 ```
 S_working = {A, B, C, D}
 Symbolic_args = [[int8, int8], [int16, int16], [float32, float32], [int16, float32]]
+Equations = [S.TInp[0].matches(TInp[0]),
+             S.TInp[1].matches(TInp[1]]
+
 Candidate 1: hash-map of TInp[0].typeid
 S_working hash-map: {int8: {A}, int16: {B, D}, float32: {C}, <default>: {}}
 Candidate 2: hash-map of TInp[1].typeid
@@ -333,6 +344,8 @@ of `TInp[0]`, it was marked as finished, and there is only one candidate left.
 ```
 S_working = {B, D}
 Symbolic_args = [culled, [int16, int16], culled, [int16, float32]]
+Equations = [S.TInp[1].matches(TInp[1]]
+
 Candidate 1: hash-map of TInp[1].typeid
 S_working hash-map: {int16: {B}, float32: {D}, <default:> {}}
 ```
