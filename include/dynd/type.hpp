@@ -227,12 +227,11 @@ namespace ndt {
     }
 
     /**
-     * Matches the provided candidate type against the current type. The
-     * 'this' type is the pattern to match against, and may be symbolic
-     * or concrete. If it is concrete, the candidate type must be equal
-     * for the match to succeed.
+     * Matches the provided candidate type against the current type. The 'this' type is the pattern to match against,
+     * and may be symbolic or concrete. If it is concrete, the candidate type must be equal for the match to succeed.
      *
-     * The candidate type may also be symbolic.
+     * The candidate type may also be symbolic. The definition of a symbolic type matching another symbolic type is that
+     * pat.match(cand) is true if and only if cand.match(conc) => pat.match(conc) for every concrete type conc.
      *
      * Returns true if it matches, false otherwise.
      *

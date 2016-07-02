@@ -74,10 +74,7 @@ void ndt::typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {
 }
 
 bool ndt::typevar_type::match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const {
-  if (candidate_tp.get_id() == typevar_id) {
-    return *this == *candidate_tp.extended();
-  }
-
+  // TODO: This implementation is mostly wrong in the case of symbolic to symbolic type matches
   if (candidate_tp.get_ndim() > 0 || candidate_tp.get_id() == any_kind_id) {
     return false;
   }
