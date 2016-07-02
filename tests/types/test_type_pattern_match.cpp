@@ -279,3 +279,17 @@ TEST(TypePatternMatch, Broadcast) {
   EXPECT_EQ(ndt::type("3 * 2 * bool"),
             ndt::substitute(ndt::type("Dims... * bool"), tp_vars, true));
 }
+
+TEST(TypePatternMatch, TypeVar) {
+  EXPECT_TYPE_MATCH("T", "T");
+  EXPECT_TYPE_MATCH("T", "S");
+  EXPECT_TYPE_MATCH("(T)", "(T)");
+  EXPECT_TYPE_MATCH("(T)", "(S)");
+  EXPECT_TYPE_MATCH("(T)", "(S)");
+  EXPECT_TYPE_MATCH("(T,T)", "(T,T)");
+  EXPECT_TYPE_MATCH("(S,T)", "(T,T)");
+  EXPECT_FALSE(ndt::type("(T,T)").match(ndt::type("(S,T)")));
+  EXPECT_TYPE_MATCH("(T,T)->T", "(T,T)->T");
+  EXPECT_TYPE_MATCH("(S,T)->T", "(T,T)->T");
+  EXPECT_FALSE(ndt::type("(T,T)->T").match(ndt::type("(S,T)->T")));
+}
