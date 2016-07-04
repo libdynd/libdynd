@@ -199,6 +199,7 @@ set(libdyndt_SRC
     src/dynd/types/state_type.cpp
     src/dynd/types/string_type.cpp
     src/dynd/types/struct_type.cpp
+    src/dynd/types/substitute_typevars.cpp
     src/dynd/types/tuple_type.cpp
     src/dynd/types/type_id.cpp
     src/dynd/types/type_type.cpp
@@ -224,6 +225,9 @@ set(libdyndt_SRC
     include/dynd/types/sso_bytestring.hpp
     include/dynd/types/state_type.hpp
     include/dynd/types/string_type.hpp
+    include/dynd/types/struct_type.hpp
+    include/dynd/types/substitute_typevars.hpp
+    include/dynd/types/tuple_type.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/type_type.hpp
     # Memory blocks
@@ -270,11 +274,9 @@ set(libdynd_SRC
     src/dynd/types/adapt_type.cpp
     src/dynd/types/categorical_type.cpp
     src/dynd/types/substitute_shape.cpp
-    src/dynd/types/substitute_typevars.cpp
     include/dynd/types/adapt_type.hpp
     include/dynd/types/categorical_type.hpp
     include/dynd/types/substitute_shape.hpp
-    include/dynd/types/substitute_typevars.hpp
     # Callables
     src/dynd/callables/base_callable.cpp
     include/dynd/callables/base_callable.hpp
