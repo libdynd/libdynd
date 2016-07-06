@@ -38,10 +38,10 @@ allows us to define whether one match is more specific than another, and we use 
 
 ```
 # All the signatures which match the input arguments (where A is the input arguments)
-# NOTE: X.matches(Y) means that Y is a match to the possibly symbolic type X
-M_candidate = {S in S_all | S.matches(A)}
+# NOTE: X.match(Y) means that Y is a match to the possibly symbolic type X
+M_candidate = {S in S_all | S.match(A)}
 # Only the most specific ones, i.e. signatures which don't have a more specific one in the set
-M = {S in M_candidate | for all S' in M_candidate, not (S' matches S and not S matches S') }
+M = {S in M_candidate | for all S' != S in M_candidate, not S.match(S') }
 ```
 
 This set `M` could be empty, have size 1, or be arbitrarily large. In the case where its cardinality
