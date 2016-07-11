@@ -268,8 +268,8 @@ nd::reg_entry &dynd::get(const std::string &path, nd::reg_entry &entry) {
 
 nd::callable &dynd::get(const std::string &name) { return get(name, get()).value(); }
 
-void nd::set(const std::string &name, const reg_entry &entry) {
-  reg_entry &root = get();
+void dynd::insert(const std::string &name, const nd::reg_entry &entry) {
+  nd::reg_entry &root = get();
   root.insert({name, entry});
 
   for (auto observer : detail::observers) {
@@ -277,6 +277,6 @@ void nd::set(const std::string &name, const reg_entry &entry) {
   }
 }
 
-DYND_API std::vector<void (*)(const char *, nd::reg_entry *)> nd::detail::observers;
+DYND_API std::vector<void (*)(const char *, nd::reg_entry *)> dynd::detail::observers;
 
-void nd::observe(void (*callback)(const char *, reg_entry *)) { detail::observers.push_back(callback); }
+void dynd::observe(void (*callback)(const char *, nd::reg_entry *)) { dynd::detail::observers.push_back(callback); }
