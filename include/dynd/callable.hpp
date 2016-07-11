@@ -329,18 +329,23 @@ namespace nd {
      */
     DYND_API reg_entry &get_regfunctions();
 
-    extern DYND_API std::vector<void (*)(const char *, reg_entry *)> observers;
-
   } // namespace dynd::nd::detail
 
-  DYND_API reg_entry &get();
-  DYND_API reg_entry &get(const std::string &name, reg_entry &entry);
-
-  DYND_API void set(const std::string &name, const reg_entry &entry);
-
-  DYND_API void observe(void (*callback)(const char *, reg_entry *));
-
 } // namespace dynd::nd
+
+DYND_API nd::reg_entry &get();
+
+DYND_API nd::reg_entry &get(const std::string &name, nd::reg_entry &entry);
+
+DYND_API void insert(const std::string &name, const nd::reg_entry &entry);
+
+namespace detail {
+
+  extern DYND_API std::vector<void (*)(const char *, nd::reg_entry *)> observers;
+
+} // namespace dynd::detail
+
+DYND_API void observe(void (*callback)(const char *, nd::reg_entry *));
 
 /**
  * Creates a callable which does the assignment from
