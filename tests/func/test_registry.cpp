@@ -34,18 +34,18 @@ TEST(CallableRegistry, Dispatch)
 TEST(CallableRegistry, Arithmetic) {
   // Simple sanity checks
   nd::callable af;
-  af = nd::get("add");
+  af = get("add");
   EXPECT_EQ(ndt::type("int32"), af((int8_t)3, (int8_t)4).get_type());
   EXPECT_EQ(8, af(3, 5).as<int>());
   EXPECT_EQ(ndt::type("float32"), af(3.5f, 5.25f).get_type());
   EXPECT_EQ(8.75, af(3.5f, 5.25f).as<float>());
-  af = nd::get("subtract");
+  af = get("subtract");
   EXPECT_EQ(ndt::type("float64"), af(3.5, 4).get_type());
   EXPECT_EQ(-0.5, af(3.5, 4).as<double>());
-  af = nd::get("multiply");
+  af = get("multiply");
   EXPECT_EQ(ndt::type("float32"), af(3.5f, (int8_t)4).get_type());
   EXPECT_EQ(14, af(3.5f, (int8_t)4).as<float>());
-  af = nd::get("divide");
+  af = get("divide");
   EXPECT_EQ(ndt::type("float64"), af(12.0, (int8_t)4).get_type());
   EXPECT_EQ(3, af(12.0, (int8_t)4).as<double>());
 }
@@ -53,16 +53,16 @@ TEST(CallableRegistry, Arithmetic) {
 TEST(CallableRegistry, Trig) {
   // Simple sanity checks
   nd::callable af;
-  af = nd::get("sin");
+  af = get("sin");
   //  EXPECT_FLOAT_EQ(sinf(2.0f), af(2.0f).as<float>());
   EXPECT_DOUBLE_EQ(sin(1.0), af(1.0).as<double>());
-  af = nd::get("cos");
+  af = get("cos");
   // EXPECT_FLOAT_EQ(cosf(1.f), af(1.f).as<float>());
   EXPECT_DOUBLE_EQ(cos(1.0), af(1.0).as<double>());
-  af = nd::get("tan");
+  af = get("tan");
   //  EXPECT_FLOAT_EQ(tanf(1.f), af(1.f).as<float>());
   EXPECT_DOUBLE_EQ(tan(1.0), af(1.0).as<double>());
-  af = nd::get("exp");
+  af = get("exp");
   // EXPECT_FLOAT_EQ(expf(1.f), af(1.f).as<float>());
   EXPECT_DOUBLE_EQ(exp(1.0), af(1.0).as<double>());
   /*

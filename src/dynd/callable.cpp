@@ -244,9 +244,9 @@ nd::reg_entry &nd::detail::get_regfunctions() {
   return registry;
 }
 
-nd::reg_entry &nd::get() { return detail::get_regfunctions(); }
+nd::reg_entry &dynd::get() { return nd::detail::get_regfunctions(); }
 
-nd::reg_entry &nd::get(const std::string &path, reg_entry &entry) {
+nd::reg_entry &dynd::get(const std::string &path, nd::reg_entry &entry) {
   size_t i = path.find(".");
   std::string name = path.substr(0, i);
 
@@ -266,7 +266,7 @@ nd::reg_entry &nd::get(const std::string &path, reg_entry &entry) {
   throw invalid_argument(ss.str());
 }
 
-nd::callable &nd::get(const std::string &name) { return get(name, get()).value(); }
+nd::callable &dynd::get(const std::string &name) { return get(name, get()).value(); }
 
 void nd::set(const std::string &name, const reg_entry &entry) {
   reg_entry &root = get();

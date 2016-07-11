@@ -21,9 +21,10 @@
 #include <dynd/types/var_dim_type.hpp>
 
 namespace dynd {
-namespace nd {
 
-  DYND_API callable &get(const std::string &name);
+DYND_API nd::callable &get(const std::string &name);
+
+namespace nd {
 
   /**
    * Constructs an uninitialized array of the given dtype. This is
@@ -200,7 +201,7 @@ namespace nd {
      */
     template <typename... ArgTypes>
     array f(const char *name, ArgTypes &&... args) const {
-      callable &f = nd::get(name);
+      callable &f = dynd::get(name);
       return f(*this, std::forward<ArgTypes>(args)...);
     }
 
