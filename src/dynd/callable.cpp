@@ -192,59 +192,57 @@ nd::array nd::callable::call(size_t narg, const array *args, size_t nkwd,
   return dst;
 }
 
-nd::reg_entry &nd::detail::get_regfunctions() {
-  static reg_entry registry({{"dynd", {{"nd", {{"add", add},
-                                               {"assign", assign},
-                                               {"assign_na", assign_na},
-                                               {"bitwise_and", bitwise_and},
-                                               {"bitwise_not", bitwise_not},
-                                               {"bitwise_or", bitwise_or},
-                                               {"bitwise_xor", bitwise_xor},
-                                               {"cbrt", cbrt},
-                                               {"compound_add", compound_add},
-                                               {"compound_div", compound_div},
-                                               {"conj", conj},
-                                               {"cos", cos},
-                                               {"dereference", dereference},
-                                               {"divide", divide},
-                                               {"equal", equal},
-                                               {"exp", exp},
-                                               {"greater", greater},
-                                               {"greater_equal", greater_equal},
-                                               {"imag", imag},
-                                               {"is_na", is_na},
-                                               {"left_shift", left_shift},
-                                               {"less", less},
-                                               {"less_equal", less_equal},
-                                               {"logical_and", logical_and},
-                                               {"logical_not", logical_not},
-                                               {"logical_or", logical_or},
-                                               {"logical_xor", logical_xor},
-                                               {"max", max},
-                                               {"min", min},
-                                               {"minus", minus},
-                                               {"mod", mod},
-                                               {"multiply", multiply},
-                                               {"not_equal", not_equal},
-                                               {"plus", plus},
-                                               {"pow", pow},
-                                               {"range", range},
-                                               {"real", real},
-                                               {"right_shift", right_shift},
-                                               {"serialize", serialize},
-                                               {"sin", sin},
-                                               {"sqrt", sqrt},
-                                               {"subtract", subtract},
-                                               {"sum", sum},
-                                               {"take", take},
-                                               {"tan", tan},
-                                               {"total_order", total_order},
-                                               {"random", {{"uniform", random::uniform}}}}}}}});
+nd::reg_entry &dynd::root() {
+  static nd::reg_entry registry({{"dynd", {{"nd", {{"add", nd::add},
+                                                   {"assign", nd::assign},
+                                                   {"assign_na", nd::assign_na},
+                                                   {"bitwise_and", nd::bitwise_and},
+                                                   {"bitwise_not", nd::bitwise_not},
+                                                   {"bitwise_or", nd::bitwise_or},
+                                                   {"bitwise_xor", nd::bitwise_xor},
+                                                   {"cbrt", nd::cbrt},
+                                                   {"compound_add", nd::compound_add},
+                                                   {"compound_div", nd::compound_div},
+                                                   {"conj", nd::conj},
+                                                   {"cos", nd::cos},
+                                                   {"dereference", nd::dereference},
+                                                   {"divide", nd::divide},
+                                                   {"equal", nd::equal},
+                                                   {"exp", nd::exp},
+                                                   {"greater", nd::greater},
+                                                   {"greater_equal", nd::greater_equal},
+                                                   {"imag", nd::imag},
+                                                   {"is_na", nd::is_na},
+                                                   {"left_shift", nd::left_shift},
+                                                   {"less", nd::less},
+                                                   {"less_equal", nd::less_equal},
+                                                   {"logical_and", nd::logical_and},
+                                                   {"logical_not", nd::logical_not},
+                                                   {"logical_or", nd::logical_or},
+                                                   {"logical_xor", nd::logical_xor},
+                                                   {"max", nd::max},
+                                                   {"min", nd::min},
+                                                   {"minus", nd::minus},
+                                                   {"mod", nd::mod},
+                                                   {"multiply", nd::multiply},
+                                                   {"not_equal", nd::not_equal},
+                                                   {"plus", nd::plus},
+                                                   {"pow", nd::pow},
+                                                   {"range", nd::range},
+                                                   {"real", nd::real},
+                                                   {"right_shift", nd::right_shift},
+                                                   {"serialize", nd::serialize},
+                                                   {"sin", nd::sin},
+                                                   {"sqrt", nd::sqrt},
+                                                   {"subtract", nd::subtract},
+                                                   {"sum", nd::sum},
+                                                   {"take", nd::take},
+                                                   {"tan", nd::tan},
+                                                   {"total_order", nd::total_order},
+                                                   {"random", {{"uniform", nd::random::uniform}}}}}}}});
 
   return registry;
 }
-
-nd::reg_entry &dynd::get() { return nd::detail::get_regfunctions(); }
 
 nd::reg_entry &dynd::get(const std::string &path, nd::reg_entry &entry) {
   size_t i = path.find(".");
@@ -266,10 +264,8 @@ nd::reg_entry &dynd::get(const std::string &path, nd::reg_entry &entry) {
   throw invalid_argument(ss.str());
 }
 
-nd::callable &dynd::get(const std::string &name) { return get(name, get()).value(); }
-
 void dynd::insert(const std::string &name, const nd::reg_entry &entry) {
-  nd::reg_entry &root = get();
+  nd::reg_entry &root = dynd::root();
   root.insert({name, entry});
 
   for (auto observer : detail::observers) {

@@ -336,20 +336,16 @@ namespace nd {
       }
     };
 
-    /**
-     * Returns a reference to the map of registered callables.
-     * NOTE: The internal representation will change, this
-     *       function will change.
-     */
-    DYND_API reg_entry &get_regfunctions();
-
   } // namespace dynd::nd::detail
 
 } // namespace dynd::nd
 
-DYND_API nd::reg_entry &get();
+/**
+ * Returns a reference to the map of registered callables.
+ */
+DYND_API nd::reg_entry &root();
 
-DYND_API nd::reg_entry &get(const std::string &name, nd::reg_entry &entry);
+DYND_API nd::reg_entry &get(const std::string &name, nd::reg_entry &entry = root());
 
 DYND_API void insert(const std::string &name, const nd::reg_entry &entry);
 
@@ -372,4 +368,13 @@ DYND_API void observe(void (*callback)(const char *, nd::reg_entry *));
 DYND_API nd::callable make_callable_from_assignment(const ndt::type &dst_tp, const ndt::type &src_tp,
                                                     assign_error_mode errmode);
 
+namespace nd {
+
+  template <typename... ArgTypes>
+  array array::f(const char *name, ArgTypes &&... args) const {
+    callable &f = dynd::get("dynd.nd." + std::string(name)).value();
+    return f(*this, std::forward<ArgTypes>(args)...);
+  }
+
+} // namespace dynd::nd
 } // namespace dynd
