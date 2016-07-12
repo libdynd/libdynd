@@ -23,9 +23,9 @@ using namespace std;
 using namespace dynd;
 
 TEST(Compose, Simple) {
-  reg_entry &reg = nd::registry();
+  registry_entry &entry = registered("dynd.nd");
 
-  nd::callable composed = nd::functional::compose(nd::copy, reg["sin"].value(), ndt::make_type<double>());
+  nd::callable composed = nd::functional::compose(nd::copy, entry["sin"].value(), ndt::make_type<double>());
   nd::array a = nd::empty(ndt::make_type<double>());
   composed({"0.0"}, {{"dst", a}});
   EXPECT_EQ(0., a.as<double>());

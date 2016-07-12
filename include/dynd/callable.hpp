@@ -282,65 +282,51 @@ namespace nd {
 
 } // namespace dynd::nd
 
-class reg_entry {
+class registry_entry {
 public:
-  typedef void (*observer)(const char *, reg_entry *);
-  typedef typename std::map<std::string, reg_entry>::iterator iterator;
-  typedef typename std::map<std::string, reg_entry>::const_iterator const_iterator;
+  typedef void (*observer)(const char *, registry_entry *);
+  typedef typename std::map<std::string, registry_entry>::iterator iterator;
+  typedef typename std::map<std::string, registry_entry>::const_iterator const_iterator;
 
 private:
   bool m_is_namespace;
   nd::callable m_value;
-  std::map<std::string, reg_entry> m_namespace;
+  std::map<std::string, registry_entry> m_namespace;
   std::vector<observer> m_observers;
 
 public:
-  reg_entry() = default;
+  registry_entry() = default;
 
-  reg_entry(const nd::callable &entry) : m_is_namespace(false), m_value(entry) {}
+  registry_entry(const nd::callable &entry) : m_is_namespace(false), m_value(entry) {}
 
-  reg_entry(std::initializer_list<std::pair<const std::string, reg_entry>> values)
+  registry_entry(std::initializer_list<std::pair<const std::string, registry_entry>> values)
       : m_is_namespace(true), m_namespace(values) {}
-
-  reg_entry(const std::map<std::string, reg_entry> &values) : m_is_namespace(true), m_namespace(values) {}
-
-  std::vector<observer> &get_observers() { return m_observers; }
 
   nd::callable &value() { return m_value; }
   const nd::callable &value() const { return m_value; }
 
-  std::map<std::string, reg_entry> &all() { return m_namespace; }
-
   bool is_namespace() const { return m_is_namespace; }
 
-  void insert(const std::pair<const std::string, reg_entry> &entry) {
+  void insert(const std::pair<const std::string, registry_entry> &entry) {
     auto subentry = m_namespace.find(entry.first);
     if (subentry == m_namespace.end()) {
-      m_namespace.insert(entry);
+      m_namespace.emplace(entry);
     } else {
       for (const auto &pair : entry.second) {
         subentry->second.insert(pair);
       }
     }
 
-    for (auto observer : m_observers) {
-      observer(entry.first.c_str(), this);
+    for (observer obs : m_observers) {
+      obs(entry.first.c_str(), this);
     }
   }
 
-  void observe(observer callback) { m_observers.push_back(callback); }
-
-  iterator begin() { return m_namespace.begin(); }
-
-  const_iterator begin() const { return m_namespace.begin(); }
-
-  iterator end() { return m_namespace.end(); }
-
-  const_iterator end() const { return m_namespace.end(); }
-
   iterator find(const std::string &name) { return m_namespace.find(name); }
 
-  reg_entry &operator=(const reg_entry &rhs) {
+  void observe(observer obs) { m_observers.emplace_back(obs); }
+
+  registry_entry &operator=(const registry_entry &rhs) {
     m_is_namespace = rhs.m_is_namespace;
     if (m_is_namespace) {
       m_namespace = rhs.m_namespace;
@@ -351,39 +337,46 @@ public:
     return *this;
   }
 
-  reg_entry &get(const std::string &path) {
-    reg_entry &entry = *this;
-
+  registry_entry &operator[](const std::string &path) {
     size_t i = path.find(".");
     std::string name = path.substr(0, i);
 
-    auto it = entry.find(name);
-    if (it != entry.end()) {
-      if (i == std::string::npos) {
-        return it->second;
-      } else {
-        return it->second.get(path.substr(i + 1));
-      }
+    iterator it = find(name);
+    if (it == end()) {
+      std::stringstream ss;
+      ss << "No dynd function ";
+      print_escaped_utf8_string(ss, name);
+      ss << " has been registered";
+      throw std::invalid_argument(ss.str());
     }
 
-    std::stringstream ss;
-    ss << "No dynd function ";
-    print_escaped_utf8_string(ss, name);
-    ss << " has been registered";
-    throw std::invalid_argument(ss.str());
+    if (i == std::string::npos) {
+      return it->second;
+    }
+
+    return it->second[path.substr(i + 1)];
   }
 
-  reg_entry &operator[](const std::string &name) { return get(name); }
+  iterator begin() { return m_namespace.begin(); }
+  const_iterator begin() const { return m_namespace.begin(); }
+
+  iterator end() { return m_namespace.end(); }
+  const_iterator end() const { return m_namespace.end(); }
+
+  const_iterator cbegin() const { return m_namespace.cbegin(); }
+
+  const_iterator cend() const { return m_namespace.cend(); }
 };
 
 /**
  * Returns a reference to the map of registered callables.
- * NOTE: The internal representation will change, this
- *       function will change.
  */
-DYND_API reg_entry &parent_registry();
+DYND_API registry_entry &registered();
 
-DYND_API reg_entry &registry();
+inline registry_entry &registered(const std::string &path) {
+  registry_entry &entry = registered();
+  return entry[path];
+}
 
 /**
  * Creates a callable which does the assignment from
@@ -398,15 +391,11 @@ DYND_API nd::callable make_callable_from_assignment(const ndt::type &dst_tp, con
 
 namespace nd {
 
-  inline reg_entry &parent_registry() { return registry(); }
-
-  DYND_API reg_entry &registry();
-
   template <typename... ArgTypes>
   array array::f(const char *name, ArgTypes &&... args) const {
-    reg_entry &reg = registry();
+    registry_entry &entry = registered("dynd.nd");
 
-    callable &f = reg[name].value();
+    callable &f = entry[name].value();
     return f(*this, std::forward<ArgTypes>(args)...);
   }
 
