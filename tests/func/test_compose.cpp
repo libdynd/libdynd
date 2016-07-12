@@ -23,7 +23,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(Compose, Simple) {
-  nd::callable composed = nd::functional::compose(nd::copy, get("dynd.nd.sin"), ndt::make_type<double>());
+  nd::callable composed = nd::functional::compose(nd::copy, get("dynd.nd.sin").value(), ndt::make_type<double>());
   nd::array a = nd::empty(ndt::make_type<double>());
   composed({"0.0"}, {{"dst", a}});
   EXPECT_EQ(0., a.as<double>());

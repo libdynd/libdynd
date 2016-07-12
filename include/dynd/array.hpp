@@ -21,9 +21,6 @@
 #include <dynd/types/var_dim_type.hpp>
 
 namespace dynd {
-
-DYND_API nd::callable &get(const std::string &name);
-
 namespace nd {
 
   /**
@@ -200,10 +197,7 @@ namespace nd {
      * Calls the dynamic function.
      */
     template <typename... ArgTypes>
-    array f(const char *name, ArgTypes &&... args) const {
-      callable &f = dynd::get("dynd.nd." + std::string(name));
-      return f(*this, std::forward<ArgTypes>(args)...);
-    }
+    array f(const char *name, ArgTypes &&... args) const;
 
     array &operator+=(const array &rhs);
     array &operator-=(const array &rhs);
