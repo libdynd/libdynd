@@ -173,64 +173,6 @@ namespace nd {
     }
   };
 
-  class reg_entry {
-    bool m_is_namespace;
-    callable m_value;
-    std::map<std::string, reg_entry> m_namespace;
-
-  public:
-    typedef typename std::map<std::string, reg_entry>::iterator iterator;
-    typedef typename std::map<std::string, reg_entry>::const_iterator const_iterator;
-
-    reg_entry() = default;
-
-    reg_entry(const callable &entry) : m_is_namespace(false), m_value(entry) {}
-
-    reg_entry(std::initializer_list<std::pair<const std::string, reg_entry>> values)
-        : m_is_namespace(true), m_namespace(values) {}
-
-    reg_entry(const std::map<std::string, reg_entry> &values) : m_is_namespace(true), m_namespace(values) {}
-
-    callable &value() { return m_value; }
-    const callable &value() const { return m_value; }
-
-    std::map<std::string, reg_entry> &all() { return m_namespace; }
-
-    bool is_namespace() const { return m_is_namespace; }
-
-    void insert(const std::pair<const std::string, reg_entry> &entry) {
-      auto subentry = m_namespace.find(entry.first);
-      if (subentry == m_namespace.end()) {
-        m_namespace.insert(entry);
-      } else {
-        for (const auto &pair : entry.second) {
-          subentry->second.insert(pair);
-        }
-      }
-    }
-
-    iterator begin() { return m_namespace.begin(); }
-
-    const_iterator begin() const { return m_namespace.begin(); }
-
-    iterator end() { return m_namespace.end(); }
-
-    const_iterator end() const { return m_namespace.end(); }
-
-    iterator find(const std::string &name) { return m_namespace.find(name); }
-
-    reg_entry &operator=(const reg_entry &rhs) {
-      m_is_namespace = rhs.m_is_namespace;
-      if (m_is_namespace) {
-        m_namespace = rhs.m_namespace;
-      } else {
-        m_value = rhs.m_value;
-      }
-
-      return *this;
-    }
-  };
-
   template <typename CallableType, typename... ArgTypes>
   std::enable_if_t<std::is_base_of<base_callable, CallableType>::value, callable> make_callable(ArgTypes &&... args) {
     return callable(new CallableType(std::forward<ArgTypes>(args)...), true);
@@ -340,22 +282,82 @@ namespace nd {
 
 } // namespace dynd::nd
 
+class reg_entry {
+public:
+  typedef void (*observer)(const char *, reg_entry *);
+  typedef typename std::map<std::string, reg_entry>::iterator iterator;
+  typedef typename std::map<std::string, reg_entry>::const_iterator const_iterator;
+
+private:
+  bool m_is_namespace;
+  nd::callable m_value;
+  std::map<std::string, reg_entry> m_namespace;
+  std::vector<observer> m_observers;
+
+public:
+  reg_entry() = default;
+
+  reg_entry(const nd::callable &entry) : m_is_namespace(false), m_value(entry) {}
+
+  reg_entry(std::initializer_list<std::pair<const std::string, reg_entry>> values)
+      : m_is_namespace(true), m_namespace(values) {}
+
+  reg_entry(const std::map<std::string, reg_entry> &values) : m_is_namespace(true), m_namespace(values) {}
+
+  std::vector<observer> &get_observers() { return m_observers; }
+
+  nd::callable &value() { return m_value; }
+  const nd::callable &value() const { return m_value; }
+
+  std::map<std::string, reg_entry> &all() { return m_namespace; }
+
+  bool is_namespace() const { return m_is_namespace; }
+
+  void insert(const std::pair<const std::string, reg_entry> &entry) {
+    auto subentry = m_namespace.find(entry.first);
+    if (subentry == m_namespace.end()) {
+      m_namespace.insert(entry);
+    } else {
+      for (const auto &pair : entry.second) {
+        subentry->second.insert(pair);
+      }
+    }
+  }
+
+  void observe(observer callback) { m_observers.push_back(callback); }
+
+  iterator begin() { return m_namespace.begin(); }
+
+  const_iterator begin() const { return m_namespace.begin(); }
+
+  iterator end() { return m_namespace.end(); }
+
+  const_iterator end() const { return m_namespace.end(); }
+
+  iterator find(const std::string &name) { return m_namespace.find(name); }
+
+  reg_entry &operator=(const reg_entry &rhs) {
+    m_is_namespace = rhs.m_is_namespace;
+    if (m_is_namespace) {
+      m_namespace = rhs.m_namespace;
+    } else {
+      m_value = rhs.m_value;
+    }
+
+    return *this;
+  }
+};
+
 /**
  * Returns a reference to the map of registered callables.
+ * NOTE: The internal representation will change, this
+ *       function will change.
  */
-DYND_API nd::reg_entry &root();
+DYND_API reg_entry &root();
 
-DYND_API nd::reg_entry &get(const std::string &name, nd::reg_entry &entry = root());
+DYND_API reg_entry &get(const std::string &name, reg_entry &entry = root());
 
-DYND_API void insert(const std::string &name, const nd::reg_entry &entry);
-
-namespace detail {
-
-  extern DYND_API std::vector<void (*)(const char *, nd::reg_entry *)> observers;
-
-} // namespace dynd::detail
-
-DYND_API void observe(void (*callback)(const char *, nd::reg_entry *));
+DYND_API void insert(const std::string &name, const reg_entry &entry);
 
 /**
  * Creates a callable which does the assignment from
