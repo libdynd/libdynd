@@ -201,7 +201,7 @@ namespace nd {
      */
     template <typename... ArgTypes>
     array f(const char *name, ArgTypes &&... args) const {
-      callable &f = dynd::get(name);
+      callable &f = dynd::get("nd." + std::string(name));
       return f(*this, std::forward<ArgTypes>(args)...);
     }
 

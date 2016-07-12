@@ -180,6 +180,7 @@ namespace nd {
 
   public:
     typedef typename std::map<std::string, reg_entry>::iterator iterator;
+    typedef typename std::map<std::string, reg_entry>::const_iterator const_iterator;
 
     reg_entry() = default;
 
@@ -197,11 +198,24 @@ namespace nd {
 
     bool is_namespace() const { return m_is_namespace; }
 
-    void insert(const std::pair<const std::string, reg_entry> &entry) { m_namespace.insert(entry); }
+    void insert(const std::pair<const std::string, reg_entry> &entry) {
+      auto subentry = m_namespace.find(entry.first);
+      if (subentry == m_namespace.end()) {
+        m_namespace.insert(entry);
+      } else {
+        for (const auto &pair : entry.second) {
+          subentry->second.insert(pair);
+        }
+      }
+    }
 
     iterator begin() { return m_namespace.begin(); }
 
+    const_iterator begin() const { return m_namespace.begin(); }
+
     iterator end() { return m_namespace.end(); }
+
+    const_iterator end() const { return m_namespace.end(); }
 
     iterator find(const std::string &name) { return m_namespace.find(name); }
 
