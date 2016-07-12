@@ -350,6 +350,30 @@ public:
 
     return *this;
   }
+
+  reg_entry &get(const std::string &path) {
+    reg_entry &entry = *this;
+
+    size_t i = path.find(".");
+    std::string name = path.substr(0, i);
+
+    auto it = entry.find(name);
+    if (it != entry.end()) {
+      if (i == std::string::npos) {
+        return it->second;
+      } else {
+        return it->second.get(path.substr(i + 1));
+      }
+    }
+
+    std::stringstream ss;
+    ss << "No dynd function ";
+    print_escaped_utf8_string(ss, name);
+    ss << " has been registered";
+    throw std::invalid_argument(ss.str());
+  }
+
+  reg_entry &operator[](const std::string &name) { return get(name); }
 };
 
 /**
@@ -357,9 +381,9 @@ public:
  * NOTE: The internal representation will change, this
  *       function will change.
  */
-DYND_API reg_entry &root();
+DYND_API reg_entry &parent_registry();
 
-DYND_API reg_entry &get(const std::string &name, reg_entry &entry = root());
+DYND_API reg_entry &registry();
 
 /**
  * Creates a callable which does the assignment from
@@ -374,9 +398,15 @@ DYND_API nd::callable make_callable_from_assignment(const ndt::type &dst_tp, con
 
 namespace nd {
 
+  inline reg_entry &parent_registry() { return registry(); }
+
+  DYND_API reg_entry &registry();
+
   template <typename... ArgTypes>
   array array::f(const char *name, ArgTypes &&... args) const {
-    callable &f = dynd::get("dynd.nd." + std::string(name)).value();
+    reg_entry &reg = registry();
+
+    callable &f = reg[name].value();
     return f(*this, std::forward<ArgTypes>(args)...);
   }
 
