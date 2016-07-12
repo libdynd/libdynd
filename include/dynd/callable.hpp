@@ -322,6 +322,10 @@ public:
         subentry->second.insert(pair);
       }
     }
+
+    for (auto observer : m_observers) {
+      observer(entry.first.c_str(), this);
+    }
   }
 
   void observe(observer callback) { m_observers.push_back(callback); }
@@ -356,8 +360,6 @@ public:
 DYND_API reg_entry &root();
 
 DYND_API reg_entry &get(const std::string &name, reg_entry &entry = root());
-
-DYND_API void insert(const std::string &name, const reg_entry &entry);
 
 /**
  * Creates a callable which does the assignment from

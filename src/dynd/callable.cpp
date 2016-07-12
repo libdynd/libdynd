@@ -263,12 +263,3 @@ reg_entry &dynd::get(const std::string &path, reg_entry &entry) {
   ss << " has been registered";
   throw invalid_argument(ss.str());
 }
-
-void dynd::insert(const std::string &name, const reg_entry &entry) {
-  reg_entry &root = dynd::root();
-  root.insert({name, entry});
-
-  for (auto observer : dynd::root().get_observers()) {
-    observer(name.c_str(), &root);
-  }
-}
