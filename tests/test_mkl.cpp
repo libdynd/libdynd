@@ -34,9 +34,9 @@ using make_types =
 TEST(MKL, Load) {
   load("libdynd_mkl");
 
-  EXPECT_EQ(nd::mkl::fft, get("mkl.fft"));
-  EXPECT_EQ(nd::mkl::ifft, get("mkl.ifft"));
-  EXPECT_EQ(nd::mkl::conv, get("mkl.conv"));
+  EXPECT_EQ(nd::mkl::fft, get("nd.mkl.fft"));
+  EXPECT_EQ(nd::mkl::ifft, get("nd.mkl.ifft"));
+  EXPECT_EQ(nd::mkl::conv, get("nd.mkl.conv"));
 }
 
 TYPED_TEST_CASE_P(FFT);

@@ -49,14 +49,6 @@ nd::callable make_conv() {
   return nd::make_callable<dispatch_callable>();
 }
 
-/*
-int init() {
-  nd::reg("conv", nd::mkl::conv);
-
-  return 0;
-}
-*/
-
 } // unnamed namespace
 
 nd::callable nd::mkl::fft = nd::make_callable<nd::mkl::fft_callable>();
@@ -64,4 +56,6 @@ nd::callable nd::mkl::ifft = nd::make_callable<nd::mkl::ifft_callable<dynd::comp
 
 nd::callable nd::mkl::conv = make_conv();
 
-void dynd_mkl_init() { insert("mkl", {{"fft", nd::mkl::fft}, {"ifft", nd::mkl::ifft}, {"conv", nd::mkl::conv}}); }
+void dynd_mkl_init() {
+  insert("nd", {{"mkl", {{"fft", nd::mkl::fft}, {"ifft", nd::mkl::ifft}, {"conv", nd::mkl::conv}}}});
+}
