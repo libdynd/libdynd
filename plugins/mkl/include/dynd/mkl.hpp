@@ -45,8 +45,6 @@ namespace nd {
 
     extern callable conv;
 
-    reg_entry &registry();
-
   } // namespace dynd::nd::mkl
 } // namespace dynd::nd
 } // namespace dynd

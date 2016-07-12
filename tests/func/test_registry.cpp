@@ -32,41 +32,41 @@ TEST(CallableRegistry, Dispatch)
 */
 
 TEST(CallableRegistry, Arithmetic) {
-  reg_entry &reg = nd::registry();
+  registry_entry &entry = registered("dynd.nd");
 
   // Simple sanity checks
   nd::callable af;
-  af = reg["add"].value();
+  af = entry["add"].value();
   EXPECT_EQ(ndt::type("int32"), af((int8_t)3, (int8_t)4).get_type());
   EXPECT_EQ(8, af(3, 5).as<int>());
   EXPECT_EQ(ndt::type("float32"), af(3.5f, 5.25f).get_type());
   EXPECT_EQ(8.75, af(3.5f, 5.25f).as<float>());
-  af = reg["subtract"].value();
+  af = entry["subtract"].value();
   EXPECT_EQ(ndt::type("float64"), af(3.5, 4).get_type());
   EXPECT_EQ(-0.5, af(3.5, 4).as<double>());
-  af = reg["multiply"].value();
+  af = entry["multiply"].value();
   EXPECT_EQ(ndt::type("float32"), af(3.5f, (int8_t)4).get_type());
   EXPECT_EQ(14, af(3.5f, (int8_t)4).as<float>());
-  af = reg["divide"].value();
+  af = entry["divide"].value();
   EXPECT_EQ(ndt::type("float64"), af(12.0, (int8_t)4).get_type());
   EXPECT_EQ(3, af(12.0, (int8_t)4).as<double>());
 }
 
 TEST(CallableRegistry, Trig) {
-  reg_entry &reg = nd::registry();
+  registry_entry &entry = registered("dynd.nd");
 
   // Simple sanity checks
   nd::callable af;
-  af = reg["sin"].value();
+  af = entry["sin"].value();
   //  EXPECT_FLOAT_EQ(sinf(2.0f), af(2.0f).as<float>());
   EXPECT_DOUBLE_EQ(sin(1.0), af(1.0).as<double>());
-  af = reg["cos"].value();
+  af = entry["cos"].value();
   // EXPECT_FLOAT_EQ(cosf(1.f), af(1.f).as<float>());
   EXPECT_DOUBLE_EQ(cos(1.0), af(1.0).as<double>());
-  af = reg["tan"].value();
+  af = entry["tan"].value();
   //  EXPECT_FLOAT_EQ(tanf(1.f), af(1.f).as<float>());
   EXPECT_DOUBLE_EQ(tan(1.0), af(1.0).as<double>());
-  af = reg["exp"].value();
+  af = entry["exp"].value();
   // EXPECT_FLOAT_EQ(expf(1.f), af(1.f).as<float>());
   EXPECT_DOUBLE_EQ(exp(1.0), af(1.0).as<double>());
   /*

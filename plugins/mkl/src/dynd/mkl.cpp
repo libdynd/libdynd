@@ -56,9 +56,8 @@ nd::callable nd::mkl::ifft = nd::make_callable<nd::mkl::ifft_callable<dynd::comp
 
 nd::callable nd::mkl::conv = make_conv();
 
-reg_entry &nd::mkl::registry() { return nd::registry()["mkl"]; }
-
 void dynd_mkl_init() {
-  reg_entry &reg = parent_registry();
-  reg.insert({"dynd", {{"nd", {{"mkl", {{"fft", nd::mkl::fft}, {"ifft", nd::mkl::ifft}, {"conv", nd::mkl::conv}}}}}}});
+  registry_entry &entry = registered();
+  entry.insert(
+      {"dynd", {{"nd", {{"mkl", {{"fft", nd::mkl::fft}, {"ifft", nd::mkl::ifft}, {"conv", nd::mkl::conv}}}}}}});
 }

@@ -34,10 +34,10 @@ using make_types =
 TEST(MKL, Load) {
   load("libdynd_mkl");
 
-  reg_entry &reg = nd::mkl::registry();
-  EXPECT_EQ(nd::mkl::fft, reg["fft"].value());
-  EXPECT_EQ(nd::mkl::ifft, reg["ifft"].value());
-  EXPECT_EQ(nd::mkl::conv, reg["conv"].value());
+  registry_entry &entry = registered("dynd.nd.mkl");
+  EXPECT_EQ(nd::mkl::fft, entry["fft"].value());
+  EXPECT_EQ(nd::mkl::ifft, entry["ifft"].value());
+  EXPECT_EQ(nd::mkl::conv, entry["conv"].value());
 }
 
 TYPED_TEST_CASE_P(FFT);
