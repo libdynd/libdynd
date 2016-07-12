@@ -3,7 +3,7 @@
 # BSD 2-Clause License, see LICENSE.txt
 #
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.11) 
 project(libdynd)
 
 include(CheckTypeSize)
