@@ -14,13 +14,12 @@ public:
   typedef nd::callable value_type;
   typedef std::map<std::string, registry_entry> namespace_type;
 
-  typedef void (*observer)(registry_entry *, const char *);
+  typedef void (*observer)(registry_entry *, const char *, registry_entry *);
 
   typedef typename namespace_type::iterator iterator;
   typedef typename namespace_type::const_iterator const_iterator;
 
 private:
-  registry_entry *m_parent;
   std::string m_name;
   bool m_is_namespace;
   value_type m_value;
@@ -28,79 +27,52 @@ private:
   std::vector<observer> m_observers;
 
 public:
-  registry_entry *parent() { return m_parent; }
-
   registry_entry() = default;
 
-  registry_entry(const value_type &entry) : m_parent(nullptr), m_is_namespace(false), m_value(entry) {}
+  registry_entry(const value_type &entry) : m_is_namespace(false), m_value(entry) {}
 
-  registry_entry(std::initializer_list<typename namespace_type::value_type> values)
-      : m_parent(nullptr), m_is_namespace(true), m_namespace(values) {
-    for (auto &x : m_namespace) {
-      x.second.m_parent = this;
-      x.second.m_name = x.first;
+  registry_entry(std::initializer_list<std::pair<const std::string, registry_entry>> values)
+      : m_is_namespace(true), m_namespace(values) {
+    for (auto &pair : m_namespace) {
+      pair.second.absolute(pair.first);
     }
   }
-
-  registry_entry(const registry_entry &other)
-      : m_parent(other.m_parent), m_name(other.m_name), m_is_namespace(other.m_is_namespace), m_value(other.m_value),
-        m_namespace(other.m_namespace), m_observers(other.m_observers) {
-    for (auto &x : m_namespace) {
-      x.second.m_parent = this;
-      x.second.m_name = x.first;
-    }
-  }
-
-  registry_entry(registry_entry &&other) = delete;
-
-  registry_entry &operator=(const registry_entry &other) {
-    m_parent = other.m_parent;
-    m_is_namespace = other.m_is_namespace;
-    m_value = other.m_value;
-    m_namespace = other.m_namespace;
-    m_observers = other.m_observers;
-    m_name = other.m_name;
-
-    for (auto x : m_namespace) {
-      x.second.m_parent = this;
-    }
-
-    return *this;
-  }
-
-  registry_entry &operator=(registry_entry &&other) = delete;
 
   value_type &value() { return m_value; }
   const value_type &value() const { return m_value; }
 
-  bool is_namespace() const { return m_is_namespace; }
+  const std::string &path() const { return m_name; }
 
-  const std::string &name() const { return m_name; }
-
-  void emit(const char *path) {
-    for (observer observer : m_observers) {
-      observer(this, path);
+  void absolute(const std::string &name) {
+    if (m_name.empty()) {
+      m_name = name;
+    } else {
+      m_name = name + "." + m_name;
     }
 
-  //  if (m_parent) {
-    //  std::string new_path = m_name + "." + std::string(path);
-//      m_parent->emit(new_path.c_str());
-//    }
-  }
-
-  void insert(const typename namespace_type::value_type &child) {
-    auto subentry = m_namespace.find(child.first);
-    if (subentry == m_namespace.end()) {
-      auto res = m_namespace.emplace(child);
-      res.first->second.m_parent = this;
-      res.first->second.m_name = child.first;
-    } else {
-      for (const auto &pair : child.second) {
-        subentry->second.insert(pair);
+    if (m_is_namespace) {
+      for (auto &pair : m_namespace) {
+        pair.second.absolute(name);
       }
     }
+  }
 
-    emit(child.first.c_str());
+  bool is_namespace() const { return m_is_namespace; }
+
+  void emit(const char *name, registry_entry *entry) {
+    for (observer observer : m_observers) {
+      observer(this, name, entry);
+    }
+  }
+
+  void insert(const std::pair<std::string, const registry_entry &> &entry) {
+    iterator it = m_namespace.find(entry.first);
+    if (it != m_namespace.end()) {
+      throw std::runtime_error("entry already exists");
+    }
+
+    it = m_namespace.emplace(entry).first;
+    emit(entry.first.c_str(), &it->second);
   }
 
   iterator find(const std::string &name) { return m_namespace.find(name); }

@@ -101,9 +101,16 @@ TEST(CallableRegistry, Trig) {
 }
 
 
-/*
 TEST(Registry, Insert) {
-  registry_entry &entry = registered("dynd.nd");
+//  registry_entry &entry = registered("dynd.nd");
+  //std::cout << entry.path() << std::endl;
+
+//  registry_entry &entry2 = registered("dynd.nd.random");
+  //std::cout << entry2.path() << std::endl;
+
+//  std::exit(-1);
+/*
+
 
   entry.observe([](registry_entry *, const char *name) { std::cout << (std::string(name) + " changed") << std::endl; });
   std::cout << entry.name() << std::endl;
@@ -127,5 +134,5 @@ TEST(Registry, Insert) {
 
   entry.insert({"f", nd::callable([] { return 0; })});
 //  EXPECT_TRUE(flag);
-}
 */
+}
