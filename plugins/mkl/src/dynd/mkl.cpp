@@ -8,6 +8,7 @@
 #include <dynd/callables/fft_callable.hpp>
 #include <dynd/callables/ifft_callable.hpp>
 #include <dynd/mkl.hpp>
+#include <dynd/registry.hpp>
 
 using namespace std;
 using namespace dynd;
