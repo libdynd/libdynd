@@ -13,6 +13,7 @@
 #include <dynd/json_parser.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/functional.hpp>
+#include <dynd/registry.hpp>
 
 using namespace std;
 using namespace dynd;
