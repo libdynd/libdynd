@@ -13,6 +13,7 @@
 
 #include <dynd/mkl.hpp>
 #include <dynd/random.hpp>
+#include <dynd/registry.hpp>
 
 using namespace std;
 using namespace dynd;

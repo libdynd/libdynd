@@ -8,11 +8,12 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "inc_gtest.hpp"
 #include "dynd_assertions.hpp"
+#include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/math.hpp>
+#include <dynd/registry.hpp>
 
 using namespace std;
 using namespace dynd;

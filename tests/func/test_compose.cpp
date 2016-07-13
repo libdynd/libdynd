@@ -17,6 +17,7 @@
 #include <dynd/functional.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/index.hpp>
+#include <dynd/registry.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 
 using namespace std;
