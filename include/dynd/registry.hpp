@@ -11,58 +11,101 @@ namespace dynd {
 
 class registry_entry {
 public:
-  typedef void (*observer)(const char *, registry_entry *);
-  typedef typename std::map<std::string, registry_entry>::iterator iterator;
-  typedef typename std::map<std::string, registry_entry>::const_iterator const_iterator;
+  typedef nd::callable value_type;
+  typedef std::map<std::string, registry_entry> namespace_type;
+
+  typedef void (*observer)(registry_entry *, const char *);
+
+  typedef typename namespace_type::iterator iterator;
+  typedef typename namespace_type::const_iterator const_iterator;
 
 private:
+  registry_entry *m_parent;
+  std::string m_name;
   bool m_is_namespace;
-  nd::callable m_value;
-  std::map<std::string, registry_entry> m_namespace;
+  value_type m_value;
+  namespace_type m_namespace;
   std::vector<observer> m_observers;
 
 public:
+  registry_entry *parent() { return m_parent; }
+
   registry_entry() = default;
 
-  registry_entry(const nd::callable &entry) : m_is_namespace(false), m_value(entry) {}
+  registry_entry(const value_type &entry) : m_parent(nullptr), m_is_namespace(false), m_value(entry) {}
 
-  registry_entry(std::initializer_list<std::pair<const std::string, registry_entry>> values)
-      : m_is_namespace(true), m_namespace(values) {}
+  registry_entry(std::initializer_list<typename namespace_type::value_type> values)
+      : m_parent(nullptr), m_is_namespace(true), m_namespace(values) {
+    for (auto &x : m_namespace) {
+      x.second.m_parent = this;
+      x.second.m_name = x.first;
+    }
+  }
 
-  nd::callable &value() { return m_value; }
-  const nd::callable &value() const { return m_value; }
+  registry_entry(const registry_entry &other)
+      : m_parent(other.m_parent), m_name(other.m_name), m_is_namespace(other.m_is_namespace), m_value(other.m_value),
+        m_namespace(other.m_namespace), m_observers(other.m_observers) {
+    for (auto &x : m_namespace) {
+      x.second.m_parent = this;
+      x.second.m_name = x.first;
+    }
+  }
+
+  registry_entry(registry_entry &&other) = delete;
+
+  registry_entry &operator=(const registry_entry &other) {
+    m_parent = other.m_parent;
+    m_is_namespace = other.m_is_namespace;
+    m_value = other.m_value;
+    m_namespace = other.m_namespace;
+    m_observers = other.m_observers;
+    m_name = other.m_name;
+
+    for (auto x : m_namespace) {
+      x.second.m_parent = this;
+    }
+
+    return *this;
+  }
+
+  registry_entry &operator=(registry_entry &&other) = delete;
+
+  value_type &value() { return m_value; }
+  const value_type &value() const { return m_value; }
 
   bool is_namespace() const { return m_is_namespace; }
 
-  void insert(const std::pair<const std::string, registry_entry> &entry) {
-    auto subentry = m_namespace.find(entry.first);
+  const std::string &name() const { return m_name; }
+
+  void emit(const char *path) {
+    for (observer observer : m_observers) {
+      observer(this, path);
+    }
+
+  //  if (m_parent) {
+    //  std::string new_path = m_name + "." + std::string(path);
+//      m_parent->emit(new_path.c_str());
+//    }
+  }
+
+  void insert(const typename namespace_type::value_type &child) {
+    auto subentry = m_namespace.find(child.first);
     if (subentry == m_namespace.end()) {
-      m_namespace.emplace(entry);
+      auto res = m_namespace.emplace(child);
+      res.first->second.m_parent = this;
+      res.first->second.m_name = child.first;
     } else {
-      for (const auto &pair : entry.second) {
+      for (const auto &pair : child.second) {
         subentry->second.insert(pair);
       }
     }
 
-    for (observer obs : m_observers) {
-      obs(entry.first.c_str(), this);
-    }
+    emit(child.first.c_str());
   }
 
   iterator find(const std::string &name) { return m_namespace.find(name); }
 
   void observe(observer obs) { m_observers.emplace_back(obs); }
-
-  registry_entry &operator=(const registry_entry &rhs) {
-    m_is_namespace = rhs.m_is_namespace;
-    if (m_is_namespace) {
-      m_namespace = rhs.m_namespace;
-    } else {
-      m_value = rhs.m_value;
-    }
-
-    return *this;
-  }
 
   registry_entry &operator[](const std::string &path) {
     size_t i = path.find(".");

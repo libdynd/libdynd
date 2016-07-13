@@ -99,3 +99,33 @@ TEST(CallableRegistry, Trig) {
     EXPECT_DOUBLE_EQ(pow(1.5, 2.25), af(1.5, 2.25).as<double>());
   */
 }
+
+
+/*
+TEST(Registry, Insert) {
+  registry_entry &entry = registered("dynd.nd");
+
+  entry.observe([](registry_entry *, const char *name) { std::cout << (std::string(name) + " changed") << std::endl; });
+  std::cout << entry.name() << std::endl;
+
+  registry_entry &entry2 = registered("dynd");
+
+  entry2.observe([](registry_entry *, const char *name) { std::cout << (std::string(name) + " changed") << std::endl; });
+//  std::cout << entry.name() << std::endl;
+
+//  registry_entry &entry = registered("dynd.nd");
+//  std::cout << (entry.parent() == NULL) << std::endl;
+  //std::cout << entry.name() << std::endl;
+
+//  entry.observe([](registry_entry *, const char *name) {
+  //  std::cout << (std::string(name) + " changed") << std::endl;
+
+//    EXPECT_EQ("f", std::string(name));
+
+  //  flag = true;
+//  });
+
+  entry.insert({"f", nd::callable([] { return 0; })});
+//  EXPECT_TRUE(flag);
+}
+*/
