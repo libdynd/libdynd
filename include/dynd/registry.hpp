@@ -72,6 +72,8 @@ public:
     }
 
     it = m_namespace.emplace(entry).first;
+    it->second.absolute(entry.first);
+
     emit(entry.first.c_str(), &it->second);
   }
 

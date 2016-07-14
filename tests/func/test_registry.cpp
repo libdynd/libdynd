@@ -100,39 +100,42 @@ TEST(CallableRegistry, Trig) {
   */
 }
 
+//TEST(Registry, Insert) {
+  //registry_entry &entry = registered();
+  //entry.insert({"x", {{"y", nd::callable([] { return 0; })}}});
 
-TEST(Registry, Insert) {
-//  registry_entry &entry = registered("dynd.nd");
-  //std::cout << entry.path() << std::endl;
+//  std::cout << entry.path() << std::endl;
 
-//  registry_entry &entry2 = registered("dynd.nd.random");
-  //std::cout << entry2.path() << std::endl;
+  //  registry_entry &entry2 = registered("dynd.nd.random");
+  // std::cout << entry2.path() << std::endl;
 
-//  std::exit(-1);
-/*
+  //  std::exit(-1);
+  /*
 
 
-  entry.observe([](registry_entry *, const char *name) { std::cout << (std::string(name) + " changed") << std::endl; });
-  std::cout << entry.name() << std::endl;
+    entry.observe([](registry_entry *, const char *name) { std::cout << (std::string(name) + " changed") << std::endl;
+  });
+    std::cout << entry.name() << std::endl;
 
-  registry_entry &entry2 = registered("dynd");
+    registry_entry &entry2 = registered("dynd");
 
-  entry2.observe([](registry_entry *, const char *name) { std::cout << (std::string(name) + " changed") << std::endl; });
-//  std::cout << entry.name() << std::endl;
+    entry2.observe([](registry_entry *, const char *name) { std::cout << (std::string(name) + " changed") << std::endl;
+  });
+  //  std::cout << entry.name() << std::endl;
 
-//  registry_entry &entry = registered("dynd.nd");
-//  std::cout << (entry.parent() == NULL) << std::endl;
-  //std::cout << entry.name() << std::endl;
+  //  registry_entry &entry = registered("dynd.nd");
+  //  std::cout << (entry.parent() == NULL) << std::endl;
+    //std::cout << entry.name() << std::endl;
 
-//  entry.observe([](registry_entry *, const char *name) {
-  //  std::cout << (std::string(name) + " changed") << std::endl;
+  //  entry.observe([](registry_entry *, const char *name) {
+    //  std::cout << (std::string(name) + " changed") << std::endl;
 
-//    EXPECT_EQ("f", std::string(name));
+  //    EXPECT_EQ("f", std::string(name));
 
-  //  flag = true;
-//  });
+    //  flag = true;
+  //  });
 
-  entry.insert({"f", nd::callable([] { return 0; })});
-//  EXPECT_TRUE(flag);
-*/
-}
+    entry.insert({"f", nd::callable([] { return 0; })});
+  //  EXPECT_TRUE(flag);
+  */
+//}
