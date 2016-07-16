@@ -22,9 +22,8 @@ namespace nd {
 
       ifft_kernel(size_t ndim, const char *src0_metadata, real_type scale) {
 
-        MKL_LONG status;
         if (ndim == 1) {
-          status = DftiCreateDescriptor(&descriptor, DFTI_DOUBLE, DFTI_COMPLEX, 1,
+          DftiCreateDescriptor(&descriptor, DFTI_DOUBLE, DFTI_COMPLEX, 1,
                                         reinterpret_cast<const size_stride_t *>(src0_metadata)->dim_size);
         } else {
           MKL_LONG src0_size[3];
@@ -34,10 +33,10 @@ namespace nd {
           }
         }
 
-        status = DftiSetValue(descriptor, DFTI_BACKWARD_SCALE, scale);
-        status = DftiSetValue(descriptor, DFTI_PLACEMENT, DFTI_NOT_INPLACE);
+        DftiSetValue(descriptor, DFTI_BACKWARD_SCALE, scale);
+        DftiSetValue(descriptor, DFTI_PLACEMENT, DFTI_NOT_INPLACE);
 
-        status = DftiCommitDescriptor(descriptor);
+        DftiCommitDescriptor(descriptor);
       }
 
       ~ifft_kernel() { DftiFreeDescriptor(&descriptor); }

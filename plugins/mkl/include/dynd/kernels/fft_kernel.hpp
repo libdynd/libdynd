@@ -20,25 +20,24 @@ namespace nd {
       DFTI_DESCRIPTOR_HANDLE descriptor;
 
       fft_kernel(size_t ndim, const size_stride_t *src0_size_stride) {
-        MKL_LONG status;
         switch (ndim) {
         case 1: {
           MKL_LONG src0_size = src0_size_stride[0].dim_size;
-          status = DftiCreateDescriptor(&descriptor, DFTI_DOUBLE, DFTI_COMPLEX, 1, src0_size);
+          DftiCreateDescriptor(&descriptor, DFTI_DOUBLE, DFTI_COMPLEX, 1, src0_size);
           break;
         }
         case 2: {
           MKL_LONG src0_size[2] = {src0_size_stride[0].dim_size, src0_size_stride[1].dim_size};
-          status = DftiCreateDescriptor(&descriptor, DFTI_DOUBLE, DFTI_COMPLEX, 2, src0_size);
+          DftiCreateDescriptor(&descriptor, DFTI_DOUBLE, DFTI_COMPLEX, 2, src0_size);
           break;
         }
         default:
           break;
         }
 
-        status = DftiSetValue(descriptor, DFTI_PLACEMENT, DFTI_NOT_INPLACE);
+        DftiSetValue(descriptor, DFTI_PLACEMENT, DFTI_NOT_INPLACE);
 
-        status = DftiCommitDescriptor(descriptor);
+        DftiCommitDescriptor(descriptor);
       }
 
       ~fft_kernel() { DftiFreeDescriptor(&descriptor); }
