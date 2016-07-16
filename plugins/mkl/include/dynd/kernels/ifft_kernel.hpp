@@ -26,11 +26,13 @@ namespace nd {
           DftiCreateDescriptor(&descriptor, DFTI_DOUBLE, DFTI_COMPLEX, 1,
                                         reinterpret_cast<const size_stride_t *>(src0_metadata)->dim_size);
         } else {
+/*
           MKL_LONG src0_size[3];
           for (size_t i = 0; i < ndim; ++i) {
             src0_size[i] = reinterpret_cast<const size_stride_t *>(src0_metadata)->dim_size;
             src0_metadata += sizeof(size_stride_t);
           }
+*/
         }
 
         DftiSetValue(descriptor, DFTI_BACKWARD_SCALE, scale);
