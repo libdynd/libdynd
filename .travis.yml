@@ -24,6 +24,9 @@ matrix:
     - compiler: gcc
       sudo: required
       env: VALGRIND
+      cache:
+        directories:
+            - $HOME/intel
       addons:
         apt:
           sources:
