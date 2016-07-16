@@ -9,8 +9,8 @@ project(libdynd_mkl)
 set(CMAKE_MACOSX_RPATH 1)
 
 # There is no FindMKL, but this will find Intel's MKL
-set(BLA_VENDOR Intel10_64lp)
-find_package(BLAS REQUIRED)
+#set(BLA_VENDOR Intel10_64lp)
+#find_package(BLAS REQUIRED)
 
 include_directories(include)
 
