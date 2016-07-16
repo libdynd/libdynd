@@ -42,7 +42,7 @@ matrix:
       before_install:
         - export CC="gcc-5"
         - export CXX="g++-5"
-        - if [ -d "$HOME/intel" ]; then wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh; bash install-icc.sh --components mkl; fi
+        - if [ ! -d "$HOME/intel" ]; then wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh; bash install-icc.sh --components mkl; fi
       script:
         - cmake -DDYND_BUILD_DOCS=ON -DDYND_BUILD_PLUGINS=OFF ..
         - make -j4 || exit 1
