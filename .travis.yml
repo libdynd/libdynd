@@ -175,5 +175,9 @@ notifications:
 
 env:
   global:
+    # Anaconda.org?
     - secure: KJZ5DWK3iAmthDnPaXz/S8aQFa6zVlD+CWCPXM+vgkiJQG5qgJfn5t2yy5n3mVyS0qZFd/LrFJ6ZqjUr/BKFDqGPBxESYIAOOgN+cXIEWxkeGFEHxOEK9QBS6aq6GBhyQlteWcqozYsG93oSVh+Xiv9tHl4m1mHXOHk2llQXy4g=
+    # Old Intel Serial Number?
     - secure: Qt/St9copUdPo4kej+9DtLDCzIAkDo/PDP0Ac244yF+8dRac3KhskRVVURNcCMonUeuqS5Dm5qcQl9b/L4P9Gkpn1aDKPHMp7pgTZHZLJ7VIHgFrSWo545mqV0fcYN+GLpaSqd8NwdUi5+1aHGWTtrw4BoIO4DSgV4eiIVEdRbA=
+    # Intel Serial Number
+    - secure: "TIZuSCCQWGf10FZlt150X5BXPhwjXretYxsnFAJtIDKoNPFZ89SW5/ApGv8kq55j5JsK6tp4VKPA9TujJ1hwEqIFP1WNv9CEqlrnB9VXbFve0WOYwdRmWchIPCUyqjJSdgPXSCzVoj2sFP9JZkKCaXEG+49fGLfkwYOeznecYpw="
