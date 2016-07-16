@@ -44,7 +44,6 @@ TEST(MKL, Load) {
 TYPED_TEST_CASE_P(FFT);
 
 TYPED_TEST_P(FFT, Linear) {
-/*
   const ndt::type &res_tp = ndt::make_type<TypeParam>();
 
   nd::array x0 = nd::random::uniform({}, {{"dst_tp", res_tp}});
@@ -56,7 +55,6 @@ TYPED_TEST_P(FFT, Linear) {
   nd::array y = nd::mkl::fft(x);
 
   EXPECT_ARRAY_NEAR(y0 + y1, y);
-*/
 }
 
 /*
