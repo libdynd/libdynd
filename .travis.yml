@@ -44,7 +44,6 @@ matrix:
         - export CXX="g++-5"
         - wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh
         - bash install-icc.sh --components mkl
-#        - | /bin/sh
       script:
         - cmake -DDYND_BUILD_DOCS=ON -DDYND_BUILD_PLUGINS=OFF ..
         - make -j4 || exit 1
