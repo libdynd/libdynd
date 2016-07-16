@@ -44,6 +44,7 @@ matrix:
         - export CXX="g++-5"
         - if [ ! -d "$HOME/intel" ]; then wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh; bash install-icc.sh --components mkl; fi
       script:
+        - source ~/.bashrc
         - cmake -DDYND_BUILD_DOCS=ON -DDYND_BUILD_PLUGINS=OFF ..
         - make -j4 || exit 1
         - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
