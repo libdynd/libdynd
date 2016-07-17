@@ -35,10 +35,6 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(DYND_SHARED_LIB
            "Build a libdynd shared library instead of a static library"
            ON)
-# -DDYND_FFTW=ON/OFF, whether to build libdynd with or without FFTW
-    option(DYND_FFTW
-           "Build a libdynd library with FFTW"
-           OFF)
 # -DDYND_LLVM=ON/OFF, whether to build libdynd with or without LLVM support
     option(DYND_LLVM
            "Build a libdynd library with LLVM"
@@ -443,12 +439,6 @@ source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 #set_source_files_properties(include/dynd/kernels/compare_kernels.hpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
 #set_source_files_properties(src/dynd/func/comparison.cpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
-
-if (DYND_FFTW)
-    find_path(FFTW_PATH fftw3.h)
-    include_directories(${FFTW_PATH})
-    set(DYND_LINK_LIBS ${DYND_LINK_LIBS} fftw3 fftw3f)
-endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
