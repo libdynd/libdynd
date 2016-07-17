@@ -6,11 +6,9 @@ addons:
     sources:
     - ubuntu-toolchain-r-test
     - kalakris-cmake
-    - llvm-toolchain-precise-3.6
     packages:
     - gcc-4.9
     - g++-4.9
-    - clang-3.6
     - cmake
     - s3cmd
 
