@@ -45,7 +45,6 @@ matrix:
         - if [ ! -d "$HOME/intel" ]; then wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh; bash install-icc.sh --components mkl; fi
       script:
         - source $HOME/intel/mkl/bin/mklvars.sh intel64
-        - env
         - cmake -DDYND_BUILD_DOCS=OFF -DCMAKE_CXX_FLAGS="-fsanitize=address" -DDYND_BUILD_PLUGINS=ON ..
         - make -j4 || exit 1
         - ./tests/test_libdynd
