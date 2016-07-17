@@ -21,7 +21,7 @@ matrix:
   include:
     - compiler: gcc
       sudo: required
-      env: CMAKE_CXX_FLAGS="-fsanitize=address"
+      env: -fsanitize=address
       cache:
         directories:
             - $HOME/intel
@@ -41,13 +41,13 @@ matrix:
         - if [ ! -d "$HOME/intel" ]; then wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh; bash install-icc.sh --components mkl; fi
       script:
         - source $HOME/intel/mkl/bin/mklvars.sh intel64
-        - cmake -DDYND_BUILD_DOCS=OFF -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -DDYND_BUILD_PLUGINS=ON ..
+        - cmake -DDYND_BUILD_DOCS=OFF -DCMAKE_CXX_FLAGS="-fsanitize=address" -DDYND_BUILD_PLUGINS=ON ..
         - make -j4 || exit 1
         - ./tests/test_libdynd
     - compiler: clang
-      env: CMAKE_CXX_FLAGS="-fsanitize=address"
+      env: -fsanitize=address
       script:
-        - cmake -DCMAKE_CXX_FLAGS=${CMAKE_FXX_FLAGS} ..
+        - cmake -DCMAKE_CXX_FLAGS="-fsanitize=address" ..
         - make -j4 || exit 1
         - ./tests/test_libdynd
     - compiler: gcc
