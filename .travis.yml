@@ -46,9 +46,9 @@ matrix:
       script:
         - source $HOME/intel/mkl/bin/mklvars.sh intel64
         - env
-        - cmake -DDYND_BUILD_DOCS=ON -DDYND_BUILD_PLUGINS=ON ..
+        - cmake -DDYND_BUILD_DOCS=OFF -DCMAKE_CXX_FLAGS="-fsanitize=address" -DDYND_BUILD_PLUGINS=ON ..
         - make -j4 || exit 1
-        - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
+        - ./tests/test_libdynd
     - compiler: clang
       env: VALGRIND DYND_FFTW=OFF
       script:
