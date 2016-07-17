@@ -1,5 +1,4 @@
-sudo: false
-
+sudo: required
 dist: trusty
 
 addons:
@@ -11,8 +10,6 @@ addons:
     - gcc-4.9
     - g++-4.9
     - cmake
-    - valgrind
-    - libfftw3-dev
     - s3cmd
 
 cache:
@@ -23,7 +20,7 @@ matrix:
   include:
     - compiler: gcc
       sudo: required
-      env: VALGRIND
+      env: -fsanitize=address
       cache:
         directories:
             - $HOME/intel
@@ -37,22 +34,22 @@ matrix:
             - g++-5
             - cmake
             - doxygen
-            - valgrind
-            - libfftw3-dev
       before_install:
         - export CC="gcc-5"
         - export CXX="g++-5"
         - if [ ! -d "$HOME/intel" ]; then wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh; bash install-icc.sh --components mkl; fi
       script:
+        - ls $HOME/intel
         - source $HOME/intel/mkl/bin/mklvars.sh intel64
         - cmake -DDYND_BUILD_DOCS=OFF -DCMAKE_CXX_FLAGS="-fsanitize=address" -DDYND_BUILD_PLUGINS=ON ..
         - make -j4 || exit 1
         - ./tests/test_libdynd
     - compiler: clang
-      env: VALGRIND DYND_FFTW=OFF
+      env: -fsanitize=address
       script:
+        - cmake -DCMAKE_CXX_FLAGS="-fsanitize=address" ..
         - make -j4 || exit 1
-        - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
+        - ./tests/test_libdynd
     - compiler: gcc
       env: CONDA=true
       before_install:
@@ -80,7 +77,7 @@ matrix:
       script:
         - conda build conda.recipe
     - language: python
-      env: DYND_FFTW=OFF VERBOSE=1
+      env: VERBOSE=1
       compiler: gcc
       python: 3.5
       addons:
@@ -111,7 +108,7 @@ matrix:
         - python -c "import dynd; dynd.test(verbosity=2, exit=True)"
       after_script:
     - compiler: gcc
-      env: DYND_FFTW=ON DYND_COVERAGE=ON
+      env: DYND_COVERAGE=ON
       addons:
         apt:
           sources:
@@ -122,7 +119,6 @@ matrix:
             - g++-6
             - cmake
             - lcov
-            - libfftw3-dev
       before_install:
         - export CC="gcc-6"
         - export CXX="g++-6"
@@ -134,7 +130,7 @@ matrix:
       before_script:
         - mkdir build
         - pushd build
-        - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_COVERAGE=${DYND_COVERAGE} ..
+        - cmake -DDYND_COVERAGE=${DYND_COVERAGE} ..
       script:
         - make || exit 1
         - make coverage
@@ -149,7 +145,7 @@ before_install:
 before_script:
   - mkdir build
   - pushd build
-  - cmake -DDYND_FFTW=${DYND_FFTW} ..
+  - cmake ..
 
 script:
   - make -j4 || exit 1

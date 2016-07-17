@@ -35,10 +35,6 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(DYND_SHARED_LIB
            "Build a libdynd shared library instead of a static library"
            ON)
-# -DDYND_FFTW=ON/OFF, whether to build libdynd with or without FFTW
-    option(DYND_FFTW
-           "Build a libdynd library with FFTW"
-           OFF)
 # -DDYND_LLVM=ON/OFF, whether to build libdynd with or without LLVM support
     option(DYND_LLVM
            "Build a libdynd library with LLVM"
@@ -121,7 +117,7 @@ else()
         endif()
         set(CMAKE_CXX_FLAGS "-std=c++14 -fmax-errors=20 -Wno-type-limits -Wno-maybe-uninitialized ${CMAKE_CXX_FLAGS}")
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        set(CMAKE_CXX_FLAGS "-std=c++1y -ferror-limit=20 -Wno-missing-braces -ftemplate-depth=500 ${CMAKE_CXX_FLAGS}")
+        set(CMAKE_CXX_FLAGS "-std=c++14 -ferror-limit=20 -Wno-missing-braces -ftemplate-depth=500 ${CMAKE_CXX_FLAGS}")
     endif()
 
     if(WIN32)
@@ -284,7 +280,6 @@ set(libdynd_SRC
     include/dynd/callables/base_dispatch_callable.hpp
     # Kernels
     src/dynd/kernels/byteswap_kernels.cpp
-    src/dynd/kernels/old_fft_kernel.cpp
     src/dynd/kernels/kernel_builder.cpp
     include/dynd/kernels/apply.hpp
     include/dynd/kernels/arithmetic.hpp
@@ -298,7 +293,6 @@ set(libdynd_SRC
     include/dynd/kernels/cuda_launch.hpp
     include/dynd/kernels/dereference_kernel.hpp
     include/dynd/kernels/elwise_kernel.hpp
-    include/dynd/kernels/old_fft_kernel.hpp
     include/dynd/kernels/index_kernel.hpp
     include/dynd/kernels/is_na_kernel.hpp
     include/dynd/kernels/kernel_builder.hpp
@@ -338,7 +332,6 @@ set(libdynd_SRC
     src/dynd/compound_div.cpp
     src/dynd/convert.cpp
     src/dynd/divide.cpp
-    src/dynd/old_fft.cpp
     src/dynd/functional.cpp
     src/dynd/index.cpp
     src/dynd/io.cpp
@@ -390,7 +383,6 @@ set(libdynd_SRC
     include/dynd/convert.hpp
     include/dynd/diagnostics.hpp
     include/dynd/ensure_immutable_contig.hpp
-    include/dynd/old_fft.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/reduction.hpp
     include/dynd/functional.hpp
@@ -447,12 +439,6 @@ source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 #set_source_files_properties(include/dynd/kernels/compare_kernels.hpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
 #set_source_files_properties(src/dynd/func/comparison.cpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
-
-if (DYND_FFTW)
-    find_path(FFTW_PATH fftw3.h)
-    include_directories(${FFTW_PATH})
-    set(DYND_LINK_LIBS ${DYND_LINK_LIBS} fftw3 fftw3f)
-endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
