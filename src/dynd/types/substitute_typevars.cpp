@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/callable.hpp>
-#include <dynd/types/base_memory_type.hpp>
+#include <dynd/types/callable_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
@@ -26,14 +25,13 @@ using namespace dynd;
 /**
  * Substitutes the field types for contiguous array of types
  */
-static std::vector<ndt::type> substitute_type_array(const nd::array &type_array,
+static std::vector<ndt::type> substitute_type_array(const std::vector<ndt::type> &type_array,
                                                     const std::map<std::string, ndt::type> &typevars, bool concrete) {
-  intptr_t field_count = type_array.get_dim_size();
-  const ndt::type *field_types = reinterpret_cast<const ndt::type *>(type_array.cdata());
+  intptr_t field_count = type_array.size();
   std::vector<ndt::type> tmp_field_types(field_count);
 
   for (intptr_t i = 0; i < field_count; ++i) {
-    tmp_field_types[i] = ndt::substitute(field_types[i], typevars, concrete);
+    tmp_field_types[i] = ndt::substitute(type_array[i], typevars, concrete);
   }
   return tmp_field_types;
 }

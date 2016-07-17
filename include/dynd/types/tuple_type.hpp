@@ -124,6 +124,9 @@ namespace ndt {
       this->m_metadata_size = arrmeta_offset;
     }
 
+    tuple_type(type_id_t id, const std::vector<type> &element_tp, bool variadic = false)
+        : tuple_type(id, element_tp.size(), element_tp.empty() ? nullptr : &element_tp[0], variadic, type_flag_none) {}
+
     tuple_type(type_id_t id, std::initializer_list<type> element_tp, bool variadic = false)
         : tuple_type(id, element_tp.size(), element_tp.begin(), variadic, type_flag_none) {}
 
