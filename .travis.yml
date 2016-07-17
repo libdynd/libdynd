@@ -10,6 +10,7 @@ addons:
     packages:
     - gcc-4.9
     - g++-4.9
+    - clang-3.6
     - cmake
     - s3cmd
 
@@ -40,6 +41,7 @@ matrix:
         - export CXX="g++-5"
         - if [ ! -d "$HOME/intel" ]; then wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh; bash install-icc.sh --components mkl; fi
       script:
+        - ls $HOME/intel
         - source $HOME/intel/mkl/bin/mklvars.sh intel64
         - cmake -DDYND_BUILD_DOCS=OFF -DCMAKE_CXX_FLAGS="-fsanitize=address" -DDYND_BUILD_PLUGINS=ON ..
         - make -j4 || exit 1
