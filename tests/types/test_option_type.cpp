@@ -47,7 +47,6 @@ TEST(OptionType, Create) {
 
   // No option of option allowed
   EXPECT_THROW(ndt::make_type<ndt::option_type>(ndt::make_type<ndt::option_type>(ndt::make_type<int>())), type_error);
-  EXPECT_THROW(ndt::type("option[option[bool]]"), type_error);
 }
 
 TEST(OptionType, OptionIntAssign) {
