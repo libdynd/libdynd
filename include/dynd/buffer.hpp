@@ -15,6 +15,13 @@ namespace nd {
   inline buffer empty_buffer(const ndt::type &tp);
   inline buffer empty_buffer(const ndt::type &tp, uint64_t flags);
 
+  /**
+   * This class holds a memory buffer, typed according to an ndt::type. It's intended for typed memory
+   * interoperability, along the lines of PEP 3118 from CPython.
+   *
+   * It supports basic initialization and access from C++, but does not expose more advanced array operations. For a
+   * more advanced computational primitive, see nd::array.
+   */
   class DYNDT_API buffer : public intrusive_ptr<const buffer_memory_block> {
     template <typename T>
     void init(T &&value) {
