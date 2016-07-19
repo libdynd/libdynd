@@ -12,9 +12,6 @@
 namespace dynd {
 namespace nd {
 
-  inline buffer empty_buffer(const ndt::type &tp);
-  inline buffer empty_buffer(const ndt::type &tp, uint64_t flags);
-
   /**
    * This class holds a memory buffer, typed according to an ndt::type. It's intended for typed memory
    * interoperability, along the lines of PEP 3118 from CPython.
@@ -26,55 +23,80 @@ namespace nd {
     template <typename T>
     void init(T &&value) {
       init_kernel<typename remove_reference_then_cv<T>::type> init(get_type(), get()->metadata());
-      init.single(const_cast<char *>(cdata()), std::forward<T>(value));
+      init.single(m_ptr->m_data, std::forward<T>(value));
     }
 
     template <typename ValueType>
     void init(const ValueType *values, size_t size) {
       init_kernel<ValueType> init(get_type(), get()->metadata());
-      init.contiguous(const_cast<char *>(cdata()), values, size);
+      init.contiguous(m_ptr->m_data, values, size);
     }
+
+  protected:
+    /** Tag to distinguish the protected value initialization constructors */
+    struct buffer_empty_init_tag {};
+
+    /** Internal constructor. Initializes the buffer memory via one allocation, including the data aligned as needed */
+    buffer(const ndt::type &tp, size_t data_offset, size_t data_size, uint64_t flags, buffer_empty_init_tag)
+        : intrusive_ptr(new (data_offset + data_size - sizeof(buffer_memory_block))
+                            buffer_memory_block(tp, data_offset, data_size, flags),
+                        false) {}
+
+    /** Internal constructor. Initializes the buffer memory via one allocation, leaves data uninitialized */
+    buffer(const ndt::type &tp, uint64_t flags, buffer_empty_init_tag)
+        : buffer(tp, inc_to_alignment(sizeof(buffer_memory_block) + tp.get_arrmeta_size(), tp.get_data_alignment()),
+                 tp.get_default_data_size(), flags, buffer_empty_init_tag()) {
+      if (get_type().get_arrmeta_size() > 0) {
+        get_type()->arrmeta_default_construct(m_ptr->metadata(), true);
+      }
+    }
+
+    /**
+     * Internal constructor. Initializes the buffer memory via one allocation, leaves data uninitialized. Scalars get
+     * flagged as immutable, arrays as read-write.
+     */
+    buffer(const ndt::type &tp, buffer_empty_init_tag)
+        : buffer(tp, (tp.get_ndim() == 0) ? (read_access_flag | immutable_access_flag) : readwrite_access_flags,
+                 buffer_empty_init_tag()) {}
 
   public:
     using intrusive_ptr<const buffer_memory_block>::intrusive_ptr;
 
     buffer() = default;
 
-    /**
-      * Constructs an array from a C++ type.
-      */
+    /** Constructs a buffer from a C++ type. */
     template <typename T,
               typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
-    buffer(T &&value) : buffer(empty_buffer(ndt::type_for(value))) {
+    buffer(T &&value) : buffer(ndt::type_for(value), buffer_empty_init_tag()) {
       init(std::forward<T>(value));
     }
 
-    /** Constructs an array from a 1D initializer list */
+    /** Constructs a buffer from a 1D initializer list */
     template <typename ValueType>
-    buffer(std::initializer_list<ValueType> values) : buffer(empty_buffer(ndt::type_for(values))) {
+    buffer(const std::initializer_list<ValueType> &values) : buffer(ndt::type_for(values), buffer_empty_init_tag()) {
       init(values);
     }
 
-    /** Constructs an array from a 2D initializer list */
+    /** Constructs a buffer from a 2D initializer list */
     template <typename ValueType>
-    buffer(std::initializer_list<std::initializer_list<ValueType>> values)
-        : buffer(empty_buffer(ndt::type_for(values))) {
+    buffer(const std::initializer_list<std::initializer_list<ValueType>> &values)
+        : buffer(ndt::type_for(values), buffer_empty_init_tag()) {
       init(values);
     }
 
-    /** Constructs an array from a 3D initializer list */
+    /** Constructs a buffer from a 3D initializer list */
     template <typename ValueType>
-    buffer(std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> values)
-        : buffer(empty_buffer(ndt::type_for(values))) {
+    buffer(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
+        : buffer(ndt::type_for(values), buffer_empty_init_tag()) {
       init(values);
     }
 
     /**
-     * Constructs a 1D array from a pointer and a size.
+     * Constructs a 1D buffer from a pointer and a size.
      */
     template <typename ValueType>
     buffer(const ValueType *values, size_t size)
-        : buffer(empty_buffer(ndt::make_fixed_dim(size, ndt::make_type<ValueType>()))) {
+        : buffer(ndt::make_fixed_dim(size, ndt::make_type<ValueType>()), buffer_empty_init_tag()) {
       init(values, size);
     }
 
@@ -218,21 +240,6 @@ namespace nd {
     return buffer(new (data_offset + data_size - sizeof(buffer_memory_block))
                       buffer_memory_block(tp, data_offset, data_size, flags),
                   false);
-  }
-
-  inline buffer empty_buffer(const ndt::type &tp, uint64_t flags) {
-    // Create an empty shell
-    buffer res = make_buffer(tp, flags);
-    // Construct the arrmeta with default settings
-    if (tp.get_arrmeta_size() > 0) {
-      res.get_type()->arrmeta_default_construct(res->metadata(), true);
-    }
-
-    return res;
-  }
-
-  inline buffer empty_buffer(const ndt::type &tp) {
-    return empty_buffer(tp, (tp.get_ndim() == 0) ? (read_access_flag | immutable_access_flag) : readwrite_access_flags);
   }
 
   inline buffer make_buffer(const ndt::type &tp, char *data, uint64_t flags) {
