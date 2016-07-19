@@ -563,6 +563,39 @@ TEST(Array, CArrayConstructor) {
   EXPECT_ARRAY_EQ((nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), values);
 }
 
+TEST(Array, ConstructAssign) {
+  nd::array a0({0, 1, 2, 3, 4}, ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<double>()));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<double>()), a0.get_type());
+  const auto &v0 = a0.view<fixed<double>>();
+  EXPECT_EQ(0.0, v0[0]);
+  EXPECT_EQ(1.0, v0[1]);
+  EXPECT_EQ(2.0, v0[2]);
+  EXPECT_EQ(3.0, v0[3]);
+  EXPECT_EQ(4.0, v0[4]);
+
+  nd::array a1({0, ndt::traits<int>::na(), 2, ndt::traits<int>::na(), 4},
+               ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<ndt::option_type>(ndt::make_type<int>())));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<ndt::option_type>(ndt::make_type<int>())),
+            a1.get_type());
+  const auto &v1 = a1.view<fixed<optional<int>>>();
+  EXPECT_EQ(0, v1[0].value());
+  EXPECT_TRUE(v1[1].is_na());
+  EXPECT_EQ(2, v1[2].value());
+  EXPECT_TRUE(v1[3].is_na());
+  EXPECT_EQ(4, v1[4].value());
+
+  nd::array a2({0, ndt::traits<int>::na(), 2, ndt::traits<int>::na(), 4},
+               ndt::make_type<ndt::option_type>(ndt::make_type<int>()));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<ndt::option_type>(ndt::make_type<int>())),
+            a2.get_type());
+  const auto &v2 = a2.view<fixed<optional<int>>>();
+  EXPECT_EQ(0, v2[0].value());
+  EXPECT_TRUE(v2[1].is_na());
+  EXPECT_EQ(2, v2[2].value());
+  EXPECT_TRUE(v2[3].is_na());
+  EXPECT_EQ(4, v2[4].value());
+}
+
 REGISTER_TYPED_TEST_CASE_P(Array, ScalarConstructor, OneDimConstructor, TwoDimConstructor, ThreeDimConstructor,
                            AsScalar);
 
