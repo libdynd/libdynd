@@ -53,6 +53,15 @@ namespace nd {
   public:
     using buffer::buffer;
 
+    array() = default;
+
+    array(const array &values, const ndt::type &tp)
+        : buffer(empty_buffer((values.get_type().get_ndim() == tp.get_ndim())
+                                  ? tp
+                                  : values.get_type().with_replaced_dtype(tp, tp.get_ndim()))) {
+      assign(values);
+    }
+
     /**
      * Accesses a dynamic property of the array.
      *
