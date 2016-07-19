@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/buffer.hpp>
+#include <dynd/memory_block.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/base_dim_type.hpp>
 #include <dynd/types/dim_kind_type.hpp>

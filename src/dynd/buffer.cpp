@@ -8,6 +8,17 @@
 using namespace std;
 using namespace dynd;
 
+nd::memory_block::memory_block(const buffer &other)
+    : intrusive_ptr<base_memory_block>(const_cast<buffer_memory_block *>(other.get()), true) {}
+
+nd::memory_block nd::buffer::get_data_memblock() const {
+  if (m_ptr->m_owner) {
+    return m_ptr->m_owner;
+  }
+
+  return *this;
+}
+
 void nd::buffer::debug_print(std::ostream &o, const std::string &indent) const {
   o << indent << "------ buffer\n";
   if (m_ptr) {
