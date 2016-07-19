@@ -10,7 +10,6 @@
 #include <string>
 
 #include <dynd/buffer.hpp>
-#include <dynd/config.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -53,59 +52,6 @@ namespace nd {
   class DYND_API array : public buffer {
   public:
     using buffer::buffer;
-
-    /**
-      * Constructs an array with no data.
-      */
-    array() = default;
-
-    /**
-      * Constructs an array from a C++ type.
-      */
-    template <typename T,
-              typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
-    array(T &&value)
-        : buffer(empty(ndt::type_for(value), (ndt::type_for(value).get_ndim() == 0)
-                                                 ? (read_access_flag | immutable_access_flag)
-                                                 : readwrite_access_flags)) {
-      init(std::forward<T>(value));
-    }
-
-    /** Constructs an array from a 1D initializer list */
-    template <typename ValueType>
-    array(const std::initializer_list<ValueType> &values)
-        : buffer(empty(ndt::type_for(values), (ndt::type_for(values).get_ndim() == 0)
-                                                  ? (read_access_flag | immutable_access_flag)
-                                                  : readwrite_access_flags)) {
-      init(values);
-    }
-
-    /** Constructs an array from a 2D initializer list */
-    template <typename ValueType>
-    array(const std::initializer_list<std::initializer_list<ValueType>> &values)
-        : buffer(empty(ndt::type_for(values), (ndt::type_for(values).get_ndim() == 0)
-                                                  ? (read_access_flag | immutable_access_flag)
-                                                  : readwrite_access_flags)) {
-      init(values);
-    }
-
-    /** Constructs an array from a 3D initializer list */
-    template <typename ValueType>
-    array(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
-        : buffer(empty(ndt::type_for(values), (ndt::type_for(values).get_ndim() == 0)
-                                                  ? (read_access_flag | immutable_access_flag)
-                                                  : readwrite_access_flags)) {
-      init(values);
-    }
-
-    /**
-     * Constructs a 1D array from a pointer and a size.
-     */
-    template <typename ValueType>
-    array(const ValueType *values, size_t size)
-        : buffer(empty(ndt::make_fixed_dim(size, ndt::make_type<ValueType>()))) {
-      init(values, size);
-    }
 
     /**
      * Accesses a dynamic property of the array.
