@@ -5,24 +5,26 @@
 
 #pragma once
 
-#include <dynd/init.hpp>
+#include <dynd/kernels/init_kernel.hpp>
 #include <dynd/memblock/buffer_memory_block.hpp>
 #include <dynd/shortvector.hpp>
 
 namespace dynd {
 namespace nd {
 
+  inline buffer empty_buffer(const ndt::type &tp);
+  inline buffer empty_buffer(const ndt::type &tp, uint64_t flags);
+
   class DYNDT_API buffer : public intrusive_ptr<const buffer_memory_block> {
-  protected:
     template <typename T>
     void init(T &&value) {
-      nd::init_kernel<typename remove_reference_then_cv<T>::type> init(get_type(), get()->metadata());
+      init_kernel<typename remove_reference_then_cv<T>::type> init(get_type(), get()->metadata());
       init.single(const_cast<char *>(cdata()), std::forward<T>(value));
     }
 
     template <typename ValueType>
     void init(const ValueType *values, size_t size) {
-      nd::init_kernel<ValueType> init(get_type(), get()->metadata());
+      init_kernel<ValueType> init(get_type(), get()->metadata());
       init.contiguous(const_cast<char *>(cdata()), values, size);
     }
 
@@ -30,6 +32,54 @@ namespace nd {
     using intrusive_ptr<const buffer_memory_block>::intrusive_ptr;
 
     buffer() = default;
+
+    /**
+      * Constructs an array from a C++ type.
+      */
+    template <typename T,
+              typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
+    buffer(T &&value)
+        : buffer(empty_buffer(ndt::type_for(value), (ndt::type_for(value).get_ndim() == 0)
+                                                        ? (read_access_flag | immutable_access_flag)
+                                                        : readwrite_access_flags)) {
+      init(std::forward<T>(value));
+    }
+
+    /** Constructs an array from a 1D initializer list */
+    template <typename ValueType>
+    buffer(const std::initializer_list<ValueType> &values)
+        : buffer(empty_buffer(ndt::type_for(values), (ndt::type_for(values).get_ndim() == 0)
+                                                         ? (read_access_flag | immutable_access_flag)
+                                                         : readwrite_access_flags)) {
+      init(values);
+    }
+
+    /** Constructs an array from a 2D initializer list */
+    template <typename ValueType>
+    buffer(const std::initializer_list<std::initializer_list<ValueType>> &values)
+        : buffer(empty_buffer(ndt::type_for(values), (ndt::type_for(values).get_ndim() == 0)
+                                                         ? (read_access_flag | immutable_access_flag)
+                                                         : readwrite_access_flags)) {
+      init(values);
+    }
+
+    /** Constructs an array from a 3D initializer list */
+    template <typename ValueType>
+    buffer(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
+        : buffer(empty_buffer(ndt::type_for(values), (ndt::type_for(values).get_ndim() == 0)
+                                                         ? (read_access_flag | immutable_access_flag)
+                                                         : readwrite_access_flags)) {
+      init(values);
+    }
+
+    /**
+     * Constructs a 1D array from a pointer and a size.
+     */
+    template <typename ValueType>
+    buffer(const ValueType *values, size_t size)
+        : buffer(empty_buffer(ndt::make_fixed_dim(size, ndt::make_type<ValueType>()))) {
+      init(values, size);
+    }
 
     /** The type */
     const ndt::type &get_type() const { return m_ptr->m_tp; }
@@ -157,6 +207,34 @@ namespace nd {
 
     void debug_print(std::ostream &o, const std::string &indent = "") const;
   };
+
+  inline buffer make_buffer(const ndt::type &tp, uint64_t flags) {
+    if (tp.is_symbolic()) {
+      std::stringstream ss;
+      ss << "Cannot create a dynd buffer with symbolic type " << tp;
+      throw type_error(ss.str());
+    }
+
+    size_t data_offset = inc_to_alignment(sizeof(buffer_memory_block) + tp.get_arrmeta_size(), tp.get_data_alignment());
+    size_t data_size = tp.get_default_data_size();
+
+    return buffer(new (data_offset + data_size - sizeof(buffer_memory_block))
+                      buffer_memory_block(tp, data_offset, data_size, flags),
+                  false);
+  }
+
+  inline buffer empty_buffer(const ndt::type &tp, uint64_t flags) {
+    // Create an empty shell
+    buffer res = make_buffer(tp, flags);
+    // Construct the arrmeta with default settings
+    if (tp.get_arrmeta_size() > 0) {
+      res.get_type()->arrmeta_default_construct(res->metadata(), true);
+    }
+
+    return res;
+  }
+
+  inline buffer empty_buffer(const ndt::type &tp) { return empty_buffer(tp, readwrite_access_flags); }
 
   inline buffer make_buffer(const ndt::type &tp, char *data, uint64_t flags) {
     return buffer(new (tp.get_arrmeta_size()) buffer_memory_block(tp, data, flags), false);
