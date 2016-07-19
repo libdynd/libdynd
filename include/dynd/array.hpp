@@ -11,7 +11,6 @@
 
 #include <dynd/buffer.hpp>
 #include <dynd/config.hpp>
-#include <dynd/init.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -36,65 +35,6 @@ namespace nd {
   class array_vals;
   class array_vals_at;
 
-  namespace detail {
-
-    template <typename CArrayType, bool IsTriviallyCopyable>
-    struct init_from_c_array;
-
-    /*
-        template <typename ValueType, size_t Size>
-        struct init_from_c_array<ValueType[Size], true> {
-          init_from_c_array(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
-
-          void single(char *data, const ValueType(&values)[Size]) const { memcpy(data, values, Size *
-       sizeof(ValueType)); }
-        };
-    */
-
-    template <typename ValueType, size_t Size>
-    struct init_from_c_array<ValueType[Size], true> {
-      nd::init<ValueType> child;
-      intptr_t stride;
-
-      init_from_c_array(const ndt::type &tp, const char *metadata)
-          : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
-            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride) {}
-
-      void single(char *data, const ValueType (&values)[Size]) const {
-        for (const ValueType &value : values) {
-          child.single(data, value);
-          data += stride;
-        }
-      }
-    };
-
-    template <typename ValueType, size_t Size>
-    struct init_from_c_array<ValueType[Size], false> {
-      nd::init<ValueType> child;
-      intptr_t stride;
-
-      init_from_c_array(const ndt::type &tp, const char *metadata)
-          : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
-            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride) {}
-
-      void single(char *data, const ValueType (&values)[Size]) const {
-        for (const ValueType &value : values) {
-          child.single(data, value);
-          data += stride;
-        }
-      }
-    };
-
-  } // namespace dynd::nd::detail
-
-  template <typename ValueType, size_t Size>
-  struct init<ValueType[Size]>
-      : detail::init_from_c_array<ValueType[Size],
-                                  std::is_pod<ValueType>::value && ndt::traits<ValueType>::is_same_layout> {
-    using detail::init_from_c_array<ValueType[Size], std::is_pod<ValueType>::value &&
-                                                         ndt::traits<ValueType>::is_same_layout>::init_from_c_array;
-  };
-
   template <typename ValueType>
   struct as {
     void single(ValueType &value, char *data) const { value = *reinterpret_cast<ValueType *>(data); }
@@ -111,18 +51,6 @@ namespace nd {
    * This is the primary multi-dimensional array class.
    */
   class DYND_API array : public buffer {
-    template <typename T>
-    void init(T &&value) {
-      nd::init<typename remove_reference_then_cv<T>::type> init(get_type(), get()->metadata());
-      init.single(const_cast<char *>(cdata()), std::forward<T>(value));
-    }
-
-    template <typename ValueType>
-    void init(const ValueType *values, size_t size) {
-      nd::init<ValueType> init(get_type(), get()->metadata());
-      init.contiguous(const_cast<char *>(cdata()), values, size);
-    }
-
   public:
     using buffer::buffer;
 

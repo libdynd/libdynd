@@ -12,8 +12,8 @@ namespace dynd {
 namespace nd {
 
   template <typename ValueType>
-  struct init {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+  struct init_kernel {
+    init_kernel(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
     void single(char *data, const ValueType &value) const { *reinterpret_cast<ValueType *>(data) = value; }
 
@@ -26,8 +26,8 @@ namespace nd {
   };
 
   template <>
-  struct init<bool> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+  struct init_kernel<bool> {
+    init_kernel(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
     void single(char *data, bool value) const { *reinterpret_cast<bool1 *>(data) = value; }
 
@@ -40,8 +40,8 @@ namespace nd {
   };
 
   template <>
-  struct init<bytes> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+  struct init_kernel<bytes> {
+    init_kernel(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
     void single(char *data, const bytes &value) const {
       reinterpret_cast<bytes *>(data)->assign(value.data(), value.size());
@@ -56,8 +56,8 @@ namespace nd {
   };
 
   template <>
-  struct init<std::string> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+  struct init_kernel<std::string> {
+    init_kernel(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
     void single(char *data, const std::string &value) const {
       reinterpret_cast<string *>(data)->assign(value.data(), value.size());
@@ -72,8 +72,8 @@ namespace nd {
   };
 
   template <>
-  struct init<const char *> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+  struct init_kernel<const char *> {
+    init_kernel(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
     void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, strlen(value)); }
 
@@ -86,8 +86,8 @@ namespace nd {
   };
 
   template <size_t N>
-  struct init<char[N]> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+  struct init_kernel<char[N]> {
+    init_kernel(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
     void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, N - 1); }
 
@@ -100,8 +100,8 @@ namespace nd {
   };
 
   template <size_t N>
-  struct init<const char[N]> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+  struct init_kernel<const char[N]> {
+    init_kernel(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
     void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, N - 1); }
 
@@ -120,7 +120,7 @@ namespace nd {
 
     intptr_t stride;
     closure_type closure;
-    init<value_type> child;
+    init_kernel<value_type> child;
 
     container_init(const ndt::type &tp, const char *metadata)
         : child(tp.extended<ndt::base_dim_type>()->get_element_type(),
@@ -150,7 +150,7 @@ namespace nd {
 
     memory_block memblock;
     closure_type closure;
-    init<value_type> child;
+    init_kernel<value_type> child;
 
     container_init(const ndt::type &tp, const char *metadata)
         : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {
@@ -182,7 +182,7 @@ namespace nd {
     typedef typename ContainerType::value_type value_type;
 
     void (*func)(const container_init *, char *, const ContainerType &);
-    init<value_type> child;
+    init_kernel<value_type> child;
 
     container_init(const ndt::type &tp, const char *metadata)
         : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
@@ -191,13 +191,72 @@ namespace nd {
   };
 
   template <typename T>
-  struct init<std::initializer_list<T>> : container_init<std::initializer_list<T>, ndt::traits<T>::ndim + 1> {
+  struct init_kernel<std::initializer_list<T>> : container_init<std::initializer_list<T>, ndt::traits<T>::ndim + 1> {
     using container_init<std::initializer_list<T>, ndt::traits<T>::ndim + 1>::container_init;
   };
 
   template <typename T>
-  struct init<std::vector<T>> : container_init<std::vector<T>, ndt::traits<T>::ndim + 1> {
+  struct init_kernel<std::vector<T>> : container_init<std::vector<T>, ndt::traits<T>::ndim + 1> {
     using container_init<std::vector<T>, ndt::traits<T>::ndim + 1>::container_init;
+  };
+
+  namespace detail {
+
+    template <typename CArrayType, bool IsTriviallyCopyable>
+    struct init_from_c_array;
+
+    /*
+        template <typename ValueType, size_t Size>
+        struct init_from_c_array<ValueType[Size], true> {
+          init_from_c_array(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+          void single(char *data, const ValueType(&values)[Size]) const { memcpy(data, values, Size *
+       sizeof(ValueType)); }
+        };
+    */
+
+    template <typename ValueType, size_t Size>
+    struct init_from_c_array<ValueType[Size], true> {
+      nd::init_kernel<ValueType> child;
+      intptr_t stride;
+
+      init_from_c_array(const ndt::type &tp, const char *metadata)
+          : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
+            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride) {}
+
+      void single(char *data, const ValueType (&values)[Size]) const {
+        for (const ValueType &value : values) {
+          child.single(data, value);
+          data += stride;
+        }
+      }
+    };
+
+    template <typename ValueType, size_t Size>
+    struct init_from_c_array<ValueType[Size], false> {
+      nd::init_kernel<ValueType> child;
+      intptr_t stride;
+
+      init_from_c_array(const ndt::type &tp, const char *metadata)
+          : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
+            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride) {}
+
+      void single(char *data, const ValueType (&values)[Size]) const {
+        for (const ValueType &value : values) {
+          child.single(data, value);
+          data += stride;
+        }
+      }
+    };
+
+  } // namespace dynd::nd::detail
+
+  template <typename ValueType, size_t Size>
+  struct init_kernel<ValueType[Size]>
+      : detail::init_from_c_array<ValueType[Size],
+                                  std::is_pod<ValueType>::value && ndt::traits<ValueType>::is_same_layout> {
+    using detail::init_from_c_array<ValueType[Size], std::is_pod<ValueType>::value &&
+                                                         ndt::traits<ValueType>::is_same_layout>::init_from_c_array;
   };
 
 } // namespace dynd::nd

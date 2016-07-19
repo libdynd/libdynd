@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/init.hpp>
 #include <dynd/memblock/buffer_memory_block.hpp>
 #include <dynd/shortvector.hpp>
 
@@ -12,6 +13,19 @@ namespace dynd {
 namespace nd {
 
   class DYNDT_API buffer : public intrusive_ptr<const buffer_memory_block> {
+  protected:
+    template <typename T>
+    void init(T &&value) {
+      nd::init_kernel<typename remove_reference_then_cv<T>::type> init(get_type(), get()->metadata());
+      init.single(const_cast<char *>(cdata()), std::forward<T>(value));
+    }
+
+    template <typename ValueType>
+    void init(const ValueType *values, size_t size) {
+      nd::init_kernel<ValueType> init(get_type(), get()->metadata());
+      init.contiguous(const_cast<char *>(cdata()), values, size);
+    }
+
   public:
     using intrusive_ptr<const buffer_memory_block>::intrusive_ptr;
 
@@ -35,13 +49,7 @@ namespace nd {
 
     const char *cdata() const { return m_ptr->m_data; }
 
-    memory_block get_data_memblock() const {
-      if (m_ptr->m_owner) {
-        return m_ptr->m_owner;
-      }
-
-      return *this;
-    }
+    memory_block get_data_memblock() const;
 
     bool is_immutable() const { return (m_ptr->m_flags & immutable_access_flag) != 0; }
 
@@ -157,9 +165,6 @@ namespace nd {
   inline buffer make_buffer(const ndt::type &tp, char *data, const memory_block &owner, uint64_t flags) {
     return buffer(new (tp.get_arrmeta_size()) buffer_memory_block(tp, data, owner, flags), false);
   }
-
-  inline memory_block::memory_block(const buffer &other)
-      : intrusive_ptr<base_memory_block>(const_cast<buffer_memory_block *>(other.get()), true) {}
 
 } // namespace dynd::nd
 } // namespace dynd

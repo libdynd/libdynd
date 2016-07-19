@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <dynd/buffer.hpp>
 #include <dynd/memblock/base_memory_block.hpp>
 
 namespace dynd {
