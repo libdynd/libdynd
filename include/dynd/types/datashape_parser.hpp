@@ -43,11 +43,9 @@ inline ndt::type type_from_datashape(const char(&datashape)[N])
  * Returns a NULL nd::array if there is no arg list, and an nd::array with datashape
  *   "{pos: N * arg, kw: {name: arg, ...}}" otherwise.
  */
-/*
-DYNDT_API nd::array parse_type_constr_args(const char *&rbegin, const char *end,
-                                          std::map<std::string, ndt::type> &symtable);
+DYNDT_API nd::buffer parse_type_constr_args(const char *&rbegin, const char *end,
+                                           std::map<std::string, ndt::type> &symtable);
 
-DYNDT_API nd::array parse_type_constr_args(const std::string &str);
-*/
+DYNDT_API nd::buffer parse_type_constr_args(const std::string &str);
 
 } // namespace dynd

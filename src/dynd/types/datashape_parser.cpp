@@ -528,23 +528,20 @@ static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end, 
 
 // datashape_list : datashape COMMA datashape_list RBRACKET
 //                | datashape RBRACKET
-/*
-static nd::array parse_datashape_list(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
-{
+static nd::buffer parse_datashape_list(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
   const char *begin = rbegin;
 
   vector<ndt::type> dlist;
   ndt::type arg = parse_datashape(begin, end, symtable);
   if (arg.is_null()) {
-    return nd::array();
+    return nd::buffer();
   }
   dlist.push_back(arg);
   for (;;) {
     if (!parse_token_ds(begin, end, ',')) {
       if (!parse_token_ds(begin, end, ']')) {
-        return nd::array();
-      }
-      else {
+        return nd::buffer();
+      } else {
         break;
       }
     }
@@ -558,19 +555,16 @@ static nd::array parse_datashape_list(const char *&rbegin, const char *end, map<
   rbegin = begin;
   return dlist;
 }
-*/
 
 // integer_list : INTEGER COMMA integer_list RBRACKET
 //              | INTEGER RBRACKET
-/*
-static nd::array parse_integer_list(const char *&rbegin, const char *end)
-{
+static nd::buffer parse_integer_list(const char *&rbegin, const char *end) {
   const char *begin = rbegin;
 
   vector<int64_t> dlist;
   const char *strbegin, *strend;
   if (!parse_int_no_ws(begin, end, strbegin, strend)) {
-    return nd::array();
+    return nd::buffer();
   }
   dlist.push_back(parse<int64_t>(strbegin, strend));
   for (;;) {
@@ -578,9 +572,8 @@ static nd::array parse_integer_list(const char *&rbegin, const char *end)
       if (parse_token_ds(begin, end, ']')) {
         rbegin = begin;
         return dlist;
-      }
-      else {
-        return nd::array();
+      } else {
+        return nd::buffer();
       }
     }
     skip_whitespace_and_pound_comments(begin, end);
@@ -590,27 +583,23 @@ static nd::array parse_integer_list(const char *&rbegin, const char *end)
     dlist.push_back(parse<int64_t>(strbegin, strend));
   }
 }
-*/
 
 // string_list : STRING COMMA string_list RBRACKET
 //             | STRING RBRACKET
-/*
-static nd::array parse_string_list(const char *&rbegin, const char *end)
-{
+static nd::buffer parse_string_list(const char *&rbegin, const char *end) {
   const char *begin = rbegin;
 
   vector<std::string> dlist;
   std::string str;
   if (!parse_quoted_string(begin, end, str)) {
-    return nd::array();
+    return nd::buffer();
   }
   dlist.push_back(str);
   for (;;) {
     if (!parse_token_ds(begin, end, ',')) {
       if (!parse_token_ds(begin, end, ']')) {
-        return nd::array();
-      }
-      else {
+        return nd::buffer();
+      } else {
         break;
       }
     }
@@ -623,7 +612,6 @@ static nd::array parse_string_list(const char *&rbegin, const char *end)
   rbegin = begin;
   return dlist;
 }
-*/
 
 // list_type_arg : LBRACKET RBRACKET
 //               | LBRACKET datashape_list
@@ -633,9 +621,7 @@ static nd::array parse_string_list(const char *&rbegin, const char *end)
 //          | INTEGER
 //          | STRING
 //          | list_type_arg
-/*
-static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
-{
+static nd::buffer parse_type_arg(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
   const char *begin = rbegin;
 
   skip_whitespace_and_pound_comments(begin, end);
@@ -653,7 +639,7 @@ static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::s
   }
 
   if (parse_token(begin, end, '[')) {
-    nd::array result;
+    nd::buffer result;
     result = parse_integer_list(begin, end);
     if (result.is_null()) {
       result = parse_string_list(begin, end);
@@ -662,7 +648,7 @@ static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::s
       result = parse_datashape_list(begin, end, symtable);
     }
     if (result.is_null()) {
-      result = nd::empty(0, ndt::make_type<void>());
+      result = nd::buffer::empty(ndt::make_fixed_dim(0, ndt::make_type<void>()));
     }
     rbegin = begin;
     return result;
@@ -674,9 +660,8 @@ static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::s
     return tp;
   }
 
-  return nd::array();
+  return nd::buffer();
 }
-*/
 
 // type_arg_list : type_arg COMMA type_arg_list
 //               | type_kwarg_list
@@ -685,10 +670,9 @@ static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::s
 //                 | type_kwarg
 // type_kwarg : NAME_LOWER EQUAL type_arg
 // type_constr_args : LBRACKET type_arg_list RBRACKET
-/*
-nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
+nd::buffer dynd::parse_type_constr_args(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
-  nd::array result;
+  nd::buffer result;
 
   const char *begin = rbegin;
   if (!parse_token_ds(begin, end, '[')) {
@@ -697,11 +681,12 @@ nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map
   }
 
   if (parse_token_ds(begin, end, ']')) {
-    return nd::empty(ndt::tuple_type::make({ndt::tuple_type::make(), ndt::struct_type::make()}));
+    return nd::buffer::empty(
+        ndt::make_type<ndt::tuple_type>({ndt::make_type<ndt::tuple_type>(), ndt::make_type<ndt::struct_type>()}));
   }
 
-  vector<nd::array> pos_args;
-  vector<nd::array> kw_args;
+  vector<nd::buffer> pos_args;
+  vector<nd::buffer> kw_args;
   vector<std::string> kw_names;
 
   const char *field_name_begin, *field_name_end;
@@ -718,7 +703,7 @@ nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map
     }
     begin = saved_begin;
     // Parse one positional argument
-    nd::array arg = parse_type_arg(begin, end, symtable);
+    nd::buffer arg = parse_type_arg(begin, end, symtable);
     if (arg.is_null()) {
       throw datashape_parse_error(saved_begin, "Expected a positional or keyword type argument");
     }
@@ -742,7 +727,7 @@ nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map
       if (!parse_token_ds(begin, end, ':')) {
         throw datashape_parse_error(begin, "Expected ':' between keyword name and parameter");
       }
-      nd::array arg = parse_type_arg(begin, end, symtable);
+      nd::buffer arg = parse_type_arg(begin, end, symtable);
       if (arg.is_null()) {
         throw datashape_parse_error(begin, "Expected keyword argument value");
       }
@@ -762,29 +747,29 @@ nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map
   // Create type "((type0, ...), {kw0: kwtype0, ...})"
   vector<ndt::type> pos_arg_types;
   transform(pos_args.begin(), pos_args.end(), back_inserter(pos_arg_types),
-            [](const nd::array &a) { return a.get_type(); });
+            [](const nd::buffer &a) { return a.get_type(); });
 
   vector<ndt::type> kw_arg_types;
   transform(kw_args.begin(), kw_args.end(), back_inserter(kw_arg_types),
-            [](const nd::array &a) { return a.get_type(); });
+            [](const nd::buffer &a) { return a.get_type(); });
 
-  ndt::type result_tp =
-      ndt::tuple_type::make({ndt::tuple_type::make(pos_arg_types), ndt::struct_type::make(kw_names, kw_arg_types)});
+  ndt::type result_tp = ndt::make_type<ndt::tuple_type>(
+      {ndt::make_type<ndt::tuple_type>(pos_arg_types), ndt::make_type<ndt::struct_type>(kw_names, kw_arg_types)});
 
-  result = nd::empty(result_tp);
-  nd::array pos = result(0);
+	//FIXME HERE
+  result = nd::buffer::empty(result_tp);
+  nd::buffer *pos = reinterpret_cast<nd::buffer *>(result.data());
   for (size_t i = 0; i != pos_args.size(); ++i) {
-    pos.vals_at(i) = pos_args[i];
+    pos[i] = pos_args[i];
   }
-  nd::array kw = result(1);
+  nd::buffer *kw = reinterpret_cast<nd::buffer *>(result.data()) + pos_args.size();
   for (size_t i = 0; i != kw_args.size(); ++i) {
-    kw.vals_at(i) = kw_args[i];
+    kw[i] = kw_args[i];
   }
 
   rbegin = begin;
   return result;
 }
-*/
 
 // record_item_bare : BARENAME COLON rhs_expression
 static bool parse_struct_item_bare(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable,
@@ -1401,17 +1386,14 @@ ndt::type dynd::type_from_datashape(const char *datashape_begin, const char *dat
   }
 }
 
-/*
-nd::array dynd::parse_type_constr_args(const std::string &str)
-{
-  nd::array result;
+nd::buffer dynd::parse_type_constr_args(const std::string &str) {
+  nd::buffer result;
   std::map<std::string, ndt::type> symtable;
   if (!str.empty()) {
     const char *begin = &str[0], *end = &str[0] + str.size();
     try {
       result = parse_type_constr_args(begin, end, symtable);
-    }
-    catch (const datashape_parse_error &e) {
+    } catch (const datashape_parse_error &e) {
       stringstream ss;
       std::string line_prev, line_cur;
       int line, column;
@@ -1437,4 +1419,3 @@ nd::array dynd::parse_type_constr_args(const std::string &str)
 
   return result;
 }
-*/

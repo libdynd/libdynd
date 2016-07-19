@@ -53,6 +53,7 @@ namespace nd {
   public:
     using buffer::buffer;
 
+    /** Constructs an array with no data. */
     array() = default;
 
     array(const array &values, const ndt::type &tp)
@@ -63,13 +64,16 @@ namespace nd {
       assign(values);
     }
 
+    /** Construct an array from a typed buffer */
+    array(const nd::buffer &buf) : buffer(buf) {}
+    array(nd::buffer &&buf) : buffer(std::forward<nd::buffer>(buf)) {}
+
     /**
      * Accesses a dynamic property of the array.
      *
      * \param name  The property to access.
      */
     array p(const char *name) const;
-
     array p(const std::string &name) const;
 
     /**

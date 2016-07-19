@@ -100,6 +100,16 @@ namespace nd {
       init(values, size);
     }
 
+    /** Constructs a typed buffer of the specified type, with uninitialized data */
+    static buffer empty(const ndt::type &tp) {
+      if (tp.is_symbolic()) {
+        std::stringstream ss;
+        ss << "Cannot create a typed dynd buffer with symbolic type " << tp;
+        throw type_error(ss.str());
+      }
+      return buffer(tp, buffer_empty_init_tag());
+    }
+
     /** The type */
     const ndt::type &get_type() const { return m_ptr->m_tp; }
 

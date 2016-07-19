@@ -97,6 +97,8 @@ namespace ndt {
 
     struct_type(type_id_t id, bool variadic = false) : struct_type(id, {}, variadic) {}
 
+    struct_type(bool variadic = false) : struct_type(struct_id, variadic) {}
+
     /** The array of the field names */
     const std::vector<std::string> &get_field_names() const { return m_field_names; }
     const std::string &get_field_name(intptr_t i) const { return m_field_names[i]; }
