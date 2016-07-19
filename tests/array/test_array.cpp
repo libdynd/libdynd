@@ -564,6 +564,8 @@ TEST(Array, CArrayConstructor) {
 }
 
 TEST(Array, ConstructAssign) {
+  using dynd::fixed;
+
   nd::array a0({0, 1, 2, 3, 4}, ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<double>()));
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<double>()), a0.get_type());
   const auto &v0 = a0.view<fixed<double>>();
