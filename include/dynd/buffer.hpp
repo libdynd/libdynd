@@ -38,37 +38,27 @@ namespace nd {
       */
     template <typename T,
               typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
-    buffer(T &&value)
-        : buffer(empty_buffer(ndt::type_for(value), (ndt::type_for(value).get_ndim() == 0)
-                                                        ? (read_access_flag | immutable_access_flag)
-                                                        : readwrite_access_flags)) {
+    buffer(T &&value) : buffer(empty_buffer(ndt::type_for(value))) {
       init(std::forward<T>(value));
     }
 
     /** Constructs an array from a 1D initializer list */
     template <typename ValueType>
-    buffer(const std::initializer_list<ValueType> &values)
-        : buffer(empty_buffer(ndt::type_for(values), (ndt::type_for(values).get_ndim() == 0)
-                                                         ? (read_access_flag | immutable_access_flag)
-                                                         : readwrite_access_flags)) {
+    buffer(std::initializer_list<ValueType> values) : buffer(empty_buffer(ndt::type_for(values))) {
       init(values);
     }
 
     /** Constructs an array from a 2D initializer list */
     template <typename ValueType>
-    buffer(const std::initializer_list<std::initializer_list<ValueType>> &values)
-        : buffer(empty_buffer(ndt::type_for(values), (ndt::type_for(values).get_ndim() == 0)
-                                                         ? (read_access_flag | immutable_access_flag)
-                                                         : readwrite_access_flags)) {
+    buffer(std::initializer_list<std::initializer_list<ValueType>> values)
+        : buffer(empty_buffer(ndt::type_for(values))) {
       init(values);
     }
 
     /** Constructs an array from a 3D initializer list */
     template <typename ValueType>
-    buffer(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
-        : buffer(empty_buffer(ndt::type_for(values), (ndt::type_for(values).get_ndim() == 0)
-                                                         ? (read_access_flag | immutable_access_flag)
-                                                         : readwrite_access_flags)) {
+    buffer(std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> values)
+        : buffer(empty_buffer(ndt::type_for(values))) {
       init(values);
     }
 
@@ -234,7 +224,9 @@ namespace nd {
     return res;
   }
 
-  inline buffer empty_buffer(const ndt::type &tp) { return empty_buffer(tp, readwrite_access_flags); }
+  inline buffer empty_buffer(const ndt::type &tp) {
+    return empty_buffer(tp, (tp.get_ndim() == 0) ? (read_access_flag | immutable_access_flag) : readwrite_access_flags);
+  }
 
   inline buffer make_buffer(const ndt::type &tp, char *data, uint64_t flags) {
     return buffer(new (tp.get_arrmeta_size()) buffer_memory_block(tp, data, flags), false);
