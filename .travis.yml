@@ -70,6 +70,7 @@ matrix:
       addons:
       before_script:
       before_install:
+        - env
         - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
         - bash Miniconda-latest-MacOSX-x86_64.sh -b
         - export PATH=$HOME/miniconda2/bin:$PATH
