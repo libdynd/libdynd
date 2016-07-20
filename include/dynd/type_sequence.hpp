@@ -120,8 +120,8 @@ std::enable_if_t<(S::size() > 1), void> for_each(A &&... a) {
   for_each<typename pop_front<S>::type>(std::forward<A>(a)...);
 }
 
-template <typename S, size_t I = 0, typename A0, typename... A>
-std::enable_if_t<S::size() == 1, void> for_each2(A0 &&a0, A &&... a) {
+template <typename S, size_t I, typename A0, typename... A>
+std::enable_if_t<S::size() == 1, void> for_each(A0 &&a0, A &&... a) {
 #ifdef _MSC_VER
   a0.operator()<typename front<S>::type, I>(std::forward<A>(a)...);
 #else
@@ -129,10 +129,10 @@ std::enable_if_t<S::size() == 1, void> for_each2(A0 &&a0, A &&... a) {
 #endif
 }
 
-template <typename S, size_t I = 0, typename... A>
-std::enable_if_t<(S::size() > 1), void> for_each2(A &&... a) {
-  for_each2<typename to<S, 1>::type, I>(std::forward<A>(a)...);
-  for_each2<typename pop_front<S>::type, I + 1>(std::forward<A>(a)...);
+template <typename S, size_t I, typename... A>
+std::enable_if_t<(S::size() > 1), void> for_each(A &&... a) {
+  for_each<typename to<S, 1>::type, I>(std::forward<A>(a)...);
+  for_each<typename pop_front<S>::type, I + 1>(std::forward<A>(a)...);
 }
 
 template <typename... A>
