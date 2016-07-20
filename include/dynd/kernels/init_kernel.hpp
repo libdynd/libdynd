@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
@@ -263,10 +264,10 @@ namespace nd {
 
   template <typename... ElementTypes>
   struct init_kernel<std::tuple<ElementTypes...>> {
-    struct on {
+    struct on_each {
       template <typename ElementType, size_t I>
-      void on_each(const char *metadata, std::tuple<init_kernel<ElementTypes>...> &children, char *data,
-                   const std::tuple<ElementTypes...> &value) {
+      void operator()(const char *metadata, std::tuple<init_kernel<ElementTypes>...> &children, char *data,
+                      const std::tuple<ElementTypes...> &value) {
         const init_kernel<ElementType> &child = std::get<I>(children);
         child.single(data + *(reinterpret_cast<const uintptr_t *>(metadata) + I), std::get<I>(value));
       }
@@ -280,7 +281,7 @@ namespace nd {
 
     void single(char *data, const std::tuple<ElementTypes...> &value) {
       typedef type_sequence<ElementTypes...> sequence;
-      for_each2<sequence>(on(), metadata, children, data, value);
+      for_each2<sequence>(on_each(), metadata, children, data, value);
     }
   };
 
