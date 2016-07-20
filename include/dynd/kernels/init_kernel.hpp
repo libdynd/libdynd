@@ -13,6 +13,8 @@ namespace nd {
 
   template <typename ValueType>
   struct init_kernel {
+    init_kernel(const char *DYND_UNUSED(metadata)) {}
+
     init_kernel(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
     void single(char *data, const ValueType &value) const { *reinterpret_cast<ValueType *>(data) = value; }
@@ -257,6 +259,29 @@ namespace nd {
                                   std::is_pod<ValueType>::value && ndt::traits<ValueType>::is_same_layout> {
     using detail::init_from_c_array<ValueType[Size], std::is_pod<ValueType>::value &&
                                                          ndt::traits<ValueType>::is_same_layout>::init_from_c_array;
+  };
+
+  template <typename... ElementTypes>
+  struct init_kernel<std::tuple<ElementTypes...>> {
+    struct on {
+      template <typename ElementType, size_t I>
+      void on_each(const char *metadata, std::tuple<init_kernel<ElementTypes>...> &children, char *data,
+                   const std::tuple<ElementTypes...> &value) {
+        const init_kernel<ElementType> &child = std::get<I>(children);
+        child.single(data + *(reinterpret_cast<const uintptr_t *>(metadata) + I), std::get<I>(value));
+      }
+    };
+
+    const char *metadata;
+    std::tuple<init_kernel<ElementTypes>...> children;
+
+    init_kernel(const ndt::type &DYND_UNUSED(tp), const char *metadata)
+        : metadata(metadata), children(postfix_add(metadata, ndt::traits<ElementTypes>::metadata_size)...) {}
+
+    void single(char *data, const std::tuple<ElementTypes...> &value) {
+      typedef type_sequence<ElementTypes...> sequence;
+      for_each2<sequence>(on(), metadata, children, data, value);
+    }
   };
 
 } // namespace dynd::nd
