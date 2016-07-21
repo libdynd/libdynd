@@ -569,6 +569,31 @@ TEST(Array, TupleConstructor) {
   const auto &v = a.view<dynd::tuple<int, double>>();
   EXPECT_EQ(1, get<0>(v));
   EXPECT_EQ(2.0, get<1>(v));
+
+  //  make_tuple(u, 3.5);
+
+  std::tuple<int[3], double> t({0, 1, 2}, 3);
+  std::get<0>(t)[0] = 0;
+  std::get<0>(t)[1] = 1;
+  std::get<0>(t)[2] = 2;
+  std::get<1>(t) = 3.5;
+
+//  nd::array a1(t);
+//  EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<int[3]>(), ndt::make_type<double>()}), a1.get_type());
+  //  const auto &v1 = a.view<dynd::tuple<int[3], double>>();
+  // EXPECT_EQ(0, get<0>(v1)[0]);
+  //  EXPECT_EQ(1, get<0>(v1)[1]);
+  //  EXPECT_EQ(2, get<0>(v1)[2]);
+  //  EXPECT_EQ(3.5, get<1>(v1));
+
+  //std::cout << a1 << std::endl;
+  //({0, 1, 2});
+  // = std::make_tuple<int[3], int>({0, 1, 2}, 3);
+  //  std::cout << std::get<1>(t) << std::endl;
+  //  nd::array a1(t);
+
+  //  std::cout << a1 << std::endl;
+//  std::exit(-1);
 }
 
 TEST(Array, ConstructAssign) {
