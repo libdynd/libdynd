@@ -274,8 +274,9 @@ namespace nd {
     const char *metadata;
     std::tuple<init_kernel<ElementTypes>...> children;
 
-    init_kernel(const ndt::type *DYND_UNUSED(field_tp), const ndt::type &tp, const char *metadata)
-        : metadata(metadata), children({tp, postfix_add(metadata, ndt::traits<ElementTypes>::metadata_size)}...) {}
+    init_kernel(const ndt::type *field_tp, const ndt::type &DYND_UNUSED(tp), const char *metadata)
+        : metadata(metadata),
+          children({field_tp[0], postfix_add(metadata, ndt::traits<ElementTypes>::metadata_size)}...) {}
 
     init_kernel(const ndt::type &tp, const char *metadata)
         : init_kernel(tp.extended<ndt::tuple_type>()->get_field_types_raw(), tp, metadata) {}
