@@ -274,8 +274,10 @@ namespace nd {
     const char *metadata;
     std::tuple<init_kernel<ElementTypes>...> children;
 
-    init_kernel(const ndt::type &tp, const char *metadata)
+    init_kernel(int, const ndt::type &tp, const char *metadata)
         : metadata(metadata), children({tp, postfix_add(metadata, ndt::traits<ElementTypes>::metadata_size)}...) {}
+
+    init_kernel(const ndt::type &tp, const char *metadata) : init_kernel(0, tp, metadata) {}
 
     void single(char *data, const std::tuple<ElementTypes...> &value) {
       for_each<type_sequence<ElementTypes...>, 0>(on_each(), metadata, children, data, value);
