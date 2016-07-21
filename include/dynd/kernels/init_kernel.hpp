@@ -276,7 +276,7 @@ namespace nd {
 
     init_kernel(const ndt::type *field_tp, const char *metadata)
         : metadata(metadata),
-          children({field_tp[0], postfix_add(metadata, ndt::traits<ElementTypes>::metadata_size)}...) {}
+          children({*postfix_add(field_tp, 1), postfix_add(metadata, ndt::traits<ElementTypes>::metadata_size)}...) {}
 
     init_kernel(const ndt::type &tp, const char *metadata)
         : init_kernel(tp.extended<ndt::tuple_type>()->get_field_types_raw(), metadata) {}
