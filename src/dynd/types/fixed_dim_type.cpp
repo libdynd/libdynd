@@ -527,3 +527,7 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::fixed_dim_type::g
 ndt::type ndt::fixed_dim_type::with_element_type(const type &element_tp) const {
   return make_fixed_dim(m_dim_size, element_tp);
 }
+
+ndt::type ndt::make_fixed_dim(size_t dim_size, const type &element_tp) {
+  return make_type<fixed_dim_type>(dim_size, element_tp);
+}

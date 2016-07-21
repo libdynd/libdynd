@@ -46,14 +46,5 @@ namespace ndt {
   template <>
   struct id_of<type> : std::integral_constant<type_id_t, type_id> {};
 
-  template <>
-  struct traits<type> {
-    static const size_t ndim = 0;
-
-    static const bool is_same_layout = true;
-
-    static type equivalent() { return make_type<type_type>(); }
-  };
-
 } // namespace dynd::ndt
 } // namespace dynd

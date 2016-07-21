@@ -563,7 +563,7 @@ TEST(Array, CArrayConstructor) {
   EXPECT_ARRAY_EQ((nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), values);
 }
 
-TEST(Array, ConstructTuple) {
+TEST(Array, TupleConstructor) {
   nd::array a(make_tuple(1, 2.0));
   EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<int>(), ndt::make_type<double>()}), a.get_type());
   const auto &v = a.view<dynd::tuple<int, double>>();

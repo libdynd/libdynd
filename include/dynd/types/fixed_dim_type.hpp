@@ -121,9 +121,6 @@ namespace ndt {
   template <>
   struct id_of<fixed_dim_type> : std::integral_constant<type_id_t, fixed_dim_id> {};
 
-  inline type make_fixed_dim(size_t dim_size, const type &element_tp) {
-    return make_type<fixed_dim_type>(dim_size, element_tp);
-  }
-
+  DYNDT_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 } // namespace dynd::ndt
 } // namespace dynd

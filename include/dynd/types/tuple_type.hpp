@@ -9,7 +9,6 @@
 #include <vector>
 
 #include <dynd/type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
 
 namespace dynd {
 

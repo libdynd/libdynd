@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <dynd/type.hpp>
 #include <dynd/types/string_type.hpp>
+#include <dynd/types/tuple_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 namespace dynd {
