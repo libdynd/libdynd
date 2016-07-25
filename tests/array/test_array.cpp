@@ -566,6 +566,8 @@ TEST(Array, CArrayConstructor) {
 TEST(Array, STLArrayConstructor) {
   nd::array a(array<int, 5>{0, 1, 2, 3, 4});
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<int>()), a.get_type());
+  EXPECT_EQ(5, reinterpret_cast<const size_stride_t *>(a->metadata())->dim_size);
+  EXPECT_EQ(static_cast<intptr_t>(sizeof(int)), reinterpret_cast<const size_stride_t *>(a->metadata())->stride);
   EXPECT_EQ(0, *reinterpret_cast<const int *>(a.cdata()));
   EXPECT_EQ(1, *reinterpret_cast<const int *>(a.cdata() + sizeof(int)));
   EXPECT_EQ(2, *reinterpret_cast<const int *>(a.cdata() + 2 * sizeof(int)));
