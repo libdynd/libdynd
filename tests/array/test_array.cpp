@@ -576,29 +576,17 @@ TEST(Array, STLArrayConstructor) {
 TEST(Array, STLTupleConstructor) {
   nd::array a(make_tuple(1, 2.5));
   EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<int>(), ndt::make_type<double>()}), a.get_type());
-  EXPECT_EQ(1, *reinterpret_cast<const int *>(a.cdata()));
-  EXPECT_EQ(2.5, *reinterpret_cast<const double *>(a.cdata() + aligned_size(sizeof(int))));
+  const uintptr_t *offsets = reinterpret_cast<const uintptr_t *>(a->metadata());
+  EXPECT_EQ(1, *reinterpret_cast<const int *>(a.cdata() + offsets[0]));
+  EXPECT_EQ(2.5, *reinterpret_cast<const double *>(a.cdata() + offsets[1]));
 
-  //  make_tuple(u, 3.5);
-
-  //  std::tuple<std::array<int, 3>, double> t({0, 1, 2}, 3.5);
-
-  // nd::array a1(t);
-  //  EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<int[3]>(), ndt::make_type<double>()}), a1.get_type());
-  //  const auto &v1 = a.view<dynd::tuple<int[3], double>>();
-  // EXPECT_EQ(0, get<0>(v1)[0]);
-  //  EXPECT_EQ(1, get<0>(v1)[1]);
-  //  EXPECT_EQ(2, get<0>(v1)[2]);
-  //  EXPECT_EQ(3.5, get<1>(v1));
-
-  // std::cout << a1 << std::endl;
-  //({0, 1, 2});
-  // = std::make_tuple<int[3], int>({0, 1, 2}, 3);
-  //  std::cout << std::get<1>(t) << std::endl;
-  //  nd::array a1(t);
-
-  //  std::cout << a1 << std::endl;
-  //  std::exit(-1);
+  a = std::tuple<std::array<int, 3>, double>({0, 1, 2}, 3.5);
+  EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<int[3]>(), ndt::make_type<double>()}), a.get_type());
+  offsets = reinterpret_cast<const uintptr_t *>(a->metadata());
+  EXPECT_EQ(0, *reinterpret_cast<const int *>(a.cdata() + offsets[0]));
+  EXPECT_EQ(1, *reinterpret_cast<const int *>(a.cdata() + offsets[0] + sizeof(int)));
+  EXPECT_EQ(2, *reinterpret_cast<const int *>(a.cdata() + offsets[0] + 2 * sizeof(int)));
+  EXPECT_EQ(3.5, *reinterpret_cast<const double *>(a.cdata() + offsets[1]));
 }
 
 TEST(Array, ConstructAssign) {
