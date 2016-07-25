@@ -566,8 +566,6 @@ TEST(Array, CArrayConstructor) {
 TEST(Array, STLArrayConstructor) {
   nd::array a(array<int, 5>{0, 1, 2, 3, 4});
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<int>()), a.get_type());
-  EXPECT_EQ(5, reinterpret_cast<const size_stride_t *>(a->metadata())->dim_size);
-  EXPECT_EQ(static_cast<intptr_t>(sizeof(int)), reinterpret_cast<const size_stride_t *>(a->metadata())->stride);
   EXPECT_EQ(0, *reinterpret_cast<const int *>(a.cdata()));
   EXPECT_EQ(1, *reinterpret_cast<const int *>(a.cdata() + sizeof(int)));
   EXPECT_EQ(2, *reinterpret_cast<const int *>(a.cdata() + 2 * sizeof(int)));
@@ -576,11 +574,10 @@ TEST(Array, STLArrayConstructor) {
 }
 
 TEST(Array, STLTupleConstructor) {
-  nd::array a(make_tuple(1, 2.0));
+  nd::array a(make_tuple(1, 2.5));
   EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<int>(), ndt::make_type<double>()}), a.get_type());
-  const auto &v = a.view<dynd::tuple<int, double>>();
-  EXPECT_EQ(1, get<0>(v));
-  EXPECT_EQ(2.0, get<1>(v));
+  EXPECT_EQ(1, *reinterpret_cast<const int *>(a.cdata()));
+  EXPECT_EQ(2.5, *reinterpret_cast<const double *>(a.cdata() + aligned_size(sizeof(int))));
 
   //  make_tuple(u, 3.5);
 
