@@ -590,7 +590,7 @@ TEST(Array, STLTupleConstructor) {
   EXPECT_EQ(2.5, *reinterpret_cast<const double *>(a.cdata() + offsets[1]));
 
   a = make_tuple(array<int, 3>{0, 1, 2}, 3.5);
-  EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<int[3]>(), ndt::make_type<double>()}), a.get_type());
+  EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<array<int, 3>>(), ndt::make_type<double>()}), a.get_type());
   offsets = reinterpret_cast<const offset_t *>(a->metadata());
   const size_stride_t *size_stride = reinterpret_cast<const size_stride_t *>(a->metadata() + 2 * sizeof(offset_t));
   EXPECT_EQ(0, *reinterpret_cast<const int *>(a.cdata() + offsets[0]));
