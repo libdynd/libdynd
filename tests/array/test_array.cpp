@@ -563,7 +563,17 @@ TEST(Array, CArrayConstructor) {
   EXPECT_ARRAY_EQ((nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), values);
 }
 
-TEST(Array, TupleConstructor) {
+TEST(Array, STLArrayConstructor) {
+  nd::array a(array<int, 5>{0, 1, 2, 3, 4});
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<int>()), a.get_type());
+  EXPECT_EQ(0, *reinterpret_cast<const int *>(a.cdata()));
+  EXPECT_EQ(1, *reinterpret_cast<const int *>(a.cdata() + sizeof(int)));
+  EXPECT_EQ(2, *reinterpret_cast<const int *>(a.cdata() + 2 * sizeof(int)));
+  EXPECT_EQ(3, *reinterpret_cast<const int *>(a.cdata() + 3 * sizeof(int)));
+  EXPECT_EQ(4, *reinterpret_cast<const int *>(a.cdata() + 4 * sizeof(int)));
+}
+
+TEST(Array, STLTupleConstructor) {
   nd::array a(make_tuple(1, 2.0));
   EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<int>(), ndt::make_type<double>()}), a.get_type());
   const auto &v = a.view<dynd::tuple<int, double>>();
@@ -572,28 +582,24 @@ TEST(Array, TupleConstructor) {
 
   //  make_tuple(u, 3.5);
 
-  std::tuple<int[3], double> t({0, 1, 2}, 3);
-  std::get<0>(t)[0] = 0;
-  std::get<0>(t)[1] = 1;
-  std::get<0>(t)[2] = 2;
-  std::get<1>(t) = 3.5;
+  //  std::tuple<std::array<int, 3>, double> t({0, 1, 2}, 3.5);
 
-//  nd::array a1(t);
-//  EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<int[3]>(), ndt::make_type<double>()}), a1.get_type());
+  // nd::array a1(t);
+  //  EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<int[3]>(), ndt::make_type<double>()}), a1.get_type());
   //  const auto &v1 = a.view<dynd::tuple<int[3], double>>();
   // EXPECT_EQ(0, get<0>(v1)[0]);
   //  EXPECT_EQ(1, get<0>(v1)[1]);
   //  EXPECT_EQ(2, get<0>(v1)[2]);
   //  EXPECT_EQ(3.5, get<1>(v1));
 
-  //std::cout << a1 << std::endl;
+  // std::cout << a1 << std::endl;
   //({0, 1, 2});
   // = std::make_tuple<int[3], int>({0, 1, 2}, 3);
   //  std::cout << std::get<1>(t) << std::endl;
   //  nd::array a1(t);
 
   //  std::cout << a1 << std::endl;
-//  std::exit(-1);
+  //  std::exit(-1);
 }
 
 TEST(Array, ConstructAssign) {

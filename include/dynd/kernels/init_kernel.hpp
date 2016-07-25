@@ -201,6 +201,11 @@ namespace nd {
     using container_init<std::vector<T>, ndt::traits<T>::ndim + 1>::container_init;
   };
 
+  template <typename T, size_t N>
+  struct init_kernel<std::array<T, N>> : container_init<std::array<T, N>, ndt::traits<T>::ndim + 1> {
+    using container_init<std::array<T, N>, ndt::traits<T>::ndim + 1>::container_init;
+  };
+
   namespace detail {
 
     template <typename CArrayType, bool IsTriviallyCopyable>
