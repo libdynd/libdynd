@@ -484,6 +484,8 @@ struct arg_at {
   typedef typename at<typename args_of<func_type>::type, I>::type type;
 };
 
+typedef uintptr_t offset_t;
+
 } // namespace dynd
 
 /////////////////////////////////////////
