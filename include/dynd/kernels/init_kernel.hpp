@@ -10,6 +10,20 @@
 #include <dynd/types/var_dim_type.hpp>
 
 namespace dynd {
+
+template <typename T>
+struct value_type {
+  typedef typename T::value_type type;
+};
+
+template <typename T, size_t N>
+struct value_type<T[N]> {
+  typedef T type;
+};
+
+template <typename T>
+using value_type_t = typename value_type<T>::type;
+
 namespace nd {
 
   template <typename ValueType>
@@ -143,7 +157,7 @@ namespace nd {
   template <typename ContainerType>
   struct fixed_dim_init_kernel<
       ContainerType, std::enable_if_t<!std::is_array<ContainerType>::value && ndt::traits<ContainerType>::ndim == 1>> {
-    typedef typename ContainerType::value_type value_type;
+    typedef value_type_t<ContainerType> value_type;
 
     init_kernel<value_type> child;
 
@@ -156,15 +170,17 @@ namespace nd {
   template <typename ValueType, size_t Size>
   struct fixed_dim_init_kernel<
       ValueType[Size], std::enable_if_t<std::is_pod<ValueType>::value && ndt::traits<ValueType>::is_same_layout>> {
+    typedef value_type_t<ValueType[Size]> value_type;
+
     intptr_t stride;
-    init_kernel<ValueType> child;
+    init_kernel<value_type> child;
 
     fixed_dim_init_kernel(const ndt::type &tp, const char *metadata)
         : stride(reinterpret_cast<const size_stride_t *>(metadata)->stride),
           child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
 
-    void single(char *data, const ValueType (&values)[Size]) {
-      for (const ValueType &value : values) {
+    void single(char *data, const value_type (&values)[Size]) {
+      for (const value_type &value : values) {
         child.single(data, value);
         data += stride;
       }
@@ -174,15 +190,17 @@ namespace nd {
   template <typename ValueType, size_t Size>
   struct fixed_dim_init_kernel<
       ValueType[Size], std::enable_if_t<!std::is_pod<ValueType>::value || !ndt::traits<ValueType>::is_same_layout>> {
+    typedef value_type_t<ValueType[Size]> value_type;
+
     intptr_t stride;
-    init_kernel<ValueType> child;
+    init_kernel<value_type> child;
 
     fixed_dim_init_kernel(const ndt::type &tp, const char *metadata)
         : stride(reinterpret_cast<const size_stride_t *>(metadata)->stride),
           child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
 
-    void single(char *data, const ValueType (&values)[Size]) {
-      for (const ValueType &value : values) {
+    void single(char *data, const value_type (&values)[Size]) {
+      for (const value_type &value : values) {
         child.single(data, value);
         data += stride;
       }
