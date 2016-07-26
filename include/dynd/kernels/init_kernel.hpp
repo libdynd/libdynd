@@ -168,8 +168,9 @@ namespace nd {
   };
 
   template <typename ValueType, size_t Size>
-  struct fixed_dim_init_kernel<
-      ValueType[Size], std::enable_if_t<std::is_pod<ValueType>::value && ndt::traits<ValueType>::is_same_layout>> {
+  struct fixed_dim_init_kernel<ValueType[Size],
+                               std::enable_if_t<std::is_pod<value_type_t<ValueType[Size]>>::value &&
+                                                ndt::traits<value_type_t<ValueType[Size]>>::is_same_layout>> {
     typedef value_type_t<ValueType[Size]> value_type;
 
     intptr_t stride;
@@ -188,8 +189,9 @@ namespace nd {
   };
 
   template <typename ValueType, size_t Size>
-  struct fixed_dim_init_kernel<
-      ValueType[Size], std::enable_if_t<!std::is_pod<ValueType>::value || !ndt::traits<ValueType>::is_same_layout>> {
+  struct fixed_dim_init_kernel<ValueType[Size],
+                               std::enable_if_t<!std::is_pod<value_type_t<ValueType[Size]>>::value ||
+                                                !ndt::traits<value_type_t<ValueType[Size]>>::is_same_layout>> {
     typedef value_type_t<ValueType[Size]> value_type;
 
     intptr_t stride;
