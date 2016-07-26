@@ -114,8 +114,11 @@ namespace nd {
     }
   };
 
-  template <typename ContainerType, size_t Rank>
-  struct fixed_dim_init_kernel {
+  template <typename ContainerType, typename Enable = void>
+  struct fixed_dim_init_kernel;
+
+  template <typename ContainerType>
+  struct fixed_dim_init_kernel<ContainerType, std::enable_if_t<ndt::traits<ContainerType>::ndim != 1>> {
     typedef void (*closure_type)(fixed_dim_init_kernel *, char *, const ContainerType &);
     typedef typename ContainerType::value_type value_type;
 
@@ -145,7 +148,7 @@ namespace nd {
   };
 
   template <typename ContainerType>
-  struct fixed_dim_init_kernel<ContainerType, 1> {
+  struct fixed_dim_init_kernel<ContainerType, std::enable_if_t<ndt::traits<ContainerType>::ndim == 1>> {
     typedef typename ContainerType::value_type value_type;
 
     void (*func)(const fixed_dim_init_kernel *, char *, const ContainerType &);
@@ -244,9 +247,9 @@ namespace nd {
     using container_init<std::vector<T>, ndt::traits<T>::ndim + 1>::container_init;
   };
 
-  template <typename T, size_t N>
-  struct init_kernel<std::array<T, N>> : fixed_dim_init_kernel<std::array<T, N>, ndt::traits<T>::ndim + 1> {
-    using fixed_dim_init_kernel<std::array<T, N>, ndt::traits<T>::ndim + 1>::fixed_dim_init_kernel;
+  template <typename ValueType, size_t Size>
+  struct init_kernel<std::array<ValueType, Size>> : fixed_dim_init_kernel<std::array<ValueType, Size>> {
+    using fixed_dim_init_kernel<std::array<ValueType, Size>>::fixed_dim_init_kernel;
   };
 
   namespace detail {
