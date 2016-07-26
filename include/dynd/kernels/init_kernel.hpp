@@ -117,43 +117,34 @@ namespace nd {
   template <typename ContainerType, typename Enable = void>
   struct fixed_dim_init_kernel;
 
+  // ASSUMPTION: The data is not contiguous
   template <typename ContainerType>
   struct fixed_dim_init_kernel<
       ContainerType, std::enable_if_t<!std::is_array<ContainerType>::value && ndt::traits<ContainerType>::ndim != 1>> {
-    typedef void (*closure_type)(fixed_dim_init_kernel *, char *, const ContainerType &);
     typedef typename ContainerType::value_type value_type;
 
     intptr_t stride;
-    closure_type closure;
     init_kernel<value_type> child;
 
     fixed_dim_init_kernel(const ndt::type &tp, const char *metadata)
-        : child(tp.extended<ndt::base_dim_type>()->get_element_type(),
-                metadata + tp.extended<ndt::base_dim_type>()->get_element_arrmeta_offset()) {
-      switch (tp.get_id()) {
-      case fixed_dim_id:
-        stride = reinterpret_cast<const size_stride_t *>(metadata)->stride;
-        closure = [](fixed_dim_init_kernel *self, char *data, const ContainerType &values) {
-          for (const value_type &value : values) {
-            self->child.single(data, value);
-            data += self->stride;
-          }
-        };
-        break;
-      default:
-        throw std::runtime_error("unsupported");
+        : stride(reinterpret_cast<const size_stride_t *>(metadata)->stride),
+          child(tp.extended<ndt::base_dim_type>()->get_element_type(),
+                metadata + tp.extended<ndt::base_dim_type>()->get_element_arrmeta_offset()) {}
+
+    void single(char *data, const ContainerType &values) {
+      for (const value_type &value : values) {
+        child.single(data, value);
+        data += stride;
       }
     }
-
-    void single(char *data, const ContainerType &values) { closure(this, data, values); }
   };
 
+  // ASSUMPTION: The data is contiguous
   template <typename ContainerType>
   struct fixed_dim_init_kernel<
       ContainerType, std::enable_if_t<!std::is_array<ContainerType>::value && ndt::traits<ContainerType>::ndim == 1>> {
     typedef typename ContainerType::value_type value_type;
 
-    void (*func)(const fixed_dim_init_kernel *, char *, const ContainerType &);
     init_kernel<value_type> child;
 
     fixed_dim_init_kernel(const ndt::type &tp, const char *metadata)
@@ -165,12 +156,12 @@ namespace nd {
   template <typename ValueType, size_t Size>
   struct fixed_dim_init_kernel<
       ValueType[Size], std::enable_if_t<std::is_pod<ValueType>::value && ndt::traits<ValueType>::is_same_layout>> {
-    nd::init_kernel<ValueType> child;
     intptr_t stride;
+    init_kernel<ValueType> child;
 
     fixed_dim_init_kernel(const ndt::type &tp, const char *metadata)
-        : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
-          stride(reinterpret_cast<const size_stride_t *>(metadata)->stride) {}
+        : stride(reinterpret_cast<const size_stride_t *>(metadata)->stride),
+          child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
 
     void single(char *data, const ValueType (&values)[Size]) {
       for (const ValueType &value : values) {
@@ -183,12 +174,12 @@ namespace nd {
   template <typename ValueType, size_t Size>
   struct fixed_dim_init_kernel<
       ValueType[Size], std::enable_if_t<!std::is_pod<ValueType>::value || !ndt::traits<ValueType>::is_same_layout>> {
-    nd::init_kernel<ValueType> child;
     intptr_t stride;
+    init_kernel<ValueType> child;
 
     fixed_dim_init_kernel(const ndt::type &tp, const char *metadata)
-        : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
-          stride(reinterpret_cast<const size_stride_t *>(metadata)->stride) {}
+        : stride(reinterpret_cast<const size_stride_t *>(metadata)->stride),
+          child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
 
     void single(char *data, const ValueType (&values)[Size]) {
       for (const ValueType &value : values) {
