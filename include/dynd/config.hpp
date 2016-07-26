@@ -484,6 +484,8 @@ struct arg_at {
   typedef typename at<typename args_of<func_type>::type, I>::type type;
 };
 
+typedef uintptr_t offset_t;
+
 } // namespace dynd
 
 /////////////////////////////////////////
@@ -1178,6 +1180,14 @@ decltype(auto) zip(ArgTypes &&... args) {
 template <typename... ValueType>
 decltype(auto) zip(std::initializer_list<ValueType> &&... args) {
   return zip_pair<std::initializer_list<ValueType>...>(args...);
+}
+
+template <typename Arg0Type, typename Arg1Type>
+Arg0Type postfix_add(Arg0Type &lhs, const Arg1Type &rhs) {
+  Arg0Type old = lhs;
+  lhs += rhs;
+
+  return old;
 }
 
 namespace ndt {

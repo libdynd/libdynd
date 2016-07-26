@@ -9,7 +9,6 @@
 #include <vector>
 
 #include <dynd/type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
 
 namespace dynd {
 
@@ -241,6 +240,15 @@ namespace ndt {
         src += traits<ElementType>::metadata_size;
       }
     };
+  };
+
+  template <typename... ElementTypes>
+  struct traits<std::tuple<ElementTypes...>> {
+    static const bool is_same_layout = false;
+
+    static const bool metadata_size = traits<tuple<ElementTypes...>>::metadata_size;
+
+    static type equivalent() { return make_type<tuple_type>({make_type<ElementTypes>()...}); }
   };
 
 } // namespace dynd::ndt

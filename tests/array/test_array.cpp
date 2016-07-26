@@ -559,8 +559,44 @@ TEST(Array, PrintBoolVector) {
 }
 
 TEST(Array, CArrayConstructor) {
-  int values[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  EXPECT_ARRAY_EQ((nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), values);
+  const int vals[5] = {0, 1, 2, 3, 4};
+
+  nd::array a(vals);
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<int>()), a.get_type());
+  const size_stride_t *size_stride = reinterpret_cast<const size_stride_t *>(a->metadata());
+  EXPECT_EQ(0, *reinterpret_cast<const int *>(a.cdata()));
+  EXPECT_EQ(1, *reinterpret_cast<const int *>(a.cdata() + size_stride->stride));
+  EXPECT_EQ(2, *reinterpret_cast<const int *>(a.cdata() + 2 * size_stride->stride));
+  EXPECT_EQ(3, *reinterpret_cast<const int *>(a.cdata() + 3 * size_stride->stride));
+  EXPECT_EQ(4, *reinterpret_cast<const int *>(a.cdata() + 4 * size_stride->stride));
+}
+
+TEST(Array, STLArrayConstructor) {
+  nd::array a(array<int, 5>{0, 1, 2, 3, 4});
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<int>()), a.get_type());
+  const size_stride_t *size_stride = reinterpret_cast<const size_stride_t *>(a->metadata());
+  EXPECT_EQ(0, *reinterpret_cast<const int *>(a.cdata()));
+  EXPECT_EQ(1, *reinterpret_cast<const int *>(a.cdata() + size_stride->stride));
+  EXPECT_EQ(2, *reinterpret_cast<const int *>(a.cdata() + 2 * size_stride->stride));
+  EXPECT_EQ(3, *reinterpret_cast<const int *>(a.cdata() + 3 * size_stride->stride));
+  EXPECT_EQ(4, *reinterpret_cast<const int *>(a.cdata() + 4 * size_stride->stride));
+}
+
+TEST(Array, STLTupleConstructor) {
+  nd::array a(make_tuple(1, 2.5));
+  EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<int>(), ndt::make_type<double>()}), a.get_type());
+  const offset_t *offsets = reinterpret_cast<const offset_t *>(a->metadata());
+  EXPECT_EQ(1, *reinterpret_cast<const int *>(a.cdata() + offsets[0]));
+  EXPECT_EQ(2.5, *reinterpret_cast<const double *>(a.cdata() + offsets[1]));
+
+  a = make_tuple(array<int, 3>{0, 1, 2}, 3.5);
+  EXPECT_EQ(ndt::make_type<ndt::tuple_type>({ndt::make_type<array<int, 3>>(), ndt::make_type<double>()}), a.get_type());
+  offsets = reinterpret_cast<const offset_t *>(a->metadata());
+  const size_stride_t *size_stride = reinterpret_cast<const size_stride_t *>(a->metadata() + 2 * sizeof(offset_t));
+  EXPECT_EQ(0, *reinterpret_cast<const int *>(a.cdata() + offsets[0]));
+  EXPECT_EQ(1, *reinterpret_cast<const int *>(a.cdata() + offsets[0] + size_stride->stride));
+  EXPECT_EQ(2, *reinterpret_cast<const int *>(a.cdata() + offsets[0] + 2 * size_stride->stride));
+  EXPECT_EQ(3.5, *reinterpret_cast<const double *>(a.cdata() + offsets[1]));
 }
 
 TEST(Array, ConstructAssign) {

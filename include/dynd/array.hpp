@@ -245,7 +245,7 @@ namespace nd {
 
     template <typename T>
     typename std::enable_if<!ndt::traits<T>::is_same_layout, T>::type view() {
-      return T(get()->metadata(), data());
+      return T(get()->metadata(), const_cast<char *>(cdata()));
     }
 
     /**

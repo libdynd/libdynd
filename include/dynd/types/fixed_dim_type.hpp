@@ -121,9 +121,27 @@ namespace ndt {
   template <>
   struct id_of<fixed_dim_type> : std::integral_constant<type_id_t, fixed_dim_id> {};
 
-  inline type make_fixed_dim(size_t dim_size, const type &element_tp) {
-    return make_type<fixed_dim_type>(dim_size, element_tp);
-  }
+  DYNDT_API type make_fixed_dim(size_t dim_size, const type &element_tp);
+
+  template <typename ElementType>
+  struct fixed_dim_traits {
+    static const size_t metadata_size = sizeof(size_stride_t) + traits<ElementType>::metadata_size;
+    static const size_t ndim = 1 + traits<ElementType>::ndim;
+
+    static void metadata_copy_construct(char *dst, const char *src) {
+      reinterpret_cast<size_stride_t *>(dst)->dim_size = reinterpret_cast<const size_stride_t *>(src)->dim_size;
+      reinterpret_cast<size_stride_t *>(dst)->stride = reinterpret_cast<const size_stride_t *>(src)->stride;
+
+      traits<ElementType>::metadata_copy_construct(dst + sizeof(size_stride_t), src + sizeof(size_stride_t));
+    }
+  };
+
+  template <typename ElementType, size_t Size>
+  struct traits<std::array<ElementType, Size>> : fixed_dim_traits<ElementType> {
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return make_type<fixed_dim_type>(Size, make_type<ElementType>()); }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd
