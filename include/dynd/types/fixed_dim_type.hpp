@@ -136,8 +136,25 @@ namespace ndt {
     }
   };
 
+  template <typename ValueType, size_t Size>
+  struct traits<ValueType[Size]> : fixed_dim_traits<ValueType> {
+    static const bool is_same_layout = traits<ValueType>::is_same_layout;
+
+    static type equivalent() { return make_type<fixed_dim_type>(Size, make_type<ValueType>()); }
+  };
+
+  // Need to handle const properly
+  template <typename T, size_t N>
+  struct traits<const T[N]> : fixed_dim_traits<const T> {
+    static const bool is_same_layout = traits<T[N]>::is_same_layout;
+
+    static type equivalent() { return make_type<T[N]>(); }
+  };
+
   template <typename ElementType, size_t Size>
   struct traits<std::array<ElementType, Size>> : fixed_dim_traits<ElementType> {
+    static const bool is_contiguous_container = true;
+
     static const bool is_same_layout = false;
 
     static type equivalent() { return make_type<fixed_dim_type>(Size, make_type<ElementType>()); }

@@ -974,23 +974,6 @@ namespace ndt {
   template <typename T>
   struct traits<T &&> : traits<T> {};
 
-  template <typename T, size_t N>
-  struct traits<T[N]> {
-    static const size_t ndim = traits<T>::ndim + 1;
-    static const size_t metadata_size = 0;
-
-    static const bool is_same_layout = traits<T>::is_same_layout;
-
-    static type equivalent() { return make_fixed_dim(N, make_type<T>()); }
-
-    static void metadata_copy_construct(char *dst, const char *src) {
-      reinterpret_cast<size_stride_t *>(dst)->dim_size = reinterpret_cast<const size_stride_t *>(src)->dim_size;
-      reinterpret_cast<size_stride_t *>(dst)->stride = reinterpret_cast<const size_stride_t *>(src)->stride;
-
-      traits<T>::metadata_copy_construct(dst + sizeof(size_stride_t), src + sizeof(size_stride_t));
-    }
-  };
-
   template <>
   struct traits<assign_error_mode> {
     static const size_t ndim = 0;
@@ -1002,16 +985,6 @@ namespace ndt {
     static assign_error_mode na() {
       return static_cast<assign_error_mode>(traits<typename std::underlying_type<assign_error_mode>::type>::na());
     }
-  };
-
-  // Need to handle const properly
-  template <typename T, size_t N>
-  struct traits<const T[N]> {
-    static const size_t ndim = traits<T[N]>::ndim;
-
-    static const bool is_same_layout = traits<T[N]>::is_same_layout;
-
-    static type equivalent() { return make_type<T[N]>(); }
   };
 
   template <typename ContainerType, size_t NDim>
