@@ -115,6 +115,49 @@ namespace nd {
   };
 
   template <typename ContainerType, size_t Rank>
+  struct fixed_dim_init_kernel {
+    typedef void (*closure_type)(fixed_dim_init_kernel *, char *, const ContainerType &);
+    typedef typename ContainerType::value_type value_type;
+
+    intptr_t stride;
+    closure_type closure;
+    init_kernel<value_type> child;
+
+    fixed_dim_init_kernel(const ndt::type &tp, const char *metadata)
+        : child(tp.extended<ndt::base_dim_type>()->get_element_type(),
+                metadata + tp.extended<ndt::base_dim_type>()->get_element_arrmeta_offset()) {
+      switch (tp.get_id()) {
+      case fixed_dim_id:
+        stride = reinterpret_cast<const size_stride_t *>(metadata)->stride;
+        closure = [](fixed_dim_init_kernel *self, char *data, const ContainerType &values) {
+          for (const value_type &value : values) {
+            self->child.single(data, value);
+            data += self->stride;
+          }
+        };
+        break;
+      default:
+        throw std::runtime_error("unsupported");
+      }
+    }
+
+    void single(char *data, const ContainerType &values) { closure(this, data, values); }
+  };
+
+  template <typename ContainerType>
+  struct fixed_dim_init_kernel<ContainerType, 1> {
+    typedef typename ContainerType::value_type value_type;
+
+    void (*func)(const fixed_dim_init_kernel *, char *, const ContainerType &);
+    init_kernel<value_type> child;
+
+    fixed_dim_init_kernel(const ndt::type &tp, const char *metadata)
+        : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
+
+    void single(char *data, const ContainerType &values) { child.contiguous(data, values.data(), values.size()); }
+  };
+
+  template <typename ContainerType, size_t Rank>
   struct container_init {
     typedef void (*closure_type)(container_init *, char *, const ContainerType &);
     typedef typename ContainerType::value_type value_type;
@@ -202,8 +245,8 @@ namespace nd {
   };
 
   template <typename T, size_t N>
-  struct init_kernel<std::array<T, N>> : container_init<std::array<T, N>, ndt::traits<T>::ndim + 1> {
-    using container_init<std::array<T, N>, ndt::traits<T>::ndim + 1>::container_init;
+  struct init_kernel<std::array<T, N>> : fixed_dim_init_kernel<std::array<T, N>, ndt::traits<T>::ndim + 1> {
+    using fixed_dim_init_kernel<std::array<T, N>, ndt::traits<T>::ndim + 1>::fixed_dim_init_kernel;
   };
 
   namespace detail {
