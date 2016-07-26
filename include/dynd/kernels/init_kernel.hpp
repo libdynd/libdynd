@@ -251,7 +251,7 @@ namespace nd {
 
   namespace detail {
 
-    template <typename CArrayType, bool IsTriviallyCopyable>
+    template <typename CArrayType, typename Enable = void>
     struct init_from_c_array;
 
     /*
@@ -265,7 +265,8 @@ namespace nd {
     */
 
     template <typename ValueType, size_t Size>
-    struct init_from_c_array<ValueType[Size], true> {
+    struct init_from_c_array<
+        ValueType[Size], std::enable_if_t<std::is_pod<ValueType>::value && ndt::traits<ValueType>::is_same_layout>> {
       nd::init_kernel<ValueType> child;
       intptr_t stride;
 
@@ -282,7 +283,8 @@ namespace nd {
     };
 
     template <typename ValueType, size_t Size>
-    struct init_from_c_array<ValueType[Size], false> {
+    struct init_from_c_array<
+        ValueType[Size], std::enable_if_t<!std::is_pod<ValueType>::value || !ndt::traits<ValueType>::is_same_layout>> {
       nd::init_kernel<ValueType> child;
       intptr_t stride;
 
@@ -301,11 +303,8 @@ namespace nd {
   } // namespace dynd::nd::detail
 
   template <typename ValueType, size_t Size>
-  struct init_kernel<ValueType[Size]>
-      : detail::init_from_c_array<ValueType[Size],
-                                  std::is_pod<ValueType>::value && ndt::traits<ValueType>::is_same_layout> {
-    using detail::init_from_c_array<ValueType[Size], std::is_pod<ValueType>::value &&
-                                                         ndt::traits<ValueType>::is_same_layout>::init_from_c_array;
+  struct init_kernel<ValueType[Size]> : detail::init_from_c_array<ValueType[Size]> {
+    using detail::init_from_c_array<ValueType[Size]>::init_from_c_array;
   };
 
   template <typename... ElementTypes>
