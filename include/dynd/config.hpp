@@ -1208,12 +1208,21 @@ namespace nd {
 } // namespace dynd ::nd
 } // namespace dynd
 
-#define tost(X) #X
-#define xtostr(X) tost(X)
+/*
+#define STR(X) #X
+#define XSTR(X) STR(X)
 
-static_assert(false, xtostr(__GNUC_MINOR__));
+#pragma message "__GNU_LIBRARY__ = " XSTR(__GNU_LIBRARY__)
 
-#if (__GNUC__ == 4)
+#pragma message "__GLIBCXX__ = " XSTR(__GLIBCXX__)
+
+#pragma message "__GNUC__ = " XSTR(__GNUC__)
+#pragma message "__GNUC_MINOR__ = " XSTR(__GNUC_MINOR__)
+#pragma message "__GNUC_PATCHLEVEL__ = " XSTR(__GNUC_PATCHLEVEL__)
+*/
+
+#ifdef __GNUC__
+#if !__has_include(<experimental/any>)
 
 namespace std {
 
@@ -1231,4 +1240,5 @@ using aligned_union_t = typename aligned_union<Len, Types...>::type;
 
 } // namespace std
 
+#endif
 #endif
