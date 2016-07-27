@@ -1221,7 +1221,6 @@ namespace nd {
 #pragma message "__GNUC_PATCHLEVEL__ = " XSTR(__GNUC_PATCHLEVEL__)
 */
 
-
 #include <algorithm>
 
 #ifdef __GNUC__
@@ -1229,12 +1228,15 @@ namespace nd {
 
 namespace std {
 
-template <std::size_t Len, class... Types>
-struct aligned_union {
-  static constexpr std::size_t alignment_value = std::max({alignof(Types)...});
+template <size_t Len, class... Types>
+struct aligned_union;
+
+template <std::size_t Len, class Type0, class Type1>
+struct aligned_union<Len, Type0, Type1> {
+  static constexpr std::size_t alignment_value = std::max(alignof(Type0), alignof(Type1));
 
   struct type {
-    alignas(alignment_value) char _s[std::max({Len, sizeof(Types)...})];
+    alignas(alignment_value) char _s[std::max(Len, std::max(sizeof(Type0), sizeof(Type1)))];
   };
 };
 
