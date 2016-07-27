@@ -220,6 +220,25 @@ namespace nd {
       }
     };
 
+    template <typename ContainerType>
+    struct init_kernel<ndt::var_dim_type, ContainerType> {
+      typedef value_type_t<ContainerType> value_type;
+
+      memory_block memblock;
+      nd::init_kernel<value_type> child;
+
+      init_kernel(const ndt::type &tp, const char *metadata)
+          : memblock(reinterpret_cast<const ndt::var_dim_type::metadata_type *>(metadata)->blockref),
+            child(tp.extended<ndt::base_dim_type>()->get_element_type(),
+                  metadata + sizeof(ndt::var_dim_type::metadata_type)) {}
+
+      void single(char *data, const ContainerType &values) {
+        reinterpret_cast<ndt::var_dim_type::data_type *>(data)->begin = memblock->alloc(values.size());
+        reinterpret_cast<ndt::var_dim_type::data_type *>(data)->size = values.size();
+        child.contiguous(reinterpret_cast<ndt::var_dim_type::data_type *>(data)->begin, values.begin(), values.size());
+      }
+    };
+
   } // namespace dynd::nd::detail
 
   template <typename ContainerType, typename Enable = void>
@@ -237,31 +256,30 @@ namespace nd {
                         std::enable_if_t<ndt::traits<std::initializer_list<ValueType>>::ndim == 1>> {
     typedef std::initializer_list<ValueType> ContainerType;
 
-    typedef void (*closure_type)(container_init *, char *, const std::initializer_list<ValueType> &);
     typedef ValueType value_type;
 
     bool is_var;
-    memory_block memblock;
-    closure_type closure;
-    init_kernel<value_type> child;
+    void (*single_wrapper)(container_init *, char *, const ContainerType &);
 
-    container_init(const ndt::type &tp, const char *metadata)
-        : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {
+    char storage[256];
+    //    ::aligned_union_t<8, detail::init_kernel<ndt::fixed_dim_type, ContainerType>> storage;
+
+    template <typename ResType>
+    void init(const ndt::type &tp, const char *metadata) {
+      new (storage) detail::init_kernel<ResType, ContainerType>(tp, metadata);
+      single_wrapper = [](container_init *self, char *data, const ContainerType &values) {
+        reinterpret_cast<detail::init_kernel<ResType, ContainerType> *>(self->storage)->single(data, values);
+      };
+    }
+
+    container_init(const ndt::type &tp, const char *metadata) {
       switch (tp.get_id()) {
       case fixed_dim_id:
-        closure = [](container_init *self, char *data, const std::initializer_list<ValueType> &values) {
-          self->child.contiguous(data, values.begin(), values.size());
-        };
+        init<ndt::fixed_dim_type>(tp, metadata);
         is_var = false;
         break;
       case var_dim_id:
-        memblock = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(metadata)->blockref;
-        closure = [](container_init *self, char *data, const std::initializer_list<ValueType> &values) {
-          reinterpret_cast<ndt::var_dim_type::data_type *>(data)->begin = self->memblock->alloc(values.size());
-          reinterpret_cast<ndt::var_dim_type::data_type *>(data)->size = values.size();
-          self->child.contiguous(reinterpret_cast<ndt::var_dim_type::data_type *>(data)->begin, values.begin(),
-                                 values.size());
-        };
+        init<ndt::var_dim_type>(tp, metadata);
         is_var = true;
         break;
       default:
@@ -269,7 +287,7 @@ namespace nd {
       }
     }
 
-    void single(char *data, const std::initializer_list<ValueType> &values) { closure(this, data, values); }
+    void single(char *data, const ContainerType &values) { single_wrapper(this, data, values); }
 
     void contiguous(char *data, const ContainerType *values, size_t size) {
       if (is_var) {
