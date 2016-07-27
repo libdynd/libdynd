@@ -580,6 +580,15 @@ TEST(Array, STLArrayConstructor) {
   EXPECT_EQ(2, *reinterpret_cast<const int *>(a.cdata() + 2 * size_stride->stride));
   EXPECT_EQ(3, *reinterpret_cast<const int *>(a.cdata() + 3 * size_stride->stride));
   EXPECT_EQ(4, *reinterpret_cast<const int *>(a.cdata() + 4 * size_stride->stride));
+
+  a = array<array<int, 2>, 2>{{{0, 1}, {2, 3}}};
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<int>())),
+            a.get_type());
+  size_stride = reinterpret_cast<const size_stride_t *>(a->metadata());
+  EXPECT_EQ(0, *reinterpret_cast<const int *>(a.cdata() + 0 * size_stride[0].stride + 0 * size_stride[1].stride));
+  EXPECT_EQ(1, *reinterpret_cast<const int *>(a.cdata() + 0 * size_stride[0].stride + 1 * size_stride[1].stride));
+  EXPECT_EQ(2, *reinterpret_cast<const int *>(a.cdata() + 1 * size_stride[0].stride + 0 * size_stride[1].stride));
+  EXPECT_EQ(3, *reinterpret_cast<const int *>(a.cdata() + 1 * size_stride[0].stride + 1 * size_stride[1].stride));
 }
 
 TEST(Array, STLTupleConstructor) {
