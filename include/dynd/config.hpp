@@ -1224,7 +1224,7 @@ namespace nd {
 #include <algorithm>
 
 #ifdef __GNUC__
-#if !__has_include(<experimental/any>)
+#if !__has_include(<experimental / any>)
 
 namespace std {
 
@@ -1233,7 +1233,7 @@ struct aligned_union;
 
 template <std::size_t Len, class Type0, class Type1>
 struct aligned_union<Len, Type0, Type1> {
-  static constexpr std::size_t alignment_value = std::max(alignof(Type0), alignof(Type1));
+  static constexpr std::size_t alignment_value = (alignof(Type0) > alignof(Type1)) ? alignof(Type0) : alignof(Type1);
 
   struct type {
     alignas(alignment_value) char _s[std::max(Len, std::max(sizeof(Type0), sizeof(Type1)))];
