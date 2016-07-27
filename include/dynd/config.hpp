@@ -1233,7 +1233,7 @@ namespace nd {
 #if defined(__GNUC__) && !defined(__APPLE__)
 
 // clang-format off
-#if !__has_include(<experimental/any>) // This is a test for GCC 5 - clang overrides the GCC version macros, making them unusable
+#if !__has_include(<experimental/any>) // This is a test for the GCC 4.9 headers
 // clang-format on
 
 namespace std {

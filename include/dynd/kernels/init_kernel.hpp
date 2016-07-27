@@ -270,8 +270,6 @@ namespace nd {
     void (*single_wrapper)(container_init *, char *, const ContainerType &);
     void (*contiguous_wrapper)(container_init *, char *, const ContainerType *, size_t);
 
-    bool is_var;
-
     template <typename ResType>
     void init(const ndt::type &tp, const char *metadata) {
       typedef detail::init_kernel<ResType, ContainerType> kernel;
@@ -290,11 +288,9 @@ namespace nd {
       switch (tp.get_id()) {
       case fixed_dim_id:
         init<ndt::fixed_dim_type>(tp, metadata);
-        is_var = false;
         break;
       case var_dim_id:
         init<ndt::var_dim_type>(tp, metadata);
-        is_var = true;
         break;
       default:
         throw std::runtime_error("unexpected type id");
@@ -306,17 +302,7 @@ namespace nd {
     void single(char *data, const ContainerType &values) { single_wrapper(this, data, values); }
 
     void contiguous(char *data, const ContainerType *values, size_t size) {
-      if (is_var) {
-        for (size_t i = 0; i < size; ++i) {
-          single(data, values[i]);
-          data += sizeof(ndt::var_dim_type::data_type);
-        }
-      } else {
-        for (size_t i = 0; i < size; ++i) {
-          single(data, values[i]);
-          data += values[i].size() * sizeof(value_type);
-        }
-      }
+      contiguous_wrapper(this, data, values, size);
     }
   };
 
