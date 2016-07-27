@@ -174,7 +174,7 @@ namespace nd {
         }
     */
 
-    void single(char *data, const ContainerType &values) { child.contiguous(data, std::begin(values), size); }
+    void single(char *data, const ContainerType &values) { child.contiguous(data, &values[0], size); }
 
     void contiguous(char *data, const ContainerType *values, size_t size) {
       for (size_t i = 0; i < size; ++i) {
