@@ -1208,7 +1208,12 @@ namespace nd {
 } // namespace dynd ::nd
 } // namespace dynd
 
-#if (__GNUC__ == 4 && __GNUC_MINOR__ == 9)
+#define tost(X) #X
+#define xtostr(X) tost(X)
+
+static_assert(false, xtostr(__GNUC__));
+
+#if (__GNUC__ == 4)
 
 namespace std {
 
