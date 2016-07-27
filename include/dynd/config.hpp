@@ -1223,6 +1223,17 @@ namespace nd {
 
 #include <algorithm>
 
+template <typename Type0, typename... Types>
+struct max_sizeof {
+  static constexpr size_t value =
+      (sizeof(Type0) > max_sizeof<Types...>::value) ? sizeof(Type0) : max_sizeof<Types...>::value;
+};
+
+template <typename Type0>
+struct max_sizeof<Type0> {
+  static constexpr size_t value = sizeof(Type0);
+};
+
 #ifdef __GNUC__
 #if !__has_include(<experimental / any>)
 
@@ -1236,7 +1247,7 @@ struct aligned_union<Len, Type0, Type1> {
   static constexpr std::size_t alignment_value = (alignof(Type0) > alignof(Type1)) ? alignof(Type0) : alignof(Type1);
 
   struct type {
-    alignas(alignment_value) char _s[std::max(Len, std::max(sizeof(Type0), sizeof(Type1)))];
+    alignas(alignment_value) char _s[(Len > max_sizeof<Type0, Type1>::value) ? Len : max_sizeof<Type0, Type1>::value];
   };
 };
 
