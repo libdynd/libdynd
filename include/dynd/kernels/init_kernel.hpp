@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -128,81 +129,88 @@ namespace nd {
     }
   };
 
-  template <typename ContainerType, typename Enable = void>
-  struct fixed_dim_init_kernel;
+  namespace detail {
 
-  // ContainerType is same_layout -> direct memcpy
-  // ContainerType is not same_layout, but ContainerType is contiguous -> child.contiguous of unpacked data
-  // otherwise for loop
+    template <typename ResType, typename ContainerType, typename Enable = void>
+    struct init_kernel;
 
-  template <typename ContainerType>
-  struct fixed_dim_init_kernel<ContainerType, std::enable_if_t<ndt::traits<ContainerType>::is_same_layout>> {
-    typedef value_type_t<ContainerType> value_type;
+    // ContainerType is same_layout -> direct memcpy
+    // ContainerType is not same_layout, but ContainerType is contiguous -> child.contiguous of unpacked data
+    // otherwise for loop
 
-    init_kernel<value_type> child;
+    template <typename ContainerType>
+    struct init_kernel<ndt::fixed_dim_type, ContainerType,
+                       std::enable_if_t<ndt::traits<ContainerType>::is_same_layout>> {
+      typedef value_type_t<ContainerType> value_type;
 
-    fixed_dim_init_kernel(const ndt::type &tp, const char *metadata)
-        : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
+      nd::init_kernel<value_type> child;
 
-    void single(char *data, const ContainerType &values) { memcpy(data, values, sizeof(ContainerType)); }
+      init_kernel(const ndt::type &tp, const char *metadata)
+          : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
 
-    void contiguous(char *data, const ContainerType *values, size_t size) {
-      memcpy(data, values, size * sizeof(ContainerType));
-    }
-  };
+      void single(char *data, const ContainerType &values) { memcpy(data, values, sizeof(ContainerType)); }
 
-  template <typename ContainerType>
-  struct fixed_dim_init_kernel<ContainerType, std::enable_if_t<!ndt::traits<ContainerType>::is_same_layout &&
-                                                               ndt::traits<ContainerType>::is_contiguous_container>> {
-    typedef value_type_t<ContainerType> value_type;
+      void contiguous(char *data, const ContainerType *values, size_t size) {
+        memcpy(data, values, size * sizeof(ContainerType));
+      }
+    };
 
-    size_t size;
-    intptr_t stride;
-    init_kernel<value_type> child;
+    template <typename ContainerType>
+    struct init_kernel<ndt::fixed_dim_type, ContainerType,
+                       std::enable_if_t<!ndt::traits<ContainerType>::is_same_layout &&
+                                        ndt::traits<ContainerType>::is_contiguous_container>> {
+      typedef value_type_t<ContainerType> value_type;
 
-    fixed_dim_init_kernel(const ndt::type &tp, const char *metadata)
-        : size(reinterpret_cast<const size_stride_t *>(metadata)->dim_size),
-          stride(reinterpret_cast<const size_stride_t *>(metadata)->stride),
-          child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
+      size_t size;
+      intptr_t stride;
+      nd::init_kernel<value_type> child;
 
-    /*
-        void single(char *data, const ContainerType &values) {
-          for (const value_type &value : values) {
-            child.single(data, value);
-            data += stride;
+      init_kernel(const ndt::type &tp, const char *metadata)
+          : size(reinterpret_cast<const size_stride_t *>(metadata)->dim_size),
+            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride),
+            child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
+
+      /*
+          void single(char *data, const ContainerType &values) {
+            for (const value_type &value : values) {
+              child.single(data, value);
+              data += stride;
+            }
           }
+      */
+
+      void single(char *data, const ContainerType &values) { child.contiguous(data, &values[0], size); }
+
+      void contiguous(char *data, const ContainerType *values, size_t size) {
+        for (size_t i = 0; i < size; ++i) {
+          single(data, values[i]);
+          data += size * stride;
         }
-    */
-
-    void single(char *data, const ContainerType &values) { child.contiguous(data, &values[0], size); }
-
-    void contiguous(char *data, const ContainerType *values, size_t size) {
-      for (size_t i = 0; i < size; ++i) {
-        single(data, values[i]);
-        data += size * stride;
       }
-    }
-  };
+    };
 
-  template <typename ContainerType>
-  struct fixed_dim_init_kernel<ContainerType, std::enable_if_t<!ndt::traits<ContainerType>::is_same_layout &&
-                                                               !ndt::traits<ContainerType>::is_contiguous_container>> {
-    typedef value_type_t<ContainerType> value_type;
+    template <typename ContainerType>
+    struct init_kernel<ndt::fixed_dim_type, ContainerType,
+                       std::enable_if_t<!ndt::traits<ContainerType>::is_same_layout &&
+                                        !ndt::traits<ContainerType>::is_contiguous_container>> {
+      typedef value_type_t<ContainerType> value_type;
 
-    intptr_t stride;
-    init_kernel<value_type> child;
+      intptr_t stride;
+      nd::init_kernel<value_type> child;
 
-    fixed_dim_init_kernel(const ndt::type &tp, const char *metadata)
-        : stride(reinterpret_cast<const size_stride_t *>(metadata)->stride),
-          child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
+      init_kernel(const ndt::type &tp, const char *metadata)
+          : stride(reinterpret_cast<const size_stride_t *>(metadata)->stride),
+            child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
 
-    void single(char *data, const ContainerType &values) {
-      for (const value_type &value : values) {
-        child.single(data, value);
-        data += stride;
+      void single(char *data, const ContainerType &values) {
+        for (const value_type &value : values) {
+          child.single(data, value);
+          data += stride;
+        }
       }
-    }
-  };
+    };
+
+  } // namespace dynd::nd::detail
 
   template <typename ContainerType, size_t Rank>
   struct container_init {
@@ -268,27 +276,15 @@ namespace nd {
     void single(char *data, const std::initializer_list<ValueType> &values) { closure(this, data, values); }
   };
 
-  template <typename ContainerType>
-  struct container_init<ContainerType, 1> {
-    typedef typename ContainerType::value_type value_type;
-
-    void (*func)(const container_init *, char *, const ContainerType &);
-    init_kernel<value_type> child;
-
-    container_init(const ndt::type &tp, const char *metadata)
-        : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
-
-    void single(char *data, const ContainerType &values) { child.contiguous(data, values.data(), values.size()); }
+  template <typename ValueType, size_t Size>
+  struct init_kernel<ValueType[Size]> : detail::init_kernel<ndt::fixed_dim_type, ValueType[Size]> {
+    using detail::init_kernel<ndt::fixed_dim_type, ValueType[Size]>::init_kernel;
   };
 
   template <typename ValueType, size_t Size>
-  struct init_kernel<ValueType[Size]> : fixed_dim_init_kernel<ValueType[Size]> {
-    using fixed_dim_init_kernel<ValueType[Size]>::fixed_dim_init_kernel;
-  };
-
-  template <typename ValueType, size_t Size>
-  struct init_kernel<std::array<ValueType, Size>> : fixed_dim_init_kernel<std::array<ValueType, Size>> {
-    using fixed_dim_init_kernel<std::array<ValueType, Size>>::fixed_dim_init_kernel;
+  struct init_kernel<std::array<ValueType, Size>>
+      : detail::init_kernel<ndt::fixed_dim_type, std::array<ValueType, Size>> {
+    using detail::init_kernel<ndt::fixed_dim_type, std::array<ValueType, Size>>::init_kernel;
   };
 
   template <typename T>
@@ -297,8 +293,8 @@ namespace nd {
   };
 
   template <typename T>
-  struct init_kernel<std::vector<T>> : container_init<std::vector<T>, ndt::traits<T>::ndim + 1> {
-    using container_init<std::vector<T>, ndt::traits<T>::ndim + 1>::container_init;
+  struct init_kernel<std::vector<T>> : detail::init_kernel<ndt::fixed_dim_type, std::vector<T>> {
+    using detail::init_kernel<ndt::fixed_dim_type, std::vector<T>>::init_kernel;
   };
 
   template <typename... ElementTypes>

@@ -1053,7 +1053,9 @@ namespace ndt {
       : container_traits<std::initializer_list<ValueType>, traits<ValueType>::ndim + 1> {};
 
   template <typename ValueType>
-  struct traits<std::vector<ValueType>> : container_traits<std::vector<ValueType>, traits<ValueType>::ndim + 1> {};
+  struct traits<std::vector<ValueType>> : container_traits<std::vector<ValueType>, traits<ValueType>::ndim + 1> {
+    static const bool is_contiguous_container = true;
+  };
 
   /**
    * Constructs an array type from a shape and
