@@ -237,6 +237,13 @@ namespace nd {
         reinterpret_cast<ndt::var_dim_type::data_type *>(data)->size = values.size();
         child.contiguous(reinterpret_cast<ndt::var_dim_type::data_type *>(data)->begin, values.begin(), values.size());
       }
+
+      void contiguous(char *data, const ContainerType *values, size_t size) {
+        for (size_t i = 0; i < size; ++i) {
+          single(data, values[i]);
+          data += sizeof(ndt::var_dim_type::data_type);
+        }
+      }
     };
 
   } // namespace dynd::nd::detail
@@ -251,19 +258,16 @@ namespace nd {
     using detail::init_kernel<ndt::fixed_dim_type, std::initializer_list<ValueType>>::init_kernel;
   };
 
-  template <typename ValueType>
-  struct container_init<std::initializer_list<ValueType>,
-                        std::enable_if_t<ndt::traits<std::initializer_list<ValueType>>::ndim == 1>> {
-    typedef std::initializer_list<ValueType> ContainerType;
+  template <typename ContainerType>
+  struct container_init<ContainerType, std::enable_if_t<ndt::traits<ContainerType>::ndim == 1>> {
+    typedef value_type_t<ContainerType> value_type;
 
-    typedef ValueType value_type;
-
-    std::aligned_union_t<1, detail::init_kernel<ndt::fixed_dim_type, ContainerType>,
-                         detail::init_kernel<ndt::var_dim_type, ContainerType>>
-        storage;
+    typename std::aligned_union<1, detail::init_kernel<ndt::fixed_dim_type, ContainerType>,
+                                detail::init_kernel<ndt::var_dim_type, ContainerType>>::type child;
 
     void (*destruct_wrapper)(container_init *);
     void (*single_wrapper)(container_init *, char *, const ContainerType &);
+    void (*contiguous_wrapper)(container_init *, char *, const ContainerType *, size_t);
 
     bool is_var;
 
@@ -271,10 +275,13 @@ namespace nd {
     void init(const ndt::type &tp, const char *metadata) {
       typedef detail::init_kernel<ResType, ContainerType> kernel;
 
-      new (&storage) kernel(tp, metadata);
-      destruct_wrapper = [](container_init *self) { reinterpret_cast<kernel *>(&self->storage)->~kernel(); };
+      new (&child) kernel(tp, metadata);
+      destruct_wrapper = [](container_init *self) { reinterpret_cast<kernel *>(&self->child)->~kernel(); };
       single_wrapper = [](container_init *self, char *data, const ContainerType &values) {
-        reinterpret_cast<kernel *>(&self->storage)->single(data, values);
+        reinterpret_cast<kernel *>(&self->child)->single(data, values);
+      };
+      contiguous_wrapper = [](container_init *self, char *data, const ContainerType *values, size_t size) {
+        reinterpret_cast<kernel *>(&self->child)->contiguous(data, values, size);
       };
     }
 
