@@ -412,6 +412,28 @@ struct remove_all_pointers<T *> {
 
 namespace detail {
 
+  template <typename Type0, typename... Types>
+  struct max_alignof {
+    static constexpr size_t value =
+        (alignof(Type0) > max_alignof<Types...>::value) ? alignof(Type0) : max_alignof<Types...>::value;
+  };
+
+  template <typename Type0>
+  struct max_alignof<Type0> {
+    static constexpr size_t value = alignof(Type0);
+  };
+
+  template <typename Type0, typename... Types>
+  struct max_sizeof {
+    static constexpr size_t value =
+        (sizeof(Type0) > max_sizeof<Types...>::value) ? sizeof(Type0) : max_sizeof<Types...>::value;
+  };
+
+  template <typename Type0>
+  struct max_sizeof<Type0> {
+    static constexpr size_t value = sizeof(Type0);
+  };
+
   template <typename func_type, typename... B>
   struct funcproto {
     typedef typename funcproto<decltype(&func_type::operator()), B...>::type type;
@@ -1207,3 +1229,30 @@ namespace nd {
 
 } // namespace dynd ::nd
 } // namespace dynd
+
+#if defined(__GNUC__) && !defined(__APPLE__)
+
+// clang-format off
+#if !__has_include(<experimental/any>) // This is a test for the GCC 4.9 headers
+// clang-format on
+
+namespace std {
+
+template <size_t MinSize, typename... Types>
+struct aligned_union {
+  static constexpr size_t alignment_value = dynd::detail::max_alignof<Types...>::value;
+
+  struct type {
+    alignas(alignment_value) char _s[MinSize > dynd::detail::max_sizeof<Types...>::value
+                                         ? MinSize
+                                         : dynd::detail::max_sizeof<Types...>::value];
+  };
+};
+
+template <size_t MinSize, typename... Types>
+using aligned_union_t = typename aligned_union<MinSize, Types...>::type;
+
+} // namespace std
+
+#endif
+#endif
