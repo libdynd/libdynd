@@ -1207,3 +1207,23 @@ namespace nd {
 
 } // namespace dynd ::nd
 } // namespace dynd
+
+#if (__GNUC__ == 4 && __GNUC_MINOR__ == 9)
+
+namespace std {
+
+template <std::size_t Len, class... Types>
+struct aligned_union {
+  static constexpr std::size_t alignment_value = std::max({alignof(Types)...});
+
+  struct type {
+    alignas(alignment_value) char _s[std::max({Len, sizeof(Types)...})];
+  };
+};
+
+template <std::size_t Len, class... Types>
+using aligned_union_t = typename aligned_union<Len, Types...>::type;
+
+} // namespace std
+
+#endif
