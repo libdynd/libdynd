@@ -13,18 +13,6 @@
 
 namespace dynd {
 
-template <std::size_t Len, class... Types>
-struct aligned_union {
-  static constexpr std::size_t alignment_value = std::max({alignof(Types)...});
-
-  struct type {
-    alignas(alignment_value) char _s[std::max({Len, sizeof(Types)...})];
-  };
-};
-
-template <std::size_t Len, class... Types>
-using aligned_union_t = typename aligned_union<Len, Types...>::type;
-
 template <typename T>
 struct value_type {
   typedef typename T::value_type type;
@@ -275,9 +263,8 @@ namespace nd {
   struct container_init<ContainerType, std::enable_if_t<ndt::traits<ContainerType>::ndim == 1>> {
     typedef value_type_t<ContainerType> value_type;
 
-    aligned_union_t<1, detail::init_kernel<ndt::fixed_dim_type, ContainerType>,
-                    detail::init_kernel<ndt::var_dim_type, ContainerType>>
-        child;
+    char child[std::max({sizeof(detail::init_kernel<ndt::fixed_dim_type, ContainerType>),
+                         sizeof(detail::init_kernel<ndt::var_dim_type, ContainerType>)})];
 
     void (*destruct_wrapper)(container_init *);
     void (*single_wrapper)(container_init *, char *, const ContainerType &);
