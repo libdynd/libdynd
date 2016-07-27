@@ -412,6 +412,28 @@ struct remove_all_pointers<T *> {
 
 namespace detail {
 
+  template <typename Type0, typename... Types>
+  struct max_sizeof {
+    static constexpr size_t value =
+        (sizeof(Type0) > max_sizeof<Types...>::value) ? sizeof(Type0) : max_sizeof<Types...>::value;
+  };
+
+  template <typename Type0>
+  struct max_sizeof<Type0> {
+    static constexpr size_t value = sizeof(Type0);
+  };
+
+  template <typename Type0, typename... Types>
+  struct max_alignof {
+    static constexpr size_t value =
+        (alignof(Type0) > max_alignof<Types...>::value) ? alignof(Type0) : max_alignof<Types...>::value;
+  };
+
+  template <typename Type0>
+  struct max_alignof<Type0> {
+    static constexpr size_t value = alignof(Type0);
+  };
+
   template <typename func_type, typename... B>
   struct funcproto {
     typedef typename funcproto<decltype(&func_type::operator()), B...>::type type;
@@ -1208,51 +1230,26 @@ namespace nd {
 } // namespace dynd ::nd
 } // namespace dynd
 
-/*
-#define STR(X) #X
-#define XSTR(X) STR(X)
+#if defined(__GNUC__) && !defined(__APPLE__)
 
-#pragma message "__GNU_LIBRARY__ = " XSTR(__GNU_LIBRARY__)
-
-#pragma message "__GLIBCXX__ = " XSTR(__GLIBCXX__)
-
-#pragma message "__GNUC__ = " XSTR(__GNUC__)
-#pragma message "__GNUC_MINOR__ = " XSTR(__GNUC_MINOR__)
-#pragma message "__GNUC_PATCHLEVEL__ = " XSTR(__GNUC_PATCHLEVEL__)
-*/
-
-#include <algorithm>
-
-template <typename Type0, typename... Types>
-struct max_sizeof {
-  static constexpr size_t value =
-      (sizeof(Type0) > max_sizeof<Types...>::value) ? sizeof(Type0) : max_sizeof<Types...>::value;
-};
-
-template <typename Type0>
-struct max_sizeof<Type0> {
-  static constexpr size_t value = sizeof(Type0);
-};
-
-#ifdef __GNUC__
-#if !__has_include(<experimental / any>)
+#if !__has_include(<experimental/any>)
 
 namespace std {
 
-template <size_t Len, class... Types>
-struct aligned_union;
+template <size_t MinSize, typename... Types>
+struct aligned_union {
+  using dynd::detail::max_alignof;
+  using dynd::detail::max_sizeof;
 
-template <std::size_t Len, class Type0, class Type1>
-struct aligned_union<Len, Type0, Type1> {
-  static constexpr std::size_t alignment_value = (alignof(Type0) > alignof(Type1)) ? alignof(Type0) : alignof(Type1);
+  static constexpr size_t alignment_value = max_alignof<Types...>::value;
 
   struct type {
-    alignas(alignment_value) char _s[(Len > max_sizeof<Type0, Type1>::value) ? Len : max_sizeof<Type0, Type1>::value];
+    alignas(alignment_value) char _s[MinSize > max_sizeof<Types...>::value ? MinSize : max_sizeof<Types...>::value];
   };
 };
 
-template <std::size_t Len, class... Types>
-using aligned_union_t = typename aligned_union<Len, Types...>::type;
+template <size_t MinSize, typename... Types>
+using aligned_union_t = typename aligned_union<MinSize, Types...>::type;
 
 } // namespace std
 
