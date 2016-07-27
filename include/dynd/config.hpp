@@ -1211,7 +1211,7 @@ namespace nd {
 #define tost(X) #X
 #define xtostr(X) tost(X)
 
-static_assert(false, xtostr(__GNUC__));
+static_assert(false, xtostr(__GNUC_MINOR__));
 
 #if (__GNUC__ == 4)
 
