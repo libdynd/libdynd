@@ -258,17 +258,23 @@ namespace nd {
 
     typedef ValueType value_type;
 
-    bool is_var;
+    std::aligned_union_t<1, detail::init_kernel<ndt::fixed_dim_type, ContainerType>,
+                         detail::init_kernel<ndt::var_dim_type, ContainerType>>
+        storage;
+
+    void (*destruct_wrapper)(container_init *);
     void (*single_wrapper)(container_init *, char *, const ContainerType &);
 
-    char storage[256];
-    //    ::aligned_union_t<8, detail::init_kernel<ndt::fixed_dim_type, ContainerType>> storage;
+    bool is_var;
 
     template <typename ResType>
     void init(const ndt::type &tp, const char *metadata) {
-      new (storage) detail::init_kernel<ResType, ContainerType>(tp, metadata);
+      typedef detail::init_kernel<ResType, ContainerType> kernel;
+
+      new (&storage) kernel(tp, metadata);
+      destruct_wrapper = [](container_init *self) { reinterpret_cast<kernel *>(&self->storage)->~kernel(); };
       single_wrapper = [](container_init *self, char *data, const ContainerType &values) {
-        reinterpret_cast<detail::init_kernel<ResType, ContainerType> *>(self->storage)->single(data, values);
+        reinterpret_cast<kernel *>(&self->storage)->single(data, values);
       };
     }
 
@@ -286,6 +292,8 @@ namespace nd {
         throw std::runtime_error("unexpected type id");
       }
     }
+
+    ~container_init() { destruct_wrapper(this); }
 
     void single(char *data, const ContainerType &values) { single_wrapper(this, data, values); }
 
