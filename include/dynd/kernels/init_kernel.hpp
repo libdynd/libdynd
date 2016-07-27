@@ -9,6 +9,7 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
+#include <type_traits>
 
 namespace dynd {
 
