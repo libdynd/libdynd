@@ -9,7 +9,6 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <type_traits>
 
 namespace dynd {
 
@@ -263,8 +262,9 @@ namespace nd {
   struct container_init<ContainerType, std::enable_if_t<ndt::traits<ContainerType>::ndim == 1>> {
     typedef value_type_t<ContainerType> value_type;
 
-    char child[std::max({sizeof(detail::init_kernel<ndt::fixed_dim_type, ContainerType>),
-                         sizeof(detail::init_kernel<ndt::var_dim_type, ContainerType>)})];
+    std::aligned_union_t<1, detail::init_kernel<ndt::fixed_dim_type, ContainerType>,
+                         detail::init_kernel<ndt::var_dim_type, ContainerType>>
+        child;
 
     void (*destruct_wrapper)(container_init *);
     void (*single_wrapper)(container_init *, char *, const ContainerType &);
