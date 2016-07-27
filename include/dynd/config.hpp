@@ -1221,6 +1221,9 @@ namespace nd {
 #pragma message "__GNUC_PATCHLEVEL__ = " XSTR(__GNUC_PATCHLEVEL__)
 */
 
+
+#include <algorithm>
+
 #ifdef __GNUC__
 #if !__has_include(<experimental/any>)
 
