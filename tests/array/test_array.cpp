@@ -25,6 +25,11 @@ class Array : public Memory<T> {};
 TYPED_TEST_CASE_P(Array);
 
 TEST(Array, NullConstructor) {
+#if (__GNUC__ == 4 && __GNUC_MINOR__ == 9)
+  std::cout << "detected" << std::endl;
+  std::exit(-1);
+#endif
+
   nd::array a;
 
   // Default-constructed nd::array is NULL and will crash if access is attempted
