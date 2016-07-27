@@ -413,17 +413,6 @@ struct remove_all_pointers<T *> {
 namespace detail {
 
   template <typename Type0, typename... Types>
-  struct max_sizeof {
-    static constexpr size_t value =
-        (sizeof(Type0) > max_sizeof<Types...>::value) ? sizeof(Type0) : max_sizeof<Types...>::value;
-  };
-
-  template <typename Type0>
-  struct max_sizeof<Type0> {
-    static constexpr size_t value = sizeof(Type0);
-  };
-
-  template <typename Type0, typename... Types>
   struct max_alignof {
     static constexpr size_t value =
         (alignof(Type0) > max_alignof<Types...>::value) ? alignof(Type0) : max_alignof<Types...>::value;
@@ -432,6 +421,17 @@ namespace detail {
   template <typename Type0>
   struct max_alignof<Type0> {
     static constexpr size_t value = alignof(Type0);
+  };
+
+  template <typename Type0, typename... Types>
+  struct max_sizeof {
+    static constexpr size_t value =
+        (sizeof(Type0) > max_sizeof<Types...>::value) ? sizeof(Type0) : max_sizeof<Types...>::value;
+  };
+
+  template <typename Type0>
+  struct max_sizeof<Type0> {
+    static constexpr size_t value = sizeof(Type0);
   };
 
   template <typename func_type, typename... B>
@@ -1232,19 +1232,20 @@ namespace nd {
 
 #if defined(__GNUC__) && !defined(__APPLE__)
 
-#if !__has_include(<experimental/any>)
+// clang-format off
+#if !__has_include(<experimental/any>) // This is a test for GCC 5 - clang overrides the GCC version macros, making them unusable
+// clang-format on
 
 namespace std {
 
 template <size_t MinSize, typename... Types>
 struct aligned_union {
-  using dynd::detail::max_alignof;
-  using dynd::detail::max_sizeof;
-
-  static constexpr size_t alignment_value = max_alignof<Types...>::value;
+  static constexpr size_t alignment_value = dynd::detail::max_alignof<Types...>::value;
 
   struct type {
-    alignas(alignment_value) char _s[MinSize > max_sizeof<Types...>::value ? MinSize : max_sizeof<Types...>::value];
+    alignas(alignment_value) char _s[MinSize > dynd::detail::max_sizeof<Types...>::value
+                                         ? MinSize
+                                         : dynd::detail::max_sizeof<Types...>::value];
   };
 };
 
