@@ -798,7 +798,7 @@ namespace ndt {
   */
 
   struct trivial_traits {
-    static const size_t metadata_size = 0;
+    static constexpr size_t metadata_size = 0;
 
     static const bool is_same_layout = true;
 
