@@ -125,8 +125,8 @@ namespace ndt {
 
   template <typename ElementType>
   struct fixed_dim_traits {
-    static const size_t metadata_size = sizeof(size_stride_t) + traits<ElementType>::metadata_size;
-    static const size_t ndim = 1 + traits<ElementType>::ndim;
+    static constexpr size_t metadata_size = sizeof(size_stride_t) + traits<ElementType>::metadata_size;
+    static constexpr size_t ndim = 1 + traits<ElementType>::ndim;
 
     static void metadata_copy_construct(char *dst, const char *src) {
       reinterpret_cast<size_stride_t *>(dst)->dim_size = reinterpret_cast<const size_stride_t *>(src)->dim_size;
@@ -135,6 +135,14 @@ namespace ndt {
       traits<ElementType>::metadata_copy_construct(dst + sizeof(size_stride_t), src + sizeof(size_stride_t));
     }
   };
+
+  // Needed to prevent linker errors
+  template <typename ElementType>
+  constexpr size_t fixed_dim_traits<ElementType>::metadata_size;
+
+  // Needed to prevent linker errors
+  template <typename ElementType>
+  constexpr size_t fixed_dim_traits<ElementType>::ndim;
 
   template <typename ValueType, size_t Size>
   struct traits<ValueType[Size]> : fixed_dim_traits<ValueType> {
