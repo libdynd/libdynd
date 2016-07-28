@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "inc_gtest.hpp"
+#include <gtest/gtest.h>
 
 #include <memory>
 

@@ -8,12 +8,9 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "inc_gtest.hpp"
-
 #include <dynd/arithmetic.hpp>
 #include <dynd/logic.hpp>
-
-#include "dynd_assertions.hpp"
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

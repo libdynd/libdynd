@@ -8,11 +8,9 @@
 #include <algorithm>
 #include <cmath>
 
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
-
 #include <dynd/math.hpp>
 #include <dynd/random.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

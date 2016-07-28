@@ -3,14 +3,12 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <cmath>
 #include <iostream>
 #include <stdexcept>
-#include <cmath>
-#include <inc_gtest.hpp>
-
-#include "dynd_assertions.hpp"
 
 #include <dynd/access.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -19,7 +17,7 @@ TEST(Struct, FieldAccess) {
   nd::array s1 = nd::as_struct({{"x", 7}, {"y", 0.5}});
   EXPECT_ARRAY_EQ(7, nd::field_access(s1, "x"));
   EXPECT_ARRAY_EQ(0.5, nd::field_access(s1, "y"));
-//  EXPECT_THROW(nd::field_access(s1, "z"), std::invalid_argument);
+  //  EXPECT_THROW(nd::field_access(s1, "z"), std::invalid_argument);
 
   nd::array a = nd::array({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
   nd::array s2 = nd::as_struct({{"a", a}, {"s1", s1}});

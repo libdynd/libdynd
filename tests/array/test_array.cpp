@@ -9,12 +9,11 @@
 #include <stdexcept>
 
 #include "../test_memory.hpp"
-#include "dynd_assertions.hpp"
-#include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

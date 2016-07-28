@@ -3,23 +3,20 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
-
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
+#include <iostream>
+#include <stdexcept>
 
 #include <dynd/config.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
 
 //#define EXPECT_TYPE_IS_SAME(A, B) EXPECT_TRUE((std::is_same<A, B>::value))
 
-TEST(Bool1, ArithmeticType)
-{
+TEST(Bool1, ArithmeticType) {
 // int32 + uint32 -> uint32
 
 //  EXPECT_TYPE_IS_SAME(decltype(declval<bool1>() / declval<short>()),
@@ -74,11 +71,10 @@ TEST(Bool1, ArithmeticType)
   EXPECT_TRUE((is_same<decltype(declval<bool1>() OPERATOR declval<double>()),                                          \
                        typename common_type<bool, double>::type>::value))
 
-  EXPECTATIONS(/ );
+  EXPECTATIONS(/);
 }
 
-TEST(Complex, CommonType)
-{
+TEST(Complex, CommonType) {
   using dynd::complex;
   typedef double T;
 
@@ -113,8 +109,7 @@ TEST(Complex, CommonType)
   EXPECT_TRUE((is_same<decltype(declval<complex<T>>() / declval<int128>()), complex<T>>::value));
 }
 
-TEST(Int128, CommonType)
-{
+TEST(Int128, CommonType) {
   using dynd::complex;
 
   EXPECT_TRUE((is_same<decltype(declval<int128>() / declval<bool1>()), int128>::value));

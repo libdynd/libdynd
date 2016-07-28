@@ -3,7 +3,6 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include "inc_gtest.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -14,8 +13,7 @@
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
-
-#include "dynd_assertions.hpp"
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

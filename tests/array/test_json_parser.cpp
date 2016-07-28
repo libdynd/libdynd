@@ -3,23 +3,21 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
-#include "inc_gtest.hpp"
-#include "../dynd_assertions.hpp"
-
-#include <dynd/view.hpp>
-#include <dynd/json_parser.hpp>
 #include <dynd/callable.hpp>
-#include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/struct_type.hpp>
-#include <dynd/types/string_type.hpp>
-#include <dynd/types/option_type.hpp>
+#include <dynd/json_parser.hpp>
 #include <dynd/parse.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/option_type.hpp>
+#include <dynd/types/string_type.hpp>
+#include <dynd/types/struct_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
+#include <dynd/view.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -9,12 +9,11 @@
 #include <stdexcept>
 
 #include "../test_memory_new.hpp"
-#include "dynd_assertions.hpp"
-#include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/types/tuple_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

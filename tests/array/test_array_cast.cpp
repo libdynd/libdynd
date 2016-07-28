@@ -6,10 +6,10 @@
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
-#include "inc_gtest.hpp"
 
 #include "dynd/array.hpp"
 #include "dynd/exceptions.hpp"
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

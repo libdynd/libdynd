@@ -3,14 +3,12 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include "dynd_assertions.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 
-#include "inc_gtest.hpp"
-
 #include <dynd/types/scalar_kind_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

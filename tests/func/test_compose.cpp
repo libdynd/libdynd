@@ -8,8 +8,6 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "inc_gtest.hpp"
-
 #include <dynd/array.hpp>
 #include <dynd/assignment.hpp>
 #include <dynd/callable.hpp>
@@ -19,6 +17,7 @@
 #include <dynd/index.hpp>
 #include <dynd/registry.hpp>
 #include <dynd/types/fixed_string_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

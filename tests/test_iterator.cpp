@@ -3,21 +3,18 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
-
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
+#include <iostream>
+#include <stdexcept>
 
 #include <dynd/iterator.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(Iterator, CArray1D)
-{
+TEST(Iterator, CArray1D) {
   int vals[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
   auto it = dynd::begin(vals);
@@ -27,8 +24,7 @@ TEST(Iterator, CArray1D)
   EXPECT_TRUE(it == dynd::end(vals));
 }
 
-TEST(ConstIterator, CArray1D)
-{
+TEST(ConstIterator, CArray1D) {
   const int vals[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
   auto it = dynd::begin(vals);
@@ -38,8 +34,7 @@ TEST(ConstIterator, CArray1D)
   EXPECT_TRUE(it == dynd::end(vals));
 }
 
-TEST(Iterator, CArray2D)
-{
+TEST(Iterator, CArray2D) {
   int vals[3][2] = {{0, 1}, {2, 3}, {4, 5}};
 
   auto it = dynd::begin<2>(vals);
@@ -51,8 +46,7 @@ TEST(Iterator, CArray2D)
   EXPECT_TRUE(it == dynd::end<2>(vals));
 }
 
-TEST(ConstIterator, CArray2D)
-{
+TEST(ConstIterator, CArray2D) {
   const int vals[3][2] = {{0, 1}, {2, 3}, {4, 5}};
 
   auto it = dynd::begin<2>(vals);
@@ -64,8 +58,7 @@ TEST(ConstIterator, CArray2D)
   EXPECT_TRUE(it == dynd::end<2>(vals));
 }
 
-TEST(Iterator, CArray3D)
-{
+TEST(Iterator, CArray3D) {
   int vals[4][3][2] = {
       {{0, 1}, {2, 3}, {4, 5}},
       {{6, 7}, {8, 9}, {10, 11}},
@@ -84,8 +77,7 @@ TEST(Iterator, CArray3D)
   EXPECT_TRUE(it == dynd::end<3>(vals));
 }
 
-TEST(ConstIterator, CArray3D)
-{
+TEST(ConstIterator, CArray3D) {
   const int vals[4][3][2] = {
       {{0, 1}, {2, 3}, {4, 5}},
       {{6, 7}, {8, 9}, {10, 11}},

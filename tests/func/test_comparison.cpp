@@ -4,16 +4,15 @@
 //
 
 #include <cmath>
-#include <inc_gtest.hpp>
 #include <iostream>
 #include <stdexcept>
 
-#include "../dynd_assertions.hpp"
 #include "../test_memory_new.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/comparison.hpp>
 #include <dynd/json_parser.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace dynd;
 

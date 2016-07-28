@@ -8,17 +8,14 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "../dynd_assertions.hpp"
-#include "inc_gtest.hpp"
-
+#include <dynd/arithmetic.hpp>
 #include <dynd/array.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/index.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/fixed_string_type.hpp>
-
-#include <dynd/arithmetic.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
