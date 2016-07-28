@@ -3,24 +3,22 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
-#include "inc_gtest.hpp"
-#include "../dynd_assertions.hpp"
 #include "../test_memory.hpp"
 
 #include <dynd/array_range.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/with.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(With1DStrided, ViewData)
-{
+TEST(With1DStrided, ViewData) {
   nd::array a = {1, 3, 5, 7};
   // Contiguous stride
   nd::with_1d_stride<int>(a, [&](intptr_t size, intptr_t stride, const int *data) {
@@ -44,8 +42,7 @@ TEST(With1DStrided, ViewData)
   });
 }
 
-TEST(With1DStrided, ConvertData)
-{
+TEST(With1DStrided, ConvertData) {
   nd::array a = {1.f, 3.f, 5.f, 7.f};
   // Contiguous stride
   nd::with_1d_stride<int>(a, [&](intptr_t size, intptr_t stride, const int *data) {

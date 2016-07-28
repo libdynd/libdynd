@@ -3,24 +3,21 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
-
-#include "inc_gtest.hpp"
-#include "../dynd_assertions.hpp"
+#include <iostream>
+#include <stdexcept>
 
 #include <dynd/array.hpp>
 #include <dynd/comparison.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(ArrayCompare, Bool)
-{
+TEST(ArrayCompare, Bool) {
   // Equality
   EXPECT_ALL_TRUE(nd::array(true) == nd::array(true));
   EXPECT_ALL_TRUE(nd::array(false) == nd::array(false));
@@ -66,8 +63,7 @@ TEST(ArrayCompare, Bool)
   */
 }
 
-TEST(ArrayCompare, EqualityIntUInt)
-{
+TEST(ArrayCompare, EqualityIntUInt) {
   // Equality
   EXPECT_ALL_TRUE(nd::array((uint8_t)127) == nd::array((int8_t)127));
   EXPECT_ALL_TRUE(nd::array((int8_t)127) == nd::array((uint8_t)127));
@@ -87,30 +83,29 @@ TEST(ArrayCompare, EqualityIntUInt)
   EXPECT_ALL_FALSE(nd::array((uint64_t)9223372036854775807LL) != nd::array((int64_t)9223372036854775807LL));
   EXPECT_ALL_FALSE(nd::array((int64_t)9223372036854775807LL) != nd::array((uint64_t)9223372036854775807LL));
   // Equality with same bits
-  EXPECT_ALL_FALSE(nd::array((uint8_t)255) == nd::array((int8_t) - 1));
-  EXPECT_ALL_FALSE(nd::array((int8_t) - 1) == nd::array((uint8_t)255));
-  EXPECT_ALL_FALSE(nd::array((uint16_t)65535) == nd::array((int16_t) - 1));
-  EXPECT_ALL_FALSE(nd::array((int16_t) - 1) == nd::array((uint16_t)65535));
-  EXPECT_ALL_TRUE(nd::array((uint32_t)4294967295u) == nd::array((int32_t) - 1));
-  EXPECT_ALL_TRUE(nd::array((int32_t) - 1) == nd::array((uint32_t)4294967295u));
-  EXPECT_ALL_TRUE(nd::array((uint64_t)18446744073709551615ULL) == nd::array((int64_t) - 1));
-  EXPECT_ALL_TRUE(nd::array((int64_t) - 1) == nd::array((uint64_t)18446744073709551615ULL));
+  EXPECT_ALL_FALSE(nd::array((uint8_t)255) == nd::array((int8_t)-1));
+  EXPECT_ALL_FALSE(nd::array((int8_t)-1) == nd::array((uint8_t)255));
+  EXPECT_ALL_FALSE(nd::array((uint16_t)65535) == nd::array((int16_t)-1));
+  EXPECT_ALL_FALSE(nd::array((int16_t)-1) == nd::array((uint16_t)65535));
+  EXPECT_ALL_TRUE(nd::array((uint32_t)4294967295u) == nd::array((int32_t)-1));
+  EXPECT_ALL_TRUE(nd::array((int32_t)-1) == nd::array((uint32_t)4294967295u));
+  EXPECT_ALL_TRUE(nd::array((uint64_t)18446744073709551615ULL) == nd::array((int64_t)-1));
+  EXPECT_ALL_TRUE(nd::array((int64_t)-1) == nd::array((uint64_t)18446744073709551615ULL));
   // Inequality with same bits
-  EXPECT_ALL_TRUE(nd::array((uint8_t)255) != nd::array((int8_t) - 1));
-  EXPECT_ALL_TRUE(nd::array((int8_t) - 1) != nd::array((uint8_t)255));
-  EXPECT_ALL_TRUE(nd::array((uint16_t)65535) != nd::array((int16_t) - 1));
-  EXPECT_ALL_TRUE(nd::array((int16_t) - 1) != nd::array((uint16_t)65535));
-  EXPECT_ALL_FALSE(nd::array((uint32_t)4294967295u) != nd::array((int32_t) - 1));
-  EXPECT_ALL_FALSE(nd::array((int32_t) - 1) != nd::array((uint32_t)4294967295u));
-  EXPECT_ALL_FALSE(nd::array((uint64_t)18446744073709551615ULL) != nd::array((int64_t) - 1));
-  EXPECT_ALL_FALSE(nd::array((int64_t) - 1) != nd::array((uint64_t)18446744073709551615ULL));
+  EXPECT_ALL_TRUE(nd::array((uint8_t)255) != nd::array((int8_t)-1));
+  EXPECT_ALL_TRUE(nd::array((int8_t)-1) != nd::array((uint8_t)255));
+  EXPECT_ALL_TRUE(nd::array((uint16_t)65535) != nd::array((int16_t)-1));
+  EXPECT_ALL_TRUE(nd::array((int16_t)-1) != nd::array((uint16_t)65535));
+  EXPECT_ALL_FALSE(nd::array((uint32_t)4294967295u) != nd::array((int32_t)-1));
+  EXPECT_ALL_FALSE(nd::array((int32_t)-1) != nd::array((uint32_t)4294967295u));
+  EXPECT_ALL_FALSE(nd::array((uint64_t)18446744073709551615ULL) != nd::array((int64_t)-1));
+  EXPECT_ALL_FALSE(nd::array((int64_t)-1) != nd::array((uint64_t)18446744073709551615ULL));
 }
 
-TEST(ArrayCompare, InequalityInt8UInt8)
-{
+TEST(ArrayCompare, InequalityInt8UInt8) {
   nd::array a, b;
 
-  a = (int8_t) - 1;
+  a = (int8_t)-1;
   b = (uint8_t)0;
   EXPECT_ALL_TRUE(a < b);
   EXPECT_ALL_TRUE(a <= b);
@@ -177,11 +172,10 @@ TEST(ArrayCompare, InequalityInt8UInt8)
   EXPECT_ALL_TRUE(b > a);
 }
 
-TEST(ArrayCompare, InequalityInt64UInt64)
-{
+TEST(ArrayCompare, InequalityInt64UInt64) {
   nd::array a, b;
 
-  a = (int64_t) - 1;
+  a = (int64_t)-1;
   b = (uint64_t)0;
   EXPECT_ALL_FALSE(a < b);
   EXPECT_ALL_FALSE(a <= b);
@@ -260,8 +254,7 @@ TEST(ArrayCompare, InequalityInt64UInt64)
   EXPECT_ALL_TRUE(b > a);
 }
 
-TEST(ArrayCompare, EqualityIntFloat)
-{
+TEST(ArrayCompare, EqualityIntFloat) {
   nd::array a, b;
 
   // 2**24 is the end of the consecutive float32 integers
@@ -324,8 +317,7 @@ TEST(ArrayCompare, EqualityIntFloat)
   EXPECT_ALL_TRUE(b > a);
 }
 
-TEST(ArrayCompare, EqualityUIntFloat)
-{
+TEST(ArrayCompare, EqualityUIntFloat) {
   nd::array a, b;
 
   // 2**24 is the end of the consecutive float32 integers

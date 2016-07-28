@@ -6,14 +6,12 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
-
-#include "../dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/assignment.hpp>
 #include <dynd/json_parser.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

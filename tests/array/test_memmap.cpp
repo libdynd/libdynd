@@ -9,12 +9,11 @@
 #include <algorithm>
 #include <cmath>
 
-#include "inc_gtest.hpp"
-
 #include <dynd/array.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/callable_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

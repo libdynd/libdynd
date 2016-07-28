@@ -8,9 +8,8 @@
 #include <algorithm>
 #include <cmath>
 
-#include "inc_gtest.hpp"
-
 #include <dynd/asarray.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

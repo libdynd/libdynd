@@ -7,10 +7,10 @@
 #include <stdexcept>
 #include <algorithm>
 #include <cmath>
-#include "inc_gtest.hpp"
 
 #include "dynd/shape_tools.hpp"
 #include "dynd/exceptions.hpp"
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

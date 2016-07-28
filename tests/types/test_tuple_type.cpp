@@ -4,7 +4,7 @@
 //
 
 #include "dynd_assertions.hpp"
-#include "inc_gtest.hpp"
+
 #include <iostream>
 #include <sstream>
 #include <stdexcept>

@@ -3,22 +3,20 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <cmath>
 #include <iostream>
 #include <stdexcept>
-#include <cmath>
-#include <inc_gtest.hpp>
 
 #include "../test_memory_new.hpp"
-#include "../dynd_assertions.hpp"
 
 #include <dynd/arithmetic.hpp>
 #include <dynd/array.hpp>
-#include <dynd/json_parser.hpp>
 #include <dynd/index.hpp>
-#include <dynd/option.hpp>
-
-#include <dynd/types/option_type.hpp>
+#include <dynd/json_parser.hpp>
 #include <dynd/kernels/arithmetic.hpp>
+#include <dynd/option.hpp>
+#include <dynd/types/option_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

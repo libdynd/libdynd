@@ -3,31 +3,26 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
-
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
+#include <iostream>
+#include <stdexcept>
 
 #include <dynd/config.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
 
 struct push_back_size {
   template <typename T>
-  void on_each(vector<size_t> &res) const
-  {
+  void on_each(vector<size_t> &res) const {
     res.push_back(sizeof(T));
   }
 };
 
-TEST(TypeSequence, ForEach)
-{
-  typedef type_sequence<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t,
-                        uint32_t, uint64_t, float, double> S;
+TEST(TypeSequence, ForEach) {
+  typedef type_sequence<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double> S;
 
   vector<size_t> res;
   for_each<S>(push_back_size(), res);

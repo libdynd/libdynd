@@ -8,9 +8,8 @@
 #include <stdexcept>
 
 #include "../test_memory.hpp"
-#include "dynd_assertions.hpp"
-#include "inc_gtest.hpp"
 
+#include <dynd_assertions.hpp>
 #include <dynd/array.hpp>
 #include <dynd/assignment.hpp>
 #include <dynd/json_parser.hpp>

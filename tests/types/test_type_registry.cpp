@@ -7,10 +7,9 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "inc_gtest.hpp"
-
-#include <dynd/type.hpp>
 #include <dynd/array.hpp>
+#include <dynd/type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

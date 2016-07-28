@@ -3,25 +3,22 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
-
-#include <dynd/types/cuda_host_type.hpp>
-#include <dynd/types/cuda_device_type.hpp>
 #include <dynd/array.hpp>
+#include <dynd/types/cuda_device_type.hpp>
+#include <dynd/types/cuda_host_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
 
 #ifdef DYND_CUDA
 
-TEST(CUDAHostType, Basic)
-{
+TEST(CUDAHostType, Basic) {
   ndt::type d = ndt::make_cuda_host(ndt::make_type<int32_t>());
   EXPECT_EQ(cuda_host_id, d.get_id());
   EXPECT_EQ(memory_id, d.get_base_id());
@@ -37,8 +34,7 @@ TEST(CUDAHostType, Basic)
   EXPECT_EQ((unsigned int)cudaHostAllocMapped, d.extended<cuda_host_type>()->get_cuda_host_flags());
 }
 
-TEST(CUDAHostType, BuiltIn)
-{
+TEST(CUDAHostType, BuiltIn) {
   ndt::type d = ndt::make_cuda_host(ndt::make_type<float>());
   EXPECT_EQ(cuda_host_id, d.get_id());
   EXPECT_EQ(memory_id, d.get_base_id());
@@ -48,8 +44,7 @@ TEST(CUDAHostType, BuiltIn)
   EXPECT_EQ(d, ndt::type("cuda_host[float32]"));
 }
 
-TEST(CUDAHostType, FixedDim)
-{
+TEST(CUDAHostType, FixedDim) {
   ndt::type d = ndt::make_cuda_host(ndt::make_fixed_dimsym(ndt::make_type<float>()));
   EXPECT_EQ(cuda_host_id, d.get_id());
   EXPECT_EQ(memory_id, d.get_base_id());
@@ -57,8 +52,7 @@ TEST(CUDAHostType, FixedDim)
   EXPECT_EQ(d, ndt::type("cuda_host[Fixed * float32]"));
 }
 
-TEST(CUDAHostType, IsTypeSubarray)
-{
+TEST(CUDAHostType, IsTypeSubarray) {
   EXPECT_TRUE(
       ndt::make_cuda_host(ndt::make_type<int32_t>()).is_type_subarray(ndt::make_cuda_host(ndt::make_type<int32_t>())));
   EXPECT_TRUE(ndt::make_cuda_host(ndt::make_type<int32_t>()).is_type_subarray(ndt::make_type<int32_t>()));

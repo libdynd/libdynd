@@ -3,20 +3,19 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
-#include <inc_gtest.hpp>
+#include <iostream>
+#include <stdexcept>
 
 #include <dynd/array.hpp>
 #include <dynd/array_range.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(ArrayRange, Basic)
-{
+TEST(ArrayRange, Basic) {
   nd::array a;
 
   a = nd::old_range(1, 10);
@@ -49,8 +48,7 @@ TEST(ArrayRange, Basic)
   }
 }
 
-TEST(ArrayRange, CastScalars)
-{
+TEST(ArrayRange, CastScalars) {
   nd::array a;
 
   a = nd::empty(ndt::type("4 * int32")).assign(nd::old_range(4));
@@ -65,8 +63,7 @@ TEST(ArrayRange, CastScalars)
   EXPECT_EQ(3., a(3).as<double>());
 }
 
-TEST(ArrayLinspace, Basic)
-{
+TEST(ArrayLinspace, Basic) {
   nd::array a;
 
   a = nd::old_linspace(0, 3, 4);

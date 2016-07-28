@@ -3,27 +3,24 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
-
+#include <dynd/array.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/pointer_type.hpp>
-#include <dynd/array.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
 
 #ifdef DYND_CUDA
 
-TEST(CUDADeviceType, Simple)
-{
+TEST(CUDADeviceType, Simple) {
   ndt::type d = ndt::make_cuda_device(ndt::make_type<int32_t>());
   EXPECT_EQ(cuda_device_id, d.get_id());
   EXPECT_EQ(memory_id, d.get_base_id());
@@ -41,8 +38,7 @@ TEST(CUDADeviceType, Simple)
   //  EXPECT_THROW(ndt::make_cuda_device(ndt::make_pointer<char>()), runtime_error);
 }
 
-TEST(CUDADeviceType, BuiltIn)
-{
+TEST(CUDADeviceType, BuiltIn) {
   ndt::type d = ndt::make_cuda_device(ndt::make_type<float>());
   EXPECT_EQ(cuda_device_id, d.get_id());
   EXPECT_EQ(memory_id, d.get_base_id());
@@ -52,8 +48,7 @@ TEST(CUDADeviceType, BuiltIn)
   EXPECT_EQ(d, ndt::type("cuda_device[float32]"));
 }
 
-TEST(CUDADeviceType, FixedDim)
-{
+TEST(CUDADeviceType, FixedDim) {
   ndt::type d = ndt::make_cuda_device(ndt::make_fixed_dimsym(ndt::make_type<float>()));
   EXPECT_EQ(cuda_device_id, d.get_id());
   EXPECT_EQ(memory_id, d.get_base_id());
@@ -61,8 +56,7 @@ TEST(CUDADeviceType, FixedDim)
   EXPECT_EQ(d, ndt::type("cuda_device[Fixed * float32]"));
 }
 
-TEST(CUDADeviceType, IsTypeSubarray)
-{
+TEST(CUDADeviceType, IsTypeSubarray) {
   EXPECT_TRUE(ndt::make_cuda_device(ndt::make_type<int32_t>())
                   .is_type_subarray(ndt::make_cuda_device(ndt::make_type<int32_t>())));
   EXPECT_TRUE(ndt::make_cuda_device(ndt::make_type<int32_t>()).is_type_subarray(ndt::make_type<int32_t>()));

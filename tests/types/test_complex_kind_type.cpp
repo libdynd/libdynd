@@ -7,9 +7,8 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "inc_gtest.hpp"
-
 #include <dynd/types/complex_kind_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

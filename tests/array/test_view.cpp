@@ -8,15 +8,14 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "../dynd_assertions.hpp"
 #include "../test_memory.hpp"
-#include "inc_gtest.hpp"
 
 #include <dynd/array_range.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/view.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

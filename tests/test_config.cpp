@@ -8,10 +8,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "dynd_assertions.hpp"
-#include "inc_gtest.hpp"
-
 #include <dynd/config.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

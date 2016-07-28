@@ -5,18 +5,17 @@
 
 #include <iostream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
 
-#include <dynd/types/substitute_typevars.hpp>
-#include <dynd/types/substitute_shape.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
+#include <dynd/types/substitute_shape.hpp>
+#include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(SubstituteTypeVars, SimpleNoSubstitutions)
-{
+TEST(SubstituteTypeVars, SimpleNoSubstitutions) {
 // SimpleNoSubstitutions is segfaulting on Mac OS X
 #ifndef __APPLE__
   map<std::string, ndt::type> typevars;
@@ -29,8 +28,7 @@ TEST(SubstituteTypeVars, SimpleNoSubstitutions)
 #endif
 }
 
-TEST(SubstituteTypeVars, SimpleSubstitution)
-{
+TEST(SubstituteTypeVars, SimpleSubstitution) {
 // SimpleSubstitution is segfaulting on Mac OS X
 #ifndef __APPLE__
   map<std::string, ndt::type> typevars;
@@ -92,8 +90,7 @@ TEST(SubstituteTypeVars, SimpleSubstitution)
 #endif
 }
 
-TEST(SubstituteTypeVars, Tuple)
-{
+TEST(SubstituteTypeVars, Tuple) {
   map<std::string, ndt::type> typevars;
   typevars["T"] = ndt::type("int32");
   typevars["M"] = ndt::type("3 * void");
@@ -110,8 +107,7 @@ TEST(SubstituteTypeVars, Tuple)
             ndt::substitute(ndt::type("(A... * T, M * real)"), typevars, true));
 }
 
-TEST(SubstituteTypeVars, Struct)
-{
+TEST(SubstituteTypeVars, Struct) {
   map<std::string, ndt::type> typevars;
   typevars["T"] = ndt::type("int32");
   typevars["M"] = ndt::type("3 * void");
@@ -128,8 +124,7 @@ TEST(SubstituteTypeVars, Struct)
             ndt::substitute(ndt::type("{x: A... * T, y: M * real}"), typevars, true));
 }
 
-TEST(SubstituteTypeVars, FuncProto)
-{
+TEST(SubstituteTypeVars, FuncProto) {
   map<std::string, ndt::type> typevars;
   typevars["T"] = ndt::type("int32");
   typevars["M"] = ndt::type("3 * void");
@@ -141,8 +136,7 @@ TEST(SubstituteTypeVars, FuncProto)
             ndt::substitute(ndt::type("(T, M * real) -> A... * complex"), typevars, false));
 }
 
-TEST(SubstituteShape, Simple)
-{
+TEST(SubstituteShape, Simple) {
   intptr_t shape[5] = {0, 1, 2, 3, 4};
   EXPECT_EQ(ndt::type("0 * int32"), ndt::substitute_shape(ndt::type("Fixed * int32"), 1, shape));
   EXPECT_EQ(ndt::type("1 * 2 * T"), ndt::substitute_shape(ndt::type("Fixed**2 * T"), 2, shape + 1));
@@ -150,8 +144,7 @@ TEST(SubstituteShape, Simple)
   EXPECT_EQ(ndt::type("1 * var * 3 * T"), ndt::substitute_shape(ndt::type("Fixed * var * 3 * T"), 3, shape + 1));
 }
 
-TEST(SubstituteShape, Errors)
-{
+TEST(SubstituteShape, Errors) {
   intptr_t shape[5] = {0, 1, 2, 3, 4};
   // Too many dimensions
   EXPECT_THROW(ndt::substitute_shape(ndt::type("Fixed * int32"), 2, shape), type_error);

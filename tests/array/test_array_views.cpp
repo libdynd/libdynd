@@ -3,18 +3,16 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
-
-#include "../inc_gtest.hpp"
-#include "../dynd_assertions.hpp"
+#include <iostream>
+#include <stdexcept>
 
 #include <dynd/array.hpp>
 #include <dynd/array_range.hpp>
 #include <dynd/random.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -84,8 +82,7 @@ TEST(ArrayViews, MultiDimensionalRawMemory)
 }
 */
 
-TEST(ArrayViews, OneDimPermute)
-{
+TEST(ArrayViews, OneDimPermute) {
   int vals0[3] = {0, 1, 2};
 
   nd::array a = nd::empty(ndt::make_type<int[3]>());
@@ -109,8 +106,7 @@ TEST(ArrayViews, OneDimPermute)
   }
 }
 
-TEST(ArrayViews, TwoDimPermute)
-{
+TEST(ArrayViews, TwoDimPermute) {
   int vals0[3][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}};
 
   nd::array a = nd::empty(ndt::make_type<int[3][3]>());
@@ -193,8 +189,7 @@ TEST(ArrayViews, TwoDimPermute)
   }
 }
 
-TEST(ArrayViews, NDimPermute)
-{
+TEST(ArrayViews, NDimPermute) {
   const intptr_t ndim0 = 4;
   intptr_t shape0[ndim0] = {7, 10, 15, 23};
   nd::array a = nd::rand(ndt::make_type(ndim0, shape0, "float64"));
@@ -237,8 +232,7 @@ TEST(ArrayViews, NDimPermute)
       for (int k = 0; k < shape1[2]; ++k) {
         for (int l = 0; l < shape1[3]; ++l) {
           for (int m = 0; m < shape1[4]; ++m) {
-            EXPECT_EQ(a(i, j, k, l, m).as<double>(),
-                      b(j, i, k, l, m).as<double>());
+            EXPECT_EQ(a(i, j, k, l, m).as<double>(), b(j, i, k, l, m).as<double>());
           }
         }
       }
@@ -246,8 +240,7 @@ TEST(ArrayViews, NDimPermute)
   }
 }
 
-TEST(ArrayViews, NDimPermute_BadPerms)
-{
+TEST(ArrayViews, NDimPermute_BadPerms) {
   nd::array a;
   const int ndim1 = 5;
   a = nd::empty("5 * 8 * var * 4 * 2 * float64");
@@ -274,45 +267,35 @@ TEST(ArrayViews, NDimPermute_BadPerms)
 }
 
 #ifndef DYND_NESTED_INIT_LIST_BUG
-TEST(ArrayViews, Reshape)
-{
+TEST(ArrayViews, Reshape) {
   EXPECT_ARRAY_EQ(nd::array({{0, 1}, {2, 3}}), nd::reshape(nd::old_range(4), {2, 2}));
   EXPECT_ARRAY_EQ(nd::old_range(4), nd::reshape({{0, 1}, {2, 3}}, {4}));
 
-  EXPECT_ARRAY_EQ(nd::array({{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}),
-                nd::reshape(nd::old_range(10), {5, 2}));
-  EXPECT_ARRAY_EQ(nd::old_range(10),
-                nd::reshape({{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}, {10}));
+  EXPECT_ARRAY_EQ(nd::array({{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}), nd::reshape(nd::old_range(10), {5, 2}));
+  EXPECT_ARRAY_EQ(nd::old_range(10), nd::reshape({{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}}, {10}));
 
-  EXPECT_ARRAY_EQ(nd::array({{0, 1, 2, 3, 4}, {5, 6, 7, 8, 9}}),
-                nd::reshape(nd::old_range(10), {2, 5}));
-  EXPECT_ARRAY_EQ(nd::old_range(10),
-                nd::reshape({{0, 1, 2, 3, 4}, {5, 6, 7, 8, 9}}, {10}));
+  EXPECT_ARRAY_EQ(nd::array({{0, 1, 2, 3, 4}, {5, 6, 7, 8, 9}}), nd::reshape(nd::old_range(10), {2, 5}));
+  EXPECT_ARRAY_EQ(nd::old_range(10), nd::reshape({{0, 1, 2, 3, 4}, {5, 6, 7, 8, 9}}, {10}));
 
-  EXPECT_ARRAY_EQ(nd::array({{{0, 1}, {2, 3}}, {{4, 5}, {6, 7}}}),
-                nd::reshape(nd::old_range(8), {2, 2, 2}));
-  EXPECT_ARRAY_EQ(nd::old_range(8),
-                nd::reshape({{{0, 1}, {2, 3}}, {{4, 5}, {6, 7}}}, {8}));
+  EXPECT_ARRAY_EQ(nd::array({{{0, 1}, {2, 3}}, {{4, 5}, {6, 7}}}), nd::reshape(nd::old_range(8), {2, 2, 2}));
+  EXPECT_ARRAY_EQ(nd::old_range(8), nd::reshape({{{0, 1}, {2, 3}}, {{4, 5}, {6, 7}}}, {8}));
 
   EXPECT_ARRAY_EQ(
-      nd::array({{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}},
-                 {{12, 13, 14, 15}, {16, 17, 18, 19}, {20, 21, 22, 23}}}),
+      nd::array({{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}}, {{12, 13, 14, 15}, {16, 17, 18, 19}, {20, 21, 22, 23}}}),
       nd::reshape(nd::old_range(24), {2, 3, 4}));
-  EXPECT_ARRAY_EQ(
-      nd::old_range(24),
-      nd::reshape({{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}},
-                   {{12, 13, 14, 15}, {16, 17, 18, 19}, {20, 21, 22, 23}}},
-                  {24}));
+  EXPECT_ARRAY_EQ(nd::old_range(24), nd::reshape({{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}},
+                                                  {{12, 13, 14, 15}, {16, 17, 18, 19}, {20, 21, 22, 23}}},
+                                                 {24}));
 
   EXPECT_ARRAY_EQ(nd::array({{{0, 1}, {2, 3}, {4, 5}},
-                           {{6, 7}, {8, 9}, {10, 11}},
-                           {{12, 13}, {14, 15}, {16, 17}},
-                           {{18, 19}, {20, 21}, {22, 23}}}),
-                nd::reshape(nd::old_range(24), {4, 3, 2}));
+                             {{6, 7}, {8, 9}, {10, 11}},
+                             {{12, 13}, {14, 15}, {16, 17}},
+                             {{18, 19}, {20, 21}, {22, 23}}}),
+                  nd::reshape(nd::old_range(24), {4, 3, 2}));
   EXPECT_ARRAY_EQ(nd::old_range(24), nd::reshape({{{0, 1}, {2, 3}, {4, 5}},
-                                            {{6, 7}, {8, 9}, {10, 11}},
-                                            {{12, 13}, {14, 15}, {16, 17}},
-                                            {{18, 19}, {20, 21}, {22, 23}}},
-                                           {24}));
+                                                  {{6, 7}, {8, 9}, {10, 11}},
+                                                  {{12, 13}, {14, 15}, {16, 17}},
+                                                  {{18, 19}, {20, 21}, {22, 23}}},
+                                                 {24}));
 }
 #endif // DYND_NESTED_INIT_LIST_BUG

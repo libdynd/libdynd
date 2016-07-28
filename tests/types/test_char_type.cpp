@@ -6,12 +6,12 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

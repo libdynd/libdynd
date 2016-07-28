@@ -8,12 +8,10 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "dynd_assertions.hpp"
-#include "inc_gtest.hpp"
-
 #include <dynd/dispatcher.hpp>
 #include <dynd/type_registry.hpp>
 #include <dynd/types/bool_kind_type.hpp>
+#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
