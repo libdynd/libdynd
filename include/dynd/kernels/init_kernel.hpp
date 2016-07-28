@@ -39,8 +39,6 @@ namespace nd {
 
   template <typename ValueType>
   struct init_kernel {
-    init_kernel(const char *DYND_UNUSED(metadata)) {}
-
     init_kernel(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
     void single(char *data, const ValueType &value) { *reinterpret_cast<ValueType *>(data) = value; }
@@ -144,19 +142,10 @@ namespace nd {
     template <typename ResType, typename ContainerType, typename Enable = void>
     struct init_kernel;
 
-    // ContainerType is same_layout -> direct memcpy
-    // ContainerType is not same_layout, but ContainerType is contiguous -> child.contiguous of unpacked data
-    // otherwise for loop
-
     template <typename ContainerType>
     struct init_kernel<ndt::fixed_dim_type, ContainerType,
                        std::enable_if_t<ndt::traits<ContainerType>::is_same_layout>> {
-      typedef value_type_t<ContainerType> value_type;
-
-      nd::init_kernel<value_type> child;
-
-      init_kernel(const ndt::type &tp, const char *metadata)
-          : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)) {}
+      init_kernel(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
       void single(char *data, const ContainerType &values) { memcpy(data, values, sizeof(ContainerType)); }
 
