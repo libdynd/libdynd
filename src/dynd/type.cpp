@@ -964,4 +964,4 @@ bool dynd::is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_
   }
 }
 
-// constexpr size_t ndt::trivial_traits::metadata_size;
+constexpr size_t ndt::trivial_traits::metadata_size;

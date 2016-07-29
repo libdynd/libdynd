@@ -65,7 +65,7 @@ class array_iter<1, 0> {
   }
 
 public:
-  array_iter(const nd::array &op0) { init(op0.get_type(), op0.get()->metadata(), op0.data()); }
+  array_iter(const nd::array &op0) { init(op0.get_type(), op0.get()->metadata(), const_cast<char *>(op0.cdata())); }
 
   ~array_iter() {
     if (m_iterdata) {
@@ -275,7 +275,8 @@ public:
     init(tp0, arrmeta0, data0, tp1, arrmeta1, data1);
   }
   array_iter(const nd::array &op0, const nd::array &op1) {
-    init(op0.get_type(), op0.get()->metadata(), op0.data(), op1.get_type(), op1.get()->metadata(), op1.cdata());
+    init(op0.get_type(), op0.get()->metadata(), const_cast<char *>(op0.cdata()), op1.get_type(), op1.get()->metadata(),
+         const_cast<char *>(op1.cdata()));
   }
 
   ~array_iter() {
@@ -375,7 +376,7 @@ public:
         m_arrmeta[i] = ops[i].get()->metadata();
         m_array_tp[i].broadcasted_iterdata_construct(m_iterdata[i], &m_arrmeta[i], iter_ndim_i,
                                                      m_itershape.get() + (m_iter_ndim - iter_ndim_i), m_uniform_tp[i]);
-        m_data[i] = m_iterdata[i]->reset(m_iterdata[i], ops[i].data(), m_iter_ndim);
+        m_data[i] = m_iterdata[i]->reset(m_iterdata[i], const_cast<char *>(ops[i].cdata()), m_iter_ndim);
       }
 
       for (intptr_t i = 0, i_end = m_iter_ndim; i != i_end; ++i) {
@@ -385,7 +386,7 @@ public:
       for (size_t i = 0; i < 2; ++i) {
         m_iterdata[i] = NULL;
         m_uniform_tp[i] = m_array_tp[i];
-        m_data[i] = ops[i].data();
+        m_data[i] = const_cast<char *>(ops[i].cdata());
         m_arrmeta[i] = ops[i].get()->metadata();
       }
     }

@@ -10,11 +10,11 @@
 #include <memory>
 
 #include <dynd/json_parser.hpp>
-#include <dynd/types/struct_type.hpp>
 #include <dynd/type_promotion.hpp>
+#include <dynd/types/struct_type.hpp>
 
-#include <dynd/math.hpp>
 #include <dynd/functional.hpp>
+#include <dynd/math.hpp>
 #include <dynd/option.hpp>
 
 inline std::string ShapeFormatter(const std::vector<intptr_t> &shape) {
@@ -38,13 +38,37 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
     return CompareDyNDArrays(expr1, expr2, val1.to_host(), val2.to_host());
   }
 
+  /*
+  */
+
+  if (val1.get_type() != val2.get_type()) {
+    return ::testing::AssertionFailure() << "The types of " << expr1 << " and " << expr2 << " do not match\n"
+                                         << expr1 << " has type " << val1.get_type() << ",\n"
+                                         << expr2 << " has type " << val2.get_type() << ".";
+  }
+
+  if (val1.get_type().get_id() == tuple_id && val2.get_type().get_id() == tuple_id) {
+    const ndt::tuple_type *bsd = val1.get_type().extended<ndt::tuple_type>();
+    intptr_t field_count = bsd->get_field_count();
+    for (intptr_t i = 0; i < field_count; ++i) {
+      nd::array field1 = val1(i), field2 = val2(i);
+      if (!field1.equals_exact(field2)) {
+        return ::testing::AssertionFailure() << "The values of " << expr1 << " and " << expr2
+                                             << " do not match at field index " << i << "\"\n"
+                                             << expr1 << " has field value " << field1 << ",\n"
+                                             << expr2 << " has field value " << field2 << ".";
+      }
+    }
+    return ::testing::AssertionSuccess();
+  }
+
   if (val1.equals_exact(val2)) {
     return ::testing::AssertionSuccess();
   } else {
     if (val1.get_type() != val2.get_type()) {
-      return ::testing::AssertionFailure() << "The types of " << expr1 << " and " << expr2 << " do not match\n" << expr1
-                                           << " has type " << val1.get_type() << ",\n" << expr2 << " has type "
-                                           << val2.get_type() << ".";
+      return ::testing::AssertionFailure() << "The types of " << expr1 << " and " << expr2 << " do not match\n"
+                                           << expr1 << " has type " << val1.get_type() << ",\n"
+                                           << expr2 << " has type " << val2.get_type() << ".";
     } else if (val1.get_shape() != val2.get_shape()) {
       return ::testing::AssertionFailure() << "The shapes of " << expr1 << " and " << expr2 << " do not match\n"
                                            << expr1 << " has shape " << ShapeFormatter(val1.get_shape()) << ",\n"
@@ -55,10 +79,11 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
       for (intptr_t i = 0; i < field_count; ++i) {
         nd::array field1 = val1(i), field2 = val2(i);
         if (!field1.equals_exact(field2)) {
-          return ::testing::AssertionFailure()
-                 << "The values of " << expr1 << " and " << expr2 << " do not match at field index " << i << ", name \""
-                 << bsd->get_field_name(i) << "\"\n" << expr1 << " has field value " << field1 << ",\n" << expr2
-                 << " has field value " << field2 << ".";
+          return ::testing::AssertionFailure() << "The values of " << expr1 << " and " << expr2
+                                               << " do not match at field index " << i << ", name \""
+                                               << bsd->get_field_name(i) << "\"\n"
+                                               << expr1 << " has field value " << field1 << ",\n"
+                                               << expr2 << " has field value " << field2 << ".";
         }
       }
       return ::testing::AssertionFailure() << "DYND ASSERTION INTERNAL ERROR: One of the struct fields "
@@ -69,9 +94,10 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
       for (intptr_t i = 0; i < field_count; ++i) {
         nd::array field1 = val1(i), field2 = val2(i);
         if (!field1.equals_exact(field2)) {
-          return ::testing::AssertionFailure()
-                 << "The values of " << expr1 << " and " << expr2 << " do not match at field index " << i << "\"\n"
-                 << expr1 << " has field value " << field1 << ",\n" << expr2 << " has field value " << field2 << ".";
+          return ::testing::AssertionFailure() << "The values of " << expr1 << " and " << expr2
+                                               << " do not match at field index " << i << "\"\n"
+                                               << expr1 << " has field value " << field1 << ",\n"
+                                               << expr2 << " has field value " << field2 << ".";
         }
       }
       return ::testing::AssertionFailure() << "DYND ASSERTION INTERNAL ERROR: One of the tuple fields "
@@ -81,19 +107,20 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
       for (intptr_t i = 0; i < dim_size; ++i) {
         nd::array sub1 = val1(i), sub2 = val2(i);
         if (!sub1.equals_exact(sub2)) {
-          return ::testing::AssertionFailure()
-                 << "The values of " << expr1 << " and " << expr2 << " do not match at index " << i << "\"\n" << expr1
-                 << " has subarray value " << sub1 << ",\n" << expr2 << " has subarray value " << sub2 << ".";
+          return ::testing::AssertionFailure() << "The values of " << expr1 << " and " << expr2
+                                               << " do not match at index " << i << "\"\n"
+                                               << expr1 << " has subarray value " << sub1 << ",\n"
+                                               << expr2 << " has subarray value " << sub2 << ".";
         }
       }
       return ::testing::AssertionFailure() << "DYND ASSERTION INTERNAL ERROR: One of the subarrays "
                                               "should have compared unequal\n"
-                                           << expr1 << " has value " << val1 << ",\n" << expr2 << " has value " << val2
-                                           << ".";
+                                           << expr1 << " has value " << val1 << ",\n"
+                                           << expr2 << " has value " << val2 << ".";
     } else {
       return ::testing::AssertionFailure() << "The values of " << expr1 << " and " << expr2 << " do not match\n"
-                                           << expr1 << " has value " << val1 << ",\n" << expr2 << " has value " << val2
-                                           << ".";
+                                           << expr1 << " has value " << val1 << ",\n"
+                                           << expr2 << " has value " << val2 << ".";
     }
   }
 }
@@ -106,8 +133,9 @@ inline ::testing::AssertionResult CompareDyNDArrayValues(const char *expr1, cons
     common_tp = promote_types_arithmetic(val1.get_type(), val2.get_type());
   } catch (const type_error &) {
     return ::testing::AssertionFailure() << "The types of " << expr1 << " and " << expr2
-                                         << " do not have mutually promotable types\n" << expr1 << " has type "
-                                         << val1.get_type() << ",\n" << expr2 << " has type " << val2.get_type() << ".";
+                                         << " do not have mutually promotable types\n"
+                                         << expr1 << " has type " << val1.get_type() << ",\n"
+                                         << expr2 << " has type " << val2.get_type() << ".";
   }
   nd::array v1 = nd::empty(common_tp), v2 = nd::empty(common_tp);
   v1.vals() = val1;
@@ -129,8 +157,9 @@ inline ::testing::AssertionResult MatchNdtTypes(const char *expr1, const char *e
     return ::testing::AssertionSuccess();
   } else {
     return ::testing::AssertionFailure() << "The type of candidate " << expr2 << " does not match pattern " << expr1
-                                         << "\n" << expr1 << " has value " << pattern << ",\n" << expr2 << " has value "
-                                         << candidate << ".";
+                                         << "\n"
+                                         << expr1 << " has value " << pattern << ",\n"
+                                         << expr2 << " has value " << candidate << ".";
   }
 }
 
