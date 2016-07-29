@@ -133,8 +133,8 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
   } else {
     ndt::type this_dt = get_type();
     ndt::type dt = get_type()->apply_linear_index(nindices, indices, 0, this_dt, collapse_leading);
-    array result = make_array(dt, data(), get_owner() ? get_owner() : *this, get_flags());
-    char *data = result.data();
+    array result = make_array(dt, const_cast<char *>(cdata()), get_owner() ? get_owner() : *this, get_flags());
+    char *data = const_cast<char *>(result.cdata());
     intptr_t offset =
         get_type()->apply_linear_index(nindices, indices, get()->metadata(), dt, result->metadata(), *this, 0, this_dt,
                                        collapse_leading, &data, const_cast<memory_block &>(result.get_owner()));
