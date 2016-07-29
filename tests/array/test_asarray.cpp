@@ -3,13 +3,13 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
 #include <dynd/asarray.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

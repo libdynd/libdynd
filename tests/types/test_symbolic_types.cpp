@@ -15,7 +15,7 @@
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

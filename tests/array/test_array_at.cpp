@@ -11,7 +11,7 @@
 
 #include "dynd/array.hpp"
 #include "dynd/exceptions.hpp"
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

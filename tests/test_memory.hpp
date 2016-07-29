@@ -6,12 +6,12 @@
 #include <utility>
 
 #include <dynd/array.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/type.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/type_id.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -3,17 +3,17 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
 
 #include <dynd/array.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/types/bytes_type.hpp>
-#include <dynd/types/string_type.hpp>
 #include <dynd/types/callable_type.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/types/string_type.hpp>
 
 using namespace std;
 using namespace dynd;

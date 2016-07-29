@@ -9,6 +9,7 @@
 #include <stdexcept>
 
 #include <dynd/callable.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/parse.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -17,7 +18,6 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/view.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

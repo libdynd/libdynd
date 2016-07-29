@@ -9,9 +9,9 @@
 
 #include "../test_memory.hpp"
 
-#include <dynd_assertions.hpp>
 #include <dynd/array.hpp>
 #include <dynd/assignment.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/json_parser.hpp>
 
 using namespace std;

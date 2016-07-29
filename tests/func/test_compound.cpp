@@ -9,7 +9,7 @@
 #include <stdexcept>
 
 #include <dynd/functional.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

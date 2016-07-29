@@ -3,13 +3,12 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include "dynd_assertions.hpp"
-
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 
 #include <dynd/array.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/tuple_type.hpp>

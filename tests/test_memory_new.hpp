@@ -10,7 +10,7 @@
 #include <stdexcept>
 
 #include <dynd/callable.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 template <typename T>
 class Memory;

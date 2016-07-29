@@ -13,7 +13,7 @@
 #include <dynd/array.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/types/tuple_type.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

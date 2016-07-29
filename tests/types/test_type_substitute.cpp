@@ -10,7 +10,7 @@
 #include <dynd/types/substitute_shape.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

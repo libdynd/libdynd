@@ -3,14 +3,14 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <cmath>
 #include <iostream>
 #include <stdexcept>
-#include <cmath>
 
 #include "../test_memory_new.hpp"
 
+#include <dynd/gtest.hpp>
 #include <dynd/option.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -9,9 +9,9 @@
 #include <stdexcept>
 
 #include <dynd/dispatcher.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/type_registry.hpp>
 #include <dynd/types/bool_kind_type.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

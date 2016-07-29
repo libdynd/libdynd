@@ -11,8 +11,8 @@
 
 #include <dynd/array.hpp>
 #include <dynd/comparison.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace dynd;
 

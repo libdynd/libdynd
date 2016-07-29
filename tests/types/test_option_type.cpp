@@ -13,7 +13,7 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/view.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -10,7 +10,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/array_range.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

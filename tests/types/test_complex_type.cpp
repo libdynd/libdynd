@@ -9,9 +9,9 @@
 #include <stdexcept>
 
 #include <dynd/array.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/math.hpp>
 #include <dynd/registry.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
