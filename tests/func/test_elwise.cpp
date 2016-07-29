@@ -12,10 +12,10 @@
 #include <dynd/assignment.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/functional.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/index.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

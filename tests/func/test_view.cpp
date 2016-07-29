@@ -3,13 +3,13 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <stdexcept>
 
+#include <dynd/gtest.hpp>
 #include <dynd/view.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

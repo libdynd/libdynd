@@ -7,8 +7,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "inc_gtest.hpp"
-
 #include <dynd/types/any_kind_type.hpp>
 
 using namespace std;

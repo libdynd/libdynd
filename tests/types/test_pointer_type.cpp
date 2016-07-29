@@ -9,7 +9,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/pointer_type.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

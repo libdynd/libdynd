@@ -8,10 +8,10 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <dynd/gtest.hpp>
 #include <dynd/mkl.hpp>
 #include <dynd/random.hpp>
 #include <dynd/registry.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

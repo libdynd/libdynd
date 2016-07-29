@@ -8,8 +8,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <dynd/gtest.hpp>
 #include <dynd/random.hpp>
-#include <dynd_assertions.hpp>
 
 typedef testing::Types<int32_t, int64_t, uint32_t, uint64_t> IntegralTypes;
 typedef testing::Types<float, double> RealTypes;

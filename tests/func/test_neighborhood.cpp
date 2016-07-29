@@ -8,9 +8,7 @@
 #include <algorithm>
 #include <cmath>
 
-#include "inc_gtest.hpp"
-#include "../dynd_assertions.hpp"
-
+#include <dynd/gtest.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/types/struct_type.hpp>

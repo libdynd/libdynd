@@ -9,7 +9,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/state_type.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

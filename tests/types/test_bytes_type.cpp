@@ -11,7 +11,7 @@
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

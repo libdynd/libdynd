@@ -11,9 +11,9 @@
 #include "../test_memory.hpp"
 
 #include <dynd/array_range.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/with.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

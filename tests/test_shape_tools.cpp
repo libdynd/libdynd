@@ -10,7 +10,7 @@
 
 #include "dynd/shape_tools.hpp"
 #include "dynd/exceptions.hpp"
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

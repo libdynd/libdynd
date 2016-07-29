@@ -9,8 +9,8 @@
 #include <stdexcept>
 
 #include <dynd/arithmetic.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/logic.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

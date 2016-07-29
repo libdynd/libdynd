@@ -11,12 +11,12 @@
 
 #include <dynd/arithmetic.hpp>
 #include <dynd/array.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/index.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/kernels/arithmetic.hpp>
 #include <dynd/option.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

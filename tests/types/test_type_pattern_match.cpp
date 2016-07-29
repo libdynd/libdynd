@@ -10,7 +10,7 @@
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/pow_dimsym_type.hpp>
-#include <dynd_assertions.hpp>
+#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

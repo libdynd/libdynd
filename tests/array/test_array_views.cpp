@@ -10,9 +10,9 @@
 
 #include <dynd/array.hpp>
 #include <dynd/array_range.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/random.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;

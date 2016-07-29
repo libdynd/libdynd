@@ -8,12 +8,12 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <dynd/gtest.hpp>
 #include <dynd/json_formatter.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd_assertions.hpp>
 
 using namespace std;
 using namespace dynd;
