@@ -41,7 +41,6 @@
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/uint_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -663,6 +662,65 @@ static nd::buffer parse_type_arg(const char *&rbegin, const char *end, map<std::
   return nd::buffer();
 }
 
+/**
+ * Limited low-level tuple assignment of default-layout data into an uninitialized destination, moves the values so it
+ * can work with data of type "type"
+ */
+template <class Type>
+static void move_to_tuple(const ndt::type &tp, const char *meta, char *data, vector<nd::buffer> &values) {
+  // Copy all the positional arguments
+  auto types = tp.extended<Type>()->get_field_types_raw();
+  auto meta_offsets = tp.extended<Type>()->get_arrmeta_offsets_raw();
+  auto data_offsets = reinterpret_cast<const uintptr_t *>(meta);
+  for (size_t i = 0; i != values.size(); ++i) {
+    const nd::buffer &buf = values[i];
+    if (buf.get_type() != types[i] ||
+        memcmp(buf.get()->metadata(), meta + meta_offsets[i], types[i].get_arrmeta_size()) != 0) {
+      throw runtime_error("internal error concatenating datashape type arguments in dynd datashape parser");
+    }
+    memcpy(data + data_offsets[i], buf.cdata(), types[i].get_default_data_size());
+    // Destroy the nd::buffer without destructing its data
+    nd::buffer tmp;
+    values[i].swap(tmp);
+    if (!tmp.get_type().is_builtin()) {
+      tmp.get_type().get()->arrmeta_destruct(tmp.get()->metadata());
+      const_cast<ndt::type &>(tmp.get_type()) = ndt::type();
+    }
+  }
+}
+
+/**
+ * Special-cased nd::buffer concatenation function, tailored for arg buffers. Ultimately, some basic form of nd::buffer
+ * concatenation needs to make its way into dyndt, likely via the basic nd::callable primitives.
+ */
+static nd::buffer move_concatenate_arg_buffers(vector<nd::buffer> &pos_args, const vector<std::string> &kw_names,
+                                               vector<nd::buffer> &kw_args) {
+  // Create type "((type0, ...), {kw0: kwtype0, ...})"
+  vector<ndt::type> pos_arg_types;
+  transform(pos_args.begin(), pos_args.end(), back_inserter(pos_arg_types),
+            [](const nd::buffer &a) { return a.get_type(); });
+
+  vector<ndt::type> kw_arg_types;
+  transform(kw_args.begin(), kw_args.end(), back_inserter(kw_arg_types),
+            [](const nd::buffer &a) { return a.get_type(); });
+
+  ndt::type result_tp = ndt::make_type<ndt::tuple_type>(
+      {ndt::make_type<ndt::tuple_type>(pos_arg_types), ndt::make_type<ndt::struct_type>(kw_names, kw_arg_types)});
+
+  nd::buffer result = nd::buffer::empty(result_tp);
+
+  auto outer_types = result.get_type().extended<ndt::tuple_type>()->get_field_types_raw();
+  auto outer_meta_offsets = result.get_type().extended<ndt::tuple_type>()->get_arrmeta_offsets_raw();
+  auto outer_data_offsets = reinterpret_cast<const uintptr_t *>(result.get()->metadata());
+
+  move_to_tuple<ndt::tuple_type>(outer_types[0], result.get()->metadata() + outer_meta_offsets[0],
+                                 result.data() + outer_data_offsets[0], pos_args);
+  move_to_tuple<ndt::struct_type>(outer_types[1], result.get()->metadata() + outer_meta_offsets[1],
+                                  result.data() + outer_data_offsets[1], kw_args);
+
+  return result;
+}
+
 // type_arg_list : type_arg COMMA type_arg_list
 //               | type_kwarg_list
 //               | type_arg
@@ -670,8 +728,7 @@ static nd::buffer parse_type_arg(const char *&rbegin, const char *end, map<std::
 //                 | type_kwarg
 // type_kwarg : NAME_LOWER EQUAL type_arg
 // type_constr_args : LBRACKET type_arg_list RBRACKET
-nd::buffer dynd::parse_type_constr_args(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
-{
+nd::buffer dynd::parse_type_constr_args(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
   nd::buffer result;
 
   const char *begin = rbegin;
@@ -736,36 +793,14 @@ nd::buffer dynd::parse_type_constr_args(const char *&rbegin, const char *end, ma
       if (!parse_token_ds(begin, end, ',')) {
         if (!parse_token_ds(begin, end, ']')) {
           throw datashape_parse_error(begin, "Expected a ',' or ']'");
-        }
-        else {
+        } else {
           break;
         }
       }
     }
   }
 
-  // Create type "((type0, ...), {kw0: kwtype0, ...})"
-  vector<ndt::type> pos_arg_types;
-  transform(pos_args.begin(), pos_args.end(), back_inserter(pos_arg_types),
-            [](const nd::buffer &a) { return a.get_type(); });
-
-  vector<ndt::type> kw_arg_types;
-  transform(kw_args.begin(), kw_args.end(), back_inserter(kw_arg_types),
-            [](const nd::buffer &a) { return a.get_type(); });
-
-  ndt::type result_tp = ndt::make_type<ndt::tuple_type>(
-      {ndt::make_type<ndt::tuple_type>(pos_arg_types), ndt::make_type<ndt::struct_type>(kw_names, kw_arg_types)});
-
-	//FIXME HERE
-  result = nd::buffer::empty(result_tp);
-  nd::buffer *pos = reinterpret_cast<nd::buffer *>(result.data());
-  for (size_t i = 0; i != pos_args.size(); ++i) {
-    pos[i] = pos_args[i];
-  }
-  nd::buffer *kw = reinterpret_cast<nd::buffer *>(result.data()) + pos_args.size();
-  for (size_t i = 0; i != kw_args.size(); ++i) {
-    kw[i] = kw_args[i];
-  }
+  result = move_concatenate_arg_buffers(pos_args, kw_names, kw_args);
 
   rbegin = begin;
   return result;

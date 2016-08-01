@@ -305,14 +305,14 @@ static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrme
   return true;
 }
 
+template <class Type>
 static bool parse_tuple_json_from_list(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&begin,
-                                       const char *end, const eval::eval_context *ectx)
-{
+                                       const char *end, const eval::eval_context *ectx) {
   if (!parse_token(begin, end, "[")) {
     return false;
   }
 
-  auto fsd = tp.extended<ndt::tuple_type>();
+  auto fsd = tp.extended<Type>();
   intptr_t field_count = fsd->get_field_count();
   const uintptr_t *data_offsets = reinterpret_cast<const uintptr_t *>(arrmeta);
   const std::vector<uintptr_t> &arrmeta_offsets = fsd->get_arrmeta_offsets();
@@ -334,23 +334,18 @@ static bool parse_tuple_json_from_list(const ndt::type &tp, const char *arrmeta,
 }
 
 static void parse_struct_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&begin,
-                              const char *end, const eval::eval_context *ectx)
-{
+                              const char *end, const eval::eval_context *ectx) {
   if (parse_struct_json_from_object(tp, arrmeta, out_data, begin, end, ectx)) {
-  }
-  else if (parse_tuple_json_from_list(tp, arrmeta, out_data, begin, end, ectx)) {
-  }
-  else {
+  } else if (parse_tuple_json_from_list<ndt::struct_type>(tp, arrmeta, out_data, begin, end, ectx)) {
+  } else {
     throw json_parse_error(begin, "expected object dict starting with '{' or list with '['", tp);
   }
 }
 
 static void parse_tuple_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&begin,
-                             const char *end, const eval::eval_context *ectx)
-{
-  if (parse_tuple_json_from_list(tp, arrmeta, out_data, begin, end, ectx)) {
-  }
-  else {
+                             const char *end, const eval::eval_context *ectx) {
+  if (parse_tuple_json_from_list<ndt::tuple_type>(tp, arrmeta, out_data, begin, end, ectx)) {
+  } else {
     throw json_parse_error(begin, "expected object dict starting with '{' or list with '['", tp);
   }
 }
@@ -604,8 +599,7 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
 }
 
 static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&begin, const char *end,
-                       const eval::eval_context *ectx)
-{
+                       const eval::eval_context *ectx) {
   skip_whitespace(begin, end);
   switch (tp.get_id()) {
   case fixed_dim_id:

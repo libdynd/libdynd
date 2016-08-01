@@ -107,7 +107,7 @@ namespace nd {
         ss << "Cannot create a typed dynd buffer with symbolic type " << tp;
         throw type_error(ss.str());
       }
-      return buffer(tp, buffer_empty_init_tag());
+      return buffer(tp, readwrite_access_flags, buffer_empty_init_tag());
     }
 
     /** The type */

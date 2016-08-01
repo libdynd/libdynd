@@ -739,16 +739,13 @@ TEST(DataShapeParser, SpecialCharacterFields) {
   }
 }
 
-/*
-static std::string to_str(const nd::array &a)
-{
+static std::string to_str(const nd::array &a) {
   stringstream ss;
   ss << a;
   return ss.str();
 }
 
-TEST(DataShapeParser, TypeConstructorArgs)
-{
+TEST(DataShapeParser, TypeConstructorArgs) {
   nd::array a, b;
   EXPECT_JSON_EQ_ARR("[[], {}]", parse_type_constr_args("[]"));
   EXPECT_JSON_EQ_ARR("[[3, -10, \"test\"], {}]", parse_type_constr_args("[3, -10, \"test\"]"));
@@ -767,4 +764,3 @@ TEST(DataShapeParser, TypeConstructorArgs)
   a = parse_json(b.get_type(), "[[[1, 2, 3]], [[\"2 * int32\", \"float32\", \"3 * int8\"], [\"x\", \"yz\"]]]");
   EXPECT_EQ(to_str(a), to_str(b));
 }
-*/
