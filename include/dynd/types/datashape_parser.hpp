@@ -21,19 +21,16 @@ namespace dynd {
  */
 DYNDT_API ndt::type type_from_datashape(const char *datashape_begin, const char *datashape_end);
 
-inline ndt::type type_from_datashape(const std::string &datashape)
-{
+inline ndt::type type_from_datashape(const std::string &datashape) {
   return type_from_datashape(datashape.data(), datashape.data() + datashape.size());
 }
 
-inline ndt::type type_from_datashape(const char *datashape)
-{
+inline ndt::type type_from_datashape(const char *datashape) {
   return type_from_datashape(datashape, datashape + strlen(datashape));
 }
 
 template <int N>
-inline ndt::type type_from_datashape(const char(&datashape)[N])
-{
+inline ndt::type type_from_datashape(const char (&datashape)[N]) {
   return type_from_datashape(datashape, datashape + N - 1);
 }
 
@@ -44,7 +41,7 @@ inline ndt::type type_from_datashape(const char(&datashape)[N])
  *   "{pos: N * arg, kw: {name: arg, ...}}" otherwise.
  */
 DYNDT_API nd::buffer parse_type_constr_args(const char *&rbegin, const char *end,
-                                           std::map<std::string, ndt::type> &symtable);
+                                            std::map<std::string, ndt::type> &symtable);
 
 DYNDT_API nd::buffer parse_type_constr_args(const std::string &str);
 

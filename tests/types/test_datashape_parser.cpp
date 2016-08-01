@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include <dynd/callable.hpp>
+#include <dynd/gtest.hpp>
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
@@ -16,7 +17,6 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/gtest.hpp>
 
 using namespace std;
 using namespace dynd;

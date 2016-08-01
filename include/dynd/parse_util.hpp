@@ -16,8 +16,7 @@
 
 namespace dynd {
 
-struct nocheck_t {
-};
+struct nocheck_t {};
 
 static const nocheck_t nocheck = nocheck_t();
 
@@ -36,8 +35,7 @@ static const nocheck_t nocheck = nocheck_t();
 template <typename DstType, typename SrcType>
 typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
                         bool>::type
-is_overflow(SrcType src)
-{
+is_overflow(SrcType src) {
   return src < static_cast<SrcType>(std::numeric_limits<DstType>::min()) ||
          src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
 }
@@ -45,63 +43,55 @@ is_overflow(SrcType src)
 template <typename DstType, typename SrcType>
 typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
                         bool>::type
-is_overflow(SrcType DYND_UNUSED(src))
-{
+is_overflow(SrcType DYND_UNUSED(src)) {
   return false;
 }
 
 template <typename DstType, typename SrcType>
 typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value,
                         bool>::type
-is_overflow(SrcType src)
-{
+is_overflow(SrcType src) {
   return src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
 }
 
 template <typename DstType, typename SrcType>
 typename std::enable_if<
     (sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType src)
-{
+is_overflow(SrcType src) {
   return src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
 }
 
 template <typename DstType, typename SrcType>
 typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_unsigned<DstType>::value && is_signed<SrcType>::value,
                         bool>::type
-is_overflow(SrcType src)
-{
+is_overflow(SrcType src) {
   return src < static_cast<SrcType>(0) || static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
 }
 
 template <typename DstType, typename SrcType>
 typename std::enable_if<
     (sizeof(DstType) >= sizeof(SrcType)) && is_unsigned<DstType>::value && is_signed<SrcType>::value, bool>::type
-is_overflow(SrcType src)
-{
+is_overflow(SrcType src) {
   return src < static_cast<SrcType>(0);
 }
 
 template <typename DstType, typename SrcType>
 typename std::enable_if<
     (sizeof(DstType) < sizeof(SrcType)) && is_unsigned<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType src)
-{
+is_overflow(SrcType src) {
   return static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
 }
 
 template <typename DstType, typename SrcType>
 typename std::enable_if<
     (sizeof(DstType) >= sizeof(SrcType)) && is_unsigned<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType DYND_UNUSED(src))
-{
+is_overflow(SrcType DYND_UNUSED(src)) {
   return false;
 }
 
 template <class T>
 struct overflow_check {
-  static bool is_overflow(uint64_t value, bool negative)
-  {
+  static bool is_overflow(uint64_t value, bool negative) {
     if (negative && value == static_cast<uint64_t>(-static_cast<int64_t>(std::numeric_limits<T>::min()))) {
       return false;
     }
@@ -111,8 +101,7 @@ struct overflow_check {
 };
 
 template <class T>
-void assign_signed_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow)
-{
+void assign_signed_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow) {
   overflow = overflow || overflow_check<T>::is_overflow(uvalue, negative);
   if (!overflow) {
     *reinterpret_cast<T *>(out_int) =
@@ -121,8 +110,7 @@ void assign_signed_int_value(char *out_int, uint64_t uvalue, bool &negative, boo
 }
 
 inline void raise_string_cast_error(const ndt::type &dst_tp, const ndt::type &string_tp, const char *arrmeta,
-                                    const char *data)
-{
+                                    const char *data) {
   std::stringstream ss;
   ss << "cannot cast string ";
   string_tp.print_data(ss, arrmeta, data);
@@ -130,8 +118,7 @@ inline void raise_string_cast_error(const ndt::type &dst_tp, const ndt::type &st
   throw std::invalid_argument(ss.str());
 }
 
-inline void raise_string_cast_error(const ndt::type &dst_tp, const char *begin, const char *end)
-{
+inline void raise_string_cast_error(const ndt::type &dst_tp, const char *begin, const char *end) {
   std::stringstream ss;
   ss << "cannot cast string ";
   ss.write(begin, end - begin);
@@ -140,8 +127,7 @@ inline void raise_string_cast_error(const ndt::type &dst_tp, const char *begin, 
 }
 
 inline void raise_string_cast_overflow_error(const ndt::type &dst_tp, const ndt::type &string_tp, const char *arrmeta,
-                                             const char *data)
-{
+                                             const char *data) {
   std::stringstream ss;
   ss << "overflow converting string ";
   string_tp.print_data(ss, arrmeta, data);
@@ -149,8 +135,7 @@ inline void raise_string_cast_overflow_error(const ndt::type &dst_tp, const ndt:
   throw std::overflow_error(ss.str());
 }
 
-inline void raise_string_cast_overflow_error(const ndt::type &dst_tp, const char *begin, const char *end)
-{
+inline void raise_string_cast_overflow_error(const ndt::type &dst_tp, const char *begin, const char *end) {
   std::stringstream ss;
   ss << "overflow converting string ";
   ss.write(begin, end - begin);
@@ -187,16 +172,14 @@ class DYNDT_API saved_begin_state {
 public:
   explicit saved_begin_state(const char *&begin) : m_begin(begin), m_saved_begin(begin), m_succeeded(false) {}
 
-  ~saved_begin_state()
-  {
+  ~saved_begin_state() {
     if (!m_succeeded) {
       // Restore begin if not success
       m_begin = m_saved_begin;
     }
   }
 
-  inline bool succeed()
-  {
+  inline bool succeed() {
     m_succeeded = true;
     return true;
   }
@@ -215,9 +198,8 @@ class parse_error : public std::invalid_argument {
   const char *m_position;
 
 public:
-  parse_error(const char *position, const std::string &message) : std::invalid_argument(message), m_position(position)
-  {
-  }
+  parse_error(const char *position, const std::string &message)
+      : std::invalid_argument(message), m_position(position) {}
   virtual ~parse_error() throw() {}
   const char *get_position() const { return m_position; }
 };
@@ -228,8 +210,7 @@ public:
  * Example:
  *     skip_whitespace(begin, end);
  */
-inline void skip_whitespace(const char *&rbegin, const char *end)
-{
+inline void skip_whitespace(const char *&rbegin, const char *end) {
   using namespace std;
   const char *begin = rbegin;
   while (begin < end && DYND_ISSPACE(*begin)) {
@@ -238,8 +219,7 @@ inline void skip_whitespace(const char *&rbegin, const char *end)
   rbegin = begin;
 }
 
-inline void skip_whitespace(char *const *src)
-{
+inline void skip_whitespace(char *const *src) {
   skip_whitespace(*reinterpret_cast<const char **>(src[0]), *reinterpret_cast<const char **>(src[1]));
 }
 
@@ -249,8 +229,7 @@ inline void skip_whitespace(char *const *src)
  * Example:
  *     skip_whitespace(begin, end);
  */
-inline void skip_whitespace_and_pound_comments(const char *&rbegin, const char *end)
-{
+inline void skip_whitespace_and_pound_comments(const char *&rbegin, const char *end) {
   using namespace std;
   const char *begin = rbegin;
   while (begin < end && DYND_ISSPACE(*begin)) {
@@ -262,8 +241,7 @@ inline void skip_whitespace_and_pound_comments(const char *&rbegin, const char *
     const char *line_end = (const char *)memchr(begin, '\n', end - begin);
     if (line_end == NULL) {
       begin = end;
-    }
-    else {
+    } else {
       begin = line_end + 1;
       skip_whitespace_and_pound_comments(begin, end);
     }
@@ -281,8 +259,7 @@ inline void skip_whitespace_and_pound_comments(const char *&rbegin, const char *
  *         // Do something if there was no whitespace
  *     }
  */
-inline bool skip_required_whitespace(const char *&rbegin, const char *end)
-{
+inline bool skip_required_whitespace(const char *&rbegin, const char *end) {
   using namespace std;
   const char *begin = rbegin;
   if (begin < end && DYND_ISSPACE(*begin)) {
@@ -292,8 +269,7 @@ inline bool skip_required_whitespace(const char *&rbegin, const char *end)
     }
     rbegin = begin;
     return true;
-  }
-  else {
+  } else {
     return false;
   }
 }
@@ -313,15 +289,13 @@ inline bool skip_required_whitespace(const char *&rbegin, const char *end)
  *     }
  */
 template <int N>
-inline bool parse_token(const char *&rbegin, const char *end, const char (&token)[N])
-{
+inline bool parse_token(const char *&rbegin, const char *end, const char (&token)[N]) {
   const char *begin = rbegin;
   skip_whitespace(begin, end);
   if (N - 1 <= end - begin && memcmp(begin, token, N - 1) == 0) {
     rbegin = begin + N - 1;
     return true;
-  }
-  else {
+  } else {
     return false;
   }
 }
@@ -338,22 +312,19 @@ inline bool parse_token(const char *&rbegin, const char *end, const char (&token
  *         // No * token found
  *     }
  */
-inline bool parse_token(const char *&rbegin, const char *end, char token)
-{
+inline bool parse_token(const char *&rbegin, const char *end, char token) {
   const char *begin = rbegin;
   skip_whitespace(begin, end);
   if (1 <= end - begin && *begin == token) {
     rbegin = begin + 1;
     return true;
-  }
-  else {
+  } else {
     return false;
   }
 }
 
 template <int N>
-inline bool parse_token(char *const *src, const char (&token)[N])
-{
+inline bool parse_token(char *const *src, const char (&token)[N]) {
   return parse_token(*reinterpret_cast<const char **>(src[0]), *reinterpret_cast<const char **>(src[1]), token);
 }
 
@@ -372,14 +343,12 @@ inline bool parse_token(char *const *src, const char (&token)[N])
  *     }
  */
 template <int N>
-inline bool parse_token_no_ws(const char *&rbegin, const char *end, const char (&token)[N])
-{
+inline bool parse_token_no_ws(const char *&rbegin, const char *end, const char (&token)[N]) {
   const char *begin = rbegin;
   if (N - 1 <= end - begin && memcmp(begin, token, N - 1) == 0) {
     rbegin = begin + N - 1;
     return true;
-  }
-  else {
+  } else {
     return false;
   }
 }
@@ -396,14 +365,12 @@ inline bool parse_token_no_ws(const char *&rbegin, const char *end, const char (
  *         // No * token found
  *     }
  */
-inline bool parse_token_no_ws(const char *&rbegin, const char *end, char token)
-{
+inline bool parse_token_no_ws(const char *&rbegin, const char *end, char token) {
   const char *begin = rbegin;
   if (1 <= end - begin && *begin == token) {
     rbegin = begin + 1;
     return true;
-  }
-  else {
+  } else {
     return false;
   }
 }
@@ -496,8 +463,7 @@ namespace nd {
  * Does an exact comparison of a byte range to a string literal.
  */
 template <int N>
-inline bool compare_range_to_literal(const char *begin, const char *end, const char (&token)[N])
-{
+inline bool compare_range_to_literal(const char *begin, const char *end, const char (&token)[N]) {
   return (end - begin) == N - 1 && !memcmp(begin, token, N - 1);
 }
 
@@ -514,8 +480,7 @@ inline bool compare_range_to_literal(const char *begin, const char *end, const c
  *     }
  */
 inline bool parse_unsigned_int_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin,
-                                     const char *&out_strend)
-{
+                                     const char *&out_strend) {
   const char *begin = rbegin;
   if (begin < end) {
     if ('1' <= *begin && *begin <= '9') {
@@ -527,24 +492,20 @@ inline bool parse_unsigned_int_no_ws(const char *&rbegin, const char *end, const
       out_strend = begin;
       rbegin = begin;
       return true;
-    }
-    else if (*begin == '0') {
+    } else if (*begin == '0') {
       if (begin + 1 < end && ('0' <= *(begin + 1) && *(begin + 1) <= '9')) {
         // Don't match leading zeros
         return false;
-      }
-      else {
+      } else {
         out_strbegin = begin;
         out_strend = begin + 1;
         rbegin = begin + 1;
         return true;
       }
-    }
-    else {
+    } else {
       return false;
     }
-  }
-  else {
+  } else {
     return false;
   }
 }
@@ -561,8 +522,7 @@ inline bool parse_unsigned_int_no_ws(const char *&rbegin, const char *end, const
  *         // Couldn't match unsigned integer
  *     }
  */
-inline bool parse_int_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin, const char *&out_strend)
-{
+inline bool parse_int_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin, const char *&out_strend) {
   const char *begin = rbegin;
   const char *saved_begin = begin;
   parse_token(begin, end, '-');
@@ -643,51 +603,42 @@ DYNDT_API bool parse_6digit_int_no_ws(const char *&rbegin, const char *end, int 
  * \param end  The end of the string.
  */
 template <typename T>
-std::enable_if_t<is_boolean<T>::value, T> parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck))
-{
+std::enable_if_t<is_boolean<T>::value, T> parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck)) {
   size_t size = end - begin;
   if (size == 1) {
     char c = *begin;
     if (c == '0' || c == 'n' || c == 'N' || c == 'f' || c == 'F') {
       return T(0);
-    }
-    else if (c == '1' || c == 'y' || c == 'Y' || c == 't' || c == 'T') {
+    } else if (c == '1' || c == 'y' || c == 'Y' || c == 't' || c == 'T') {
       return T(1);
     }
-  }
-  else if (size == 4) {
+  } else if (size == 4) {
     return T(1);
     //    else if ((begin[0] == 'T' || begin[0] == 't') && (begin[1] == 'R' || begin[1] == 'r') &&
     //           (begin[2] == 'U' || begin[2] == 'u') && (begin[3] == 'E' || begin[3] == 'e')) {
     //  return true;
     //  }
-  }
-  else if (size == 5) {
+  } else if (size == 5) {
     if ((begin[0] == 'F' || begin[0] == 'f') && (begin[1] == 'A' || begin[1] == 'a') &&
         (begin[2] == 'L' || begin[2] == 'l') && (begin[3] == 'S' || begin[3] == 's') &&
         (begin[4] == 'E' || begin[4] == 'e')) {
       return T(0);
     }
     return T(1);
-  }
-  else if (size == 0) {
+  } else if (size == 0) {
     return T(0);
-  }
-  else if (size == 2) {
+  } else if (size == 2) {
     if ((begin[0] == 'N' || begin[0] == 'n') && (begin[1] == 'O' || begin[1] == 'o')) {
       return T(0);
-    }
-    else if (((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'N' || begin[1] == 'n'))) {
+    } else if (((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'N' || begin[1] == 'n'))) {
       return T(1);
     }
-  }
-  else if (size == 3) {
+  } else if (size == 3) {
     if ((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'F' || begin[1] == 'f') &&
         (begin[2] == 'F' || begin[2] == 'f')) {
       return T(0);
-    }
-    else if (((begin[0] == 'Y' || begin[0] == 'y') && (begin[1] == 'E' || begin[1] == 'e') &&
-              (begin[2] == 'S' || begin[2] == 's'))) {
+    } else if (((begin[0] == 'Y' || begin[0] == 'y') && (begin[1] == 'E' || begin[1] == 'e') &&
+                (begin[2] == 'S' || begin[2] == 's'))) {
       return T(1);
     }
   }
@@ -701,15 +652,13 @@ std::enable_if_t<is_boolean<T>::value, T> parse(const char *begin, const char *e
  */
 template <typename T>
 std::enable_if_t<is_unsigned<T>::value && is_integral<T>::value && !is_boolean<T>::value, T>
-parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck))
-{
+parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck)) {
   T result = 0;
   while (begin < end) {
     char c = *begin;
     if ('0' <= c && c <= '9') {
       result = (result * 10u) + static_cast<T>(c - '0');
-    }
-    else if (c == 'e' || c == 'E') {
+    } else if (c == 'e' || c == 'E') {
       // Accept "1e5", "1e+5" integers with a positive exponent,
       // a subset of floating point syntax. Note that "1.2e1"
       // is not accepted as the value 12 by this code.
@@ -738,8 +687,7 @@ parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck))
         }
       }
       break;
-    }
-    else {
+    } else {
       break;
     }
     ++begin;
@@ -749,8 +697,7 @@ parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck))
 
 template <typename T>
 std::enable_if_t<is_signed<T>::value && is_integral<T>::value, T> parse(const char *begin, const char *end,
-                                                                        nocheck_t DYND_UNUSED(nocheck))
-{
+                                                                        nocheck_t DYND_UNUSED(nocheck)) {
   typedef typename std::make_unsigned<T>::type unsigned_type;
 
   bool negative = false;
@@ -778,8 +725,7 @@ std::enable_if_t<is_signed<T>::value && is_integral<T>::value, T> parse(const ch
  */
 template <typename T>
 std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const char *end,
-                                                       nocheck_t DYND_UNUSED(nocheck))
-{
+                                                       nocheck_t DYND_UNUSED(nocheck)) {
   bool negative = false;
   const char *pos = begin;
   if (pos < end && *pos == '-') {
@@ -791,29 +737,25 @@ std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const 
   if (size == 3) {
     if ((pos[0] == 'N' || pos[0] == 'n') && (pos[1] == 'A' || pos[1] == 'a') && (pos[2] == 'N' || pos[2] == 'n')) {
       return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
-    }
-    else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f')) {
+    } else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') &&
+               (pos[2] == 'F' || pos[2] == 'f')) {
       return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
     }
-  }
-  else if (size == 7) {
+  } else if (size == 7) {
     if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#') && (pos[3] == 'Q' || pos[3] == 'q') &&
         (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'A' || pos[5] == 'a') && (pos[6] == 'N' || pos[6] == 'n')) {
       return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
     }
-  }
-  else if (size == 6) {
+  } else if (size == 6) {
     if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#')) {
       if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'D' || pos[5] == 'd')) {
         return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
-      }
-      else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
-               (pos[5] == 'F' || pos[5] == 'f')) {
+      } else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
+                 (pos[5] == 'F' || pos[5] == 'f')) {
         return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
       }
     }
-  }
-  else if (size == 8) {
+  } else if (size == 8) {
     if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f') &&
         (pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'I' || pos[5] == 'i') &&
         (pos[6] == 'T' || pos[6] == 't') && (pos[7] == 'Y' || pos[7] == 'y')) {
@@ -828,60 +770,49 @@ std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const 
 }
 
 template <typename T>
-T parse(const std::string &s, nocheck_t nocheck)
-{
+T parse(const std::string &s, nocheck_t nocheck) {
   return parse<T>(s.c_str(), s.c_str() + s.size(), nocheck);
 }
 
 template <typename T>
-T parse(const string &s, nocheck_t nocheck)
-{
+T parse(const string &s, nocheck_t nocheck) {
   return parse<T>(s.begin(), s.end(), nocheck);
 }
 
 template <typename T>
-std::enable_if_t<is_boolean<T>::value, T> parse(const char *begin, const char *end)
-{
+std::enable_if_t<is_boolean<T>::value, T> parse(const char *begin, const char *end) {
   size_t size = end - begin;
   if (size == 1) {
     char c = *begin;
     if (c == '0' || c == 'n' || c == 'N' || c == 'f' || c == 'F') {
       return T(0);
-    }
-    else if (c == '1' || c == 'y' || c == 'Y' || c == 't' || c == 'T') {
+    } else if (c == '1' || c == 'y' || c == 'Y' || c == 't' || c == 'T') {
       return T(1);
     }
-  }
-  else if (size == 4) {
+  } else if (size == 4) {
     if ((begin[0] == 'T' || begin[0] == 't') && (begin[1] == 'R' || begin[1] == 'r') &&
         (begin[2] == 'U' || begin[2] == 'u') && (begin[3] == 'E' || begin[3] == 'e')) {
       return T(1);
     }
-  }
-  else if (size == 5) {
+  } else if (size == 5) {
     if ((begin[0] == 'F' || begin[0] == 'f') && (begin[1] == 'A' || begin[1] == 'a') &&
         (begin[2] == 'L' || begin[2] == 'l') && (begin[3] == 'S' || begin[3] == 's') &&
         (begin[4] == 'E' || begin[4] == 'e')) {
       return T(0);
     }
-  }
-  else if (size == 0) {
-  }
-  else if (size == 2) {
+  } else if (size == 0) {
+  } else if (size == 2) {
     if ((begin[0] == 'N' || begin[0] == 'n') && (begin[1] == 'O' || begin[1] == 'o')) {
       return T(0);
-    }
-    else if (((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'N' || begin[1] == 'n'))) {
+    } else if (((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'N' || begin[1] == 'n'))) {
       return T(1);
     }
-  }
-  else if (size == 3) {
+  } else if (size == 3) {
     if ((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'F' || begin[1] == 'f') &&
         (begin[2] == 'F' || begin[2] == 'f')) {
       return T(0);
-    }
-    else if (((begin[0] == 'Y' || begin[0] == 'y') && (begin[1] == 'E' || begin[1] == 'e') &&
-              (begin[2] == 'S' || begin[2] == 's'))) {
+    } else if (((begin[0] == 'Y' || begin[0] == 'y') && (begin[1] == 'E' || begin[1] == 'e') &&
+                (begin[2] == 'S' || begin[2] == 's'))) {
       return T(1);
     }
   }
@@ -899,8 +830,7 @@ std::enable_if_t<is_boolean<T>::value, T> parse(const char *begin, const char *e
  */
 template <typename T>
 std::enable_if_t<is_unsigned<T>::value && is_integral<T>::value && !is_boolean<T>::value, T> parse(const char *begin,
-                                                                                                   const char *end)
-{
+                                                                                                   const char *end) {
   T result = 0, prev_result = 0;
   if (begin == end) {
     raise_string_cast_error(ndt::make_type<T>(), begin, end);
@@ -916,8 +846,7 @@ std::enable_if_t<is_unsigned<T>::value && is_integral<T>::value && !is_boolean<T
         ss << " to " << ndt::make_type<T>();
         throw std::out_of_range(ss.str());
       }
-    }
-    else {
+    } else {
       if (c == '.') {
         // Accept ".", ".0" with trailing decimal zeros as well
         ++begin;
@@ -927,8 +856,7 @@ std::enable_if_t<is_unsigned<T>::value && is_integral<T>::value && !is_boolean<T
         if (begin == end) {
           break;
         }
-      }
-      else if (c == 'e' || c == 'E') {
+      } else if (c == 'e' || c == 'E') {
         // Accept "1e5", "1e+5" integers with a positive exponent,
         // a subset of floating point syntax. Note that "1.2e1"
         // is not accepted as the value 12 by this code.
@@ -987,8 +915,7 @@ std::enable_if_t<is_unsigned<T>::value && is_integral<T>::value && !is_boolean<T
  * there are problems.
  */
 template <typename T>
-std::enable_if_t<is_signed<T>::value && is_integral<T>::value, T> parse(const char *begin, const char *end)
-{
+std::enable_if_t<is_signed<T>::value && is_integral<T>::value, T> parse(const char *begin, const char *end) {
   typedef typename std::make_unsigned<T>::type unsigned_type;
 
   bool negative = false;
@@ -1011,8 +938,7 @@ std::enable_if_t<is_signed<T>::value && is_integral<T>::value, T> parse(const ch
 }
 
 template <typename T>
-std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const char *end)
-{
+std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const char *end) {
   bool negative = false;
   const char *pos = begin;
   if (pos < end && *pos == '-') {
@@ -1024,29 +950,25 @@ std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const 
   if (size == 3) {
     if ((pos[0] == 'N' || pos[0] == 'n') && (pos[1] == 'A' || pos[1] == 'a') && (pos[2] == 'N' || pos[2] == 'n')) {
       return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
-    }
-    else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f')) {
+    } else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') &&
+               (pos[2] == 'F' || pos[2] == 'f')) {
       return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
     }
-  }
-  else if (size == 7) {
+  } else if (size == 7) {
     if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#') && (pos[3] == 'Q' || pos[3] == 'q') &&
         (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'A' || pos[5] == 'a') && (pos[6] == 'N' || pos[6] == 'n')) {
       return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
     }
-  }
-  else if (size == 6) {
+  } else if (size == 6) {
     if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#')) {
       if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'D' || pos[5] == 'd')) {
         return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
-      }
-      else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
-               (pos[5] == 'F' || pos[5] == 'f')) {
+      } else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
+                 (pos[5] == 'F' || pos[5] == 'f')) {
         return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
       }
     }
-  }
-  else if (size == 8) {
+  } else if (size == 8) {
     if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f') &&
         (pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'I' || pos[5] == 'i') &&
         (pos[6] == 'T' || pos[6] == 't') && (pos[7] == 'Y' || pos[7] == 'y')) {
@@ -1069,14 +991,12 @@ std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const 
 }
 
 template <typename T>
-T parse(const std::string &s)
-{
+T parse(const std::string &s) {
   return parse<T>(s.c_str(), s.c_str() + s.size());
 }
 
 template <typename T>
-T parse(const string &s)
-{
+T parse(const string &s) {
   return parse<T>(s.begin(), s.end());
 }
 
@@ -1129,8 +1049,7 @@ struct DYNDT_API named_value {
  */
 template <int N>
 inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char *end, named_value (&nvt)[N],
-                                                 int &out_value)
-{
+                                                 int &out_value) {
   using namespace std;
   // TODO: Could specialize two implementations based on the size of N,
   //       for small N do a linear search, big N do a binary search.
@@ -1164,8 +1083,7 @@ inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char
 }
 
 template <class T>
-void assign_unsigned_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow)
-{
+void assign_unsigned_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow) {
   overflow = overflow || negative || is_overflow<T>(uvalue);
   if (!overflow) {
     *reinterpret_cast<T *>(out_int) = static_cast<T>(uvalue);
@@ -1184,8 +1102,7 @@ void assign_unsigned_int_value(char *out_int, uint64_t uvalue, bool &negative, b
  * \param option  If true, treat it as option[Num] instead of just Num.
  * \param errmode  The error handling mode.
  */
-inline void string_to_number(char *out, type_id_t tid, const char *begin, const char *end, assign_error_mode errmode)
-{
+inline void string_to_number(char *out, type_id_t tid, const char *begin, const char *end, assign_error_mode errmode) {
   uint64_t uvalue;
   const char *saved_begin = begin;
   bool negative = false, overflow = false;
@@ -1305,8 +1222,7 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
       ss << tid;
       throw std::overflow_error(ss.str());
     }
-  }
-  else {
+  } else {
     // errmode == assign_error_nocheck
     switch (tid) {
     case int8_id:
@@ -1376,51 +1292,40 @@ class json_parse_error : public parse_error {
 
 public:
   json_parse_error(const char *position, const std::string &message, const ndt::type &tp)
-      : parse_error(position, message), m_type(tp)
-  {
-  }
+      : parse_error(position, message), m_type(tp) {}
 
   json_parse_error(char *const *src, const std::string &message, const ndt::type &tp)
-      : json_parse_error(*reinterpret_cast<const char **>(src[0]), message, tp)
-  {
-  }
+      : json_parse_error(*reinterpret_cast<const char **>(src[0]), message, tp) {}
 
   virtual ~json_parse_error() throw() {}
   const ndt::type &get_type() const { return m_type; }
 };
 
 inline void parse_number_json(const ndt::type &tp, char *out_data, const char *&rbegin, const char *end, bool option,
-                              const eval::eval_context *ectx)
-{
+                              const eval::eval_context *ectx) {
   const char *begin = rbegin;
   const char *nbegin, *nend;
   bool escaped = false;
   if (option && parse_token_no_ws(begin, end, "null")) {
     assign_na_builtin(tp.get_id(), out_data);
-  }
-  else if (json::parse_number(begin, end, nbegin, nend)) {
+  } else if (json::parse_number(begin, end, nbegin, nend)) {
     string_to_number(out_data, tp.get_id(), nbegin, nend, ectx->errmode);
-  }
-  else if (parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
+  } else if (parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
     // Interpret the data inside the string as an int
     try {
       if (!escaped) {
         string_to_number(out_data, tp.get_id(), nbegin, nend, ectx->errmode);
-      }
-      else {
+      } else {
         std::string s;
         unescape_string(nbegin, nend, s);
         string_to_number(out_data, tp.get_id(), nbegin, nend, ectx->errmode);
       }
-    }
-    catch (const std::exception &e) {
+    } catch (const std::exception &e) {
+      throw json_parse_error(rbegin, e.what(), tp);
+    } catch (const dynd::dynd_exception &e) {
       throw json_parse_error(rbegin, e.what(), tp);
     }
-    catch (const dynd::dynd_exception &e) {
-      throw json_parse_error(rbegin, e.what(), tp);
-    }
-  }
-  else {
+  } else {
     throw json_parse_error(rbegin, "expected a number", tp);
   }
   rbegin = begin;

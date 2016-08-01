@@ -10,12 +10,12 @@
 
 #include <dynd/callable.hpp>
 #include <dynd/config.hpp>
-#include <dynd/string_encodings.hpp>
-#include <dynd/type.hpp>
-#include <dynd/types/string_type.hpp>
-#include <dynd/types/option_type.hpp>
 #include <dynd/option.hpp>
 #include <dynd/parse_util.hpp>
+#include <dynd/string_encodings.hpp>
+#include <dynd/type.hpp>
+#include <dynd/types/option_type.hpp>
+#include <dynd/types/string_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -23,8 +23,7 @@ namespace nd {
 
     extern DYND_API callable dynamic_parse;
 
-    inline array parse(const ndt::type &ret_tp, const char *begin, const char *end)
-    {
+    inline array parse(const ndt::type &ret_tp, const char *begin, const char *end) {
       skip_whitespace(begin, end);
 
       ndt::type dst_tp2 = ret_tp;
@@ -40,13 +39,11 @@ namespace nd {
       return ret;
     }
 
-    inline array parse(const ndt::type &ret_tp, const char *begin)
-    {
+    inline array parse(const ndt::type &ret_tp, const char *begin) {
       return parse(ret_tp, begin, begin + std::strlen(begin));
     }
 
-    inline array parse(const ndt::type &ret_tp, const std::string &s)
-    {
+    inline array parse(const ndt::type &ret_tp, const std::string &s) {
       return parse(ret_tp, s.c_str(), s.c_str() + s.size());
     }
 

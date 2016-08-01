@@ -13,13 +13,9 @@ namespace ndt {
 
     DYND_API void discover(ndt::type &res, const char *begin, const char *end);
 
-    inline void discover(ndt::type &res, const std::string &str)
-    {
-      discover(res, str.data(), str.data() + str.size());
-    }
+    inline void discover(ndt::type &res, const std::string &str) { discover(res, str.data(), str.data() + str.size()); }
 
-    inline ndt::type discover(const std::string &str)
-    {
+    inline ndt::type discover(const std::string &str) {
       ndt::type res;
       discover(res, str);
 
@@ -81,32 +77,27 @@ DYND_API nd::array parse_json(const ndt::type &tp, const nd::array &json, const 
  */
 DYND_API void parse_json(nd::array &out, const nd::array &json, const eval::eval_context *ectx);
 
-inline nd::array parse_json(const ndt::type &tp, const std::string &json, const eval::eval_context *ectx)
-{
+inline nd::array parse_json(const ndt::type &tp, const std::string &json, const eval::eval_context *ectx) {
   return parse_json(tp, json.data(), json.data() + json.size(), ectx);
 }
 
-inline void parse_json(nd::array &out, const std::string &json, const eval::eval_context *ectx)
-{
+inline void parse_json(nd::array &out, const std::string &json, const eval::eval_context *ectx) {
   parse_json(out, json.data(), json.data() + json.size(), ectx);
 }
 
 inline nd::array parse_json(const ndt::type &tp, const char *json,
-                            const eval::eval_context *ectx = &eval::default_eval_context)
-{
+                            const eval::eval_context *ectx = &eval::default_eval_context) {
   return parse_json(tp, json, json + strlen(json), ectx);
 }
 
-inline void parse_json(nd::array &out, const char *json, const eval::eval_context *ectx = &eval::default_eval_context)
-{
+inline void parse_json(nd::array &out, const char *json, const eval::eval_context *ectx = &eval::default_eval_context) {
   return parse_json(out, json, json + strlen(json), ectx);
 }
 
 /** Interface to the JSON parser for an input of two string literals */
 template <int M, int N>
 inline nd::array parse_json(const char (&dt)[M], const char (&json)[N],
-                            const eval::eval_context *ectx = &eval::default_eval_context)
-{
+                            const eval::eval_context *ectx = &eval::default_eval_context) {
   return parse_json(ndt::type(dt, dt + M - 1), json, json + N - 1, ectx);
 }
 

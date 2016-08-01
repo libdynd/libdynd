@@ -8,28 +8,26 @@
 #include <string>
 
 #include <dynd/config.hpp>
-#include <dynd/string_encodings.hpp>
-#include <dynd/type.hpp>
-#include <dynd/types/string_type.hpp>
-#include <dynd/types/option_type.hpp>
 #include <dynd/parse_util.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/string_encodings.hpp>
+#include <dynd/type.hpp>
 #include <dynd/types/any_kind_type.hpp>
+#include <dynd/types/option_type.hpp>
+#include <dynd/types/string_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
 // [a-zA-Z_][a-zA-Z0-9_]*
-bool dynd::parse_name_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin, const char *&out_strend)
-{
+bool dynd::parse_name_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin, const char *&out_strend) {
   const char *begin = rbegin;
   if (begin == end) {
     return false;
   }
   if (('a' <= *begin && *begin <= 'z') || ('A' <= *begin && *begin <= 'Z') || *begin == '_') {
     ++begin;
-  }
-  else {
+  } else {
     return false;
   }
   while (begin < end && (('a' <= *begin && *begin <= 'z') || ('A' <= *begin && *begin <= 'Z') ||
@@ -44,16 +42,14 @@ bool dynd::parse_name_no_ws(const char *&rbegin, const char *end, const char *&o
 
 // [a-zA-Z]+
 bool dynd::parse_alpha_name_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin,
-                                  const char *&out_strend)
-{
+                                  const char *&out_strend) {
   const char *begin = rbegin;
   if (begin == end) {
     return false;
   }
   if (('a' <= *begin && *begin <= 'z') || ('A' <= *begin && *begin <= 'Z')) {
     ++begin;
-  }
-  else {
+  } else {
     return false;
   }
   while (begin < end && (('a' <= *begin && *begin <= 'z') || ('A' <= *begin && *begin <= 'Z'))) {
@@ -66,8 +62,7 @@ bool dynd::parse_alpha_name_no_ws(const char *&rbegin, const char *end, const ch
 }
 
 bool dynd::parse_doublequote_string_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin,
-                                          const char *&out_strend, bool &out_escaped)
-{
+                                          const char *&out_strend, bool &out_escaped) {
   bool escaped = false;
   const char *begin = rbegin;
   if (!parse_token_no_ws(begin, end, '\"')) {
@@ -121,8 +116,7 @@ bool dynd::parse_doublequote_string_no_ws(const char *&rbegin, const char *end, 
       default:
         throw parse_error(begin - 2, "invalid escape sequence in string");
       }
-    }
-    else if (c == '"') {
+    } else if (c == '"') {
       out_strbegin = rbegin + 1;
       out_strend = begin - 1;
       out_escaped = escaped;
@@ -132,8 +126,7 @@ bool dynd::parse_doublequote_string_no_ws(const char *&rbegin, const char *end, 
   }
 }
 
-void dynd::unescape_string(const char *strbegin, const char *strend, std::string &out)
-{
+void dynd::unescape_string(const char *strbegin, const char *strend, std::string &out) {
   out.resize(0);
   while (strbegin < strend) {
     char c = *strbegin++;
@@ -173,14 +166,11 @@ void dynd::unescape_string(const char *strbegin, const char *strend, std::string
           cp *= 16;
           if ('0' <= d && d <= '9') {
             cp += d - '0';
-          }
-          else if ('A' <= d && d <= 'F') {
+          } else if ('A' <= d && d <= 'F') {
             cp += d - 'A' + 10;
-          }
-          else if ('a' <= d && d <= 'f') {
+          } else if ('a' <= d && d <= 'f') {
             cp += d - 'a' + 10;
-          }
-          else {
+          } else {
             cp = '?';
           }
         }
@@ -197,14 +187,11 @@ void dynd::unescape_string(const char *strbegin, const char *strend, std::string
           cp *= 16;
           if ('0' <= d && d <= '9') {
             cp += d - '0';
-          }
-          else if ('A' <= d && d <= 'F') {
+          } else if ('A' <= d && d <= 'F') {
             cp += d - 'A' + 10;
-          }
-          else if ('a' <= d && d <= 'f') {
+          } else if ('a' <= d && d <= 'f') {
             cp += d - 'a' + 10;
-          }
-          else {
+          } else {
             cp = '?';
           }
         }
@@ -214,15 +201,13 @@ void dynd::unescape_string(const char *strbegin, const char *strend, std::string
       default:
         out += '?';
       }
-    }
-    else {
+    } else {
       out += c;
     }
   }
 }
 
-bool dynd::json::parse_number(const char *&rbegin, const char *end, const char *&out_nbegin, const char *&out_nend)
-{
+bool dynd::json::parse_number(const char *&rbegin, const char *end, const char *&out_nbegin, const char *&out_nend) {
   const char *begin = rbegin;
   if (begin == end) {
     return false;
@@ -237,14 +222,12 @@ bool dynd::json::parse_number(const char *&rbegin, const char *end, const char *
   // Either '0' or a non-zero digit followed by digits
   if (*begin == '0') {
     ++begin;
-  }
-  else if ('1' <= *begin && *begin <= '9') {
+  } else if ('1' <= *begin && *begin <= '9') {
     ++begin;
     while (begin < end && ('0' <= *begin && *begin <= '9')) {
       ++begin;
     }
-  }
-  else {
+  } else {
     return false;
   }
   // Optional decimal point, followed by one or more digits
@@ -287,8 +270,7 @@ bool dynd::json::parse_number(const char *&rbegin, const char *end, const char *
 }
 
 // [0-9][0-9]
-bool dynd::parse_2digit_int_no_ws(const char *&begin, const char *end, int &out_val)
-{
+bool dynd::parse_2digit_int_no_ws(const char *&begin, const char *end, int &out_val) {
   if (end - begin >= 2) {
     int d0 = begin[0], d1 = begin[1];
     if (d0 >= '0' && d0 <= '9' && d1 >= '0' && d1 <= '9') {
@@ -301,8 +283,7 @@ bool dynd::parse_2digit_int_no_ws(const char *&begin, const char *end, int &out_
 }
 
 // [0-9][0-9]?
-bool dynd::parse_1or2digit_int_no_ws(const char *&begin, const char *end, int &out_val)
-{
+bool dynd::parse_1or2digit_int_no_ws(const char *&begin, const char *end, int &out_val) {
   if (end - begin >= 2) {
     int d0 = begin[0], d1 = begin[1];
     if (d0 >= '0' && d0 <= '9') {
@@ -310,15 +291,13 @@ bool dynd::parse_1or2digit_int_no_ws(const char *&begin, const char *end, int &o
         begin += 2;
         out_val = (d0 - '0') * 10 + (d1 - '0');
         return true;
-      }
-      else {
+      } else {
         ++begin;
         out_val = (d0 - '0');
         return true;
       }
     }
-  }
-  else if (end - begin == 1) {
+  } else if (end - begin == 1) {
     int d0 = begin[0];
     if (d0 >= '0' && d0 <= '9') {
       ++begin;
@@ -330,8 +309,7 @@ bool dynd::parse_1or2digit_int_no_ws(const char *&begin, const char *end, int &o
 }
 
 // [0-9][0-9][0-9][0-9]
-bool dynd::parse_4digit_int_no_ws(const char *&begin, const char *end, int &out_val)
-{
+bool dynd::parse_4digit_int_no_ws(const char *&begin, const char *end, int &out_val) {
   if (end - begin >= 4) {
     int d0 = begin[0], d1 = begin[1], d2 = begin[2], d3 = begin[3];
     if (d0 >= '0' && d0 <= '9' && d1 >= '0' && d1 <= '9' && d2 >= '0' && d2 <= '9' && d3 >= '0' && d3 <= '9') {
@@ -344,8 +322,7 @@ bool dynd::parse_4digit_int_no_ws(const char *&begin, const char *end, int &out_
 }
 
 // [0-9][0-9][0-9][0-9][0-9][0-9]
-bool dynd::parse_6digit_int_no_ws(const char *&begin, const char *end, int &out_val)
-{
+bool dynd::parse_6digit_int_no_ws(const char *&begin, const char *end, int &out_val) {
   if (end - begin >= 6) {
     int d0 = begin[0], d1 = begin[1], d2 = begin[2], d3 = begin[3], d4 = begin[4], d5 = begin[5];
     if (d0 >= '0' && d0 <= '9' && d1 >= '0' && d1 <= '9' && d2 >= '0' && d2 <= '9' && d3 >= '0' && d3 <= '9' &&
@@ -360,8 +337,7 @@ bool dynd::parse_6digit_int_no_ws(const char *&begin, const char *end, int &out_
 }
 
 template <class T>
-static T checked_string_to_signed_int(const char *begin, const char *end)
-{
+static T checked_string_to_signed_int(const char *begin, const char *end) {
   bool negative = false;
   if (begin < end && *begin == '-') {
     negative = true;
@@ -374,24 +350,20 @@ static T checked_string_to_signed_int(const char *begin, const char *end)
     ss.write(begin, end - begin);
     ss << " to " << ndt::make_type<T>();
     throw overflow_error(ss.str());
-  }
-  else {
+  } else {
     return negative ? -static_cast<T>(uvalue) : static_cast<T>(uvalue);
   }
 }
 
-bool dynd::parse_na(const char *begin, const char *end)
-{
+bool dynd::parse_na(const char *begin, const char *end) {
   size_t size = end - begin;
   if (size == 0) {
     return true;
-  }
-  else if (size == 2) {
+  } else if (size == 2) {
     if (begin[0] == 'N' && begin[1] == 'A') {
       return true;
     }
-  }
-  else if (size == 4) {
+  } else if (size == 4) {
     if (((begin[0] == 'N' || begin[0] == 'n') && (begin[1] == 'U' || begin[1] == 'u') &&
          (begin[2] == 'L' || begin[2] == 'l') && (begin[3] == 'L' || begin[3] == 'l'))) {
       return true;
@@ -404,33 +376,27 @@ bool dynd::parse_na(const char *begin, const char *end)
   return false;
 }
 
-bool json::parse_bool(const char *&begin, const char *&end)
-{
+bool json::parse_bool(const char *&begin, const char *&end) {
   bool escaped;
   const char *nbegin;
   const char *nend;
 
   if (parse_token(begin, end, "true")) {
     return true;
-  }
-  else if (parse_token(begin, end, "false")) {
+  } else if (parse_token(begin, end, "false")) {
     return false;
-  }
-  else if (json::parse_number(begin, end, nbegin, nend)) {
+  } else if (json::parse_number(begin, end, nbegin, nend)) {
     if (nend - nbegin == 1) {
       if (*nbegin == '0') {
         return false;
-      }
-      else if (*nbegin == '1') {
+      } else if (*nbegin == '1') {
         return true;
       }
     }
-  }
-  else if (parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
+  } else if (parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
     if (!escaped) {
       return parse<bool>(nbegin, nend);
-    }
-    else {
+    } else {
       std::string s;
       unescape_string(nbegin, nend, s);
       return parse<bool>(s.data(), s.data() + s.size());
