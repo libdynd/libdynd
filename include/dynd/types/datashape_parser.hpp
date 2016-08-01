@@ -45,4 +45,23 @@ DYNDT_API nd::buffer parse_type_constr_args(const char *&rbegin, const char *end
 
 DYNDT_API nd::buffer parse_type_constr_args(const std::string &str);
 
+/**
+ * An internal exception for communicating a parse error location to the outermost parse function, which can then
+ * extract the line and column number for the final error message. Not used to communicate errors to outside code.
+ */
+class DYNDT_API internal_datashape_parse_error {
+  /** The position of the error within the buffer being parsed */
+  const char *m_position;
+  const std::string m_message;
+
+public:
+  internal_datashape_parse_error(const char *position, const std::string &message)
+      : m_position(position), m_message(message) {}
+  internal_datashape_parse_error(const char *position, std::string &&message)
+      : m_position(position), m_message(std::move(message)) {}
+  ~internal_datashape_parse_error() {}
+  const char *get_position() const { return m_position; }
+  const std::string &get_message() const { return m_message; }
+};
+
 } // namespace dynd

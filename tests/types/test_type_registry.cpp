@@ -8,8 +8,8 @@
 #include <stdexcept>
 
 #include <dynd/array.hpp>
-#include <dynd/type.hpp>
 #include <dynd/gtest.hpp>
+#include <dynd/type.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -8,6 +8,7 @@
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/char_type.hpp>
+#include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
@@ -82,6 +83,24 @@ DYNDT_API vector<id_info> &detail::infos() {
                                {"", any_kind_id}};
 
   return infos;
+}
+
+ndt::type default_parse_type_args(type_id_t id, const char *&begin, const char *end,
+                                  std::map<std::string, ndt::type> &symtable) {
+  ndt::type result;
+  const char *saved_begin = begin;
+  nd::buffer args = dynd::parse_type_constr_args(begin, end, symtable);
+  if (!args.is_null()) {
+    const vector<id_info> &infos = detail::infos();
+    try {
+      result = infos[id].construct_type(id, args);
+    } catch (const dynd::dynd_exception &e) {
+      throw dynd::internal_datashape_parse_error(saved_begin, e.what());
+    } catch (const std::exception &e) {
+      throw dynd::internal_datashape_parse_error(saved_begin, e.what());
+    }
+  }
+  return result;
 }
 
 DYNDT_API type_id_t dynd::new_id(const char *name, type_id_t base_id) {
