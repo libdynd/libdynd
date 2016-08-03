@@ -41,25 +41,28 @@ struct id_info {
    */
   ndt::type singleton_type;
   /**
-   * Low-level optimized type arguments parser. Must be equivalent to `dynd::parse_type_constr_args` followed by calling
-   * the type constructor. May be set to `dynd::default_parse_type_args`.
-   *
-   * If this is NULL, then the type cannot be created with a type constructor and requires a singleton type.
-   */
-  low_level_type_args_parse_fn_t parse_type_args;
-  /**
    * High-level generic construction from an nd::buffer of type arguments. Either both `parse_type_args` and
    * `construct_type` must be provided, or both must be NULL.
    *
    * If this is NULL, then the type cannot be created with a type constructor and requires a singleton type.
    */
   type_constructor_fn_t construct_type;
+  /**
+   * Low-level optimized type arguments parser. Must be equivalent to `dynd::parse_type_constr_args` followed by calling
+   * the type constructor. May be set to `dynd::default_parse_type_args`.
+   *
+   * If this is NULL, then the type cannot be created with a type constructor and requires a singleton type.
+   */
+  low_level_type_args_parse_fn_t parse_type_args;
 
   id_info() = default;
   id_info(const id_info &) = default;
   id_info(id_info &&) = default;
 
-  id_info(const char *name, type_id_t base_id) : name(name), base_id(base_id) {}
+  id_info(const char *name, type_id_t base_id, ndt::type &&singleton_type, type_constructor_fn_t construct_type,
+          low_level_type_args_parse_fn_t parse_type_args)
+      : name(name), base_id(base_id), singleton_type(singleton_type), construct_type(construct_type),
+        parse_type_args(parse_type_args) {}
 };
 
 namespace detail {

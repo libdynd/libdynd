@@ -217,11 +217,13 @@ set(libdyndt_SRC
     include/dynd/types/bytes_type.hpp
     include/dynd/types/callable_type.hpp
     include/dynd/types/char_type.hpp
+    include/dynd/types/complex_kind_type.hpp
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
     include/dynd/types/fixed_bytes_type.hpp
     include/dynd/types/fixed_dim_type.hpp
     include/dynd/types/fixed_dim_kind_type.hpp
+    include/dynd/types/pointer_type.hpp
     include/dynd/types/sso_bytestring.hpp
     include/dynd/types/state_type.hpp
     include/dynd/types/string_type.hpp
