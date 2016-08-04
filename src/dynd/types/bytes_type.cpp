@@ -3,9 +3,11 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/bytes_type.hpp>
-#include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/parse_util.hpp>
+#include <dynd/types/bytes_type.hpp>
+#include <dynd/types/datashape_parser.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 
 #include <algorithm>
 
@@ -122,4 +124,30 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::bytes_type::get_d
   properties["target_alignment"] = {ndt::type("size"), reinterpret_cast<const char *>(&m_alignment)};
 
   return properties;
+}
+
+// bytes_type : bytes[align=<alignment>]
+ndt::type ndt::bytes_type::parse_type_args(type_id_t id, const char *&rbegin, const char *end,
+                                           std::map<std::string, ndt::type> &DYND_UNUSED(symtable)) {
+  const char *begin = rbegin;
+  if (datashape::parse_token(begin, end, '[')) {
+    if (datashape::parse_token(begin, end, "align")) {
+      // bytes type with an alignment
+      if (!datashape::parse_token(begin, end, '=')) {
+        throw internal_datashape_parse_error(begin, "expected an =");
+      }
+      std::string align_val = datashape::parse_number(begin, end);
+      if (align_val.empty()) {
+        throw internal_datashape_parse_error(begin, "expected an integer");
+      }
+      if (!datashape::parse_token(begin, end, ']')) {
+        throw internal_datashape_parse_error(begin, "expected closing ']'");
+      }
+      rbegin = begin;
+      return ndt::make_type<ndt::bytes_type>(atoi(align_val.c_str()));
+    }
+    throw internal_datashape_parse_error(begin, "expected 'align'");
+  } else {
+    return ndt::make_type<ndt::bytes_type>(1);
+  }
 }

@@ -13,6 +13,7 @@
 #include <dynd/string_encodings.hpp>
 #include <dynd/type.hpp>
 #include <dynd/types/any_kind_type.hpp>
+#include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/string_type.hpp>
 
@@ -408,4 +409,100 @@ bool json::parse_bool(const char *&begin, const char *&end) {
   ss.write(begin, end - begin);
   ss << " to bool";
   throw std::invalid_argument(ss.str());
+}
+
+bool datashape::parse_quoted_string(const char *&rbegin, const char *end, std::string &out_val) {
+  const char *begin = rbegin;
+  char beginning_quote = 0;
+  out_val = "";
+  if (datashape::parse_token(begin, end, '\'')) {
+    beginning_quote = '\'';
+  } else if (datashape::parse_token(begin, end, '"')) {
+    beginning_quote = '"';
+  } else {
+    return false;
+  }
+  for (;;) {
+    if (begin == end) {
+      begin = rbegin;
+      skip_whitespace_and_pound_comments(begin, end);
+      throw internal_datashape_parse_error(begin, "string has no ending quote");
+    }
+    char c = *begin++;
+    if (c == '\\') {
+      if (begin == end) {
+        begin = rbegin;
+        skip_whitespace_and_pound_comments(begin, end);
+        throw internal_datashape_parse_error(begin, "string has no ending quote");
+      }
+      c = *begin++;
+      switch (c) {
+      case '"':
+      case '\'':
+      case '\\':
+      case '/':
+        out_val += c;
+        break;
+      case 'b':
+        out_val += '\b';
+        break;
+      case 'f':
+        out_val += '\f';
+        break;
+      case 'n':
+        out_val += '\n';
+        break;
+      case 'r':
+        out_val += '\r';
+        break;
+      case 't':
+        out_val += '\t';
+        break;
+      case 'u': {
+        if (end - begin < 4) {
+          throw internal_datashape_parse_error(begin - 2, "invalid unicode escape sequence in string");
+        }
+        uint32_t cp = 0;
+        for (int i = 0; i < 4; ++i) {
+          char d = *begin++;
+          cp *= 16;
+          if ('0' <= d && d <= '9') {
+            cp += d - '0';
+          } else if ('A' <= d && d <= 'F') {
+            cp += d - 'A' + 10;
+          } else if ('a' <= d && d <= 'f') {
+            cp += d - 'a' + 10;
+          } else {
+            throw internal_datashape_parse_error(begin - 1, "invalid unicode escape sequence in string");
+          }
+        }
+        append_utf8_codepoint(cp, out_val);
+        break;
+      }
+      default:
+        throw internal_datashape_parse_error(begin - 2, "invalid escape sequence in string");
+      }
+    } else if (c != beginning_quote) {
+      out_val += c;
+    } else {
+      rbegin = begin;
+      return true;
+    }
+  }
+}
+
+string_encoding_t datashape::string_to_encoding(const char *error_begin, const std::string &estr) {
+  if (estr == "A" || estr == "ascii" || estr == "us-ascii") {
+    return string_encoding_ascii;
+  } else if (estr == "U8" || estr == "utf8" || estr == "utf-8" || estr == "utf_8") {
+    return string_encoding_utf_8;
+  } else if (estr == "U16" || estr == "utf16" || estr == "utf-16" || estr == "utf_16") {
+    return string_encoding_utf_16;
+  } else if (estr == "U32" || estr == "utf32" || estr == "utf-32" || estr == "utf_32") {
+    return string_encoding_utf_32;
+  } else if (estr == "ucs2" || estr == "ucs-2" || estr == "ucs_2") {
+    return string_encoding_ucs_2;
+  } else {
+    throw internal_datashape_parse_error(error_begin, "unrecognized string encoding");
+  }
 }

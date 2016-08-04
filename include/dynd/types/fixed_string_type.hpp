@@ -70,6 +70,9 @@ namespace ndt {
                              const std::string &DYND_UNUSED(indent)) const {}
 
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
+
+    static ndt::type parse_type_args(type_id_t id, const char *&begin, const char *end,
+                                     std::map<std::string, ndt::type> &symtable);
   };
 
   template <>

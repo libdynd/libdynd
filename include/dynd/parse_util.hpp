@@ -328,6 +328,58 @@ inline bool parse_token(char *const *src, const char (&token)[N]) {
   return parse_token(*reinterpret_cast<const char **>(src[0]), *reinterpret_cast<const char **>(src[1]), token);
 }
 
+namespace datashape {
+
+  /**
+   * Skips whitespace according to datashape's definition, then matches the provided literal string token. On success,
+   * returns true and modifies `rbegin` to point after the token. If the token is a single character, use the other
+   * `parse_token` function which accepts a char.
+   *
+   * Example:
+   *     // Match the token "<="
+   *     if (datashape::parse_token(begin, end, "<=")) {
+   *         // Handle <= statement
+   *     } else {
+   *         // No while token found
+   *     }
+   */
+  template <int N>
+  inline bool parse_token(const char *&rbegin, const char *end, const char (&token)[N]) {
+    const char *begin = rbegin;
+    skip_whitespace_and_pound_comments(begin, end);
+    if (N - 1 <= end - begin && memcmp(begin, token, N - 1) == 0) {
+      rbegin = begin + N - 1;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Skips whitespace according to datashape's definition, then matches the provided literal character token. On
+   * success, returns true and modifies `rbegin` to point after the token.
+   *
+   * Example:
+   *     // Match the token "*"
+   *     if (datashape::parse_token(begin, end, '*')) {
+   *         // Handle dimension type concatenation
+   *     } else {
+   *         // No * token found
+   *     }
+   */
+  inline bool parse_token(const char *&rbegin, const char *end, char token) {
+    const char *begin = rbegin;
+    skip_whitespace_and_pound_comments(begin, end);
+    if (1 <= end - begin && *begin == token) {
+      rbegin = begin + 1;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+} // namespace dynd::datashape
+
 /**
  * Without skipping whitespace, matches the provided literal string token. On
  * success, returns true and modifies `rbegin` to point after the token. If the
@@ -434,6 +486,21 @@ bool parse_alpha_name_no_ws(const char *&rbegin, const char *end, const char *&o
 DYNDT_API bool parse_doublequote_string_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin,
                                               const char *&out_strend, bool &out_escaped);
 
+namespace datashape {
+
+  /**
+   * Skip whitespace according to the datashape definition, then parse a quoted string,
+   * either a double-quoted string or a single-quoted string.
+   */
+  DYNDT_API bool parse_quoted_string(const char *&rbegin, const char *end, std::string &out_val);
+
+  /**
+   * Converts a string encoding into its corresponding enum for the string type.
+   */
+  DYNDT_API string_encoding_t string_to_encoding(const char *error_begin, const std::string &estr);
+
+} // namespace dynd::datashape
+
 /**
  * Unescapes the string provided in the byte range into the
  * output string as UTF-8. Typically used with the
@@ -533,6 +600,26 @@ inline bool parse_int_no_ws(const char *&rbegin, const char *end, const char *&o
   }
   return false;
 }
+
+namespace datashape {
+
+  /**
+   * Skips whitespace according to the datashape definition, and parses a number (unsigned integer).
+   * Returns an empty string if there is no match, otherwise a string containing the number.
+   */
+  inline std::string parse_number(const char *&rbegin, const char *end) {
+    const char *begin = rbegin;
+    const char *result_begin, *result_end;
+    // NUMBER
+    skip_whitespace_and_pound_comments(begin, end);
+    if (!parse_unsigned_int_no_ws(begin, end, result_begin, result_end)) {
+      return std::string();
+    }
+    rbegin = begin;
+    return std::string(result_begin, result_end);
+  }
+
+} // namespace dynd::datashape
 
 /**
  * Without skipping whitespace, parses an integer with exactly two digits.

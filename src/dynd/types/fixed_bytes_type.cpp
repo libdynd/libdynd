@@ -5,9 +5,11 @@
 
 #include <algorithm>
 
-#include <dynd/types/fixed_bytes_type.hpp>
-#include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/parse_util.hpp>
+#include <dynd/shape_tools.hpp>
+#include <dynd/types/datashape_parser.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -65,4 +67,39 @@ bool ndt::fixed_bytes_type::operator==(const base_type &rhs) const
     const fixed_bytes_type *dt = static_cast<const fixed_bytes_type *>(&rhs);
     return get_data_size() == dt->get_data_size() && get_data_alignment() == dt->get_data_alignment();
   }
+}
+
+ndt::type ndt::fixed_bytes_type::parse_type_args(type_id_t id, const char *&rbegin, const char *end,
+                                                 std::map<std::string, ndt::type> &DYND_UNUSED(symtable)) {
+  const char *begin = rbegin;
+  if (datashape::parse_token(begin, end, '[')) {
+    std::string size_val = datashape::parse_number(begin, end);
+    if (size_val.empty()) {
+      throw internal_datashape_parse_error(begin, "expected 'align' or an integer");
+    }
+    if (datashape::parse_token(begin, end, ']')) {
+      // Fixed bytes with just a size parameter
+      rbegin = begin;
+      return ndt::make_type<ndt::fixed_bytes_type>(atoi(size_val.c_str()), 1);
+    }
+    if (!datashape::parse_token(begin, end, ',')) {
+      throw internal_datashape_parse_error(begin, "expected closing ']' or another argument");
+    }
+    if (!datashape::parse_token(begin, end, "align")) {
+      throw internal_datashape_parse_error(begin, "expected align= parameter");
+    }
+    if (!datashape::parse_token(begin, end, '=')) {
+      throw internal_datashape_parse_error(begin, "expected an =");
+    }
+    std::string align_val = datashape::parse_number(begin, end);
+    if (align_val.empty()) {
+      throw internal_datashape_parse_error(begin, "expected an integer");
+    }
+    if (!datashape::parse_token(begin, end, ']')) {
+      throw internal_datashape_parse_error(begin, "expected closing ']'");
+    }
+    rbegin = begin;
+    return ndt::make_type<ndt::fixed_bytes_type>(atoi(size_val.c_str()), atoi(align_val.c_str()));
+  }
+  throw internal_datashape_parse_error(begin, "expected opening '['");
 }

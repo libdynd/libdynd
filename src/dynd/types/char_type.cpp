@@ -4,7 +4,9 @@
 //
 
 #include <dynd/exceptions.hpp>
+#include <dynd/parse_util.hpp>
 #include <dynd/types/char_type.hpp>
+#include <dynd/types/datashape_parser.hpp>
 
 #include <algorithm>
 
@@ -61,5 +63,31 @@ bool ndt::char_type::operator==(const base_type &rhs) const {
   } else {
     const char_type *dt = static_cast<const char_type *>(&rhs);
     return m_encoding == dt->m_encoding;
+  }
+}
+
+// char_type : char | char[encoding]
+ndt::type ndt::char_type::parse_type_args(type_id_t id, const char *&rbegin, const char *end,
+                                          std::map<std::string, ndt::type> &DYND_UNUSED(symtable)) {
+  const char *begin = rbegin;
+  if (datashape::parse_token(begin, end, '[')) {
+    const char *saved_begin = begin;
+    std::string encoding_str;
+    if (!datashape::parse_quoted_string(begin, end, encoding_str)) {
+      throw internal_datashape_parse_error(saved_begin, "expected a string encoding");
+    }
+    string_encoding_t encoding;
+    if (!encoding_str.empty()) {
+      encoding = datashape::string_to_encoding(saved_begin, encoding_str);
+    } else {
+      throw internal_datashape_parse_error(begin, "expected string encoding");
+    }
+    if (!datashape::parse_token(begin, end, ']')) {
+      throw internal_datashape_parse_error(begin, "expected closing ']'");
+    }
+    rbegin = begin;
+    return ndt::make_type<ndt::char_type>(encoding);
+  } else {
+    return ndt::make_type<ndt::char_type>();
   }
 }

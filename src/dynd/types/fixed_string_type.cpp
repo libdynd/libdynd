@@ -5,10 +5,12 @@
 
 #include <algorithm>
 
+#include <dynd/exceptions.hpp>
+#include <dynd/parse_util.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/exceptions.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -135,4 +137,43 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::fixed_string_type
   properties["encoding"] = {ndt::type("string"), reinterpret_cast<const char *>(&m_encoding_repr)};
 
   return properties;
+}
+
+// fixed_string_type : fixed_string[NUMBER] |
+//                     fixed_string[NUMBER,'encoding']
+ndt::type ndt::fixed_string_type::parse_type_args(type_id_t id, const char *&rbegin, const char *end,
+                                                  std::map<std::string, ndt::type> &DYND_UNUSED(symtable)) {
+  const char *begin = rbegin;
+  if (datashape::parse_token(begin, end, '[')) {
+    const char *saved_begin = begin;
+    std::string value = datashape::parse_number(begin, end);
+    std::string encoding_str;
+    string_encoding_t encoding = string_encoding_utf_8;
+    int string_size = 0;
+    if (!value.empty()) {
+      string_size = atoi(value.c_str());
+      if (string_size == 0) {
+        throw internal_datashape_parse_error(saved_begin, "string size cannot be zero");
+      }
+      if (datashape::parse_token(begin, end, ',')) {
+        saved_begin = begin;
+        if (!datashape::parse_quoted_string(begin, end, encoding_str)) {
+          throw internal_datashape_parse_error(saved_begin, "expected a string encoding");
+        }
+        encoding = datashape::string_to_encoding(saved_begin, encoding_str);
+      }
+    } else {
+      if (!datashape::parse_quoted_string(begin, end, encoding_str)) {
+        throw internal_datashape_parse_error(saved_begin, "expected a size integer");
+      }
+      encoding = datashape::string_to_encoding(saved_begin, encoding_str);
+    }
+    if (!datashape::parse_token(begin, end, ']')) {
+      throw internal_datashape_parse_error(begin, "expected closing ']'");
+    }
+    rbegin = begin;
+    return ndt::make_type<ndt::fixed_string_type>(string_size, encoding);
+  }
+
+  throw internal_datashape_parse_error(begin, "expected opening '['");
 }

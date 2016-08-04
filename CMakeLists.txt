@@ -223,6 +223,7 @@ set(libdyndt_SRC
     include/dynd/types/fixed_bytes_type.hpp
     include/dynd/types/fixed_dim_type.hpp
     include/dynd/types/fixed_dim_kind_type.hpp
+    include/dynd/types/fixed_string_type.hpp
     include/dynd/types/pointer_type.hpp
     include/dynd/types/sso_bytestring.hpp
     include/dynd/types/state_type.hpp

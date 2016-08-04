@@ -73,4 +73,11 @@ namespace detail {
 
 DYNDT_API type_id_t new_id(const char *name, type_id_t base_id);
 
+/**
+ * Searches for a name in the type id registry, returning the `id_info` corresponding to it.
+ *
+ * \return The type id and its corresponding id_info, uninitialized_id when the name isn't found.
+ */
+DYNDT_API std::pair<type_id_t, const id_info *> lookup_id_by_name(const std::string &name);
+
 } // namespace dynd
