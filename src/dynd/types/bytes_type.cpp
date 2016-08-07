@@ -134,19 +134,19 @@ ndt::type ndt::bytes_type::parse_type_args(type_id_t id, const char *&rbegin, co
     if (datashape::parse_token(begin, end, "align")) {
       // bytes type with an alignment
       if (!datashape::parse_token(begin, end, '=')) {
-        throw internal_datashape_parse_error(begin, "expected an =");
+        throw datashape::internal_parse_error(begin, "expected an =");
       }
       std::string align_val = datashape::parse_number(begin, end);
       if (align_val.empty()) {
-        throw internal_datashape_parse_error(begin, "expected an integer");
+        throw datashape::internal_parse_error(begin, "expected an integer");
       }
       if (!datashape::parse_token(begin, end, ']')) {
-        throw internal_datashape_parse_error(begin, "expected closing ']'");
+        throw datashape::internal_parse_error(begin, "expected closing ']'");
       }
       rbegin = begin;
       return ndt::make_type<ndt::bytes_type>(atoi(align_val.c_str()));
     }
-    throw internal_datashape_parse_error(begin, "expected 'align'");
+    throw datashape::internal_parse_error(begin, "expected 'align'");
   } else {
     return ndt::make_type<ndt::bytes_type>(1);
   }

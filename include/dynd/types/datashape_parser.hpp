@@ -34,34 +34,48 @@ inline ndt::type type_from_datashape(const char (&datashape)[N]) {
   return type_from_datashape(datashape, datashape + N - 1);
 }
 
-/**
- * Low level parsing function for parsing the argument list passed to a datashape type constructor.
- *
- * Returns a NULL nd::array if there is no arg list, and an nd::array with datashape
- *   "{pos: N * arg, kw: {name: arg, ...}}" otherwise.
- */
-DYNDT_API nd::buffer parse_type_constr_args(const char *&rbegin, const char *end,
-                                            std::map<std::string, ndt::type> &symtable);
+namespace datashape {
 
-DYNDT_API nd::buffer parse_type_constr_args(const std::string &str);
+  /**
+   * An internal exception for communicating a parse error location to the outermost parse function, which can then
+   * extract the line and column number for the final error message. Not used to communicate errors to outside code.
+   */
+  class DYNDT_API internal_parse_error {
+    /** The position of the error within the buffer being parsed */
+    const char *m_position;
+    const std::string m_message;
 
-/**
- * An internal exception for communicating a parse error location to the outermost parse function, which can then
- * extract the line and column number for the final error message. Not used to communicate errors to outside code.
- */
-class DYNDT_API internal_datashape_parse_error {
-  /** The position of the error within the buffer being parsed */
-  const char *m_position;
-  const std::string m_message;
+  public:
+    internal_parse_error(const char *position, const std::string &message) : m_position(position), m_message(message) {}
+    internal_parse_error(const char *position, std::string &&message)
+        : m_position(position), m_message(std::move(message)) {}
+    ~internal_parse_error() {}
+    const char *get_position() const { return m_position; }
+    const std::string &get_message() const { return m_message; }
+  };
 
-public:
-  internal_datashape_parse_error(const char *position, const std::string &message)
-      : m_position(position), m_message(message) {}
-  internal_datashape_parse_error(const char *position, std::string &&message)
-      : m_position(position), m_message(std::move(message)) {}
-  ~internal_datashape_parse_error() {}
-  const char *get_position() const { return m_position; }
-  const std::string &get_message() const { return m_message; }
-};
+  /**
+   * Datashape parsing function, for the outermost datashape grammar node. It's the function to call for parsing a type
+   * inside the recursive descent parsing.
+   *
+   * May throw `internal_parse_error` if the datashape partially matches in a way that couldn't be something else, then
+   * has a syntax error.
+   *
+   * \return Either the parsed type or ndt::type if a datashape couldn't be matched.
+   */
+  ndt::type parse(const char *&begin, const char *end, std::map<std::string, ndt::type> &symtable);
+
+  /**
+   * Low level parsing function for parsing the argument list passed to a datashape type constructor.
+   *
+   * Returns a NULL nd::array if there is no arg list, and an nd::array with datashape
+   *   "{pos: N * arg, kw: {name: arg, ...}}" otherwise.
+   */
+  DYNDT_API nd::buffer parse_type_constr_args(const char *&rbegin, const char *end,
+                                              std::map<std::string, ndt::type> &symtable);
+
+  DYNDT_API nd::buffer parse_type_constr_args(const std::string &str);
+
+} // namespace datashape
 
 } // namespace dynd

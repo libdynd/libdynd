@@ -426,14 +426,14 @@ bool datashape::parse_quoted_string(const char *&rbegin, const char *end, std::s
     if (begin == end) {
       begin = rbegin;
       skip_whitespace_and_pound_comments(begin, end);
-      throw internal_datashape_parse_error(begin, "string has no ending quote");
+      throw datashape::internal_parse_error(begin, "string has no ending quote");
     }
     char c = *begin++;
     if (c == '\\') {
       if (begin == end) {
         begin = rbegin;
         skip_whitespace_and_pound_comments(begin, end);
-        throw internal_datashape_parse_error(begin, "string has no ending quote");
+        throw datashape::internal_parse_error(begin, "string has no ending quote");
       }
       c = *begin++;
       switch (c) {
@@ -460,7 +460,7 @@ bool datashape::parse_quoted_string(const char *&rbegin, const char *end, std::s
         break;
       case 'u': {
         if (end - begin < 4) {
-          throw internal_datashape_parse_error(begin - 2, "invalid unicode escape sequence in string");
+          throw datashape::internal_parse_error(begin - 2, "invalid unicode escape sequence in string");
         }
         uint32_t cp = 0;
         for (int i = 0; i < 4; ++i) {
@@ -473,14 +473,14 @@ bool datashape::parse_quoted_string(const char *&rbegin, const char *end, std::s
           } else if ('a' <= d && d <= 'f') {
             cp += d - 'a' + 10;
           } else {
-            throw internal_datashape_parse_error(begin - 1, "invalid unicode escape sequence in string");
+            throw datashape::internal_parse_error(begin - 1, "invalid unicode escape sequence in string");
           }
         }
         append_utf8_codepoint(cp, out_val);
         break;
       }
       default:
-        throw internal_datashape_parse_error(begin - 2, "invalid escape sequence in string");
+        throw datashape::internal_parse_error(begin - 2, "invalid escape sequence in string");
       }
     } else if (c != beginning_quote) {
       out_val += c;
@@ -503,6 +503,6 @@ string_encoding_t datashape::string_to_encoding(const char *error_begin, const s
   } else if (estr == "ucs2" || estr == "ucs-2" || estr == "ucs_2") {
     return string_encoding_ucs_2;
   } else {
-    throw internal_datashape_parse_error(error_begin, "unrecognized string encoding");
+    throw datashape::internal_parse_error(error_begin, "unrecognized string encoding");
   }
 }

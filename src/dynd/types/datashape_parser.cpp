@@ -35,8 +35,6 @@ using namespace dynd;
 // Simple recursive descent parser for a subset of the Blaze datashape grammar.
 // (Blaze grammar modified slightly to work this way)
 
-static ndt::type parse_datashape(const char *&begin, const char *end, map<std::string, ndt::type> &symtable);
-
 static const map<std::string, ndt::type> &builtin_types() {
   static map<std::string, ndt::type> bit;
   if (bit.empty()) {
@@ -72,39 +70,39 @@ static ndt::type parse_fixed_dim_parameters(const char *&rbegin, const char *end
     const char *saved_begin = begin;
     std::string dim_size_str = datashape::parse_number(begin, end);
     if (dim_size_str.empty()) {
-      throw internal_datashape_parse_error(saved_begin, "expected dimension size");
+      throw datashape::internal_parse_error(saved_begin, "expected dimension size");
     }
     intptr_t dim_size = (intptr_t)std::atoll(dim_size_str.c_str());
     if (!datashape::parse_token(begin, end, ']')) {
-      throw internal_datashape_parse_error(begin, "expected closing ']'");
+      throw datashape::internal_parse_error(begin, "expected closing ']'");
     }
     if (!datashape::parse_token(begin, end, '*')) {
-      throw internal_datashape_parse_error(begin, "expected dimension separator '*'");
+      throw datashape::internal_parse_error(begin, "expected dimension separator '*'");
     }
-    ndt::type element_tp = parse_datashape(begin, end, symtable);
+    ndt::type element_tp = datashape::parse(begin, end, symtable);
     if (element_tp.is_null()) {
-      throw internal_datashape_parse_error(begin, "expected element type");
+      throw datashape::internal_parse_error(begin, "expected element type");
     }
     rbegin = begin;
     return ndt::make_fixed_dim(dim_size, element_tp);
   } else {
-    throw internal_datashape_parse_error(begin, "expected opening '['");
+    throw datashape::internal_parse_error(begin, "expected opening '['");
   }
 }
 
 static ndt::type parse_option_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
   const char *begin = rbegin;
   if (!datashape::parse_token(begin, end, '[')) {
-    throw internal_datashape_parse_error(begin, "expected opening '[' after 'option'");
+    throw datashape::internal_parse_error(begin, "expected opening '[' after 'option'");
   }
-  ndt::type tp = parse_datashape(begin, end, symtable);
+  ndt::type tp = datashape::parse(begin, end, symtable);
   if (tp.is_null()) {
-    throw internal_datashape_parse_error(begin, "expected a data type");
+    throw datashape::internal_parse_error(begin, "expected a data type");
   }
   if (!datashape::parse_token(begin, end, ']')) {
-    throw internal_datashape_parse_error(begin, "expected closing ']'");
+    throw datashape::internal_parse_error(begin, "expected closing ']'");
   }
-  // TODO catch errors, convert them to internal_datashape_parse_error so the position is
+  // TODO catch errors, convert them to datashape::internal_parse_error so the position is
   // shown
   rbegin = begin;
   return ndt::make_type<ndt::option_type>(tp);
@@ -116,12 +114,12 @@ static ndt::type parse_complex_parameters(const char *&rbegin, const char *end, 
   const char *begin = rbegin;
   if (datashape::parse_token(begin, end, '[')) {
     const char *saved_begin = begin;
-    ndt::type tp = parse_datashape(begin, end, symtable);
+    ndt::type tp = datashape::parse(begin, end, symtable);
     if (tp.is_null()) {
-      throw internal_datashape_parse_error(begin, "expected a type parameter");
+      throw datashape::internal_parse_error(begin, "expected a type parameter");
     }
     if (!datashape::parse_token(begin, end, ']')) {
-      throw internal_datashape_parse_error(begin, "expected closing ']'");
+      throw datashape::internal_parse_error(begin, "expected closing ']'");
     }
     if (tp.get_id() == float32_id) {
       rbegin = begin;
@@ -130,7 +128,7 @@ static ndt::type parse_complex_parameters(const char *&rbegin, const char *end, 
       rbegin = begin;
       return ndt::make_type<dynd::complex<double>>();
     } else {
-      throw internal_datashape_parse_error(saved_begin, "unsupported real type for complex numbers");
+      throw datashape::internal_parse_error(saved_begin, "unsupported real type for complex numbers");
     }
   } else {
     // Default to complex[double] if no parameters are provided
@@ -145,22 +143,22 @@ static ndt::type parse_cuda_host_parameters(const char *&rbegin, const char *end
   const char *begin = rbegin;
   if (datashape::parse_token(begin, end, '[')) {
 #ifdef DYND_CUDA
-    ndt::type tp = parse_datashape(begin, end, symtable);
+    ndt::type tp = datashape::parse(begin, end, symtable);
     if (tp.is_null()) {
-      throw internal_datashape_parse_error(begin, "expected a type parameter");
+      throw datashape::internal_parse_error(begin, "expected a type parameter");
     }
     if (!datashape::parse_token(begin, end, ']')) {
-      throw internal_datashape_parse_error(begin, "expected closing ']'");
+      throw datashape::internal_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
     return ndt::make_cuda_host(tp);
 #else
     // Silence the unused parameter warning
     symtable.empty();
-    throw internal_datashape_parse_error(begin, "cuda_host type is not available");
+    throw datashape::internal_parse_error(begin, "cuda_host type is not available");
 #endif // DYND_CUDA
   } else {
-    throw internal_datashape_parse_error(begin, "expected opening '['");
+    throw datashape::internal_parse_error(begin, "expected opening '['");
   }
 }
 
@@ -171,38 +169,38 @@ static ndt::type parse_cuda_device_parameters(const char *&rbegin, const char *e
   const char *begin = rbegin;
   if (datashape::parse_token(begin, end, '[')) {
 #ifdef DYND_CUDA
-    ndt::type tp = parse_datashape(begin, end, symtable);
+    ndt::type tp = datashape::parse(begin, end, symtable);
     if (tp.is_null()) {
-      throw internal_datashape_parse_error(begin, "expected a type parameter");
+      throw datashape::internal_parse_error(begin, "expected a type parameter");
     }
     if (!datashape::parse_token(begin, end, ']')) {
-      throw internal_datashape_parse_error(begin, "expected closing ']'");
+      throw datashape::internal_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
     return ndt::make_cuda_device(tp);
 #else
     // Silence the unused parameter warning
     symtable.empty();
-    throw internal_datashape_parse_error(begin, "cuda_device type is not available");
+    throw datashape::internal_parse_error(begin, "cuda_device type is not available");
 #endif // DYND_CUDA
   } else {
-    throw internal_datashape_parse_error(begin, "expected opening '['");
+    throw datashape::internal_parse_error(begin, "expected opening '['");
   }
 }
 
 static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
   const char *begin = rbegin;
   if (!datashape::parse_token(begin, end, '[')) {
-    throw internal_datashape_parse_error(begin, "expected opening '[' after 'pointer'");
+    throw datashape::internal_parse_error(begin, "expected opening '[' after 'pointer'");
   }
-  ndt::type tp = parse_datashape(begin, end, symtable);
+  ndt::type tp = datashape::parse(begin, end, symtable);
   if (tp.is_null()) {
-    throw internal_datashape_parse_error(begin, "expected a data type");
+    throw datashape::internal_parse_error(begin, "expected a data type");
   }
   if (!datashape::parse_token(begin, end, ']')) {
-    throw internal_datashape_parse_error(begin, "expected closing ']'");
+    throw datashape::internal_parse_error(begin, "expected closing ']'");
   }
-  // TODO catch errors, convert them to internal_datashape_parse_error so the position is shown
+  // TODO catch errors, convert them to datashape::internal_parse_error so the position is shown
   rbegin = begin;
   return ndt::make_type<ndt::pointer_type>(tp);
 }
@@ -213,7 +211,7 @@ static nd::buffer parse_datashape_list(const char *&rbegin, const char *end, map
   const char *begin = rbegin;
 
   vector<ndt::type> dlist;
-  ndt::type arg = parse_datashape(begin, end, symtable);
+  ndt::type arg = datashape::parse(begin, end, symtable);
   if (arg.is_null()) {
     return nd::buffer();
   }
@@ -226,9 +224,9 @@ static nd::buffer parse_datashape_list(const char *&rbegin, const char *end, map
         break;
       }
     }
-    arg = parse_datashape(begin, end, symtable);
+    arg = datashape::parse(begin, end, symtable);
     if (arg.is_null()) {
-      throw internal_datashape_parse_error(begin, "Expected a dynd type or a terminating ']'");
+      throw datashape::internal_parse_error(begin, "Expected a dynd type or a terminating ']'");
     }
     dlist.push_back(arg);
   }
@@ -259,7 +257,7 @@ static nd::buffer parse_integer_list(const char *&rbegin, const char *end) {
     }
     skip_whitespace_and_pound_comments(begin, end);
     if (!parse_int_no_ws(begin, end, strbegin, strend)) {
-      throw internal_datashape_parse_error(begin, "Expected an integer or a terminating ']'");
+      throw datashape::internal_parse_error(begin, "Expected an integer or a terminating ']'");
     }
     dlist.push_back(parse<int64_t>(strbegin, strend));
   }
@@ -285,7 +283,7 @@ static nd::buffer parse_string_list(const char *&rbegin, const char *end) {
       }
     }
     if (!datashape::parse_quoted_string(begin, end, str)) {
-      throw internal_datashape_parse_error(begin, "Expected a string");
+      throw datashape::internal_parse_error(begin, "Expected a string");
     }
     dlist.push_back(str);
   }
@@ -335,7 +333,7 @@ static nd::buffer parse_type_arg(const char *&rbegin, const char *end, map<std::
     return result;
   }
 
-  ndt::type tp = parse_datashape(begin, end, symtable);
+  ndt::type tp = datashape::parse(begin, end, symtable);
   if (!tp.is_null()) {
     rbegin = begin;
     return tp;
@@ -410,7 +408,8 @@ static nd::buffer move_concatenate_arg_buffers(vector<nd::buffer> &pos_args, con
 //                 | type_kwarg
 // type_kwarg : NAME_LOWER EQUAL type_arg
 // type_constr_args : LBRACKET type_arg_list RBRACKET
-nd::buffer dynd::parse_type_constr_args(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
+nd::buffer datashape::parse_type_constr_args(const char *&rbegin, const char *end,
+                                             map<std::string, ndt::type> &symtable) {
   nd::buffer result;
 
   const char *begin = rbegin;
@@ -444,7 +443,7 @@ nd::buffer dynd::parse_type_constr_args(const char *&rbegin, const char *end, ma
     // Parse one positional argument
     nd::buffer arg = parse_type_arg(begin, end, symtable);
     if (arg.is_null()) {
-      throw internal_datashape_parse_error(saved_begin, "Expected a positional or keyword type argument");
+      throw datashape::internal_parse_error(saved_begin, "Expected a positional or keyword type argument");
     }
     pos_args.push_back(arg);
     if (!datashape::parse_token(begin, end, ',')) {
@@ -461,20 +460,20 @@ nd::buffer dynd::parse_type_constr_args(const char *&rbegin, const char *end, ma
       const char *saved_begin = begin;
       skip_whitespace_and_pound_comments(begin, end);
       if (!parse_name_no_ws(begin, end, field_name_begin, field_name_end)) {
-        throw internal_datashape_parse_error(saved_begin, "Expected a keyword name or terminating ']'");
+        throw datashape::internal_parse_error(saved_begin, "Expected a keyword name or terminating ']'");
       }
       if (!datashape::parse_token(begin, end, ':')) {
-        throw internal_datashape_parse_error(begin, "Expected ':' between keyword name and parameter");
+        throw datashape::internal_parse_error(begin, "Expected ':' between keyword name and parameter");
       }
       nd::buffer arg = parse_type_arg(begin, end, symtable);
       if (arg.is_null()) {
-        throw internal_datashape_parse_error(begin, "Expected keyword argument value");
+        throw datashape::internal_parse_error(begin, "Expected keyword argument value");
       }
       kw_args.push_back(arg);
       kw_names.push_back(std::string(field_name_begin, field_name_end));
       if (!datashape::parse_token(begin, end, ',')) {
         if (!datashape::parse_token(begin, end, ']')) {
-          throw internal_datashape_parse_error(begin, "Expected a ',' or ']'");
+          throw datashape::internal_parse_error(begin, "Expected a ',' or ']'");
         } else {
           break;
         }
@@ -502,11 +501,11 @@ static bool parse_struct_item_bare(const char *&rbegin, const char *end, map<std
     return false;
   }
   if (!datashape::parse_token(begin, end, ':')) {
-    throw internal_datashape_parse_error(begin, "expected ':' after record item name");
+    throw datashape::internal_parse_error(begin, "expected ':' after record item name");
   }
-  out_field_type = parse_datashape(begin, end, symtable);
+  out_field_type = datashape::parse(begin, end, symtable);
   if (out_field_type.is_null()) {
-    throw internal_datashape_parse_error(begin, "expected a data type");
+    throw datashape::internal_parse_error(begin, "expected a data type");
   }
 
   out_field_name.assign(field_name_begin, field_name_end);
@@ -541,11 +540,11 @@ static bool parse_struct_item_general(const char *&rbegin, const char *end, map<
     return false;
   }
   if (!datashape::parse_token(begin, end, ':')) {
-    throw internal_datashape_parse_error(begin, "expected ':' after record item name");
+    throw datashape::internal_parse_error(begin, "expected ':' after record item name");
   }
-  out_field_type = parse_datashape(begin, end, symtable);
+  out_field_type = datashape::parse(begin, end, symtable);
   if (out_field_type.is_null()) {
-    throw internal_datashape_parse_error(begin, "expected a data type");
+    throw datashape::internal_parse_error(begin, "expected a data type");
   }
 
   if (!quoted_name) {
@@ -582,7 +581,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end, map<std::str
   for (;;) {
     if (datashape::parse_token(begin, end, "...")) {
       if (!datashape::parse_token(begin, end, '}')) {
-        throw internal_datashape_parse_error(begin, "expected '}'");
+        throw datashape::internal_parse_error(begin, "expected '}'");
       }
       variadic = true;
       break;
@@ -594,7 +593,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end, map<std::str
       field_name_list.push_back(field_name);
       field_type_list.push_back(field_type);
     } else {
-      throw internal_datashape_parse_error(saved_begin, "expected a record item");
+      throw datashape::internal_parse_error(saved_begin, "expected a record item");
     }
 
     if (datashape::parse_token(begin, end, ',')) {
@@ -604,7 +603,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end, map<std::str
     } else if (datashape::parse_token(begin, end, '}')) {
       break;
     } else {
-      throw internal_datashape_parse_error(begin, "expected ',' or '}'");
+      throw datashape::internal_parse_error(begin, "expected ',' or '}'");
     }
   }
 
@@ -625,7 +624,7 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end, map<
     // Check for variadic ending
     if (datashape::parse_token(begin, end, "...")) {
       if (!datashape::parse_token(begin, end, ')')) {
-        throw internal_datashape_parse_error(begin, "expected ',' or ')' in callable prototype");
+        throw datashape::internal_parse_error(begin, "expected ',' or ')' in callable prototype");
       }
       variadic = true;
       break;
@@ -637,7 +636,7 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end, map<
       field_name_list.push_back(field_name);
       field_type_list.push_back(field_type);
     } else {
-      throw internal_datashape_parse_error(saved_begin, "expected a kwd arg in callable prototype");
+      throw datashape::internal_parse_error(saved_begin, "expected a kwd arg in callable prototype");
     }
 
     if (datashape::parse_token(begin, end, ',')) {
@@ -647,7 +646,7 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end, map<
     } else if (datashape::parse_token(begin, end, ')')) {
       break;
     } else {
-      throw internal_datashape_parse_error(begin, "expected ',' or ')' in callable prototype");
+      throw datashape::internal_parse_error(begin, "expected ',' or ')' in callable prototype");
     }
   }
 
@@ -689,16 +688,16 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
               return ndt::make_type<ndt::tuple_type>(field_type_list.size(), field_type_list.data());
             }
 
-            ndt::type return_type = parse_datashape(begin, end, symtable);
+            ndt::type return_type = datashape::parse(begin, end, symtable);
             if (return_type.is_null()) {
-              throw internal_datashape_parse_error(begin, "expected function prototype return type");
+              throw datashape::internal_parse_error(begin, "expected function prototype return type");
             }
             rbegin = begin;
             return ndt::make_type<ndt::callable_type>(
                 return_type, ndt::make_type<ndt::tuple_type>(field_type_list.size(), field_type_list.data(), variadic),
                 funcproto_kwd);
           } else {
-            throw internal_datashape_parse_error(begin, "expected funcproto keyword arguments");
+            throw datashape::internal_parse_error(begin, "expected funcproto keyword arguments");
           }
         }
       }
@@ -714,12 +713,12 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
       }
       begin = saved_begin;
 
-      tp = parse_datashape(begin, end, symtable);
+      tp = datashape::parse(begin, end, symtable);
 
       if (tp.get_id() != uninitialized_id) {
         field_type_list.push_back(tp);
       } else {
-        throw internal_datashape_parse_error(begin, "expected a type");
+        throw datashape::internal_parse_error(begin, "expected a type");
       }
 
       if (datashape::parse_token(begin, end, ',')) {
@@ -729,7 +728,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
       } else if (datashape::parse_token(begin, end, ')')) {
         break;
       } else {
-        throw internal_datashape_parse_error(begin, "expected ',' or ')'");
+        throw datashape::internal_parse_error(begin, "expected ',' or ')'");
       }
     }
   }
@@ -740,9 +739,9 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
     return ndt::make_type<ndt::tuple_type>(field_type_list.size(), field_type_list.data(), variadic);
   }
 
-  ndt::type return_type = parse_datashape(begin, end, symtable);
+  ndt::type return_type = datashape::parse(begin, end, symtable);
   if (return_type.is_null()) {
-    throw internal_datashape_parse_error(begin, "expected function prototype return type");
+    throw datashape::internal_parse_error(begin, "expected function prototype return type");
   }
   rbegin = begin;
   // TODO: I suspect because of the change away from immutable default
@@ -772,9 +771,9 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
         if ('1' <= *nbegin && *nbegin <= '9') {
           intptr_t exponent = parse<intptr_t>(nbegin, nend);
           if (!datashape::parse_token(begin, end, '*')) {
-            throw internal_datashape_parse_error(begin, "expected a '*' after dimensional power");
+            throw datashape::internal_parse_error(begin, "expected a '*' after dimensional power");
           }
-          ndt::type element_tp = parse_datashape(begin, end, symtable);
+          ndt::type element_tp = datashape::parse(begin, end, symtable);
           if ('0' <= *bbegin && *bbegin <= '9') {
             intptr_t dim_size = parse<intptr_t>(bbegin, bend);
             result = ndt::pow(ndt::make_fixed_dim(dim_size, element_tp), exponent);
@@ -785,7 +784,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
           } else if (isupper(*bbegin)) {
             result = ndt::pow(ndt::make_type<ndt::typevar_dim_type>(std::string(bbegin, bend), element_tp), exponent);
           } else {
-            throw internal_datashape_parse_error(bbegin, "invalid dimension type for base of dimensional power");
+            throw datashape::internal_parse_error(bbegin, "invalid dimension type for base of dimensional power");
           }
         } else if (isupper(*nbegin)) {
           std::string exponent_name(nbegin, nend);
@@ -793,32 +792,32 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
             if ('0' <= *bbegin && *bbegin <= '9') {
               intptr_t dim_size = parse<intptr_t>(bbegin, bend);
               result = ndt::make_type<ndt::pow_dimsym_type>(ndt::make_fixed_dim(dim_size, ndt::make_type<void>()),
-                                                            exponent_name, parse_datashape(begin, end, symtable));
+                                                            exponent_name, datashape::parse(begin, end, symtable));
             } else if (compare_range_to_literal(bbegin, bend, "var")) {
               result = ndt::make_type<ndt::pow_dimsym_type>(ndt::make_type<ndt::var_dim_type>(ndt::make_type<void>()),
-                                                            exponent_name, parse_datashape(begin, end, symtable));
+                                                            exponent_name, datashape::parse(begin, end, symtable));
             } else if (compare_range_to_literal(bbegin, bend, "Fixed")) {
               result =
                   ndt::make_type<ndt::pow_dimsym_type>(ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<void>()),
-                                                       exponent_name, parse_datashape(begin, end, symtable));
+                                                       exponent_name, datashape::parse(begin, end, symtable));
             } else if (isupper(*bbegin)) {
               result = ndt::make_type<ndt::pow_dimsym_type>(
                   ndt::make_type<ndt::typevar_dim_type>(std::string(bbegin, bend), ndt::make_type<void>()),
-                  exponent_name, parse_datashape(begin, end, symtable));
+                  exponent_name, datashape::parse(begin, end, symtable));
             } else {
-              throw internal_datashape_parse_error(bbegin, "invalid dimension type for base of dimensional power");
+              throw datashape::internal_parse_error(bbegin, "invalid dimension type for base of dimensional power");
             }
           }
         } else {
-          throw internal_datashape_parse_error(begin, "expected a number or a typevar symbol");
+          throw datashape::internal_parse_error(begin, "expected a number or a typevar symbol");
         }
       } else {
-        throw internal_datashape_parse_error(begin, "expected a number or a typevar symbol");
+        throw datashape::internal_parse_error(begin, "expected a number or a typevar symbol");
       }
     } else if (datashape::parse_token(begin, end, '*')) {
-      ndt::type element_tp = parse_datashape(begin, end, symtable);
+      ndt::type element_tp = datashape::parse(begin, end, symtable);
       if (element_tp.is_null()) {
-        throw internal_datashape_parse_error(begin, "expected a dynd type");
+        throw datashape::internal_parse_error(begin, "expected a dynd type");
       }
       // No type constructor args, just a dim type
       if ('0' <= *nbegin && *nbegin <= '9') {
@@ -832,19 +831,19 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
         result = ndt::make_type<ndt::typevar_dim_type>(std::string(nbegin, nend), element_tp);
       } else {
         skip_whitespace_and_pound_comments(rbegin, end);
-        throw internal_datashape_parse_error(rbegin, "unrecognized dimension type");
+        throw datashape::internal_parse_error(rbegin, "unrecognized dimension type");
       }
     } else if (datashape::parse_token(begin, end, "...")) { // ELLIPSIS
       // A named ellipsis dim
       if (datashape::parse_token(begin, end, '*')) { // ASTERISK
         // An unnamed ellipsis dim
-        ndt::type element_tp = parse_datashape(begin, end, symtable);
+        ndt::type element_tp = datashape::parse(begin, end, symtable);
         if (element_tp.is_null()) {
-          throw internal_datashape_parse_error(begin, "expected a dynd type");
+          throw datashape::internal_parse_error(begin, "expected a dynd type");
         }
         result = ndt::make_type<ndt::ellipsis_dim_type>(std::string(nbegin, nend), element_tp);
       } else {
-        throw internal_datashape_parse_error(begin, "expected a '*'");
+        throw datashape::internal_parse_error(begin, "expected a '*'");
       }
     } else if (compare_range_to_literal(nbegin, nend, "complex")) {
       result = parse_complex_parameters(begin, end, symtable);
@@ -878,50 +877,50 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
           if (begin > end && *begin == '[') {
             if (ii.second->construct_type == nullptr) {
               skip_whitespace_and_pound_comments(rbegin, end);
-              throw internal_datashape_parse_error(rbegin, "this data type does not accept arguments");
+              throw datashape::internal_parse_error(rbegin, "this data type does not accept arguments");
             } else if (ii.second->parse_type_args != nullptr) {
               result = ii.second->parse_type_args(ii.first, begin, end, symtable);
             } else {
               // Both `construct_type` and `parse_type_args` must be there or not, raise an error for types where this
               // is not the case.
               skip_whitespace_and_pound_comments(rbegin, end);
-              throw internal_datashape_parse_error(rbegin, "internal type registry for this type is inconsistent");
+              throw datashape::internal_parse_error(rbegin, "internal type registry for this type is inconsistent");
             }
           } else if (!ii.second->singleton_type.is_null()) {
             result = ii.second->singleton_type;
           } else {
             skip_whitespace_and_pound_comments(rbegin, end);
-            throw internal_datashape_parse_error(rbegin, "this data type requires arguments");
+            throw datashape::internal_parse_error(rbegin, "this data type requires arguments");
           }
         } else if (isupper(*nbegin)) {
           if (!datashape::parse_token(begin, end, '[')) {
             result = ndt::make_type<ndt::typevar_type>(std::string(nbegin, nend));
           } else {
-            ndt::type arg_tp = parse_datashape(begin, end, symtable);
+            ndt::type arg_tp = datashape::parse(begin, end, symtable);
             if (arg_tp.is_null()) {
-              throw internal_datashape_parse_error(begin, "expected a dynd type");
+              throw datashape::internal_parse_error(begin, "expected a dynd type");
             }
             if (!datashape::parse_token(begin, end, ']')) {
-              throw internal_datashape_parse_error(begin, "expected closing ']'");
+              throw datashape::internal_parse_error(begin, "expected closing ']'");
             }
             result = ndt::make_type<ndt::typevar_constructed_type>(std::string(nbegin, nend), arg_tp);
           }
         } else {
           skip_whitespace_and_pound_comments(rbegin, end);
-          throw internal_datashape_parse_error(rbegin, "unrecognized data type");
+          throw datashape::internal_parse_error(rbegin, "unrecognized data type");
         }
       }
     }
   } else if (parse_token_no_ws(begin, end, "...")) {
     // An unnamed ellipsis dim
     if (datashape::parse_token(begin, end, '*')) { // ASTERISK
-      ndt::type element_type = parse_datashape(begin, end, symtable);
+      ndt::type element_type = datashape::parse(begin, end, symtable);
       if (element_type.is_null()) {
-        throw internal_datashape_parse_error(begin, "expected a dynd type");
+        throw datashape::internal_parse_error(begin, "expected a dynd type");
       }
       result = ndt::make_type<ndt::ellipsis_dim_type>(element_type);
     } else {
-      throw internal_datashape_parse_error(begin, "expected a '*'");
+      throw datashape::internal_parse_error(begin, "expected a '*'");
     }
   }
   // struct
@@ -943,7 +942,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
 // This is what parses a single datashape as an ndt::type
 //    datashape : datashape_nooption
 //              | QUESTIONMARK datashape_nooption
-static ndt::type parse_datashape(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
+ndt::type datashape::parse(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
   const char *begin = rbegin;
   skip_whitespace_and_pound_comments(begin, end);
   if (parse_token_no_ws(begin, end, '?')) {
@@ -984,32 +983,32 @@ static ndt::type parse_stmt(const char *&rbegin, const char *end, map<std::strin
         rbegin = begin;
         return bit.find("type")->second;
       } else {
-        throw internal_datashape_parse_error(saved_begin, "expected an identifier for a type name");
+        throw datashape::internal_parse_error(saved_begin, "expected an identifier for a type name");
       }
     }
     if (!datashape::parse_token(begin, end, '=')) {
-      throw internal_datashape_parse_error(begin, "expected an '='");
+      throw datashape::internal_parse_error(begin, "expected an '='");
     }
-    ndt::type result = parse_datashape(begin, end, symtable);
+    ndt::type result = datashape::parse(begin, end, symtable);
     if (result.is_null()) {
-      throw internal_datashape_parse_error(begin, "expected a data type");
+      throw datashape::internal_parse_error(begin, "expected a data type");
     }
     std::string tname(tname_begin, tname_end);
     // ACTION: Put the parsed type in the symbol table
     if (bit.find(tname) != bit.end()) {
       skip_whitespace_and_pound_comments(saved_begin, end);
-      throw internal_datashape_parse_error(saved_begin, "cannot redefine a builtin type");
+      throw datashape::internal_parse_error(saved_begin, "cannot redefine a builtin type");
     }
     if (symtable.find(tname) != symtable.end()) {
       skip_whitespace_and_pound_comments(saved_begin, end);
-      throw internal_datashape_parse_error(saved_begin, "type name already defined in datashape string");
+      throw datashape::internal_parse_error(saved_begin, "type name already defined in datashape string");
     }
     symtable[tname] = result;
     rbegin = begin;
     return result;
   } else {
     // stmt : rhs_expression
-    return parse_datashape(rbegin, end, symtable);
+    return datashape::parse(rbegin, end, symtable);
   }
 }
 
@@ -1017,14 +1016,14 @@ static ndt::type parse_stmt(const char *&rbegin, const char *end, map<std::strin
 static ndt::type parse_top(const char *&begin, const char *end, map<std::string, ndt::type> &symtable) {
   ndt::type result = parse_stmt(begin, end, symtable);
   if (result.is_null()) {
-    throw internal_datashape_parse_error(begin, "expected a datashape statement");
+    throw datashape::internal_parse_error(begin, "expected a datashape statement");
   }
   for (;;) {
     ndt::type next = parse_stmt(begin, end, symtable);
     if (next.is_null()) {
       skip_whitespace_and_pound_comments(begin, end);
       if (begin != end) {
-        throw internal_datashape_parse_error(begin, "unexpected token in datashape");
+        throw datashape::internal_parse_error(begin, "unexpected token in datashape");
       }
       return result;
     } else {
@@ -1073,7 +1072,7 @@ ndt::type dynd::type_from_datashape(const char *datashape_begin, const char *dat
     // Parse the datashape and construct the type
     const char *begin = datashape_begin, *end = datashape_end;
     return parse_top(begin, end, symtable);
-  } catch (const internal_datashape_parse_error &e) {
+  } catch (const datashape::internal_parse_error &e) {
     stringstream ss;
     std::string line_prev, line_cur;
     int line, column;
@@ -1092,14 +1091,14 @@ ndt::type dynd::type_from_datashape(const char *datashape_begin, const char *dat
   }
 }
 
-nd::buffer dynd::parse_type_constr_args(const std::string &str) {
+nd::buffer datashape::parse_type_constr_args(const std::string &str) {
   nd::buffer result;
   std::map<std::string, ndt::type> symtable;
   if (!str.empty()) {
     const char *begin = &str[0], *end = &str[0] + str.size();
     try {
       result = parse_type_constr_args(begin, end, symtable);
-    } catch (const internal_datashape_parse_error &e) {
+    } catch (const datashape::internal_parse_error &e) {
       stringstream ss;
       std::string line_prev, line_cur;
       int line, column;

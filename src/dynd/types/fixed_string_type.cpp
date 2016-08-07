@@ -153,27 +153,27 @@ ndt::type ndt::fixed_string_type::parse_type_args(type_id_t id, const char *&rbe
     if (!value.empty()) {
       string_size = atoi(value.c_str());
       if (string_size == 0) {
-        throw internal_datashape_parse_error(saved_begin, "string size cannot be zero");
+        throw datashape::internal_parse_error(saved_begin, "string size cannot be zero");
       }
       if (datashape::parse_token(begin, end, ',')) {
         saved_begin = begin;
         if (!datashape::parse_quoted_string(begin, end, encoding_str)) {
-          throw internal_datashape_parse_error(saved_begin, "expected a string encoding");
+          throw datashape::internal_parse_error(saved_begin, "expected a string encoding");
         }
         encoding = datashape::string_to_encoding(saved_begin, encoding_str);
       }
     } else {
       if (!datashape::parse_quoted_string(begin, end, encoding_str)) {
-        throw internal_datashape_parse_error(saved_begin, "expected a size integer");
+        throw datashape::internal_parse_error(saved_begin, "expected a size integer");
       }
       encoding = datashape::string_to_encoding(saved_begin, encoding_str);
     }
     if (!datashape::parse_token(begin, end, ']')) {
-      throw internal_datashape_parse_error(begin, "expected closing ']'");
+      throw datashape::internal_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
     return ndt::make_type<ndt::fixed_string_type>(string_size, encoding);
   }
 
-  throw internal_datashape_parse_error(begin, "expected opening '['");
+  throw datashape::internal_parse_error(begin, "expected opening '['");
 }

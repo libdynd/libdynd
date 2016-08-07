@@ -74,16 +74,16 @@ ndt::type ndt::char_type::parse_type_args(type_id_t id, const char *&rbegin, con
     const char *saved_begin = begin;
     std::string encoding_str;
     if (!datashape::parse_quoted_string(begin, end, encoding_str)) {
-      throw internal_datashape_parse_error(saved_begin, "expected a string encoding");
+      throw datashape::internal_parse_error(saved_begin, "expected a string encoding");
     }
     string_encoding_t encoding;
     if (!encoding_str.empty()) {
       encoding = datashape::string_to_encoding(saved_begin, encoding_str);
     } else {
-      throw internal_datashape_parse_error(begin, "expected string encoding");
+      throw datashape::internal_parse_error(begin, "expected string encoding");
     }
     if (!datashape::parse_token(begin, end, ']')) {
-      throw internal_datashape_parse_error(begin, "expected closing ']'");
+      throw datashape::internal_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
     return ndt::make_type<ndt::char_type>(encoding);

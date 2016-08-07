@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/parse_util.hpp>
 #include <dynd/type_registry.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/bool_kind_type.hpp>
@@ -94,17 +95,26 @@ DYNDT_API vector<id_info> &detail::infos() {
 
 ndt::type default_parse_type_args(type_id_t id, const char *&begin, const char *end,
                                   std::map<std::string, ndt::type> &symtable) {
-  ndt::type result;
+  ndt::type result, element_type;
   const char *saved_begin = begin;
-  nd::buffer args = dynd::parse_type_constr_args(begin, end, symtable);
+  nd::buffer args = datashape::parse_type_constr_args(begin, end, symtable);
   if (!args.is_null()) {
+    // If there's a '*', there needs to be a following element type.
+    if (datashape::parse_token(begin, end, '*')) {
+      const char *eltype_saved_begin = begin;
+      element_type = datashape::parse(begin, end, symtable);
+      if (element_type.is_null()) {
+        skip_whitespace_and_pound_comments(begin, end);
+        throw datashape::internal_parse_error(eltype_saved_begin, "Expected an element type");
+      }
+    }
     const vector<id_info> &infos = detail::infos();
     try {
-      result = infos[id].construct_type(id, args);
+      result = infos[id].construct_type(id, args, element_type);
     } catch (const dynd::dynd_exception &e) {
-      throw dynd::internal_datashape_parse_error(saved_begin, e.what());
+      throw datashape::internal_parse_error(saved_begin, e.what());
     } catch (const std::exception &e) {
-      throw dynd::internal_datashape_parse_error(saved_begin, e.what());
+      throw datashape::internal_parse_error(saved_begin, e.what());
     }
   }
   return result;

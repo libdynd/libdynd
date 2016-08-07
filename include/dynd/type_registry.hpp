@@ -13,15 +13,20 @@ namespace dynd {
 
 /**
  * Function prototype for a function which parses the type constructor arguments. It is called on the range of bytes
- * starting from the '[' character.
+ * starting from the '[' character. If there is a '*' after the corresponding ']', this function is responsible
+ * for handling it.
  */
 typedef ndt::type (*low_level_type_args_parse_fn_t)(type_id_t id, const char *&begin, const char *end,
                                                     std::map<std::string, ndt::type> &symtable);
 /**
- * Function prototype for a type constructor. The provided argument is a tuple containing a tuple of positional
- * arguments and a struct of keyword arguments, as is produced by `dynd::parse_type_constr_args`.
+ * Function prototype for a type constructor.
+ *
+ * \param id  The type id of of the type being constructed.
+ * \param args  The type constructor arguments. e.g. as produced by `dynd::parse_type_constr_args`.
+ * \param element_type  Provided if and only if the type is being constructed as a dimension type, is the
+ *                      element type of the dimension.
  */
-typedef ndt::type (*type_constructor_fn_t)(type_id_t id, const nd::buffer &args);
+typedef ndt::type (*type_constructor_fn_t)(type_id_t id, const nd::buffer &args, const ndt::type &element_type);
 
 /**
  * Default mechanism for parsing type arguments, when an optimized version is not implemented. It parses the type

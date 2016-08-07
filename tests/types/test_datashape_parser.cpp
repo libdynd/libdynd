@@ -747,20 +747,20 @@ static std::string to_str(const nd::array &a) {
 
 TEST(DataShapeParser, TypeConstructorArgs) {
   nd::array a, b;
-  EXPECT_JSON_EQ_ARR("[[], {}]", parse_type_constr_args("[]"));
-  EXPECT_JSON_EQ_ARR("[[3, -10, \"test\"], {}]", parse_type_constr_args("[3, -10, \"test\"]"));
+  EXPECT_JSON_EQ_ARR("[[], {}]", datashape::parse_type_constr_args("[]"));
+  EXPECT_JSON_EQ_ARR("[[3, -10, \"test\"], {}]", datashape::parse_type_constr_args("[3, -10, \"test\"]"));
   // The following currently raises a broadcast error in equality testing
-  b = parse_type_constr_args("[3, -10, \"test\", first:int32, second:[1,2,3]]");
+  b = datashape::parse_type_constr_args("[3, -10, \"test\", first:int32, second:[1,2,3]]");
   a = parse_json(b.get_type(), "[[3, -10, \"test\"], [\"int32\", [1,2,3]]]");
   EXPECT_EQ(to_str(a), to_str(b));
   EXPECT_JSON_EQ_ARR("[[3, -10, \"test\"], [\"int32\", \"blah\"]]",
-                     parse_type_constr_args("[3, -10, \"test\", first:int32, second:\"blah\"]"));
+                     datashape::parse_type_constr_args("[3, -10, \"test\", first:int32, second:\"blah\"]"));
   // The following currently raises a broadcast error in equality testing
-  b = parse_type_constr_args("[[1, 2, 3], [2 * int32, float32, 3 * int8], [\"x\", \"yz\"]]");
+  b = datashape::parse_type_constr_args("[[1, 2, 3], [2 * int32, float32, 3 * int8], [\"x\", \"yz\"]]");
   a = parse_json(b.get_type(), "[[[1, 2, 3], [\"2 * int32\", \"float32\", \"3 * int8\"], [\"x\", \"yz\"]], []]");
   EXPECT_EQ(to_str(a), to_str(b));
   // The following currently raises a broadcast error in equality testing
-  b = parse_type_constr_args("[[1, 2, 3], x: [2 * int32, float32, 3 * int8], y: [\"x\", \"yz\"]]");
+  b = datashape::parse_type_constr_args("[[1, 2, 3], x: [2 * int32, float32, 3 * int8], y: [\"x\", \"yz\"]]");
   a = parse_json(b.get_type(), "[[[1, 2, 3]], [[\"2 * int32\", \"float32\", \"3 * int8\"], [\"x\", \"yz\"]]]");
   EXPECT_EQ(to_str(a), to_str(b));
 }

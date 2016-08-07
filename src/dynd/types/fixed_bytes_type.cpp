@@ -75,7 +75,7 @@ ndt::type ndt::fixed_bytes_type::parse_type_args(type_id_t id, const char *&rbeg
   if (datashape::parse_token(begin, end, '[')) {
     std::string size_val = datashape::parse_number(begin, end);
     if (size_val.empty()) {
-      throw internal_datashape_parse_error(begin, "expected 'align' or an integer");
+      throw datashape::internal_parse_error(begin, "expected 'align' or an integer");
     }
     if (datashape::parse_token(begin, end, ']')) {
       // Fixed bytes with just a size parameter
@@ -83,23 +83,23 @@ ndt::type ndt::fixed_bytes_type::parse_type_args(type_id_t id, const char *&rbeg
       return ndt::make_type<ndt::fixed_bytes_type>(atoi(size_val.c_str()), 1);
     }
     if (!datashape::parse_token(begin, end, ',')) {
-      throw internal_datashape_parse_error(begin, "expected closing ']' or another argument");
+      throw datashape::internal_parse_error(begin, "expected closing ']' or another argument");
     }
     if (!datashape::parse_token(begin, end, "align")) {
-      throw internal_datashape_parse_error(begin, "expected align= parameter");
+      throw datashape::internal_parse_error(begin, "expected align= parameter");
     }
     if (!datashape::parse_token(begin, end, '=')) {
-      throw internal_datashape_parse_error(begin, "expected an =");
+      throw datashape::internal_parse_error(begin, "expected an =");
     }
     std::string align_val = datashape::parse_number(begin, end);
     if (align_val.empty()) {
-      throw internal_datashape_parse_error(begin, "expected an integer");
+      throw datashape::internal_parse_error(begin, "expected an integer");
     }
     if (!datashape::parse_token(begin, end, ']')) {
-      throw internal_datashape_parse_error(begin, "expected closing ']'");
+      throw datashape::internal_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
     return ndt::make_type<ndt::fixed_bytes_type>(atoi(size_val.c_str()), atoi(align_val.c_str()));
   }
-  throw internal_datashape_parse_error(begin, "expected opening '['");
+  throw datashape::internal_parse_error(begin, "expected opening '['");
 }
