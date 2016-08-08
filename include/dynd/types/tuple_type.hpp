@@ -129,7 +129,12 @@ namespace ndt {
     tuple_type(type_id_t id, std::initializer_list<type> element_tp, bool variadic = false)
         : tuple_type(id, element_tp.size(), element_tp.begin(), variadic, type_flag_none) {}
 
+    tuple_type(std::initializer_list<type> element_tp, bool variadic = false)
+        : tuple_type(tuple_id, element_tp, variadic) {}
+
     tuple_type(type_id_t id, bool variadic = false) : tuple_type(id, 0, nullptr, variadic, type_flag_none) {}
+
+    tuple_type(bool variadic = false) : tuple_type(tuple_id, variadic) {}
 
     intptr_t get_field_count() const { return m_field_count; }
     const ndt::type get_type() const { return ndt::type_for(m_field_types); }

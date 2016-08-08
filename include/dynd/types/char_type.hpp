@@ -65,6 +65,9 @@ namespace ndt {
     void arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
     void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
                              const std::string &DYND_UNUSED(indent)) const {}
+
+    static ndt::type parse_type_args(type_id_t id, const char *&begin, const char *end,
+                                     std::map<std::string, ndt::type> &symtable);
   };
 
   template <>

@@ -217,11 +217,14 @@ set(libdyndt_SRC
     include/dynd/types/bytes_type.hpp
     include/dynd/types/callable_type.hpp
     include/dynd/types/char_type.hpp
+    include/dynd/types/complex_kind_type.hpp
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
     include/dynd/types/fixed_bytes_type.hpp
     include/dynd/types/fixed_dim_type.hpp
     include/dynd/types/fixed_dim_kind_type.hpp
+    include/dynd/types/fixed_string_type.hpp
+    include/dynd/types/pointer_type.hpp
     include/dynd/types/sso_bytestring.hpp
     include/dynd/types/state_type.hpp
     include/dynd/types/string_type.hpp
@@ -256,15 +259,20 @@ set(libdyndt_SRC
     src/dynd/type_promotion.cpp
     src/dynd/type_registry.cpp
     src/dynd/uint128.cpp
+    include/dynd/buffer.hpp
     include/dynd/bytes.hpp
+    include/dynd/config.hpp
+    include/dynd/exceptions.hpp
     include/dynd/float16.hpp
     include/dynd/float128.hpp
+    include/dynd/git_version.hpp
     include/dynd/int128.hpp
-    include/dynd/exceptions.hpp
     include/dynd/parse.hpp
+    include/dynd/parse_util.hpp
     include/dynd/shape_tools.hpp
     include/dynd/string_encodings.hpp
     include/dynd/type.hpp
+    include/dynd/type_promotion.hpp
     include/dynd/type_registry.hpp
     include/dynd/uint128.hpp
 )
@@ -297,6 +305,7 @@ set(libdynd_SRC
     include/dynd/kernels/dereference_kernel.hpp
     include/dynd/kernels/elwise_kernel.hpp
     include/dynd/kernels/index_kernel.hpp
+    include/dynd/kernels/init_kernel.hpp
     include/dynd/kernels/is_na_kernel.hpp
     include/dynd/kernels/kernel_builder.hpp
     include/dynd/kernels/kernel_prefix.hpp
@@ -381,10 +390,10 @@ set(libdynd_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
     include/dynd/comparison.hpp
     include/dynd/complex.hpp
-    include/dynd/config.hpp
     include/dynd/cling_all.hpp
     include/dynd/convert.hpp
     include/dynd/diagnostics.hpp
+    include/dynd/dispatcher.hpp
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/reduction.hpp
@@ -401,7 +410,6 @@ set(libdynd_SRC
     include/dynd/string.hpp
     include/dynd/string_search.hpp
     include/dynd/type_sequence.hpp
-    include/dynd/type_promotion.hpp
     include/dynd/exceptions.hpp
     include/dynd/fpstatus.hpp
     include/dynd/functional.hpp

@@ -53,14 +53,20 @@ namespace nd {
   public:
     using buffer::buffer;
 
+    /** Constructs an array with no data. */
     array() = default;
 
     array(const array &values, const ndt::type &tp)
-        : buffer(empty_buffer((values.get_type().get_ndim() == tp.get_ndim())
-                                  ? tp
-                                  : values.get_type().with_replaced_dtype(tp, tp.get_ndim()))) {
+        : buffer((values.get_type().get_ndim() == tp.get_ndim())
+                     ? tp
+                     : values.get_type().with_replaced_dtype(tp, tp.get_ndim()),
+                 buffer_empty_init_tag()) {
       assign(values);
     }
+
+    /** Construct an array from a typed buffer */
+    array(const nd::buffer &buf) : buffer(buf) {}
+    array(nd::buffer &&buf) : buffer(std::forward<nd::buffer>(buf)) {}
 
     /**
      * Accesses a dynamic property of the array.
@@ -68,7 +74,6 @@ namespace nd {
      * \param name  The property to access.
      */
     array p(const char *name) const;
-
     array p(const std::string &name) const;
 
     /**
@@ -366,6 +371,7 @@ namespace nd {
     friend DYND_API std::ostream &operator<<(std::ostream &o, const array &rhs);
     friend class array_vals;
     friend class array_vals_at;
+    friend array make_array(const ndt::type &tp, uint64_t flags);
   };
 
   DYND_API array tuple(size_t size, const array *vals);
@@ -767,12 +773,7 @@ namespace nd {
       throw type_error(ss.str());
     }
 
-    size_t data_offset = inc_to_alignment(sizeof(buffer_memory_block) + tp.get_arrmeta_size(), tp.get_data_alignment());
-    size_t data_size = tp.get_default_data_size();
-
-    return array(new (data_offset + data_size - sizeof(buffer_memory_block))
-                     buffer_memory_block(tp, data_offset, data_size, flags),
-                 false);
+    return array(tp, flags, buffer::buffer_empty_init_tag());
   }
 
   inline array make_array(const ndt::type &tp, char *data, uint64_t flags) {
