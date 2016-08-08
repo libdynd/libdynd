@@ -49,6 +49,8 @@ TEST(DataShapeParser, Basic) {
   EXPECT_EQ(ndt::make_type<int32_t>(), ndt::type("int"));
   EXPECT_EQ(ndt::make_type<double>(), ndt::type("real"));
   EXPECT_EQ(ndt::make_type<dynd::complex<double>>(), ndt::type("complex"));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<int8>()), ndt::type("Fixed * int8"));
+  EXPECT_EQ(ndt::make_type<ndt::dim_kind_type>(ndt::make_type<int8>()), ndt::type("Dim * int8"));
 }
 
 TEST(DataShapeParser, BasicThrow) {

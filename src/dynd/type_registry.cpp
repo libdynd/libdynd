@@ -55,7 +55,7 @@ DYNDT_API vector<id_info> &detail::infos() {
       {"complex32", complex_kind_id, ndt::make_type<complex<float>>(), nullptr, nullptr},
       {"complex64", complex_kind_id, ndt::make_type<complex<double>>(), nullptr, nullptr},
       {"void", scalar_kind_id, ndt::make_type<void>(), nullptr, nullptr},
-      {"Dim", any_kind_id, ndt::make_type<ndt::dim_kind_type>(), nullptr, nullptr},
+      {"Dim", any_kind_id, ndt::make_type<void>(), &ndt::dim_kind_type::construct_type, nullptr},
       {"Bytes", scalar_kind_id, ndt::make_type<ndt::bytes_kind_type>(), nullptr, nullptr},
       {"FixedBytes", bytes_kind_id, ndt::make_type<ndt::fixed_bytes_kind_type>(), nullptr, nullptr},
       {"fixed_bytes", fixed_bytes_kind_id, ndt::type(), nullptr, &ndt::fixed_bytes_type::parse_type_args},

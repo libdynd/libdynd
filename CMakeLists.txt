@@ -183,6 +183,7 @@ set(libdyndt_SRC
     src/dynd/types/datashape_formatter.cpp
     src/dynd/types/datashape_parser.cpp
     src/dynd/types/dim_fragment_type.cpp
+    src/dynd/types/dim_kind_type.cpp
     src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/fixed_bytes_kind_type.cpp
     src/dynd/types/fixed_bytes_type.cpp
@@ -220,6 +221,7 @@ set(libdyndt_SRC
     include/dynd/types/complex_kind_type.hpp
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
+    include/dynd/types/dim_kind_type.hpp
     include/dynd/types/fixed_bytes_type.hpp
     include/dynd/types/fixed_dim_type.hpp
     include/dynd/types/fixed_dim_kind_type.hpp
