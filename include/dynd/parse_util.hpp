@@ -378,6 +378,12 @@ namespace datashape {
     }
   }
 
+  /**
+   * Skips whitespace according to datashape's definition, then peeks for the provided literal character token. On
+   * success, returns true. Unlike `parse_token`, it does not modify the `begin` parameter.
+   */
+  inline bool peek_token(const char *begin, const char *end, char token) { return parse_token(begin, end, token); }
+
 } // namespace dynd::datashape
 
 /**

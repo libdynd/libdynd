@@ -69,7 +69,7 @@ bool ndt::fixed_bytes_type::operator==(const base_type &rhs) const
   }
 }
 
-ndt::type ndt::fixed_bytes_type::parse_type_args(type_id_t id, const char *&rbegin, const char *end,
+ndt::type ndt::fixed_bytes_type::parse_type_args(type_id_t DYND_UNUSED(id), const char *&rbegin, const char *end,
                                                  std::map<std::string, ndt::type> &DYND_UNUSED(symtable)) {
   const char *begin = rbegin;
   if (datashape::parse_token(begin, end, '[')) {

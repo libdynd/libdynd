@@ -141,7 +141,7 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::fixed_string_type
 
 // fixed_string_type : fixed_string[NUMBER] |
 //                     fixed_string[NUMBER,'encoding']
-ndt::type ndt::fixed_string_type::parse_type_args(type_id_t id, const char *&rbegin, const char *end,
+ndt::type ndt::fixed_string_type::parse_type_args(type_id_t DYND_UNUSED(id), const char *&rbegin, const char *end,
                                                   std::map<std::string, ndt::type> &DYND_UNUSED(symtable)) {
   const char *begin = rbegin;
   if (datashape::parse_token(begin, end, '[')) {

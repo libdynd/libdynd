@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/buffer.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
@@ -164,4 +165,12 @@ ndt::fixed_dim_kind_type::get_dynamic_type_properties() const {
 
 ndt::type ndt::fixed_dim_kind_type::with_element_type(const type &element_tp) const {
   return make_type<fixed_dim_kind_type>(element_tp);
+}
+
+ndt::type ndt::fixed_dim_kind_type::construct_type(type_id_t DYND_UNUSED(id), const nd::buffer &args,
+                                                   const ndt::type &element_type) {
+  if (!args.is_null()) {
+    throw invalid_argument("Fixed dimension kind does not accept arguments");
+  }
+  return ndt::make_type<ndt::fixed_dim_kind_type>(element_type);
 }

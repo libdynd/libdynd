@@ -197,6 +197,8 @@ namespace ndt {
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
     virtual type with_element_type(const type &element_tp) const;
+
+    static ndt::type construct_type(type_id_t id, const nd::buffer &args, const ndt::type &element_type);
   };
 
   template <>

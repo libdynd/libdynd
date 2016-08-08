@@ -67,7 +67,7 @@ DYNDT_API vector<id_info> &detail::infos() {
       {"string", string_kind_id, ndt::make_type<dynd::string>(), nullptr, nullptr},
       {"tuple", scalar_kind_id, ndt::type(), nullptr, nullptr},
       {"struct", scalar_kind_id, ndt::type(), nullptr, nullptr},
-      {"Fixed", dim_kind_id, ndt::type(), nullptr, nullptr},
+      {"Fixed", dim_kind_id, ndt::type(), &ndt::fixed_dim_kind_type::construct_type, nullptr},
       {"fixed", fixed_dim_kind_id, ndt::type(), nullptr, nullptr},
       {"var", dim_kind_id, ndt::type(), nullptr, nullptr},
       {"categorical", scalar_kind_id, ndt::type(), nullptr, nullptr},
@@ -105,7 +105,7 @@ ndt::type default_parse_type_args(type_id_t id, const char *&begin, const char *
       element_type = datashape::parse(begin, end, symtable);
       if (element_type.is_null()) {
         skip_whitespace_and_pound_comments(begin, end);
-        throw datashape::internal_parse_error(eltype_saved_begin, "Expected an element type");
+        throw datashape::internal_parse_error(eltype_saved_begin, "expected a dynd type");
       }
     }
     const vector<id_info> &infos = detail::infos();

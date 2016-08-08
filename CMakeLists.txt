@@ -393,6 +393,7 @@ set(libdynd_SRC
     include/dynd/cling_all.hpp
     include/dynd/convert.hpp
     include/dynd/diagnostics.hpp
+    include/dynd/dispatcher.hpp
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/reduction.hpp

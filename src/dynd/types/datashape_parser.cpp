@@ -38,6 +38,7 @@ using namespace dynd;
 static const map<std::string, ndt::type> &builtin_types() {
   static map<std::string, ndt::type> bit;
   if (bit.empty()) {
+    bit["int"] = ndt::make_type<int>();
     bit["intptr"] = ndt::make_type<intptr_t>();
     bit["uintptr"] = ndt::make_type<uintptr_t>();
     bit["size"] = ndt::make_type<size_t>();
@@ -825,13 +826,22 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
         result = ndt::make_fixed_dim(size, element_tp);
       } else if (compare_range_to_literal(nbegin, nend, "var")) {
         result = ndt::make_type<ndt::var_dim_type>(element_tp);
-      } else if (compare_range_to_literal(nbegin, nend, "Fixed")) {
-        result = ndt::make_type<ndt::fixed_dim_kind_type>(element_tp);
-      } else if (isupper(*nbegin)) {
-        result = ndt::make_type<ndt::typevar_dim_type>(std::string(nbegin, nend), element_tp);
       } else {
-        skip_whitespace_and_pound_comments(rbegin, end);
-        throw datashape::internal_parse_error(rbegin, "unrecognized dimension type");
+        auto ii = lookup_id_by_name(std::string(nbegin, nend));
+        if (ii.first != uninitialized_id) {
+          if (ii.second->construct_type != nullptr) {
+            // Call the type constructor with no arguments and the element type
+            result = ii.second->construct_type(ii.first, nd::buffer(), element_tp);
+          } else {
+            skip_whitespace_and_pound_comments(rbegin, end);
+            throw datashape::internal_parse_error(rbegin, "unrecognized dimension type");
+          }
+        } else if (isupper(*nbegin)) {
+          result = ndt::make_type<ndt::typevar_dim_type>(std::string(nbegin, nend), element_tp);
+        } else {
+          skip_whitespace_and_pound_comments(rbegin, end);
+          throw datashape::internal_parse_error(rbegin, "unrecognized dimension type");
+        }
       }
     } else if (datashape::parse_token(begin, end, "...")) { // ELLIPSIS
       // A named ellipsis dim
@@ -872,19 +882,15 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       } else {
         auto ii = lookup_id_by_name(n);
         if (ii.first != uninitialized_id) {
-          skip_whitespace_and_pound_comments(begin, end);
           // Peek ahead for the '[' to determine whether arguments are there to parse
-          if (begin > end && *begin == '[') {
-            if (ii.second->construct_type == nullptr) {
-              skip_whitespace_and_pound_comments(rbegin, end);
-              throw datashape::internal_parse_error(rbegin, "this data type does not accept arguments");
-            } else if (ii.second->parse_type_args != nullptr) {
+          if (datashape::peek_token(begin, end, '[')) {
+            if (ii.second->parse_type_args != nullptr) {
               result = ii.second->parse_type_args(ii.first, begin, end, symtable);
             } else {
               // Both `construct_type` and `parse_type_args` must be there or not, raise an error for types where this
               // is not the case.
               skip_whitespace_and_pound_comments(rbegin, end);
-              throw datashape::internal_parse_error(rbegin, "internal type registry for this type is inconsistent");
+              throw datashape::internal_parse_error(rbegin, "this dynd type does not accept arguments");
             }
           } else if (!ii.second->singleton_type.is_null()) {
             result = ii.second->singleton_type;
@@ -995,7 +1001,7 @@ static ndt::type parse_stmt(const char *&rbegin, const char *end, map<std::strin
     }
     std::string tname(tname_begin, tname_end);
     // ACTION: Put the parsed type in the symbol table
-    if (bit.find(tname) != bit.end()) {
+    if (bit.find(tname) != bit.end() || lookup_id_by_name(tname).first != uninitialized_id) {
       skip_whitespace_and_pound_comments(saved_begin, end);
       throw datashape::internal_parse_error(saved_begin, "cannot redefine a builtin type");
     }
