@@ -32,10 +32,12 @@ namespace nd {
       init.contiguous(m_ptr->m_data, values, size);
     }
 
-  protected:
-    /** Tag to distinguish the protected value initialization constructors */
+  public:
+    /** Tag to distinguish the protected value initialization constructors (public because of warnings building with
+     * asan) */
     struct buffer_empty_init_tag {};
 
+  protected:
     /** Internal constructor. Initializes the buffer memory via one allocation, including the data aligned as needed */
     buffer(const ndt::type &tp, size_t data_offset, size_t data_size, uint64_t flags, buffer_empty_init_tag)
         : intrusive_ptr(new (data_offset + data_size - sizeof(buffer_memory_block))
