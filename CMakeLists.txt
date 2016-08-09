@@ -387,11 +387,13 @@ set(libdynd_SRC
     include/dynd/arrmeta_holder.hpp
     include/dynd/asarray.hpp
     include/dynd/assignment.hpp
+    include/dynd/binary_arithmetic.hpp
     include/dynd/callable.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
     include/dynd/comparison.hpp
     include/dynd/complex.hpp
+    include/dynd/compound_arithmetic.hpp
     include/dynd/cling_all.hpp
     include/dynd/convert.hpp
     include/dynd/diagnostics.hpp

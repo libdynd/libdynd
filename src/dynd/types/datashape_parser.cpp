@@ -1093,7 +1093,7 @@ ndt::type dynd::type_from_datashape(const char *datashape_begin, const char *dat
       ss << " ";
     }
     ss << "^\n";
-    throw runtime_error(ss.str());
+    throw dynd::type_error(ss.str());
   }
 }
 
@@ -1119,13 +1119,13 @@ nd::buffer datashape::parse_type_constr_args(const std::string &str) {
         ss << " ";
       }
       ss << "^\n";
-      throw runtime_error(ss.str());
+      throw dynd::type_error(ss.str());
     }
   }
   if (result.is_null()) {
     stringstream ss;
     ss << "Cannot parse \"" << str << "\" as a dynd type";
-    throw runtime_error(ss.str());
+    throw dynd::type_error(ss.str());
   }
 
   return result;

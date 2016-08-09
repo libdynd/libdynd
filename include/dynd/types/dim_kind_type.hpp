@@ -25,6 +25,8 @@ namespace ndt {
 
     void print_type(std::ostream &o) const;
 
+    type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
+
     intptr_t get_dim_size(const char *arrmeta, const char *data) const;
 
     type with_element_type(const type &element_tp) const;

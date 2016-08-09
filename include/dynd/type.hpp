@@ -241,9 +241,9 @@ namespace ndt {
      */
     bool match(const ndt::type &candidate_tp, std::map<std::string, ndt::type> &tp_vars) const;
 
-    bool match(const type &other) const {
+    bool match(const type &candidate_tp) const {
       std::map<std::string, type> tp_vars;
-      return match(other, tp_vars);
+      return match(candidate_tp, tp_vars);
     }
 
     /**

@@ -54,8 +54,8 @@ TEST(DataShapeParser, Basic) {
 }
 
 TEST(DataShapeParser, BasicThrow) {
-  EXPECT_THROW(ndt::type("boot"), runtime_error);
-  EXPECT_THROW(ndt::type("int33"), runtime_error);
+  EXPECT_THROW(ndt::type("boot"), dynd::type_error);
+  EXPECT_THROW(ndt::type("int33"), dynd::type_error);
 }
 
 TEST(DataShapeParser, StringAtoms) {
@@ -194,7 +194,7 @@ TEST(DataShapeParser, ErrorBasic) {
   try {
     ndt::type("float65");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 1") != std::string::npos);
     EXPECT_TRUE(msg.find("unrecognized data type") != std::string::npos);
@@ -202,7 +202,7 @@ TEST(DataShapeParser, ErrorBasic) {
   try {
     ndt::type("float64+");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 8") != std::string::npos);
     EXPECT_TRUE(msg.find("unexpected token") != std::string::npos);
@@ -210,7 +210,7 @@ TEST(DataShapeParser, ErrorBasic) {
   try {
     ndt::type("3 * int32 * float64");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 5") != std::string::npos);
     EXPECT_TRUE(msg.find("unrecognized dimension type") != std::string::npos);
@@ -221,7 +221,7 @@ TEST(DataShapeParser, ErrorString) {
   try {
     ndt::type("fixed_string[");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 14") != std::string::npos);
     EXPECT_TRUE(msg.find("expected a size integer") != std::string::npos);
@@ -229,7 +229,7 @@ TEST(DataShapeParser, ErrorString) {
   try {
     ndt::type("fixed_string[0]");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 14") != std::string::npos);
     EXPECT_TRUE(msg.find("string size cannot be zero") != std::string::npos);
@@ -237,7 +237,7 @@ TEST(DataShapeParser, ErrorString) {
   try {
     ndt::type("fixed_string[3,'U8',10]");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 20") != std::string::npos);
     EXPECT_TRUE(msg.find("expected closing ']'") != std::string::npos);
@@ -245,7 +245,7 @@ TEST(DataShapeParser, ErrorString) {
   try {
     ndt::type("fixed_string[3,3]");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 16") != std::string::npos);
     EXPECT_TRUE(msg.find("expected a string encoding") != std::string::npos);
@@ -260,7 +260,7 @@ TEST(DataShapeParser, ErrorRecord) {
               "   amount: invalidtype\n"
               "}\n");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 2, column 13") != std::string::npos);
     EXPECT_TRUE(msg.find("expected ',' or '}'") != std::string::npos);
@@ -272,7 +272,7 @@ TEST(DataShapeParser, ErrorRecord) {
               "   amount: invalidtype;\n"
               "}\n");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 4, column 12") != std::string::npos);
     EXPECT_TRUE(msg.find("unrecognized data type") != std::string::npos);
@@ -284,7 +284,7 @@ TEST(DataShapeParser, ErrorRecord) {
               "   amount: %,\n"
               "}\n");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 4, column 11") != std::string::npos);
     EXPECT_TRUE(msg.find("expected a data type") != std::string::npos);
@@ -296,7 +296,7 @@ TEST(DataShapeParser, ErrorRecord) {
               "   amount+ float32,\n"
               "}\n");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 4, column 10") != std::string::npos);
     EXPECT_TRUE(msg.find("expected ':'") != std::string::npos);
@@ -308,7 +308,7 @@ TEST(DataShapeParser, ErrorRecord) {
               "   amount: float32,\n"
               "}\n");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     // The name field works as a funcproto until it hits the '}' token
     EXPECT_TRUE(msg.find("line 4, column 20") != std::string::npos);
@@ -322,7 +322,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
               "type 33 = int32\n"
               "2, int32\n");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 2, column 5") != std::string::npos);
     EXPECT_TRUE(msg.find("expected an identifier") != std::string::npos);
@@ -332,7 +332,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
               "type MyInt - int32\n"
               "2, MyInt\n");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 2, column 11") != std::string::npos);
     EXPECT_TRUE(msg.find("expected an '='") != std::string::npos);
@@ -342,7 +342,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
               "type MyInt = &\n"
               "2 * MyInt\n");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 2, column 13") != std::string::npos);
     EXPECT_TRUE(msg.find("expected a data type") != std::string::npos);
@@ -352,7 +352,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
               "type int32 = int64\n"
               "2 * int32\n");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 2, column 6") != std::string::npos);
     EXPECT_TRUE(msg.find("cannot redefine") != std::string::npos);
@@ -363,7 +363,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
               "type MyInt = int32\n"
               "2 * MyInt\n");
     EXPECT_TRUE(false);
-  } catch (const runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 3, column 6") != std::string::npos);
     EXPECT_TRUE(msg.find("type name already defined") != std::string::npos);
@@ -716,7 +716,7 @@ TEST(DataShapeParser, SpecialCharacterFields) {
   try {
     ndt::type d = ndt::type("{ bad name : int }");
     EXPECT_TRUE(false);
-  } catch (std::runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("Error parsing datashape at line 1, column 6") != std::string::npos);
     EXPECT_TRUE(msg.find("Message: expected ':' after record item name") != std::string::npos);
@@ -725,7 +725,7 @@ TEST(DataShapeParser, SpecialCharacterFields) {
   try {
     ndt::type d = ndt::type("{ name(foo) : int }");
     EXPECT_TRUE(false);
-  } catch (std::runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("Error parsing datashape at line 1, column 7") != std::string::npos);
     EXPECT_TRUE(msg.find("Message: expected ':' after record item name") != std::string::npos);
@@ -734,7 +734,7 @@ TEST(DataShapeParser, SpecialCharacterFields) {
   try {
     ndt::type d = ndt::type("{ name\' : int }");
     EXPECT_TRUE(false);
-  } catch (std::runtime_error &e) {
+  } catch (const dynd::type_error &e) {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("Error parsing datashape at line 1, column 7") != std::string::npos);
     EXPECT_TRUE(msg.find("Message: expected ':' after record item name") != std::string::npos);

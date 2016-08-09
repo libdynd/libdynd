@@ -32,8 +32,9 @@ nd::callable make_binary_arithmetic() {
   dispatcher.insert({nd::functional::forward_na<0>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("Any")}),
                      nd::functional::forward_na<1>(ndt::type("Any"), {ndt::type("Any"), ndt::type("?Any")}),
                      nd::functional::forward_na<0, 1>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("?Any")}),
-                     nd::get_elwise(ndt::type("(Dim, Scalar) -> Any")),
-                     nd::get_elwise(ndt::type("(Scalar, Dim) -> Any")), nd::get_elwise(ndt::type("(Dim, Dim) -> Any")),
+                     nd::get_elwise(ndt::type("(Dim * Any, Scalar) -> Any")),
+                     nd::get_elwise(ndt::type("(Scalar, Dim * Any) -> Any")),
+                     nd::get_elwise(ndt::type("(Dim * Any, Dim * Any) -> Any")),
                      nd::get_elwise(ndt::type("(Scalar, Scalar) -> Any"))});
 
   return nd::make_callable<nd::multidispatch_callable<2>>(tp, dispatcher);

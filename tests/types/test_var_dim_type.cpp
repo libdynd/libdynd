@@ -289,7 +289,7 @@ TEST(VarArrayDType, AssignKernel) {
   a = 9.0;
   b = parse_json("var * int32", "[3, 5, 7]");
   EXPECT_EQ(var_dim_id, b.get_type().get_id());
-  EXPECT_THROW(a.assign(b), runtime_error);
+  EXPECT_THROW(a.assign(b), dynd::broadcast_error);
 
   // Error assignment initialized var array -> initialized var array
   a = nd::empty(ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>()));

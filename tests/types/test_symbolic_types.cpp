@@ -237,3 +237,18 @@ TEST(SymbolicTypes, VariadicCallable) {
   EXPECT_EQ(ndt::type("{shape: 3 * intptr}"), tp.extended<ndt::callable_type>()->get_kwd_struct());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }
+
+TEST(SymbolicTypes, Kinds) {
+  EXPECT_TYPE_MATCH("Dim * Any", "Dim * Any");
+  EXPECT_TYPE_MATCH("Dim * Any", "Dim * int32");
+  EXPECT_TYPE_MATCH("Dim * Any", "3 * int32");
+  EXPECT_TYPE_MATCH("Dim * Any", "3 * var * int32");
+  EXPECT_FALSE(ndt::type("Dim * int32").match(ndt::type("Dim * Any")));
+  EXPECT_TYPE_MATCH("Dim * int32", "Dim * int32");
+  EXPECT_TYPE_MATCH("Dim * int32", "Fixed * int32");
+  EXPECT_TYPE_MATCH("Dim * int32", "3 * int32");
+  EXPECT_TYPE_MATCH("Fixed * int32", "3 * int32");
+  EXPECT_TYPE_MATCH("T * int32", "Dim * int32");
+  EXPECT_TYPE_MATCH("Dim * int32", "T * int32");
+  EXPECT_THROW(ndt::type("Dim"), dynd::type_error);
+}

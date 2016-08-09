@@ -100,8 +100,9 @@ nd::callable make_assign() {
   dispatcher.insert(nd::make_callable<nd::assign_callable<double, dynd::string>>());
   dispatcher.insert(nd::make_callable<nd::assign_callable<ndt::tuple_type, ndt::tuple_type>>());
   dispatcher.insert(nd::make_callable<nd::assign_callable<ndt::struct_type, ndt::struct_type>>());
-  dispatcher.insert({nd::get_elwise(ndt::type("(Dim) -> Scalar")), nd::get_elwise(ndt::type("(Scalar) -> Dim")),
-                     nd::get_elwise(ndt::type("(Dim) -> Dim"))});
+  dispatcher.insert({nd::get_elwise(ndt::type("(Dim * Any) -> Scalar")),
+                     nd::get_elwise(ndt::type("(Scalar) -> Dim * Any")),
+                     nd::get_elwise(ndt::type("(Dim * Any) -> Dim * Any"))});
 
   return nd::make_callable<nd::multidispatch_callable<2>>(self_tp, dispatcher);
 }

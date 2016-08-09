@@ -17,7 +17,7 @@ ndt::dim_kind_type::dim_kind_type(type_id_t id, const type &element_tp)
 }
 
 bool ndt::dim_kind_type::match(const type &candidate_tp, std::map<std::string, type> &DYND_UNUSED(tp_vars)) const {
-  return candidate_tp.get_ndim() > 0 && candidate_tp.get_type_at_dimension(NULL, 1).match(m_element_tp);
+  return candidate_tp.get_ndim() > 0 && m_element_tp.match(candidate_tp.get_type_at_dimension(NULL, 1));
 }
 
 void ndt::dim_kind_type::print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),
@@ -33,6 +33,15 @@ ndt::dim_kind_type::arrmeta_copy_construct_onedim(char *DYND_UNUSED(dst_arrmeta)
   stringstream ss;
   ss << "Cannot copy construct arrmeta for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
+}
+
+ndt::type ndt::dim_kind_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta), intptr_t i,
+                                                    intptr_t total_ndim) const {
+  if (i == 0) {
+    return type(this, true);
+  } else {
+    return m_element_tp.get_type_at_dimension(NULL, i - 1, total_ndim + 1);
+  }
 }
 
 intptr_t ndt::dim_kind_type::get_dim_size(const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const {
