@@ -130,7 +130,7 @@ TEST(FixedDimType, AssignKernel_FixedToScalarError) {
   a = 9.0;
   b = parse_json("3 * int32", "[3, 5, 7]");
   EXPECT_EQ(fixed_dim_id, b.get_type().get_id());
-  EXPECT_THROW(a.assign(b), runtime_error);
+  EXPECT_THROW(a.assign(b), dynd::broadcast_error);
 }
 
 TEST(FixedDimType, IsTypeSubarray) {

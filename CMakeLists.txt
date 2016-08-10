@@ -183,6 +183,7 @@ set(libdyndt_SRC
     src/dynd/types/datashape_formatter.cpp
     src/dynd/types/datashape_parser.cpp
     src/dynd/types/dim_fragment_type.cpp
+    src/dynd/types/dim_kind_type.cpp
     src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/fixed_bytes_kind_type.cpp
     src/dynd/types/fixed_bytes_type.cpp
@@ -220,6 +221,7 @@ set(libdyndt_SRC
     include/dynd/types/complex_kind_type.hpp
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
+    include/dynd/types/dim_kind_type.hpp
     include/dynd/types/fixed_bytes_type.hpp
     include/dynd/types/fixed_dim_type.hpp
     include/dynd/types/fixed_dim_kind_type.hpp
@@ -385,11 +387,13 @@ set(libdynd_SRC
     include/dynd/arrmeta_holder.hpp
     include/dynd/asarray.hpp
     include/dynd/assignment.hpp
+    include/dynd/binary_arithmetic.hpp
     include/dynd/callable.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
     include/dynd/comparison.hpp
     include/dynd/complex.hpp
+    include/dynd/compound_arithmetic.hpp
     include/dynd/cling_all.hpp
     include/dynd/convert.hpp
     include/dynd/diagnostics.hpp

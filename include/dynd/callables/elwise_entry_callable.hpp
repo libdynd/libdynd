@@ -50,7 +50,7 @@ namespace nd {
           if (ndim > data.ndim) {
             data.ndim = ndim;
           } else if (ndim < data.ndim) {
-            throw std::runtime_error("broadcast error 0");
+            throw dynd::broadcast_error(dst_tp, nullptr, child_ret_tp, nullptr);
           }
         }
 

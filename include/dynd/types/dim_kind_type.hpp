@@ -10,22 +10,30 @@
 namespace dynd {
 namespace ndt {
 
-  class dim_kind_type : public base_type {
+  class DYNDT_API dim_kind_type : public base_dim_type {
   public:
-    dim_kind_type(type_id_t id) : base_type(id, 0, 1, type_flag_symbolic, 0, 0, 0) {}
+    using base_dim_type::base_dim_type;
 
-    bool match(const type &candidate_tp, std::map<std::string, type> &DYND_UNUSED(tp_vars)) const {
-      return candidate_tp.get_id() == dim_kind_id || candidate_tp.get_ndim() > 0;
-    }
+    dim_kind_type(type_id_t id, const type &element_tp = make_type<any_kind_type>());
 
-    void print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),
-                    const char *DYND_UNUSED(data)) const {
-      throw std::runtime_error("cannot print data of dim_kind_type");
-    }
+    bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
-    void print_type(std::ostream &o) const { o << "Dim"; }
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
-    bool operator==(const base_type &rhs) const { return this == &rhs || rhs.get_id() == dim_kind_id; }
+    size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
+                                         const nd::memory_block &embedded_reference) const;
+
+    void print_type(std::ostream &o) const;
+
+    type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
+
+    intptr_t get_dim_size(const char *arrmeta, const char *data) const;
+
+    type with_element_type(const type &element_tp) const;
+
+    bool operator==(const base_type &rhs) const;
+
+    static ndt::type construct_type(type_id_t id, const nd::buffer &args, const ndt::type &element_type);
   };
 
   template <>

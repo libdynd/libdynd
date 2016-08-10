@@ -38,9 +38,9 @@ nd::callable make_compound_arithmetic() {
                                                    ndt::make_type<dynd::complex<float>>(),
                                                    ndt::make_type<dynd::complex<double>>()};
 
-  dispatcher.insert(nd::get_elwise(ndt::type("(Scalar, Dim) -> Any")));
-  dispatcher.insert(nd::get_elwise(ndt::type("(Dim, Scalar) -> Any")));
-  dispatcher.insert(nd::get_elwise(ndt::type("(Dim, Dim) -> Any")));
+  dispatcher.insert(nd::get_elwise(ndt::type("(Scalar, Dim * Any) -> Any")));
+  dispatcher.insert(nd::get_elwise(ndt::type("(Dim * Any, Scalar) -> Any")));
+  dispatcher.insert(nd::get_elwise(ndt::type("(Dim * Any, Dim * Any) -> Any")));
 
   return nd::make_callable<nd::multidispatch_callable<2>>(tp, dispatcher);
 }
