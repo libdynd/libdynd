@@ -178,8 +178,8 @@ set(libdyndt_SRC
     src/dynd/types/callable_type.cpp
     src/dynd/types/char_type.cpp
     src/dynd/types/complex_kind_type.cpp
-    src/dynd/types/cuda_host_type.cpp
     src/dynd/types/cuda_device_type.cpp
+    src/dynd/types/cuda_host_type.cpp
     src/dynd/types/datashape_formatter.cpp
     src/dynd/types/datashape_parser.cpp
     src/dynd/types/dim_fragment_type.cpp
@@ -217,8 +217,11 @@ set(libdyndt_SRC
     include/dynd/types/base_string_type.hpp
     include/dynd/types/bytes_type.hpp
     include/dynd/types/callable_type.hpp
+    include/dynd/types/categorical_kind_type.hpp
     include/dynd/types/char_type.hpp
     include/dynd/types/complex_kind_type.hpp
+    include/dynd/types/cuda_device_type.hpp
+    include/dynd/types/cuda_host_type.hpp
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
     include/dynd/types/dim_kind_type.hpp
@@ -226,6 +229,7 @@ set(libdyndt_SRC
     include/dynd/types/fixed_dim_type.hpp
     include/dynd/types/fixed_dim_kind_type.hpp
     include/dynd/types/fixed_string_type.hpp
+    include/dynd/types/option_type.hpp
     include/dynd/types/pointer_type.hpp
     include/dynd/types/sso_bytestring.hpp
     include/dynd/types/state_type.hpp
@@ -235,6 +239,7 @@ set(libdyndt_SRC
     include/dynd/types/tuple_type.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/type_type.hpp
+    include/dynd/types/var_dim_type.hpp
     # Memory blocks
     src/dynd/memblock/base_memory_block.cpp
     include/dynd/memblock/buffer_memory_block.hpp

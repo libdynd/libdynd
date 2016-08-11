@@ -10,8 +10,10 @@
 #include <dynd/array_range.hpp>
 #include <dynd/assignment.hpp>
 #include <dynd/callable.hpp>
+#include <dynd/parse_util.hpp>
 #include <dynd/search.hpp>
 #include <dynd/types/categorical_type.hpp>
+#include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 
 using namespace dynd;
@@ -408,4 +410,10 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::categorical_type:
   properties["category_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_category_tp)};
 
   return properties;
+}
+
+ndt::type ndt::categorical_type::parse_type_args(type_id_t DYND_UNUSED(id), const char *&rbegin,
+                                                 const char *DYND_UNUSED(end),
+                                                 std::map<std::string, ndt::type> &DYND_UNUSED(symtable)) {
+  throw datashape::internal_parse_error(rbegin, "categorical type parsing isn't implemented");
 }

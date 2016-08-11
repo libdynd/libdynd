@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/parse_util.hpp>
+#include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/option_type.hpp>
 
 using namespace std;
@@ -208,4 +210,23 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::option_type::get_
   properties["value_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_value_tp)};
 
   return properties;
+}
+
+ndt::type ndt::option_type::parse_type_args(type_id_t DYND_UNUSED(id), const char *&rbegin, const char *end,
+                                            std::map<std::string, ndt::type> &symtable) {
+  const char *begin = rbegin;
+  if (!datashape::parse_token(begin, end, '[')) {
+    throw datashape::internal_parse_error(begin, "expected opening '[' after 'option'");
+  }
+  ndt::type tp = datashape::parse(begin, end, symtable);
+  if (tp.is_null()) {
+    throw datashape::internal_parse_error(begin, "expected a data type");
+  }
+  if (!datashape::parse_token(begin, end, ']')) {
+    throw datashape::internal_parse_error(begin, "expected closing ']'");
+  }
+  // TODO catch errors, convert them to datashape::internal_parse_error so the position is
+  // shown
+  rbegin = begin;
+  return ndt::make_type<ndt::option_type>(tp);
 }

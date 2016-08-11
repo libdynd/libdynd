@@ -5,6 +5,8 @@
 
 #include <dynd/buffer.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
+#include <dynd/parse_util.hpp>
+#include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/pointer_type.hpp>
 
 using namespace std;
@@ -233,4 +235,22 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::pointer_type::get
   properties["target_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_target_tp)};
 
   return properties;
+}
+
+ndt::type ndt::pointer_type::parse_type_args(type_id_t DYND_UNUSED(id), const char *&rbegin, const char *end,
+                                             std::map<std::string, ndt::type> &symtable) {
+  const char *begin = rbegin;
+  if (!datashape::parse_token(begin, end, '[')) {
+    throw datashape::internal_parse_error(begin, "expected opening '[' after 'pointer'");
+  }
+  ndt::type tp = datashape::parse(begin, end, symtable);
+  if (tp.is_null()) {
+    throw datashape::internal_parse_error(begin, "expected a data type");
+  }
+  if (!datashape::parse_token(begin, end, ']')) {
+    throw datashape::internal_parse_error(begin, "expected closing ']'");
+  }
+  // TODO catch errors, convert them to datashape::internal_parse_error so the position is shown
+  rbegin = begin;
+  return ndt::make_type<ndt::pointer_type>(tp);
 }

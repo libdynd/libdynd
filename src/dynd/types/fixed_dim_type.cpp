@@ -5,7 +5,9 @@
 
 #include <dynd/buffer.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/parse_util.hpp>
 #include <dynd/shape_tools.hpp>
+#include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 
@@ -530,4 +532,32 @@ ndt::type ndt::fixed_dim_type::with_element_type(const type &element_tp) const {
 
 ndt::type ndt::make_fixed_dim(size_t dim_size, const type &element_tp) {
   return make_type<fixed_dim_type>(dim_size, element_tp);
+}
+
+// fixed_type : fixed[N] * rhs_expression
+ndt::type ndt::fixed_dim_type::parse_type_args(type_id_t DYND_UNUSED(id), const char *&rbegin, const char *end,
+                                               std::map<std::string, ndt::type> &symtable) {
+  const char *begin = rbegin;
+  if (datashape::parse_token(begin, end, '[')) {
+    const char *saved_begin = begin;
+    std::string dim_size_str = datashape::parse_number(begin, end);
+    if (dim_size_str.empty()) {
+      throw datashape::internal_parse_error(saved_begin, "expected dimension size");
+    }
+    intptr_t dim_size = (intptr_t)std::atoll(dim_size_str.c_str());
+    if (!datashape::parse_token(begin, end, ']')) {
+      throw datashape::internal_parse_error(begin, "expected closing ']'");
+    }
+    if (!datashape::parse_token(begin, end, '*')) {
+      throw datashape::internal_parse_error(begin, "expected dimension separator '*'");
+    }
+    ndt::type element_tp = datashape::parse(begin, end, symtable);
+    if (element_tp.is_null()) {
+      throw datashape::internal_parse_error(begin, "expected element type");
+    }
+    rbegin = begin;
+    return ndt::make_fixed_dim(dim_size, element_tp);
+  } else {
+    throw datashape::internal_parse_error(begin, "expected opening '['");
+  }
 }

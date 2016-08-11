@@ -456,3 +456,11 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::var_dim_type::get
 ndt::type ndt::var_dim_type::with_element_type(const type &element_tp) const {
   return make_type<var_dim_type>(element_tp);
 }
+
+ndt::type ndt::var_dim_type::construct_type(type_id_t DYND_UNUSED(id), const nd::buffer &args,
+                                            const ndt::type &element_type) {
+  if (!args.is_null()) {
+    throw invalid_argument("var dimension does not accept arguments");
+  }
+  return ndt::make_type<ndt::var_dim_type>(element_type);
+}

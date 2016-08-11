@@ -89,10 +89,13 @@ namespace ndt {
     friend struct assign_to_same_category_type;
     friend struct assign_from_same_category_type;
     friend struct assign_from_commensurate_category_type;
+
+    static ndt::type parse_type_args(type_id_t id, const char *&begin, const char *end,
+                                     std::map<std::string, ndt::type> &symtable);
   };
 
   template <>
-  struct id_of<categorical_type> : std::integral_constant<type_id_t, categorical_id> {};
+  struct id_of<categorical_type> : std::integral_constant<type_id_t, categorical_kind_id> {};
 
   DYND_API type factor_categorical(const nd::array &values);
 

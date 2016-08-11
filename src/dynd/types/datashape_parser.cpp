@@ -9,11 +9,7 @@
 
 #include <dynd/parse_util.hpp>
 #include <dynd/type_registry.hpp>
-#include <dynd/types/array_type.hpp>
 #include <dynd/types/callable_type.hpp>
-#include <dynd/types/categorical_kind_type.hpp>
-#include <dynd/types/cuda_device_type.hpp>
-#include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -63,52 +59,6 @@ static bool parse_name_or_number(const char *&rbegin, const char *end, const cha
   return false;
 }
 
-// fixed_type : fixed[N] * rhs_expression
-static ndt::type parse_fixed_dim_parameters(const char *&rbegin, const char *end,
-                                            map<std::string, ndt::type> &symtable) {
-  const char *begin = rbegin;
-  if (datashape::parse_token(begin, end, '[')) {
-    const char *saved_begin = begin;
-    std::string dim_size_str = datashape::parse_number(begin, end);
-    if (dim_size_str.empty()) {
-      throw datashape::internal_parse_error(saved_begin, "expected dimension size");
-    }
-    intptr_t dim_size = (intptr_t)std::atoll(dim_size_str.c_str());
-    if (!datashape::parse_token(begin, end, ']')) {
-      throw datashape::internal_parse_error(begin, "expected closing ']'");
-    }
-    if (!datashape::parse_token(begin, end, '*')) {
-      throw datashape::internal_parse_error(begin, "expected dimension separator '*'");
-    }
-    ndt::type element_tp = datashape::parse(begin, end, symtable);
-    if (element_tp.is_null()) {
-      throw datashape::internal_parse_error(begin, "expected element type");
-    }
-    rbegin = begin;
-    return ndt::make_fixed_dim(dim_size, element_tp);
-  } else {
-    throw datashape::internal_parse_error(begin, "expected opening '['");
-  }
-}
-
-static ndt::type parse_option_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
-  const char *begin = rbegin;
-  if (!datashape::parse_token(begin, end, '[')) {
-    throw datashape::internal_parse_error(begin, "expected opening '[' after 'option'");
-  }
-  ndt::type tp = datashape::parse(begin, end, symtable);
-  if (tp.is_null()) {
-    throw datashape::internal_parse_error(begin, "expected a data type");
-  }
-  if (!datashape::parse_token(begin, end, ']')) {
-    throw datashape::internal_parse_error(begin, "expected closing ']'");
-  }
-  // TODO catch errors, convert them to datashape::internal_parse_error so the position is
-  // shown
-  rbegin = begin;
-  return ndt::make_type<ndt::option_type>(tp);
-}
-
 // complex_type : complex[float_type]
 // This is called after 'complex' is already matched
 static ndt::type parse_complex_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
@@ -135,75 +85,6 @@ static ndt::type parse_complex_parameters(const char *&rbegin, const char *end, 
     // Default to complex[double] if no parameters are provided
     return ndt::make_type<dynd::complex<double>>();
   }
-}
-
-// cuda_host_type : cuda_host[storage_type]
-// This is called after 'cuda_host' is already matched
-static ndt::type parse_cuda_host_parameters(const char *&rbegin, const char *end,
-                                            map<std::string, ndt::type> &symtable) {
-  const char *begin = rbegin;
-  if (datashape::parse_token(begin, end, '[')) {
-#ifdef DYND_CUDA
-    ndt::type tp = datashape::parse(begin, end, symtable);
-    if (tp.is_null()) {
-      throw datashape::internal_parse_error(begin, "expected a type parameter");
-    }
-    if (!datashape::parse_token(begin, end, ']')) {
-      throw datashape::internal_parse_error(begin, "expected closing ']'");
-    }
-    rbegin = begin;
-    return ndt::make_cuda_host(tp);
-#else
-    // Silence the unused parameter warning
-    symtable.empty();
-    throw datashape::internal_parse_error(begin, "cuda_host type is not available");
-#endif // DYND_CUDA
-  } else {
-    throw datashape::internal_parse_error(begin, "expected opening '['");
-  }
-}
-
-// cuda_device_type : cuda_device[storage_type]
-// This is called after 'cuda_device' is already matched
-static ndt::type parse_cuda_device_parameters(const char *&rbegin, const char *end,
-                                              map<std::string, ndt::type> &symtable) {
-  const char *begin = rbegin;
-  if (datashape::parse_token(begin, end, '[')) {
-#ifdef DYND_CUDA
-    ndt::type tp = datashape::parse(begin, end, symtable);
-    if (tp.is_null()) {
-      throw datashape::internal_parse_error(begin, "expected a type parameter");
-    }
-    if (!datashape::parse_token(begin, end, ']')) {
-      throw datashape::internal_parse_error(begin, "expected closing ']'");
-    }
-    rbegin = begin;
-    return ndt::make_cuda_device(tp);
-#else
-    // Silence the unused parameter warning
-    symtable.empty();
-    throw datashape::internal_parse_error(begin, "cuda_device type is not available");
-#endif // DYND_CUDA
-  } else {
-    throw datashape::internal_parse_error(begin, "expected opening '['");
-  }
-}
-
-static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
-  const char *begin = rbegin;
-  if (!datashape::parse_token(begin, end, '[')) {
-    throw datashape::internal_parse_error(begin, "expected opening '[' after 'pointer'");
-  }
-  ndt::type tp = datashape::parse(begin, end, symtable);
-  if (tp.is_null()) {
-    throw datashape::internal_parse_error(begin, "expected a data type");
-  }
-  if (!datashape::parse_token(begin, end, ']')) {
-    throw datashape::internal_parse_error(begin, "expected closing ']'");
-  }
-  // TODO catch errors, convert them to datashape::internal_parse_error so the position is shown
-  rbegin = begin;
-  return ndt::make_type<ndt::pointer_type>(tp);
 }
 
 // datashape_list : datashape COMMA datashape_list RBRACKET
@@ -824,8 +705,6 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       if ('0' <= *nbegin && *nbegin <= '9') {
         intptr_t size = parse<intptr_t>(nbegin, nend);
         result = ndt::make_fixed_dim(size, element_tp);
-      } else if (compare_range_to_literal(nbegin, nend, "var")) {
-        result = ndt::make_type<ndt::var_dim_type>(element_tp);
       } else {
         auto ii = lookup_id_by_name(std::string(nbegin, nend));
         if (ii.first != uninitialized_id) {
@@ -857,22 +736,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       }
     } else if (compare_range_to_literal(nbegin, nend, "complex")) {
       result = parse_complex_parameters(begin, end, symtable);
-    } else if (compare_range_to_literal(nbegin, nend, "pointer")) {
-      result = parse_pointer_parameters(begin, end, symtable);
-    } else if (compare_range_to_literal(nbegin, nend, "array")) {
-      result = ndt::make_type<ndt::array_type>();
-    } else if (compare_range_to_literal(nbegin, nend, "cuda_host")) {
-      result = parse_cuda_host_parameters(begin, end, symtable);
-    } else if (compare_range_to_literal(nbegin, nend, "cuda_device")) {
-      result = parse_cuda_device_parameters(begin, end, symtable);
-    } else if (compare_range_to_literal(nbegin, nend, "fixed")) {
-      result = parse_fixed_dim_parameters(begin, end, symtable);
-    } else if (compare_range_to_literal(nbegin, nend, "option")) {
-      result = parse_option_parameters(begin, end, symtable);
     } else if (compare_range_to_literal(nbegin, nend, "State")) {
       result = ndt::make_type<ndt::state_type>();
-    } else if (compare_range_to_literal(nbegin, nend, "Categorical")) {
-      result = ndt::make_type<ndt::categorical_kind_type>();
     } else {
       std::string n(nbegin, nend);
       const map<std::string, ndt::type> &bit = builtin_types();

@@ -51,6 +51,9 @@ TEST(FixedDimType, Create) {
   EXPECT_EQ(1, fad->get_fixed_dim_size());
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
+
+  // Type constructor vs syntax sugar
+  EXPECT_EQ(ndt::type("fixed[3] * int32"), ndt::type("3 * int32"));
 }
 
 TEST(FixedDimType, Basic) {
