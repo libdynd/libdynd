@@ -3,12 +3,16 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/type.hpp>
 #include <dynd/types/type_type.hpp>
 
 #include <algorithm>
 
 using namespace std;
 using namespace dynd;
+
+ndt::type_type::type_type(type_id_t id)
+    : base_type(id, sizeof(ndt::type), sizeof(ndt::type), type_flag_zeroinit | type_flag_destructor, 0, 0, 0) {}
 
 void ndt::type_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const {
   o << *reinterpret_cast<const ndt::type *>(data);

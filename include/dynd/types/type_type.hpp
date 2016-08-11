@@ -5,11 +5,12 @@
 
 #pragma once
 
-#include <dynd/type.hpp>
-#include <dynd/types/scalar_kind_type.hpp>
+#include <dynd/types/base_type.hpp>
 
 namespace dynd {
 namespace ndt {
+  // Forward declaration of ndt::type for the `data_type` typedef
+  class DYNDT_API type;
 
   /**
    * A type whose instance represents a type itself.
@@ -18,8 +19,7 @@ namespace ndt {
   public:
     typedef type data_type;
 
-    type_type(type_id_t id)
-        : base_type(id, sizeof(ndt::type), sizeof(ndt::type), type_flag_zeroinit | type_flag_destructor, 0, 0, 0) {}
+    type_type(type_id_t id);
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
@@ -42,9 +42,6 @@ namespace ndt {
 
   template <>
   struct id_of<type_type> : std::integral_constant<type_id_t, type_id> {};
-
-  template <>
-  struct id_of<type> : std::integral_constant<type_id_t, type_id> {};
 
 } // namespace dynd::ndt
 } // namespace dynd

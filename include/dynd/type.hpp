@@ -13,6 +13,7 @@
 #include <dynd/types/base_string_type.hpp>
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/type_id.hpp>
+#include <dynd/types/type_type.hpp>
 
 namespace dynd {
 
@@ -1117,12 +1118,15 @@ namespace ndt {
   DYNDT_API std::ostream &operator<<(std::ostream &o, const type &rhs);
 
   template <>
+  struct id_of<type> : std::integral_constant<type_id_t, type_id> {};
+
+  template <>
   struct traits<type> {
     static const size_t ndim = 0;
 
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type("type"); }
+    static type equivalent() { return ndt::make_type<ndt::type_type>(); }
   };
 
 } // namespace dynd::ndt

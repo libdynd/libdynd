@@ -204,7 +204,7 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::callable_type::ge
   properties["pos_types"] = {ndt::type_for(pos_types), reinterpret_cast<const char *>(&pos_types)};
   properties["kwd_types"] = {ndt::type_for(kwd_types), reinterpret_cast<const char *>(&kwd_types)};
   properties["kwd_names"] = {ndt::type_for(kwd_names), reinterpret_cast<const char *>(&kwd_names)};
-  properties["return_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_return_type)};
+  properties["return_type"] = {ndt::make_type<ndt::type_type>(), reinterpret_cast<const char *>(&m_return_type)};
 
   return properties;
 }
