@@ -38,7 +38,7 @@ bool ndt::categorical_kind_type::operator==(const base_type &rhs) const {
   if (this == &rhs) {
     return true;
   } else {
-    return rhs.is_symbolic() && rhs.get_id() == categorical_id;
+    return rhs.is_symbolic() && rhs.get_id() == categorical_kind_id;
   }
 }
 
@@ -85,5 +85,5 @@ void ndt::categorical_kind_type::data_destruct_strided(const char *DYND_UNUSED(a
 
 bool ndt::categorical_kind_type::match(const type &candidate_tp,
                                        std::map<std::string, type> &DYND_UNUSED(tp_vars)) const {
-  return candidate_tp.get_id() == categorical_id;
+  return candidate_tp.get_id() == categorical_id || candidate_tp.get_id() == categorical_kind_id;
 }

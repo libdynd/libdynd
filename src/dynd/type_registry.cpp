@@ -6,11 +6,15 @@
 #include <dynd/parse_util.hpp>
 #include <dynd/type_registry.hpp>
 #include <dynd/types/any_kind_type.hpp>
+#include <dynd/types/array_type.hpp>
 #include <dynd/types/bool_kind_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
+#include <dynd/types/categorical_type.hpp>
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/complex_kind_type.hpp>
+#include <dynd/types/cuda_device_type.hpp>
+#include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
@@ -68,20 +72,21 @@ DYNDT_API vector<id_info> &detail::infos() {
       {"tuple", scalar_kind_id, ndt::type(), nullptr, nullptr},
       {"struct", scalar_kind_id, ndt::type(), nullptr, nullptr},
       {"Fixed", dim_kind_id, ndt::type(), &ndt::fixed_dim_kind_type::construct_type, nullptr},
-      {"fixed", fixed_dim_kind_id, ndt::type(), nullptr, nullptr},
-      {"var", dim_kind_id, ndt::type(), nullptr, nullptr},
-      {"categorical", scalar_kind_id, ndt::type(), nullptr, nullptr},
-      {"option", any_kind_id, ndt::type(), nullptr, nullptr},
-      {"pointer", any_kind_id, ndt::type(), nullptr, nullptr},
+      {"fixed", fixed_dim_kind_id, ndt::type(), nullptr, &ndt::fixed_dim_type::parse_type_args},
+      {"var", dim_kind_id, ndt::type(), &ndt::var_dim_type::construct_type, nullptr},
+      {"Categorical", scalar_kind_id, ndt::make_type<ndt::categorical_kind_type>(), nullptr, nullptr},
+      {"categorical", categorical_kind_id, ndt::type(), nullptr, nullptr /*&ndt::categorical_type::parse_type_args*/},
+      {"option", any_kind_id, ndt::type(), nullptr, &ndt::option_type::parse_type_args},
+      {"pointer", any_kind_id, ndt::type(), nullptr, &ndt::pointer_type::parse_type_args},
       {"memory", any_kind_id, ndt::type(), nullptr, nullptr},
-      {"type", scalar_kind_id, ndt::type(), nullptr, nullptr},
-      {"array", scalar_kind_id, ndt::type(), nullptr, nullptr},
+      {"type", scalar_kind_id, ndt::make_type<ndt::type_type>(), nullptr, nullptr},
+      {"array", scalar_kind_id, ndt::make_type<ndt::array_type>(), nullptr, nullptr},
       {"callable", scalar_kind_id, ndt::type(), nullptr, nullptr},
       {"Expr", any_kind_id, ndt::type(), nullptr, nullptr},
       {"adapt", expr_kind_id, ndt::type(), nullptr, nullptr},
       {"expr", expr_kind_id, ndt::type(), nullptr, nullptr},
-      {"cuda_host", memory_id, ndt::type(), nullptr, nullptr},
-      {"cuda_device", memory_id, ndt::type(), nullptr, nullptr},
+      {"cuda_host", memory_id, ndt::type(), nullptr, &ndt::cuda_host_type::parse_type_args},
+      {"cuda_device", memory_id, ndt::type(), nullptr, &ndt::cuda_device_type::parse_type_args},
       {"State", any_kind_id, ndt::type(), nullptr, nullptr},
       {"", any_kind_id, ndt::type(), nullptr, nullptr},
       {"", any_kind_id, ndt::type(), nullptr, nullptr},

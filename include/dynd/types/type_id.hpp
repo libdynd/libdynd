@@ -79,6 +79,7 @@ enum type_id_t {
   var_dim_id,   // A variable-sized array dimension type
   // offset_dim_id, // A dimension made up of offsets
 
+  categorical_kind_id,
   categorical_id, // A categorical (enum-like) type
   option_id,
   pointer_id, // A pointer type
