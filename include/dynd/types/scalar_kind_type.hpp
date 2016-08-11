@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <dynd/type.hpp>
 #include <dynd/types/any_kind_type.hpp>
+#include <dynd/types/base_type.hpp>
 
 namespace dynd {
 namespace ndt {

@@ -118,7 +118,7 @@ bool ndt::base_memory_type::match(const type &candidate_tp, std::map<std::string
 
 std::map<std::string, std::pair<ndt::type, const char *>> ndt::base_memory_type::get_dynamic_type_properties() const {
   std::map<std::string, std::pair<ndt::type, const char *>> properties;
-  properties["storage_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_element_tp)};
+  properties["storage_type"] = {ndt::make_type<type_type>(), reinterpret_cast<const char *>(&m_element_tp)};
 
   return properties;
 }

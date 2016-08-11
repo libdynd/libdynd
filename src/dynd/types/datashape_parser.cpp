@@ -19,7 +19,6 @@
 #include <dynd/types/state_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/tuple_type.hpp>
-#include <dynd/types/type_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
@@ -42,7 +41,6 @@ static const map<std::string, ndt::type> &builtin_types() {
     bit["complex64"] = ndt::make_type<dynd::complex<float32>>();
     bit["complex128"] = ndt::make_type<dynd::complex<float64>>();
     bit["complex"] = ndt::make_type<dynd::complex<double>>();
-    bit["type"] = ndt::make_type<ndt::type_type>();
   }
 
   return bit;
@@ -835,14 +833,13 @@ static ndt::type parse_stmt(const char *&rbegin, const char *end, map<std::strin
   // NOTE that this doesn't support parameterized lhs_expression, this is subset
   // of Blaze datashape
   if (datashape::parse_token(begin, end, "type")) {
-    const map<std::string, ndt::type> &bit = builtin_types();
     const char *saved_begin = begin;
     const char *tname_begin, *tname_end;
     if (!skip_required_whitespace(begin, end)) {
       if (begin == end) {
         // If it's only "type" by itself, return the "type" type
         rbegin = begin;
-        return bit.find("type")->second;
+        return ndt::make_type<ndt::type_type>();
       } else {
         return ndt::type();
       }
@@ -852,7 +849,7 @@ static ndt::type parse_stmt(const char *&rbegin, const char *end, map<std::strin
       if (begin == end) {
         // If it's only "type" by itself, return the "type" type
         rbegin = begin;
-        return bit.find("type")->second;
+        return ndt::make_type<ndt::type_type>();
       } else {
         throw datashape::internal_parse_error(saved_begin, "expected an identifier for a type name");
       }
@@ -866,7 +863,7 @@ static ndt::type parse_stmt(const char *&rbegin, const char *end, map<std::strin
     }
     std::string tname(tname_begin, tname_end);
     // ACTION: Put the parsed type in the symbol table
-    if (bit.find(tname) != bit.end() || lookup_id_by_name(tname).first != uninitialized_id) {
+    if (lookup_id_by_name(tname).first != uninitialized_id) {
       skip_whitespace_and_pound_comments(saved_begin, end);
       throw datashape::internal_parse_error(saved_begin, "cannot redefine a builtin type");
     }

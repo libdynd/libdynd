@@ -448,7 +448,7 @@ void ndt::var_dim_type::foreach_leading(const char *arrmeta, char *data, foreach
 
 std::map<std::string, std::pair<ndt::type, const char *>> ndt::var_dim_type::get_dynamic_type_properties() const {
   std::map<std::string, std::pair<ndt::type, const char *>> properties;
-  properties["element_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_element_tp)};
+  properties["element_type"] = {ndt::make_type<type_type>(), reinterpret_cast<const char *>(&m_element_tp)};
 
   return properties;
 }

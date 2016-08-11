@@ -406,8 +406,8 @@ ndt::type ndt::factor_categorical(const nd::array &values) {
 
 std::map<std::string, std::pair<ndt::type, const char *>> ndt::categorical_type::get_dynamic_type_properties() const {
   std::map<std::string, std::pair<ndt::type, const char *>> properties;
-  properties["storage_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_storage_type)};
-  properties["category_type"] = {ndt::type("type"), reinterpret_cast<const char *>(&m_category_tp)};
+  properties["storage_type"] = {ndt::make_type<type_type>(), reinterpret_cast<const char *>(&m_storage_type)};
+  properties["category_type"] = {ndt::make_type<type_type>(), reinterpret_cast<const char *>(&m_category_tp)};
 
   return properties;
 }
