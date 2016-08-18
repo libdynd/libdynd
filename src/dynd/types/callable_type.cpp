@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/array.hpp>
+#include <dynd/type_registry.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/str_util.hpp>
@@ -207,4 +209,25 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::callable_type::ge
   properties["return_type"] = {ndt::make_type<ndt::type_type>(), reinterpret_cast<const char *>(&m_return_type)};
 
   return properties;
+}
+
+ndt::type ndt::callable_type::construct_type(type_id_t DYND_UNUSED(id), const nd::buffer &args0,
+                                             const ndt::type &element_type) {
+  nd::array args = args0;
+  if (args.is_null()) {
+    throw invalid_argument("callable type constructor requires arguments");
+  }
+  if (!element_type.is_null()) {
+    throw invalid_argument("callable type is not a dimension type");
+  }
+
+  return ndt::make_type<ndt::callable_type>(element_type);
+}
+
+namespace {
+// Dynamically register the type constructor for `callable`
+const bool init_callable_type = []() -> bool {
+  dynd::register_known_type_id_constructor(callable_id, ndt::type(), &ndt::callable_type::construct_type);
+  return true;
+}();
 }

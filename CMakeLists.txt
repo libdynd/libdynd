@@ -175,7 +175,6 @@ set(libdyndt_SRC
     src/dynd/types/base_string_type.cpp
     src/dynd/types/bytes_type.cpp
     src/dynd/types/categorical_kind_type.cpp
-    src/dynd/types/callable_type.cpp
     src/dynd/types/char_type.cpp
     src/dynd/types/complex_kind_type.cpp
     src/dynd/types/cuda_device_type.cpp
@@ -216,7 +215,6 @@ set(libdyndt_SRC
     include/dynd/types/base_dim_type.hpp
     include/dynd/types/base_string_type.hpp
     include/dynd/types/bytes_type.hpp
-    include/dynd/types/callable_type.hpp
     include/dynd/types/categorical_kind_type.hpp
     include/dynd/types/char_type.hpp
     include/dynd/types/complex_kind_type.hpp
@@ -287,9 +285,11 @@ set(libdyndt_SRC
 set(libdynd_SRC
     # Types
     src/dynd/types/adapt_type.cpp
+    src/dynd/types/callable_type.cpp
     src/dynd/types/categorical_type.cpp
     src/dynd/types/substitute_shape.cpp
     include/dynd/types/adapt_type.hpp
+    include/dynd/types/callable_type.hpp
     include/dynd/types/categorical_type.hpp
     include/dynd/types/substitute_shape.hpp
     # Callables

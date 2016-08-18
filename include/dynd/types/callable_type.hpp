@@ -12,7 +12,7 @@
 namespace dynd {
 namespace ndt {
 
-  class DYNDT_API callable_type : public base_type {
+  class DYND_API callable_type : public base_type {
     type m_return_type;
     // Always a tuple type containing the types for positional args
     type m_pos_tuple;
@@ -140,6 +140,8 @@ namespace ndt {
     bool match(const type &candidate_tp, std::map<std::string, type> &tp_vars) const;
 
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
+
+    static ndt::type construct_type(type_id_t id, const nd::buffer &args, const ndt::type &element_type);
   };
 
   template <typename R>
@@ -176,7 +178,7 @@ namespace ndt {
     static type equivalent() { return make_type<typename funcproto_of<R (T::*)(A...)>::type>(); }
   };
 
-  //  DYNDT_API type make_generic_funcproto(intptr_t nargs);
+  //  DYND_API type make_generic_funcproto(intptr_t nargs);
 
 } // namespace dynd::ndt
 } // namespace dynd

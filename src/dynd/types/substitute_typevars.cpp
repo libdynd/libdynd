@@ -3,7 +3,6 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/callable_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
@@ -78,10 +77,13 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
     return ndt::make_type<ndt::option_type>(
         ndt::substitute(pattern.extended<option_type>()->get_value_type(), typevars, concrete));
   case callable_id:
-    return ndt::make_type<ndt::callable_type>(
-        substitute(pattern.extended<callable_type>()->get_return_type(), typevars, concrete),
-        substitute(pattern.extended<callable_type>()->get_pos_tuple(), typevars, concrete),
-        substitute(pattern.extended<callable_type>()->get_kwd_struct(), typevars, concrete));
+    throw std::runtime_error("TODO: substitute type vars in callable");
+  /*
+  return ndt::make_type<ndt::callable_type>(
+      substitute(pattern.extended<callable_type>()->get_return_type(), typevars, concrete),
+      substitute(pattern.extended<callable_type>()->get_pos_tuple(), typevars, concrete),
+      substitute(pattern.extended<callable_type>()->get_kwd_struct(), typevars, concrete));
+      */
   case typevar_constructed_id: {
     map<std::string, ndt::type>::const_iterator it =
         typevars.find(pattern.extended<typevar_constructed_type>()->get_name());

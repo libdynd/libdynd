@@ -9,7 +9,6 @@
 
 #include <dynd/parse_util.hpp>
 #include <dynd/type_registry.hpp>
-#include <dynd/types/callable_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -573,9 +572,22 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
               throw datashape::internal_parse_error(begin, "expected function prototype return type");
             }
             rbegin = begin;
-            return ndt::make_type<ndt::callable_type>(
-                return_type, ndt::make_type<ndt::tuple_type>(field_type_list.size(), field_type_list.data(), variadic),
-                funcproto_kwd);
+            // Call the registered `callable` type constructor
+            nd::buffer callable_args = nd::buffer::empty(ndt::make_type<ndt::tuple_type>(
+                {ndt::make_type<ndt::tuple_type>({ndt::make_type<ndt::type_type>(), ndt::make_type<ndt::type_type>(),
+                                                  ndt::make_type<ndt::type_type>()}),
+                 ndt::make_type<ndt::struct_type>()}));
+            reinterpret_cast<ndt::type *>(callable_args.data())[0] = return_type;
+            reinterpret_cast<ndt::type *>(callable_args.data())[1] =
+                ndt::make_type<ndt::tuple_type>(field_type_list.size(), field_type_list.data(), variadic);
+            reinterpret_cast<ndt::type *>(callable_args.data())[2] = funcproto_kwd;
+
+            const auto &ii = lookup_id_by_name("callable");
+            if (ii.second->construct_type != nullptr) {
+              return ii.second->construct_type(callable_id, callable_args, ndt::type());
+            } else {
+              throw dynd::type_error("Cannot create callable type, its type constructor has not been registered");
+            }
           } else {
             throw datashape::internal_parse_error(begin, "expected funcproto keyword arguments");
           }
@@ -624,14 +636,20 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
     throw datashape::internal_parse_error(begin, "expected function prototype return type");
   }
   rbegin = begin;
-  // TODO: I suspect because of the change away from immutable default
-  // construction, and
-  //       the requirement that arrays into callable constructors are
-  //       immutable, that too
-  //       many copies may be occurring.
-  return ndt::make_type<ndt::callable_type>(
-      return_type, ndt::make_type<ndt::tuple_type>(field_type_list.size(), field_type_list.data(), variadic),
-      ndt::make_type<ndt::struct_type>(variadic));
+  // Call the registered `callable` type constructor
+  nd::buffer callable_args = nd::buffer::empty(ndt::make_type<ndt::tuple_type>(
+      {ndt::make_type<ndt::tuple_type>({ndt::make_type<ndt::type_type>(), ndt::make_type<ndt::type_type>()}),
+       ndt::make_type<ndt::struct_type>()}));
+  reinterpret_cast<ndt::type *>(callable_args.data())[0] = return_type;
+  reinterpret_cast<ndt::type *>(callable_args.data())[1] =
+      ndt::make_type<ndt::tuple_type>(field_type_list.size(), field_type_list.data(), variadic);
+
+  const auto &ii = lookup_id_by_name("callable");
+  if (ii.second->construct_type != nullptr) {
+    return ii.second->construct_type(callable_id, callable_args, ndt::type());
+  } else {
+    throw dynd::type_error("Cannot create callable type, its type constructor has not been registered");
+  }
 }
 
 //    datashape_nooption : dim ASTERISK datashape
