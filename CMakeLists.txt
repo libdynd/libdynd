@@ -223,6 +223,7 @@ set(libdyndt_SRC
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
     include/dynd/types/dim_kind_type.hpp
+    include/dynd/types/ellipsis_dim_type.hpp
     include/dynd/types/fixed_bytes_type.hpp
     include/dynd/types/fixed_dim_type.hpp
     include/dynd/types/fixed_dim_kind_type.hpp
@@ -294,6 +295,7 @@ set(libdynd_SRC
     include/dynd/types/substitute_shape.hpp
     # Callables
     src/dynd/callables/base_callable.cpp
+    include/dynd/callables/assign_callable.hpp
     include/dynd/callables/base_callable.hpp
     include/dynd/callables/base_dispatch_callable.hpp
     # Kernels

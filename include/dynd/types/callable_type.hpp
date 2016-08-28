@@ -67,6 +67,9 @@ namespace ndt {
     callable_type(type_id_t new_id, const type &ret, const std::vector<type> &args)
         : callable_type(new_id, ret, args.size(), args.data()) {}
 
+    callable_type(type_id_t new_id, const type &ret, std::initializer_list<type> args)
+        : callable_type(new_id, ret, make_type<tuple_type>(args.size(), args.begin()), ndt::make_type<struct_type>()) {}
+
     callable_type(type_id_t new_id, const type &ret, std::initializer_list<type> args,
                   const std::vector<std::pair<type, std::string>> &kwds)
         : callable_type(new_id, ret, args.size(), args.begin(), kwds) {}

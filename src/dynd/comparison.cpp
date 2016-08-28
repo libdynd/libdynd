@@ -37,16 +37,31 @@ dispatcher<2, nd::callable> make_comparison_children() {
       ndt::make_type<uint64_t>(), ndt::make_type<float>(),   ndt::make_type<double>()};
 
   dispatcher<2, nd::callable> dispatcher = nd::callable::make_all<KernelType, numeric_types, numeric_types>(Func);
-  dispatcher.insert({nd::get_elwise(ndt::type("(Dim * Any, Scalar) -> Any")),
-                     nd::get_elwise(ndt::type("(Scalar, Dim * Any) -> Any")),
-                     nd::get_elwise(ndt::type("(Dim * Any, Dim * Any) -> Any"))});
+  dispatcher.insert({nd::get_elwise(ndt::make_type<ndt::callable_type>(
+                         ndt::make_type<ndt::any_kind_type>(),
+                         {ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>()),
+                          ndt::make_type<ndt::scalar_kind_type>()})),
+                     nd::get_elwise(ndt::make_type<ndt::callable_type>(
+                         ndt::make_type<ndt::any_kind_type>(),
+                         {ndt::make_type<ndt::scalar_kind_type>(),
+                          ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>())})),
+                     nd::get_elwise(ndt::make_type<ndt::callable_type>(
+                         ndt::make_type<ndt::any_kind_type>(),
+                         {ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>()),
+                          ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>())}))});
 
   dispatcher.insert({nd::functional::forward_na<0>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("Any")}),
                      nd::functional::forward_na<1>(ndt::type("Any"), {ndt::type("Any"), ndt::type("?Any")}),
                      nd::functional::forward_na<0, 1>(ndt::type("Any"), {ndt::type("?Any"), ndt::type("?Any")})});
 
-  dispatcher.insert(nd::get_elwise(ndt::type("(Dim * Any, ?Any) -> Any")));
-  dispatcher.insert(nd::get_elwise(ndt::type("(?Any, Dim * Any) -> Any")));
+  dispatcher.insert(nd::get_elwise(
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                         {ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>()),
+                                          ndt::make_type<ndt::option_type>(ndt::make_type<ndt::scalar_kind_type>())})));
+  dispatcher.insert(nd::get_elwise(
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                         {ndt::make_type<ndt::option_type>(ndt::make_type<ndt::scalar_kind_type>()),
+                                          ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>())})));
 
   dispatcher.insert(nd::make_callable<KernelType<dynd::string, dynd::string>>());
 
@@ -55,8 +70,10 @@ dispatcher<2, nd::callable> make_comparison_children() {
 
 template <template <typename...> class CallableType>
 nd::callable make_comparison_callable() {
-  return nd::make_callable<nd::multidispatch_callable<2>>(ndt::type("(Any, Any) -> Any"),
-                                                          make_comparison_children<func_ptr, CallableType>());
+  return nd::make_callable<nd::multidispatch_callable<2>>(
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                         {ndt::make_type<ndt::any_kind_type>(), ndt::make_type<ndt::any_kind_type>()}),
+      make_comparison_children<func_ptr, CallableType>());
 }
 
 nd::callable make_less() { return make_comparison_callable<nd::less_callable>(); }
@@ -72,7 +89,10 @@ nd::callable make_equal() {
   dispatcher.insert(nd::make_callable<nd::equal_callable<ndt::type, ndt::type>>());
   dispatcher.insert(nd::make_callable<nd::equal_callable<bytes, bytes>>());
 
-  return nd::make_callable<nd::multidispatch_callable<2>>(ndt::type("(Any, Any) -> Any"), dispatcher);
+  return nd::make_callable<nd::multidispatch_callable<2>>(
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                         {ndt::make_type<ndt::any_kind_type>(), ndt::make_type<ndt::any_kind_type>()}),
+      dispatcher);
 }
 
 nd::callable make_not_equal() {
@@ -84,7 +104,10 @@ nd::callable make_not_equal() {
   dispatcher.insert(nd::make_callable<nd::not_equal_callable<ndt::type, ndt::type>>());
   dispatcher.insert(nd::make_callable<nd::not_equal_callable<bytes, bytes>>());
 
-  return nd::make_callable<nd::multidispatch_callable<2>>(ndt::type("(Any, Any) -> Any"), dispatcher);
+  return nd::make_callable<nd::multidispatch_callable<2>>(
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                         {ndt::make_type<ndt::any_kind_type>(), ndt::make_type<ndt::any_kind_type>()}),
+      dispatcher);
 }
 
 nd::callable make_greater_equal() { return make_comparison_callable<nd::greater_equal_callable>(); }
@@ -93,7 +116,8 @@ nd::callable make_greater() { return make_comparison_callable<nd::greater_callab
 
 nd::callable make_total_order() {
   return nd::make_callable<nd::multidispatch_callable<2>>(
-      ndt::type("(Any, Any) -> Any"),
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                         {ndt::make_type<ndt::any_kind_type>(), ndt::make_type<ndt::any_kind_type>()}),
       dispatcher<2, nd::callable>(func_ptr, {nd::make_callable<nd::total_order_callable<dynd::string, dynd::string>>(),
                                              nd::make_callable<nd::total_order_callable<int32_t, int32_t>>(),
                                              nd::make_callable<nd::total_order_callable<bool, bool>>()}));
@@ -103,8 +127,12 @@ nd::callable make_all_equal() {
   dispatcher<2, nd::callable> dispatcher =
       nd::callable::make_all<nd::all_equal_callable, numeric_types, numeric_types>(func_ptr);
 
-  return nd::functional::reduction([] { return true; }, nd::make_callable<nd::multidispatch_callable<2>>(
-                                                            ndt::type("(Scalar, Scalar) -> bool"), dispatcher));
+  return nd::functional::reduction(
+      [] { return true; },
+      nd::make_callable<nd::multidispatch_callable<2>>(
+          ndt::make_type<ndt::callable_type>(ndt::make_type<bool>(), {ndt::make_type<ndt::scalar_kind_type>(),
+                                                                      ndt::make_type<ndt::scalar_kind_type>()}),
+          dispatcher));
 }
 
 } // unnamed namespace

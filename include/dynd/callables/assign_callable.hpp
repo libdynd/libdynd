@@ -828,7 +828,10 @@ namespace nd {
 
   class option_to_value_callable : public base_callable {
   public:
-    option_to_value_callable() : base_callable(ndt::type("(?Any) -> Scalar")) {}
+    option_to_value_callable()
+        : base_callable(ndt::make_type<ndt::callable_type>(
+              ndt::make_type<ndt::scalar_kind_type>(),
+              {ndt::make_type<ndt::option_type>(ndt::make_type<ndt::any_kind_type>())})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,
@@ -860,7 +863,9 @@ namespace nd {
 
   class adapt_assign_from_callable : public base_callable {
   public:
-    adapt_assign_from_callable() : base_callable(ndt::type("(Any) -> Any")) {}
+    adapt_assign_from_callable()
+        : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                                           {ndt::make_type<ndt::any_kind_type>()})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -908,7 +913,9 @@ namespace nd {
 
   class adapt_assign_to_callable : public base_callable {
   public:
-    adapt_assign_to_callable() : base_callable(ndt::type("(Any) -> Any")) {}
+    adapt_assign_to_callable()
+        : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                                           {ndt::make_type<ndt::any_kind_type>()})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t nsrc, const ndt::type *DYND_UNUSED(src_tp), size_t nkwd,
@@ -924,7 +931,9 @@ namespace nd {
 
   class assignment_option_callable : public base_callable {
   public:
-    assignment_option_callable() : base_callable(ndt::type("(Scalar) -> ?Any")) {}
+    assignment_option_callable()
+        : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                                           {ndt::make_type<ndt::scalar_kind_type>()})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp, size_t nkwd,

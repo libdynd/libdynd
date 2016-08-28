@@ -13,7 +13,10 @@ namespace nd {
 
   class field_access_callable : public base_callable {
   public:
-    field_access_callable() : base_callable(ndt::type("({...}, field_name : string) -> Any")) {}
+    field_access_callable()
+        : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                                           {ndt::make_type<ndt::struct_type>(true)},
+                                                           {{ndt::make_type<dynd::string>(), "field_name"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &DYND_UNUSED(res_tp), size_t DYND_UNUSED(narg), const ndt::type *arg_tp,

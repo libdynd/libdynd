@@ -100,9 +100,19 @@ nd::callable make_assign() {
   dispatcher.insert(nd::make_callable<nd::assign_callable<double, dynd::string>>());
   dispatcher.insert(nd::make_callable<nd::assign_callable<ndt::tuple_type, ndt::tuple_type>>());
   dispatcher.insert(nd::make_callable<nd::assign_callable<ndt::struct_type, ndt::struct_type>>());
-  dispatcher.insert({nd::get_elwise(ndt::type("(Dim * Any) -> Scalar")),
-                     nd::get_elwise(ndt::type("(Scalar) -> Dim * Any")),
-                     nd::get_elwise(ndt::type("(Dim * Any) -> Dim * Any"))});
+  dispatcher.insert(
+      {nd::get_elwise(ndt::make_type<ndt::callable_type>(
+           ndt::make_type<ndt::scalar_kind_type>(),
+           ndt::make_type<ndt::tuple_type>({ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>())}),
+           ndt::make_type<ndt::struct_type>())),
+       nd::get_elwise(ndt::make_type<ndt::callable_type>(
+           ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>()),
+           ndt::make_type<ndt::tuple_type>({ndt::make_type<ndt::scalar_kind_type>()}),
+           ndt::make_type<ndt::struct_type>())),
+       nd::get_elwise(ndt::make_type<ndt::callable_type>(
+           ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>()),
+           ndt::make_type<ndt::tuple_type>({ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>())}),
+           ndt::make_type<ndt::struct_type>()))});
 
   return nd::make_callable<nd::multidispatch_callable<2>>(self_tp, dispatcher);
 }

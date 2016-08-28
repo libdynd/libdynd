@@ -27,9 +27,14 @@ template <template <typename> class CallableType, template <typename> class Cond
 nd::callable make_unary_arithmetic() {
   dispatcher<1, nd::callable> dispatcher = nd::callable::make_all_if<CallableType, Condition, TypeSequence>(func_ptr);
 
-  const ndt::type &tp = ndt::type("(Any) -> Any");
-  dispatcher.insert(nd::get_elwise(ndt::type("(Fixed * Any) -> Any")));
-  dispatcher.insert(nd::get_elwise(ndt::type("(var * Any) -> Any")));
+  const ndt::type &tp =
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<ndt::any_kind_type>()});
+  dispatcher.insert(nd::get_elwise(ndt::make_type<ndt::callable_type>(
+      ndt::make_type<ndt::any_kind_type>(),
+      {ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<ndt::any_kind_type>())})));
+  dispatcher.insert(nd::get_elwise(
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                         {ndt::make_type<ndt::var_dim_type>(ndt::make_type<ndt::any_kind_type>())})));
 
   return nd::make_callable<nd::multidispatch_callable<1>>(tp, dispatcher);
 }

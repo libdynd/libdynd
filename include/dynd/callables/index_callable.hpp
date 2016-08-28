@@ -30,7 +30,10 @@ namespace nd {
       }
     };
 
-    index_callable() : base_callable(ndt::type("(Any, i: Any) -> Any")) {}
+    index_callable()
+        : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                                           {ndt::make_type<ndt::any_kind_type>()},
+                                                           {{ndt::make_type<ndt::any_kind_type>(), "i"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),
                       const ndt::type &DYND_UNUSED(dst_tp), size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -68,7 +71,10 @@ namespace nd {
       }
     };
 
-    index_callable() : base_callable(ndt::type("(Any, i: Any) -> Any")) {}
+    index_callable()
+        : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                                           {ndt::make_type<ndt::any_kind_type>()},
+                                                           {{ndt::make_type<ndt::any_kind_type>(), "i"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,

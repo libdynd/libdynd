@@ -13,7 +13,9 @@ namespace nd {
 
   class all_callable : public default_instantiable_callable<all_kernel> {
   public:
-    all_callable() : default_instantiable_callable<all_kernel>(ndt::type("(bool) -> bool")) {}
+    all_callable()
+        : default_instantiable_callable<all_kernel>(
+              ndt::make_type<ndt::callable_type>(ndt::make_type<bool>(), {ndt::make_type<bool>()})) {}
   };
 
 } // namespace dynd::nd

@@ -221,7 +221,22 @@ ndt::type ndt::callable_type::construct_type(type_id_t DYND_UNUSED(id), const nd
     throw invalid_argument("callable type is not a dimension type");
   }
 
-  return ndt::make_type<ndt::callable_type>(element_type);
+  // TODO: better validation checking of dynamic arguments
+  nd::array posargs = args(0);
+  if (posargs.get_type().get_id() != tuple_id) {
+    throw invalid_argument("positional type constructor args must be a tuple");
+  }
+  auto ret_tp = posargs(0).as<ndt::type>();
+  auto pos_args_tp = posargs(1).as<ndt::type>();
+  if (posargs.get_type().extended<ndt::tuple_type>()->get_field_count() > 2) {
+    return ndt::make_type<ndt::callable_type>(ret_tp, pos_args_tp, posargs(2).as<ndt::type>());
+  } else {
+    if (pos_args_tp.get_id() != tuple_id) {
+      throw invalid_argument("expected a tuple type as the positional callable args");
+    }
+    return ndt::make_type<ndt::callable_type>(
+        ret_tp, pos_args_tp, ndt::make_type<ndt::struct_type>(pos_args_tp.extended<ndt::tuple_type>()->is_variadic()));
+  }
 }
 
 namespace {

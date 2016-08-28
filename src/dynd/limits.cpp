@@ -17,11 +17,11 @@ static std::vector<ndt::type> func_ptr(const ndt::type &dst_tp, size_t DYND_UNUS
 }
 
 DYND_API nd::callable nd::limits::max = nd::make_callable<nd::multidispatch_callable<1>>(
-    ndt::type("() -> Any"),
+    ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(), {}),
     nd::callable::make_all<nd::limits::max_callable, type_sequence<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t,
                                                                    uint32_t, uint64_t, float, double>>(func_ptr));
 
 DYND_API nd::callable nd::limits::min = nd::make_callable<nd::multidispatch_callable<1>>(
-    ndt::type("() -> Any"),
+    ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(), {}),
     nd::callable::make_all<nd::limits::min_callable, type_sequence<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t,
                                                                    uint32_t, uint64_t, float, double>>(func_ptr));

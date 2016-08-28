@@ -22,7 +22,8 @@ static std::vector<ndt::type> func_ptr(const ndt::type &DYND_UNUSED(dst_tp), siz
 } // unnamed namespace
 
 DYND_API nd::callable nd::index = nd::make_callable<nd::multidispatch_callable<1>>(
-    ndt::type("(Any, i: Any) -> Any"),
+    ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<ndt::any_kind_type>()},
+                                       {{ndt::make_type<ndt::any_kind_type>(), "i"}}),
     nd::callable::make_all<nd::index_callable, type_sequence<int32_t, ndt::fixed_dim_kind_type>>(func_ptr));
 
 DYND_API nd::callable nd::take = nd::make_callable<nd::take_dispatch_callable>();
