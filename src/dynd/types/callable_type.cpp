@@ -211,6 +211,26 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::callable_type::ge
   return properties;
 }
 
+nd::buffer ndt::callable_type::get_type_constructor_args() const {
+  nd::buffer callable_args;
+  if (get_nkwd() == 0) {
+    callable_args = nd::buffer::empty(ndt::make_type<ndt::tuple_type>(
+        {ndt::make_type<ndt::tuple_type>({ndt::make_type<ndt::type_type>(), ndt::make_type<ndt::type_type>()}),
+         ndt::make_type<ndt::struct_type>()}));
+    reinterpret_cast<ndt::type *>(callable_args.data())[0] = get_return_type();
+    reinterpret_cast<ndt::type *>(callable_args.data())[1] = get_pos_tuple();
+  } else {
+    nd::buffer callable_args = nd::buffer::empty(ndt::make_type<ndt::tuple_type>(
+        {ndt::make_type<ndt::tuple_type>(
+             {ndt::make_type<ndt::type_type>(), ndt::make_type<ndt::type_type>(), ndt::make_type<ndt::type_type>()}),
+         ndt::make_type<ndt::struct_type>()}));
+    reinterpret_cast<ndt::type *>(callable_args.data())[0] = get_return_type();
+    reinterpret_cast<ndt::type *>(callable_args.data())[1] = get_pos_tuple();
+    reinterpret_cast<ndt::type *>(callable_args.data())[2] = get_kwd_struct();
+  }
+  return callable_args;
+}
+
 ndt::type ndt::callable_type::construct_type(type_id_t DYND_UNUSED(id), const nd::buffer &args0,
                                              const ndt::type &element_type) {
   nd::array args = args0;
@@ -232,7 +252,9 @@ ndt::type ndt::callable_type::construct_type(type_id_t DYND_UNUSED(id), const nd
     return ndt::make_type<ndt::callable_type>(ret_tp, pos_args_tp, posargs(2).as<ndt::type>());
   } else {
     if (pos_args_tp.get_id() != tuple_id) {
-      throw invalid_argument("expected a tuple type as the positional callable args");
+      stringstream ss;
+      ss << "expected a tuple type as the positional callable args, args are: " << args;
+      throw invalid_argument(ss.str());
     }
     return ndt::make_type<ndt::callable_type>(
         ret_tp, pos_args_tp, ndt::make_type<ndt::struct_type>(pos_args_tp.extended<ndt::tuple_type>()->is_variadic()));

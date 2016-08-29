@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/type_registry.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
@@ -33,6 +34,73 @@ static std::vector<ndt::type> substitute_type_array(const std::vector<ndt::type>
     tmp_field_types[i] = ndt::substitute(type_array[i], typevars, concrete);
   }
   return tmp_field_types;
+}
+
+// This substitutes just the types supported by the datashape argument grammar
+static void internal_substitute_args(const ndt::type &tp, const char *out_arrmeta, char *out_data,
+                                     const char *in_arrmeta, const char *in_data,
+                                     const std::map<std::string, ndt::type> &typevars, bool concrete) {
+  switch (tp.get_id()) {
+  case int64_id:
+    *reinterpret_cast<int64_t *>(out_data) = *reinterpret_cast<const int64_t *>(in_data);
+    break;
+  case string_id:
+    *reinterpret_cast<dynd::string *>(out_data) = *reinterpret_cast<const dynd::string *>(in_data);
+    break;
+  case type_id:
+    *reinterpret_cast<ndt::type *>(out_data) =
+        ndt::substitute(*reinterpret_cast<const ndt::type *>(in_data), typevars, concrete);
+    break;
+  case struct_id:
+  case tuple_id: {
+    intptr_t field_count;
+    const ndt::type *field_types;
+    const uintptr_t *arrmeta_offsets;
+    const uintptr_t *out_data_offsets = reinterpret_cast<const uintptr_t *>(out_arrmeta);
+    const uintptr_t *in_data_offsets = reinterpret_cast<const uintptr_t *>(in_arrmeta);
+    if (tp.get_id() == tuple_id) {
+      field_count = tp.extended<ndt::tuple_type>()->get_field_count();
+      field_types = tp.extended<ndt::tuple_type>()->get_field_types_raw();
+      arrmeta_offsets = tp.extended<ndt::tuple_type>()->get_arrmeta_offsets_raw();
+    } else {
+      field_count = tp.extended<ndt::struct_type>()->get_field_count();
+      field_types = tp.extended<ndt::struct_type>()->get_field_types_raw();
+      arrmeta_offsets = tp.extended<ndt::struct_type>()->get_arrmeta_offsets_raw();
+    }
+    for (intptr_t i = 0; i < field_count; ++i) {
+      internal_substitute_args(field_types[i], out_arrmeta + arrmeta_offsets[i], out_data + out_data_offsets[i],
+                               in_arrmeta + arrmeta_offsets[i], in_data + in_data_offsets[i], typevars, concrete);
+    }
+    break;
+  }
+  case fixed_dim_id: {
+    const ndt::fixed_dim_type *etp = tp.extended<ndt::fixed_dim_type>();
+    const ndt::type &el_tp = etp->get_element_type();
+    const size_stride_t &out_ss = *reinterpret_cast<const size_stride_t *>(out_arrmeta);
+    const size_stride_t &in_ss = *reinterpret_cast<const size_stride_t *>(in_arrmeta);
+    out_arrmeta += sizeof(size_stride_t);
+    in_arrmeta += sizeof(size_stride_t);
+    for (intptr_t i = 0, ie = etp->get_fixed_dim_size(); i != ie; ++i) {
+      internal_substitute_args(el_tp, out_arrmeta, out_data, in_arrmeta, in_data, typevars, concrete);
+      out_data += out_ss.stride;
+      in_data += in_ss.stride;
+    }
+    break;
+  }
+  default: {
+    stringstream ss;
+    ss << "substitute_typevars: type construction args during substitution had invalid type " << tp;
+    throw runtime_error(ss.str());
+  }
+  }
+}
+
+static nd::buffer internal_substitute_args(const nd::buffer &args, const std::map<std::string, ndt::type> &typevars,
+                                           bool concrete) {
+  nd::buffer result = nd::buffer::empty(args.get_type());
+  internal_substitute_args(args.get_type(), result->metadata(), result.data(), args->metadata(), args.cdata(), typevars,
+                           concrete);
+  return result;
 }
 
 ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::map<std::string, ndt::type> &typevars,
@@ -76,14 +144,6 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
   case option_id:
     return ndt::make_type<ndt::option_type>(
         ndt::substitute(pattern.extended<option_type>()->get_value_type(), typevars, concrete));
-  case callable_id:
-    throw std::runtime_error("TODO: substitute type vars in callable");
-  /*
-  return ndt::make_type<ndt::callable_type>(
-      substitute(pattern.extended<callable_type>()->get_return_type(), typevars, concrete),
-      substitute(pattern.extended<callable_type>()->get_pos_tuple(), typevars, concrete),
-      substitute(pattern.extended<callable_type>()->get_kwd_struct(), typevars, concrete));
-      */
   case typevar_constructed_id: {
     map<std::string, ndt::type>::const_iterator it =
         typevars.find(pattern.extended<typevar_constructed_type>()->get_name());
@@ -312,11 +372,17 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
       return pattern;
     }
   }
-  default:
-    break;
+  default: {
+    if (pattern.is_builtin()) {
+      return pattern;
+    } else {
+      // Generic code path via type reconstruction. We turn the type into its generic type constructor arguments, do the
+      // type variable substitution on them, then reconstruct the type.
+      type_id_t tid = pattern.get_id();
+      nd::buffer args = pattern.extended()->get_type_constructor_args();
+      args = internal_substitute_args(args, typevars, concrete);
+      return dynd::detail::infos()[tid].construct_type(tid, args, ndt::type());
+    }
   }
-
-  stringstream ss;
-  ss << "Unsupported dynd type \"" << pattern << "\" encountered for substituting typevars";
-  throw invalid_argument(ss.str());
+  }
 }

@@ -144,6 +144,11 @@ namespace ndt {
 
     std::map<std::string, std::pair<ndt::type, const char *>> get_dynamic_type_properties() const;
 
+    /**
+     * This function is just here for now, but it seems useful to make it general. Then `get_type_constructor_args` and
+     * `construct_type` together make DyND's types generically reconstructible.
+     */
+    nd::buffer get_type_constructor_args() const;
     static ndt::type construct_type(type_id_t id, const nd::buffer &args, const ndt::type &element_type);
   };
 

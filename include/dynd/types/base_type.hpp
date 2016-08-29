@@ -449,6 +449,13 @@ namespace ndt {
     /** Destructs any references or other state contained in the iterdata */
     virtual size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
+    /**
+     * This function returns an nd::buffer with type constructor arguments, exactly as are accepted by the
+     * `construct_type` function which is part of the type registry. The two functions `get_type_constructor_args` and
+     * `construct_type` make DyND's types generically reconstructible.
+     */
+    virtual nd::buffer get_type_constructor_args() const;
+
     virtual bool match(const ndt::type &candidate_tp, std::map<std::string, ndt::type> &tp_vars) const;
 
     /**

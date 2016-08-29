@@ -26,8 +26,9 @@ namespace ndt {
    */
   inline ndt::type substitute(const ndt::type &pattern, const std::map<std::string, ndt::type> &typevars, bool concrete)
   {
-    // This check for whether ``pattern`` is symbolic is put here in
-    // the inline function to avoid the call overhead in this case
+    // This check for whether ``pattern`` is symbolic is put here in the inline function to avoid the call overhead in
+    // this case. Callables are not symbolic themselves, but may contain symbolic types within them that need
+    // substitution.
     if (!pattern.is_symbolic() && pattern.get_id() != callable_id) {
       return pattern;
     }
