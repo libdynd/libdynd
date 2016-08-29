@@ -15,7 +15,10 @@ namespace nd {
     ndt::type m_tp;
 
   public:
-    mean_callable(const ndt::type &tp) : base_callable(ndt::type("(Any) -> Any")), m_tp(tp) {}
+    mean_callable(const ndt::type &tp)
+        : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                                           {ndt::make_type<ndt::any_kind_type>()})),
+          m_tp(tp) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &DYND_UNUSED(cg),
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),

@@ -85,4 +85,12 @@ DYNDT_API type_id_t new_id(const char *name, type_id_t base_id);
  */
 DYNDT_API std::pair<type_id_t, const id_info *> lookup_id_by_name(const std::string &name);
 
+/**
+ * For type ids which are pre-allocated, but whose implementation isn't part of dynd.ndt, this function provides the
+ * mechanism to add the type construction and parsing.
+ */
+DYNDT_API void register_known_type_id_constructor(type_id_t id, ndt::type &&singleton_type,
+                                                  type_constructor_fn_t construct_type,
+                                                  low_level_type_args_parse_fn_t parse_type_args = nullptr);
+
 } // namespace dynd

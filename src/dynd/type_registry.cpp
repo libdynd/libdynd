@@ -98,8 +98,8 @@ DYNDT_API vector<id_info> &detail::infos() {
   return infos;
 }
 
-ndt::type default_parse_type_args(type_id_t id, const char *&begin, const char *end,
-                                  std::map<std::string, ndt::type> &symtable) {
+ndt::type dynd::default_parse_type_args(type_id_t id, const char *&begin, const char *end,
+                                        std::map<std::string, ndt::type> &symtable) {
   ndt::type result, element_type;
   const char *saved_begin = begin;
   nd::buffer args = datashape::parse_type_constr_args(begin, end, symtable);
@@ -144,4 +144,28 @@ DYNDT_API std::pair<type_id_t, const id_info *> dynd::lookup_id_by_name(const st
     }
   }
   return {uninitialized_id, nullptr};
+}
+
+DYNDT_API void dynd::register_known_type_id_constructor(type_id_t id, ndt::type &&singleton_type,
+                                                        type_constructor_fn_t construct_type,
+                                                        low_level_type_args_parse_fn_t parse_type_args) {
+  vector<id_info> &infos = detail::infos();
+  if (id < 0 || id >= infos.size()) {
+    throw out_of_range("Type ID " + to_string(id) + " is out of range, cannot register its known type ID constructor");
+  }
+  id_info &ii = infos[id];
+  if (ii.singleton_type != ndt::type() || ii.construct_type != nullptr || ii.parse_type_args != nullptr) {
+    throw runtime_error("Type ID " + to_string(id) + ", " + ii.name + ", already has type construction registerd");
+  }
+  ii.singleton_type = std::move(singleton_type);
+  if (construct_type != nullptr) {
+    ii.construct_type = construct_type;
+    // If the type args parser isn't provided, we can put in a default
+    ii.parse_type_args = parse_type_args ? parse_type_args : &default_parse_type_args;
+  } else if (parse_type_args != nullptr) {
+    // If the type args parser is provided, the type constructor needs to be provided too
+    throw runtime_error(
+        "Type ID " + to_string(id) + ", " + ii.name +
+        ", type construction registration needs a type constructor function along with the type args parser");
+  }
 }

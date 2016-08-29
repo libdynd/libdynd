@@ -19,7 +19,11 @@ typedef type_sequence<uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, in
 
 template <template <typename, typename> class KernelType, typename TypeSequence>
 nd::callable make_compound_arithmetic() {
-  const ndt::type &tp = ndt::type("(Any, Any) -> Any");
+  const ndt::type &tp = ndt::make_type<ndt::callable_type>(
+      ndt::make_type<ndt::any_kind_type>(),
+      ndt::make_type<ndt::tuple_type>({ndt::make_type<ndt::any_kind_type>(), ndt::make_type<ndt::any_kind_type>()}),
+      ndt::make_type<ndt::struct_type>());
+
   auto dispatcher = nd::callable::make_all<KernelType, TypeSequence, TypeSequence>(
       [](const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp) -> std::vector<ndt::type> {
         return {dst_tp, src_tp[0]};
@@ -38,9 +42,21 @@ nd::callable make_compound_arithmetic() {
                                                    ndt::make_type<dynd::complex<float>>(),
                                                    ndt::make_type<dynd::complex<double>>()};
 
-  dispatcher.insert(nd::get_elwise(ndt::type("(Scalar, Dim * Any) -> Any")));
-  dispatcher.insert(nd::get_elwise(ndt::type("(Dim * Any, Scalar) -> Any")));
-  dispatcher.insert(nd::get_elwise(ndt::type("(Dim * Any, Dim * Any) -> Any")));
+  dispatcher.insert(nd::get_elwise(ndt::make_type<ndt::callable_type>(
+      ndt::make_type<ndt::any_kind_type>(),
+      ndt::make_type<ndt::tuple_type>({ndt::make_type<ndt::scalar_kind_type>(),
+                                       ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>())}),
+      ndt::make_type<ndt::struct_type>())));
+  dispatcher.insert(nd::get_elwise(ndt::make_type<ndt::callable_type>(
+      ndt::make_type<ndt::any_kind_type>(),
+      ndt::make_type<ndt::tuple_type>({ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>()),
+                                       ndt::make_type<ndt::scalar_kind_type>()}),
+      ndt::make_type<ndt::struct_type>())));
+  dispatcher.insert(nd::get_elwise(ndt::make_type<ndt::callable_type>(
+      ndt::make_type<ndt::any_kind_type>(),
+      ndt::make_type<ndt::tuple_type>({ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>()),
+                                       ndt::make_type<ndt::dim_kind_type>(ndt::make_type<ndt::any_kind_type>())}),
+      ndt::make_type<ndt::struct_type>())));
 
   return nd::make_callable<nd::multidispatch_callable<2>>(tp, dispatcher);
 }

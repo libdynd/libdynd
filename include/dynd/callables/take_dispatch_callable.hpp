@@ -7,6 +7,8 @@
 
 #include <dynd/callables/base_callable.hpp>
 #include <dynd/kernels/take_kernel.hpp>
+#include <dynd/types/ellipsis_dim_type.hpp>
+#include <dynd/types/typevar_dim_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -17,7 +19,11 @@ namespace nd {
   template <>
   class take_callable<bool_id> : public base_callable {
   public:
-    take_callable() : base_callable(ndt::type("(Any, Fixed * bool) -> Any")) {}
+    take_callable()
+        : base_callable(
+              ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                                 {ndt::make_type<ndt::any_kind_type>(),
+                                                  ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<bool>())})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &DYND_UNUSED(dst_tp), size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -63,7 +69,9 @@ namespace nd {
 
   class indexed_take_callable : public base_callable {
   public:
-    indexed_take_callable() : base_callable(ndt::type("(Any) -> Any")) {}
+    indexed_take_callable()
+        : base_callable(ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(),
+                                                           {ndt::make_type<ndt::any_kind_type>()})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -194,7 +202,11 @@ namespace nd {
 
   class take_dispatch_callable : public base_callable {
   public:
-    take_dispatch_callable() : base_callable(ndt::type("(Dims... * T, N * Ix) -> R * T")) {}
+    take_dispatch_callable()
+        : base_callable(ndt::make_type<ndt::callable_type>(
+              ndt::make_type<ndt::typevar_dim_type>("R", ndt::make_type<ndt::typevar_type>("T")),
+              {ndt::make_type<ndt::ellipsis_dim_type>("Dims", ndt::make_type<ndt::typevar_type>("T")),
+               ndt::make_type<ndt::typevar_dim_type>("N", ndt::make_type<ndt::typevar_type>("Ix"))})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &dst_tp, size_t nsrc, const ndt::type *src_tp, size_t nkwd, const array *kwds,

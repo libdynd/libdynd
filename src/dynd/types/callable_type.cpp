@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/array.hpp>
+#include <dynd/type_registry.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/str_util.hpp>
@@ -10,6 +12,14 @@
 
 using namespace std;
 using namespace dynd;
+
+namespace {
+// Dynamically register the type constructor for `callable`
+const bool init_callable_type = []() -> bool {
+  dynd::register_known_type_id_constructor(callable_id, ndt::type(), &ndt::callable_type::construct_type);
+  return true;
+}();
+}
 
 static void print_callable(std::ostream &o, const ndt::callable_type *DYND_UNUSED(af_tp),
                            const ndt::callable_type::data_type *af) {
@@ -27,7 +37,9 @@ void ndt::callable_type::print_type(std::ostream &o) const {
   const bool pos_variadic = m_pos_tuple.extended<tuple_type>()->is_variadic();
   const bool kwd_variadic = m_kwd_struct.extended<struct_type>()->is_variadic();
 
-  o << "(";
+  if (init_callable_type) { // Will always be true, using this here so gcc/clang don't complain about the unused global
+    o << "(";
+  }
 
   const std::vector<type> &arg_tp = get_argument_types();
 
@@ -207,4 +219,54 @@ std::map<std::string, std::pair<ndt::type, const char *>> ndt::callable_type::ge
   properties["return_type"] = {ndt::make_type<ndt::type_type>(), reinterpret_cast<const char *>(&m_return_type)};
 
   return properties;
+}
+
+nd::buffer ndt::callable_type::get_type_constructor_args() const {
+  nd::buffer callable_args;
+  if (get_nkwd() == 0) {
+    callable_args = nd::buffer::empty(ndt::make_type<ndt::tuple_type>(
+        {ndt::make_type<ndt::tuple_type>({ndt::make_type<ndt::type_type>(), ndt::make_type<ndt::type_type>()}),
+         ndt::make_type<ndt::struct_type>()}));
+    reinterpret_cast<ndt::type *>(callable_args.data())[0] = get_return_type();
+    reinterpret_cast<ndt::type *>(callable_args.data())[1] = get_pos_tuple();
+  } else {
+    nd::buffer callable_args = nd::buffer::empty(ndt::make_type<ndt::tuple_type>(
+        {ndt::make_type<ndt::tuple_type>(
+             {ndt::make_type<ndt::type_type>(), ndt::make_type<ndt::type_type>(), ndt::make_type<ndt::type_type>()}),
+         ndt::make_type<ndt::struct_type>()}));
+    reinterpret_cast<ndt::type *>(callable_args.data())[0] = get_return_type();
+    reinterpret_cast<ndt::type *>(callable_args.data())[1] = get_pos_tuple();
+    reinterpret_cast<ndt::type *>(callable_args.data())[2] = get_kwd_struct();
+  }
+  return callable_args;
+}
+
+ndt::type ndt::callable_type::construct_type(type_id_t DYND_UNUSED(id), const nd::buffer &args0,
+                                             const ndt::type &element_type) {
+  nd::array args = args0;
+  if (args.is_null()) {
+    throw invalid_argument("callable type constructor requires arguments");
+  }
+  if (!element_type.is_null()) {
+    throw invalid_argument("callable type is not a dimension type");
+  }
+
+  // TODO: better validation checking of dynamic arguments
+  nd::array posargs = args(0);
+  if (posargs.get_type().get_id() != tuple_id) {
+    throw invalid_argument("positional type constructor args must be a tuple");
+  }
+  auto ret_tp = posargs(0).as<ndt::type>();
+  auto pos_args_tp = posargs(1).as<ndt::type>();
+  if (posargs.get_type().extended<ndt::tuple_type>()->get_field_count() > 2) {
+    return ndt::make_type<ndt::callable_type>(ret_tp, pos_args_tp, posargs(2).as<ndt::type>());
+  } else {
+    if (pos_args_tp.get_id() != tuple_id) {
+      stringstream ss;
+      ss << "expected a tuple type as the positional callable args, args are: " << args;
+      throw invalid_argument(ss.str());
+    }
+    return ndt::make_type<ndt::callable_type>(
+        ret_tp, pos_args_tp, ndt::make_type<ndt::struct_type>(pos_args_tp.extended<ndt::tuple_type>()->is_variadic()));
+  }
 }

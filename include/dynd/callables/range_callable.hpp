@@ -7,6 +7,7 @@
 
 #include <dynd/callables/base_callable.hpp>
 #include <dynd/kernels/range_kernel.hpp>
+#include <dynd/types/option_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -18,7 +19,12 @@ namespace nd {
   class range_callable<ReturnElementType, std::enable_if_t<is_signed_integral<ReturnElementType>::value>>
       : public base_callable {
   public:
-    range_callable() : base_callable(ndt::type("(start: ?Scalar, stop: ?Scalar, step: ?Scalar) -> Fixed * Scalar")) {}
+    range_callable()
+        : base_callable(ndt::make_type<ndt::callable_type>(
+              ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<ndt::scalar_kind_type>()), {},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<ndt::scalar_kind_type>()), "start"},
+               {ndt::make_type<ndt::option_type>(ndt::make_type<ndt::scalar_kind_type>()), "stop"},
+               {ndt::make_type<ndt::option_type>(ndt::make_type<ndt::scalar_kind_type>()), "step"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &DYND_UNUSED(ret_tp), size_t DYND_UNUSED(narg),
@@ -81,7 +87,12 @@ namespace nd {
   class range_callable<ReturnElementType, std::enable_if_t<is_floating_point<ReturnElementType>::value>>
       : public base_callable {
   public:
-    range_callable() : base_callable(ndt::type("(start: ?Scalar, stop: Scalar, step: ?Scalar) -> Fixed * Scalar")) {}
+    range_callable()
+        : base_callable(ndt::make_type<ndt::callable_type>(
+              ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<ndt::scalar_kind_type>()), {},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<ndt::scalar_kind_type>()), "start"},
+               {ndt::make_type<ndt::option_type>(ndt::make_type<ndt::scalar_kind_type>()), "stop"},
+               {ndt::make_type<ndt::option_type>(ndt::make_type<ndt::scalar_kind_type>()), "step"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &DYND_UNUSED(ret_tp), size_t DYND_UNUSED(narg),
@@ -128,7 +139,11 @@ namespace nd {
   class range_dispatch_callable : public base_callable {
   public:
     range_dispatch_callable()
-        : base_callable(ndt::type("(start: ?Scalar, stop: ?Scalar, step: ?Scalar) -> Fixed * Scalar")) {}
+        : base_callable(ndt::make_type<ndt::callable_type>(
+              ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<ndt::scalar_kind_type>()), {},
+              {{ndt::make_type<ndt::option_type>(ndt::make_type<ndt::scalar_kind_type>()), "start"},
+               {ndt::make_type<ndt::option_type>(ndt::make_type<ndt::scalar_kind_type>()), "stop"},
+               {ndt::make_type<ndt::option_type>(ndt::make_type<ndt::scalar_kind_type>()), "step"}})) {}
 
     ndt::type resolve(base_callable *DYND_UNUSED(caller), char *DYND_UNUSED(data), call_graph &cg,
                       const ndt::type &ret_tp, size_t narg, const ndt::type *arg_tp, size_t nkwd, const array *kwds,

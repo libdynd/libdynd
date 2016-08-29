@@ -9,6 +9,7 @@
 #include <dynd/callables/uniform_callable.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/random.hpp>
+#include <dynd/types/typevar_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -29,7 +30,10 @@ struct uniform_callable_alias {
 } // unnamed namespace
 
 DYND_API nd::callable nd::random::uniform = nd::functional::elwise(nd::make_callable<nd::multidispatch_callable<1>>(
-    ndt::type("(a: ?R, b: ?R) -> R"),
+    ndt::make_type<ndt::callable_type>(
+        ndt::make_type<ndt::typevar_type>("R"), {},
+        {{ndt::make_type<ndt::option_type>(ndt::make_type<ndt::typevar_type>("R")), "a"},
+         {ndt::make_type<ndt::option_type>(ndt::make_type<ndt::typevar_type>("R")), "b"}}),
     nd::callable::make_all<uniform_callable_alias<std::default_random_engine>::type,
                            type_sequence<int32_t, int64_t, uint32_t, uint64_t, float, double, dynd::complex<float>,
                                          dynd::complex<double>>>(func_ptr)));

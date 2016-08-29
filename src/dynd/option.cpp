@@ -30,10 +30,14 @@ nd::callable make_assign_na() {
       type_sequence<bool, int8_t, int16_t, int32_t, int64_t, int128, uint32_t, float, double, dynd::complex<float>,
                     dynd::complex<double>, void, dynd::bytes, dynd::string, ndt::fixed_dim_kind_type>>(
       assign_na_func_ptr);
-  children.insert(nd::get_elwise(ndt::type("() -> Fixed * Any")));
-  children.insert(nd::get_elwise(ndt::type("() -> var * Any")));
+  children.insert(nd::get_elwise(ndt::make_type<ndt::callable_type>(
+      ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<ndt::any_kind_type>()), {})));
+  children.insert(nd::get_elwise(
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::var_dim_type>(ndt::make_type<ndt::any_kind_type>()), {})));
 
-  return nd::make_callable<nd::multidispatch_callable<1>>(ndt::type("() -> ?Any"), children);
+  return nd::make_callable<nd::multidispatch_callable<1>>(
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::option_type>(ndt::make_type<ndt::any_kind_type>()), {}),
+      children);
 }
 
 nd::callable make_is_na() {
@@ -41,10 +45,16 @@ nd::callable make_is_na() {
       nd::is_na_callable,
       type_sequence<bool, int8_t, int16_t, int32_t, int64_t, int128, uint32_t, float, double, dynd::complex<float>,
                     dynd::complex<double>, void, dynd::bytes, dynd::string, ndt::fixed_dim_kind_type>>(is_na_func_ptr);
-  dispatcher.insert(nd::get_elwise(ndt::type("(Fixed * Any) -> Fixed * Any")));
-  dispatcher.insert(nd::get_elwise(ndt::type("(var * Any) -> var * Any")));
+  dispatcher.insert(nd::get_elwise(ndt::make_type<ndt::callable_type>(
+      ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<ndt::any_kind_type>()),
+      {ndt::make_type<ndt::fixed_dim_kind_type>(ndt::make_type<ndt::any_kind_type>())})));
+  dispatcher.insert(nd::get_elwise(
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::var_dim_type>(ndt::make_type<ndt::any_kind_type>()),
+                                         {ndt::make_type<ndt::var_dim_type>(ndt::make_type<ndt::any_kind_type>())})));
 
-  return nd::make_callable<nd::multidispatch_callable<1>>(ndt::type("(Any) -> Any"), dispatcher);
+  return nd::make_callable<nd::multidispatch_callable<1>>(
+      ndt::make_type<ndt::callable_type>(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<ndt::any_kind_type>()}),
+      dispatcher);
 }
 
 } // unnamed namespace

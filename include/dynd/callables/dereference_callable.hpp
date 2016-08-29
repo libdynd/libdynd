@@ -13,7 +13,10 @@ namespace nd {
 
   class dereference_callable : public base_callable {
   public:
-    dereference_callable() : base_callable(ndt::type("(pointer[Any]) -> Any")) {}
+    dereference_callable()
+        : base_callable(ndt::make_type<ndt::callable_type>(
+              ndt::make_type<ndt::any_kind_type>(),
+              {ndt::make_type<ndt::pointer_type>(ndt::make_type<ndt::any_kind_type>())})) {}
 
     array alloc(const ndt::type *dst_tp) const { return empty(*dst_tp); }
 

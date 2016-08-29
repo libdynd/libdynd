@@ -5,6 +5,8 @@
 
 #include <dynd/type.hpp>
 
+#include <dynd/buffer.hpp>
+
 using namespace std;
 using namespace dynd;
 
@@ -182,6 +184,13 @@ size_t ndt::base_type::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata)
 size_t ndt::base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), intptr_t DYND_UNUSED(ndim)) const {
   stringstream ss;
   ss << "iterdata_destruct: dynd type " << type(this, true) << " is not uniformly iterable";
+  throw std::runtime_error(ss.str());
+}
+
+nd::buffer ndt::base_type::get_type_constructor_args() const {
+  stringstream ss;
+  ss << "get_type_constructor_args: dynd type " << type(this, true)
+     << " has not yet implemented get_type_constructor_args";
   throw std::runtime_error(ss.str());
 }
 
