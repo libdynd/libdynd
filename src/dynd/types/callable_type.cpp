@@ -13,6 +13,14 @@
 using namespace std;
 using namespace dynd;
 
+namespace {
+// Dynamically register the type constructor for `callable`
+const bool init_callable_type = []() -> bool {
+  dynd::register_known_type_id_constructor(callable_id, ndt::type(), &ndt::callable_type::construct_type);
+  return true;
+}();
+}
+
 static void print_callable(std::ostream &o, const ndt::callable_type *DYND_UNUSED(af_tp),
                            const ndt::callable_type::data_type *af) {
   o << "<callable at " << (void *)af << ">";
@@ -29,7 +37,9 @@ void ndt::callable_type::print_type(std::ostream &o) const {
   const bool pos_variadic = m_pos_tuple.extended<tuple_type>()->is_variadic();
   const bool kwd_variadic = m_kwd_struct.extended<struct_type>()->is_variadic();
 
-  o << "(";
+  if (init_callable_type) { // Will always be true, using this here so gcc/clang don't complain about the unused global
+    o << "(";
+  }
 
   const std::vector<type> &arg_tp = get_argument_types();
 
@@ -259,12 +269,4 @@ ndt::type ndt::callable_type::construct_type(type_id_t DYND_UNUSED(id), const nd
     return ndt::make_type<ndt::callable_type>(
         ret_tp, pos_args_tp, ndt::make_type<ndt::struct_type>(pos_args_tp.extended<ndt::tuple_type>()->is_variadic()));
   }
-}
-
-namespace {
-// Dynamically register the type constructor for `callable`
-const bool init_callable_type = []() -> bool {
-  dynd::register_known_type_id_constructor(callable_id, ndt::type(), &ndt::callable_type::construct_type);
-  return true;
-}();
 }
