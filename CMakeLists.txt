@@ -13,9 +13,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(LIB_SUFFIX "" CACHE STRING
     "Typically an empty string or 64. Controls installation to lib or lib64")
 
-add_definitions(-DDYND_SHARED_LIBRARY_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
-
-
 CHECK_TYPE_SIZE("float" SIZEOF_FLOAT)
 if(NOT (SIZEOF_FLOAT EQUAL 4))
   message(FATAL_ERROR "libdynd requires sizeof(float) == 4")
