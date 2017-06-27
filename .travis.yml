@@ -148,7 +148,7 @@ before_deploy:
   - mkdir deploy
   - mv build/*.tar.gz deploy/
   - conda install --yes anaconda-client
-  - export CONDA_OUTPUT=`conda build --output conda.recipe | grep bz2`
+  - export CONDA_OUTPUT=`conda build --output conda.recipe`
   - anaconda --token $ANACONDA_TOKEN upload $CONDA_OUTPUT --user dynd --channel dev
 
 deploy:
