@@ -70,9 +70,9 @@ matrix:
       addons:
       before_script:
       before_install:
-        - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
-        - bash Miniconda-latest-MacOSX-x86_64.sh -b
-        - export PATH=$HOME/miniconda2/bin:$PATH
+        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+        - bash Miniconda3-latest-MacOSX-x86_64.sh -b
+        - export PATH=$HOME/miniconda3/bin:$PATH
         - conda install --yes conda-build jinja2
       script:
         - conda build conda.recipe
