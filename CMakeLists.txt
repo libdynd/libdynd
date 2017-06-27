@@ -13,9 +13,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(LIB_SUFFIX "" CACHE STRING
     "Typically an empty string or 64. Controls installation to lib or lib64")
 
-add_definitions(-DDYND_SHARED_LIBRARY_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
-
-
 CHECK_TYPE_SIZE("float" SIZEOF_FLOAT)
 if(NOT (SIZEOF_FLOAT EQUAL 4))
   message(FATAL_ERROR "libdynd requires sizeof(float) == 4")
@@ -338,6 +335,7 @@ set(libdynd_SRC
     # Main
     src/dynd/access.cpp
     src/dynd/add.cpp
+    src/dynd/all_equal.cpp
     src/dynd/array.cpp
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
@@ -348,17 +346,21 @@ set(libdynd_SRC
     src/dynd/bitwise_xor.cpp
     src/dynd/callable.cpp
     src/dynd/cbrt.cpp
-    src/dynd/comparison.cpp
     src/dynd/compound_add.cpp
     src/dynd/compound_div.cpp
     src/dynd/convert.cpp
     src/dynd/divide.cpp
+    src/dynd/equal.cpp
     src/dynd/functional.cpp
+    src/dynd/greater.cpp
+    src/dynd/greater_equal.cpp
     src/dynd/index.cpp
     src/dynd/io.cpp
     src/dynd/json_formatter.cpp
     src/dynd/json_parser.cpp
     src/dynd/left_shift.cpp
+    src/dynd/less.cpp
+    src/dynd/less_equal.cpp
     src/dynd/limits.cpp
     src/dynd/logic.cpp
     src/dynd/logical_and.cpp
@@ -369,6 +371,7 @@ set(libdynd_SRC
     src/dynd/minus.cpp
     src/dynd/mod.cpp
     src/dynd/multiply.cpp
+    src/dynd/not_equal.cpp
     src/dynd/option.cpp
     src/dynd/parse.cpp
     src/dynd/plus.cpp
@@ -385,6 +388,7 @@ set(libdynd_SRC
     src/dynd/string.cpp
     src/dynd/subtract.cpp
     src/dynd/sum.cpp
+    src/dynd/total_order.cpp
     src/dynd/view.cpp
     include/dynd/access.hpp
     include/dynd/arithmetic.hpp

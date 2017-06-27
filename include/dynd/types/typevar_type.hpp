@@ -17,7 +17,7 @@ namespace ndt {
   /**
    * Checks if the provided string range is a valid typevar name.
    */
-  bool is_valid_typevar_name(const char *begin, const char *end);
+  bool DYNDT_API is_valid_typevar_name(const char *begin, const char *end);
 
   class DYNDT_API typevar_type : public base_type {
     std::string m_name;

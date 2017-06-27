@@ -1,1 +1,10 @@
 #cmakedefine DYND_FFTW
+
+// This could be included via a define normally,
+// but that mechanism isn't currently working
+// with the CMake generator for MinGW.
+// The quotes come in to the define escaped rather
+// than just as plain quotes.
+// To avoid that, route the info from CMake through
+// here instead
+#define DYND_SHARED_LIBRARY_SUFFIX "@CMAKE_SHARED_LIBRARY_SUFFIX@"
