@@ -1,4 +1,3 @@
-sudo: required
 dist: trusty
 
 addons:
@@ -19,7 +18,6 @@ cache:
 matrix:
   include:
     - compiler: gcc
-      sudo: required
       env: -fsanitize=address
       cache:
         directories:
@@ -37,10 +35,7 @@ matrix:
       before_install:
         - export CC="gcc-5"
         - export CXX="g++-5"
-#        - wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh; bash install-icc.sh --components mkl
-#        - if [ ! -d "$HOME/intel" ]; then wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh; bash install-icc.sh --components mkl; fi
       script:
- #       - source $HOME/intel/mkl/bin/mklvars.sh intel64
         - cmake -DDYND_BUILD_DOCS=OFF -DCMAKE_CXX_FLAGS="-fsanitize=address" -DDYND_BUILD_PLUGINS=OFF ..
         - make -j4 || exit 1
         - ./tests/test_libdynd
