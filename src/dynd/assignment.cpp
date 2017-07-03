@@ -21,7 +21,7 @@ static std::vector<ndt::type> func_ptr(const ndt::type &dst_tp, size_t DYND_UNUS
 }
 
 template <typename VariadicType, template <typename, typename, VariadicType...> class T>
-struct DYND_API _bind {
+struct helper_bind {
   template <typename Type0, typename Type1>
   using type = T<Type0, Type1>;
 };
@@ -36,7 +36,7 @@ nd::callable make_assign() {
       {{ndt::make_type<ndt::option_type>(ndt::make_type<assign_error_mode>()), "error_mode"}});
 
   auto dispatcher =
-      nd::callable::make_all<_bind<assign_error_mode, nd::assign_callable>::type, numeric_types, numeric_types>(
+      nd::callable::make_all<helper_bind<assign_error_mode, nd::assign_callable>::type, numeric_types, numeric_types>(
           func_ptr);
   dispatcher.insert(nd::make_callable<nd::assign_callable<dynd::string, dynd::string>>());
   dispatcher.insert(nd::make_callable<nd::assign_callable<dynd::bytes, dynd::bytes>>());

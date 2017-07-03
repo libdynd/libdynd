@@ -11,6 +11,7 @@
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/fpstatus.hpp>
 #include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_strided_kernel.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/math.hpp>

@@ -35,7 +35,13 @@ namespace nd {
     /**
      * Returns the child kernel immediately following this one.
      */
-    kernel_prefix *get_child() { return kernel_prefix::get_child(reinterpret_cast<SelfType *>(this)->size()); }
+    // This needs to be a template to avoid resolving this->size while
+    // SelfType is still an incomplete type, as would the case when SelfType
+    // is built using a CRTP idiom subclassing from base_kernel.
+    template <typename T = SelfType>
+    kernel_prefix *get_child() {
+      return kernel_prefix::get_child(reinterpret_cast<T *>(this)->size());
+    }
 
     template <size_t I>
     std::enable_if_t<I == 0, kernel_prefix *> get_child() {
@@ -48,7 +54,13 @@ namespace nd {
       return kernel_prefix::get_child(offsets[I - 1]);
     }
 
-    constexpr size_t size() const { return sizeof(SelfType); }
+    // This needs to be a template to avoid resolving sizeof(SelfType) while
+    // SelfType is still an incomplete type, as would the case when SelfType
+    // is built using a CRTP idiom subclassing from base_kernel.
+    template <typename T = SelfType>
+    constexpr size_t size() const {
+      return sizeof(T);
+    }
 
     /** Initializes just the kernel_prefix function member. */
     template <typename... ArgTypes>

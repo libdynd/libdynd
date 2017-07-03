@@ -122,7 +122,7 @@ std::enable_if_t<(S::size() > 1), void> for_each(A &&... a) {
 
 template <typename S, size_t I, typename A0, typename... A>
 std::enable_if_t<S::size() == 1, void> for_each(A0 &&a0, A &&... a) {
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
   a0.operator()<typename front<S>::type, I>(std::forward<A>(a)...);
 #else
   a0.template operator()<typename front<S>::type, I>(std::forward<A>(a)...);
