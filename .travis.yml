@@ -37,7 +37,10 @@ matrix:
         - export CC="gcc-5"
         - export CXX="g++-5"
       script:
-        - cmake -DDYND_BUILD_DOCS=OFF -DCMAKE_CXX_FLAGS="-fsanitize=address" -DDYND_BUILD_PLUGINS=OFF ..
+        # Explicitly tell gcc to use the gold linker for the
+        # address sanitization run to work around the bug described in
+        # https://stackoverflow.com/q/37603238/1935144
+        - cmake -DDYND_BUILD_DOCS=OFF -DCMAKE_CXX_FLAGS="-fsanitize=address -fuse-ld=gold" -DDYND_BUILD_PLUGINS=OFF ..
         - make -j4 || exit 1
         - ./tests/test_libdynd
     - compiler: clang
