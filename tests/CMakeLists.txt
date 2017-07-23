@@ -144,7 +144,7 @@ source_group("Types Tests" REGULAR_EXPRESSION "\\/types\\/test_[^\\/]*\\.cpp$")
 source_group("Func Tests" REGULAR_EXPRESSION "\\/func\\/test_[^\\/]*\\.cpp$")
 
 add_executable(test_libdynd ${tests_SRC})
-set(LINK_LIBS ${LINK_LIBS} libdyndt libdynd)
+set(LINK_LIBS ${LINK_LIBS} libdynd libdyndt)
 
 if(DYND_BUILD_PLUGINS)
     set(LINK_LIBS ${LINK_LIBS} dynd_mkl)
