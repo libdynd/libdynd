@@ -510,15 +510,16 @@ else()
         )
 endif()
 
-set_property(
-    TARGET libdyndt
-    PROPERTY COMPILE_DEFINITIONS DYNDT_EXPORT
-)
-
-set_property(
-    TARGET libdynd
-    PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
-)
+if(DYND_SHARED_LIB)
+    set_property(
+        TARGET libdyndt
+        PROPERTY COMPILE_DEFINITIONS DYNDT_EXPORT
+    )
+    set_property(
+        TARGET libdynd
+        PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
+    )
+endif()
 
 # Add preprocessor definitions from CMake
 configure_file("include/dynd/cmake_config.hpp.in"
