@@ -316,6 +316,117 @@ namespace nd {
     using detail::init_kernel<ndt::fixed_dim_type, std::vector<T>>::init_kernel;
   };
 
+  template <typename T, T... first, T... second>
+  auto join_integer_sequence(std::integer_sequence<T, first...> DYND_UNUSED(f),
+                             std::integer_sequence<T, second...> DYND_UNUSED(s)) -> decltype(auto) {
+    return std::integer_sequence<T, first..., second...>();
+  }
+
+  /*
+    template <typename T, T... vals>
+    auto reverse_integer_sequence(std::integer_sequence<T, vals...> DYND_UNUSED(v)) {
+      return reverse_integer_sequence_impl(std::integer_sequence<T, vals...>(), std::integer_sequence<T>());
+    }
+
+    template <typename T, T... done>
+    auto reverse_integer_sequence_impl(std::integer_sequence<T> DYND_UNUSED(f), std::integer_sequence<T, done...>
+    DYND_UNUSED(r)) -> decltype(auto) {
+      return std::integer_sequence<T, done...>();
+    }
+
+    template <typename T, T first, T... remaining, T... done>
+    auto reverse_integer_sequence_impl(std::integer_sequence<T, first, remaining...> DYND_UNUSED(f),
+    std::integer_sequence<T, done...> DYND_UNUSED(r)) -> decltype(auto) {
+      return reverse_integer_sequence_impl(std::integer_sequence<T, remaining>(), std::integer_sequence<T, first,
+    done...>());
+    }
+  */
+
+  template <typename T, T sum, T... done>
+  auto prefix_sum_integer_sequence_impl(std::integral_constant<T, sum> DYND_UNUSED(val),
+                                        std::integer_sequence<T, done...> DYND_UNUSED(l),
+                                        std::integer_sequence<T> DYND_UNUSED(r)) -> decltype(auto) {
+    return std::integer_sequence<T, done...>();
+  }
+
+  template <typename T, T sum, T current, T... done, T... remaining>
+  auto prefix_sum_integer_sequence_impl(std::integral_constant<T, sum> DYND_UNUSED(val),
+                                        std::integer_sequence<T, done...> DYND_UNUSED(l),
+                                        std::integer_sequence<T, current, remaining...> DYND_UNUSED(r))
+      -> decltype(auto) {
+    return prefix_sum_integer_sequence_impl(std::integral_constant<T, sum + current>(),
+                                            std::integer_sequence<T, done..., sum + current>(),
+                                            std::integer_sequence<T, remaining...>());
+  }
+
+  template <typename T, T... vals>
+  auto prefix_sum_integer_sequence(std::integer_sequence<T, vals...> DYND_UNUSED(v)) -> decltype(auto) {
+    return prefix_sum_integer_sequence_impl(std::integral_constant<T, 0>(), std::integer_sequence<T>(),
+                                            std::integer_sequence<T, vals...>());
+  }
+
+  template <typename T, T val>
+  auto end_of_integer_sequence(std::integer_sequence<T, val> DYND_UNUSED(v)) -> decltype(auto) {
+    return std::integral_constant<T, val>();
+  }
+
+  template <typename T, T val, T next, T... vals>
+  auto end_of_integer_sequence(std::integer_sequence<T, val, next, vals...> DYND_UNUSED(v)) -> decltype(auto) {
+    return end_of_integer_sequence(std::integer_sequence<T, next, vals...>());
+  }
+
+  template <typename T, T val, T... done>
+  auto right_truncate_integer_sequence_impl(std::integer_sequence<T, done...> DYND_UNUSED(d),
+                                            std::integer_sequence<T, val> DYND_UNUSED(r)) -> decltype(auto) {
+    return std::integer_sequence<T, done...>();
+  }
+
+  template <typename T, T val, T next, T... done, T... remaining>
+  auto right_truncate_integer_sequence_impl(std::integer_sequence<T, done...> DYND_UNUSED(d),
+                                            std::integer_sequence<T, val, next, remaining...> DYND_UNUSED(r)) -> auto {
+    return right_truncate_integer_sequence_impl(std::integer_sequence<T, done..., val>(),
+                                                std::integer_sequence<T, next, remaining...>());
+  }
+
+  template <typename T, T... vals>
+  auto right_truncate_integer_sequence(std::integer_sequence<T, vals...> v) -> decltype(auto) {
+    static_assert(sizeof...(vals) > 0, "Cannot right truncate an empty integer sequence.");
+    return right_truncate_integer_sequence_impl(std::integer_sequence<T>(), v);
+  }
+
+  template <typename T>
+  auto right_shift_integer_sequence(std::integer_sequence<T> v) -> decltype(auto) {
+    return v;
+  }
+
+  template <typename T, T val, T... vals>
+  auto right_shift_integer_sequence(std::integer_sequence<T, val, vals...> v) -> decltype(auto) {
+    return join_integer_sequence(std::integer_sequence<T, 0>(), right_truncate_integer_sequence(v));
+  }
+
+  template <typename T>
+  auto tuple_metadata_offset(std::integer_sequence<T> DYND_UNUSED(v)) -> decltype(auto) {
+    return std::integral_constant<T, 0>();
+  }
+
+  template <typename T, T val, T... vals>
+  auto tuple_metadata_offset(std::integer_sequence<T, val, vals...> offsets) -> decltype(auto) {
+    return end_of_integer_sequence(offsets);
+  }
+
+  template <std::size_t LastOffset, typename... ElementTypes, std::size_t... Indices, std::size_t... Offsets>
+  auto construct_tuple_children(const ndt::type *&field_tp, const char *&metadata,
+                                type_sequence<ElementTypes...> DYND_UNUSED(tps),
+                                std::index_sequence<Indices...> DYND_UNUSED(idxs),
+                                std::index_sequence<Offsets...> DYND_UNUSED(ofsts),
+                                std::integral_constant<std::size_t, LastOffset> last) -> decltype(auto) {
+    static_assert(sizeof...(ElementTypes) == sizeof...(Indices), "Indices and ElementTypes must have same size.");
+    static_assert(sizeof...(ElementTypes) == sizeof...(Offsets), "Offsets and ElementTypes must have same size.");
+    std::tuple<init_kernel<ElementTypes>...> ret({*(field_tp + Indices), metadata + Offsets}...);
+    metadata += last();
+    return ret;
+  }
+
   template <typename... ElementTypes>
   struct init_kernel<std::tuple<ElementTypes...>> {
     struct on_each {
@@ -332,7 +443,12 @@ namespace nd {
 
     init_kernel(const ndt::type *field_tp, const char *metadata)
         : metadata(postfix_add(metadata, sizeof...(ElementTypes) * sizeof(uintptr_t))),
-          children({*postfix_add(field_tp, 1), postfix_add(metadata, ndt::traits<ElementTypes>::metadata_size)}...) {}
+          children(construct_tuple_children(
+              field_tp, metadata, type_sequence<ElementTypes...>(), std::make_index_sequence<sizeof...(ElementTypes)>(),
+              right_shift_integer_sequence(
+                  prefix_sum_integer_sequence(std::index_sequence<ndt::traits<ElementTypes>::metadata_size...>())),
+              tuple_metadata_offset(
+                  prefix_sum_integer_sequence(std::index_sequence<ndt::traits<ElementTypes>::metadata_size...>())))) {}
 
     init_kernel(const ndt::type &tp, const char *metadata)
         : init_kernel(tp.extended<ndt::tuple_type>()->get_field_types_raw(), metadata) {}
