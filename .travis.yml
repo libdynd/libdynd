@@ -136,6 +136,8 @@ matrix:
       after_script:
         - popd
         - coveralls-lcov build/coverage.info.cleaned
+  allow_failures:
+  - language: python
 
 language: cpp
 
