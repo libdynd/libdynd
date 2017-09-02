@@ -1,5 +1,5 @@
-sudo: required
 dist: trusty
+sudo: false
 
 addons:
   apt:
@@ -19,7 +19,6 @@ cache:
 matrix:
   include:
     - compiler: gcc
-      sudo: required
       env: -fsanitize=address
       cache:
         directories:
@@ -37,11 +36,11 @@ matrix:
       before_install:
         - export CC="gcc-5"
         - export CXX="g++-5"
-#        - wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh; bash install-icc.sh --components mkl
-#        - if [ ! -d "$HOME/intel" ]; then wget https://raw.githubusercontent.com/nemequ/icc-travis/master/install-icc.sh; bash install-icc.sh --components mkl; fi
       script:
- #       - source $HOME/intel/mkl/bin/mklvars.sh intel64
-        - cmake -DDYND_BUILD_DOCS=OFF -DCMAKE_CXX_FLAGS="-fsanitize=address" -DDYND_BUILD_PLUGINS=OFF ..
+        # Explicitly tell gcc to use the gold linker for the
+        # address sanitization run to work around the bug described in
+        # https://stackoverflow.com/q/37603238/1935144
+        - cmake -DDYND_BUILD_DOCS=OFF -DCMAKE_CXX_FLAGS="-fsanitize=address -fuse-ld=gold" -DDYND_BUILD_PLUGINS=OFF ..
         - make -j4 || exit 1
         - ./tests/test_libdynd
     - compiler: clang
@@ -70,9 +69,9 @@ matrix:
       addons:
       before_script:
       before_install:
-        - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
-        - bash Miniconda-latest-MacOSX-x86_64.sh -b
-        - export PATH=$HOME/miniconda2/bin:$PATH
+        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+        - bash Miniconda3-latest-MacOSX-x86_64.sh -b
+        - export PATH=$HOME/miniconda3/bin:$PATH
         - conda install --yes conda-build jinja2
       script:
         - conda build conda.recipe
@@ -137,10 +136,10 @@ matrix:
       after_script:
         - popd
         - coveralls-lcov build/coverage.info.cleaned
+  allow_failures:
+  - language: python
 
 language: cpp
-
-before_install:
 
 before_script:
   - mkdir build
@@ -155,7 +154,7 @@ before_deploy:
   - mkdir deploy
   - mv build/*.tar.gz deploy/
   - conda install --yes anaconda-client
-  - export CONDA_OUTPUT=`conda build --output conda.recipe | grep bz2`
+  - export CONDA_OUTPUT=`conda build --output conda.recipe`
   - anaconda --token $ANACONDA_TOKEN upload $CONDA_OUTPUT --user dynd --channel dev
 
 deploy:
@@ -178,7 +177,3 @@ env:
   global:
     # Anaconda.org?
     - secure: KJZ5DWK3iAmthDnPaXz/S8aQFa6zVlD+CWCPXM+vgkiJQG5qgJfn5t2yy5n3mVyS0qZFd/LrFJ6ZqjUr/BKFDqGPBxESYIAOOgN+cXIEWxkeGFEHxOEK9QBS6aq6GBhyQlteWcqozYsG93oSVh+Xiv9tHl4m1mHXOHk2llQXy4g=
-    # Old Intel Serial Number?
-    - secure: Qt/St9copUdPo4kej+9DtLDCzIAkDo/PDP0Ac244yF+8dRac3KhskRVVURNcCMonUeuqS5Dm5qcQl9b/L4P9Gkpn1aDKPHMp7pgTZHZLJ7VIHgFrSWo545mqV0fcYN+GLpaSqd8NwdUi5+1aHGWTtrw4BoIO4DSgV4eiIVEdRbA=
-    # Intel Serial Number
-    - secure: "TIZuSCCQWGf10FZlt150X5BXPhwjXretYxsnFAJtIDKoNPFZ89SW5/ApGv8kq55j5JsK6tp4VKPA9TujJ1hwEqIFP1WNv9CEqlrnB9VXbFve0WOYwdRmWchIPCUyqjJSdgPXSCzVoj2sFP9JZkKCaXEG+49fGLfkwYOeznecYpw="
