@@ -6,6 +6,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(benchmark_libdynd)
 
+set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "Enable building the unit tests which depend on gtest.")
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/benchmark ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/benchmark)
 
 set(benchmarks_SRC
