@@ -198,13 +198,10 @@ namespace nd {
 
     template <size_t NArg>
     class reduction_callable<var_dim_id, NArg> : public base_reduction_callable {
-      void resolve(call_graph &cg, char *data) {
-        bool inner = reinterpret_cast<node_type *>(data)->inner;
-        bool broadcast = reinterpret_cast<node_type *>(data)->broadcast;
-        bool keepdim = reinterpret_cast<node_type *>(data)->keepdim;
-        cg.emplace_back([inner, broadcast, keepdim](kernel_builder &kb, kernel_request_t kernreq,
-                                                    char *DYND_UNUSED(data), const char *dst_arrmeta, size_t nsrc,
-                                                    const char *const *src_arrmeta) {
+      void resolve(call_graph &cg, char *DYND_UNUSED(data)) {
+        cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq,
+                           char *DYND_UNUSED(data), const char *dst_arrmeta, size_t nsrc,
+                           const char *const *src_arrmeta) {
           typedef reduction_kernel<ndt::var_dim_type, false, true, NArg> self_type;
           intptr_t root_ckb_offset = kb.size();
           kb.emplace_back<self_type>(
