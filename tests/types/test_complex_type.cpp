@@ -25,7 +25,7 @@ using namespace dynd;
 template <typename T>
 class ComplexType : public ::testing::Test {};
 
-TYPED_TEST_CASE_P(ComplexType);
+TYPED_TEST_SUITE_P(ComplexType);
 
 TEST(Complex, Math) {
   dynd::complex<double> z;
@@ -225,6 +225,6 @@ TYPED_TEST_P(ComplexType, Arithmetic) {
                            2.0f / dynd::complex<TypeParam>(1.5, 0.5));
 }
 
-REGISTER_TYPED_TEST_CASE_P(ComplexType, Arithmetic);
+REGISTER_TYPED_TEST_SUITE_P(ComplexType, Arithmetic);
 
-INSTANTIATE_TYPED_TEST_CASE_P(Double, ComplexType, double);
+INSTANTIATE_TYPED_TEST_SUITE_P(Double, ComplexType, double);

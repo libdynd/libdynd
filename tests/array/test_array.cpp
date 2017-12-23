@@ -21,7 +21,7 @@ using namespace dynd;
 template <typename T>
 class Array : public Memory<T> {};
 
-TYPED_TEST_CASE_P(Array);
+TYPED_TEST_SUITE_P(Array);
 
 TEST(Array, NullConstructor) {
   nd::array a;
@@ -661,10 +661,10 @@ TEST(Array, ConstructAssign) {
   EXPECT_EQ(4, v2[4].value());
 }
 
-REGISTER_TYPED_TEST_CASE_P(Array, ScalarConstructor, OneDimConstructor, TwoDimConstructor, ThreeDimConstructor,
+REGISTER_TYPED_TEST_SUITE_P(Array, ScalarConstructor, OneDimConstructor, TwoDimConstructor, ThreeDimConstructor,
                            AsScalar);
 
-INSTANTIATE_TYPED_TEST_CASE_P(Default, Array, DefaultMemory);
+INSTANTIATE_TYPED_TEST_SUITE_P(Default, Array, DefaultMemory);
 #ifdef DYND_CUDA
-INSTANTIATE_TYPED_TEST_CASE_P(CUDA, Array, CUDAMemory);
+INSTANTIATE_TYPED_TEST_SUITE_P(CUDA, Array, CUDAMemory);
 #endif // DYND_CUDA
