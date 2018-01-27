@@ -31,7 +31,7 @@ build_script:
   - conda config --set always_yes yes
   - conda update conda
   - conda install conda-build
-  - ps: if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { conda install anaconda-client }
+  - ps: if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { conda install anaconda-client 2>&1 }
   - conda-build conda.recipe
 
 on_success:
