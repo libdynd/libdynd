@@ -15,7 +15,7 @@ os: Visual Studio 2015
 environment:
   global:
     appveyor_token:
-      secure: GvR4dCHoeYM712VDQYvSuNzFu+rZfo/zdns7xGlFPGOKfFvBmVCXTX6iuHmMpUeP
+      secure: 5sNhUoi/yrDIrFlf8O56TKEjL0cFx3a9EHklw7keN/FXeaX+YcA6cpAGM+YiHJvx
   matrix:
     - PYTHON_ARCH: "x86_64"
       platform: x64
