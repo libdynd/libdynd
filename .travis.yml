@@ -61,6 +61,8 @@ matrix:
         - export CXX="g++-4.9"
       script:
         - conda build conda.recipe
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then conda install --yes anaconda-client; fi'
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then anaconda --token $ANACONDA_TOKEN upload `conda build --output conda.recipe` --user dynd --channel dev; fi'
     - language: objective-c
       os: osx
       osx_image: xcode6.4
@@ -75,6 +77,8 @@ matrix:
         - conda install --yes conda-build jinja2
       script:
         - conda build conda.recipe
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then conda install --yes anaconda-client; fi'
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then anaconda --token $ANACONDA_TOKEN upload `conda build --output conda.recipe` --user dynd --channel dev; fi'
     - language: python
       env: VERBOSE=1
       compiler: gcc
@@ -149,13 +153,6 @@ before_script:
 script:
   - make -j4 || exit 1
   - ./tests/test_libdynd
-
-before_deploy:
-  - mkdir deploy
-  - mv build/*.tar.gz deploy/
-  - conda install --yes anaconda-client
-  - export CONDA_OUTPUT=`conda build --output conda.recipe`
-  - anaconda --token $ANACONDA_TOKEN upload $CONDA_OUTPUT --user dynd --channel dev
 
 notifications:
   email: false
