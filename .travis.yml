@@ -157,17 +157,6 @@ before_deploy:
   - export CONDA_OUTPUT=`conda build --output conda.recipe`
   - anaconda --token $ANACONDA_TOKEN upload $CONDA_OUTPUT --user dynd --channel dev
 
-deploy:
-  skip_cleanup: true
-  provider: s3
-  access_key_id: AKIAJEH6A3L3S4BYA5VA
-  secret_access_key:
-    secure: EmyhQ2+CtsIumNEskhjZOC/ZWYYOoPC1bQLijwuFXU8WwyEpoaB1CqLRHdiJGzVSRRr3SW3p6p8z5wxsLTBZtKQrGnP0Z4J9L7bZ5HsGRSshlqT0Zm1/AYSCjbFgNFKe1kIjaCamhk2/cNt1WKgx/cZ/tdxMKjhc8reavYBfCnU=
-  bucket: libdynd
-  local_dir: deploy
-  on:
-    condition: ${CONDA:-false} == "true"
-
 notifications:
   email: false
   on_success: change
