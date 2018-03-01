@@ -44,9 +44,8 @@ matrix:
         - make -j4 || exit 1
         - ./tests/test_libdynd
     - compiler: clang
-      env: -fsanitize=address
       script:
-        - cmake -DCMAKE_CXX_FLAGS="-fsanitize=address" ..
+        - cmake ..
         - make -j4 || exit 1
         - ./tests/test_libdynd
     - compiler: gcc
