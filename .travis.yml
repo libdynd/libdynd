@@ -62,6 +62,20 @@ matrix:
         - conda build conda.recipe
         - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then conda install --yes anaconda-client; fi'
         - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then anaconda --token $ANACONDA_TOKEN upload `conda build --output conda.recipe` --user dynd --channel dev; fi'
+    - compiler: gcc
+      env: GCC_VERSION=6
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - kalakris-cmake
+          packages:
+            - gcc-6
+            - g++-6
+            - cmake
+      before_script:
+        - export CC="gcc-6"
+        - export CXX="g++-6"
     - language: objective-c
       os: osx
       osx_image: xcode6.4
