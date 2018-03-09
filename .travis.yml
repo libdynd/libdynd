@@ -10,7 +10,6 @@ addons:
     - gcc-4.9
     - g++-4.9
     - cmake
-    - s3cmd
 
 cache:
   directories:
@@ -40,14 +39,85 @@ matrix:
         # Explicitly tell gcc to use the gold linker for the
         # address sanitization run to work around the bug described in
         # https://stackoverflow.com/q/37603238/1935144
-        - cmake -DDYND_BUILD_DOCS=OFF -DCMAKE_CXX_FLAGS="-fsanitize=address -fuse-ld=gold" -DDYND_BUILD_PLUGINS=OFF ..
+        - cmake -DCMAKE_CXX_FLAGS="-fsanitize=address -fuse-ld=gold" ..
         - make -j4 || exit 1
         - ./tests/test_libdynd
     - compiler: clang
-      script:
+      env: CLANG_VERSION=3.9
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-3.9
+            - kalakris-cmake
+          packages:
+            - clang-3.9
+            - gcc-4.9
+            - g++-4.9
+            - cmake
+      before_script:
+        - export CC=clang-3.9
+        - export CXX=clang++-3.9
+        - mkdir build
+        - pushd build
         - cmake ..
-        - make -j4 || exit 1
-        - ./tests/test_libdynd
+    - compiler: clang
+      env: CLANG_VERSION=4.0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-4.0
+            - kalakris-cmake
+          packages:
+            - clang-4.0
+            - gcc-5
+            - g++-5
+            - cmake
+      before_script:
+        - export CC=clang-4.0
+        - export CXX=clang++-4.0
+        - mkdir build
+        - pushd build
+        - cmake ..
+    - compiler: clang
+      env: CLANG_VERSION=5.0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-5.0
+            - kalakris-cmake
+          packages:
+            - clang-5.0
+            - gcc-6
+            - g++-6
+            - cmake
+      before_script:
+        - export CC=clang-5.0
+        - export CXX=clang++-5.0
+        - mkdir build
+        - pushd build
+        - cmake ..
+    - compiler: clang
+      env: CLANG_VERSION=6.0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-6.0
+            - kalakris-cmake
+          packages:
+            - clang-6.0
+            - gcc-7
+            - g++-7
+            - cmake
+      before_script:
+        - export CC=clang-6.0
+        - export CXX=clang++-6.0
+        - mkdir build
+        - pushd build
+        - cmake ..
     - compiler: gcc
       env: CONDA=true
       before_install:
@@ -62,6 +132,40 @@ matrix:
         - conda build conda.recipe
         - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then conda install --yes anaconda-client; fi'
         - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then anaconda --token $ANACONDA_TOKEN upload `conda build --output conda.recipe` --user dynd --channel dev; fi'
+    - compiler: gcc
+      env: GCC_VERSION=6
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - kalakris-cmake
+          packages:
+            - gcc-6
+            - g++-6
+            - cmake
+      before_script:
+        - export CC="gcc-6"
+        - export CXX="g++-6"
+        - mkdir build
+        - pushd build
+        - cmake ..
+    - compiler: gcc
+      env: GCC_VERSION=7
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - kalakris-cmake
+          packages:
+            - gcc-7
+            - g++-7
+            - cmake
+      before_script:
+        - export CC="gcc-7"
+        - export CXX="g++-7"
+        - mkdir build
+        - pushd build
+        - cmake -DCMAKE_CXX_FLAGS="-Wno-error" ..
     - language: objective-c
       os: osx
       osx_image: xcode6.4
