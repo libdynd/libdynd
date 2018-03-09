@@ -161,8 +161,8 @@ matrix:
             - g++-7
             - cmake
       before_script:
-        - export CC="gcc-6"
-        - export CXX="g++-6"
+        - export CC="gcc-7"
+        - export CXX="g++-7"
         - mkdir build
         - pushd build
         - cmake -DCMAKE_CXX_FLAGS="-Wno-error" ..
