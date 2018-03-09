@@ -47,10 +47,13 @@ matrix:
       addons:
         apt:
           sources:
+            - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-3.9
             - kalakris-cmake
           packages:
             - clang-3.9
+            - gcc-4.9
+            - g++-4.9
             - cmake
       before_script:
         - export CC=clang-3.9
@@ -63,10 +66,13 @@ matrix:
       addons:
         apt:
           sources:
+            - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-4.0
             - kalakris-cmake
           packages:
             - clang-4.0
+            - gcc-5
+            - g++-5
             - cmake
       before_script:
         - export CC=clang-4.0
@@ -79,10 +85,13 @@ matrix:
       addons:
         apt:
           sources:
+            - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-5.0
             - kalakris-cmake
           packages:
             - clang-5.0
+            - gcc-6
+            - g++-6
             - cmake
       before_script:
         - export CC=clang-5.0
@@ -95,10 +104,13 @@ matrix:
       addons:
         apt:
           sources:
+            - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-6.0
             - kalakris-cmake
           packages:
             - clang-6.0
+            - gcc-7
+            - g++-7
             - cmake
       before_script:
         - export CC=clang-6.0
