@@ -76,6 +76,24 @@ matrix:
       before_script:
         - export CC="gcc-6"
         - export CXX="g++-6"
+    - compiler: gcc
+      env: GCC_VERSION=7
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - kalakris-cmake
+          packages:
+            - gcc-7
+            - g++-7
+            - cmake
+      before_script:
+        - export CC="gcc-6"
+        - export CXX="g++-6"
+      script:
+        - cmake -DCMAKE_CXX_FLAGS="-Wno-error" ..
+        - make -j4 || exit 1
+        - ./tests/test_libdynd
     - language: objective-c
       os: osx
       osx_image: xcode6.4
