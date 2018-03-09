@@ -55,6 +55,19 @@ matrix:
       before_script:
         - export CC=clang-3.9
         - export CXX=clang++-3.9
+    - compiler: clang
+      env: CLANG_VERSION=4.0
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-4.0
+            - kalakris-cmake
+          packages:
+            - clang-4.0
+            - cmake
+      before_script:
+        - export CC=clang-4.0
+        - export CXX=clang++-4.0
     - compiler: gcc
       env: CONDA=true
       before_install:
