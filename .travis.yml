@@ -43,10 +43,18 @@ matrix:
         - make -j4 || exit 1
         - ./tests/test_libdynd
     - compiler: clang
-      script:
-        - cmake ..
-        - make -j4 || exit 1
-        - ./tests/test_libdynd
+      env: CLANG_VERSION=3.9
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-3.9
+            - kalakris-cmake
+          packages:
+            - clang-3.9
+            - cmake
+      before_script:
+        - export CC=clang-3.9
+        - export CXX=clang++-3.9
     - compiler: gcc
       env: CONDA=true
       before_install:
