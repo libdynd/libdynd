@@ -3,10 +3,10 @@
 mkdir build
 pushd build
 
-cmake -G "Visual Studio 14 Win64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ..
+cmake -G "Visual Studio 14 Win64" -DCMAKE_BUILD_TYPE=%MSVC_BUILD_TYPE% ..
 
-cmake --build . --config %BUILD_TYPE%
+cmake --build . --config %MSVC_BUILD_TYPE%
 
-"tests/%BUILD_TYPE%/test_libdynd.exe"
+"tests/%MSVC_BUILD_TYPE%/test_libdynd.exe"
 
 popd
