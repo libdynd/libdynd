@@ -19,6 +19,9 @@ environment:
   matrix:
     - PYTHON_ARCH: "x86_64"
       platform: x64
+      MINGW64: 1
+    - PYTHON_ARCH: "x86_64"
+      platform: x64
       CONDA_UPLOAD: 1
     - PYTHON_ARCH: "x86"
       platform: Win32
@@ -28,6 +31,7 @@ configuration: Release
 
 build_script:
   - if defined CONDA_UPLOAD "appveyor/conda.bat"
+  - if defined MINGW64 "appveyor/mingw64.bat"
 
 on_success:
   # Redirect output from stderr to stdout to avoid having the command for uploading
