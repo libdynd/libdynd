@@ -32,9 +32,9 @@ environment:
     - platform: x64
       BUILD_TYPE: Release
       MSVC_2017: 1
-    - platform: x64
-      BUILD_TYPE: Debug
-      MSVC_2017: 1
+    #- platform: x64
+    #  BUILD_TYPE: Debug
+    #  MSVC_2017: 1
     - platform: x64
       CLANG_VERSION: 6.0
       MSVC_2017: 1
