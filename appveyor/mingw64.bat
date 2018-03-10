@@ -14,8 +14,11 @@ cmake ^
     -DCMAKE_CXX_FLAGS="-Wno-error" ^
     -DCMAKE_SH="CMAKE_SH-NOTFOUND" ^
     -G "MinGW Makefiles" ^
-    ..
+    .. ^
+    || exit /b 1
 
-mingw32-make -j4
-"tests/test_libdynd.exe"
+mingw32-make -j4 || exit /b 1
+
+"tests/test_libdynd.exe" || exit /b 1
+
 popd
