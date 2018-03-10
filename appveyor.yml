@@ -16,20 +16,28 @@ environment:
     appveyor_token:
       secure: GtPl1Je/qm5rbN+99pCZqgSP8dCKIjuXam9zRyXW3ifVzyOflbaZhIug5wNCaZWz
   matrix:
+    # Specify MSVC version even for builds that don't need a particular
+    # MSVC version to be able to exclude one of the os options further down.
     - platform: x64
       MINGW64: 1
+      MSVC_2017: 1
     - PYTHON_ARCH: "x86_64"
       platform: x64
       CONDA_UPLOAD: 1
+      MSVC_2015: 1
     - PYTHON_ARCH: "x86"
       platform: Win32
       CONDA_UPLOAD: 1
+      MSVC_2015: 1
     - platform: x64
-      MSVC_2017: 1
       BUILD_TYPE: Release
-    - platform: x64
       MSVC_2017: 1
+    - platform: x64
       BUILD_TYPE: Debug
+      MSVC_2017: 1
+    - platform: x64
+      CLANG_VERSION: 6.0
+      MSVC_2017: 1
 
 matrix:
   # immediately finish build once one of the jobs fails.
@@ -37,12 +45,12 @@ matrix:
 
   # MSVC version is specified as "os" whereas other compilers
   # are specified using environment variables.
-  # Exclude erroneous builds that result.
+  # Since every os option is paired with every environment option
+  # in the build matrix, this results in a bunch of erroneous builds.
+  # Exclude those here.
   exclude:
     - os: Visual Studio 2017
-      CONDA_UPLOAD: 1
-    - os: Visual Studio 2015
-      MINGW64: 1
+      MSVC_2015: 1
     - os: Visual Studio 2015
       MSVC_2017: 1
 
@@ -52,6 +60,7 @@ build_script:
   - if defined CONDA_UPLOAD "appveyor/conda.bat"
   - if defined MINGW64 "appveyor/mingw64.bat"
   - if defined MSVC_2017 "appveyor/msvc_2017.bat"
+  - if defined CLANG "appveyor/clang.bat"
 
 on_success:
   # Redirect output from stderr to stdout to avoid having the command for uploading
