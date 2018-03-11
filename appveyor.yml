@@ -7,32 +7,60 @@ clone_depth: 1
 # Do not build on tags (GitHub only)
 skip_tags: true
 
-matrix:
-  fast_finish: true     # immediately finish build once one of the jobs fails.
-
-os: Visual Studio 2015
+os:
+  - Visual Studio 2017
+  - Visual Studio 2015
 
 environment:
   global:
     appveyor_token:
       secure: GtPl1Je/qm5rbN+99pCZqgSP8dCKIjuXam9zRyXW3ifVzyOflbaZhIug5wNCaZWz
   matrix:
+    # Specify MSVC version even for builds that don't need a particular
+    # MSVC version to be able to exclude one of the os options further down.
+    - platform: x64
+      CLANG_VERSION: 6.0
+      MSVC_2017: 1
+    - platform: x64
+      MINGW64: 1
+      MSVC_2017: 1
     - PYTHON_ARCH: "x86_64"
       platform: x64
+      CONDA_UPLOAD: 1
+      MSVC_2015: 1
     - PYTHON_ARCH: "x86"
       platform: Win32
+      CONDA_UPLOAD: 1
+      MSVC_2015: 1
+    - platform: x64
+      MSVC_BUILD_TYPE: Release
+      MSVC_2017: 1
+    #- platform: x64
+    #  MSVC_BUILD_TYPE: Debug
+    #  MSVC_2017: 1
+
+matrix:
+  # immediately finish build once one of the jobs fails.
+  fast_finish: true
+
+  # MSVC version is specified as "os" whereas other compilers
+  # are specified using environment variables.
+  # Since every os option is paired with every environment option
+  # in the build matrix, this results in a bunch of erroneous builds.
+  # Exclude those here.
+  exclude:
+    - os: Visual Studio 2017
+      MSVC_2015: 1
+    - os: Visual Studio 2015
+      MSVC_2017: 1
 
 configuration: Release
 
 build_script:
-  - ps: Start-FileDownload "https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-$env:PYTHON_ARCH.exe" C:\Miniconda.exe; echo "Finished downloading miniconda"
-  - cmd: C:\Miniconda.exe /S /D=C:\Py
-  - SET PATH=C:\Py;C:\Py\Scripts;C:\Py\Library\bin;%PATH%
-  - conda config --set always_yes yes
-  - conda update conda
-  - conda install conda-build
-  - if not defined APPVEYOR_PULL_REQUEST_NUMBER conda install anaconda-client
-  - conda-build conda.recipe
+  - if defined CONDA_UPLOAD "appveyor/conda.bat"
+  - if defined MINGW64 "appveyor/mingw64.bat"
+  - if defined MSVC_BUILD_TYPE "appveyor/msvc_2017.bat"
+  - if defined CLANG_VERSION "appveyor/clang.bat"
 
 on_success:
   # Redirect output from stderr to stdout to avoid having the command for uploading
@@ -42,4 +70,4 @@ on_success:
   # See also http://stackoverflow.com/a/2095623/1935144
   # Route command back through cmd to avoid the powershell bug entirely.
   # See https://connect.microsoft.com/PowerShell/feedback/details/645954
-  - ps: if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { cmd /C anaconda --token $env:appveyor_token upload ((cmd /C conda build --output conda.recipe "2>&1") | select -Last 1) --user dynd --channel dev "2>&1" }
+  - ps: if($env:CONDA_UPLOAD -and -not $env:APPVEYOR_PULL_REQUEST_NUMBER) { cmd /C anaconda --token $env:appveyor_token upload ((cmd /C conda build --output conda.recipe "2>&1") | select -Last 1) --user dynd --channel dev "2>&1" }
