@@ -8,8 +8,8 @@ clone_depth: 1
 skip_tags: true
 
 os:
-  - Visual Studio 2015
   - Visual Studio 2017
+  - Visual Studio 2015
 
 environment:
   global:
@@ -18,6 +18,9 @@ environment:
   matrix:
     # Specify MSVC version even for builds that don't need a particular
     # MSVC version to be able to exclude one of the os options further down.
+    - platform: x64
+      CLANG_VERSION: 6.0
+      MSVC_2017: 1
     - platform: x64
       MINGW64: 1
       MSVC_2017: 1
@@ -35,9 +38,6 @@ environment:
     #- platform: x64
     #  MSVC_BUILD_TYPE: Debug
     #  MSVC_2017: 1
-    - platform: x64
-      CLANG_VERSION: 6.0
-      MSVC_2017: 1
 
 matrix:
   # immediately finish build once one of the jobs fails.
