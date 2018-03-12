@@ -57,10 +57,10 @@ matrix:
 configuration: Release
 
 build_script:
-  - if defined CONDA_UPLOAD "appveyor/conda.bat"
-  - if defined MINGW64 "appveyor/mingw64.bat"
-  - if defined MSVC_BUILD_TYPE "appveyor/msvc_2017.bat"
-  - if defined CLANG_VERSION "appveyor/clang.bat"
+  - if defined CONDA_UPLOAD call "appveyor/conda.bat"
+  - if defined MINGW64 call "appveyor/mingw64.bat"
+  - if defined MSVC_BUILD_TYPE call "appveyor/msvc_2017.bat"
+  - if defined CLANG_VERSION call "appveyor/clang.bat"
 
 on_success:
   # Redirect output from stderr to stdout to avoid having the command for uploading
