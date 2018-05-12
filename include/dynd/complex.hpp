@@ -19,6 +19,8 @@ public:
 
   complex(const T &re = 0.0, const T &im = 0.0) : m_real(re), m_imag(im) {}
 
+  complex(const complex<T> &rhs) = default;
+
   template <typename U>
   complex(const complex<U> &rhs) : m_real(static_cast<T>(rhs.m_real)), m_imag(static_cast<T>(rhs.m_imag)) {}
 
@@ -27,7 +29,10 @@ public:
   T real() const { return m_real; }
   T imag() const { return m_imag; }
 
-  complex<T> &operator=(const complex<T> &rhs) {
+  complex<T> &operator=(const complex<T> &rhs) = default;
+
+  template <typename U>
+  complex<T> &operator=(const complex<U> &rhs) {
     m_real = rhs.m_real;
     m_imag = rhs.m_imag;
 
