@@ -250,9 +250,9 @@ public:
 
   float128 operator-() const { return float128(-static_cast<double>(*this)); }
 
-  bool operator!() const { return ((0x7fffffffffffffffULL | m_hi) == 0) && (m_lo == 0); }
+  bool operator!() const { return ((0x7fffffffffffffffULL & m_hi) | m_lo) == 0; }
 
-  explicit operator bool() const { return (m_lo != 0) || ((0x7fffffffffffffffULL | m_hi) != 0); }
+  explicit operator bool() const { return ((0x7fffffffffffffffULL & m_hi) | m_lo) != 0; }
 };
 
 template <>
