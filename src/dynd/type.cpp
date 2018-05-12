@@ -905,8 +905,10 @@ bool dynd::is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_
       break;
     case float_kind_id:
       switch (dst_tp.get_base_id()) {
-      case bool_kind_id: break;
-      case int_kind_id: break;
+      case bool_kind_id:
+	return false;
+      case int_kind_id:
+	return false;
       case uint_kind_id:
         return false;
       case float_kind_id:
@@ -921,9 +923,12 @@ bool dynd::is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_
       break;
     case complex_kind_id:
       switch (dst_tp.get_base_id()) {
-      case bool_kind_id: break;
-      case int_kind_id: break;
-      case uint_kind_id: break;
+      case bool_kind_id:
+	return false;
+      case int_kind_id:
+	return false;
+      case uint_kind_id:
+	return false;
       case float_kind_id:
         return false;
       case complex_kind_id:
@@ -936,10 +941,14 @@ bool dynd::is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_
       break;
     case string_kind_id:
       switch (dst_tp.get_base_id()) {
-      case bool_kind_id: break;
-      case int_kind_id: break;
-      case uint_kind_id: break;
-      case float_kind_id: break;
+      case bool_kind_id:
+	return false;
+      case int_kind_id:
+	return false;
+      case uint_kind_id:
+        return false;
+      case float_kind_id:
+        return false;
       case complex_kind_id:
         return false;
       case bytes_kind_id:
