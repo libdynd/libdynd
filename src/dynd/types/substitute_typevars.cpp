@@ -156,6 +156,9 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
           substitute(pattern.extended<typevar_constructed_type>()->get_arg(), typevars, concrete));
     }
 #endif
+    stringstream ss;
+    ss << "No constructed id for dynd type var " << pattern << " was available";
+    throw invalid_argument(ss.str());
   }
   case typevar_id: {
     map<std::string, ndt::type>::const_iterator it = typevars.find(pattern.extended<typevar_type>()->get_name());
