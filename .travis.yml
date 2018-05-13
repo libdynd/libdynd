@@ -165,7 +165,7 @@ matrix:
         - export CXX="g++-7"
         - mkdir build
         - pushd build
-        - cmake -DCMAKE_CXX_FLAGS="-Wno-error" ..
+        - cmake ..
     - language: objective-c
       os: osx
       osx_image: xcode6.4
