@@ -92,7 +92,7 @@ public:
 
   explicit operator uint128() const;
 
-  explicit operator float32() const
+  operator float32() const
   {
     DYND_IGNORE_MAYBE_UNINITIALIZED
     return halfbits_to_float(m_bits);
