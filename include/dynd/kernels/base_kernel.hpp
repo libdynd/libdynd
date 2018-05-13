@@ -110,8 +110,11 @@ namespace nd {
     static const volatile char *DYND_USED(ir);
   };
 
+// Ignore a false positive warning from gcc 8 about unnecessary parentheses.
+DYND_IGNORE_UNNECESSARY_PARENTHESES
   template <typename PrefixType, typename SelfType>
   const volatile char *DYND_USED((base_kernel<PrefixType, SelfType>::ir)) = NULL;
+DYND_END_IGNORE_UNNECESSARY_PARENTHESES
 
   template <typename SelfType>
   struct base_kernel<SelfType> : base_kernel<kernel_prefix, SelfType> {};
