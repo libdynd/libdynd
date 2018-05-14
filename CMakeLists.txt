@@ -559,6 +559,7 @@ if(DYND_BUILD_TESTS)
 endif()
 
 if(DYND_BUILD_BENCHMARKS)
+    set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Enable testing of the benchmark library.")
     add_subdirectory(benchmarks)
 endif()
 
