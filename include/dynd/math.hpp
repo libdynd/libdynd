@@ -224,14 +224,14 @@ complex<T> exp(complex<T> z) {
     if (isfinite(i)) {
       ret = complex<T>(x * c, x * s);
     } else {
-      ret = complex<T>(_nan<T>(NULL), copysign(_nan<T>(NULL), i));
+      ret = complex<T>(std::numeric_limits<T>::quiet_NaN(), copysign(std::numeric_limits<T>::quiet_NaN(), i));
     }
   } else if (isnan(r)) {
     // r is nan
     if (i == 0) {
       ret = complex<T>(r, 0);
     } else {
-      ret = complex<T>(r, copysign(_nan<T>(NULL), i));
+      ret = complex<T>(r, copysign(std::numeric_limits<T>::quiet_NaN(), i));
     }
   } else {
     // r is +- inf
@@ -245,7 +245,7 @@ complex<T> exp(complex<T> z) {
         ret = complex<T>(r * c, r * s);
       } else {
         // x = +inf, y = +-inf | nan
-        ret = complex<T>(r, _nan<T>(NULL));
+        ret = complex<T>(r, std::numeric_limits<T>::quiet_NaN());
       }
     } else {
       if (isfinite(i)) {

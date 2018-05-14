@@ -65,7 +65,7 @@ public:
 
   explicit float16(const float128 &value);
 
-  float16(const float16 &rhs) : m_bits(rhs.m_bits) {}
+  float16(const float16 &rhs) = default;
 
   explicit operator int8() const { return static_cast<int8>(halfbits_to_float(m_bits)); }
 

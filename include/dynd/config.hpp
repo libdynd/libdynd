@@ -72,8 +72,18 @@
 
 // Ignore erroneous maybe-uninitizlized
 // warnings on a given line or code block.
-#define DYND_IGNORE_MAYBE_UNINITIALIZED _Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+#define DYND_IGNORE_MAYBE_UNINITIALIZED                     \
+_Pragma("GCC diagnostic push")                              \
+_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
 #define DYND_END_IGNORE_MAYBE_UNINITIALIZED _Pragma("GCC diagnostic pop")
+
+// Ignore erroneous warnings about unnecessary parentheses.
+#if __GNUC__ >= 8 && !defined(__clang__)
+#define DYND_IGNORE_UNNECESSARY_PARENTHESES         \
+_Pragma("GCC diagnostic push")                      \
+_Pragma("GCC diagnostic ignored \"-Wparentheses\"")
+#define DYND_END_IGNORE_UNNECESSARY_PARENTHESES _Pragma("GCC diagnostic pop")
+#endif
 
 #define DYND_CONSTEXPR constexpr
 
@@ -545,6 +555,11 @@ typedef uintptr_t offset_t;
 #ifndef DYND_IGNORE_MAYBE_UNINITIALIZED
 #define DYND_IGNORE_MAYBE_UNINITIALIZED
 #define DYND_END_IGNORE_MAYBE_UNINITIALIZED
+#endif
+
+#ifndef DYND_IGNORE_UNNECESSARY_PARENTHESES
+#define DYND_IGNORE_UNNECESSARY_PARENTHESES
+#define DYND_END_IGNORE_UNNECESSARY_PARENTHESES
 #endif
 
 // Check endian: define DYND_BIG_ENDIAN if big endian, otherwise assume little

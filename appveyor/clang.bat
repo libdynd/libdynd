@@ -1,7 +1,8 @@
 @ECHO ON
 
-SET MINICONDA_ROOT=C:\Miniconda3-x64
-SET PATH=%MINICONDA_ROOT%;%MINICONDA_ROOT%\Scripts;%MINICONDA_ROOT%\Library\bin;%PATH%
+Powershell -Command "Start-FileDownload \"https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-x86_64.exe\" C:\Miniconda.exe"
+C:\Miniconda.exe /S /D=C:\Py || exit /b 1
+SET PATH=C:\Py;C:\Py\Scripts;C:\Py\Library\bin;%PATH%
 
 conda config --set always_yes yes || exit /b 1
 
