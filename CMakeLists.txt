@@ -51,7 +51,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 # -DDYND_BUILD_BENCHMARKS=ON/OFF, whether to build the Google benchmarks
     option(DYND_BUILD_BENCHMARKS
            "Build the Google benchmarks for libdynd."
-           ON)
+	   OFF)
 # -DDYND_BUILD_PLUGINS=ON/OFF, whether to build the DyND plugins
     option(DYND_BUILD_PLUGINS
            "Build the plugins for libdynd."
