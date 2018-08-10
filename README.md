@@ -6,14 +6,15 @@ The DyND Library
 Travis CI: [![Build Status](https://api.travis-ci.org/libdynd/libdynd.svg?branch=master)](https://travis-ci.org/libdynd/libdynd) CircleCI: [![CircleCI](https://circleci.com/gh/libdynd/libdynd.svg?style=svg)](https://circleci.com/gh/libdynd/libdynd) AppVeyor: [![Build status](https://ci.appveyor.com/api/projects/status/92o89tiw6wwliuxy/branch/master?svg=true)](https://ci.appveyor.com/project/libdynd/libdynd/branch/master) Coveralls: [![Coverage Status](https://coveralls.io/repos/github/libdynd/libdynd/badge.svg?branch=master)](https://coveralls.io/github/libdynd/libdynd?branch=master)
 Gitter: [![Join the chat at https://gitter.im/libdynd/libdynd](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/libdynd/libdynd?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-DyND is a dynamic array library for structured and semi-structured data, written with
+DyND is an array library for managing structured and semi-structured data, written with
 C++ as a first-class target and extended to Python with a lightweight binding. It aims
 to be a cross-language platform for data analysis, by bringing the popularity and flexibility
 of the Python data science stack to other languages. It is inspired by [NumPy](http://www.numpy.org/),
 the Python array programming library at the core of the scientific Python stack, but tries
 to address a number of obstacles encountered by some of NumPy’s users. Examples of these are
 support for variable-sized strings, missing values, variable-sized (ragged) array dimensions,
-and versatile tools for creating functions that apply generic patterns across arrays.
+and versatile tools for creating and manipulating functions that apply generic patterns
+across containers.
 
 At a high level, the cornerstones of DyND are its type system, array container, and callable
 (function) objects. These represent the description, storage, and manipulation of dynamic,
@@ -32,7 +33,7 @@ contributions include [Phillip Cloud](https://github.com/cpcloud), [Michael Droe
 and [DARPA-BAA-12-38](https://www.fbo.gov/index?s=opportunity&mode=form&id=7a77846c73ffc5cb22f9295ffe6cdd55&tab=core&_cview=0),
 part of [XDATA](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx).
 
-We pronounce DyND as "dined", though others refer to it as "dy-n-d". It's not something we're picky about it.
+We pronounce DyND as "dined", though others refer to it as "dy-n-d". It's not something we're picky about.
 
 Getting Started
 ===============
@@ -97,7 +98,7 @@ the [build instructions](BUILD.md) for details about how
 to build the library.
 
 DyND requires a C++14 compiler, the minimum versions supported are gcc 4.9,
-MSVC 2015, and Clang 3.4. The last release to support C++98 was DyND 0.6.6.
+MSVC 2015, and Clang 3.6. The last release to support C++98 was DyND 0.6.6.
 C++14 brings several things to the library, including a roughly factor of two
 compile time improvement and generality with variadic templates.
 
