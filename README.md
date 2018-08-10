@@ -98,7 +98,7 @@ the [build instructions](BUILD.md) for details about how
 to build the library.
 
 DyND requires a C++14 compiler, the minimum versions supported are gcc 4.9,
-MSVC 2015, and Clang 3.4. The last release to support C++98 was DyND 0.6.6.
+MSVC 2015, and Clang 3.6. The last release to support C++98 was DyND 0.6.6.
 C++14 brings several things to the library, including a roughly factor of two
 compile time improvement and generality with variadic templates.
 
