@@ -180,11 +180,11 @@ jobs:
           ./tests/test_libdynd
   "gcc-8-dbg-Arch":
     docker:
-      - image: archlinux/base
+      - image: base/archlinux
     steps:
       - checkout
       - run: |
-          pacman -Syy
+          pacman -Sy
           pacman -q -S --noconfirm gcc make cmake
           mkdir build
           cd build
