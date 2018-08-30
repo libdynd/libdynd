@@ -5,11 +5,10 @@ addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
-    - kalakris-cmake
     packages:
     - gcc-4.9
     - g++-4.9
-    - cmake
+    - cmake3
 
 cache:
   directories:
@@ -26,11 +25,10 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - kalakris-cmake
           packages:
             - gcc-5
             - g++-5
-            - cmake
+            - cmake3
             - doxygen
       before_install:
         - export CC="gcc-5"
@@ -49,12 +47,11 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-3.9
-            - kalakris-cmake
           packages:
             - clang-3.9
             - gcc-4.9
             - g++-4.9
-            - cmake
+            - cmake3
       before_script:
         - export CC=clang-3.9
         - export CXX=clang++-3.9
@@ -68,12 +65,11 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-4.0
-            - kalakris-cmake
           packages:
             - clang-4.0
             - gcc-5
             - g++-5
-            - cmake
+            - cmake3
       before_script:
         - export CC=clang-4.0
         - export CXX=clang++-4.0
@@ -87,12 +83,11 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-5.0
-            - kalakris-cmake
           packages:
             - clang-5.0
             - gcc-6
             - g++-6
-            - cmake
+            - cmake3
       before_script:
         - export CC=clang-5.0
         - export CXX=clang++-5.0
@@ -106,12 +101,11 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-6.0
-            - kalakris-cmake
           packages:
             - clang-6.0
             - gcc-7
             - g++-7
-            - cmake
+            - cmake3
       before_script:
         - export CC=clang-6.0
         - export CXX=clang++-6.0
@@ -138,11 +132,10 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - kalakris-cmake
           packages:
             - gcc-6
             - g++-6
-            - cmake
+            - cmake3
       before_script:
         - export CC="gcc-6"
         - export CXX="g++-6"
@@ -172,12 +165,11 @@ matrix:
       addons:
         apt:
           sources:
-            - kalakris-cmake
             - ubuntu-toolchain-r-test
           packages:
             - gcc-6
             - g++-6
-            - cmake
+            - cmake3
       cache:
       directories:
         - $HOME/.cache/pip
@@ -202,11 +194,10 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - kalakris-cmake
           packages:
             - gcc-6
             - g++-6
-            - cmake
+            - cmake3
             - lcov
       before_install:
         - export CC="gcc-6"
