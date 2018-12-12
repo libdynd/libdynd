@@ -1,0 +1,23 @@
+trigger:
+  # start a new build for every push
+  batch: False
+  branches:
+    include:
+      - master
+
+jobs:
+- job: Windows
+  pool:
+    vmIMage: 'VS2017-Win2016'
+  strategy:
+    maxParallel: 4
+    matrix:
+        msvc64:
+          BITS: 64
+  steps:
+  - powershell: |
+      mkdir build
+      cd build
+      cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_CXX_FLAGS="-MP4" -G "Visual Studio 15 2017 Win64" ..
+      cmake --build . --config Release
+      tests/Release/test_libdynd.exe
