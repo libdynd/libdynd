@@ -5,19 +5,53 @@ trigger:
     include:
       - master
 
+pr:
+  - master
+
 jobs:
-- job: Windows
+- job: MSVC_2017
   pool:
-    vmIMage: 'VS2017-Win2016'
+    vmImage: 'VS2017-Win2016'
   strategy:
     maxParallel: 4
     matrix:
-        msvc64:
-          BITS: 64
+      Release:
+        BITS: 64
+        env:
+          BUILD_TYPE=Release
+      Debug:
+        BITS: 64
+        env:
+          BUILD_TYPE=Debug
   steps:
-  - powershell: |
+  - script: |
+      @echo on
       mkdir build
       cd build
-      cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_CXX_FLAGS="-MP4" -G "Visual Studio 15 2017 Win64" ..
-      cmake --build . --config Release
-      tests/Release/test_libdynd.exe
+      cmake -G "Visual Studio 15 2017 Win64" ..
+      cmake --build . --config %BUILD_TYPE% --parallel 4
+      tests\%BUILD_TYPE%\test_libdynd.exe
+
+- job: MSVC_2019
+  pool:
+    vmImage: 'windows-2019'
+  strategy:
+    maxParallel: 4
+    matrix:
+      Release:
+        BITS: 64
+        env:
+          BUILD_TYPE=Release
+      Debug:
+        BITS: 64
+        env:
+          BUILD_TYPE=Debug
+  steps:
+  - script: |
+      @echo on
+      mkdir build
+      cd build
+      cmake -G "Visual Studio 16 2019" -A x64 ..
+      cmake --build . --config %BUILD_TYPE% --parallel 4
+      tests\%BUILD_TYPE%\test_libdynd.exe
+
