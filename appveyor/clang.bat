@@ -11,7 +11,7 @@ conda install -c conda-forge clangdev=%CLANG_VERSION% ninja || exit /b 1
 mkdir build
 pushd build
 
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 cmake ^
     -DCMAKE_VERBOSE_MAKEFILE=ON ^

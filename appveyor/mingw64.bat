@@ -1,6 +1,6 @@
 @ECHO ON
-SET PATH=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin;%PATH%
-SET MINGW_PREFIX=C:/mingw-w64/x86_64-7.2.0-posix-seh-rt_v5-rev1/mingw64/bin
+SET MINGW_PREFIX=C:/mingw-w64/x86_64-8.1.0-posix-seh-rt_v6-rev0/mingw64/bin
+SET PATH=%MINGW_PREFIX%;%PATH%
 
 mkdir build
 pushd build
