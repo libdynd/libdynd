@@ -1,209 +1,66 @@
 version: 2
 
-# TODO: These builds are currently configured to
-# install the needed dependencies in each container
-# at the start of each build.
-# We should eventually roll the set up for each
-# container into a separate dockerfile and push custom
-# build images to dockerhub so that setting up packages
-# during the actual CI testing is no longer necessary.
-
 jobs:
-  "gcc-8":
-    # As of this writing, runs on Debian 9.5
+  "CheckFormat":
     docker:
-      - image: gcc:8
+      - image: ubuntu:bionic
     steps:
       - checkout
       - run: |
           apt-get -q update -y
-          apt-get -q install -y cmake
-          mkdir build
-          cd build
-          cmake -DCMAKE_VERBOSE_MAKEFILE=ON ..
-          make -j4
-          ./tests/test_libdynd
-  "clang-5":
-    docker:
-      - image: debian:9.5-slim
-    steps:
-      - checkout
-      - run: |
+          apt-get -q install -y apt-transport-https ca-certificates git gnupg software-properties-common wget
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key 2>/dev/null | apt-key add -
+          apt-add-repository -y 'deb https://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
           apt-get -q update -y
-          apt-get -q install -y cmake gcc g++ cmake clang
-          mkdir build
-          cd build
-          cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang ..
-          make -j4
-          ./tests/test_libdynd
-  "gcc-7-Ubuntu-18.04":
-    docker:
-      - image: ubuntu:18.04
-    steps:
-      - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
       - run: |
-          apt-get -q update -y
-          apt-get -q install -y cmake gcc g++
-          mkdir build
-          cd build
-          cmake -DCMAKE_VERBOSE_MAKEFILE=ON ..
-          make -j4
-          ./tests/test_libdynd
-  "clang-6-libc++-Debug-Ubuntu-18.04":
+          apt-get -q install -y \
+            clang-format-10
+
+          update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-10 50
+
+          scripts/check_format.sh .
+  "Arch":
     docker:
-      - image: ubuntu:18.04
-    steps:
-      - checkout
-      - run: |
-          apt-get -q update -y
-          # clang 6.0
-          apt-get -q install -y cmake gcc g++ clang libc++-dev
-          mkdir build
-          cd build
-          cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug ..
-          make -j4
-          ./tests/test_libdynd
-  "clang-6-libc++-Ubuntu-18.04":
-    docker:
-      - image: ubuntu:18.04
-    steps:
-      - checkout
-      - run: |
-          apt-get -q update -y
-          # clang 6.0
-          apt-get -q install -y cmake gcc g++ clang libc++-dev
-          mkdir build
-          cd build
-          cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang ..
-          make -j4
-          ./tests/test_libdynd
-  "gcc-5-Ubuntu-16.04":
-    docker:
-      - image: ubuntu:16.04
-    steps:
-      - checkout
-      - run: |
-          apt-get -q update -y
-          # clang 3.8
-          apt-get -q install -y cmake gcc g++ clang
-          mkdir build
-          cd build
-          cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang ..
-          make -j4
-          ./tests/test_libdynd
-  "gcc-7-CentOS-7":
-    docker:
-      # Use an image with sudo enabled so packages can be installed.
-      # Once we transition to building in our own containers we can
-      # move to something based off of centos/devtoolset-7-toolchain-centos7
-      # but, since that one doesn't include sudo by default, we need
-      # to use this container instead for now.
-      - image: vikas027/centos-ssh-sudo:7
-    steps:
-      - checkout
-      - run: |
-          sudo yum -y -q install centos-release-scl scl-utils make cmake3
-          sudo yum -y -q install devtoolset-7-toolchain
-          # For some reason using scl_source enable this way doesn't work when bash
-          # was started with -e, so temporarily disable that, then re-enable it afterward.
-          set +e
-          source scl_source enable devtoolset-7
-          set -e
-          mkdir build
-          cd build
-          cmake3 -DCMAKE_VERBOSE_MAKEFILE=ON ..
-          make -j4
-          ./tests/test_libdynd
-  "clang-4-CentOS-7":
-    # Clang on CentOS 7
-    docker:
-      # As with the previous Centos 7 build, until we start using our own containers,
-      # we need to use an image that includes sudo. The default Centos 7 ones do not.
-      - image: vikas027/centos-ssh-sudo:7
-    steps:
-      - checkout
-      - run: |
-          sudo yum -y -q install centos-release-scl scl-utils make cmake3
-          sudo yum -y -q install devtoolset-7-toolchain llvm-toolset-7
-          # For some reason using scl_source enable this way doesn't work when bash
-          # was started with -e, so temporarily disable that, then re-enable it afterward.
-          set +e
-          source scl_source enable llvm-toolset-7
-          set -e
-          mkdir build
-          cd build
-          cmake3 -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
-          make -j4
-          ./tests/test_libdynd
-  "gcc-7-CentOS-6":
-    docker:
-      # Use an image with sudo enabled so packages can be installed.
-      # Once we transition to building in our own containers we can
-      # move to something based off of centos/devtoolset-7-toolchain-centos7
-      # but, since that one doesn't include sudo by default, we need
-      # to use this container instead for now.
-      - image: vikas027/centos-ssh-sudo:6
-    steps:
-      - checkout
-      - run: |
-          sudo yum -y -q install centos-release-scl scl-utils zlib-devel make cmake3
-          sudo yum -y -q install devtoolset-7-toolchain
-          # For some reason using scl_source enable this way doesn't work when bash
-          # was started with -e, so temporarily disable that, then re-enable it afterward.
-          set +e
-          source scl_source enable devtoolset-7
-          set -e
-          mkdir build
-          cd build
-          cmake3 -DCMAKE_VERBOSE_MAKEFILE=ON ..
-          make -j4
-          ./tests/test_libdynd
-  "clang-6-libc++-CentOS-6":
-    docker:
-      # As with the previous Centos 7 build, until we start using our own containers,
-      # we need to use an image that includes sudo. The default Centos ones do not.
-      - image: vikas027/centos-ssh-sudo:6
-    steps:
-      - checkout
-      - run: |
-          # Use miniconda to get all needed packages
-          wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-          bash miniconda.sh -b -p $HOME/miniconda
-          rm miniconda.sh
-          export PATH=$HOME/miniconda/bin:$PATH
-          source activate
-          conda install -y -q -c conda-forge make cmake clangdev libcxx zlib
-          mkdir build
-          cd build
-          cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath=$HOME/miniconda/lib" ..
-          make -j4
-          ./tests/test_libdynd
-  "gcc-8-dbg-Arch":
-    docker:
-      - image: base/archlinux
+      - image: archlinux/base
     steps:
       - checkout
       - run: |
           pacman -Sy
-          pacman -q -S --noconfirm gcc make cmake
-          mkdir build
-          cd build
-          cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=Debug ..
-          make -j4
-          ./tests/test_libdynd
+          pacman -q -S --noconfirm git
+      - run: git submodule sync
+      - run: git submodule update --init
+      - run: |
+          pacman -q -S --noconfirm \
+            cmake \
+            gcc \
+            make
+          cmake -S . -B /tmp/build
+          cmake --build /tmp/build --parallel 2
+          /tmp/build/tests/test_libdynd
+  "Alpine":
+    docker:
+      - image: alpine:latest
+    steps:
+      - checkout
+      - run: |
+          apk add --no-cache --no-progress git
+      - run: git submodule sync
+      - run: git submodule update --init
+      - run: |
+          apk add --no-cache --no-progress \
+            cmake \
+            g++ \
+            gcc \
+            make
+          cmake -S . -B /tmp/build
+          cmake --build /tmp/build --parallel 2
+          /tmp/build/tests/test_libdynd
  
 workflows:
   version: 2
   build:
     jobs:
-      - "gcc-8-dbg-Arch"
-      - "clang-6-libc++-CentOS-6"
-      - "gcc-7-CentOS-6"
-      - "clang-4-CentOS-7"
-      - "gcc-7-CentOS-7"
-      - "gcc-5-Ubuntu-16.04"
-      - "clang-6-libc++-Ubuntu-18.04"
-      - "clang-6-libc++-Debug-Ubuntu-18.04"
-      - "gcc-7-Ubuntu-18.04"
-      - "clang-5"
-      - "gcc-8"
+      - "Alpine"
+      - "Arch"
