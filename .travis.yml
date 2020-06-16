@@ -1,212 +1,167 @@
-dist: trusty
-sudo: false
+dist: bionic
 
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-4.9
-    - g++-4.9
-    - cmake3
+language: c++
 
-cache:
-  directories:
-  - $HOME/libdynd/build
+git:
+  submodules: true
 
 matrix:
   include:
-    - compiler: gcc
-      env: -fsanitize=address
-      cache:
-        directories:
-            - $HOME/intel
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - gcc-5
-            - g++-5
-            - cmake3
-            - doxygen
-      before_install:
-        - export CC="gcc-5"
-        - export CXX="g++-5"
-      script:
-        # Explicitly tell gcc to use the gold linker for the
-        # address sanitization run to work around the bug described in
-        # https://stackoverflow.com/q/37603238/1935144
-        - cmake -DCMAKE_CXX_FLAGS="-fsanitize=address -fuse-ld=gold" ..
-        - make -j4 || exit 1
-        - ./tests/test_libdynd
-    - compiler: clang
-      env: CLANG_VERSION=3.9
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-3.9
-          packages:
-            - clang-3.9
-            - gcc-4.9
-            - g++-4.9
-            - cmake3
+    - os: osx
+      osx_image: xcode11.6
       before_script:
-        - export CC=clang-3.9
-        - export CXX=clang++-3.9
+        - export CC=clang
+        - export CXX=clang++
         - mkdir build
-        - pushd build
-        - cmake ..
-    - compiler: clang
-      env: CLANG_VERSION=4.0
+        - cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGALOIS_ENABLE_DIST=ON || exit 1
+    - env:
+        - GCC_VER=7
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-4.0
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
           packages:
-            - clang-4.0
-            - gcc-5
-            - g++-5
-            - cmake3
-      before_script:
-        - export CC=clang-4.0
-        - export CXX=clang++-4.0
-        - mkdir build
-        - pushd build
-        - cmake ..
-    - compiler: clang
-      env: CLANG_VERSION=5.0
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
-          packages:
-            - clang-5.0
-            - gcc-6
-            - g++-6
-            - cmake3
-      before_script:
-        - export CC=clang-5.0
-        - export CXX=clang++-5.0
-        - mkdir build
-        - pushd build
-        - cmake ..
-    - compiler: clang
-      env: CLANG_VERSION=6.0
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-6.0
-          packages:
-            - clang-6.0
             - gcc-7
             - g++-7
-            - cmake3
-      before_script:
-        - export CC=clang-6.0
-        - export CXX=clang++-6.0
-        - mkdir build
-        - pushd build
-        - cmake ..
-    - compiler: gcc
-      env: CONDA=true
-      before_install:
-        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-        - bash Miniconda3-latest-Linux-x86_64.sh -b
-        - export PATH=$HOME/miniconda3/bin:$PATH
-        - conda install --yes conda-build jinja2 cmake
-      before_script:
-        - export CC="gcc-4.9"
-        - export CXX="g++-4.9"
-      script:
-        - conda build conda.recipe
-        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then conda install --yes anaconda-client; fi'
-        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then anaconda --token $ANACONDA_TOKEN upload `conda build --output conda.recipe` --user dynd --channel dev; fi'
-    - compiler: gcc
-      env: GCC_VERSION=6
+            - cmake
+    - env:
+        - GCC_VER=8
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
           packages:
-            - gcc-6
-            - g++-6
-            - cmake3
-      before_script:
-        - export CC="gcc-6"
-        - export CXX="g++-6"
-        - mkdir build
-        - pushd build
-        - cmake ..
-    - language: objective-c
-      os: osx
-      osx_image: xcode6.4
-      compiler: clang
-      env: CONDA=true
-      addons:
-      before_script:
-      before_install:
-        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-        - bash Miniconda3-latest-MacOSX-x86_64.sh -b
-        - export PATH=$HOME/miniconda3/bin:$PATH
-        - conda install --yes conda-build jinja2
-      script:
-        - conda build conda.recipe
-        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then conda install --yes anaconda-client; fi'
-        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then anaconda --token $ANACONDA_TOKEN upload `conda build --output conda.recipe` --user dynd --channel dev; fi'
-    - language: python
-      env: VERBOSE=1
-      compiler: gcc
-      python: 3.5
+            - gcc-8
+            - g++-8
+            - cmake
+    - env:
+        - GCC_VER=9
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
           packages:
-            - gcc-6
-            - g++-6
-            - cmake3
-      cache:
-      directories:
-        - $HOME/.cache/pip
-        - $HOME/dynd-python/build
-      before_install:
-        - export CC=gcc-6
-        - export CXX=g++-6
-        - travis_retry pip install --install-option="--no-cython-compile" Cython==0.24
-      before_script:
-        - cd ..
-        - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
-        - mv libdynd dynd-python/libdynd
-        - cd dynd-python
-      script:
-        - python setup.py install
-        - cd ..
-        - python -c "import dynd; dynd.test(verbosity=2, exit=True)"
-      after_script:
+            - gcc-9
+            - g++-9
+            - cmake
+    - env:
+        - GCC_VER=10
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - gcc-10
+            - g++-10
+            - cmake
+    - env:
+        - GCC_VER=10
+        - BUILD_TYPE=Debug
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - gcc-10
+            - g++-10
+            - cmake
+    - env:
+        - CLANG_VER=7
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-7 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - clang-7
+            - cmake
+    - env:
+        - CLANG_VER=8
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-8 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - clang-8
+            - cmake
+    - env:
+        - CLANG_VER=9
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - clang-9
+            - cmake
+    - env:
+        - CLANG_VER=10
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - clang-10
+            - cmake
+    - env:
+        - CLANG_VER=10
+        - BUILD_TYPE=Debug
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+            - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
+              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+          packages:
+            - clang-10
+            - cmake
     - compiler: gcc
       env: DYND_COVERAGE=ON
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
           packages:
-            - gcc-6
-            - g++-6
-            - cmake3
+            - gcc-10
+            - g++-10
+            - cmake
             - lcov
       before_install:
-        - export CC="gcc-6"
-        - export CXX="g++-6"
+        - export CC="gcc-10"
+        - export CXX="g++-10"
         - gem install coveralls-lcov
-        - wget https://github.com/linux-test-project/lcov/archive/v1.12.zip
-        - unzip v1.12.zip
-        - export PATH=${PWD}/lcov-1.12/bin:$PATH
-        - cp /usr/bin/gcov-6 ${PWD}/lcov-1.12/bin/gcov
+        - wget https://github.com/linux-test-project/lcov/archive/v1.14.zip
+        - unzip v1.14.zip
+        - export PATH=${PWD}/lcov-1.14/bin:$PATH
+        - cp /usr/bin/gcov-10 ${PWD}/lcov-1.14/bin/gcov
       before_script:
         - mkdir build
         - pushd build
@@ -217,21 +172,34 @@ matrix:
       after_script:
         - popd
         - coveralls-lcov build/coverage.info.cleaned
-  allow_failures:
-  - language: python
-
-language: cpp
 
 before_script:
+  # Depending on whether GCC_VER or CLANG_VER is set and nonempty,
+  # set CC and CXX accordingly.
+  - |
+    if [ -n "$GCC_VER" ]; then
+      export CC="gcc-$GCC_VER"
+      export CXX="g++-$GCC_VER"
+    fi
+  - |
+    if [ -n "$CLANG_VER" ]; then
+      export CC="clang-$CLANG_VER"
+      export CXX="clang++-$CLANG_VER"
+    fi
+  - |
+    # Check if BUILD_TYPE is set at all, not just whether it is empty or unset.
+    # See https://stackoverflow.com/a/13864829/1935144.
+    if [ -z ${BUILD_TYPE+x} ]; then
+      export BUILD_TYPE=Release
+    fi
   - mkdir build
-  - pushd build
-  - cmake ..
+  # Use apt-installed cmake rather than travis-provided one
+  # (/usr/local/cmake-3.12.4/bin/cmake).
+  - /usr/bin/cmake -S . -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE || exit 1
 
 script:
-  - make -j4 || exit 1
-  - ./tests/test_libdynd
+  - cmake --build build --parallel 4 || exit 1
+  - ./build/tests/test_libdynd
 
 notifications:
   email: false
-  on_success: change
-  on_failure: always
