@@ -5,19 +5,100 @@ trigger:
     include:
       - master
 
+pr:
+  - master
+
 jobs:
-- job: Windows
+- job: MSVC_2017
   pool:
-    vmIMage: 'VS2017-Win2016'
+    vmImage: 'VS2017-Win2016'
   strategy:
-    maxParallel: 4
     matrix:
-        msvc64:
-          BITS: 64
+      Release:
+        BITS: 64
+        env:
+          BUILD_TYPE=Release
+      Debug:
+        BITS: 64
+        env:
+          BUILD_TYPE=Debug
   steps:
-  - powershell: |
+  - script: |
+      @echo on
       mkdir build
       cd build
-      cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_CXX_FLAGS="-MP4" -G "Visual Studio 15 2017 Win64" ..
-      cmake --build . --config Release
-      tests/Release/test_libdynd.exe
+      cmake -G "Visual Studio 15 2017 Win64" ..
+      cmake --build . --config %BUILD_TYPE% --parallel 4
+      tests\%BUILD_TYPE%\test_libdynd.exe
+
+- job: MSVC_2019
+  pool:
+    vmImage: 'windows-2019'
+  strategy:
+    matrix:
+      Release:
+        BITS: 64
+        env:
+          BUILD_TYPE=Release
+      Debug:
+        BITS: 64
+        env:
+          BUILD_TYPE=Debug
+  steps:
+  - script: |
+      @echo on
+      mkdir build
+      cd build
+      cmake -G "Visual Studio 16 2019" -A x64 ..
+      cmake --build . --config %BUILD_TYPE% --parallel 4
+      tests\%BUILD_TYPE%\test_libdynd.exe
+
+- job: MinGW_w64
+  pool:
+    vmImage: 'windows-2019'
+  strategy:
+    matrix:
+      Release:
+        BITS: 64
+        env:
+          BUILD_TYPE=Release
+      Debug:
+        BITS: 64
+        env:
+          BUILD_TYPE=Debug
+  steps:
+  - script: |
+      @echo on
+      mkdir build
+      cd build
+      cmake -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -G "MinGW Makefiles" ..
+      mingw32-make -j4
+      tests\test_libdynd.exe
+
+- job: clang
+  pool:
+    vmImage: 'windows-2019'
+  strategy:
+    matrix:
+      Release:
+        BITS: 64
+        env:
+          BUILD_TYPE=Release
+      Debug:
+        BITS: 64
+        env:
+          BUILD_TYPE=Debug
+  steps:
+  - script: |
+      @echo on
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+      curl.exe --output miniconda.exe --url https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe
+      miniconda.exe /S /D=%CD%\miniconda
+      call miniconda\scripts\activate.bat
+      cmd.exe /c "conda install -y -q -c conda-forge clangdev=10 cmake ninja"
+      mkdir build
+      cd build
+      cmake -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -G "Ninja" ..
+      ninja
+      tests\test_libdynd.exe
+
