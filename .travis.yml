@@ -141,37 +141,6 @@ matrix:
           packages:
             - clang-10
             - cmake
-    - compiler: gcc
-      env: DYND_COVERAGE=ON
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
-              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
-          packages:
-            - gcc-10
-            - g++-10
-            - cmake
-            - lcov
-      before_install:
-        - export CC="gcc-10"
-        - export CXX="g++-10"
-        - gem install coveralls-lcov
-        - wget https://github.com/linux-test-project/lcov/archive/v1.14.zip
-        - unzip v1.14.zip
-        - export PATH=${PWD}/lcov-1.14/bin:$PATH
-        - cp /usr/bin/gcov-10 ${PWD}/lcov-1.14/bin/gcov
-      before_script:
-        - mkdir build
-        - pushd build
-        - cmake -DDYND_COVERAGE=${DYND_COVERAGE} ..
-      script:
-        - make || exit 1
-        - make coverage
-      after_script:
-        - popd
-        - coveralls-lcov build/coverage.info.cleaned
 
 before_script:
   # Depending on whether GCC_VER or CLANG_VER is set and nonempty,
