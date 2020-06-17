@@ -3,7 +3,7 @@
 The DyND Library
 ================
 
-Travis CI: [![Build Status](https://api.travis-ci.org/libdynd/libdynd.svg?branch=master)](https://travis-ci.org/libdynd/libdynd) CircleCI: [![CircleCI](https://circleci.com/gh/libdynd/libdynd.svg?style=svg)](https://circleci.com/gh/libdynd/libdynd) AppVeyor: [![Build status](https://ci.appveyor.com/api/projects/status/92o89tiw6wwliuxy/branch/master?svg=true)](https://ci.appveyor.com/project/libdynd/libdynd/branch/master) Azure Pipelines: [![Build Status](https://dev.azure.com/libdynd/libdynd/_apis/build/status/libdynd.libdynd?branchName=master)](https://dev.azure.com/libdynd/libdynd/_build/latest?definitionId=2?branchName=master)
+Travis CI: [![Build Status](https://api.travis-ci.org/libdynd/libdynd.svg?branch=master)](https://travis-ci.org/libdynd/libdynd) CircleCI: [![CircleCI](https://circleci.com/gh/libdynd/libdynd.svg?style=svg)](https://circleci.com/gh/libdynd/libdynd) Azure Pipelines: [![Build Status](https://dev.azure.com/libdynd/libdynd/_apis/build/status/libdynd.libdynd?branchName=master)](https://dev.azure.com/libdynd/libdynd/_build/latest?definitionId=2?branchName=master)
 Gitter: [![Join the chat at https://gitter.im/libdynd/libdynd](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/libdynd/libdynd?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 DyND is an array library for managing structured and semi-structured data, written with
