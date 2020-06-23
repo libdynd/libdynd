@@ -15,21 +15,17 @@ jobs:
   strategy:
     matrix:
       Release:
-        BITS: 64
-        env:
-          BUILD_TYPE=Release
+        configuration: Release
       Debug:
-        BITS: 64
-        env:
-          BUILD_TYPE=Debug
+        configuration: Debug
   steps:
   - script: |
       @echo on
       mkdir build
       cd build
       cmake -G "Visual Studio 15 2017 Win64" ..
-      cmake --build . --config %BUILD_TYPE% --parallel 4
-      tests\%BUILD_TYPE%\test_libdynd.exe
+      cmake --build . --config %CONFIGURATION% --parallel 4
+      tests\%CONFIGURATION%\test_libdynd.exe
 
 - job: MSVC_2019
   pool:
@@ -37,21 +33,17 @@ jobs:
   strategy:
     matrix:
       Release:
-        BITS: 64
-        env:
-          BUILD_TYPE=Release
+        configuration: Release
       Debug:
-        BITS: 64
-        env:
-          BUILD_TYPE=Debug
+        configuration: Debug
   steps:
   - script: |
       @echo on
       mkdir build
       cd build
       cmake -G "Visual Studio 16 2019" -A x64 ..
-      cmake --build . --config %BUILD_TYPE% --parallel 4
-      tests\%BUILD_TYPE%\test_libdynd.exe
+      cmake --build . --config %CONFIGURATION% --parallel 4
+      tests\%CONFIGURATION%\test_libdynd.exe
 
 - job: MinGW_w64
   pool:
@@ -59,19 +51,15 @@ jobs:
   strategy:
     matrix:
       Release:
-        BITS: 64
-        env:
-          BUILD_TYPE=Release
+        configuration: Release
       Debug:
-        BITS: 64
-        env:
-          BUILD_TYPE=Debug
+        configuration: Debug
   steps:
   - script: |
       @echo on
       mkdir build
       cd build
-      cmake -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -G "MinGW Makefiles" ..
+      cmake -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -G "MinGW Makefiles" ..
       mingw32-make -j4
       tests\test_libdynd.exe
 
@@ -81,13 +69,9 @@ jobs:
   strategy:
     matrix:
       Release:
-        BITS: 64
-        env:
-          BUILD_TYPE=Release
+        configuration: Release
       Debug:
-        BITS: 64
-        env:
-          BUILD_TYPE=Debug
+        configuration: Debug
   steps:
   - script: |
       @echo on
@@ -98,7 +82,7 @@ jobs:
       cmd.exe /c "conda install -y -q -c conda-forge clangdev=10 cmake ninja"
       mkdir build
       cd build
-      cmake -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -G "Ninja" ..
+      cmake -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -G "Ninja" ..
       ninja
       tests\test_libdynd.exe
 
