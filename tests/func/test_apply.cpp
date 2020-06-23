@@ -33,7 +33,7 @@ struct cuda_decltype_workaround {
 template <typename T>
 class Apply : public Memory<T> {};
 
-TYPED_TEST_CASE_P(Apply);
+TYPED_TEST_SUITE_P(Apply);
 
 template <kernel_request_t kernreq, typename func_type>
 struct func_wrapper;
@@ -536,9 +536,9 @@ TEST(Apply, ReturnWrapper) {
   EXPECT_ARRAY_EQ(nd::array({5, 6, 7, 8, 9}), f(5));
 }
 
-REGISTER_TYPED_TEST_CASE_P(Apply, Callable, CallableWithKeywords);
+REGISTER_TYPED_TEST_SUITE_P(Apply, Callable, CallableWithKeywords);
 
-INSTANTIATE_TYPED_TEST_CASE_P(HostMemory, Apply, HostKernelRequest);
+INSTANTIATE_TYPED_TEST_SUITE_P(HostMemory, Apply, HostKernelRequest);
 #ifdef DYND_CUDA
-INSTANTIATE_TYPED_TEST_CASE_P(CUDADeviceMemory, Apply, CUDADeviceKernelRequest);
+INSTANTIATE_TYPED_TEST_SUITE_P(CUDADeviceMemory, Apply, CUDADeviceKernelRequest);
 #endif

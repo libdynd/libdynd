@@ -19,7 +19,7 @@ using namespace dynd;
 template <typename T>
 class ArrayIndex : public Memory<T> {};
 
-TYPED_TEST_CASE_P(ArrayIndex);
+TYPED_TEST_SUITE_P(ArrayIndex);
 
 TYPED_TEST_P(ArrayIndex, BasicInteger) {
   int i0[3][2] = {{1, 2}, {3, 4}, {5, 6}};
@@ -211,10 +211,10 @@ TYPED_TEST_P(ArrayIndex, ExceptionsOneDimensionalRange) {
   EXPECT_THROW(a(0)(irange()), too_many_indices);
 }
 
-REGISTER_TYPED_TEST_CASE_P(ArrayIndex, BasicInteger, SimpleOneDimensionalRange, SteppedOneDimensionalRange,
-                           ExceptionsOneDimensionalRange);
+REGISTER_TYPED_TEST_SUITE_P(ArrayIndex, BasicInteger, SimpleOneDimensionalRange, SteppedOneDimensionalRange,
+                            ExceptionsOneDimensionalRange);
 
-INSTANTIATE_TYPED_TEST_CASE_P(Default, ArrayIndex, DefaultMemory);
+INSTANTIATE_TYPED_TEST_SUITE_P(Default, ArrayIndex, DefaultMemory);
 #ifdef DYND_CUDA
-INSTANTIATE_TYPED_TEST_CASE_P(CUDA, ArrayIndex, CUDAMemory);
+INSTANTIATE_TYPED_TEST_SUITE_P(CUDA, ArrayIndex, CUDAMemory);
 #endif // DYND_CUDA

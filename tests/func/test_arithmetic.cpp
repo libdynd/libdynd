@@ -24,7 +24,7 @@ using namespace dynd;
 template <typename T>
 class Arithmetic : public Memory<T> {};
 
-TYPED_TEST_CASE_P(Arithmetic);
+TYPED_TEST_SUITE_P(Arithmetic);
 
 TYPED_TEST_P(Arithmetic, SimpleBroadcast) {
   nd::array a, b, c;
@@ -449,10 +449,10 @@ TEST(Arithmetic, OptionArrayNotOptionFloat64) {
   }
 }
 
-REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast, ScalarOnTheRight, ScalarOnTheLeft,
+REGISTER_TYPED_TEST_SUITE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast, ScalarOnTheRight, ScalarOnTheLeft,
                            ComplexScalar);
 
-INSTANTIATE_TYPED_TEST_CASE_P(HostMemory, Arithmetic, HostKernelRequest);
+INSTANTIATE_TYPED_TEST_SUITE_P(HostMemory, Arithmetic, HostKernelRequest);
 #ifdef DYND_CUDA
-INSTANTIATE_TYPED_TEST_CASE_P(CUDADeviceMemory, Arithmetic, CUDADeviceKernelRequest);
+INSTANTIATE_TYPED_TEST_SUITE_P(CUDADeviceMemory, Arithmetic, CUDADeviceKernelRequest);
 #endif

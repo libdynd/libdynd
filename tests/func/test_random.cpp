@@ -23,7 +23,7 @@ public:
   typedef T DType;
 };
 
-TYPED_TEST_CASE_P(Random);
+TYPED_TEST_SUITE_P(Random);
 
 TYPED_TEST_P(Random, Uniform) {
   typename TestFixture::DType a = 0;
@@ -42,6 +42,6 @@ TYPED_TEST_P(Random, Uniform) {
   EXPECT_EQ_RELERR(static_cast<double>(a + b) / 2, mean, 0.1);
 }
 
-REGISTER_TYPED_TEST_CASE_P(Random, Uniform);
-INSTANTIATE_TYPED_TEST_CASE_P(Integral, Random, IntegralTypes);
-INSTANTIATE_TYPED_TEST_CASE_P(Real, Random, RealTypes);
+REGISTER_TYPED_TEST_SUITE_P(Random, Uniform);
+INSTANTIATE_TYPED_TEST_SUITE_P(Integral, Random, IntegralTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(Real, Random, RealTypes);
