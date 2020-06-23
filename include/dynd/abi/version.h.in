@@ -1,0 +1,23 @@
+#ifndef DYND_ABI_VERSION_H
+#define DYND_ABI_VERSION_H
+
+#include "dynd/abi/integers.h"
+#include "dynd/abi/noexcept.h"
+
+#define DYND_ABI_HEADER_VERSION_MAJOR @DYND_ABI_VERSION_MAJOR@ull
+#define DYND_ABI_HEADER_VERSION_MINOR @DYND_ABI_VERSION_MINOR@ull
+#define DYND_ABI_HEADER_VERSION_DEBUG @DYND_ABI_VERSION_DEBUG@ull
+
+#if defined(__cplusplus)
+extern "C" {
+#endif // defined(__cplusplus)
+
+DYND_SIZE_T dynd_abi_library_version_major(void) DYND_NOEXCEPT;
+DYND_SIZE_T dynd_abi_library_version_minor(void) DYND_NOEXCEPT;
+DYND_SIZE_T dynd_abi_library_version_debug(void) DYND_NOEXCEPT;
+
+#if defined(__cplusplus)
+}
+#endif // defined(__cplusplus)
+
+#endif //DYND_ABI_VERSION_H

@@ -6,6 +6,35 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(libdynd)
 
+set(DYND_ABI_VERSION_MAJOR 1)
+set(DYND_ABI_VERSION_MINOR 0)
+set(DYND_ABI_VERSION_DEBUG 0)
+
+configure_file(
+  "${PROJECT_SOURCE_DIR}/include/dynd/abi/version.h.in"
+  "${PROJECT_BINARY_DIR}/include/dynd/abi/version.h"
+)
+
+include_directories(
+  "${PROJECT_SOURCE_DIR}/include"
+  "${PROJECT_BINARY_DIR}/include"
+)
+
+set(libdynd_abi_src
+  src/dynd/abi/version.c
+)
+
+set(libdynd_abi_inc
+  include/dynd/abi/integers.h
+  include/dynd/abi/noexcept.h
+  "${PROJECT_BINARY_DIR}include/dynd/abi/version.h"
+)
+
+add_library(libdynd_abi SHARED
+  ${libdynd_abi_src}
+)
+install(TARGETS dynd_abi DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+
 include(CheckTypeSize)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
@@ -443,7 +472,6 @@ set(libdynd_SRC
     )
 
 include_directories(
-    include
     thirdparty/utf8/source
     )
 
@@ -465,8 +493,6 @@ source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 #set_source_files_properties(include/dynd/kernels/compare_kernels.hpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
 #set_source_files_properties(src/dynd/func/comparison.cpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 #if(DYND_LLVM)
 #  if(LLVM_FOUND)
