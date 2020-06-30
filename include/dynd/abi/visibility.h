@@ -1,5 +1,5 @@
-#if !defined(DYND_ABI_VISIBILITY)
-#define DYND_ABI_VISIBILITY
+#if !defined(DYND_ABI_VISIBILITY_H)
+#define DYND_ABI_VISIBILITY_H
 
 // The new ABI isn't intended to be built as a static object,
 // so that simplifies these macros significantly.
@@ -20,5 +20,4 @@
 #error Unrecognized compiler. Unable to configure symbol visibility.
 #endif // defined(_WIN32) || defined(__CYGWIN__)
 
-#endif // !defined(DYND_ABI_VISIBILITY)
-
+#endif // !defined(DYND_ABI_VISIBILITY_H)

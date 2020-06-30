@@ -1,4 +1,4 @@
-#ifndef DYND_ABI_VERSION_H
+#if !defined(DYND_ABI_VERSION_H)
 #define DYND_ABI_VERSION_H
 
 #include "dynd/abi/integers.h"
@@ -28,4 +28,4 @@ DYND_SIZE_T DYND_ABI_EXPORT(dynd_abi_library_version_debug)(void) DYND_NOEXCEPT;
 }
 #endif // defined(__cplusplus)
 
-#endif //DYND_ABI_VERSION_H
+#endif //!defined(DYND_ABI_VERSION_H)
