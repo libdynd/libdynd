@@ -35,6 +35,9 @@ add_library(dynd_abi SHARED
 add_library(dynd::abi ALIAS dynd_abi)
 
 target_compile_definitions(dynd_abi PRIVATE DYND_ABI_COMPILING)
+set_property(TARGET dynd_abi PROPERTY C_VISIBILITY_PRESET hidden)
+set_property(TARGET dynd_abi PROPERTY CXX_VISIBILITY_PRESET hidden)
+set_property(TARGET dynd_abi PROPERTY VISIBILITY_INLINES_HIDDEN ON)
 
 target_include_directories(dynd_abi PUBLIC
   "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
