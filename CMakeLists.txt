@@ -26,12 +26,15 @@ set(dynd_abi_inc
   include/dynd/abi/integers.h
   include/dynd/abi/noexcept.h
   "${PROJECT_BINARY_DIR}include/dynd/abi/version.h"
+  include/dynd/abi/visibility.h
 )
 
 add_library(dynd_abi SHARED
   ${dynd_abi_src}
 )
 add_library(dynd::abi ALIAS dynd_abi)
+
+target_compile_definitions(dynd_abi PRIVATE DYND_ABI_COMPILING)
 
 target_include_directories(dynd_abi PUBLIC
   "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"

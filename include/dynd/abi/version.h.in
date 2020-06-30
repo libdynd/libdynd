@@ -3,6 +3,7 @@
 
 #include "dynd/abi/integers.h"
 #include "dynd/abi/noexcept.h"
+#include "dynd/abi/visibility.h"
 
 #define DYND_ABI_HEADER_VERSION_MAJOR @DyND_ABI_VERSION_MAJOR@ull
 #define DYND_ABI_HEADER_VERSION_MINOR @DyND_ABI_VERSION_MINOR@ull
@@ -13,15 +14,15 @@
 // functions with the ABI major version so that using the wrong ABI
 // major version results in a load-time linker error instead of
 // just causing weird behavior.
-#define DYND_ABI(fname) DYND_##DYND_ABI_VERSION_MAJOR##_##fname
+#define DYND_ABI(fname) DYND_ABI_EXPORT(DYND_##DYND_ABI_VERSION_MAJOR##_##fname)
 
 #if defined(__cplusplus)
 extern "C" {
 #endif // defined(__cplusplus)
 
-DYND_SIZE_T dynd_abi_library_version_major(void) DYND_NOEXCEPT;
-DYND_SIZE_T dynd_abi_library_version_minor(void) DYND_NOEXCEPT;
-DYND_SIZE_T dynd_abi_library_version_debug(void) DYND_NOEXCEPT;
+DYND_SIZE_T DYND_ABI_EXPORT(dynd_abi_library_version_major)(void) DYND_NOEXCEPT;
+DYND_SIZE_T DYND_ABI_EXPORT(dynd_abi_library_version_minor)(void) DYND_NOEXCEPT;
+DYND_SIZE_T DYND_ABI_EXPORT(dynd_abi_library_version_debug)(void) DYND_NOEXCEPT;
 
 #if defined(__cplusplus)
 }
