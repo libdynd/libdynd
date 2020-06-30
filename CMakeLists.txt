@@ -6,6 +6,41 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(libdynd)
 
+include(GNUInstallDirs)
+
+set(DyND_ABI_VERSION_MAJOR 1)
+set(DyND_ABI_VERSION_MINOR 0)
+set(DyND_ABI_VERSION_DEBUG 0)
+set(DyND_ABI_VERSION "${DYND_ABI_VERSION_MAJOR}.${DYND_ABI_VERSION_MINOR}.${DYND_ABI_VERSION_DEBUG}")
+
+configure_file(
+  "${PROJECT_SOURCE_DIR}/include/dynd/abi/version.h.in"
+  "${PROJECT_BINARY_DIR}/include/dynd/abi/version.h"
+)
+
+set(dynd_abi_src
+  src/dynd/abi/version.c
+)
+
+set(dynd_abi_inc
+  include/dynd/abi/integers.h
+  include/dynd/abi/noexcept.h
+  "${PROJECT_BINARY_DIR}include/dynd/abi/version.h"
+)
+
+add_library(dynd_abi SHARED
+  ${dynd_abi_src}
+)
+add_library(dynd::abi ALIAS dynd_abi)
+
+target_include_directories(dynd_abi PUBLIC
+  "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+
+install(TARGETS dynd_abi EXPORT DyNDTargets DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib)
+
 include(CheckTypeSize)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
@@ -443,7 +478,6 @@ set(libdynd_SRC
     )
 
 include_directories(
-    include
     thirdparty/utf8/source
     )
 
@@ -465,8 +499,6 @@ source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 #set_source_files_properties(include/dynd/kernels/compare_kernels.hpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
 #set_source_files_properties(src/dynd/func/comparison.cpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 #if(DYND_LLVM)
 #  if(LLVM_FOUND)
@@ -521,9 +553,24 @@ if(DYND_SHARED_LIB)
     )
 endif()
 
+add_library(dynd::ndt ALIAS libdyndt)
+add_library(dynd::nd ALIAS libdynd)
+
 # Add preprocessor definitions from CMake
 configure_file("include/dynd/cmake_config.hpp.in"
                "${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp")
+
+target_include_directories(libdynd PUBLIC
+  "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+
+target_include_directories(libdyndt PUBLIC
+  "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+  "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>"
+  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
 
 if(APPLE)
     # The rpath stuff is confusing, and this is our attempt to get it right.
@@ -623,25 +670,47 @@ if(DYND_BUILD_DOCS)
 endif()
 
 # Install the libdyndt binary
-install(TARGETS libdyndt DESTINATION lib${LIB_SUFFIX} COMPONENT ndt)
+install(TARGETS libdyndt EXPORT DyNDTargets DESTINATION lib${LIB_SUFFIX} COMPONENT shlib)
 
 # Install the libdynd binary
-install(TARGETS libdynd DESTINATION lib${LIB_SUFFIX} COMPONENT nd)
+install(TARGETS libdynd EXPORT DyNDTargets DESTINATION lib${LIB_SUFFIX} COMPONENT shlib)
 
 # Install the libdynd headers
-install(DIRECTORY "include/dynd" DESTINATION "include" COMPONENT headers)
-install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/dynd" DESTINATION "include" COMPONENT include)
+install(DIRECTORY "include/dynd" DESTINATION "include" COMPONENT dev)
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/dynd" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev)
 
 # Install the libdynd-config script
 if(WIN32)
   install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config.bat" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-  if(DYND_SHARED_LIB)
-    install(FILES "$<TARGET_FILE_DIR:libdynd>/libdynd.dll" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-    install(FILES "$<TARGET_FILE_DIR:libdyndt>/libdyndt.dll" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-  endif()
-  else()
-    install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+else()
+  install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config" DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 endif()
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${PROJECT_BINARY_DIR}/DyNDConfigVersion.cmake"
+  VERSION "0.7.2"
+  COMPATIBILITY SameMajorVersion
+)
+configure_package_config_file(
+  "${PROJECT_SOURCE_DIR}/cmake/DyNDConfig.cmake.in"
+  "${PROJECT_BINARY_DIR}/DyNDConfig.cmake"
+  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/DyND"
+  PATH_VARS CMAKE_INSTALL_INCLUDEDIR CMAKE_INSTALL_LIBDIR
+)
+install(
+  FILES "${PACKAGE_BINARY_DIR}/DyNDConfigVersion.cmake"
+        "${PACKAGE_BINARY_DIR}/DyNDABIConfigVersion.cmake"
+        "${PACKAGE_BINARY_DIR}/DyNDConfig.cmake"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/DyND"
+  COMPONENT dev
+)
+install(
+  EXPORT DyNDTargets
+  NAMESPACE dynd::
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/DyND"
+  COMPONENT dev
+)
 
 set(CPACK_GENERATOR "TGZ")
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)

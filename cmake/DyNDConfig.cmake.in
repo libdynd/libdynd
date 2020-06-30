@@ -1,0 +1,27 @@
+# CMake config file for libdynd
+#
+# Exports targets:
+#  dynd::abi
+#  dynd::ndt
+#  dynd::nd
+#
+# Exports variables:
+#  DyND_INCLUDE_DIRS
+#  DyND_LIBRARY_DIRS
+#  DyND_LIBRARIES
+#  DyND_ABI_VERSION
+
+include(CMakeFindDependencyMacro)
+
+@PACKAGE_INIT@
+
+set_and_check(DyND_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set_and_check(DyND_LIBRARY_DIRS "@PACKAGE_CMAKE_INSTALL_LIBDIR@")
+set(DyND_LIBRARIES dynd_abi dyndt dynd)
+set(DyND_ABI_VERSION "@DyND_ABI_VERSION@")
+
+get_filename_component(DyND_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
+if(NOT dynd::abi)
+  include("${DyND_CMAKE_DIR}/DyNDTargets.cmake")
+endif()
