@@ -8,6 +8,13 @@
 #define DYND_ABI_HEADER_VERSION_MINOR @DyND_ABI_VERSION_MINOR@ull
 #define DYND_ABI_HEADER_VERSION_DEBUG @DyND_ABI_VERSION_DEBUG@ull
 
+// Major version numbers will be used for any ABI backcompat break.
+// Mangle the the names of everything other than the version checking
+// functions with the ABI major version so that using the wrong ABI
+// major version results in a load-time linker error instead of
+// just causing weird behavior.
+#define DYND_ABI(fname) DYND_##DYND_ABI_VERSION_MAJOR##_##fname
+
 #if defined(__cplusplus)
 extern "C" {
 #endif // defined(__cplusplus)
