@@ -14,7 +14,7 @@
 // functions with the ABI major version so that using the wrong ABI
 // major version results in a load-time linker error instead of
 // just causing weird behavior.
-#define DYND_ABI(fname) DYND_ABI_EXPORT(DYND_##DYND_ABI_VERSION_MAJOR##_##fname)
+#define DYND_ABI(fname) DYND_##DYND_ABI_VERSION_MAJOR##_##fname
 
 #if defined(__cplusplus)
 extern "C" {
