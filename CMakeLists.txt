@@ -25,13 +25,19 @@ set(dynd_abi_src
 set(dynd_abi_inc
   include/dynd/abi/integers.h
   include/dynd/abi/noexcept.h
-  "${PROJECT_BINARY_DIR}include/dynd/abi/version.h"
+  "${PROJECT_BINARY_DIR}/include/dynd/abi/version.h"
+  include/dynd/abi/visibility.h
 )
 
 add_library(dynd_abi SHARED
   ${dynd_abi_src}
 )
 add_library(dynd::abi ALIAS dynd_abi)
+
+target_compile_definitions(dynd_abi PRIVATE DYND_ABI_COMPILING)
+set_property(TARGET dynd_abi PROPERTY C_VISIBILITY_PRESET hidden)
+set_property(TARGET dynd_abi PROPERTY CXX_VISIBILITY_PRESET hidden)
+set_property(TARGET dynd_abi PROPERTY VISIBILITY_INLINES_HIDDEN ON)
 
 target_include_directories(dynd_abi PUBLIC
   "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
@@ -137,18 +143,21 @@ if("${MSVC}" OR "${DYND_SIMULATED_COMPILER}" STREQUAL "MSVC")
         # If this is the clang-cl compiler.
         # Don't enable -WX here yet.
         set(CMAKE_CXX_FLAGS "-EHsc -bigobj -wd4503 ${CMAKE_CXX_FLAGS}")
-    elseif(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19)
-        message(FATAL_ERROR "Only MSVC 2015 (Version 19.0) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
+    elseif(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19.1)
+        message(FATAL_ERROR "Only MSVC 2017 (Version 19.1) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
     else()
         set(CMAKE_CXX_FLAGS "-WX -EHsc -bigobj -wd4503 ${CMAKE_CXX_FLAGS}")
     endif()
 else()
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.9)
-            message(FATAL_ERROR "Only GCC 4.9 and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
+        if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 7)
+            message(FATAL_ERROR "Only GCC 7 and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
         endif()
         set(CMAKE_CXX_FLAGS "-std=c++14 -fmax-errors=20 -Wno-type-limits -Wno-maybe-uninitialized ${CMAKE_CXX_FLAGS}")
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+	if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 7)
+            message(FATAL_ERROR "Only clang 7 and later are supported by libdynd. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
+        endif()
         set(CMAKE_CXX_FLAGS "-std=c++14 -ferror-limit=20 -Wno-missing-braces -ftemplate-depth=500 ${CMAKE_CXX_FLAGS}")
     endif()
 

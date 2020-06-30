@@ -1,23 +1,31 @@
-#ifndef DYND_ABI_VERSION_H
+#if !defined(DYND_ABI_VERSION_H)
 #define DYND_ABI_VERSION_H
 
 #include "dynd/abi/integers.h"
 #include "dynd/abi/noexcept.h"
+#include "dynd/abi/visibility.h"
 
 #define DYND_ABI_HEADER_VERSION_MAJOR @DyND_ABI_VERSION_MAJOR@ull
 #define DYND_ABI_HEADER_VERSION_MINOR @DyND_ABI_VERSION_MINOR@ull
 #define DYND_ABI_HEADER_VERSION_DEBUG @DyND_ABI_VERSION_DEBUG@ull
 
+// Major version numbers will be used for any ABI backcompat break.
+// Mangle the the names of everything other than the version checking
+// functions with the ABI major version so that using the wrong ABI
+// major version results in a load-time linker error instead of
+// just causing weird behavior.
+#define DYND_ABI(fname) DYND_##DYND_ABI_VERSION_MAJOR##_##fname
+
 #if defined(__cplusplus)
 extern "C" {
 #endif // defined(__cplusplus)
 
-DYND_SIZE_T dynd_abi_library_version_major(void) DYND_NOEXCEPT;
-DYND_SIZE_T dynd_abi_library_version_minor(void) DYND_NOEXCEPT;
-DYND_SIZE_T dynd_abi_library_version_debug(void) DYND_NOEXCEPT;
+DYND_SIZE_T DYND_ABI_EXPORT(dynd_abi_library_version_major)(void) DYND_NOEXCEPT;
+DYND_SIZE_T DYND_ABI_EXPORT(dynd_abi_library_version_minor)(void) DYND_NOEXCEPT;
+DYND_SIZE_T DYND_ABI_EXPORT(dynd_abi_library_version_debug)(void) DYND_NOEXCEPT;
 
 #if defined(__cplusplus)
 }
 #endif // defined(__cplusplus)
 
-#endif //DYND_ABI_VERSION_H
+#endif //!defined(DYND_ABI_VERSION_H)
