@@ -1,13 +1,13 @@
 #include "dynd/abi/version.h"
 
-DYND_SIZE_T dynd_abi_library_version_major(void) DYND_NOEXCEPT {
+dynd_size_t dynd_abi_library_version_major(void) dynd_noexcept {
   return DYND_ABI_HEADER_VERSION_MAJOR;
 }
 
-DYND_SIZE_T dynd_abi_library_version_minor(void) DYND_NOEXCEPT {
+dynd_size_t dynd_abi_library_version_minor(void) dynd_noexcept {
   return DYND_ABI_HEADER_VERSION_MINOR;
 }
 
-DYND_SIZE_T dynd_abi_library_version_debug(void) DYND_NOEXCEPT {
+dynd_size_t dynd_abi_library_version_debug(void) dynd_noexcept {
   return DYND_ABI_HEADER_VERSION_DEBUG;
 }
