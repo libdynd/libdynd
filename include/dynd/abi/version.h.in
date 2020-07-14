@@ -20,9 +20,9 @@
 extern "C" {
 #endif // defined(__cplusplus)
 
-DYND_SIZE_T DYND_ABI_EXPORT(dynd_abi_library_version_major)(void) DYND_NOEXCEPT;
-DYND_SIZE_T DYND_ABI_EXPORT(dynd_abi_library_version_minor)(void) DYND_NOEXCEPT;
-DYND_SIZE_T DYND_ABI_EXPORT(dynd_abi_library_version_debug)(void) DYND_NOEXCEPT;
+dynd_size_t DYND_ABI_EXPORT(dynd_abi_library_version_major)(void) dynd_noexcept;
+dynd_size_t DYND_ABI_EXPORT(dynd_abi_library_version_minor)(void) dynd_noexcept;
+dynd_size_t DYND_ABI_EXPORT(dynd_abi_library_version_debug)(void) dynd_noexcept;
 
 #if defined(__cplusplus)
 }
