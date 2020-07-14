@@ -73,6 +73,8 @@ struct dynd_refcounted {
   dynd_resource resource;
 };
 
+// TODO: incref and decref operations here!
+
 // A descriptor for an allocated block of memory
 // meant to be stored in-memory after the resource struct.
 // This is the most common type of resource.
@@ -99,6 +101,8 @@ struct dynd_buffer {
   dynd_resource resource;
   dynd_allocated allocated;
 };
+
+// TODO: Facilities for external vs non-external buffers.
 
 #if defined(__cplusplus)
 }
