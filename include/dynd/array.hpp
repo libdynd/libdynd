@@ -463,8 +463,8 @@ namespace nd {
     array_vals_at(array &&arr) : m_arr(std::move(arr)) {}
 
     // Non-copyable, not default-constructable
-    array_vals_at(const array_vals &);
-    array_vals_at &operator=(const array_vals_at &);
+    array_vals_at(const array_vals &) = delete;
+    array_vals_at &operator=(const array_vals_at &) = delete;
 
   public:
     /**

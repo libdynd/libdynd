@@ -244,7 +244,9 @@ check_cast(ArgType s, inexact_check_t) {
 template <typename RetType, typename ArgType>
 std::enable_if_t<is_signed<RetType>::value && is_integral<RetType>::value && is_floating_point<ArgType>::value, RetType>
 overflow_cast(ArgType s) {
+DYND_ALLOW_INT_FLOAT_CAST
   if (s < std::numeric_limits<RetType>::min() || std::numeric_limits<RetType>::max() < s) {
+DYND_END_ALLOW_INT_FLOAT_CAST
     std::stringstream ss;
     ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
     ss << s << " to " << ndt::make_type<RetType>();
@@ -265,7 +267,9 @@ overflow_cast(ArgType s) {
     throw std::runtime_error(ss.str());
   }
 
+DYND_ALLOW_INT_FLOAT_CAST
   if (s.real() < std::numeric_limits<RetType>::min() || std::numeric_limits<RetType>::max() < s.real()) {
+DYND_END_ALLOW_INT_FLOAT_CAST
     std::stringstream ss;
     ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
     ss << s << " to " << ndt::make_type<RetType>();
@@ -280,7 +284,9 @@ template <typename RetType, typename ArgType>
 std::enable_if_t<is_unsigned<RetType>::value && is_integral<RetType>::value && is_floating_point<ArgType>::value,
                  RetType>
 overflow_cast(ArgType s) {
+DYND_ALLOW_INT_FLOAT_CAST
   if (s < 0 || std::numeric_limits<RetType>::max() < s) {
+DYND_END_ALLOW_INT_FLOAT_CAST
     std::stringstream ss;
     ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
     ss << s << " to " << ndt::make_type<RetType>();
@@ -299,8 +305,9 @@ overflow_cast(ArgType s) {
     ss << s << " to " << ndt::make_type<RetType>();
     throw std::runtime_error(ss.str());
   }
-
+DYND_ALLOW_INT_FLOAT_CAST
   if (s.real() < 0 || std::numeric_limits<RetType>::max() < s.real()) {
+DYND_END_ALLOW_INT_FLOAT_CAST
     std::stringstream ss;
     ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
     ss << s << " to " << ndt::make_type<RetType>();
@@ -501,7 +508,9 @@ overflow_cast(ArgType s) {
 template <typename RetType, typename ArgType>
 std::enable_if_t<is_signed<RetType>::value && is_integral<RetType>::value && is_floating_point<ArgType>::value, RetType>
 fractional_cast(ArgType s) {
+DYND_ALLOW_INT_FLOAT_CAST
   if (s < std::numeric_limits<RetType>::min() || std::numeric_limits<RetType>::max() < s) {
+DYND_END_ALLOW_INT_FLOAT_CAST
     std::stringstream ss;
     ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
     ss << s << " to " << ndt::make_type<RetType>();
@@ -528,7 +537,9 @@ fractional_cast(ArgType s) {
     throw std::runtime_error(ss.str());
   }
 
+DYND_ALLOW_INT_FLOAT_CAST
   if (s.real() < std::numeric_limits<RetType>::min() || std::numeric_limits<RetType>::max() < s.real()) {
+DYND_END_ALLOW_INT_FLOAT_CAST
     std::stringstream ss;
     ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
     ss << s << " to " << ndt::make_type<RetType>();
@@ -549,7 +560,9 @@ template <typename RetType, typename ArgType>
 std::enable_if_t<is_unsigned<RetType>::value && is_integral<RetType>::value && is_floating_point<ArgType>::value,
                  RetType>
 fractional_cast(ArgType s) {
+DYND_ALLOW_INT_FLOAT_CAST
   if (s < 0 || std::numeric_limits<RetType>::max() < s) {
+DYND_END_ALLOW_INT_FLOAT_CAST
     std::stringstream ss;
     ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
     ss << s << " to " << ndt::make_type<RetType>();
@@ -576,7 +589,9 @@ fractional_cast(ArgType s) {
     throw std::runtime_error(ss.str());
   }
 
+DYND_ALLOW_INT_FLOAT_CAST
   if (s.real() < 0 || std::numeric_limits<RetType>::max() < s.real()) {
+DYND_END_ALLOW_INT_FLOAT_CAST
     std::stringstream ss;
     ss << "overflow while assigning " << ndt::make_type<ArgType>() << " value ";
     ss << s << " to " << ndt::make_type<RetType>();

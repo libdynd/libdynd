@@ -261,7 +261,7 @@ TEST(View, Fixed) {
   EXPECT_EQ(4, vals[4]);
 
   int i = 0;
-  for (const double &val : vals) {
+  for (auto val : vals) {
     EXPECT_EQ(val, vals[i]);
     ++i;
   }

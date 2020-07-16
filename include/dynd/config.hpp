@@ -56,8 +56,20 @@
 #define DYND_ALLOW_INT_BOOL_CAST
 #define DYND_END_ALLOW_INT_BOOL_CAST
 
+// Apple clang has a different versioning scheme and, as of this writing,
+// the latest apple clang is based off of LLVM 9. Once there's a version
+// of apple clang that is based off of LLVM 10, some clang versions on
+// Apple will need warnings suppressed.
+// Note: __apple_build_version__ is only defined on apple clang.
+#if defined(__apple_build_version__) || __clang_major__ < 10
 #define DYND_ALLOW_INT_FLOAT_CAST
 #define DYND_END_ALLOW_INT_FLOAT_CAST
+#else // defined(__APPLE__) || __clang_major__ < 10
+#define DYND_ALLOW_INT_FLOAT_CAST                                     \
+_Pragma("GCC diagnostic push")                                        \
+_Pragma("GCC diagnostic ignored \"-Wimplicit-int-float-conversion\"")
+#define DYND_END_ALLOW_INT_FLOAT_CAST _Pragma ("GCC diagnostic pop")
+#endif // defined(__APPLE__) || __clang_major__ < 10
 
 #elif defined(__GNUC__)
 
