@@ -1,6 +1,9 @@
 #if !defined(DYND_ABI_REFCOUNT_H)
 #define DYND_ABI_REFCOUNT_H
 
+#include "dynd/abi/integers.h"
+#include "dynd/abi/resource.h"
+
 #if defined(__cplusplus)
 extern "C" {
 #endif // defined(__cplusplus)
@@ -19,7 +22,19 @@ struct dynd_refcounted {
   dynd_resource resource;
 };
 
-// TODO: incref and decref operations here!
+#define dynd_incref DYND_ABI(incref)
+inline void dynd_incref(dynd_refcounted *ref) DYND_NOEXCEPT {
+  dynd_atomic_fetch_add((dynd_refcount*)ref, 1u, dynd_memory_order_relaxed);
+}
+
+#define dynd_decref DYND_ABI(decref)
+inline void dynd_decref(dynd_refcounted *ref) DYND_NOEXCEPT {
+  dynd_size_t val = dynd_atomic_fetch_sub((dynd_refcount*)ref, 1u, dynd_memory_order_release);
+  if (val == 1) {
+    dynd_atomic_thread_fence(dynd_memory_order_acquire);
+    ref->resource.release();
+  }
+}
 
 #if defined(__cplusplus)
 }

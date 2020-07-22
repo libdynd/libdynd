@@ -6,7 +6,6 @@
 #include <type_traits>
 #endif
 
-#include "dynd/abi/integers.h"
 #include "dynd/abi/version.h"
 
 #if defined(__cplusplus)
