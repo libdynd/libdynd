@@ -62,11 +62,17 @@ typedef dynd_size_t dynd_atomic_size_t;
 
 typedef dynd_size_t dynd_atomic_size_t;
 
+// Match the number of enum items and the order
+// of their declaration in the MSVC C++ standard
+// library to hopefully make them binary compatible.
+// TODO: check this and specify the actual values if needed.
 typedef enum {
   dynd_atomic_memory_order_relaxed,
+  dynd_internal_atomic_memory_order_consume, // not used/supported
   dynd_atomic_memory_order_acquire,
   dynd_atomic_memory_order_release,
-  dynd_atomic_memory_order_acq_rel
+  dynd_atomic_memory_order_acq_rel,
+  dynd_internal_atomic_memory_order_seq_cst // not used/supported
 } dynd_atomic_memory_order;
 
 inline dynd_size_t dynd_internal_atomic_fetch_add(dynd_atomic_size_t *val, dynd_size_t increment, dynd_atomic_memory_order consistency) {
