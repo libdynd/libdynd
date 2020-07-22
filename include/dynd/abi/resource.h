@@ -13,8 +13,6 @@
 extern "C" {
 #endif // defined(__cplusplus)
 
-typedef dynd_atomic_size_t dynd_refcount;
-
 // Some abstract resource (usually an allocated buffer)
 // that needs to be destroyed when it is no longer referred to,
 // but which does not track its reference count internally.
@@ -40,7 +38,7 @@ typedef void (*dynd_resource_release)(dynd_resource*);
 // with earlier versions that still support noexcept.
 using dynd_resource_release = decltype(std::declval<void (*)(dynd_resource*) dynd_noexcept>());
 #elif __cplusplus >= 201703L
-typedev void (*dynd_resource_release)(dynd_resource*) dynd_noexcept;
+typedef void (*dynd_resource_release)(dynd_resource*) dynd_noexcept;
 #endif
 
 extern "C" {
@@ -60,20 +58,6 @@ typedef void (*dynd_resource_release)(dynd_resource*);
 struct dynd_resource {
   dynd_resource_release release;
 };
-
-// A header for refcounting.
-// Incref and decref operations are provided below.
-// If the reference count hits 0 during a decref operation,
-// the resource is released.
-// Note: resource-specific metadata may be stored in memory
-// after the end of this struct.
-#define dynd_refcounted DYND_ABI(refcounted)
-struct dynd_refcounted {
-  dynd_refcount refcount;
-  dynd_resource resource;
-};
-
-// TODO: incref and decref operations here!
 
 #if defined(__cplusplus)
 }

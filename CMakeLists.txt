@@ -26,6 +26,7 @@ set(dynd_abi_inc
   include/dynd/abi/integers.h
   include/dynd/abi/metadata.h
   include/dynd/abi/noexcept.h
+  include/dynd/abi/refcount.h
   include/dynd/abi/resource.h
   "${PROJECT_BINARY_DIR}/include/dynd/abi/version.h"
   include/dynd/abi/visibility.h
