@@ -1,8 +1,9 @@
 #if !defined(DYND_ABI_REFCOUNT_H)
 #define DYND_ABI_REFCOUNT_H
 
-#include "dynd/abi/integers.h"
+#include "dynd/abi/atomic.h"
 #include "dynd/abi/resource.h"
+#include "dynd/abi/version.h"
 
 #if defined(__cplusplus)
 extern "C" {
