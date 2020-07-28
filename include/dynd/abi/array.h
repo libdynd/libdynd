@@ -37,19 +37,19 @@ typedef struct {
   dynd_array_header header;
 } dynd_array;
 
-// Note: the arrmeta specified by this type
-// should be laid out in memory immediately
+// Note: the array-specific metadata specified by
+// the type should be laid out in memory immediately
 // after the array header. This is all done
 // inside the buffer managed by the resource
 // in the array struct.
-// Note: the arrmeta will have the alignment
+// Note: the metadata will have the alignment
 // of a function pointer or of size_t, whichever
 // is greater. Use a macro so it works with
 // both dynd_array and dynd_array_ref.
 // This alignment is guaranteed by making
-// the alignment of the arrmeta the same as
+// the alignment of the metadata the same as
 // the alignment of the dynd_array struct.
-#define dynd_arrmeta(a) ((void*)(a + 1))
+#define dynd_array_metadata(a) ((void*)(a + 1))
 
 // Same as previous, but without reference counting.
 // The layout is kept intentionally compatible.
