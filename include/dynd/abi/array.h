@@ -36,11 +36,17 @@ struct dynd_array {
   dynd_refcounted refcount;
   dynd_array_header header;
 };
+
 // Note: the arrmeta specified by this type
 // should be laid out in memory immediately
-// after the type pointer. This is all done
+// after the array header. This is all done
 // inside the buffer managed by the resource
 // in the array struct.
+// Note: the arrmeta will have the alignment
+// of a function pointer or of size_t, whichever
+// is greater. Use a macro so it works with
+// both dynd_array and dynd_array_ref.
+#define dynd_arrmeta(a) ((void*)(a + 1))
 
 // Same as previous, but without reference counting.
 // The layout is kept intentionally compatible.
