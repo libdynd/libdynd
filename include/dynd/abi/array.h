@@ -46,6 +46,9 @@ typedef struct {
 // of a function pointer or of size_t, whichever
 // is greater. Use a macro so it works with
 // both dynd_array and dynd_array_ref.
+// This alignment is guaranteed by making
+// the alignment of the arrmeta the same as
+// the alignment of the dynd_array struct.
 #define dynd_arrmeta(a) ((void*)(a + 1))
 
 // Same as previous, but without reference counting.
