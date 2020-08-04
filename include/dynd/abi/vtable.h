@@ -1,7 +1,7 @@
 #if !defined(DYND_ABI_VTABLE_H)
 #define DYND_ABI_VTABLE_H
 
-#include "dynd/abi/generic_func_ptr.h"
+#include "dynd/abi/function_pointer.h"
 #include "dynd/abi/resource.h"
 #include "dynd/abi/version.h"
 
