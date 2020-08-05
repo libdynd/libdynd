@@ -11,18 +11,18 @@
 // from is expected to be handled in whatever
 // release routine is used to release it.
 #define dynd_allocated DYND_ABI(allocated)
-struct dynd_allocated {
+typedef struct {
   void *base_ptr;
   dynd_size_t size;
   // dynd_allocator allocator;
-};
+} dynd_allocated;
 
 // Metadata header for an externally allocated buffer.
 #define dynd_buffer DYND_ABI(buffer)
-struct dynd_buffer {
+typedef struct {
   dynd_resource resource;
   dynd_allocated allocated;
-};
+} dynd_buffer;
 
 // In a context where the type is statically known, the type-specific metadata is really all that needs to be stored
 // and that has a size that's known at compile time, so there's no need for inline resource management where the metadata is allocated.
@@ -67,9 +67,9 @@ struct dynd_buffer {
 // The layout also allows inline resource metadata but no refcount for cases where ownership is managed by something else, but reseource release still needs to be virtualized.
 
 #define dynd_inline_allocated DYND_ABI(inline_allocated)
-struct dynd_inline_allocated {
+typedef struct {
   dynd_size_t size;
-};
+} dynd_inline_allocated;
 
 // Metadata descriptor used for an allocated block
 // of memory that has its corresponding resource
@@ -78,24 +78,25 @@ struct dynd_inline_allocated {
 // base pointer since the pointer to the resource
 // is the base pointer.
 #define dynd_inline_buffer DYND_ABI(buffer)
-struct dynd_inline_buffer {
+typedef struct {
   dynd_resource resource;
   dynd_inline_allocated allocated;
-};
+} dynd_inline_buffer;
 
 #define dynd_inline_refcounted_allocated DYND_ABI(inline_refcounted_allocated)
-struct dynd_inline_refcounted_allocated {
+typedef struct {
   dynd_size_t size;
-};
+} dynd_inline_refcounted_allocated;
 
 // Metadata descriptor used for an allocated block
 // of memory that is managed via inline reference
 // counting where the reference count is the first
 // address in the block, immediately followed by
 // the corresponding resource struct.
-struct dynd_inline_refcounted_buffer {
+#define dynd_inline_refcounted_buffer DYND_ABI(inline_refcounted_buffer)
+typedef struct {
   dynd_resource resource;
   dynd_inline_refcounted_allocated allocated;
-};
+} dynd_inline_refcounted_buffer;
 
 #endif // !defined(DYND_ABI_METADATA_H)

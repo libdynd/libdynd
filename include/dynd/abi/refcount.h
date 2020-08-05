@@ -18,10 +18,10 @@ typedef dynd_atomic_size_t dynd_refcount;
 // Note: resource-specific metadata may be stored in memory
 // after the end of this struct.
 #define dynd_refcounted DYND_ABI(refcounted)
-struct dynd_refcounted {
+typedef struct {
   dynd_refcount refcount;
   dynd_resource resource;
-};
+} dynd_refcounted;
 
 #define dynd_incref DYND_ABI(incref)
 inline void dynd_incref(dynd_refcounted *ref) DYND_NOEXCEPT {

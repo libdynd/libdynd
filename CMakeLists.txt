@@ -25,6 +25,7 @@ set(dynd_abi_src
 set(dynd_abi_inc
   include/dynd/abi/array.h
   include/dynd/abi/atomic.h
+  include/dynd/abi/funtion_pointer.h
   include/dynd/abi/integers.h
   include/dynd/abi/metadata.h
   include/dynd/abi/noexcept.h
