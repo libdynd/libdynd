@@ -5,6 +5,7 @@
 #include "dynd/abi/metadata.h"
 #include "dynd/abi/resource.h"
 #include "dynd/abi/version.h"
+#include "dynd/abi/vtable.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -50,7 +51,7 @@ typedef struct {
 
 #define dynd_type_vtable DYND_ABI(type_vtable)
 typedef struct {
-  dynd_vtable vtable_header;
+  dynd_vtable header;
   dynd_type_vtable_entries entries;
 } dynd_type_vtable;
 
