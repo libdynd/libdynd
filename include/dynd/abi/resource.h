@@ -7,7 +7,7 @@
 // Some abstract resource (usually an allocated buffer)
 // that needs to be destroyed when it is no longer referred to,
 // but which does not track its reference count internally.
-#define dynd_resource_impl DYND_ABI(resource_impl);
+#define dynd_resource_impl DYND_ABI(resource);
 struct dynd_resource_impl;
 
 DYND_ABI_NOEXCEPT_FUNC(dynd_resource_release, void, dynd_resource_impl*)
@@ -23,7 +23,6 @@ struct dynd_resource_impl {
   dynd_resource_release release;
 };
 
-#define dynd_resource DYND_ABI(resource)
 typedef dynd_resource_impl dynd_resource;
 
 #endif // !defined(DYND_ABI_RESOURCE_H)

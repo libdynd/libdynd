@@ -11,7 +11,7 @@
 extern "C" {
 #endif // defined(__cplusplus)
 
-#define dynd_type_header_impl DYND_ABI(type_header_impl)
+#define dynd_type_header_impl DYND_ABI(type_header)
 struct dynd_type_header_impl;
 
 // TODO: The abstract resource freeing ABI seems
@@ -22,7 +22,7 @@ struct dynd_type_header_impl;
 // Having each allocator provide a destruction routine for
 // arrays, types, vtables, and type constructors seems dumb though.
 
-#define dynd_type_impl DYND_ABI(type_impl)
+#define dynd_type_impl DYND_ABI(type)
 struct dynd_type_impl;
 
 #define dynd_type_alignment DYND_ABI(type_alignment)
@@ -55,7 +55,7 @@ typedef struct {
   dynd_type_vtable_entries entries;
 } dynd_type_vtable;
 
-#define dynd_type_constructor_impl DYND_ABI(type_constructor_impl)
+#define dynd_type_constructor_impl DYND_ABI(type_constructor)
 struct dynd_type_constructor_impl;
 
 struct dynd_type_header_impl{
@@ -63,14 +63,12 @@ struct dynd_type_header_impl{
   dynd_type_vtable *vtable;
   dynd_type_constructor_impl *constructor;
 };
-#define dynd_type_header DYND_ABI(type_header)
 typedef struct dynd_type_header_impl dynd_type_header;
 
 struct dynd_type_impl {
   dynd_refcounted refcount;
   dynd_array_header header;
 };
-#define dynd_type DYND_ABI(type)
 typedef struct dynd_type_impl dynd_type;
 
 #define dynd_type_metadata(a) ((void*)(a + 1))
