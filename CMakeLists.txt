@@ -31,8 +31,11 @@ set(dynd_abi_inc
   include/dynd/abi/noexcept.h
   include/dynd/abi/refcount.h
   include/dynd/abi/resource.h
+  include/dynd/abi/type.h
+  include/dynd/abi/type_constructor.h
   "${PROJECT_BINARY_DIR}/include/dynd/abi/version.h"
   include/dynd/abi/visibility.h
+  include/dynd/abi/vtable.h
 )
 
 add_library(dynd_abi SHARED
