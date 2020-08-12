@@ -10,7 +10,7 @@
 #if defined(DYND_ABI_COMPILING)
 #define DYND_ABI_EXPORT __declspec(dllexport)
 #else // defined(DYND_ABI_COMPILING)
-#define DYND_API __declspec(dllimport)
+#define DYND_ABI_EXPORT __declspec(dllimport)
 #endif // defined(DYND_ABI_COMPILING)
 #elif defined(__GNUC__) // defined(_WIN32) || defined(__CYGWIN__)
 // gcc and icc both still define __GNUC__,
