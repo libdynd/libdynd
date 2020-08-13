@@ -12,7 +12,7 @@ extern "C" {
 #define dynd_type_constructor_header_impl DYND_ABI(type_constructor_header)
 struct dynd_type_constructor_header_impl;
 
-DYND_ABI_NOEXCEPT_FUNC(dynd_type_constructor_make, dynd_type*, dynd_type_constructor_header_impl*)
+DYND_ABI_NOEXCEPT_FUNC(dynd_type_constructor_make, dynd_type*, dynd_type_constructor_header_impl*, dynd_type*, dynd_type*)
 
 #define dynd_type_constructor_vtable_entries DYND_ABI(type_constructor_vtable_entries)
 typedef struct {
