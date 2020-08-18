@@ -77,7 +77,7 @@ typedef struct {
 // In this case it's not necessary to store the
 // base pointer since the pointer to the resource
 // is the base pointer.
-#define dynd_inline_buffer DYND_ABI(buffer)
+#define dynd_inline_buffer DYND_ABI(inline_buffer)
 typedef struct {
   dynd_resource resource;
   dynd_inline_allocated allocated;
