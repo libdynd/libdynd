@@ -67,7 +67,7 @@ typedef struct dynd_type_header_impl dynd_type_header;
 
 struct dynd_type_impl {
   dynd_refcounted refcount;
-  dynd_array_header header;
+  dynd_type_header header;
 };
 typedef struct dynd_type_impl dynd_type;
 
