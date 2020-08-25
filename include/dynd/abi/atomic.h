@@ -138,7 +138,7 @@ inline void dynd_internal_atomic_thread_fence(dynd_atomic_memory_order consisten
 
 #else
 // Unknown compiler with no standard atomics available.
-#error Don't know how to perform atomic operations with the current compiler.
+#error Unclear how to perform atomic operations with the current compiler.
 #endif
 
 #endif // !defined(DYND_ABI_ATOMIC_H)
