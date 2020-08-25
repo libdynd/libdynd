@@ -34,7 +34,7 @@ inline void dynd_decref(dynd_refcounted *ref) dynd_noexcept {
   dynd_size_t val = dynd_atomic_fetch_sub((dynd_refcount*)ref, dynd_size_t(1u), dynd_memory_order_release);
   if (val == 1) {
     dynd_atomic_thread_fence(dynd_memory_order_acquire);
-    ref->resource.release();
+    ref->resource.release(&(ref->resource));
   }
 }
 
