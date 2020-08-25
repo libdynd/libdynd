@@ -12,7 +12,7 @@
 // input and output types have been sorted out.
 typedef dynd_generic_func_ptr dynd_interface_cast;
 
-#define dynd_vtable_header DYND_ABI(vtable)
+#define dynd_vtable_header DYND_ABI(vtable_header)
 typedef struct {
   dynd_interface_cast build_interface;
 } dynd_vtable_header;
