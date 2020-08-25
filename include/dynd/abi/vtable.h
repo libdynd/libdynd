@@ -2,6 +2,7 @@
 #define DYND_ABI_VTABLE_H
 
 #include "dynd/abi/function_pointer.h"
+#include "dynd/abi/refcount.h"
 #include "dynd/abi/resource.h"
 #include "dynd/abi/version.h"
 
