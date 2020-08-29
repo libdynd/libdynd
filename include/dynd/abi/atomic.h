@@ -2,6 +2,7 @@
 #define DYND_ABI_ATOMIC_H
 
 #include "dynd/abi/integers.h"
+#include "dynd/abi/noexcept.h"
 
 // Defines for an atomic size_t.
 // This currently only includes the type itself and
@@ -84,7 +85,7 @@ typedef enum {
 // Simplified version of the logic in atomic_thread_fence
 // from the MSVC C++ standard library that ignores the
 // consistencies not supported here.
-inline void dynd_internal_atomic_thread_fence(dynd_memory_order consistency) {
+inline void dynd_internal_atomic_thread_fence(dynd_memory_order consistency) dynd_noexcept {
   if (consistency == dynd_memory_order_relaxed)
     return;
 #if defined(_M_IX86) || defined(_M_X64)
@@ -104,7 +105,7 @@ inline void dynd_internal_atomic_thread_fence(dynd_memory_order consistency) {
 // TODO: check via the generated assembly and via a microbenchmark
 // that this doesn't do something suboptimal. This seems unlikely
 // though since 
-inline dynd_size_t dynd_internal_atomic_load(dynd_atomic_size_t *val, dynd_memory_order consistency) {
+inline dynd_size_t dynd_internal_atomic_load(dynd_atomic_size_t *val, dynd_memory_order consistency) dynd_noexcept {
   assert(sizeof(dynd_atomic_size_t) == 4 || sizeof(dynd_atomic_size_t) == 8);
   if (consistency == dynd_memory_order_relaxed) {
     if (sizeof(dynd_atomic_size_t) == 4) {
@@ -125,7 +126,7 @@ inline dynd_size_t dynd_internal_atomic_load(dynd_atomic_size_t *val, dynd_memor
 }
 #define dynd_atomic_load(val, consistency) dynd_internal_atomic_load(val, consistency)
 
-inline void dynd_internal_atomic_store(dynd_atomic_size_t *val, dynd_atomic_size_t newval, dynd_memory_order consistency) {
+inline void dynd_internal_atomic_store(dynd_atomic_size_t *val, dynd_atomic_size_t newval, dynd_memory_order consistency) dynd_noexcept {
   assert(sizeof(dynd_atomic_size_t) == 4 || sizeof(dynd_atomic_size_t) == 8);
   if (consistency == dynd_memory_order_relaxed) {
     if (sizeof(dynd_atomic_size_t) == 4) {
@@ -147,7 +148,7 @@ inline void dynd_internal_atomic_store(dynd_atomic_size_t *val, dynd_atomic_size
 }
 #define dynd_atomic_store(val, newval, consistency) dynd_internal_atomic_store(val, newval, consistency)
 
-inline dynd_size_t dynd_internal_atomic_fetch_add(dynd_atomic_size_t *val, dynd_size_t increment, dynd_memory_order consistency) {
+inline dynd_size_t dynd_internal_atomic_fetch_add(dynd_atomic_size_t *val, dynd_size_t increment, dynd_memory_order consistency) dynd_noexcept {
   // In terms of the raw bytes, signed and unsigned addition are the same,
   // and the overflow behavior is correct for unsigned.
   // Here we rely on this fact to use the signed intrinsics
@@ -182,7 +183,7 @@ inline dynd_size_t dynd_internal_atomic_fetch_add(dynd_atomic_size_t *val, dynd_
 }
 #define dynd_atomic_fetch_add(val, increment, consistency) dynd_internal_atomic_fetch_add(val, increment, consistency)
 
-inline dynd_size_t dynd_internal_atomic_fetch_sub(dynd_atomic_size_t *val, dynd_size_t decrement, dynd_memory_order consistency) {
+inline dynd_size_t dynd_internal_atomic_fetch_sub(dynd_atomic_size_t *val, dynd_size_t decrement, dynd_memory_order consistency) dynd_noexcept {
   // Rely on wraparound arithmetic with unsigned integers.
   dynd_size_t increment = -decrement;
   return dynd_atomic_fetch_add(val, increment, consistency);
