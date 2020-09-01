@@ -31,7 +31,10 @@ typedef void (*dynd_generic_func_ptr)(dynd_abi_never_defined);
 // Noexcept is a full part of the type system in c++17 and later,
 // but this trickery is needed to get the right behavior
 // with earlier versions that still support noexcept.
-#define DYND_ABI_NOEXCEPT_FUNC(name, ret_type, ...) using name = decltype(std::declval<ret_type(*)(__VA_ARGS__) dynd_noexcept>());
+// Note: This causes compiler bugs when it's default-initialized
+// as a struct member, so we can't use this trick for now.
+//#define DYND_ABI_NOEXCEPT_FUNC(name, ret_type, ...) using name = decltype(std::declval<ret_type(*)(__VA_ARGS__) dynd_noexcept>());
+#define DYND_ABI_NOEXCEPT_FUNC(name, ret_type, ...) typedef ret_type (*name)(__VA_ARGS__);
 #else
 // No way to include throw() in the function pointer type,
 // so just use the equivalent c typedef.
