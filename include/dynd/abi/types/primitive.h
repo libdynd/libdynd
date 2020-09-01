@@ -2,11 +2,7 @@
 #define DYND_ABI_TYPES_PRIMITIVE_H
 
 #include "dynd/abi/type.h"
-#include "dynd/abi/version.h"
-
-// TODO: Expand the DYND_TYPE_IMPL macro into something more generally useful?
-#define DYND_TYPE_IMPL(prefix, name) DYND_ABI(prefix##name)
-#define DYND_TYPE(name) DYND_TYPE_IMPL(type_, name)
+#include "dynd/abi/types/prefix.h"
 
 #if defined(__cplusplus)
 extern "C" {
