@@ -5,6 +5,7 @@
 // Needed for trick to get noexcept into function pointer typedef
 // in C++11 and C++14.
 #include <type_traits>
+#include <utility>
 #endif // defined(__cplusplus) && __cplusplus >= 201103L && __cplusplus < 201703L
 
 #include "dynd/abi/noexcept.h"
