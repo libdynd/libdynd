@@ -19,14 +19,13 @@ configure_file(
 )
 
 set(dynd_abi_src
-  src/dynd/abi/builtins.cpp
+  src/dynd/abi/types/primitive.cpp
   src/dynd/abi/version.c
 )
 
 set(dynd_abi_inc
   include/dynd/abi/array.h
   include/dynd/abi/atomic.h
-  include/dynd/abi/builtins.h
   include/dynd/abi/funtion_pointer.h
   include/dynd/abi/initialization.h
   include/dynd/abi/integers.h
@@ -36,6 +35,7 @@ set(dynd_abi_inc
   include/dynd/abi/resource.h
   include/dynd/abi/type.h
   include/dynd/abi/type_constructor.h
+  include/dynd/abi/types/primitive.h
   "${PROJECT_BINARY_DIR}/include/dynd/abi/version.h"
   include/dynd/abi/visibility.h
   include/dynd/abi/vtable.h
