@@ -17,6 +17,8 @@ namespace nd {
   class forward_na_callable : public base_callable {
     callable m_child;
 
+    using kernel_type = forward_na_kernel<I...>;
+
   public:
     forward_na_callable(const ndt::type &tp, const callable &child) : base_callable(tp), m_child(child) {}
 
@@ -26,19 +28,21 @@ namespace nd {
       cg.emplace_back([](kernel_builder &kb, kernel_request_t kernreq, char *DYND_UNUSED(data), const char *dst_arrmeta,
                          size_t nsrc, const char *const *src_arrmeta) {
         size_t self_offset = kb.size();
-        kb.emplace_back<forward_na_kernel<I...>>(kernreq);
+	//using kernel_type = forward_na_kernel<I...>;
+        kb.emplace_back<kernel_type>(kernreq);
 
         kb(kernel_request_single, nullptr, dst_arrmeta, nsrc, src_arrmeta);
 
-        for (intptr_t i : std::array<index_t, sizeof...(I)>({I...})) {
+	auto indices = std::array<index_t, sizeof...(I)>({I...}); 
+        for (intptr_t i : indices) {
           size_t is_na_offset = kb.size() - self_offset;
           kb(kernel_request_single, nullptr, nullptr, 1, src_arrmeta + i);
-          kb.get_at<forward_na_kernel<I...>>(self_offset)->is_na_offset[i] = is_na_offset;
+          kb.get_at<kernel_type>(self_offset)->is_na_offset[i] = is_na_offset;
         }
 
         size_t assign_na_offset = kb.size() - self_offset;
         kb(kernel_request_single, nullptr, nullptr, 0, nullptr);
-        kb.get_at<forward_na_kernel<I...>>(self_offset)->assign_na_offset = assign_na_offset;
+        kb.get_at<kernel_type>(self_offset)->assign_na_offset = assign_na_offset;
       });
 
       ndt::type src_value_tp[2];
