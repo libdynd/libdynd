@@ -26,17 +26,16 @@ static dynd_type_range empty_range(dynd_type_header*) dynd_noexcept {
   return {nullptr, nullptr};
 }
 
-struct dynd_primitive_vtable {
-  dynd_type_vtable vtable;
+struct dynd_primitive_vtable : dynd_type_vtable {
   dynd_primitive_vtable() dynd_noexcept {
-    vtable.header.refcount.resource.release = never_release;
-    dynd_atomic_store(&vtable.header.refcount.refcount, dynd_size_t(1u), dynd_memory_order_relaxed);
-    vtable.header.header.allocated.base_ptr = this;
-    vtable.header.header.allocated.size = sizeof(dynd_primitive_vtable);
-    vtable.header.header.build_interface = nullptr;
-    vtable.entries.alignment = primitive_type_alignment;
-    vtable.entries.parameters = empty_range;
-    vtable.entries.superclasses = empty_range;
+    header.refcount.resource.release = never_release;
+    dynd_atomic_store(&header.refcount.refcount, dynd_size_t(1u), dynd_memory_order_relaxed);
+    header.header.allocated.base_ptr = this;
+    header.header.allocated.size = sizeof(dynd_primitive_vtable);
+    header.header.build_interface = nullptr;
+    entries.alignment = primitive_type_alignment;
+    entries.parameters = empty_range;
+    entries.superclasses = empty_range;
   }
   ~dynd_primitive_vtable() dynd_noexcept {
     assert(dynd_atomic_load(&header.refcount.refcount, dynd_memory_order_relaxed) == 1);
