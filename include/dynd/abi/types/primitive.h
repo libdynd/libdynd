@@ -1,5 +1,5 @@
-#if !defined(DYND_ABI_BUILTINS_H)
-#define DYND_ABI_BUILTINS_H
+#if !defined(DYND_ABI_TYPES_PRIMITIVE_H)
+#define DYND_ABI_TYPES_PRIMITIVE_H
 
 #include "dynd/abi/type.h"
 #include "dynd/abi/version.h"
@@ -41,7 +41,7 @@ typedef struct {
 // the dynd_type_primitive struct, but for simplicity
 // we're declaring them as dynd_type here since in most
 // cases that's how they'll be used.
-#if !defined(DYND_ABI_BUILTINS_CPP)
+#if !defined(DYND_ABI_TYPES_PRIMITIVE_CPP)
 extern DYND_ABI_EXPORT dynd_type dynd_types_float16;
 extern DYND_ABI_EXPORT dynd_type dynd_types_float32;
 extern DYND_ABI_EXPORT dynd_type dynd_types_float64;
@@ -54,10 +54,10 @@ extern DYND_ABI_EXPORT dynd_type dynd_types_int16;
 extern DYND_ABI_EXPORT dynd_type dynd_types_int32;
 extern DYND_ABI_EXPORT dynd_type dynd_types_int64;
 extern DYND_ABI_EXPORT dynd_type dynd_types_size_t;
-#endif // !defined(DYND_ABI_BUILTINS_CPP)
+#endif // !defined(DYND_ABI_TYPES_PRIMITIVE_CPP)
 
 #if defined(__cplusplus)
 }
 #endif // defined(__cplusplus)
 
-#endif // !defined(DYND_ABI__H)
+#endif // !defined(DYND_ABI_TYPES_PRIMITIVE_H)

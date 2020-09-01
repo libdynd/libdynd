@@ -1,6 +1,6 @@
 #include <cassert>
 
-#define DYND_ABI_BUILTINS_CPP
+#define DYND_ABI_TYPES_PRIMITIVE_CPP
 
 #include "dynd/abi/builtins.h"
 #include "dynd/abi/noexcept.h"
