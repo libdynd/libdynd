@@ -2,6 +2,7 @@
 #define DYND_ABI_RESOURCE_H
 
 #include "dynd/abi/function_pointer.h"
+#include "dynd/abi/initialization.h"
 #include "dynd/abi/version.h"
 
 // Some abstract resource (usually an allocated buffer)
@@ -20,7 +21,7 @@ DYND_ABI_NOEXCEPT_FUNC(dynd_resource_release, void, dynd_resource_impl*)
 // any corresponding metadata can be read using offsets
 // from that base address.
 struct dynd_resource_impl {
-  dynd_resource_release release;
+  dynd_resource_release release dynd_default_nullptr;
 };
 
 typedef dynd_resource_impl dynd_resource;

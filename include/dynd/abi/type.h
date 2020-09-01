@@ -1,6 +1,7 @@
 #if !defined(DYND_ABI_TYPE_H)
 #define DYND_ABI_TYPE_H
 
+#include "dynd/abi/initialization.h"
 #include "dynd/abi/integers.h"
 #include "dynd/abi/metadata.h"
 #include "dynd/abi/resource.h"
@@ -44,9 +45,9 @@ DYND_ABI_NOEXCEPT_FUNC(dynd_type_superclasses, dynd_type_range, dynd_type_header
 
 #define dynd_type_vtable_entries DYND_ABI(type_vtable_entries)
 typedef struct {
-  dynd_type_alignment alignment;
-  dynd_type_parameters parameters;
-  dynd_type_superclasses superclasses;
+  dynd_type_alignment alignment dynd_default_nullptr;
+  dynd_type_parameters parameters dynd_default_nullptr;
+  dynd_type_superclasses superclasses dynd_default_nullptr;
 } dynd_type_vtable_entries;
 
 #define dynd_type_vtable DYND_ABI(type_vtable)
