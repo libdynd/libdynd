@@ -153,7 +153,7 @@ inline void dynd_internal_atomic_store(dynd_atomic_size_t *val, dynd_atomic_size
   if (sizeof(dynd_atomic_size_t) == 4) {
     InterlockedExchangeNoFence((LONG*)val, (LONG)newval);
   } else {
-    InterlockedExchangeNoFence((LONG*)val, (LONG64)newval);
+    InterlockedExchangeNoFence64((LONG64*)val, (LONG64)newval);
   }
 }
 #define dynd_atomic_store(val, newval, consistency) dynd_internal_atomic_store(val, newval, consistency)
@@ -195,7 +195,15 @@ inline dynd_size_t dynd_internal_atomic_fetch_add(dynd_atomic_size_t *val, dynd_
 
 inline dynd_size_t dynd_internal_atomic_fetch_sub(dynd_atomic_size_t *val, dynd_size_t decrement, dynd_memory_order consistency) dynd_noexcept {
   // Rely on wraparound arithmetic with unsigned integers.
+#if !defined(__clang__)
+  __pragma(warning(push))
+  // Disable MSVC warning about unsigned unary minus.
+  __pragma(warning(disable : 4146))
+#endif
   dynd_size_t increment = -decrement;
+#if !defined(__clang__)
+  __pragma(warning(pop))
+#endif
   return dynd_atomic_fetch_add(val, increment, consistency);
 }
 #define dynd_atomic_fetch_sub(val, increment, consistency) dynd_internal_atomic_fetch_sub(val, increment, consistency)
