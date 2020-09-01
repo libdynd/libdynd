@@ -89,9 +89,19 @@ inline void dynd_internal_atomic_thread_fence(dynd_memory_order consistency) dyn
   if (consistency == dynd_memory_order_relaxed)
     return;
 #if defined(_M_IX86) || defined(_M_X64)
-  _Compiler_barrier();
+#if defined(__clang__)
+  _Pragma("clang diagnostic push")
+  _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
+  _ReadWriteBarrier();
+  _Pragma("clang diagnostic pop")
+#else // defined(__clang__)
+  __pragma(warning(push))
+  __pragma(warning(disable : 4996))
+  _ReadWriteBarrier();
+  __pragma(warning(pop))
+#endif // defined(__clang__)
 #elif defined(_M_ARM) || defined(_M_ARM64)
-  _Memory_barrier();
+  __dmb(0xB);
 #else
 // As of this writing, Windows only works on x86 and arm
 // based architectures, so there's nothing else to compile for.
@@ -143,7 +153,7 @@ inline void dynd_internal_atomic_store(dynd_atomic_size_t *val, dynd_atomic_size
   if (sizeof(dynd_atomic_size_t) == 4) {
     InterlockedExchangeNoFence((LONG*)val, (LONG)newval);
   } else {
-    IngerlockedExchangeNoFence((LONG*)val, (LONG64)newval);
+    InterlockedExchangeNoFence((LONG*)val, (LONG64)newval);
   }
 }
 #define dynd_atomic_store(val, newval, consistency) dynd_internal_atomic_store(val, newval, consistency)
