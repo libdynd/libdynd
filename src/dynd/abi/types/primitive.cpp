@@ -2,8 +2,8 @@
 
 #define DYND_ABI_TYPES_PRIMITIVE_CPP
 
-#include "dynd/abi/builtins.h"
 #include "dynd/abi/noexcept.h"
+#include "dynd/abi/types/primitive.h"
 
 extern "C" {
 
