@@ -1,6 +1,7 @@
 #if !defined(DYND_ABI_INITIALIZATION_H)
 #define DYND_ABI_INITIALIZATION_H
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 
