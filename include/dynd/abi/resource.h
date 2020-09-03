@@ -3,7 +3,12 @@
 
 #include "dynd/abi/function_pointer.h"
 #include "dynd/abi/initialization.h"
+#include "dynd/abi/noexcept.h"
 #include "dynd/abi/version.h"
+
+#if defined(__cplusplus)
+extern "C" {
+#endif // defined(__cplusplus)
 
 // Some abstract resource (usually an allocated buffer)
 // that needs to be destroyed when it is no longer referred to,
@@ -25,5 +30,12 @@ struct dynd_resource_impl {
 };
 
 typedef struct dynd_resource_impl dynd_resource;
+
+#define dynd_abi_resource_never_release DYND_ABI(resource_never_release)
+extern DYND_ABI_EXPORT void dynd_abi_resource_never_release(dynd_resource*) dynd_noexcept;
+
+#if defined(__cplusplus)
+}
+#endif // defined(__cplusplus)
 
 #endif // !defined(DYND_ABI_RESOURCE_H)
