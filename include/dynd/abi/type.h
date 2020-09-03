@@ -33,8 +33,8 @@ DYND_ABI_NOEXCEPT_FUNC(dynd_type_alignment, size_t, struct dynd_type_header_impl
 // ranges of supertypes or type parameters.
 #define dynd_type_range DYND_ABI(type_range)
 typedef struct {
-  struct dynd_type_impl *begin;
-  struct dynd_type_impl *end;
+  struct dynd_type_impl **begin;
+  struct dynd_type_impl **end;
 } dynd_type_range;
 
 #define dynd_type_range_empty DYND_ABI(type_range_empty)
