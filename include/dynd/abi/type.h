@@ -27,24 +27,24 @@ struct dynd_type_header_impl;
 struct dynd_type_impl;
 
 #define dynd_type_alignment DYND_ABI(type_alignment)
-DYND_ABI_NOEXCEPT_FUNC(dynd_type_alignment, size_t, dynd_type_header_impl*)
+DYND_ABI_NOEXCEPT_FUNC(dynd_type_alignment, size_t, struct dynd_type_header_impl*)
 
 // A pair of begin and end pointers used for returning
 // ranges of supertypes or type parameters.
 #define dynd_type_range DYND_ABI(type_range)
 typedef struct {
-  dynd_type_impl *begin;
-  dynd_type_impl *end;
+  struct dynd_type_impl *begin;
+  struct dynd_type_impl *end;
 } dynd_type_range;
 
 #define dynd_type_range_empty DYND_ABI(type_range_empty)
-DYND_ABI_EXPORT dynd_type_range dynd_type_range_empty(dynd_type_header_impl*) dynd_noexcept;
+DYND_ABI_EXPORT dynd_type_range dynd_type_range_empty(struct dynd_type_header_impl*) dynd_noexcept;
 
 #define dynd_type_parameters DYND_ABI(type_parameters)
-DYND_ABI_NOEXCEPT_FUNC(dynd_type_parameters, dynd_type_range, dynd_type_header_impl*)
+DYND_ABI_NOEXCEPT_FUNC(dynd_type_parameters, dynd_type_range, struct dynd_type_header_impl*)
 
 #define dynd_type_superclasses DYND_ABI(type_superclasses)
-DYND_ABI_NOEXCEPT_FUNC(dynd_type_superclasses, dynd_type_range, dynd_type_header_impl*)
+DYND_ABI_NOEXCEPT_FUNC(dynd_type_superclasses, dynd_type_range, struct dynd_type_header_impl*)
 
 #define dynd_type_vtable_entries DYND_ABI(type_vtable_entries)
 typedef struct {
