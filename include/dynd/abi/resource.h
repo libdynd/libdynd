@@ -11,7 +11,7 @@
 #define dynd_resource_impl DYND_ABI(resource)
 struct dynd_resource_impl;
 
-DYND_ABI_NOEXCEPT_FUNC(dynd_resource_release, void, dynd_resource_impl*)
+DYND_ABI_NOEXCEPT_FUNC(dynd_resource_release, void, struct dynd_resource_impl*)
 
 // Note: The intent is that a given resource
 // be able to store whatever additional metadata it needs
@@ -24,6 +24,6 @@ struct dynd_resource_impl {
   dynd_resource_release release dynd_default_nullptr;
 };
 
-typedef dynd_resource_impl dynd_resource;
+typedef struct dynd_resource_impl dynd_resource;
 
 #endif // !defined(DYND_ABI_RESOURCE_H)

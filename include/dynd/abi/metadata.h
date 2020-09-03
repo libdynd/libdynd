@@ -4,6 +4,10 @@
 #include "dynd/abi/integers.h"
 #include "dynd/abi/resource.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif // defined(__cplusplus)
+
 // A descriptor for an allocated block of memory
 // meant to be stored in-memory after the resource struct.
 // This is the most common type of resource.
@@ -23,6 +27,12 @@ typedef struct {
   dynd_resource resource;
   dynd_allocated allocated;
 } dynd_buffer;
+
+#define dynd_malloc_buffer DYND_ABI(malloc_buffer)
+DYND_ABI_EXPORT dynd_buffer *dynd_malloc_buffer(dynd_size_t) dynd_noexcept;
+
+#define dynd_release_malloc_allocated DYND_ABI(release_malloc_allocated)
+DYND_ABI_EXPORT void dynd_release_malloc_allocated(dynd_resource*) dynd_noexcept;
 
 // In a context where the type is statically known, the type-specific metadata is really all that needs to be stored
 // and that has a size that's known at compile time, so there's no need for inline resource management where the metadata is allocated.
@@ -98,5 +108,9 @@ typedef struct {
   dynd_resource resource;
   dynd_inline_refcounted_allocated allocated;
 } dynd_inline_refcounted_buffer;
+
+#if defined(__cplusplus)
+}
+#endif // defined(__cplusplus)
 
 #endif // !defined(DYND_ABI_METADATA_H)

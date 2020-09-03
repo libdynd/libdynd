@@ -31,11 +31,13 @@ struct dynd_type_constructor_header_impl {
 };
 typedef struct dynd_type_constructor_header_impl dynd_type_constructor_header;
 
-#define dynd_type_constructor DYND_ABI(type_constructor)
-typedef struct {
+// dynd_type_constructor_impl is a macro defined in abi/type.h
+// since a forward declaration for this struct type is needed there.
+struct dynd_type_constructor_impl {
   dynd_refcounted refcount;
   dynd_type_constructor_header header;
-} dynd_type_constructor;
+};
+typedef struct dynd_type_constructor_impl dynd_type_constructor;
 
 #if defined(__cplusplus)
 }
