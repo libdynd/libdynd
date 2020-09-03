@@ -25,19 +25,13 @@ typedef void (*dynd_generic_func_ptr)(dynd_abi_never_defined);
 // in language standards that permit that
 #if defined(__cplusplus) && __cplusplus >= 201703L
 #define DYND_ABI_NOEXCEPT_FUNC(name, ret_type, ...) typedef ret_type (*name)(__VA_ARGS__) dynd_noexcept;
-#elif defined(__cplusplus) && __cplusplus >= 201103L
-// C++ equivalent of C typedef with the noexcept specifier added.
-// Note: this isn't possible with a plain typedef.
-// Use the technique from: https://stackoverflow.com/a/53674998
-// Noexcept is a full part of the type system in c++17 and later,
-// but this trickery is needed to get the right behavior
-// with earlier versions that still support noexcept.
-// Note: This causes compiler bugs when it's default-initialized
-// as a struct member, so we can't use this trick for now.
-#define DYND_ABI_NOEXCEPT_FUNC(name, ret_type, ...) using name = std::remove_reference_t<decltype(std::declval<ret_type(*)(__VA_ARGS__) dynd_noexcept>())>;
-#else
-// No way to include throw() in the function pointer type,
-// so just use the equivalent c typedef.
+#else // defined(__cplusplus) && __cplusplus >= 201703L
+// noexcept isn't officially a part of a function pointer type
+// in C++11 and C++14. Though there are some tricks to get
+// sort-of similar behavior, they are unreliable with current
+// compilers, so just do a plain C-style function pointer typedef.
+// No way to include throw() in the function pointer type
+// in C++98 either, so do the same thing in that case.
 #define DYND_ABI_NOEXCEPT_FUNC(name, ret_type, ...) typedef ret_type (*name)(__VA_ARGS__);
 #endif
 
