@@ -19,7 +19,7 @@
 // Don't ABI version this since it's really just
 // more of a useful C idiom that we need.
 struct dynd_abi_never_defined;
-typedef void (*dynd_generic_func_ptr)(dynd_abi_never_defined);
+typedef void (*dynd_generic_func_ptr)(struct dynd_abi_never_defined);
 
 // Defining a function pointer typedef to be noexcept
 // in language standards that permit that
