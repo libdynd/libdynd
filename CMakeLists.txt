@@ -21,6 +21,7 @@ configure_file(
 set(dynd_abi_src
   src/dynd/abi/metadata.c
   src/dynd/abi/resource.cpp
+  src/dynd/abi/type.cpp
   #src/dynd/abi/types/dense.cpp
   src/dynd/abi/types/primitive.cpp
   src/dynd/abi/version.c

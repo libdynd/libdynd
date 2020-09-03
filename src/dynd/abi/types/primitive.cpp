@@ -18,10 +18,6 @@ static dynd_size_t primitive_type_alignment(dynd_type_header *header) dynd_noexc
   return ((dynd_type_primitive_typemeta*)(dynd_type_metadata(header))) -> alignment;
 }
 
-static dynd_type_range empty_range(dynd_type_header*) dynd_noexcept {
-  return {nullptr, nullptr};
-}
-
 struct dynd_primitive_vtable : dynd_type_vtable {
   dynd_primitive_vtable() dynd_noexcept {
     header.refcount.resource.release = dynd_abi_resource_never_release;
@@ -30,8 +26,8 @@ struct dynd_primitive_vtable : dynd_type_vtable {
     header.header.allocated.size = sizeof(dynd_primitive_vtable);
     header.header.build_interface = nullptr;
     entries.alignment = primitive_type_alignment;
-    entries.parameters = empty_range;
-    entries.superclasses = empty_range;
+    entries.parameters = dynd_type_range_empty;
+    entries.superclasses = dynd_type_range_empty;
   }
   ~dynd_primitive_vtable() dynd_noexcept {
     assert(dynd_atomic_load(&header.refcount.refcount, dynd_memory_order_relaxed) == 1);
