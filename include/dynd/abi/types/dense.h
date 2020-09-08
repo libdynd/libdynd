@@ -28,7 +28,7 @@ typedef struct {
   dynd_type_dense_typemeta typemeta;
 } dynd_type_dense_concrete;
 
-#define dynd_type_make_dense DYND_TYPE(make_dense)
+#define dynd_type_dense DYND_TYPE(dense)
 
 #if !defined(DYND_ABI_TYPES_DENSE_CPP)
 extern DYND_ABI_EXPORT dynd_type_constructor dynd_type_dense;
