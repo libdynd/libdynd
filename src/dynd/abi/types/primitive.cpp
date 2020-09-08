@@ -12,30 +12,22 @@ extern "C" {
 // That'd require that we have types that represent integers or some notion
 // of dependent typing, which isn't currently present.
 
-static void never_release(dynd_resource*) dynd_noexcept {
-  assert(false); // a static resource should never be released.
-}
-
 // TODO: This is currently a part of a type's ABI. This probably should be moved
 // to be a part of an interface specific to primitive types.
 static dynd_size_t primitive_type_alignment(dynd_type_header *header) dynd_noexcept {
   return ((dynd_type_primitive_typemeta*)(dynd_type_metadata(header))) -> alignment;
 }
 
-static dynd_type_range empty_range(dynd_type_header*) dynd_noexcept {
-  return {nullptr, nullptr};
-}
-
 struct dynd_primitive_vtable : dynd_type_vtable {
   dynd_primitive_vtable() dynd_noexcept {
-    header.refcount.resource.release = never_release;
+    header.refcount.resource.release = dynd_abi_resource_never_release;
     dynd_atomic_store(&header.refcount.refcount, dynd_size_t(1u), dynd_memory_order_relaxed);
     header.header.allocated.base_ptr = this;
     header.header.allocated.size = sizeof(dynd_primitive_vtable);
     header.header.build_interface = nullptr;
     entries.alignment = primitive_type_alignment;
-    entries.parameters = empty_range;
-    entries.superclasses = empty_range;
+    entries.parameters = dynd_type_range_empty;
+    entries.superclasses = dynd_type_range_empty;
   }
   ~dynd_primitive_vtable() dynd_noexcept {
     assert(dynd_atomic_load(&header.refcount.refcount, dynd_memory_order_relaxed) == 1);
@@ -53,7 +45,7 @@ struct dynd_builtin_primitive_type : dynd_type_primitive {
     typemeta.size = size;
     typemeta.alignment = alignment;
     dynd_atomic_store(&prefix.refcount.refcount, dynd_size_t(1u), dynd_memory_order_relaxed);
-    prefix.refcount.resource.release = &never_release;
+    prefix.refcount.resource.release = &dynd_abi_resource_never_release;
     // These will likely be never used, but initialize them correctly anyway.
     prefix.header.allocated.base_ptr = this;
     prefix.header.allocated.size = sizeof(dynd_builtin_primitive_type);
