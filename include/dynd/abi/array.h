@@ -2,6 +2,7 @@
 #define DYND_ABI_ARRAY_H
 
 #include "dynd/abi/metadata.h"
+#include "dynd/abi/refcount.h"
 #include "dynd/abi/resource.h"
 #include "dynd/abi/version.h"
 
@@ -32,12 +33,12 @@ typedef struct {
   // it is destroyed. If it has a base_array, it instead
   // decrefs its base array.
   void *base_array;
+  // An owned reference to the type of this array.
+  dynd_type *type;
   // Access rights associated with this metadata header.
   // For now this is primarily reserved space until
   // access flags have a settled design or until something
   // more sophisticated can be done.
-  dynd_size_t access;
-  dynd_type *type;
   // Flags representing read/write access.
   // Only a couple of bits of this space are used,
   // but alignment constraints mean that a full size_t
@@ -95,7 +96,7 @@ typedef struct {
 
 // Same as previous, but without reference counting.
 // The layout is kept intentionally compatible.
-#define dynd_array_ref DYND_ABI(array)
+#define dynd_array_ref DYND_ABI(array_ref)
 typedef struct {
   dynd_resource resource;
   dynd_array_header header;
