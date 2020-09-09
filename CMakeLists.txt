@@ -24,6 +24,7 @@ set(dynd_abi_src
   src/dynd/abi/type.cpp
   src/dynd/abi/types/dense.cpp
   src/dynd/abi/types/primitive.cpp
+  src/dynd/abi/types/tuple.cpp
   src/dynd/abi/version.c
 )
 
@@ -42,6 +43,7 @@ set(dynd_abi_inc
   include/dynd/abi/types/dense.h
   include/dynd/abi/types/prefix.h
   include/dynd/abi/types/primitive.h
+  include/dynd/abi/types/tuple.h
   "${PROJECT_BINARY_DIR}/include/dynd/abi/version.h"
   include/dynd/abi/visibility.h
   include/dynd/abi/vtable.h
