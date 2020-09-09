@@ -5,9 +5,6 @@
 #include "dynd/abi/metadata.h"
 #include "dynd/abi/types/dense.h"
 
-// Trying to provide this:
-DYND_ABI_EXPORT dynd_type_constructor dynd_type_make_dense;
-
 dynd_type **get_parameter(dynd_type_header_impl *type_header) noexcept {
   return &reinterpret_cast<dynd_type_dense_typemeta*>(dynd_type_metadata(type_header))->parameter;
 }
