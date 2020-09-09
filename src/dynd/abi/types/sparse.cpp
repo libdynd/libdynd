@@ -19,6 +19,7 @@ static dynd_size_t sparse_alignment(dynd_type_header_impl *type_header) noexcept
   return (*child_ptr)->header.vtable->entries.alignment(&(*child_ptr)->header);
 }
 
+namespace {
 struct dynd_sparse_concrete_vtable : dynd_type_vtable {
   dynd_sparse_concrete_vtable() dynd_noexcept {
     header.refcount.resource.release = dynd_abi_resource_never_release;
@@ -34,10 +35,13 @@ struct dynd_sparse_concrete_vtable : dynd_type_vtable {
     assert(dynd_atomic_load(&header.refcount.refcount, dynd_memory_order_relaxed) == 1);
   }
 };
+}
 
-dynd_sparse_concrete_vtable sparse_vtable{};
+static dynd_sparse_concrete_vtable sparse_vtable{};
 
+namespace {
 struct dynd_type_sparse_impl;
+}
 
 extern "C" {
 extern dynd_type_sparse_impl dynd_type_sparse;
@@ -65,6 +69,7 @@ static dynd_type *make_sparse(dynd_type_constructor_header *, dynd_type_range pa
 }
 
 // The vtable for the type constructor 
+namespace {
 struct dynd_sparse_constructor_vtable : dynd_type_constructor_vtable {
   dynd_sparse_constructor_vtable() dynd_noexcept {
     header.refcount.resource.release = dynd_abi_resource_never_release;
@@ -78,9 +83,11 @@ struct dynd_sparse_constructor_vtable : dynd_type_constructor_vtable {
     assert(dynd_atomic_load(&header.refcount.refcount, dynd_memory_order_relaxed) == 1);
   }
 };
+}
 
-dynd_sparse_constructor_vtable sparse_constructor_vtable{};
+static dynd_sparse_constructor_vtable sparse_constructor_vtable{};
 
+namespace {
 struct dynd_type_sparse_impl : dynd_type_constructor {
   dynd_type_sparse_impl() noexcept {
     refcount.resource.release = dynd_abi_resource_never_release;
@@ -93,6 +100,7 @@ struct dynd_type_sparse_impl : dynd_type_constructor {
     assert(dynd_atomic_load(&refcount.refcount, dynd_memory_order_relaxed) == 1);
   }
 };
+}
 
 extern "C" {
 

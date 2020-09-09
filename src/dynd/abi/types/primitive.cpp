@@ -18,6 +18,7 @@ static dynd_size_t primitive_type_alignment(dynd_type_header *header) dynd_noexc
   return ((dynd_type_primitive_typemeta*)(dynd_type_metadata(header))) -> alignment;
 }
 
+namespace {
 struct dynd_primitive_vtable : dynd_type_vtable {
   dynd_primitive_vtable() dynd_noexcept {
     header.refcount.resource.release = dynd_abi_resource_never_release;
@@ -33,13 +34,14 @@ struct dynd_primitive_vtable : dynd_type_vtable {
     assert(dynd_atomic_load(&header.refcount.refcount, dynd_memory_order_relaxed) == 1);
   }
 };
+}
 
 static dynd_primitive_vtable primitive_vtable{};
 
 // Once we have dependent typing, set this to be something real.
 // For now, it's address is really all that matters.
 DYND_ABI_EXPORT dynd_type_constructor dynd_type_make_primitive;
-
+namespace {
 struct dynd_builtin_primitive_type : dynd_type_primitive {
   dynd_builtin_primitive_type(std::size_t size, std::size_t alignment) dynd_noexcept {
     typemeta.size = size;
@@ -56,6 +58,7 @@ struct dynd_builtin_primitive_type : dynd_type_primitive {
     assert(dynd_atomic_load(&prefix.refcount.refcount, dynd_memory_order_relaxed) == 1u);
   }
 };
+}
 
 DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_float16{2u, 2u};
 DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_float32{4u, 4u};

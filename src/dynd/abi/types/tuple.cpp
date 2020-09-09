@@ -27,6 +27,7 @@ static dynd_size_t tuple_alignment(dynd_type_header_impl *type_header) noexcept 
   return alignment;
 }
 
+namespace {
 struct dynd_tuple_concrete_vtable : dynd_type_vtable {
   dynd_tuple_concrete_vtable() dynd_noexcept {
     header.refcount.resource.release = dynd_abi_resource_never_release;
@@ -42,10 +43,13 @@ struct dynd_tuple_concrete_vtable : dynd_type_vtable {
     assert(dynd_atomic_load(&header.refcount.refcount, dynd_memory_order_relaxed) == 1);
   }
 };
+}
 
-dynd_tuple_concrete_vtable tuple_vtable{};
+static dynd_tuple_concrete_vtable tuple_vtable{};
 
+namespace {
 struct dynd_type_tuple_impl;
+}
 
 extern "C" {
 extern dynd_type_tuple_impl dynd_type_tuple;
@@ -69,7 +73,8 @@ static dynd_type *make_tuple(dynd_type_constructor_header *, dynd_type_range par
   return reinterpret_cast<dynd_type*>(buffer);
 }
 
-// The vtable for the type constructor 
+// The vtable for the type constructor
+namespace {
 struct dynd_tuple_constructor_vtable : dynd_type_constructor_vtable {
   dynd_tuple_constructor_vtable() dynd_noexcept {
     header.refcount.resource.release = dynd_abi_resource_never_release;
@@ -83,9 +88,11 @@ struct dynd_tuple_constructor_vtable : dynd_type_constructor_vtable {
     assert(dynd_atomic_load(&header.refcount.refcount, dynd_memory_order_relaxed) == 1);
   }
 };
+}
 
-dynd_tuple_constructor_vtable tuple_constructor_vtable{};
+static dynd_tuple_constructor_vtable tuple_constructor_vtable{};
 
+namespace {
 struct dynd_type_tuple_impl : dynd_type_constructor {
   dynd_type_tuple_impl() noexcept {
     refcount.resource.release = dynd_abi_resource_never_release;
@@ -98,6 +105,7 @@ struct dynd_type_tuple_impl : dynd_type_constructor {
     assert(dynd_atomic_load(&refcount.refcount, dynd_memory_order_relaxed) == 1);
   }
 };
+}
 
 extern "C" {
 
