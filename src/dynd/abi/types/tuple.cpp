@@ -6,14 +6,14 @@
 #include "dynd/abi/metadata.h"
 #include "dynd/abi/types/tuple.h"
 
-dynd_type_range tuple_parameters(dynd_type_header_impl *type_header) noexcept {
+static dynd_type_range tuple_parameters(dynd_type_header_impl *type_header) noexcept {
   dynd_type_tuple_typemeta_header *typemeta = reinterpret_cast<dynd_type_tuple_typemeta_header*>(dynd_type_metadata(type_header));
   dynd_size_t num_entries = typemeta->num_entries;
   dynd_type **first_child = reinterpret_cast<dynd_type**>(typemeta + 1);
   return dynd_type_range{first_child, first_child + num_entries};
 }
 
-dynd_size_t tuple_alignment(dynd_type_header_impl *type_header) noexcept {
+static dynd_size_t tuple_alignment(dynd_type_header_impl *type_header) noexcept {
   dynd_type_range children = tuple_parameters(type_header);
   // Follow C++ convention for alignment of empty structs.
   dynd_size_t alignment = 1;
@@ -51,7 +51,7 @@ extern "C" {
 extern dynd_type_tuple_impl dynd_type_tuple;
 }
 
-dynd_type *make_tuple(dynd_type_constructor_header *, dynd_type_range parameters) noexcept {
+static dynd_type *make_tuple(dynd_type_constructor_header *, dynd_type_range parameters) noexcept {
   dynd_size_t num_entries = std::distance(parameters.begin, parameters.end);
   dynd_type_tuple_concrete_header *buffer = reinterpret_cast<dynd_type_tuple_concrete_header*>(dynd_malloc_buffer(sizeof(dynd_type_tuple_concrete_header) + 8 * num_entries));
   dynd_atomic_store(&(buffer->prefix.refcount.refcount), dynd_size_t(1u), dynd_memory_order_relaxed);

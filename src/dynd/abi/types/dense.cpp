@@ -5,16 +5,16 @@
 #include "dynd/abi/metadata.h"
 #include "dynd/abi/types/dense.h"
 
-dynd_type **dense_get_parameter(dynd_type_header_impl *type_header) noexcept {
+static dynd_type **dense_get_parameter(dynd_type_header_impl *type_header) noexcept {
   return &reinterpret_cast<dynd_type_dense_typemeta*>(dynd_type_metadata(type_header))->parameter;
 }
 
-dynd_type_range dense_type_parameter(dynd_type_header_impl *type_header) noexcept {
+static dynd_type_range dense_type_parameter(dynd_type_header_impl *type_header) noexcept {
   dynd_type **child_ptr = dense_get_parameter(type_header);
   return {child_ptr, child_ptr + 1u};
 }
 
-dynd_size_t dense_alignment(dynd_type_header_impl *type_header) noexcept {
+static dynd_size_t dense_alignment(dynd_type_header_impl *type_header) noexcept {
   dynd_type **child_ptr = dense_get_parameter(type_header);
   return (*child_ptr)->header.vtable->entries.alignment(&(*child_ptr)->header);
 }
@@ -43,7 +43,7 @@ extern "C" {
 extern dynd_type_dense_impl dynd_type_dense;
 }
 
-dynd_type *make_dense(dynd_type_constructor_header *, dynd_type_range parameters) noexcept {
+static dynd_type *make_dense(dynd_type_constructor_header *, dynd_type_range parameters) noexcept {
   // The resource management system needs an overhaul.
   // It's too complicated right now.
   // There should just be a function pointer for deallocating the buffer containing the metadata
