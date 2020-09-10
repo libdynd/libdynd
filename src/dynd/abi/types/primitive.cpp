@@ -60,19 +60,19 @@ struct dynd_builtin_primitive_type : dynd_type_primitive {
 };
 }
 
-DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_float16{2u, 2u};
-DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_float32{4u, 4u};
-DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_float64{8u, 8u};
+DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_type_float16{2u, 2u};
+DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_type_float32{4u, 4u};
+DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_type_float64{8u, 8u};
 
-DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_uint8{1u, 1u};
-DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_uint16{2u, 2u};
-DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_uint32{4u, 4u};
-DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_uint64{8u, 8u};
-DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_int8{1u, 1u};
-DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_int16{2u, 2u};
-DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_int32{4u, 4u};
-DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_int64{8u, 8u};
+DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_type_uint8{1u, 1u};
+DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_type_uint16{2u, 2u};
+DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_type_uint32{4u, 4u};
+DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_type_uint64{8u, 8u};
+DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_type_int8{1u, 1u};
+DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_type_int16{2u, 2u};
+DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_type_int32{4u, 4u};
+DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_type_int64{8u, 8u};
 
-DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_types_size_t{sizeof(dynd_size_t), alignof(dynd_size_t)};
+DYND_ABI_EXPORT dynd_builtin_primitive_type dynd_type_size_t{sizeof(dynd_size_t), alignof(dynd_size_t)};
 
 }
