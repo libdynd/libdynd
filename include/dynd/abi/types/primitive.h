@@ -53,7 +53,7 @@ extern DYND_ABI_EXPORT dynd_type dynd_types_int64;
 extern DYND_ABI_EXPORT dynd_type dynd_types_size_t;
 #endif // !defined(DYND_ABI_TYPES_PRIMITIVE_CPP)
 
-#define dynd_type_make_primitive DYND_TYPE(make_primitive);
+#define dynd_type_make_primitive DYND_TYPE(make_primitive)
 extern DYND_ABI_EXPORT dynd_type_constructor dynd_type_make_primitive;
 
 #if defined(__cplusplus)
