@@ -19,10 +19,13 @@ typedef struct {
   dynd_size_t num_entries;
 } dynd_type_tuple_arrmeta_header;
 
+// The first item in the struct implicitly has offset 0,
+// so the the size of the arrmeta is sizeof(size_t) * num_entries,
+// except in the case of the empty tuple, in which case it's
+// sizeof(size_t).
 #define dynd_type_tupl_arrmeta_entry DYND_TYPE(tuple_arrmeta_entry)
 typedef struct {
   dynd_size_t offset;
-  dynd_size_t stride;
 } dynd_type_tuple_arrmeta_entry;
 
 // Unlike in the dense case, the typemeta of the generated
