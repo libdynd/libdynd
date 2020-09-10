@@ -3,15 +3,13 @@
 # BSD 2-Clause License, see LICENSE.txt
 #
 
-cmake_minimum_required(VERSION 2.6)
-project(dynd_examples)
-
 include_directories(
     ../include
   )
 
-add_executable(simple_example
-  simple_example.cpp
-)
-
+add_executable(simple_example simple_example.cpp)
 target_link_libraries(simple_example libdynd libdyndt)
+
+add_executable(abi_sparse_example abi_sparse.cpp)
+target_link_libraries(abi_sparse_example dynd_abi)
+set_property(TARGET abi_sparse_example PROPERTY CXX_STANDARD 17)
