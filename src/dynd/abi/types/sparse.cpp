@@ -4,6 +4,7 @@
 
 #include "dynd/abi/metadata.h"
 #include "dynd/abi/types/sparse.h"
+#include "dynd/abi/visibility.h"
 
 static dynd_type **sparse_get_parameter(dynd_type_header_impl *type_header) noexcept {
   return &reinterpret_cast<dynd_type_sparse_typemeta*>(dynd_type_metadata(type_header))->parameter;
@@ -104,6 +105,6 @@ struct dynd_type_sparse_impl : dynd_type_constructor {
 
 extern "C" {
 
-dynd_type_sparse_impl dynd_type_sparse{};
+DYND_ABI_EXPORT dynd_type_sparse_impl dynd_type_sparse{};
 
 }

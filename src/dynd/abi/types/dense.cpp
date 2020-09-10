@@ -4,6 +4,7 @@
 
 #include "dynd/abi/metadata.h"
 #include "dynd/abi/types/dense.h"
+#include "dynd/abi/visibility.h"
 
 static dynd_type **dense_get_parameter(dynd_type_header_impl *type_header) noexcept {
   return &reinterpret_cast<dynd_type_dense_typemeta*>(dynd_type_metadata(type_header))->parameter;
@@ -104,6 +105,6 @@ struct dynd_type_dense_impl : dynd_type_constructor {
 
 extern "C" {
 
-dynd_type_dense_impl dynd_type_dense{};
+DYND_ABI_EXPORT dynd_type_dense_impl dynd_type_dense{};
 
 }

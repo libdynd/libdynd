@@ -5,6 +5,7 @@
 
 #include "dynd/abi/metadata.h"
 #include "dynd/abi/types/tuple.h"
+#include "dynd/abi/visibility.h"
 
 static dynd_type_range tuple_parameters(dynd_type_header_impl *type_header) noexcept {
   dynd_type_tuple_typemeta_header *typemeta = reinterpret_cast<dynd_type_tuple_typemeta_header*>(dynd_type_metadata(type_header));
@@ -109,6 +110,6 @@ struct dynd_type_tuple_impl : dynd_type_constructor {
 
 extern "C" {
 
-dynd_type_tuple_impl dynd_type_tuple{};
+DYND_ABI_EXPORT dynd_type_tuple_impl dynd_type_tuple{};
 
 }
