@@ -4,6 +4,7 @@
 
 #include "dynd/abi/metadata.h"
 #include "dynd/abi/types/dense.h"
+#include "dynd/abi/visibility.h"
 
 static dynd_type **dense_get_parameter(dynd_type_header_impl *type_header) noexcept {
   return &reinterpret_cast<dynd_type_dense_typemeta*>(dynd_type_metadata(type_header))->parameter;
@@ -19,6 +20,7 @@ static dynd_size_t dense_alignment(dynd_type_header_impl *type_header) noexcept 
   return (*child_ptr)->header.vtable->entries.alignment(&(*child_ptr)->header);
 }
 
+namespace {
 struct dynd_dense_concrete_vtable : dynd_type_vtable {
   dynd_dense_concrete_vtable() dynd_noexcept {
     header.refcount.resource.release = dynd_abi_resource_never_release;
@@ -34,10 +36,13 @@ struct dynd_dense_concrete_vtable : dynd_type_vtable {
     assert(dynd_atomic_load(&header.refcount.refcount, dynd_memory_order_relaxed) == 1);
   }
 };
+}
 
-dynd_dense_concrete_vtable dense_vtable{};
+static dynd_dense_concrete_vtable dense_vtable{};
 
+namespace {
 struct dynd_type_dense_impl;
+}
 
 extern "C" {
 extern dynd_type_dense_impl dynd_type_dense;
@@ -65,6 +70,7 @@ static dynd_type *make_dense(dynd_type_constructor_header *, dynd_type_range par
 }
 
 // The vtable for the type constructor 
+namespace {
 struct dynd_dense_constructor_vtable : dynd_type_constructor_vtable {
   dynd_dense_constructor_vtable() dynd_noexcept {
     header.refcount.resource.release = dynd_abi_resource_never_release;
@@ -78,9 +84,11 @@ struct dynd_dense_constructor_vtable : dynd_type_constructor_vtable {
     assert(dynd_atomic_load(&header.refcount.refcount, dynd_memory_order_relaxed) == 1);
   }
 };
+}
 
-dynd_dense_constructor_vtable dense_constructor_vtable{};
+static dynd_dense_constructor_vtable dense_constructor_vtable{};
 
+namespace {
 struct dynd_type_dense_impl : dynd_type_constructor {
   dynd_type_dense_impl() noexcept {
     refcount.resource.release = dynd_abi_resource_never_release;
@@ -93,9 +101,10 @@ struct dynd_type_dense_impl : dynd_type_constructor {
     assert(dynd_atomic_load(&refcount.refcount, dynd_memory_order_relaxed) == 1);
   }
 };
+}
 
 extern "C" {
 
-dynd_type_dense_impl dynd_type_dense{};
+DYND_ABI_EXPORT dynd_type_dense_impl dynd_type_dense{};
 
 }

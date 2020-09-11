@@ -39,21 +39,21 @@ typedef struct {
 // we're declaring them as dynd_type here since in most
 // cases that's how they'll be used.
 #if !defined(DYND_ABI_TYPES_PRIMITIVE_CPP)
-extern DYND_ABI_EXPORT dynd_type dynd_types_float16;
-extern DYND_ABI_EXPORT dynd_type dynd_types_float32;
-extern DYND_ABI_EXPORT dynd_type dynd_types_float64;
-extern DYND_ABI_EXPORT dynd_type dynd_types_uint8;
-extern DYND_ABI_EXPORT dynd_type dynd_types_uint16;
-extern DYND_ABI_EXPORT dynd_type dynd_types_uint32;
-extern DYND_ABI_EXPORT dynd_type dynd_types_uint64;
-extern DYND_ABI_EXPORT dynd_type dynd_types_int8;
-extern DYND_ABI_EXPORT dynd_type dynd_types_int16;
-extern DYND_ABI_EXPORT dynd_type dynd_types_int32;
-extern DYND_ABI_EXPORT dynd_type dynd_types_int64;
-extern DYND_ABI_EXPORT dynd_type dynd_types_size_t;
+extern DYND_ABI_EXPORT dynd_type dynd_type_float16;
+extern DYND_ABI_EXPORT dynd_type dynd_type_float32;
+extern DYND_ABI_EXPORT dynd_type dynd_type_float64;
+extern DYND_ABI_EXPORT dynd_type dynd_type_uint8;
+extern DYND_ABI_EXPORT dynd_type dynd_type_uint16;
+extern DYND_ABI_EXPORT dynd_type dynd_type_uint32;
+extern DYND_ABI_EXPORT dynd_type dynd_type_uint64;
+extern DYND_ABI_EXPORT dynd_type dynd_type_int8;
+extern DYND_ABI_EXPORT dynd_type dynd_type_int16;
+extern DYND_ABI_EXPORT dynd_type dynd_type_int32;
+extern DYND_ABI_EXPORT dynd_type dynd_type_int64;
+extern DYND_ABI_EXPORT dynd_type dynd_type_size_t;
 #endif // !defined(DYND_ABI_TYPES_PRIMITIVE_CPP)
 
-#define dynd_type_make_primitive DYND_TYPE(make_primitive);
+#define dynd_type_make_primitive DYND_TYPE(make_primitive)
 extern DYND_ABI_EXPORT dynd_type_constructor dynd_type_make_primitive;
 
 #if defined(__cplusplus)
