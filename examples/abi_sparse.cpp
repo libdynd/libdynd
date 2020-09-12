@@ -96,9 +96,51 @@ struct sliced_arrmeta {
   dynd_size_t data_stride;
   dynd_size_t empty_tuple_num_entries;
 };
+struct sliced_array {
+  dynd_array header;
+  sliced_arrmeta arrmeta;
+};
 
 // Slice a CSR graph to select a specific entry of the node data.
-dynd_array *select_node_data_entry(dynd_array *array) noexcept; // TODO
+// TODO: Types need a vtable entry that enables getting the arrmeta
+// associated with the given type without dealing with the hassle of
+// tracking through all the arrmeta in the array manually.
+// It's not obvious what that interface needs to look like yet.
+// In other words, I shouldn't necessarily have to know about full_arrmeta
+// to build the corresponding sliced_arrmeta.
+dynd_array *select_node_data_entry(dynd_array *array) noexcept {
+  // This works assuming that the array has the type csr_graph
+  // defined in the main function.
+  full_arrmeta &full = *reinterpret_cast<full_arrmeta*>(dynd_array_metadata(array));
+  dynd_array *result = reinterpret_cast<dynd_array*>(dynd_malloc_buffer(sizeof(sliced_array)));
+  sliced_arrmeta &sliced = *reinterpret_cast<sliced_arrmeta*>(dynd_array_metadata(result));
+  // Since the first tuple element in the per-edge data is the only one we want,
+  // and the first tuple element is defined to have zero offset, we can just
+  // copy the entries we need from the previous array's arrmeta without modification.
+  sliced.num_nodes = full.num_nodes;
+  sliced.node_stride = full.node_stride;
+  sliced.row_tuple_num_entries = full.row_tuple_num_entries;
+  sliced.row_topology_offset = full.row_topology_offset;
+  sliced.logical_size = full.logical_size;
+  sliced.indptr_stride = full.indptr_stride;
+  sliced.indices_offset = full.indices_offset;
+  sliced.data_offset = full.data_offset;
+  sliced.data_stride = full.data_stride;
+  sliced.empty_tuple_num_entries = full.empty_tuple_num_entries;
+  // Set up the members of the actual dynd_array struct
+  result->header.base_array = array;
+  result->header.base = array->header.base;
+  result->header.access = array->header.access;
+  // Now set up the type of the new array
+  // This mimics the logic in main for building the csr matrix type for the full array.
+  dynd_type *node_data = &dynd_type_size_t;
+  dynd_type *edge_data = invoke_constructor(&dynd_type_tuple);
+  dynd_type *row_topology = invoke_constructor(&dynd_type_sparse, edge_data);
+  dynd_type *row_data = invoke_constructor(&dynd_type_tuple, node_data, row_topology);
+  dynd_type *sliced_csr_graph = invoke_constructor(&dynd_type_dense, row_data);
+  result->header.type = sliced_csr_graph;
+  return result;
+}
 
 // TODO: Actually, taking the address of the builtin types/type constructors
 // is a bit cumbersome. It may be better to just make the pointers to them
