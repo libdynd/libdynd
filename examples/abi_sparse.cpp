@@ -1,4 +1,6 @@
 #include <array>
+#include <cassert>
+#include <cstdint>
 #include <iostream>
 #include <type_traits>
 
@@ -124,6 +126,7 @@ dynd_array *select_node_data_entry(dynd_array *array) noexcept {
   sliced.logical_size = full.logical_size;
   sliced.indptr_stride = full.indptr_stride;
   sliced.indices_offset = full.indices_offset;
+  sliced.indices_stride = full.indices_stride;
   sliced.data_offset = full.data_offset;
   sliced.data_stride = full.data_stride;
   sliced.empty_tuple_num_entries = full.empty_tuple_num_entries;
@@ -140,6 +143,53 @@ dynd_array *select_node_data_entry(dynd_array *array) noexcept {
   dynd_type *sliced_csr_graph = invoke_constructor(&dynd_type_dense, row_data);
   result->header.type = sliced_csr_graph;
   return result;
+}
+
+// Wraparound arithmetic is part of what
+// allows storing arbitrary tuples as offsets
+// from a single base pointer. Overflowing a
+// pointer is undefined behavior though, so
+// we have to do this ugly casting to get
+// the wraparound behavior that is allowed
+// for unsigned types.
+void *wraparound_pointer_add(void *ptr, dynd_size_t offset) noexcept {
+  return reinterpret_cast<void*>(reinterpret_cast<dynd_size_t>(ptr) + offset);
+}
+
+// Type-specific indexing function for the sliced array.
+// This operation will ultimately be doable via a
+// a multiple dispatch system, but this serves as a
+// stopgap until then.
+dynd_size_t &node_data(dynd_array *array, dynd_size_t id) noexcept {
+  static_assert(sizeof(dynd_size_t) == sizeof(std::intptr_t));
+  sliced_arrmeta &arrmeta = *reinterpret_cast<sliced_arrmeta*>(dynd_array_metadata(array));
+  void *base = array->header.base;
+  return *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, id * arrmeta.node_stride));
+}
+
+struct neighbor_range{
+  dynd_size_t *begin;
+  dynd_size_t *end;
+  dynd_size_t stride;
+};
+
+// Type-specific neighbor range function for the sliced array.
+// The stride between nodes could technically be inferred from the arrmeta
+// in the outer function, but including that in the return value
+// here seemed like it'd simplify things overall.
+neighbor_range neighbors(dynd_array *array, dynd_size_t id) noexcept {
+  sliced_arrmeta &arrmeta = *reinterpret_cast<sliced_arrmeta*>(dynd_array_metadata(array));
+  void *base = array->header.base;
+  void *node_base = wraparound_pointer_add(base, id * arrmeta.node_stride);
+  void *indptr_base = wraparound_pointer_add(node_base, arrmeta.row_topology_offset);
+  dynd_size_t start_index = *reinterpret_cast<dynd_size_t*>(indptr_base);
+  dynd_size_t end_index = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(indptr_base, arrmeta.indptr_stride));
+  void *indices_base = wraparound_pointer_add(node_base, arrmeta.indices_offset);
+  dynd_size_t *begin = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(indices_base, start_index * arrmeta.indices_stride));
+  dynd_size_t *end = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(indices_base, end_index * arrmeta.indices_stride));
+  dynd_size_t typed_stride = arrmeta.indices_stride / sizeof(dynd_size_t);
+  assert(!(arrmeta.indices_stride % alignof(dynd_size_t)));
+  return {begin, end, typed_stride};
 }
 
 // TODO: Actually, taking the address of the builtin types/type constructors
