@@ -45,7 +45,7 @@ struct dynd_type_dense_impl;
 }
 
 extern "C" {
-extern dynd_type_dense_impl dynd_type_dense;
+extern DYND_ABI_EXPORT dynd_type_dense_impl dynd_type_dense;
 }
 
 static dynd_type *make_dense(dynd_type_constructor_header *, dynd_type_range parameters) noexcept {
