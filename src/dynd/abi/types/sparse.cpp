@@ -45,7 +45,7 @@ struct dynd_type_sparse_impl;
 }
 
 extern "C" {
-extern dynd_type_sparse_impl dynd_type_sparse;
+extern DYND_ABI_EXPORT dynd_type_sparse_impl dynd_type_sparse;
 }
 
 static dynd_type *make_sparse(dynd_type_constructor_header *, dynd_type_range parameters) noexcept {

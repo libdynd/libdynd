@@ -53,7 +53,7 @@ struct dynd_type_tuple_impl;
 }
 
 extern "C" {
-extern dynd_type_tuple_impl dynd_type_tuple;
+extern DYND_ABI_EXPORT dynd_type_tuple_impl dynd_type_tuple;
 }
 
 static dynd_type *make_tuple(dynd_type_constructor_header *, dynd_type_range parameters) noexcept {
