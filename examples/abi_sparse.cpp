@@ -167,6 +167,25 @@ dynd_size_t &node_data(dynd_array *array, dynd_size_t id) noexcept {
   return *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, id * arrmeta.node_stride));
 }
 
+// Type-specific access to the first entry of
+// the indptr array for a given node.
+// Note: the last entry can be set by using
+// an index one higher than the highest node id.
+// This is another operation that will be
+// better handled once there's a working multiple dispatch system.
+dynd_size_t &first_indptr(dynd_array *array, dynd_size_t id) noexcept {
+  sliced_arrmeta &arrmeta = *reinterpret_cast<sliced_arrmeta*>(dynd_array_metadata(array));
+  void *base = array->header.base;
+  return *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.row_topology_offset + id * arrmeta.indptr_stride));
+}
+
+// Indexing routine to access the indices array
+dynd_size_t &indices(dynd_array *array, dynd_size_t idx) noexcept {
+  sliced_arrmeta &arrmeta = *reinterpret_cast<sliced_arrmeta*>(dynd_array_metadata(array));
+  void *base = array->header.base;
+  return *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.row_topology_offset + arrmeta.indices_offset + idx * arrmeta.indices_stride));
+}
+
 struct neighbor_range{
   dynd_size_t *begin;
   dynd_size_t *end;
