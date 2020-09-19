@@ -1,6 +1,7 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <type_traits>
 
@@ -63,6 +64,9 @@ struct full_arrmeta {
   dynd_size_t row_tuple_num_entries; // In this case we know this is just 2.
   // The offset for the node_data member of this tuple is implicitly 0 and is not stored.
   dynd_size_t row_topology_offset;
+  // !!!!!!!TODO: Integrate this with the rest of the metadata manipulation.
+  // Figure out a story for how it fits in with the nesting structure.
+  dynd_size_t indptr_outer_stride;
   // arrmeta from the node data.
   dynd_size_t node_data_num_entries;
   dynd_size_t float1_offset;
@@ -90,6 +94,7 @@ struct sliced_arrmeta {
   dynd_size_t node_stride;
   dynd_size_t row_tuple_num_entries;
   dynd_size_t row_topology_offset;
+  dynd_size_t indptr_outer_stride;
   dynd_size_t logical_size;
   dynd_size_t indptr_stride;
   dynd_size_t indices_offset;
@@ -121,7 +126,12 @@ dynd_array *select_node_data_entry(dynd_array *array) noexcept {
   // copy the entries we need from the previous array's arrmeta without modification.
   sliced.num_nodes = full.num_nodes;
   sliced.node_stride = full.node_stride;
+  // TODO: Should this part of the tuple arrmeta be moved
+  // to the typemeta instaed of the arrmeta?
+  // For now it's just here.
   sliced.row_tuple_num_entries = full.row_tuple_num_entries;
+  // !!!!!!!TODO: Integrate this with the rest of the metadata manipulation.
+  // Figure out a story for how it fits in with the nesting structure.
   sliced.row_topology_offset = full.row_topology_offset;
   sliced.logical_size = full.logical_size;
   sliced.indptr_stride = full.indptr_stride;
@@ -211,11 +221,7 @@ neighbor_range neighbors(dynd_array *array, dynd_size_t id) noexcept {
   return {begin, end, typed_stride};
 }
 
-// TODO: Actually, taking the address of the builtin types/type constructors
-// is a bit cumbersome. It may be better to just make the pointers to them
-// be the user-exposed interface.
-
-int main() {
+dynd_array *make_grid(dynd_size_t side_size) noexcept {
   // node_data = tuple(size_t, float64, float64)
   dynd_type *node_data = invoke_constructor(&dynd_type_tuple, &dynd_type_size_t, &dynd_type_float64, &dynd_type_float64);
   // edge_data = tuple()
@@ -234,7 +240,89 @@ int main() {
   // are all things that can be handled by configuring the metadata
   // in the corresponding dynd_array handle in different ways.
   dynd_type *csr_graph = invoke_constructor(&dynd_type_dense, row_data);
-  // Now use csr_graph to prevent the compiler from griping about an
-  // unused variable.
-  std::cout << csr_graph << std::endl;
+  dynd_size_t num_nodes = side_size * side_size;
+  assert(side_size > 0u);
+  dynd_size_t num_edges = side_size * (side_size - 1u) * 4u;
+  dynd_size_t indptr_size = (num_nodes + 1ull) * sizeof(dynd_size_t);
+  dynd_size_t indices_size = num_edges * sizeof(dynd_size_t);
+  static_assert(alignof(double) <= alignof(dynd_size_t));
+  dynd_size_t data_size = num_nodes * (sizeof(dynd_size_t) + 2u * sizeof(double));
+  dynd_size_t buffer_size = indptr_size + indices_size + data_size;
+  void *base = std::malloc(buffer_size);
+  dynd_array *ret = reinterpret_cast<dynd_array*>(dynd_malloc_buffer(sizeof(dynd_array) + sizeof(full_arrmeta)));
+  full_arrmeta &arrmeta = *reinterpret_cast<full_arrmeta*>(dynd_array_metadata(ret));
+  ret->header.base = base;
+  ret->header.base_array = nullptr;
+  ret->header.access = 0u;
+  ret->header.type = csr_graph;
+  // For simplicity, just use the layout that's simplest to set up.
+  // Have the node data be laid out contiguously in SOA layout
+  // before the graph topology info.
+  arrmeta.num_nodes = num_nodes;
+  arrmeta.node_stride = sizeof(dynd_size_t) + 2u * sizeof(double);
+  arrmeta.row_tuple_num_entries = 2u;
+  arrmeta.row_topology_offset = arrmeta.num_nodes * arrmeta.node_stride;
+  arrmeta.node_data_num_entries = 3u;
+  arrmeta.float1_offset = sizeof(dynd_size_t);
+  arrmeta.float2_offset = arrmeta.float1_offset + sizeof(double);
+  arrmeta.logical_size = num_nodes;
+  arrmeta.indptr_stride = sizeof(dynd_size_t);
+  arrmeta.indices_offset = (num_nodes + 1u) * arrmeta.indptr_stride;
+  arrmeta.indices_stride = sizeof(dynd_size_t);
+  arrmeta.data_offset = arrmeta.indices_offset + num_edges * arrmeta.indices_stride;
+  arrmeta.data_stride = 0u;
+  arrmeta.empty_tuple_num_entries = 0u;
+  // Now actually fill in the data.
+  static_assert(sizeof(dynd_size_t) == sizeof(double));
+  // Zero-init everything.
+  // Overwrite the zeros with the graph topology and node data afterward.
+  std::fill(reinterpret_cast<char*>(base), reinterpret_cast<char*>(reinterpret_cast<dynd_size_t>(base) + buffer_size), 0u);
+  dynd_size_t edge_counter = 0u;
+  for (dynd_size_t i = 0u; i < side_size; i++) {
+    for (dynd_size_t j = 0u; j < side_size; j++) {
+      dynd_size_t id = i * side_size + j;
+      dynd_size_t &indptr_start = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.indptr_stride * id));
+      dynd_size_t &indptr_end = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.indptr_stride * (id + 1u)));
+      dynd_size_t *indices = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.row_topology_offset + arrmeta.indices_offset + edge_counter * arrmeta.indices_stride));
+      indptr_end = indptr_start;
+      std::cout << i << " " << j << std::endl;
+      if (i) {
+        *indices = (i - 1u) * side_size + j;
+        indptr_end++;
+        edge_counter++;
+        indices = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(reinterpret_cast<void*>(indices), arrmeta.indices_stride));
+      }
+      if (i + 1u < side_size) {
+        *indices = (i + 1u) * side_size + j;
+        indptr_end++;
+        edge_counter++;
+        indices = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(reinterpret_cast<void*>(indices), arrmeta.indices_stride));
+      }
+      if (j) {
+        *indices = i * side_size + (j - 1);
+        indptr_end++;
+        edge_counter++;
+        indices = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(reinterpret_cast<void*>(indices), arrmeta.indices_stride));
+      }
+      if (j + 1u < side_size) {
+        *indices = i * side_size + (j + 1);
+        indptr_end++;
+        edge_counter++;
+        indices = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(reinterpret_cast<void*>(indices), arrmeta.indices_stride));
+      }
+    }
+  }
+  return ret;
+}
+
+
+// TODO: Actually, taking the address of the builtin types/type constructors
+// is a bit cumbersome. It may be better to just make the pointers to them
+// be the user-exposed interface.
+
+int main() {
+  // Build a synthetic graph for this demo since that's easier than reading one in from file.
+  dynd_array *full = make_grid(100u);
+  dynd_array *sliced = select_node_data_entry(full);
+  std::cout << sliced << std::endl;
 }
