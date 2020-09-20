@@ -333,6 +333,11 @@ dynd_array *make_grid(dynd_size_t side_size) noexcept {
   return ret;
 }
 
+// A simple sequential SSSP.
+// This routine could use Galois or some other parallel engine,
+// but the main point is that it is layout agnostic and is unaware
+// of any additional node data that has been sliced away before
+// it is called.
 void sssp(dynd_array *array, dynd_size_t source) noexcept {
   // This takes a CSR array with size_t typed node data and no edge data
   // and runs SSSP on the node data with the given topology.
@@ -378,53 +383,81 @@ void verify_grid_sssp(dynd_array *array, dynd_size_t side_size) noexcept {
 // Now the actual demo that uses all this stuff!
 
 int main() {
-  // Build a synthetic graph for this demo since that's easier than reading one in from file.
-  // The topology is just that of a regular 2D grid. It's stored in CSR layout.
-  // This graph has no edge data associated with it the node data
-  // consists of a size_t and a pair of doubles. The edge data is empty.
-  // Important to note: This is a dynamically typed object, so templates
-  // are not used to store the information about the layout.
-  // The associated dynamic type is:
-  //   dense(tuple(tuple(size_t, floa64, float64), sparse(tuple())))
+  // This demo demonstrates handing off portions of a graph's node data
+  // to a routine that knows nothing about all the fields
+  // present in the main graph. Everything except the graph greation
+  // code is layout-agnostic, showing that the layout-agnostic
+  // metadata descriptors also work as designed.
+  //
+  // For simplicity this demo uses a synthetic graph with the topology
+  // of a regular 2D grid. The graph is stored in CSR layout. Its node
+  // data consists of a single size_t and a pair of doubles. It has no
+  // edge data.
+  //
+  // Important to note: The graph is a dynamically typed object, so
+  // templates are not used to store the information about the layout.
+  // The helper routines that operate on the main graph are also not
+  // templated.
+  //
+  // The dynamic type associated with the graph is:
+  //   dense(tuple(tuple(size_t, float64, float64), sparse(tuple())))
+  //
   // In other words, a CSR array with tuple(size_t, float64, float64)
   // as node data and tuple() as edge_data.
-  // Note: Various in-memory layouts are supported with this metadata.
-  // The layout in this example sets up the node data, the indptr array,
-  // and the indices and data arrays all separately, one after the other
-  // in the same buffer. SOA layout is used for the node data.
-  // Various other layouts are possible using the same metadata though.
+  //
+  // Note: Several in-memory layouts are supported with this metadata.
+  // The layout in this example sets up the node data and topology
+  // information, one after the other, withinin the same buffer.
+  // SOA layout is used for the node data. Various other layouts
+  // are possible using the same metadata.
+  //
   // Some examples:
   //  - the indptr array can be interleaved with the node data.
   //  - node data can be stored in SOA or AOS order.
-  // Switching to one of these alternate layouts only requires changes to the
-  // array creation routine. Everything else will continue to work.
-  dynd_size_t side_size = 10000u;
-  dynd_array *full = make_grid(side_size);
-  // This creates a new dynamic descriptor associated with only a
-  // portion of the node data used in the previous graph.
-  // The metadata layout permits selecting any given element of
-  // the struct, however the given helper routine just selects the
-  // first one. This is helpful since now we can pass this portion
-  // of the graph's data off to another routine that knows nothing
-  // about what other fields may be present on the graph's node data.
-  // The helper routines here only support this, however in general
-  // the metadata layout used allows things like:
+  //
+  // Switching to one of these alternate layouts only requires changes
+  // to the array creation routine. Everything else will continue
+  // to work.
+  //
+  // The slicing helper routine used in this demo creates a new dynamic
+  // descriptor associated with only a portion of the node data used in
+  // the full graph. This allows passing portions of a graph's
+  // data off to another routine that knows nothing about what other
+  // fields may be present on the graph's node data. The helper routine
+  // here only supports selecting the first element of the node data
+  // tuple, however in general the metadata layout allows things like:
   //  - reordering struct elements
   //  - selecting subsets of node or edge data
   //  - removing node or edge data entirely
   //  - appending new node data attributes to an existing graph
-  // The dynamic types in the new DyND ABI library mostly
-  // just provide the information about the type of a buffer.
-  // With each type, there's an associated data layout for the
-  // corresponding metadata in the dynamic descriptor used
-  // to describe the type and layout of an array.
-  // Further work is needed to make manipulating these
-  // pieces of metadata easier, but all the operations
-  // described can be done by just manipulating the
+  //
+  // In this demo we select a subset of the node data, but similar
+  // manipulations of the edge data are also possible.
+  //
+  // The dynamic types in the new DyND ABI library provide the
+  // information about the type of a buffer.
+  // For each type, there is an associated data layout for the
+  // corresponding metadata in the dynamic descriptor for the array layout.
+  // All the operations described can be performed by manipulating the
   // metadata manually as is done in the helper routines here.
+  // This could be streamlined in future iterations of the code.
+  //
+  // Areas for further work include:
+  // - Simplifying the way the dynamic metadata is accessed and managed.
+  // - Providing a multiple dispatch system to perform function calls
+  //   using these dynamic types.
+  // - Providing idiomatic interfaces for using all of this in
+  //   C++ and Python (the current interface is C).
+  // - Providing appropriate helper routines in the ABI library
+  //   to make high-level manipulation of graphs easier
+  //
+  dynd_size_t side_size = 10000u;
+  dynd_array *full = make_grid(side_size);
+  // Get a view that only sees the first entry of the node data.
   dynd_array *sliced = select_node_data_entry(full);
-  // Passing the sliced graph to a routine that knows nothing
-  // about the other elements of the node data.
+  // Use a routine that doesn't know anything about the full
+  // layout to fill in the first field of the graph with
+  // the distance from a source node.
   // Note: No templates!
   sssp(sliced, 0u);
   // Checking the output.
