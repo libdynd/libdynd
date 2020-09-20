@@ -346,7 +346,7 @@ void sssp(dynd_array *array, dynd_size_t source) noexcept {
     node_data(array, id) = std::numeric_limits<dynd_size_t>::max();
   }
   node_data(array, source) = 0;
-  auto compare = [&](dynd_size_t l, dynd_size_t r) noexcept {return node_data(array, l) < node_data(array, r);};
+  auto compare = [&](dynd_size_t l, dynd_size_t r) noexcept {return node_data(array, l) > node_data(array, r);};
   std::priority_queue<dynd_size_t, std::vector<dynd_size_t>, decltype(compare)> queue{compare};
   queue.push(source);
   while (!queue.empty()) {
