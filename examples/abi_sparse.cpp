@@ -231,6 +231,15 @@ neighbor_range neighbors(dynd_array *array, dynd_size_t id) noexcept {
   return {begin, end, typed_stride};
 }
 
+// TODO: Actually, taking the address of the builtin types/type constructors
+// is a bit cumbersome. It may be better to just make the pointers to them
+// be the user-exposed interface.
+
+// Note: The resource management stuff is still semi-broken, so for now
+// allow this example to leak since it demonstrates the key ideas either way.
+// The existing resource management stuff will be simplified/refactored and using it as-is
+// would just further complicate this demo.
+
 dynd_array *make_grid(dynd_size_t side_size) noexcept {
   // node_data = tuple(size_t, float64, float64)
   dynd_type *node_data = invoke_constructor(&dynd_type_tuple, &dynd_type_size_t, &dynd_type_float64, &dynd_type_float64);
@@ -366,15 +375,58 @@ void verify_grid_sssp(dynd_array *array, dynd_size_t side_size) noexcept {
   }
 }
 
-// TODO: Actually, taking the address of the builtin types/type constructors
-// is a bit cumbersome. It may be better to just make the pointers to them
-// be the user-exposed interface.
+// Now the actual demo that uses all this stuff!
 
 int main() {
   // Build a synthetic graph for this demo since that's easier than reading one in from file.
-  dynd_size_t side_size = 10u;
+  // The topology is just that of a regular 2D grid. It's stored in CSR layout.
+  // This graph has no edge data associated with it the node data
+  // consists of a size_t and a pair of doubles. The edge data is empty.
+  // Important to note: This is a dynamically typed object, so templates
+  // are not used to store the information about the layout.
+  // The associated dynamic type is:
+  //   dense(tuple(tuple(size_t, floa64, float64), sparse(tuple())))
+  // In other words, a CSR array with tuple(size_t, float64, float64)
+  // as node data and tuple() as edge_data.
+  // Note: Various in-memory layouts are supported with this metadata.
+  // The layout in this example sets up the node data, the indptr array,
+  // and the indices and data arrays all separately, one after the other
+  // in the same buffer. SOA layout is used for the node data.
+  // Various other layouts are possible using the same metadata though.
+  // Some examples:
+  //  - the indptr array can be interleaved with the node data.
+  //  - node data can be stored in SOA or AOS order.
+  // Switching to one of these alternate layouts only requires changes to the
+  // array creation routine. Everything else will continue to work.
+  dynd_size_t side_size = 10000u;
   dynd_array *full = make_grid(side_size);
+  // This creates a new dynamic descriptor associated with only a
+  // portion of the node data used in the previous graph.
+  // The metadata layout permits selecting any given element of
+  // the struct, however the given helper routine just selects the
+  // first one. This is helpful since now we can pass this portion
+  // of the graph's data off to another routine that knows nothing
+  // about what other fields may be present on the graph's node data.
+  // The helper routines here only support this, however in general
+  // the metadata layout used allows things like:
+  //  - reordering struct elements
+  //  - selecting subsets of node or edge data
+  //  - removing node or edge data entirely
+  //  - appending new node data attributes to an existing graph
+  // The dynamic types in the new DyND ABI library mostly
+  // just provide the information about the type of a buffer.
+  // With each type, there's an associated data layout for the
+  // corresponding metadata in the dynamic descriptor used
+  // to describe the type and layout of an array.
+  // Further work is needed to make manipulating these
+  // pieces of metadata easier, but all the operations
+  // described can be done by just manipulating the
+  // metadata manually as is done in the helper routines here.
   dynd_array *sliced = select_node_data_entry(full);
+  // Passing the sliced graph to a routine that knows nothing
+  // about the other elements of the node data.
+  // Note: No templates!
   sssp(sliced, 0u);
+  // Checking the output.
   verify_grid_sssp(sliced, side_size);
 }
