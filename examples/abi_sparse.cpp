@@ -3,6 +3,9 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
+#include <limits>
+#include <queue>
+#include <vector>
 #include <type_traits>
 
 #include <dynd/abi/array.h>
@@ -177,6 +180,13 @@ dynd_size_t &node_data(dynd_array *array, dynd_size_t id) noexcept {
   return *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, id * arrmeta.node_stride));
 }
 
+// Get the number of nodes in the given graph.
+// This will work for any array where the outer type is "dense".
+// In particular, it'll work for both the full and sliced types used here.
+dynd_size_t num_nodes(dynd_array *array) noexcept {
+  return *reinterpret_cast<dynd_size_t*>(dynd_array_metadata(array));
+}
+
 // Type-specific access to the first entry of
 // the indptr array for a given node.
 // Note: the last entry can be set by using
@@ -209,11 +219,11 @@ struct neighbor_range{
 neighbor_range neighbors(dynd_array *array, dynd_size_t id) noexcept {
   sliced_arrmeta &arrmeta = *reinterpret_cast<sliced_arrmeta*>(dynd_array_metadata(array));
   void *base = array->header.base;
-  void *node_base = wraparound_pointer_add(base, id * arrmeta.node_stride);
-  void *indptr_base = wraparound_pointer_add(node_base, arrmeta.row_topology_offset);
-  dynd_size_t start_index = *reinterpret_cast<dynd_size_t*>(indptr_base);
-  dynd_size_t end_index = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(indptr_base, arrmeta.indptr_stride));
-  void *indices_base = wraparound_pointer_add(node_base, arrmeta.indices_offset);
+  void *indptr_base = wraparound_pointer_add(base, arrmeta.row_topology_offset);
+  void *node_indptr_base = wraparound_pointer_add(indptr_base, arrmeta.indptr_stride * id);
+  dynd_size_t start_index = *reinterpret_cast<dynd_size_t*>(node_indptr_base);
+  dynd_size_t end_index = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(node_indptr_base, arrmeta.indptr_stride));
+  void *indices_base = wraparound_pointer_add(indptr_base, arrmeta.indices_offset);
   dynd_size_t *begin = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(indices_base, start_index * arrmeta.indices_stride));
   dynd_size_t *end = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(indices_base, end_index * arrmeta.indices_stride));
   dynd_size_t typed_stride = arrmeta.indices_stride / sizeof(dynd_size_t);
@@ -281,11 +291,10 @@ dynd_array *make_grid(dynd_size_t side_size) noexcept {
   for (dynd_size_t i = 0u; i < side_size; i++) {
     for (dynd_size_t j = 0u; j < side_size; j++) {
       dynd_size_t id = i * side_size + j;
-      dynd_size_t &indptr_start = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.indptr_stride * id));
-      dynd_size_t &indptr_end = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.indptr_stride * (id + 1u)));
+      dynd_size_t &indptr_start = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.row_topology_offset + arrmeta.indptr_stride * id));
+      dynd_size_t &indptr_end = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.row_topology_offset + arrmeta.indptr_stride * (id + 1u)));
       dynd_size_t *indices = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.row_topology_offset + arrmeta.indices_offset + edge_counter * arrmeta.indices_stride));
       indptr_end = indptr_start;
-      std::cout << i << " " << j << std::endl;
       if (i) {
         *indices = (i - 1u) * side_size + j;
         indptr_end++;
@@ -315,6 +324,47 @@ dynd_array *make_grid(dynd_size_t side_size) noexcept {
   return ret;
 }
 
+void sssp(dynd_array *array, dynd_size_t source) noexcept {
+  // This takes a CSR array with size_t typed node data and no edge data
+  // and runs SSSP on the node data with the given topology.
+  // All edge weights are assumed to be 1.
+  for (dynd_size_t id = 0u; id < num_nodes(array); id++) {
+    node_data(array, id) = std::numeric_limits<dynd_size_t>::max();
+  }
+  node_data(array, source) = 0;
+  auto compare = [&](dynd_size_t l, dynd_size_t r) noexcept {return node_data(array, l) < node_data(array, r);};
+  std::priority_queue<dynd_size_t, std::vector<dynd_size_t>, decltype(compare)> queue{compare};
+  queue.push(source);
+  while (!queue.empty()) {
+    dynd_size_t id = queue.top();
+    queue.pop();
+    auto [begin, end, stride] = neighbors(array, id);
+    dynd_size_t new_neighbor_distance = node_data(array, id) + 1u;
+    while (begin < end) {
+      dynd_size_t &neighbor_data = node_data(array, *begin);
+      if (neighbor_data > new_neighbor_distance) {
+        neighbor_data = new_neighbor_distance;
+        queue.push(*begin);
+      }
+      begin += stride;
+    }
+  }
+}
+
+void verify_grid_sssp(dynd_array *array, dynd_size_t side_size) noexcept {
+  // Verify SSSP in the case of the simple grid topology used in this example.
+  assert(side_size * side_size == num_nodes(array));
+  for (dynd_size_t i = 0; i < side_size; i++) {
+    for (dynd_size_t j = 0; j < side_size; j++) {
+      dynd_size_t id = i * side_size + j;
+      dynd_size_t val = node_data(array, id);
+      if (val != i + j) {
+        std::cout << "Bad value from SSSP." << std::endl;
+	std::abort();
+      }
+    }
+  }
+}
 
 // TODO: Actually, taking the address of the builtin types/type constructors
 // is a bit cumbersome. It may be better to just make the pointers to them
@@ -322,7 +372,9 @@ dynd_array *make_grid(dynd_size_t side_size) noexcept {
 
 int main() {
   // Build a synthetic graph for this demo since that's easier than reading one in from file.
-  dynd_array *full = make_grid(100u);
+  dynd_size_t side_size = 10u;
+  dynd_array *full = make_grid(side_size);
   dynd_array *sliced = select_node_data_entry(full);
-  std::cout << sliced << std::endl;
+  sssp(sliced, 0u);
+  verify_grid_sssp(sliced, side_size);
 }
