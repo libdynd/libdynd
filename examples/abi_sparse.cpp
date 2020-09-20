@@ -1,7 +1,11 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
+#include <limits>
+#include <queue>
+#include <vector>
 #include <type_traits>
 
 #include <dynd/abi/array.h>
@@ -63,6 +67,9 @@ struct full_arrmeta {
   dynd_size_t row_tuple_num_entries; // In this case we know this is just 2.
   // The offset for the node_data member of this tuple is implicitly 0 and is not stored.
   dynd_size_t row_topology_offset;
+  // !!!!!!!TODO: Integrate this with the rest of the metadata manipulation.
+  // Figure out a story for how it fits in with the nesting structure.
+  dynd_size_t indptr_outer_stride;
   // arrmeta from the node data.
   dynd_size_t node_data_num_entries;
   dynd_size_t float1_offset;
@@ -90,6 +97,7 @@ struct sliced_arrmeta {
   dynd_size_t node_stride;
   dynd_size_t row_tuple_num_entries;
   dynd_size_t row_topology_offset;
+  dynd_size_t indptr_outer_stride;
   dynd_size_t logical_size;
   dynd_size_t indptr_stride;
   dynd_size_t indices_offset;
@@ -121,7 +129,12 @@ dynd_array *select_node_data_entry(dynd_array *array) noexcept {
   // copy the entries we need from the previous array's arrmeta without modification.
   sliced.num_nodes = full.num_nodes;
   sliced.node_stride = full.node_stride;
+  // TODO: Should this part of the tuple arrmeta be moved
+  // to the typemeta instaed of the arrmeta?
+  // For now it's just here.
   sliced.row_tuple_num_entries = full.row_tuple_num_entries;
+  // !!!!!!!TODO: Integrate this with the rest of the metadata manipulation.
+  // Figure out a story for how it fits in with the nesting structure.
   sliced.row_topology_offset = full.row_topology_offset;
   sliced.logical_size = full.logical_size;
   sliced.indptr_stride = full.indptr_stride;
@@ -167,6 +180,32 @@ dynd_size_t &node_data(dynd_array *array, dynd_size_t id) noexcept {
   return *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, id * arrmeta.node_stride));
 }
 
+// Get the number of nodes in the given graph.
+// This will work for any array where the outer type is "dense".
+// In particular, it'll work for both the full and sliced types used here.
+dynd_size_t num_nodes(dynd_array *array) noexcept {
+  return *reinterpret_cast<dynd_size_t*>(dynd_array_metadata(array));
+}
+
+// Type-specific access to the first entry of
+// the indptr array for a given node.
+// Note: the last entry can be set by using
+// an index one higher than the highest node id.
+// This is another operation that will be
+// better handled once there's a working multiple dispatch system.
+dynd_size_t &first_indptr(dynd_array *array, dynd_size_t id) noexcept {
+  sliced_arrmeta &arrmeta = *reinterpret_cast<sliced_arrmeta*>(dynd_array_metadata(array));
+  void *base = array->header.base;
+  return *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.row_topology_offset + id * arrmeta.indptr_stride));
+}
+
+// Indexing routine to access the indices array
+dynd_size_t &indices(dynd_array *array, dynd_size_t idx) noexcept {
+  sliced_arrmeta &arrmeta = *reinterpret_cast<sliced_arrmeta*>(dynd_array_metadata(array));
+  void *base = array->header.base;
+  return *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.row_topology_offset + arrmeta.indices_offset + idx * arrmeta.indices_stride));
+}
+
 struct neighbor_range{
   dynd_size_t *begin;
   dynd_size_t *end;
@@ -180,11 +219,11 @@ struct neighbor_range{
 neighbor_range neighbors(dynd_array *array, dynd_size_t id) noexcept {
   sliced_arrmeta &arrmeta = *reinterpret_cast<sliced_arrmeta*>(dynd_array_metadata(array));
   void *base = array->header.base;
-  void *node_base = wraparound_pointer_add(base, id * arrmeta.node_stride);
-  void *indptr_base = wraparound_pointer_add(node_base, arrmeta.row_topology_offset);
-  dynd_size_t start_index = *reinterpret_cast<dynd_size_t*>(indptr_base);
-  dynd_size_t end_index = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(indptr_base, arrmeta.indptr_stride));
-  void *indices_base = wraparound_pointer_add(node_base, arrmeta.indices_offset);
+  void *indptr_base = wraparound_pointer_add(base, arrmeta.row_topology_offset);
+  void *node_indptr_base = wraparound_pointer_add(indptr_base, arrmeta.indptr_stride * id);
+  dynd_size_t start_index = *reinterpret_cast<dynd_size_t*>(node_indptr_base);
+  dynd_size_t end_index = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(node_indptr_base, arrmeta.indptr_stride));
+  void *indices_base = wraparound_pointer_add(indptr_base, arrmeta.indices_offset);
   dynd_size_t *begin = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(indices_base, start_index * arrmeta.indices_stride));
   dynd_size_t *end = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(indices_base, end_index * arrmeta.indices_stride));
   dynd_size_t typed_stride = arrmeta.indices_stride / sizeof(dynd_size_t);
@@ -196,7 +235,12 @@ neighbor_range neighbors(dynd_array *array, dynd_size_t id) noexcept {
 // is a bit cumbersome. It may be better to just make the pointers to them
 // be the user-exposed interface.
 
-int main() {
+// Note: The resource management stuff is still semi-broken, so for now
+// allow this example to leak since it demonstrates the key ideas either way.
+// The existing resource management stuff will be simplified/refactored and using it as-is
+// would just further complicate this demo.
+
+dynd_array *make_grid(dynd_size_t side_size) noexcept {
   // node_data = tuple(size_t, float64, float64)
   dynd_type *node_data = invoke_constructor(&dynd_type_tuple, &dynd_type_size_t, &dynd_type_float64, &dynd_type_float64);
   // edge_data = tuple()
@@ -215,7 +259,207 @@ int main() {
   // are all things that can be handled by configuring the metadata
   // in the corresponding dynd_array handle in different ways.
   dynd_type *csr_graph = invoke_constructor(&dynd_type_dense, row_data);
-  // Now use csr_graph to prevent the compiler from griping about an
-  // unused variable.
-  std::cout << csr_graph << std::endl;
+  dynd_size_t num_nodes = side_size * side_size;
+  assert(side_size > 0u);
+  dynd_size_t num_edges = side_size * (side_size - 1u) * 4u;
+  dynd_size_t indptr_size = (num_nodes + 1ull) * sizeof(dynd_size_t);
+  dynd_size_t indices_size = num_edges * sizeof(dynd_size_t);
+  static_assert(alignof(double) <= alignof(dynd_size_t));
+  dynd_size_t data_size = num_nodes * (sizeof(dynd_size_t) + 2u * sizeof(double));
+  dynd_size_t buffer_size = indptr_size + indices_size + data_size;
+  void *base = std::malloc(buffer_size);
+  dynd_array *ret = reinterpret_cast<dynd_array*>(dynd_malloc_buffer(sizeof(dynd_array) + sizeof(full_arrmeta)));
+  full_arrmeta &arrmeta = *reinterpret_cast<full_arrmeta*>(dynd_array_metadata(ret));
+  ret->header.base = base;
+  ret->header.base_array = nullptr;
+  ret->header.access = 0u;
+  ret->header.type = csr_graph;
+  // For simplicity, just use the layout that's simplest to set up.
+  // Have the node data be laid out contiguously in SOA layout
+  // before the graph topology info.
+  arrmeta.num_nodes = num_nodes;
+  arrmeta.node_stride = sizeof(dynd_size_t) + 2u * sizeof(double);
+  arrmeta.row_tuple_num_entries = 2u;
+  arrmeta.row_topology_offset = arrmeta.num_nodes * arrmeta.node_stride;
+  arrmeta.node_data_num_entries = 3u;
+  arrmeta.float1_offset = sizeof(dynd_size_t);
+  arrmeta.float2_offset = arrmeta.float1_offset + sizeof(double);
+  arrmeta.logical_size = num_nodes;
+  arrmeta.indptr_stride = sizeof(dynd_size_t);
+  arrmeta.indices_offset = (num_nodes + 1u) * arrmeta.indptr_stride;
+  arrmeta.indices_stride = sizeof(dynd_size_t);
+  arrmeta.data_offset = arrmeta.indices_offset + num_edges * arrmeta.indices_stride;
+  arrmeta.data_stride = 0u;
+  arrmeta.empty_tuple_num_entries = 0u;
+  // Now actually fill in the data.
+  static_assert(sizeof(dynd_size_t) == sizeof(double));
+  // Zero-init everything.
+  // Overwrite the zeros with the graph topology and node data afterward.
+  std::fill(reinterpret_cast<char*>(base), reinterpret_cast<char*>(reinterpret_cast<dynd_size_t>(base) + buffer_size), 0u);
+  dynd_size_t edge_counter = 0u;
+  for (dynd_size_t i = 0u; i < side_size; i++) {
+    for (dynd_size_t j = 0u; j < side_size; j++) {
+      dynd_size_t id = i * side_size + j;
+      dynd_size_t &indptr_start = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.row_topology_offset + arrmeta.indptr_stride * id));
+      dynd_size_t &indptr_end = *reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.row_topology_offset + arrmeta.indptr_stride * (id + 1u)));
+      dynd_size_t *indices = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(base, arrmeta.row_topology_offset + arrmeta.indices_offset + edge_counter * arrmeta.indices_stride));
+      indptr_end = indptr_start;
+      if (i) {
+        *indices = (i - 1u) * side_size + j;
+        indptr_end++;
+        edge_counter++;
+        indices = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(reinterpret_cast<void*>(indices), arrmeta.indices_stride));
+      }
+      if (i + 1u < side_size) {
+        *indices = (i + 1u) * side_size + j;
+        indptr_end++;
+        edge_counter++;
+        indices = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(reinterpret_cast<void*>(indices), arrmeta.indices_stride));
+      }
+      if (j) {
+        *indices = i * side_size + (j - 1);
+        indptr_end++;
+        edge_counter++;
+        indices = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(reinterpret_cast<void*>(indices), arrmeta.indices_stride));
+      }
+      if (j + 1u < side_size) {
+        *indices = i * side_size + (j + 1);
+        indptr_end++;
+        edge_counter++;
+        indices = reinterpret_cast<dynd_size_t*>(wraparound_pointer_add(reinterpret_cast<void*>(indices), arrmeta.indices_stride));
+      }
+    }
+  }
+  return ret;
+}
+
+// A simple sequential SSSP.
+// This routine could use Galois or some other parallel engine,
+// but the main point is that it is layout agnostic and is unaware
+// of any additional node data that has been sliced away before
+// it is called.
+void sssp(dynd_array *array, dynd_size_t source) noexcept {
+  // This takes a CSR array with size_t typed node data and no edge data
+  // and runs SSSP on the node data with the given topology.
+  // All edge weights are assumed to be 1.
+  for (dynd_size_t id = 0u; id < num_nodes(array); id++) {
+    node_data(array, id) = std::numeric_limits<dynd_size_t>::max();
+  }
+  node_data(array, source) = 0;
+  auto compare = [&](dynd_size_t l, dynd_size_t r) noexcept {return node_data(array, l) < node_data(array, r);};
+  std::priority_queue<dynd_size_t, std::vector<dynd_size_t>, decltype(compare)> queue{compare};
+  queue.push(source);
+  while (!queue.empty()) {
+    dynd_size_t id = queue.top();
+    queue.pop();
+    auto [begin, end, stride] = neighbors(array, id);
+    dynd_size_t new_neighbor_distance = node_data(array, id) + 1u;
+    while (begin < end) {
+      dynd_size_t &neighbor_data = node_data(array, *begin);
+      if (neighbor_data > new_neighbor_distance) {
+        neighbor_data = new_neighbor_distance;
+        queue.push(*begin);
+      }
+      begin += stride;
+    }
+  }
+}
+
+void verify_grid_sssp(dynd_array *array, dynd_size_t side_size) noexcept {
+  // Verify SSSP in the case of the simple grid topology used in this example.
+  assert(side_size * side_size == num_nodes(array));
+  for (dynd_size_t i = 0; i < side_size; i++) {
+    for (dynd_size_t j = 0; j < side_size; j++) {
+      dynd_size_t id = i * side_size + j;
+      dynd_size_t val = node_data(array, id);
+      if (val != i + j) {
+        std::cout << "Bad value from SSSP." << std::endl;
+	std::abort();
+      }
+    }
+  }
+}
+
+// Now the actual demo that uses all this stuff!
+
+int main() {
+  // This demo demonstrates handing off portions of a graph's node data
+  // to a routine that knows nothing about all the fields
+  // present in the main graph. Everything except the graph greation
+  // code is layout-agnostic, showing that the layout-agnostic
+  // metadata descriptors also work as designed.
+  //
+  // For simplicity this demo uses a synthetic graph with the topology
+  // of a regular 2D grid. The graph is stored in CSR layout. Its node
+  // data consists of a single size_t and a pair of doubles. It has no
+  // edge data.
+  //
+  // Important to note: The graph is a dynamically typed object, so
+  // templates are not used to store the information about the layout.
+  // The helper routines that operate on the main graph are also not
+  // templated.
+  //
+  // The dynamic type associated with the graph is:
+  //   dense(tuple(tuple(size_t, float64, float64), sparse(tuple())))
+  //
+  // In other words, a CSR array with tuple(size_t, float64, float64)
+  // as node data and tuple() as edge_data.
+  //
+  // Note: Several in-memory layouts are supported with this metadata.
+  // The layout in this example sets up the node data and topology
+  // information, one after the other, withinin the same buffer.
+  // SOA layout is used for the node data. Various other layouts
+  // are possible using the same metadata.
+  //
+  // Some examples:
+  //  - the indptr array can be interleaved with the node data.
+  //  - node data can be stored in SOA or AOS order.
+  //
+  // Switching to one of these alternate layouts only requires changes
+  // to the array creation routine. Everything else will continue
+  // to work.
+  //
+  // The slicing helper routine used in this demo creates a new dynamic
+  // descriptor associated with only a portion of the node data used in
+  // the full graph. This allows passing portions of a graph's
+  // data off to another routine that knows nothing about what other
+  // fields may be present on the graph's node data. The helper routine
+  // here only supports selecting the first element of the node data
+  // tuple, however in general the metadata layout allows things like:
+  //  - reordering struct elements
+  //  - selecting subsets of node or edge data
+  //  - removing node or edge data entirely
+  //  - appending new node data attributes to an existing graph
+  //
+  // In this demo we select a subset of the node data, but similar
+  // manipulations of the edge data are also possible.
+  //
+  // The dynamic types in the new DyND ABI library provide the
+  // information about the type of a buffer.
+  // For each type, there is an associated data layout for the
+  // corresponding metadata in the dynamic descriptor for the array layout.
+  // All the operations described can be performed by manipulating the
+  // metadata manually as is done in the helper routines here.
+  // This could be streamlined in future iterations of the code.
+  //
+  // Areas for further work include:
+  // - Simplifying the way the dynamic metadata is accessed and managed.
+  // - Providing a multiple dispatch system to perform function calls
+  //   using these dynamic types.
+  // - Providing idiomatic interfaces for using all of this in
+  //   C++ and Python (the current interface is C).
+  // - Providing appropriate helper routines in the ABI library
+  //   to make high-level manipulation of graphs easier
+  //
+  dynd_size_t side_size = 10000u;
+  dynd_array *full = make_grid(side_size);
+  // Get a view that only sees the first entry of the node data.
+  dynd_array *sliced = select_node_data_entry(full);
+  // Use a routine that doesn't know anything about the full
+  // layout to fill in the first field of the graph with
+  // the distance from a source node.
+  // Note: No templates!
+  sssp(sliced, 0u);
+  // Checking the output.
+  verify_grid_sssp(sliced, side_size);
 }
